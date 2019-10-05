@@ -29,14 +29,6 @@ ActiveRecord::Schema.define(version: 2019_10_05_145434) do
     t.index ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource_type_and_resource_id"
   end
 
-  create_table "admins", force: :cascade do |t|
-    t.string "name"
-    t.string "email"
-    t.string "password_digest"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
-
   create_table "items", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -57,16 +49,6 @@ ActiveRecord::Schema.define(version: 2019_10_05_145434) do
   create_table "menus", force: :cascade do |t|
     t.string "name"
     t.text "bakers_note"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
-
-  create_table "subscribers", force: :cascade do |t|
-    t.string "first_name"
-    t.string "last_name"
-    t.string "email"
-    t.string "additional_email"
-    t.integer "credits"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end

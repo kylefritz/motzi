@@ -15,7 +15,7 @@ ActiveAdmin.register_page "Dashboard" do
       # column ("Item") { |v| link_to v.item, [:admin, v.item] } # Uncomment to display as link
       column ("Type") { |v| v.item_type.underscore.humanize }
       column ("Modified at") { |v| v.created_at.to_s :long }
-      column ("Admin") { |v| v.whodunnit }
+      column ("Admin") { |v| User.find_by(id: v.whodunnit)&.first_name }
     end
   end
 
