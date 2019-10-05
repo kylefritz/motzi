@@ -1,30 +1,31 @@
 kyle:
   first_name: Kyle
   last_name: Fritz
-  email: kyle.p.fritz+fixture@gmail.com
-  additional_email: meghan.l.ames+fixture@gmail.com
-  # password_digest: <%= BCrypt::Password.create('robots') %>
-  credits: 0
+  email: kyle.p.fritz@gmail.com
+  additional_email: meghan.l.ames@gmail.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'robots') %>
+  credits: 1
   is_admin: true
 
-kj:
-  first_name: KJ
-  last_name: Janaskfsakasi
-  email: kj@gmail.com
-  # password_digest: <%= BCrypt::Password.create('donuts') %>
+adrian:
+  first_name: Adrian
+  last_name: Alday
+  email: adrian.alday@gmail.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'donuts') %>
   additional_email: null
   credits: 3
+  is_admin: true
 
 russel:
   first_name: Russel
   last_name: Trimmer
   email: russel@motzi.com
-  # password_digest: <%= BCrypt::Password.create('bread') %>
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'bread') %>
   is_admin: true
 
 maya:
   first_name: Maya
   last_name: Munezish
   email: maya@motzi.com
-  # password_digest: <%= BCrypt::Password.create('wine') %>
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'wine') %>
   is_admin: true
