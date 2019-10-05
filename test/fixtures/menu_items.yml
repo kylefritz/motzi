@@ -18,6 +18,10 @@ w2_classic:
   menu: week2
   item: classic
 
+w2_rye:
+  menu: week2
+  item: rye
+
 w2_donut: 
   menu: week2
   item: donuts

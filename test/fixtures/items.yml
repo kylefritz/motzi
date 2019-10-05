@@ -2,11 +2,15 @@
 
 classic:
   name: Classic
-  description: errweek
+  description: same every week
 
 pumpkin:
   name: Pumpkin
   description: For fall
+
+rye:
+  name: Rye Five Ways
+  description: ryumm
 
 donuts:
   name: Donuts
