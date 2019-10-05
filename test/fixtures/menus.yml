@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+week1:
+  name: week1
+  bakers_note: This is the first week
+
+week2:
+  name: week2
+  bakers_note: This is the second week

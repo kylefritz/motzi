@@ -1,0 +1,24 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+#
+# week 1
+#
+w1_classic: 
+  menu: week1
+  item: classic
+
+w1_pumpkin:
+  menu: week1
+  item: pumpkin
+
+#
+# week 2
+#
+w2_classic: 
+  menu: week2
+  item: classic
+
+w2_donut: 
+  menu: week2
+  item: donuts
+  is_add_on: true
