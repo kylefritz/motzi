@@ -21,7 +21,18 @@ gem 'jbuilder', '~> 2.7'
 # gem 'redis', '~> 4.0'
 # Use Active Model has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
+
+# nice style
 gem 'bootstrap', '~> 4.3.1'
+
+# admin ui
+gem 'activeadmin'
+
+# audits
+gem 'paper_trail'
+
+# for has_secure_password
+gem 'bcrypt', '~> 3.1.7'
 
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
