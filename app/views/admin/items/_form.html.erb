@@ -1,0 +1,5 @@
+<%= semantic_form_for :item do |f| %>
+  <%= f.inputs :name, :description %>
+  <%= f.inputs f.file_field :image %>
+  <%= f.actions %>
+<% end %>
