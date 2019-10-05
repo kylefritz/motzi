@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
   
   def current_admin_user
     if Rails.env.development?
-      Admin.first
+      User.where(is_admin: true).first
     end
   end
 end
