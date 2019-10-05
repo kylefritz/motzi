@@ -3,7 +3,7 @@ kyle:
   last_name: Fritz
   email: kyle.p.fritz+fixture@gmail.com
   additional_email: meghan.l.ames+fixture@gmail.com
-  password_digest: <%= BCrypt::Password.create('robots') %>
+  # password_digest: <%= BCrypt::Password.create('robots') %>
   credits: 0
   is_admin: true
 
@@ -11,7 +11,7 @@ kj:
   first_name: KJ
   last_name: Janaskfsakasi
   email: kj@gmail.com
-  password_digest: <%= BCrypt::Password.create('donuts') %>
+  # password_digest: <%= BCrypt::Password.create('donuts') %>
   additional_email: null
   credits: 3
 
@@ -19,12 +19,12 @@ russel:
   first_name: Russel
   last_name: Trimmer
   email: russel@motzi.com
-  password_digest: <%= BCrypt::Password.create('bread') %>
+  # password_digest: <%= BCrypt::Password.create('bread') %>
   is_admin: true
 
 maya:
   first_name: Maya
   last_name: Munezish
   email: maya@motzi.com
-  password_digest: <%= BCrypt::Password.create('wine') %>
+  # password_digest: <%= BCrypt::Password.create('wine') %>
   is_admin: true
