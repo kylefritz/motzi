@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+kyle_week1:
+  user: kyle
+  menu: week1
+  feedback: cant have feedback
+  comments: cant wait for my bread
+
+kyle_week2:
+  user: kyle
+  menu: week2
+  feedback: last week was great
+  comments: more bread!

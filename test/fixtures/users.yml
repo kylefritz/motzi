@@ -1,4 +1,4 @@
-mpeople:
+kyle:
   first_name: Kyle
   last_name: Fritz
   email: kyle.p.fritz+fixture@gmail.com
@@ -7,7 +7,7 @@ mpeople:
   credits: 0
   is_admin: true
 
-kdrian:
+kj:
   first_name: KJ
   last_name: Janaskfsakasi
   email: kj@gmail.com

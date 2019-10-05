@@ -1,0 +1,11 @@
+w1_pumpkin:
+  order: kyle_week1
+  item: pumpkin
+
+w2_rye:
+  order: kyle_week2
+  item: rye
+
+w2_donuts:
+  order: kyle_week2
+  item: donuts
