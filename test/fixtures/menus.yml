@@ -3,7 +3,14 @@
 week1:
   name: week1
   bakers_note: This is the first week
+  is_current: false
 
 week2:
   name: week2
   bakers_note: This is the second week
+  is_current: true
+
+week3:
+  name: week3
+  bakers_note: I'm the next week!
+  is_current: false

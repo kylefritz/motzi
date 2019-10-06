@@ -19,4 +19,15 @@ ActiveAdmin.register Menu do
 
     active_admin_comments
   end
+
+  controller do
+    # This code is evaluated within the controller class
+
+    def finalize
+      menu = Menu.find(params[:id])
+      menu.publish_to_subscribers!(current_admin_user.id)
+      redirect_to [:admin, menu]
+    end
+  end
+
 end

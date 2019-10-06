@@ -1,7 +1,8 @@
 class MenuMailer < ApplicationMailer
-  default bcc: -> { %("#{User.pluck(:name)}" <#{User.pluck(:email)}> ) }
+  # TODO: sending all users
+  default bcc: -> { User.all.pluck(:email) }
 
-  def menu_mail
+  def menu_email
     @menu = params[:menu]
     mail(subject: "Motzi Bread - #{@menu.name}")
   end
