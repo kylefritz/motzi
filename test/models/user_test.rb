@@ -7,4 +7,9 @@ class UserTest < ActiveSupport::TestCase
     refute maya.authenticate('not-wine')
     assert maya.is_admin
   end
+
+  test "half of the week" do
+    assert users(:kyle).is_first_half?
+    refute users(:ljf).is_first_half?
+  end
 end

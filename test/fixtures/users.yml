@@ -5,6 +5,7 @@ kyle:
   additional_email: meghan.l.ames@gmail.com
   encrypted_password: <%= Devise::Encryptor.digest(User, 'robots') %>
   is_admin: true
+  is_first_half: true
 
 adrian:
   first_name: Adrian
@@ -13,6 +14,16 @@ adrian:
   encrypted_password: <%= Devise::Encryptor.digest(User, 'donuts') %>
   additional_email: null
   is_admin: true
+  is_first_half: true
+
+ljf:
+  first_name: Laura
+  last_name: Flamm
+  email: laura.flamm@gmail.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'sparkles') %>
+  additional_email: null
+  is_admin: false
+  is_first_half: false
 
 russel:
   first_name: Russel
