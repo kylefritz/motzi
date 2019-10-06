@@ -1,5 +1,6 @@
 ActiveAdmin.register Item do
   permit_params :name, :description, :image
+  config.sort_order = 'name_asc'
 
   index as: :grid, columns: 5 do |item|
     div for: item do
@@ -15,8 +16,10 @@ ActiveAdmin.register Item do
     attributes_table do
       row :name
       row :description
-      row :image do |upload|
-        image_tag url_for(upload.image)
+      row :image do |item|
+        if item.image.attached?
+          image_tag url_for(item.image)
+        end
       end
     end
   end
