@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_user!
 
   def user_for_paper_trail
-    current_user
+    current_user&.id
   end
 
   def authenticate_admin_user!
