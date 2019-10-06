@@ -1,5 +1,5 @@
-<%= semantic_form_for :item do |f| %>
+<%= semantic_form_for [:admin, @item], builder: ActiveAdmin::FormBuilder do |f| %>
   <%= f.inputs :name, :description %>
-  <%= f.inputs f.file_field :image %>
+  <%= f.input :image, as: :file %>
   <%= f.actions %>
 <% end %>
