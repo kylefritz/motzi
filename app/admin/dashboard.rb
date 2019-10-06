@@ -4,6 +4,11 @@ ActiveAdmin.register_page "Dashboard" do
   content title: proc { I18n.t("active_admin.dashboard") } do
 
 
+  # TODO
+  # * list of subscribers with low credit balance
+  # * list of new subscribers
+  # * list of new orders
+
   section "Recently updated content" do
     table_for PaperTrail::Version.order('id desc').limit(20) do # Use PaperTrail::Version if this throws an error
       column ("Object") { |v| v.item }
