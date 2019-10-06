@@ -11,4 +11,9 @@ class OrderTest < ActiveSupport::TestCase
     item_names = w2.order_items.map(&:item).map(&:name)
     assert item_names.include?(items(:donuts).name), 'got donuts'
   end
+
+  test "associate orders to users" do
+    kyle = users(:kyle)
+    assert_equal kyle.orders.count, 2
+  end
 end
