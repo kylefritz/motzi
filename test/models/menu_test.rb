@@ -15,6 +15,11 @@ class MenuTest < ActiveSupport::TestCase
     assert_equal add_ons.first.item, items(:donuts)
   end
 
+  test "current" do
+    week2 = menus(:week2)
+    assert_equal Menu.current, week2
+  end
+
   test "sending weekly email" do
     week3 = menus(:week3)
     russel = users(:russel)

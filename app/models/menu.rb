@@ -3,8 +3,12 @@ class Menu < ApplicationRecord
   has_many :items, through: :menu_items
   has_paper_trail
 
+  def self.current
+    Menu.where(is_current: true).first
+  end
+
   def make_current!
-    # mark the rest of the menus as "not this week"
+    # mark the rest of the menus as "not current"
     Menu.update_all(is_current: false)
 
     self.update!(is_current: true)
