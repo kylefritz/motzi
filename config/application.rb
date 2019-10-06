@@ -15,5 +15,12 @@ module Motzi
     # Application configuration can go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded after loading
     # the framework and any gems in your application.
+
+    # OliveBranch converts snake_case to camelCase
+    config.middleware.use OliveBranch::Middleware
+    config.middleware.use OliveBranch::Middleware, inflection: 'camel'
+
+    # zeitwerk makes ruby file autoloading better?
+    config.autoloader = :zeitwerk
   end
 end
