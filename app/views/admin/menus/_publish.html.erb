@@ -1,0 +1,3 @@
+<%= semantic_form_for @menu, url: finalize_admin_menu_path(@menu), method: :post, builder: ActiveAdmin::FormBuilder do |f| %>
+  <%= f.button 'Publish this menu to subscribers' %>
+<% end %>

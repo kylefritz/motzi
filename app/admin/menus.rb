@@ -1,5 +1,5 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :bakers_note
+  permit_params :name, :bakers_note, :is_current
 
   show do |menu|
     attributes_table do
@@ -17,17 +17,17 @@ ActiveAdmin.register Menu do
       row :updated_at
     end
 
+    render 'publish', { menu: menu }
+
     active_admin_comments
   end
 
-  controller do
-    # This code is evaluated within the controller class
-
-    def finalize
-      menu = Menu.find(params[:id])
-      menu.publish_to_subscribers!(current_admin_user.id)
-      redirect_to [:admin, menu]
-    end
+  #
+  # action to make this menu "current" & email it to subscribers
+  #
+  member_action :finalize, method: :post do
+    resource.publish_to_subscribers!(current_admin_user.id)
+    redirect_to resource_path, notice: "Menu emailed to subscribers!"
   end
 
 end
