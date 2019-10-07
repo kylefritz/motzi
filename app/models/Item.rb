@@ -3,5 +3,4 @@ class Item < ApplicationRecord
   has_many :menus, through: :menu_items
   has_paper_trail
   has_one_attached :image
-  default_scope { order(name: :asc) }
 end

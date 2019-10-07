@@ -6,7 +6,6 @@ class User < ApplicationRecord
   has_many :credit_entries
   has_many :orders
   has_paper_trail
-  default_scope { order(last_name: :asc) }
 
   def authenticate(password)
     Devise::Encryptor.compare(User, self.encrypted_password, password)
