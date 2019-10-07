@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   devise_for :users
   ActiveAdmin.routes(self)
 
-  root to: "welcome#index"
+  root to: "welcome#show"
   
   # get the menu for the week
   get "/menu", to: "menu#show"
