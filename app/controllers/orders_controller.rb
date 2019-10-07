@@ -12,6 +12,6 @@ class OrdersController < ApplicationController
         end
     end
 
-    render json: order
+    render json: nil
   end
 end
