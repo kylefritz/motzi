@@ -2,7 +2,7 @@ import React from 'react'
 
 import PlaceOrder from './PlaceOrder.js'
 
-export class Page extends React.Component {
+export default class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = { count: 0 }
@@ -14,10 +14,7 @@ export class Page extends React.Component {
   render() {
     return (
       <div>
-        <h1>I'm a react app</h1>
-        <div>yooo {this.props.name}</div>
-        <div>I've been clicked {this.state.count}</div>
-        <button onClick={this.handleClick.bind(this)}>Click me</button>
+        <button onClick={this.handleClick.bind(this)}>This react app has been clicked {this.state.count} times</button>
         <PlaceOrder />
       </div>
     )

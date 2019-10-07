@@ -6,19 +6,19 @@ import Item from './Item.js'
 export default class PlaceOrder extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { menu: null}
+    this.state = { menu: null }
   }
   componentDidMount() {
-    axios.get('/menu').then(({ data: menu }) => {
+    axios.get('/menu.json').then(({ data: menu }) => {
       this.setState({ menu })
-    }).catch((err) =>{
+    }).catch((err) => {
       throw "couldn't get menu"
     })
   }
   handleCreateOrder() {
     const selectedItem = this.state.menu.items[0].id;
 
-    axios.post('/orders', {
+    axios.post('/orders.json', {
       feedback: 'this was great',
       comments: 'more cin rolls!',
       items: [selectedItem], // list any addons here too
@@ -29,11 +29,11 @@ export default class PlaceOrder extends React.Component {
     });
   }
   render() {
-    const {menu} = this.state;
-    if(!menu){
+    const { menu } = this.state;
+    if (!menu) {
       return <div>loading...</div>;
     }
-    const { name, bakersNote, items, addons} = menu;
+    const { name, bakersNote, items, addons } = menu;
 
     return (
       <div>
