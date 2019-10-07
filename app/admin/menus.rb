@@ -1,5 +1,5 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :bakers_note, :is_current
+  permit_params :name, :bakers_note
 
   show do |menu|
     attributes_table do
