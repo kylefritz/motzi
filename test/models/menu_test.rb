@@ -33,4 +33,13 @@ class MenuTest < ActiveSupport::TestCase
 
     assert_equal ActionMailer::Base.deliveries.last.subject, "Motzi Bread - week3", 'email sent'
   end
+
+  test "serialize to json" do
+    week2 = menus(:week2)
+    json = week2.to_json
+    assert json =~ /Rye Five Ways/, 'items serialized'
+    assert json =~ /Donuts/, 'items serialized'
+    assert json =~ /is_add_on/, 'is_add_on serialized'
+    assert json =~ /bakers_note/, 'bakers_note'
+  end
 end
