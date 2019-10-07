@@ -1,5 +1,7 @@
 import React from 'react'
 
+import PlaceOrder from './PlaceOrder.js'
+
 export class Page extends React.Component {
   constructor(props) {
     super(props)
@@ -16,6 +18,7 @@ export class Page extends React.Component {
         <div>yooo {this.props.name}</div>
         <div>I've been clicked {this.state.count}</div>
         <button onClick={this.handleClick.bind(this)}>Click me</button>
+        <PlaceOrder />
       </div>
     )
   }
