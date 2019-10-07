@@ -26,12 +26,12 @@ class MenuTest < ActiveSupport::TestCase
 
     refute week3.is_current?, 'week 2 starts as the current menu'
 
-    week3.publish_to_subscribers!(russel.id)
+    assert_difference 'MenuMailer.deliveries.count', users().count, 'email sent to each user' do
+      week3.publish_to_subscribers!(russel.id)
+    end
     
     assert week3.is_current?
     assert_equal Menu.where(is_current: true).count, 1, 'there should only be one current menu'
-
-    assert_equal ActionMailer::Base.deliveries.last.subject, "Motzi Bread - week3", 'email sent'
   end
 
   test "serialize to json" do

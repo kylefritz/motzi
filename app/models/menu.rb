@@ -17,9 +17,10 @@ class Menu < ApplicationRecord
   def publish_to_subscribers!(finalized_by_user_id)
     self.make_current!
 
-    # send the email
-    # TODO: might want to send all these emails individually?
-    MenuMailer.with(menu: self).menu_email.deliver_now
+    # email each individual user
+    User.all.each do |user|
+      MenuMailer.with(menu: self, user: user).weekly_menu.deliver_now
+    end
 
     ActiveAdmin::Comment.create!(namespace: 'admin', body: 'Menu was emailed to subscribers',
                                  resource_type: "Menu", resource_id: self.id,
