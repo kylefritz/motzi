@@ -16,10 +16,12 @@ export default class PlaceOrder extends React.Component {
     })
   }
   handleCreateOrder() {
+    const selectedItem = this.state.menu.items[0].id;
 
     axios.post('/orders', {
-      firstName: 'Fred',
-      lastName: 'Flintstone'
+      feedback: 'this was great',
+      comments: 'more cin rolls!',
+      items: [selectedItem], // list any addons here too
     }).then(function (response) {
       console.log(response);
     }).catch(function (error) {
