@@ -4,15 +4,19 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
   </head>
   <body>
-    Motzi Bread - <%= @menu.name %>
+    <h1>Motzi Bread - <%= @menu.name %></h1>
 
-    <%= @menu.bakers_note %>
+    <div>
+      <%= @menu.bakers_note %>
+    </div>
 
-    Warmly,
+    <p>You have <%= @user.credits %> remaining.</p>
 
-    Maya and Russell
-    Motzi Bread
+    <p>Warmly,</p>
 
-    Fill out form: url
+    <p>Maya and Russell</p>
+    <p>Motzi Bread</p>
+
+    <p>TODO: include form_url</p>
   </body>
 </html>

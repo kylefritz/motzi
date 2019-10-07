@@ -12,4 +12,9 @@ class UserTest < ActiveSupport::TestCase
     assert users(:kyle).is_first_half?
     refute users(:ljf).is_first_half?
   end
+
+  test "credits remaining" do
+    assert_equal users(:ljf).credits, 0
+    assert_equal users(:kyle).credits, 23
+  end
 end

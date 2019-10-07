@@ -9,3 +9,9 @@ adrian:
   quantity: 13
   good_for_months: 7
   user: adrian
+
+ljf:
+  memo: KJ bought this
+  quantity: 1
+  good_for_months: 7
+  user: adrian
