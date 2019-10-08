@@ -8,9 +8,14 @@ class ApplicationController < ActionController::Base
     current_user&.id
   end
 
-  def authenticate_admin_user!
-    # TODO: implement
-    # used by active_admin
+  def redirect_unless_user_is_admin!
+    # used by active admin to keep out non-admins
+    unless current_user&.is_admin?
+      logger.info "its NOT ok"
+      return redirect_to '/', alert: 'you must be an admin'
+    end
+
+    logger.info "its ok"
   end
   
   def current_admin_user
