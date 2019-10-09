@@ -11,6 +11,7 @@ gem 'bcrypt', '~> 3.1.7' # for devise
 gem 'bootsnap', '>= 1.4.2', require: false # Reduces boot times through caching; required in config/boot.rb
 gem 'bootstrap', '~> 4.3.1' # nice style
 gem 'devise' # for authentication
+gem 'hashid-rails' # lookup models by hashid
 gem 'image_processing', '~> 1.2' # Use Active Storage variant
 gem 'jbuilder', '~> 2.7' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'newrelic_rpm' # debugging to new relic
