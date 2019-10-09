@@ -22,6 +22,7 @@ gem 'webpacker', '~> 4.0' # compiles javascript
 gem "aws-sdk-s3", require: false # for s3/active storage
 gem "olive_branch" # convert snake_case to camelCase for json
 
+
 # gem 'redis', '~> 4.0' # Use Redis adapter to run Action Cable in production
 
 
@@ -46,4 +47,9 @@ group :test do
   gem 'capybara', '>= 2.15' # Adds support for Capybara system testing and selenium driver
   gem 'selenium-webdriver'
   gem 'webdrivers' # Easy installation and use of web drivers to run system tests with browsers
+end
+
+group :production do
+  gem 'newrelic_rpm' # debugging to new relic
+  gem 'sentry-raven' # debugging to sentry.io
 end
