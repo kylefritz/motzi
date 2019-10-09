@@ -13,11 +13,13 @@ gem 'bootstrap', '~> 4.3.1' # nice style
 gem 'devise' # for authentication
 gem 'image_processing', '~> 1.2' # Use Active Storage variant
 gem 'jbuilder', '~> 2.7' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+gem 'newrelic_rpm' # debugging to new relic
 gem 'paper_trail' # audits
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'puma', '~> 3.11' # web/app server
 gem 'rails', '~> 6.0.0'
 gem 'sass-rails', '~> 5' # css
+gem 'sentry-raven' # debugging to sentry.io
 gem 'webpacker', '~> 4.0' # compiles javascript
 gem "aws-sdk-s3", require: false # for s3/active storage
 gem "olive_branch" # convert snake_case to camelCase for json
@@ -47,9 +49,4 @@ group :test do
   gem 'capybara', '>= 2.15' # Adds support for Capybara system testing and selenium driver
   gem 'selenium-webdriver'
   gem 'webdrivers' # Easy installation and use of web drivers to run system tests with browsers
-end
-
-group :production do
-  gem 'newrelic_rpm' # debugging to new relic
-  gem 'sentry-raven' # debugging to sentry.io
 end
