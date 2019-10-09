@@ -23,4 +23,14 @@ class User < ApplicationRecord
   def name
     "#{first_name} #{last_name}"
   end
+
+  #
+  # vanity users
+  #
+  def self.kyle
+    User.find_by(email: 'kyle.p.fritz@gmail.com')
+  end
+  def self.adrian
+    User.find_by(email: 'adrian.alday@gmail.com')
+  end
 end

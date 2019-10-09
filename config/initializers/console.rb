@@ -3,8 +3,8 @@ Rails.application.configure do
   console do
     PaperTrail.request.whodunnit = ->() {
       @paper_trail_whodunnit ||= (
-        kyle_id   = User.find_by(email: 'kyle.p.fritz@gmail.com')&.id
-        adrian_id = User.find_by(email: 'adrian.alday@gmail.com')&.id
+        kyle_id   = User.kyle&.id
+        adrian_id = User.adrian&.id
 
         user_id = nil
         until user_id.present? do
