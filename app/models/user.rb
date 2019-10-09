@@ -7,6 +7,7 @@ class User < ApplicationRecord
   has_many :orders
   has_many :order_items, through: :orders
   has_paper_trail
+  scope :for_weekly_email, -> { where(send_weekly_email: true) }
 
   def credits
     # TODO: not handing expiration

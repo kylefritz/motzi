@@ -26,10 +26,12 @@ class MenuTest < ActiveSupport::TestCase
 
     refute week3.is_current?, 'week 2 starts as the current menu'
 
-    assert_difference 'MenuMailer.deliveries.count', users().count, 'email sent to each user' do
+    assert_difference('MenuMailer.deliveries.count',
+                      User.for_weekly_email.count,
+                      'email sent to each user that send_weekly_email: true') do
       week3.publish_to_subscribers!(russel.id)
     end
-    
+
     assert week3.is_current?
     assert_equal Menu.where(is_current: true).count, 1, 'there should only be one current menu'
   end

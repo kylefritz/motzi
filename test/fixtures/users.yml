@@ -38,3 +38,4 @@ maya:
   email: maya@motzi.com
   encrypted_password: <%= Devise::Encryptor.digest(User, 'wine') %>
   is_admin: true
+  send_weekly_email: false

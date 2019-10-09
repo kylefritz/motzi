@@ -18,7 +18,7 @@ class Menu < ApplicationRecord
     self.make_current!
 
     # email each individual user
-    User.all.each do |user|
+    User.for_weekly_email.each do |user|
       MenuMailer.with(menu: self, user: user).weekly_menu.deliver_now
     end
 
