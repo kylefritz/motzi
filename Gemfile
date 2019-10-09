@@ -11,6 +11,7 @@ gem 'bcrypt', '~> 3.1.7' # for devise
 gem 'bootsnap', '>= 1.4.2', require: false # Reduces boot times through caching; required in config/boot.rb
 gem 'bootstrap', '~> 4.3.1' # nice style
 gem 'devise' # for authentication
+gem 'image_processing', '~> 1.2' # Use Active Storage variant
 gem 'jbuilder', '~> 2.7' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'paper_trail' # audits
 gem 'pg', '>= 0.18', '< 2.0'
@@ -22,7 +23,7 @@ gem "aws-sdk-s3", require: false # for s3/active storage
 gem "olive_branch" # convert snake_case to camelCase for json
 
 # gem 'redis', '~> 4.0' # Use Redis adapter to run Action Cable in production
-# gem 'image_processing', '~> 1.2' # Use Active Storage variant
+
 
 group :development, :test do
   gem 'byebug' # Call 'byebug' anywhere in the code to stop execution and get a debugger console
