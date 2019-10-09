@@ -8,10 +8,12 @@ class Menu < ApplicationRecord
   end
 
   def make_current!
-    # mark the rest of the menus as "not current"
-    Menu.update_all(is_current: false)
+    unless self.is_current
+      # mark the rest of the menus as "not current"
+      Menu.update_all(is_current: false)
 
-    self.update!(is_current: true)
+      self.update!(is_current: true)
+    end
   end
 
   def publish_to_subscribers!(finalized_by_user_id)

@@ -20,6 +20,19 @@ class MenuTest < ActiveSupport::TestCase
     assert_equal Menu.current, week2
   end
 
+  test "make current" do
+    # there was a bug where calling make_current! when
+    # the menu was already current make Menu.current nil
+    week2 = menus(:week2)
+    week2.make_current!
+    week2.make_current!
+    assert_equal Menu.current, week2
+
+    week1 = menus(:week1)
+    week1.make_current!
+    assert_equal Menu.current, week1
+  end
+
   test "sending weekly email" do
     week3 = menus(:week3)
     russel = users(:russel)
