@@ -2,8 +2,9 @@ import React from 'react'
 import axios from 'axios'
 
 import Item from './Item.js'
+import BakersNote from './BakersNote.js'
 
-export default class PlaceOrder extends React.Component {
+export default class Menu extends React.Component {
   constructor(props) {
     super(props)
     this.state = { menu: null }
@@ -38,7 +39,7 @@ export default class PlaceOrder extends React.Component {
     return (
       <div>
         <h2>{name}</h2>
-        <div>{bakersNote}</div>
+        <BakersNote {...{ bakersNote }} />
         <h5>Items</h5>
         {items.map(i => <Item key={i.id} {...i} />)}
 

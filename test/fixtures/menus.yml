@@ -1,16 +1,40 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
 week1:
   name: week1
-  bakers_note: This is the first week
+  bakers_note: "Hello, all! 
+
+Great to see many of you at market yesterday! Sorry for the late selection email! We had quite a week: we closed on our big construction loan, had our last construction permit approved, officially joined the Bread Baker's Guild of America, and made the most breads of any week yet (~330 to be exact!). Right now two generous Motzi subscribers and talented programmers are working on a new subscription platform for you all. It'll roll out in a few weeks and allow for easy tracking and adding of credits. Get excited!
+
+A couple breads we did for market yesterday will debut for subscribers this week. We've got Black Sesame Rye for you which has toasted and sprouted rye berries inside and is coated in black sesame. We're also going to do baguettes. Since they're a bit smaller that selection will also include two panela donuts as well. Other options include Classic and English Muffins.
+
+Thanks for everything!
+
+Warmly,
+
+Motzi Bread (Maya and Russell)"
   is_current: false
 
 week2:
   name: week2
-  bakers_note: This is the second week
+  bakers_note: "Hello, all! 
+
+Another great market yesterday!
+
+Thanks for everything!
+
+Warmly,
+
+Motzi Bread (Maya and Russell)"
   is_current: true
 
 week3:
   name: week3
-  bakers_note: I'm the next week!
+  bakers_note: "Hi friends! 
+
+Baking is great!
+
+Thanks for everything!
+
+Warmly,
+
+Motzi Bread (Maya and Russell)"
   is_current: false
