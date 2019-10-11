@@ -8,7 +8,7 @@ export default class Item extends React.Component {
       <div>
         <h6>{name}</h6>
         <div>{description}</div>
-        <img src={image} />
+        <img src={image} height={300} width={300} style={{ objectFit: 'contain' }} />
       </div>
     )
   }
