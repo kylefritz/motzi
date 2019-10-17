@@ -5,10 +5,10 @@ export default class Item extends React.Component {
     const { name, description, image } = this.props;
 
     return (
-      <div>
+      <div className="col-6">
         <h6>{name}</h6>
         <div>{description}</div>
-        <img src={image} height={300} width={300} style={{ objectFit: 'contain' }} />
+        <img src={image} height={195} width={260} style={{ objectFit: 'contain' }} />
       </div>
     )
   }

@@ -1,12 +1,35 @@
+$container-max-widths: (
+  sm: 420px,
+  md: 640px,
+  lg: 640px
+);
+
 // Custom bootstrap variables must be set or imported *before* bootstrap.
 @import "bootstrap";
 
 @import url('https://fonts.googleapis.com/css?family=Oswald:regular,bold&subset=latin,latin-ext');
 @import url('https://fonts.googleapis.com/css?family=EB+Garamond:regular&subset=latin,latin-ext');
-
-.background {
-  background-image: url("./background.jpg");
-  background-size: cover;
+body{
+  background-color: rgb(233, 242, 236);
+}
+.banner{
+  background-image: url("./background-bread.jpg");
+    background-size: cover;
+    background-position: center;
+    color: rgba(255, 255, 255, 1);
+    height: 278px;
+}
+.container{
+  margin-top: -100px;
+  // border: 1px solid black;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.37);
+  background: white;
+  border-top: 10px solid #507a4e;
+  $padding-left-right: 34px + 15px;
+  padding-left: $padding-left-right;
+  padding-right: $padding-left-right;
+  padding-bottom: $padding-left-right + 15px;
+  margin-bottom: 100px;
 }
 h1,h2,h3,h4,h5,h6{
   font-family: 'Oswald', sans-serif;
@@ -14,7 +37,8 @@ h1,h2,h3,h4,h5,h6{
   text-transform: uppercase;
 }
 h1 {
-  background-color: rgb(80, 122, 78);
+  // background-color: rgb(80, 122, 78);
+  // color: white;
   padding: 16px;
   text-align: center;
 }

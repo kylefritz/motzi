@@ -41,7 +41,10 @@ export default class Menu extends React.Component {
         <h2>{name}</h2>
         <BakersNote {...{ bakersNote }} />
         <h5>Items</h5>
-        {items.map(i => <Item key={i.id} {...i} />)}
+        <div className="row">
+          {items.map(i => <Item key={i.id} {...i} />)}
+        </div>
+
 
         <h5>Add-Ons</h5>
         {addons.map(i => <Item key={i.id} {...i} />)}
