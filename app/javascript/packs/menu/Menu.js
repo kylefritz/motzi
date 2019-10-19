@@ -2,6 +2,7 @@ import React from 'react'
 import axios from 'axios'
 
 import Item from './Item.js'
+import AddOn from './AddOn.js'
 import BakersNote from './BakersNote.js'
 
 export default class Menu extends React.Component {
@@ -41,14 +42,17 @@ export default class Menu extends React.Component {
         <h2>{name}</h2>
         <BakersNote {...{ bakersNote }} />
         <h5>Items</h5>
-        <div className="row">
+        <div className="row mt-3 mb-5">
           {items.map(i => <Item key={i.id} {...i} />)}
         </div>
 
-
-        <h5>Add-Ons</h5>
-        {addons.map(i => <Item key={i.id} {...i} />)}
-
+        {!!addons.length && (
+          <div>
+            <h5>Add-Ons</h5>
+            <div className="row mb-5">
+              {addons.map(i => <AddOn key={i.id} {...i} />)}
+            </div>
+          </div>)}
         <h5>Place order?</h5>
         <button onClick={this.handleCreateOrder.bind(this)}>Create Order</button>
       </div>

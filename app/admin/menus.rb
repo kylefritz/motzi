@@ -9,7 +9,7 @@ ActiveAdmin.register Menu do
                 
         ul do 
           menu.menu_items.map do |menu_item|
-            li menu_item.item.name
+            li "#{menu_item.item.name} #{menu_item.is_add_on? ? " (add-on)" : ""}"
           end
         end
       end
