@@ -7,6 +7,10 @@ export default class AddOn extends React.Component {
   }
   handleClick() {
     this.cbRef.current.checked = !this.cbRef.current.checked
+    this.handleChanged()
+  }
+  handleChanged() {
+    this.props.onChange(this.cbRef.current.checked)
   }
   render() {
     const { name, description, image } = this.props;
@@ -14,8 +18,8 @@ export default class AddOn extends React.Component {
     return (
       <div className="col-6">
         <div className="form-check">
-          <input className="form-check-input" type="checkbox" name="items" value={name} ref={this.cbRef} />
-          <label className="form-check-label" for="exampleRadios1">
+          <input className="form-check-input" type="checkbox" name="addOns" value={name} ref={this.cbRef} onChange={this.handleChanged.bind(this)} />
+          <label className="form-check-label">
             {/* technically you cant put an h6 inside of a label but this is working fine for us */}
             <h6>{name}</h6>
             <div onClick={this.handleClick.bind(this)}>{description}</div>
