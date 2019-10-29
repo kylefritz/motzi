@@ -1,3 +1,14 @@
-<%= semantic_form_for @menu, url: finalize_admin_menu_path(@menu), method: :post, builder: ActiveAdmin::FormBuilder do |f| %>
-  <%= f.button 'Publish this menu to subscribers' %>
-<% end %>
+<p>
+  <% if @menu.emailed_at.present? %>
+    Emailed to subscribers <strong title="<%=@menu.emailed_at.to_s(:long) %>"><%= time_ago_in_words(@menu.emailed_at) %></strong> ago
+  <% else %>
+    Has not been emailed to subscribers.
+  <% end %>
+</p>
+<%= button_to("Email menu to subscribers#{@menu.emailed_at.present? ? ', again?!' : ''}",
+              finalize_admin_menu_path(@menu),
+              {
+                method: :post,
+                data: {confirm: (@menu.emailed_at.present? ? "Menu has already been emailed to subscribers. Email it again?" : "Email menu to subscribers?")}
+              })%>
+<br/>

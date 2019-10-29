@@ -42,10 +42,12 @@ class MenuTest < ActiveSupport::TestCase
     assert_difference('MenuMailer.deliveries.count',
                       User.for_weekly_email.count,
                       'email sent to each user that send_weekly_email: true') do
-      week3.publish_to_subscribers!(russel.id)
+      emails = week3.publish_to_subscribers!(russel.id)
+      assert_equal emails.size, User.for_weekly_email.count, 'sent emails returned'
     end
 
     assert week3.is_current?
+    assert week3.emailed_at.present?
     assert_equal Menu.where(is_current: true).count, 1, 'there should only be one current menu'
   end
 end

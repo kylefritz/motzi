@@ -20,12 +20,14 @@ class Menu < ApplicationRecord
     self.make_current!
 
     # email each individual user
-    User.for_weekly_email.each do |user|
+    User.for_weekly_email.map do |user|
       MenuMailer.with(menu: self, user: user).weekly_menu.deliver_now
+    end.tap do |emails|
+      # audit that email was sent
+      self.update(emailed_at: DateTime.now)
+      ActiveAdmin::Comment.create(namespace: 'admin', body: "Menu '#{name}' was emailed to #{emails.size} subscribers",
+                                  resource_type: "Menu", resource_id: self.id,
+                                  author_type: "User", author_id: finalized_by_user_id)
     end
-
-    ActiveAdmin::Comment.create!(namespace: 'admin', body: 'Menu was emailed to subscribers',
-                                 resource_type: "Menu", resource_id: self.id,
-                                 author_type: "User", author_id: finalized_by_user_id)
   end
 end

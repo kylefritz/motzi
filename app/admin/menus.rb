@@ -1,5 +1,5 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :bakers_note
+  permit_params :name, :bakers_note, :emailed_at
 
   show do |menu|
     attributes_table do
@@ -15,9 +15,10 @@ ActiveAdmin.register Menu do
       end
       row :created_at
       row :updated_at
+      row :emailed_at do
+        render 'publish', { menu: menu }
+      end
     end
-
-    render 'publish', { menu: menu }
 
     active_admin_comments
   end
@@ -26,8 +27,8 @@ ActiveAdmin.register Menu do
   # action to make this menu "current" & email it to subscribers
   #
   member_action :finalize, method: :post do
-    resource.publish_to_subscribers!(current_admin_user.id)
-    redirect_to resource_path, notice: "Menu emailed to subscribers!"
+    emails = resource.publish_to_subscribers!(current_admin_user.id)
+    redirect_to collection_path, notice: "Menu emailed to #{emails.size} subscribers!"
   end
 
 end
