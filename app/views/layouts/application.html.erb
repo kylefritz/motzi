@@ -13,14 +13,23 @@
   </head>
 
   <body class="background">
-    <% if notice%>
-      <div class="alert alert-warning mb-0 text-center" role="alert"><%= notice %></div>
-    <% end%>
-    <% if alert%>
-      <div class="alert alert-primary mb-0 text-center" role="alert"><%= alert %></div>
-    <% end%>
+      <div class="background">
+      <div class="banner-container">
+        <div class="banner" />
+      </div>
+      <div class="container">
+        <h1>Motzi Bread</h1>
+        <% if notice%>
+          <div class="alert alert-warning text-center" role="alert"><%= notice %></div>
+        <% end%>
+        <% if alert%>
+          <div class="alert alert-primary text-center" role="alert"><%= alert %></div>
+        <% end%>
 
-    <%= yield %>
+        <%= yield %>
+      </div>
+    </div>
+
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>

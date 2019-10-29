@@ -81,7 +81,7 @@ export default class Menu extends React.Component {
         </div>
 
         <h5>Items</h5>
-        <div className="row mt-3 mb-5">
+        <div className="row mt-3">
           {items.map(i => <Item key={i.id} {...i} onChange={() => this.handleItemSelected(i.id)} />)}
 
           {/* skip */}
