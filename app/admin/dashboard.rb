@@ -4,7 +4,7 @@ ActiveAdmin.register_page "Dashboard" do
   content title: proc { I18n.t("active_admin.dashboard") } do
 
 
-  # TODO
+  # TODO improve admin dashboard
   # * list of subscribers with low credit balance
   # * list of new subscribers
   # * list of new orders

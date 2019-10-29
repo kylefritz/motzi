@@ -18,7 +18,7 @@ export default class Menu extends React.Component {
     })
   }
   handleCreateOrder() {
-    // TODO:
+    // TODO: improve menu
     // * validate things are selected
     // * skipping weeks
     // * already submitted
