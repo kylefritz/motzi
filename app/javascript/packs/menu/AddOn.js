@@ -16,16 +16,12 @@ export default class AddOn extends React.Component {
     const { name, description, image } = this.props;
 
     return (
-      <div className="col-6">
-        <div className="form-check">
-          <input className="form-check-input" type="checkbox" name="addOns" value={name} ref={this.cbRef} onChange={this.handleChanged.bind(this)} />
-          <label className="form-check-label">
-            {/* technically you cant put an h6 inside of a label but this is working fine for us */}
-            <h6>{name}</h6>
-            <div onClick={this.handleClick.bind(this)}>{description}</div>
-            <img src={image} className="img-fluid" style={{ objectFit: 'contain' }} onClick={this.handleClick.bind(this)} />
-          </label>
-        </div>
+      <div className="form-check mb-1">
+        <input value={name} ref={this.cbRef} onChange={this.handleChanged.bind(this)}
+          className="form-check-input" type="checkbox" />
+        <label className="form-check-label">
+          {name}
+        </label>
       </div>
     )
   }

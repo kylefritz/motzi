@@ -19,13 +19,13 @@ export default class Menu extends React.Component {
   }
   handleCreateOrder() {
     // TODO:
-    // * skipping weeks
     // * validate things are selected
-    // * dont let re-submit slash tell if already submitted
+    // * skipping weeks
+    // * already submitted
 
     const { selectedItem, addOns, feedback, comments } = this.state;
     let order = { feedback, comments, items: [] };
-    if (selectedItem) {
+    if (selectedItem != 'skip') {
       order.items.push(selectedItem)
     }
 
@@ -70,31 +70,49 @@ export default class Menu extends React.Component {
 
         <BakersNote {...{ bakersNote }} />
 
-        <h5>We'd love your feedback on last week's loaf. What did you think?</h5>
+        <h5>We'd love your feedback on last week's loaf.</h5>
         <div className="row mt-3 mb-5">
-          <input className="form-control" type="text" placeholder="Your feedback" onChange={this.handleFeedback.bind(this)} />
+          <input className="form-control" type="text" placeholder="What did you think?" onChange={this.handleFeedback.bind(this)} />
         </div>
 
         <h5>Items</h5>
         <div className="row mt-3 mb-5">
           {items.map(i => <Item key={i.id} {...i} onChange={() => this.handleItemSelected(i.id)} />)}
         </div>
+        <div className="row mt-3 mb-5">
+          <div className="col-6">
+            <div className="form-check">
+              <input className="form-check-input" type="radio" name="item" value="skip" onChange={() => this.handleItemSelected("skip")} />
+              <label className="form-check-label">
+                I'd like to skip this week, please credit me for a future week (limit 3 per 6 month period)
+              </label>
+            </div>
+          </div>
+        </div>
 
         {!!addons.length && (
           <div>
             <h5>Add-Ons</h5>
-            <div className="row mb-5">
-              {addons.map(i => <AddOn key={i.id} {...i} onChange={(isSelected) => this.handleAddOnSelected(i.id, isSelected)} />)}
+            <div className="row mb-5 mt-1">
+              <div className="col">
+                {addons.map(i => <AddOn key={i.id} {...i} onChange={(isSelected) => this.handleAddOnSelected(i.id, isSelected)} />)}
+              </div>
             </div>
           </div>)}
 
         <h5>Other comments?</h5>
         <div className="row mt-3 mb-5">
-          <input className="form-control" type="text" placeholder="Your comments" onChange={this.handleComments.bind(this)} />
+          <input placeholder="Your comments" onChange={this.handleComments.bind(this)}
+            className="form-control" type="text" />
         </div>
 
         <div className="row mt-3 mb-5">
-          <button className="form-control" onClick={this.handleCreateOrder.bind(this)}>Submit Order</button>
+          <div className="col">
+            <button onClick={this.handleCreateOrder.bind(this)}
+              className="form-control" type="button">
+              Submit Order
+          </button>
+          </div>
         </div>
       </div>
     )
