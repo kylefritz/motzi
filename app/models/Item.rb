@@ -9,11 +9,4 @@ class Item < ApplicationRecord
       Rails.application.routes.url_helpers.rails_blob_path(self.image, only_path: true)
     end
   end
-
-  def as_json(options = nil)
-    # poor man's serializer
-    self.slice(:id, :name, :description).tap do |attrs|      
-      attrs[:image] = self.image_path
-    end
-  end
 end

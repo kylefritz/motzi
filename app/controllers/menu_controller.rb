@@ -1,9 +1,12 @@
 class MenuController < ApplicationController
   def show
-    @menu = Menu.current
+    
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @menu }
+      format.json do
+        @menu = Menu.current
+        # show.json.jbuilder
+      end
     end
   end
 end

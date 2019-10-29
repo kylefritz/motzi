@@ -5,9 +5,9 @@ export default class Item extends React.Component {
     super(props);
     this.cbRef = React.createRef();
   }
-  handleClick() {
+  handleClickToCheck() {
     this.cbRef.current.checked = true
-    this.props.onChange(this.cbRef.current.checked)
+    this.handleChanged()
   }
   handleChanged() {
     this.props.onChange(this.cbRef.current.checked)
@@ -16,14 +16,14 @@ export default class Item extends React.Component {
     const { name, description, image } = this.props;
 
     return (
-      <div className="col-6">
+      <div className="col-6 mb-5">
+        <img src={image} className="img-fluid" style={{ objectFit: 'contain' }} onClick={this.handleClickToCheck.bind(this)} />
         <div className="form-check">
-          <input className="form-check-input" type="radio" name="item" value={name} ref={this.cbRef} onChange={this.handleChanged.bind(this)} />
           <label className="form-check-label">
+            <input className="form-check-input" type="radio" name="item" value={name} ref={this.cbRef} onChange={this.handleChanged.bind(this)} />
             {/* technically you cant put an h6 inside of a label but this is working fine for us */}
-            <h6>{name}</h6>
-            <div onClick={this.handleClick.bind(this)}>{description}</div>
-            <img src={image} className="img-fluid" style={{ objectFit: 'contain' }} onClick={this.handleClick.bind(this)} />
+            {name} <br />
+            <small>{description}</small>
           </label>
         </div>
       </div>

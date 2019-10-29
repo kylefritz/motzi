@@ -11,8 +11,8 @@ export default class Menu extends React.Component {
     this.state = { menu: null, selectedItem: null, addOns: new Set() }
   }
   componentDidMount() {
-    axios.get('/menu.json').then(({ data: menu }) => {
-      this.setState({ menu })
+    axios.get('/menu.json').then(({ data }) => {
+      this.setState(data) // expect: menu, user, credits
     }).catch((err) => {
       throw "couldn't get menu"
     })
@@ -58,32 +58,38 @@ export default class Menu extends React.Component {
     this.setState({ feedback: e.target.value })
   }
   render() {
-    const { menu } = this.state;
+    const { menu, user, credits } = this.state;
     if (!menu) {
-      return <div>loading...</div>;
+      return <h2 className="mt-5">loading...</h2>
     }
     const { name, bakersNote, items, addons } = menu;
 
     return (
-      <div>
+      <>
+        <p>User: {user}</p>
+        <p>Credits: {credits}</p>
+
         <h2>{name}</h2>
 
         <BakersNote {...{ bakersNote }} />
 
         <h5>We'd love your feedback on last week's loaf.</h5>
         <div className="row mt-3 mb-5">
-          <input className="form-control" type="text" placeholder="What did you think?" onChange={this.handleFeedback.bind(this)} />
+          <div className="col">
+            <input className="form-control" type="text" placeholder="What did you think?" onChange={this.handleFeedback.bind(this)} />
+          </div>
         </div>
 
         <h5>Items</h5>
         <div className="row mt-3 mb-5">
           {items.map(i => <Item key={i.id} {...i} onChange={() => this.handleItemSelected(i.id)} />)}
-        </div>
-        <div className="row mt-3 mb-5">
-          <div className="col-6">
+
+          {/* skip */}
+          <div className="col-6 mb-5">
             <div className="form-check">
-              <input className="form-check-input" type="radio" name="item" value="skip" onChange={() => this.handleItemSelected("skip")} />
               <label className="form-check-label">
+                <input onChange={() => this.handleItemSelected("skip")}
+                  name="item" value="skip" className="form-check-input" type="radio" />
                 I'd like to skip this week, please credit me for a future week (limit 3 per 6 month period)
               </label>
             </div>
@@ -91,30 +97,32 @@ export default class Menu extends React.Component {
         </div>
 
         {!!addons.length && (
-          <div>
+          <>
             <h5>Add-Ons</h5>
-            <div className="row mb-5 mt-1">
+            <div className="row mt-3 mb-5">
               <div className="col">
                 {addons.map(i => <AddOn key={i.id} {...i} onChange={(isSelected) => this.handleAddOnSelected(i.id, isSelected)} />)}
               </div>
             </div>
-          </div>)}
+          </>)}
 
         <h5>Other comments?</h5>
         <div className="row mt-3 mb-5">
-          <input placeholder="Your comments" onChange={this.handleComments.bind(this)}
-            className="form-control" type="text" />
+          <div className="col">
+            <input placeholder="Your comments" onChange={this.handleComments.bind(this)}
+              className="form-control" type="text" />
+          </div>
         </div>
 
         <div className="row mt-3 mb-5">
           <div className="col">
             <button onClick={this.handleCreateOrder.bind(this)}
-              className="form-control" type="button">
+              className="btn btn-primary btn-lg btn-block" type="button">
               Submit Order
           </button>
           </div>
         </div>
-      </div>
+      </>
     )
   }
 }

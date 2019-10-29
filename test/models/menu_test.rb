@@ -48,13 +48,4 @@ class MenuTest < ActiveSupport::TestCase
     assert week3.is_current?
     assert_equal Menu.where(is_current: true).count, 1, 'there should only be one current menu'
   end
-
-  test "serialize to json" do
-    week2 = menus(:week2)
-    json = week2.to_json
-    assert json =~ /Rye Five Ways/, 'items serialized'
-    assert json =~ /Donuts/, 'items serialized'
-    assert json =~ /is_add_on/, 'is_add_on serialized'
-    assert json =~ /bakers_note/, 'bakers_note'
-  end
 end

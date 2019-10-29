@@ -5,6 +5,6 @@ export default function ({ bakersNote }) {
   const converter = new Converter()
   const noteHtml = converter.makeHtml(bakersNote)
   return (
-    <div className="bakersNote" dangerouslySetInnerHTML={{ __html: noteHtml }} />
+    <div className="bakers-note" dangerouslySetInnerHTML={{ __html: noteHtml }} />
   );
 }

@@ -28,14 +28,4 @@ class Menu < ApplicationRecord
                                  resource_type: "Menu", resource_id: self.id,
                                  author_type: "User", author_id: finalized_by_user_id)
   end
-
-  def as_json(options = nil)
-    # poor man's serializer
-    self.slice(:id, :name, :bakers_note, :created_at).tap do |attrs|
-      addons, items = self.menu_items.partition(&:is_add_on?)
-      slice_item = -> (mi) { mi.item.as_json.merge(mi.slice(:is_add_on)) }
-      attrs[:items] = items.map(&slice_item)
-      attrs[:addons] = addons.map(&slice_item)
-    end
-  end
 end
