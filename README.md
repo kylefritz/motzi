@@ -27,7 +27,7 @@ $ rails db:drop db:create db:migrate db:fixtures:load
 
 ### Running the app
 ```
-rails server
+$ rails server
 ```
 
 Working on the react apps
