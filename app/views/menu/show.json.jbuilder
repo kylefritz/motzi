@@ -17,12 +17,12 @@ json.user do
   json.credits @user.credits
 end
 
-if @order
-  json.order do
+json.order do
+  if @order
     json.items @order.order_items.map do |item|
       json.extract! item, :item_id
     end
+  else
+    json.null!
   end
-else
-  json.order nil  
 end
