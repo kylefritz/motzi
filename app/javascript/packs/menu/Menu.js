@@ -23,8 +23,8 @@ export default class Menu extends React.Component {
     // * skipping weeks
     // * already submitted
 
-    const { selectedItem, addOns, feedback, comments } = this.state;
-    let order = { feedback, comments, items: [] };
+    const { selectedItem, addOns, feedback, comments, user } = this.state;
+    let order = { feedback, comments, items: [], uid: user.hashid };
     if (selectedItem != 'skip') {
       order.items.push(selectedItem)
     }
@@ -58,7 +58,7 @@ export default class Menu extends React.Component {
     this.setState({ feedback: e.target.value })
   }
   render() {
-    const { menu, user, credits } = this.state;
+    const { menu, user } = this.state;
     if (!menu) {
       return <h2 className="mt-5">loading...</h2>
     }
@@ -66,8 +66,8 @@ export default class Menu extends React.Component {
 
     return (
       <>
-        <p>User: {user}</p>
-        <p>Credits: {credits}</p>
+        <p>Ordering for: {user.name}</p>
+        <p>Credits remaining: {user.credits}</p>
 
         <h2>{name}</h2>
 
