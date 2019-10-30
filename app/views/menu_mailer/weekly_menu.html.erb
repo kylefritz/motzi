@@ -10,7 +10,7 @@
       <%= @menu.bakers_note %>
     </div>
 
-    <p><%= link_to "This week's menu", menu_url %></p>
+    <p><%= link_to "This week's menu", menu_url(uid: @user.hashid) %></p>
 
     <p>You have <%= @user.credits %> credits remaining.</p>
 

@@ -141,6 +141,10 @@ GEM
     has_scope (0.7.2)
       actionpack (>= 4.1)
       activesupport (>= 4.1)
+    hashid-rails (1.2.2)
+      activerecord (>= 4.0)
+      hashids (~> 1.0)
+    hashids (1.0.5)
     htmlentities (4.3.4)
     i18n (1.7.0)
       concurrent-ruby (~> 1.0)
@@ -381,6 +385,7 @@ DEPENDENCIES
   devise
   dotenv-rails
   fastri
+  hashid-rails
   image_processing (~> 1.2)
   jbuilder (~> 2.7)
   letter_opener_web
