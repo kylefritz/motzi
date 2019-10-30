@@ -17,4 +17,9 @@ class UserTest < ActiveSupport::TestCase
     assert_equal users(:ljf).credits, 0
     assert_equal users(:kyle).credits, 23
   end
+
+  test "current order" do
+    assert_nil users(:ljf).current_order, 'shouldnt have an order'
+    assert_equal users(:kyle).current_order, orders(:kyle_week2), 'has already ordered'
+  end
 end

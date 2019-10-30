@@ -22,6 +22,10 @@ class User < ApplicationRecord
     "#{first_name} #{last_name}"
   end
 
+  def current_order
+    orders.where(menu_id: Menu.current.id).first
+  end
+
   #
   # vanity users
   #
