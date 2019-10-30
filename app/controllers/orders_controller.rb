@@ -1,4 +1,6 @@
 class OrdersController < ApplicationController
+  include UserHashidable
+
   def create
     # TODO: don't let subscriber place order twice
     menu = Menu.current

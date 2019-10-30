@@ -11,5 +11,8 @@ json.menu do
   end
 end
 
-json.user current_user.name
-json.credits current_user.credits
+json.user do
+  json.name @user.name
+  json.hashid @user.hashid
+  json.credits @user.credits
+end
