@@ -55,3 +55,12 @@ h2 {
     margin: auto;
   }
 }
+
+// for ErrorBoundary
+.stack-trace {
+  white-space: pre;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  font-size: 0.7em;
+  background: white;
+}
