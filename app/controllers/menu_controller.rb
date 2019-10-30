@@ -7,6 +7,7 @@ class MenuController < ApplicationController
       format.json do
         @menu = Menu.current
         @user = current_user
+        @order = current_user.current_order
         # show.json.jbuilder
       end
     end

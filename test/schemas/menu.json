@@ -1,0 +1,247 @@
+{
+  "definitions": {},
+  "$id": "/menu.json",
+  "type": "object",
+  "title": "Current Menu",
+  "required": [
+    "menu",
+    "user",
+    "order"
+  ],
+  "properties": {
+    "menu": {
+      "type": "object",
+      "title": "menu",
+      "required": [
+        "id",
+        "name",
+        "bakersNote",
+        "createdAt",
+        "items",
+        "addons"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "title": "menu id",
+          "default": 0,
+          "examples": [
+            32122582
+          ]
+        },
+        "name": {
+          "type": "string",
+          "title": "menu name",
+          "default": "",
+          "examples": [
+            "week2"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "bakersNote": {
+          "type": "string",
+          "title": "bakersnote",
+          "default": "",
+          "examples": [
+            "Hello, all!\r\n\r\nBack in January we bought a several thousand pound, three deck, electric, stone hearth oven at an auction in NJ and put it into storage. Last week we took it up to a repair company along with a rare diving arm style mixer that's perfect for our breads and (lucky for us!) happened to be at Second Chance here in town. We got word yesterday that they're both in great working order and ready for us! An exciting week! All our breads are currently hand mixed and we can't wait to have more flexibility that will come with the proper equipment setup. Here's looking at you, challah!\r\n\r\nThis week we've got Roasted Pumpkin bread for you in honor of Halloween. We're adding another celebratory selection by adding a bit of chocolate to the Caraway Beer Rye. And don't neglect the classic (it's still my favorite bread)!\r\n\r\nAlso have donuts again this week. ANYONE WHO RENEWS GETS A PACK OF TWO DONUTS FREE - if you have renewed and not gotten donuts indicate such below and grab a pack this week.\r\n\r\nHave a great week! We'll see you Tuesday between 3-7pm for pickup.\r\n\r\nWarmly,\r\n\r\nMotzi Bread (Maya and Russell)"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "created at",
+          "default": "",
+          "examples": [
+            "2019-10-06T21:14:33.588Z"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "items": {
+          "type": "array",
+          "title": "menu items",
+          "items": {
+            "type": "object",
+            "title": "items",
+            "required": [
+              "id",
+              "name",
+              "description",
+              "isAddOn"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer",
+                "title": "id",
+                "default": 0,
+                "examples": [
+                  871309743
+                ]
+              },
+              "name": {
+                "type": "string",
+                "title": "name",
+                "default": "",
+                "examples": [
+                  "Classic"
+                ],
+                "pattern": "^(.*)$"
+              },
+              "description": {
+                "type": "string",
+                "title": "description",
+                "default": "",
+                "examples": [
+                  "Mix of modern wheats and ancient Einkorn for the best of both worlds."
+                ],
+                "pattern": "^(.*)$"
+              },
+              "isAddOn": {
+                "type": "boolean",
+                "title": "is addon",
+                "default": false,
+                "examples": [
+                  false
+                ]
+              },
+              "image": {
+                "type": "string,null",
+                "title": "image",
+                "default": "",
+                "examples": [
+                  "/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBCZz09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--f5152334760abf53540d2df5ba6caa61b3d4635a/RussellBread2-002.webp"
+                ],
+                "pattern": "^(.*)$"
+              }
+            }
+          }
+        },
+        "addons": {
+          "type": "array",
+          "title": "menu addons",
+          "items": {
+            "type": "object",
+            "title": "items",
+            "required": [
+              "id",
+              "name",
+              "description",
+              "isAddOn"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer",
+                "title": "id",
+                "default": 0,
+                "examples": [
+                  985741370
+                ]
+              },
+              "name": {
+                "type": "string",
+                "title": "name",
+                "default": "",
+                "examples": [
+                  "English Muffins"
+                ],
+                "pattern": "^(.*)$"
+              },
+              "description": {
+                "type": "string",
+                "title": "description",
+                "default": "",
+                "examples": [
+                  " (with chocolate this week) - Pan style Bavarian rye with Peabody Heights beer."
+                ],
+                "pattern": "^(.*)$"
+              },
+              "isAddOn": {
+                "type": "boolean",
+                "title": "is addon",
+                "default": false,
+                "examples": [
+                  true
+                ]
+              },
+              "image": {
+                "type": "string,null",
+                "title": "image",
+                "default": "",
+                "examples": [
+                  "/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBDdz09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--2dadc4cc6c64a137aafd37e542c74cde865363c7/bread-muffins.jpg"
+                ],
+                "pattern": "^(.*)$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "user": {
+      "type": "object",
+      "title": "user",
+      "required": [
+        "name",
+        "hashid",
+        "credits"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "The Name Schema",
+          "default": "",
+          "examples": [
+            "Kyle Fritz"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "hashid": {
+          "type": "string",
+          "title": "The Hashid Schema",
+          "default": "",
+          "examples": [
+            "Dot9gKn9w"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "credits": {
+          "type": "integer",
+          "title": "The Credits Schema",
+          "default": 0,
+          "examples": [
+            13
+          ]
+        }
+      }
+    },
+    "order": {
+      "type": "object,null",
+      "title": "order",
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "title": "items",
+          "items": {
+            "type": "object",
+            "title": "item",
+            "required": [
+              "itemId"
+            ],
+            "properties": {
+              "itemId": {
+                "type": "integer",
+                "title": "itemid",
+                "default": 0,
+                "examples": [
+                  722547269
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

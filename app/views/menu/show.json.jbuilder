@@ -1,5 +1,5 @@
 json.menu do
-  json.extract @menu, :id, :name, :bakers_note, :created_at
+  json.extract! @menu, :id, :name, :bakers_note, :created_at
 
   addons, items = @menu.menu_items.partition(&:is_add_on?)
 
@@ -15,4 +15,14 @@ json.user do
   json.name @user.name
   json.hashid @user.hashid
   json.credits @user.credits
+end
+
+if @order
+  json.order do
+    json.items @order.order_items.map do |item|
+      json.extract! item, :item_id
+    end
+  end
+else
+  json.order nil  
 end
