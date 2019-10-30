@@ -21,12 +21,13 @@ export default class Menu extends React.Component {
     })
   }
   handleCreateOrder() {
-    // TODO: improve menu
-    // * validate things are selected
-    // * already submitted
+    // TODO: handle already submitted
+    // TODO: validate things are selected
 
     const { selectedItem, addOns, feedback, comments, user } = this.state;
-    let order = { feedback, comments, items: [], uid: user.hashid };
+    let order = { feedback, comments, items: [], uid: user.hashid }
+
+    // TODO: handle skipping items
     if (selectedItem != 'skip') {
       order.items.push(selectedItem)
     }
@@ -95,17 +96,6 @@ export default class Menu extends React.Component {
         <h5>Items</h5>
         <div className="row mt-3">
           {items.map(i => <Item key={i.id} {...i} onChange={() => this.handleItemSelected(i.id)} />)}
-
-          {/* skip */}
-          <div className="col-6 mb-5">
-            <div className="form-check">
-              <label className="form-check-label">
-                <input onChange={() => this.handleItemSelected("skip")}
-                  name="item" value="skip" className="form-check-input" type="radio" />
-                I'd like to skip this week, please credit me for a future week (limit 3 per 6 month period)
-              </label>
-            </div>
-          </div>
         </div>
 
         {!!addons.length && (
