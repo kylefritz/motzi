@@ -1,5 +1,6 @@
 import React from 'react'
 import axios from 'axios'
+import * as Sentry from '@sentry/browser';
 
 import Item from './Item.js'
 import AddOn from './AddOn.js'
@@ -8,19 +9,20 @@ import BakersNote from './BakersNote.js'
 export default class Menu extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { menu: null, selectedItem: null, addOns: new Set() }
+    this.state = { menu: null, selectedItem: null, addOns: new Set(), error: null }
   }
   componentDidMount() {
     axios.get('/menu.json').then(({ data }) => {
-      this.setState(data) // expect: menu, user, credits
-    }).catch((err) => {
-      throw "couldn't get menu"
+      this.setState(data) // expect: menu, user
+    }).catch((error) => {
+      console.error(error)
+      Sentry.captureException(error)
+      this.setState({ error: "We can't load the menu" })
     })
   }
   handleCreateOrder() {
     // TODO: improve menu
     // * validate things are selected
-    // * skipping weeks
     // * already submitted
 
     const { selectedItem, addOns, feedback, comments, user } = this.state;
@@ -32,11 +34,13 @@ export default class Menu extends React.Component {
     for (const addOn of addOns) {
       order.items.push(addOn)
     }
-    console.log('creating order', order)
+    console.debug('creating order', order)
     axios.post('/orders.json', order).then(function (response) {
-      console.log(response);
-    }).catch(function (error) {
-      console.log(error);
+      console.debug('created order', response)
+    }).catch((error) => {
+      console.error(error);
+      window.alert("There was a problem submitting your order.")
+      Sentry.captureException(error)
     });
   }
   handleItemSelected(itemId) {
@@ -58,7 +62,15 @@ export default class Menu extends React.Component {
     this.setState({ feedback: e.target.value })
   }
   render() {
-    const { menu, user } = this.state;
+    const { menu, user, error } = this.state;
+    if (error) {
+      return (
+        <>
+          <h2 className="mt-5">{error}</h2>
+          <p className="text-center">Sorry. Maybe try again or try back later?</p>
+        </>
+      )
+    }
     if (!menu) {
       return <h2 className="mt-5">loading...</h2>
     }
