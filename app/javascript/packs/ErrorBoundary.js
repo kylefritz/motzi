@@ -28,7 +28,10 @@ export default class ErrorBoundary extends React.Component {
         <>
           <h2>There was an error in this Bread software :(</h2>
           <br />
-          <button onClick={() => Sentry.showReportDialog({ eventId: this.state.eventId })}>Tell us what happened!</button>
+          <button onClick={() => Sentry.showReportDialog({ eventId: this.state.eventId })}
+            className="btn-primary btn-lg btn-block" type="button">
+            Please tell us what happened!
+          </button>
         </>
       );
     }
