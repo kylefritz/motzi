@@ -6,7 +6,27 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     week2.make_current!
   end
 
+  test "should get menu if signed in" do
+    sign_in users(:ljf)
+    get '/menu.json'
+    assert_menu_json
+  end
+
+  test "should get menu if hashid" do
+    get "/menu.json?uid=#{users(:ljf).hashid}"
+    assert_menu_json
+  end
+
+  test "no menu otherwise" do
+    get "/menu.json"
+    assert_response :unauthorized
+  end
+
+  private
+
   def assert_menu_json
+    assert_response :success
+
     json  = @response.body
     assert json =~ /Rye Five Ways/, 'items serialized'
     assert json =~ /Donuts/, 'items serialized'
@@ -17,25 +37,4 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     validate_json_schema :menu, json
   end
 
-  test "should get menu if signed in" do
-    sign_in users(:ljf)
-    get '/menu.json'
-    assert_response :success
-
-    assert_menu_json
-  end
-
-  test "should get menu if hashid" do
-    ljf = users(:ljf)
-
-    get "/menu.json?uid=#{ljf.hashid}"
-    assert_response :success
-
-    assert_menu_json
-  end
-
-  test "no menu otherwise" do
-    get "/menu.json"
-    assert_response :unauthorized
-  end
 end
