@@ -4,6 +4,6 @@ class OrderItem < ApplicationRecord
   has_paper_trail
 
   def name
-    "#{item&.name} in Order ##{order_id}"
+    "OrderItem##{id} in Order ##{order_id}"
   end
 end

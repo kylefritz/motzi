@@ -14,7 +14,7 @@ class Order < ApplicationRecord
   end
 
   def name
-    "Order ##{id} for #{menu&.name} from #{user&.name}"
+    "Order ##{id}"
   end
 
   delegate :is_first_half?, to: :user
