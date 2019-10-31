@@ -11,7 +11,6 @@ Thanks for everything!
 Warmly,
 
 Motzi Bread (Maya and Russell)"
-  is_current: false
 
 week2:
   name: week2
@@ -24,7 +23,6 @@ Thanks for everything!
 Warmly,
 
 Motzi Bread (Maya and Russell)"
-  is_current: true
 
 week3:
   name: week3
@@ -37,4 +35,3 @@ Thanks for everything!
 Warmly,
 
 Motzi Bread (Maya and Russell)"
-  is_current: false

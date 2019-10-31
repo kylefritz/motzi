@@ -19,6 +19,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "current order" do
+    menus(:week2).make_current!
     assert_nil users(:ljf).current_order, 'shouldnt have an order'
     assert_equal users(:kyle).current_order, orders(:kyle_week2), 'has already ordered'
   end

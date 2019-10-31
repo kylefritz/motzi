@@ -25,6 +25,7 @@ gem 'sentry-raven' # debugging to sentry.io
 gem 'webpacker', '~> 4.0' # compiles javascript
 gem "aws-sdk-s3", require: false # for s3/active storage
 gem "olive_branch" # convert snake_case to camelCase for json
+gem "rails-settings-cached" # site-wide settings
 
 
 # gem 'redis', '~> 4.0' # Use Redis adapter to run Action Cable in production

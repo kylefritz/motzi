@@ -2,7 +2,10 @@ require 'test_helper'
 
 class OrdersControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
-
+  def setup
+    menus(:week2).make_current!
+  end
+  
   test "signed in user can create order" do
     sign_in users(:ljf)
     assert_order_placed

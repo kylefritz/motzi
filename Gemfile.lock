@@ -255,6 +255,9 @@ GEM
       nokogiri (>= 1.6)
     rails-html-sanitizer (1.2.0)
       loofah (~> 2.2, >= 2.2.2)
+    rails-settings-cached (2.1.1)
+      rails (>= 4.2.0)
+      request_store
     railties (6.0.0)
       actionpack (= 6.0.0)
       activesupport (= 6.0.0)
@@ -403,6 +406,7 @@ DEPENDENCIES
   pg (>= 0.18, < 2.0)
   puma (~> 3.11)
   rails (~> 6.0.0)
+  rails-settings-cached
   rcodetools
   redcarpet
   sass-rails (~> 5)

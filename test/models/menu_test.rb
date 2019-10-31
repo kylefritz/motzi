@@ -1,6 +1,10 @@
 require 'test_helper'
 
 class MenuTest < ActiveSupport::TestCase
+  def setup
+    menus(:week2).make_current!
+  end
+  
   test "items connected to menu through menu_items" do
     week1 = menus(:week1)
     assert_equal week1.name, 'week1'
@@ -37,7 +41,7 @@ class MenuTest < ActiveSupport::TestCase
     week3 = menus(:week3)
     russel = users(:russel)
 
-    refute week3.is_current?, 'week 2 starts as the current menu'
+    refute week3.current?, 'week 2 starts as the current menu'
 
     assert_difference('MenuMailer.deliveries.count',
                       User.for_weekly_email.count,
@@ -46,8 +50,7 @@ class MenuTest < ActiveSupport::TestCase
       assert_equal emails.size, User.for_weekly_email.count, 'sent emails returned'
     end
 
-    assert week3.is_current?
+    assert week3.current?
     assert week3.emailed_at.present?
-    assert_equal Menu.where(is_current: true).count, 1, 'there should only be one current menu'
   end
 end

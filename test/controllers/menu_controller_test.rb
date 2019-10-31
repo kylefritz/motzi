@@ -4,8 +4,7 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
   def setup
-    week2 = menus(:week2)
-    week2.make_current!
+    menus(:week2).make_current!
   end
 
   test "should get menu if signed in" do
