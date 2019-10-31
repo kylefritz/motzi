@@ -180,11 +180,30 @@
       "type": "object",
       "title": "user",
       "required": [
+        "id",
+        "email",
         "name",
         "hashid",
         "credits"
       ],
       "properties": {
+        "id": {
+          "type": "integer",
+          "title": "user id",
+          "default": 0,
+          "examples": [
+            32122582
+          ]
+        },
+        "email": {
+          "type": "string",
+          "title": "email",
+          "default": "",
+          "examples": [
+            "kyle@example.com"
+          ],
+          "pattern": "^(.*)$"
+        },
         "name": {
           "type": "string",
           "title": "The Name Schema",
