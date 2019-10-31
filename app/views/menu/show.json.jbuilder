@@ -12,7 +12,9 @@ json.menu do
 end
 
 json.user do
+  json.id @user.id
   json.name @user.name
+  json.email @user.email
   json.hashid @user.hashid
   json.credits @user.credits
 end

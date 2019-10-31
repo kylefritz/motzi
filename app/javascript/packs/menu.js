@@ -1,7 +1,7 @@
 // Run this example by adding <%= javascript_pack_tag 'menu' %> to an erb page
 
 import ErrorBoundary from './ErrorBoundary.js'
-import Menu from './menu/Menu.js'
+import App from './menu/App.js'
 
 import React from 'react'
 import ReactDOM from 'react-dom'
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ReactDOM.render(
     (
       <ErrorBoundary>
-        <Menu />
+        <App />
       </ErrorBoundary>
     ),
     document.getElementById('react-menu')
