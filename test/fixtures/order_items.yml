@@ -1,11 +1,19 @@
-w1_pumpkin:
+k_w1_pumpkin:
   order: kyle_week1
   item: pumpkin
 
-w2_rye:
+a_w1_class:
+  order: adrian_week1
+  item: classic
+
+ljf_w1_class:
+  order: ljf_week1
+  item: classic
+
+k_w2_rye:
   order: kyle_week2
   item: rye
 
-w2_donuts:
+k_w2_donuts:
   order: kyle_week2
   item: donuts

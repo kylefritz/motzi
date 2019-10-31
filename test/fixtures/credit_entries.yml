@@ -11,7 +11,7 @@ adrian:
   user: adrian
 
 ljf:
-  memo: KJ bought this
+  memo: ljf bought
   quantity: 1
   good_for_months: 7
-  user: adrian
+  user: ljf

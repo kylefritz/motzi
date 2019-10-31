@@ -1,4 +1,4 @@
-table_for assigns[:orders].sort_by {|o| o.user.last_name.presence || o.user.email } do
+table_for assigns[:orders].sort_by {|o| o.user.last_name.presence || o.user.email }, id: 'pickup-list' do
   column ("Last Name") { |order| order.user.last_name.presence || order.user.email }
   column ("First Name") { |order| order.user.first_name }
   column ("Items") do |order|

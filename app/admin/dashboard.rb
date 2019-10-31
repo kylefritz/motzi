@@ -8,30 +8,30 @@ ActiveAdmin.register_page "Dashboard" do
     end
 
     columns do
-      column do
+      column id: 'what-to-bake' do
         menu_name = Menu.current.name
         panel "What to bake - #{menu_name}" do
           tues_subs = User.for_weekly_email.where(is_first_half: true).count
           thurs_subs = User.for_weekly_email.where(is_first_half: true).count
-          orders = Order.for_current_menu
-          tues, thurs = orders.partition(&:is_first_half?)
+          tues, thurs = Order.for_current_menu.partition(&:is_first_half?)
 
-          def summary(orders)
+          def summary(orders, table_class)
             counts = Hash.new(0) # hash that defaults to 0 instead of nil
             orders.each do |order|
               order.items.each { |item| counts[item.name] += 1 }
             end
-            table_for counts.keys.sort do
+
+            table_for counts.keys.sort, class: table_class do
               column ("Item") { |item| item }
               column ("Count") { |item| counts[item] }
             end
           end
 
           h4 "Tuesday - #{tues.count} / #{tues_subs} orders"
-          summary(tues)
+          summary(tues, 'tues')
 
           h4 "Thursday - #{thurs.count} / #{thurs_subs} orders"
-          summary(thurs)
+          summary(thurs, 'thurs')
           
           # ul do
           #   Post.recent(5).map do |post|
