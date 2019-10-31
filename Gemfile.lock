@@ -129,6 +129,8 @@ GEM
       railties (>= 3.2, < 6.1)
     erubi (1.9.0)
     execjs (2.7.0)
+    faker (2.6.0)
+      i18n (>= 1.6, < 1.8)
     faraday (0.17.0)
       multipart-post (>= 1.2, < 3)
     fastri (0.3.1.1)
@@ -386,6 +388,7 @@ DEPENDENCIES
   capybara (>= 2.15)
   devise
   dotenv-rails
+  faker
   fastri
   hashid-rails
   image_processing (~> 1.2)

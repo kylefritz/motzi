@@ -32,6 +32,7 @@ gem "olive_branch" # convert snake_case to camelCase for json
 group :development, :test do
   gem 'byebug' # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'dotenv-rails' # load secrets `.env` file (ask kyle for it; not checked into git)
+  gem 'faker' # fake names
   gem 'json-schema' # make sure json objects have the right schema
   gem 'letter_opener_web' # nice place to preview emails
 end
