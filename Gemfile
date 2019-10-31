@@ -19,6 +19,7 @@ gem 'paper_trail' # audits
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'puma', '~> 3.11' # web/app server
 gem 'rails', '~> 6.0.0'
+gem 'redcarpet' # markdown the baker's note in admin
 gem 'sass-rails', '~> 5' # css
 gem 'sentry-raven' # debugging to sentry.io
 gem 'webpacker', '~> 4.0' # compiles javascript

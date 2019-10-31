@@ -4,8 +4,12 @@ ActiveAdmin.register Menu do
   show do |menu|
     attributes_table do
       row :name
-      row :bakers_note
-      row :menu_items do |menu_items|
+      row :bakers_note do
+        markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
+        html = markdown.render(menu.bakers_note)
+        html.html_safe
+      end
+      row :menu_items do
                 
         ul do 
           menu.menu_items.map do |menu_item|
