@@ -2,45 +2,77 @@ ActiveAdmin.register_page "Dashboard" do
   menu priority: 1, label: proc { I18n.t("active_admin.dashboard") }
 
   content title: proc { I18n.t("active_admin.dashboard") } do
-
-    section do
-      
-    end
+    menu = Menu.current
 
     columns do
-      column id: 'what-to-bake' do
-        menu_name = Menu.current.name
-        panel "What to bake - #{menu_name}" do
-          tues_subs = User.for_weekly_email.where(is_first_half: true).count
-          thurs_subs = User.for_weekly_email.where(is_first_half: true).count
-          tues, thurs = Order.for_current_menu.partition(&:is_first_half?)
-
-          def summary(orders, table_class)
-            counts = Hash.new(0) # hash that defaults to 0 instead of nil
-            orders.each do |order|
-              order.items.each { |item| counts[item.name] += 1 }
-            end
-
-            table_for counts.keys.sort, class: table_class do
-              column ("Item") { |item| item }
-              column ("Count") { |item| counts[item] }
+      column do
+        panel "Current Menu - #{menu.name}" do
+          h4 a(menu.name, href: admin_menu_path(menu.id), class: 'bigger')
+          ul do 
+            menu.menu_items.map do |menu_item|
+              li "#{menu_item.item.name} #{menu_item.is_add_on? ? " (add-on)" : ""}"
             end
           end
-
-          h4 "Tuesday - #{tues.count} / #{tues_subs} orders"
-          summary(tues, 'tues')
-
-          h4 "Thursday - #{thurs.count} / #{thurs_subs} orders"
-          summary(thurs, 'thurs')
-          
-          # ul do
-          #   Post.recent(5).map do |post|
-          #     li link_to(post.title, admin_post_path(post))
-          #   end
-          # end
         end
       end
 
+      
+      def what_to_bake(orders, num_subs, href)
+        counts = Hash.new(0) # hash that defaults to 0 instead of nil
+        orders.each do |order|
+          order.items.each { |item| counts[item.name] += 1 }
+        end
+
+        h4 a("#{orders.count} / #{num_subs} have ordered", {href: href}), class: 'mb-0'
+        table_for counts.keys.sort do
+          column ("Item") { |item| item }
+          column ("Count") { |item| counts[item] }
+        end
+      end
+
+      tues, thurs = Order.for_current_menu.partition(&:is_first_half?)
+
+      column id: 'what-to-bake-tues' do
+        panel "Tuesday - What to bake" do
+          what_to_bake(tues, User.first_half.count, pickup_tues_admin_menu_path(menu.id))
+        end
+      end
+
+      column id: 'what-to-bake-thurs' do
+        panel "Thursday - What to bake" do
+          what_to_bake(thurs, User.second_half.count, pickup_thurs_admin_menu_path(menu.id))
+        end
+      end
+    end
+
+
+    columns do
+
+      column do
+        panel "Orders with comments" do
+          table_for menu.orders.where("comments is not null") do
+            column ("comments") { |order| order.comments }
+            column ("order") { |order| order }
+            column ("user") { |order| order.user }
+          end
+        end
+      end
+
+      column do
+        panel "Orders with feedback" do
+          table_for menu.orders.where("feedback is not null") do
+            column ("feedback") { |order| order.feedback }
+            column ("order") { |order| order }
+            column ("user") { |order| order.user }
+          end
+        end
+      end
+
+      
+    end # end columns
+    
+
+    columns do
       column do
         panel "Low credit balance" do
           h4 "TODO: credit balance"
@@ -62,29 +94,6 @@ ActiveAdmin.register_page "Dashboard" do
 
 
     columns do
-
-      column do
-        panel "Orders with comments" do
-          h4 "TODO: orders with comments (for this week)"
-          # ul do
-          #   Post.recent(5).map do |post|
-          #     li link_to(post.title, admin_post_path(post))
-          #   end
-          # end
-        end
-      end
-
-      column do
-        panel "Orders with feedback" do
-          h4 "TODO: Recent feedback (for this week)"
-          # ul do
-          #   Post.recent(5).map do |post|
-          #     li link_to(post.title, admin_post_path(post))
-          #   end
-          # end
-        end
-      end
-
       column do
         panel "Recently updated content" do
           table_for PaperTrail::Version.order('id desc').limit(20) do # Use PaperTrail::Version if this throws an error
@@ -98,8 +107,7 @@ ActiveAdmin.register_page "Dashboard" do
           end
         end
       end
-
     end # end columns
-    
+
   end # content
 end

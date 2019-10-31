@@ -6,6 +6,8 @@ class User < ApplicationRecord
   has_many :order_items, through: :orders
   has_paper_trail
   scope :for_weekly_email, -> { where(send_weekly_email: true) }
+  scope :first_half, -> { where(send_weekly_email: true, is_first_half: true) }
+  scope :second_half, -> { where(send_weekly_email: true, is_first_half: false) }
 
   def credits
     # TODO: not handing expiration
