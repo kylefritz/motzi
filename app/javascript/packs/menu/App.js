@@ -23,9 +23,11 @@ export default class App extends React.Component {
       window.alert("Weird. This web site thinks you already placed an order. Refresh the page?!")
       return
     }
+
     console.debug('creating order', order)
-    axios.post('/orders.json', order).then(function (response) {
-      console.debug('created order', response)
+    axios.post('/orders.json', order).then(({ data }) => {
+      this.setState(data) // expect: menu, user, order
+      console.debug('created order', data)
     }).catch((error) => {
       console.error("cant create order", error);
       window.alert("There was a problem submitting your order.")
