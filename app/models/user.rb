@@ -19,7 +19,7 @@ class User < ApplicationRecord
   end
 
   def name
-    "#{first_name} #{last_name}"
+    [first_name, last_name].compact.join(' ').presence || email
   end
 
   def current_order

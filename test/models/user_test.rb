@@ -22,4 +22,10 @@ class UserTest < ActiveSupport::TestCase
     assert_nil users(:ljf).current_order, 'shouldnt have an order'
     assert_equal users(:kyle).current_order, orders(:kyle_week2), 'has already ordered'
   end
+
+  test "blank name" do
+    email = "someone@bread.com"
+    user = User.create!(email: email, password: "sadfsfsdf")
+    assert_equal user.name, email, 'email is fallback for name'
+  end
 end
