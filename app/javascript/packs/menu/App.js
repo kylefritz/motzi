@@ -1,13 +1,15 @@
 import React from 'react'
 import axios from 'axios'
 import * as Sentry from '@sentry/browser';
+import queryString from 'query-string'
 
 import Order from './Order.js'
 import Menu from './Menu.js'
 
 export default class App extends React.Component {
   componentDidMount() {
-    axios.get('/menu.json').then(({ data }) => {
+    const { uid } = queryString.parse(location.search)
+    axios.get('/menu.json', { params: { uid } }).then(({ data }) => {
       this.setState(data) // expect: menu, user, order
       const { user } = data
       Sentry.configureScope((scope) => scope.setUser(user))
