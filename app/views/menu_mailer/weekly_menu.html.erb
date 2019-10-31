@@ -6,17 +6,12 @@
   <body>
     <h1>Motzi Bread - <%= @menu.name %></h1>
 
-    <div>
-      <%= @menu.bakers_note %>
+    <div class="bakers-note">
+      <%= @bakers_note %>
     </div>
 
     <p><%= link_to "This week's menu", menu_url(uid: @user.hashid) %></p>
 
     <p>You have <%= @user.credits %> credits remaining.</p>
-
-    <p>Warmly,</p>
-
-    <p>Maya and Russell</p>
-    <p>Motzi Bread</p>
   </body>
 </html>
