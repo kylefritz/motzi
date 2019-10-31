@@ -17,14 +17,11 @@ ActiveAdmin.register_page "Dashboard" do
           tues, thurs = orders.partition(&:is_first_half?)
 
           def summary(orders)
-            counts = {}
+            counts = Hash.new(0) # hash that defaults to 0 instead of nil
             orders.each do |order|
-              order.items.each do |item|
-                counts[item.name] ||=0
-                counts[item.name] += 1
-              end
+              order.items.each { |item| counts[item.name] += 1 }
             end
-            table_for counts.keys.sort  do
+            table_for counts.keys.sort do
               column ("Item") { |item| item }
               column ("Count") { |item| counts[item] }
             end
@@ -96,7 +93,7 @@ ActiveAdmin.register_page "Dashboard" do
             column ("Type") { |v| v.item_type.underscore.humanize }
             column ("Modified at") { |v| v.created_at.to_s :long }
             column ("User") do |v|
-              User.find_by(id: v.whodunnit)&.first_name || "whodunnit: '#{v.whodunnit}'"
+              User.find_by(id: v.whodunnit)&.first_name.presence || "whodunnit: '#{v.whodunnit}'"
             end
           end
         end

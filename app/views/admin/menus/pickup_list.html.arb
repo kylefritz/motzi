@@ -1,0 +1,24 @@
+table_for assigns[:orders].sort_by {|o| o.user.last_name.presence || o.user.email } do
+  column ("Last Name") { |order| order.user.last_name.presence || order.user.email }
+  column ("First Name") { |order| order.user.first_name }
+  column ("Items") do |order|
+    div do
+      item_names = order.items.map(&:name).sort
+
+      counts = Hash.new(0)
+      item_names.each { |name| counts[name] += 1 }
+      unique_item = item_names.uniq
+      unique_item.each_with_index do |name, i|
+        is_last = i+1 == unique_item.size
+        span do 
+          if counts[name] > 1
+            strong "#{counts[name]}x "
+          end
+          span "#{name}#{is_last ? "": ","}"
+        end
+        
+      end
+    end
+  end
+  column ("Sign") { |order| "" }
+end
