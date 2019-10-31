@@ -6,7 +6,11 @@ class Order < ApplicationRecord
   has_paper_trail
 
   def self.for_current_menu
-    self.includes(:user, :items).where(menu_id: Menu.current.id).where("user_id is not null")
+    self.for_menu_id(Menu.current.id)
+  end
+
+  def self.for_menu_id(menu_id)
+    self.includes(:user, :items).where(menu_id: menu_id).where("user_id is not null")
   end
 
   def name

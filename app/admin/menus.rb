@@ -43,13 +43,13 @@ ActiveAdmin.register Menu do
   end
 
   member_action :pickup_tues do
-    @orders = Order.for_current_menu.select(&:is_first_half?)
+    @orders = Order.for_menu_id(resource.id).select(&:is_first_half?)
     @page_title = "Tuesday Pickup List"
     render :pickup_list
   end
 
   member_action :pickup_thurs do
-    @orders = Order.for_current_menu.reject(&:is_first_half?)
+    @orders = Order.for_menu_id(resource.id).reject(&:is_first_half?)
     @page_title = "Thursday Pickup List"
     render :pickup_list
   end
