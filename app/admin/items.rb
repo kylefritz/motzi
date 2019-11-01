@@ -2,14 +2,20 @@ ActiveAdmin.register Item do
   permit_params :name, :description, :image
   config.sort_order = 'name_asc'
 
-  index as: :grid, columns: 5 do |item|
-    div for: item do
-      resource_selection_cell item
-      span  link_to(item.name, admin_item_path(item))
+  index do
+    selectable_column
+    column :name do |item|
+      auto_link item
+    end
+    column :image do |item|
       if item.image.attached?
         span link_to(image_tag(item.image, size: "100x100", alt: item.name), admin_item_path(item))
       end
     end
+    column :description
+    column :created_at
+    column :updated_at
+    actions
   end
 
   show do
