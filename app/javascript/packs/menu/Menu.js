@@ -52,7 +52,7 @@ export default class Menu extends React.Component {
         <div className="row mt-5">
           <div className="col">
             <h5 className="text-center">Ordering for</h5>
-            <p className="text-center">{user.name} <small className="ml-3"><a href="/menu">Not you?</a></small></p>
+            <p className="text-center">{user.name} <small className="ml-3"><a href="/signout">Not you?</a></small></p>
 
           </div>
           <div className="col">
