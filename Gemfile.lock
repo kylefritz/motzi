@@ -70,6 +70,11 @@ GEM
       zeitwerk (~> 2.1, >= 2.1.8)
     addressable (2.7.0)
       public_suffix (>= 2.0.2, < 5.0)
+    ahoy_matey (3.0.1)
+      activesupport (>= 5)
+      device_detector
+      geocoder (>= 1.4.5)
+      safely_block (>= 0.2.1)
     arbre (1.2.1)
       activesupport (>= 3.0.0)
     ast (2.4.0)
@@ -117,6 +122,7 @@ GEM
     childprocess (3.0.0)
     concurrent-ruby (1.1.5)
     crass (1.0.4)
+    device_detector (1.0.2)
     devise (4.7.1)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
@@ -127,6 +133,7 @@ GEM
     dotenv-rails (2.7.5)
       dotenv (= 2.7.5)
       railties (>= 3.2, < 6.1)
+    errbase (0.2.0)
     erubi (1.9.0)
     execjs (2.7.0)
     faker (2.6.0)
@@ -138,6 +145,7 @@ GEM
     formtastic (3.1.5)
       actionpack (>= 3.2.13)
     formtastic_i18n (0.6.0)
+    geocoder (1.5.2)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
     has_scope (0.7.2)
@@ -297,6 +305,8 @@ GEM
       ffi (~> 1.9)
     ruby_dep (1.5.0)
     rubyzip (1.3.0)
+    safely_block (0.3.0)
+      errbase (>= 0.1.1)
     sass (3.7.4)
       sass-listen (~> 4.0.0)
     sass-listen (4.0.0)
@@ -384,6 +394,7 @@ PLATFORMS
 
 DEPENDENCIES
   activeadmin
+  ahoy_matey
   aws-sdk-s3
   bcrypt (~> 3.1.7)
   bootsnap (>= 1.4.2)

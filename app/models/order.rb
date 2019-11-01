@@ -4,6 +4,7 @@ class Order < ApplicationRecord
   has_many :order_items, dependent: :delete_all
   has_many :items, through: :order_items
   has_paper_trail
+  visitable :ahoy_visit
 
   def self.for_current_menu
     self.for_menu_id(Menu.current.id)
