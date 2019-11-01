@@ -18,7 +18,8 @@
         "bakersNote",
         "createdAt",
         "items",
-        "addons"
+        "addons",
+        "isCurrent"
       ],
       "properties": {
         "id": {
@@ -173,6 +174,10 @@
               }
             }
           }
+        },
+        "isCurrent": {
+          "type": "boolean",
+          "title": "is this the current menu?"
         }
       }
     },

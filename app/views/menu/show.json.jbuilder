@@ -1,5 +1,6 @@
 json.menu do
   json.extract! @menu, :id, :name, :bakers_note, :created_at
+  json.is_current @menu.current?
 
   addons, items = @menu.menu_items.partition(&:is_add_on?)
 

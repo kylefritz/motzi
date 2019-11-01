@@ -7,7 +7,8 @@ class MenuController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.json do
-        return render_current_order
+         # if params[:id] not present, show current menu
+        return render_current_order params[:id]
       end
     end
   end

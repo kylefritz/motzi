@@ -28,8 +28,12 @@ export default class Menu extends React.Component {
     this.setState({ feedback: e.target.value })
   }
   handleCreateOrder() {
-    // TODO: validate things are selected
     const { selectedItem, addOns, feedback, comments } = this.state;
+    if (!selectedItem) {
+      alert('Select a bread!')
+      return
+    }
+
     const { user } = this.props;
     let order = { feedback, comments, items: [], uid: user.hashid }
 
@@ -45,7 +49,7 @@ export default class Menu extends React.Component {
   }
   render() {
     const { menu, user } = this.props;
-    const { name, bakersNote, items, addons } = menu;
+    const { name, bakersNote, items, addons, isCurrent } = menu;
 
     return (
       <>
@@ -98,6 +102,8 @@ export default class Menu extends React.Component {
         <div className="row mt-3 mb-5">
           <div className="col">
             <button onClick={this.handleCreateOrder.bind(this)}
+              disabled={!isCurrent}
+              title={isCurrent ? null : "This is not the current menu; you cannot submit an order."}
               className="btn btn-primary btn-lg btn-block" type="button">
               Submit Order
           </button>

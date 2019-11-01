@@ -25,7 +25,11 @@ class User < ApplicationRecord
   end
 
   def current_order
-    orders.where(menu_id: Menu.current.id).includes(order_items: [:item]).first
+    order_for_menu(Menu.current.id)
+  end
+
+  def order_for_menu(menu_id)
+    orders.where(menu_id: menu_id).includes(order_items: [:item]).first
   end
 
   #

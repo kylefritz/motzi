@@ -2,6 +2,7 @@ import React from 'react'
 import axios from 'axios'
 import * as Sentry from '@sentry/browser';
 import queryString from 'query-string'
+import _ from 'lodash'
 
 import Order from './Order.js'
 import Menu from './Menu.js'
@@ -10,7 +11,9 @@ import Preview from './Preview.js'
 export default class App extends React.Component {
   componentDidMount() {
     const { uid } = queryString.parse(location.search)
-    axios.get('/menu.json', { params: { uid } }).then(({ data }) => {
+    const regex = location.pathname.match(/menu\/(.*)/)
+    const id = _.get(regex, 1)
+    axios.get('/menu.json', { params: { uid, id } }).then(({ data }) => {
       this.setState(data) // expect: menu, user, order
       const { user } = data
       Sentry.configureScope((scope) => scope.setUser(user))

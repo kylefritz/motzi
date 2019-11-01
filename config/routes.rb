@@ -4,8 +4,11 @@ Rails.application.routes.draw do
 
   root to: "home#show"
   
+  # preview other menus
+  get "/menu/:id", to: "menu#show"
+
   # get the menu for the week
-  get "/menu", to: "menu#show"
+  get "/menu", to: "menu#show"  
 
   # create a subscribers order for the week
   post "/orders", to: "orders#create"
