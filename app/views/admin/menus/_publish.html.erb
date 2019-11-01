@@ -6,7 +6,7 @@
   <% end %>
 </p>
 <%= button_to("Email menu to subscribers#{@menu.emailed_at.present? ? ', again?!' : ''}",
-              finalize_admin_menu_path(@menu),
+              email_menu_admin_menu_path(@menu),
               {
                 method: :post,
                 data: {confirm: (@menu.emailed_at.present? ? "Menu has already been emailed to subscribers. Email it again?" : "Email menu to subscribers?")}

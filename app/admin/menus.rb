@@ -1,5 +1,5 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :bakers_note, :emailed_at
+  permit_params :name, :bakers_note
   
   # create big buttons on every menu page
   action_item :pickup_tues, except: [:index, :new] do
@@ -37,7 +37,7 @@ ActiveAdmin.register Menu do
   #
   # action to make this menu "current" & email it to subscribers
   #
-  member_action :finalize, method: :post do
+  member_action :email_menu, method: :post do
     emails = resource.publish_to_subscribers!(current_admin_user.id)
     redirect_to collection_path, notice: "Menu emailed to #{emails.size} subscribers!"
   end
