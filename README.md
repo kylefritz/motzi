@@ -17,6 +17,8 @@ Try loading the fixtures into your local development database so you have some d
 
 ```
 $ rails db:fixtures:load
+$ rails fake_data:users
+$ rails fake_data:orders
 ```
 
 #### Migrations don't work?
