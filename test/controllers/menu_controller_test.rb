@@ -18,9 +18,9 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     assert_menu_json
   end
 
-  test "no menu otherwise" do
+  test "menu ok if no user" do
     get "/menu.json"
-    assert_response :unauthorized
+    assert_menu_json
   end
 
   private

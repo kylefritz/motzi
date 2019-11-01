@@ -5,6 +5,7 @@ import queryString from 'query-string'
 
 import Order from './Order.js'
 import Menu from './Menu.js'
+import Preview from './Preview.js'
 
 export default class App extends React.Component {
   componentDidMount() {
@@ -52,6 +53,10 @@ export default class App extends React.Component {
 
     if (order) {
       return <Order {...{ user, order, menu }} />
+    }
+
+    if (!user) {
+      return <Preview {...{ order, menu }} />
     }
 
     return <Menu {...{ user, order, menu, onCreateOrder: this.handleCreateOrder.bind(this) }} />

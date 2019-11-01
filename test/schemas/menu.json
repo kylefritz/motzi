@@ -177,7 +177,7 @@
       }
     },
     "user": {
-      "type": "object",
+      "type": "object,null",
       "title": "user",
       "required": [
         "id",

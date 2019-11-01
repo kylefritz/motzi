@@ -12,11 +12,11 @@ json.menu do
 end
 
 json.user do
-  json.id @user.id
-  json.name @user.name
-  json.email @user.email
-  json.hashid @user.hashid
-  json.credits @user.credits
+  if @user
+    json.extract! @user, :id, :name, :email, :hashid, :credits
+  else
+    json.null!
+  end
 end
 
 json.order do
