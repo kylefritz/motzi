@@ -1,14 +1,38 @@
 ActiveAdmin.register Menu do
   permit_params :name, :bakers_note
-  
+
   actions :all, except: [:destroy] # deleting menus can orphan orders, etc
 
+  scope("all") { |scope| scope }
+  scope("current menu") { |scope| scope.where(id: Setting.menu_id) }
+  scope("emailed") { |scope| scope.where("emailed_at is not null") }
+  scope("not emailed") { |scope| scope.where("emailed_at is null") }
+  
   # create big buttons on every menu page
   action_item :pickup_tues, except: [:index, :new] do
     link_to 'Tuesday Pickup List', pickup_tues_admin_menu_path(params[:id])
   end
   action_item :pickup_thurs, except: [:index, :new] do
     link_to 'Thursday Pickup List', pickup_thurs_admin_menu_path(params[:id])
+  end
+
+  index do
+    selectable_column()
+    column :name do |menu|
+      para strong auto_link menu
+      small menu.bakers_note[0..140]
+    end
+    column :items do |menu|
+      ul style: 'list-style: 	disc outside none !important; white-space: nowrap' do
+        menu.menu_items.map do |menu_item|
+          li "#{menu_item.item.name} #{menu_item.is_add_on? ? " (add-on)" : ""}"
+        end
+      end
+    end
+    column :created_at
+    column :updated_at
+    column :emailed_at
+    actions
   end
 
   show do |menu|
@@ -18,8 +42,7 @@ ActiveAdmin.register Menu do
         html = markdown.render(menu.bakers_note)
         html.html_safe
       end
-      row :menu_items do
-                
+      row :menu_items do                
         ul do 
           menu.menu_items.map do |menu_item|
             li "#{menu_item.item.name} #{menu_item.is_add_on? ? " (add-on)" : ""}"
