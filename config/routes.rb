@@ -22,6 +22,11 @@ Rails.application.routes.draw do
   get '/logout' => redirect('/signout')
   get '/signout' => 'home#signout'
 
+  # blazer for admins
+  authenticate :user, ->(user) { user.is_admin? } do
+    mount Blazer::Engine, at: "blazer"
+  end
+
   # review emails in development
   if Rails.env.development?
     mount LetterOpenerWeb::Engine, at: "/letter_opener"
