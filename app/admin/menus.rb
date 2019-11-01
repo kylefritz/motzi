@@ -1,6 +1,8 @@
 ActiveAdmin.register Menu do
   permit_params :name, :bakers_note
   
+  actions :all, except: [:destroy] # deleting menus can orphan orders, etc
+
   # create big buttons on every menu page
   action_item :pickup_tues, except: [:index, :new] do
     link_to 'Tuesday Pickup List', pickup_tues_admin_menu_path(params[:id])
