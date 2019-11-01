@@ -11,9 +11,12 @@ import Preview from './Preview.js'
 export default class App extends React.Component {
   componentDidMount() {
     const { uid } = queryString.parse(location.search)
-    const regex = location.pathname.match(/menu\/(.*)/)
-    const id = _.get(regex, 1)
-    axios.get('/menu.json', { params: { uid, id } }).then(({ data }) => {
+    let params = { uid }
+    const id = _.get(location.pathname.match(/menu\/(.*)/), 1)
+    if (id) {
+      params.id = id
+    }
+    axios.get('/menu.json', { params }).then(({ data }) => {
       this.setState(data) // expect: menu, user, order
       const { user } = data
       Sentry.configureScope((scope) => scope.setUser(user))
