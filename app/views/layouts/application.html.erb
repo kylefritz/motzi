@@ -27,6 +27,12 @@
         <% end%>
 
         <%= yield %>
+
+        <% if current_user&.is_admin? %>
+          <footer class="text-center">
+            <a href="/admin">Admin Site</a>
+          </footer>
+        <% end %>
       </div>
     </div>
 
