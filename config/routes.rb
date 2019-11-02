@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   resources :menus, only: [:show]
 
   # get the menu for the week
-  get "/menu", to: "menu#show"  
+  get "/menu", to: "menus#show"  
 
   # create a subscribers order for the week
   post "/orders", to: "orders#create"
