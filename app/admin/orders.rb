@@ -11,12 +11,7 @@ ActiveAdmin.register Order do
       row :feedback
       row :comments
       row :order_items do |order_items|
-                
-        ul do 
-          order.order_items.map do |order_items|
-            li order_items.item.name
-          end
-        end
+        render partial: 'admin/orders/items', locals: {items: order.items}
       end
       row :created_at
       row :updated_at

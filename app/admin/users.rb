@@ -10,16 +10,18 @@ ActiveAdmin.register User do
 
   index do
     selectable_column()
-    actions
     column :first_name
     column :last_name
-    column :email
-    column :additional_email
+    column :email do |user|
+      para user.email
+      small user.additional_email
+    end
     column :is_first_half
     column :send_weekly_email
     column :is_admin
     column :created_at
     column :updated_at
+    actions
   end
 
   form title: 'A custom title' do |f|
@@ -35,6 +37,40 @@ ActiveAdmin.register User do
       input :is_admin
     end
     actions
+  end
+
+  show do |user|
+
+    panel "Orders" do
+      table_for user.orders do
+        column "menu" do |order|
+          auto_link order.menu
+        end
+        column :order do |order|
+          auto_link order
+        end
+        column :items do |order|
+          render partial: 'admin/orders/items', locals: {items: order.items}
+        end
+        column :feedback
+        column :comments
+      end
+    end
+
+    attributes_table do
+      row :name
+      row :email do |user|
+        para strong auto_link user.email
+        small user.additional_email
+      end
+      row :is_first_half
+      row :send_weekly_email
+      row :is_admin
+      row :created_at
+      row :updated_at      
+    end
+
+    active_admin_comments
   end
 
   actions :all, except: [:destroy] # deleting users can orphan orders, etc
