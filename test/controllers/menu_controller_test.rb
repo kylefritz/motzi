@@ -23,6 +23,11 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     assert_menu_json
   end
 
+  test "get menu by id" do
+    get "/menus/#{menus(:week1).id}/.json"
+    assert_menu_json
+  end
+
   private
 
   def assert_menu_json

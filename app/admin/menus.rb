@@ -16,7 +16,7 @@ ActiveAdmin.register Menu do
     link_to 'Thursday Pickup List', pickup_thurs_admin_menu_path(params[:id])
   end
   action_item :preview, except: [:index, :new] do
-    link_to 'Preview Menu', "/menu/#{params[:id]}", target: "_blank"
+    link_to 'Preview Menu', menu_path(params[:id]), target: "_blank"
   end
 
   index do
@@ -51,11 +51,12 @@ ActiveAdmin.register Menu do
         html.html_safe
       end
       row :menu_items do                
-        ul do 
-          menu.menu_items.map do |menu_item|
-            li "#{menu_item.item.name} #{menu_item.is_add_on? ? " (add-on)" : ""}"
-          end
-        end
+        # ul do 
+        #   menu.menu_items.map do |menu_item|
+        #     li "#{menu_item.item.name} #{menu_item.is_add_on? ? " (add-on)" : ""}"
+        #   end
+        # end
+        render 'builder'
       end
       row :created_at
       row :updated_at

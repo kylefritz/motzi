@@ -5,13 +5,15 @@ Rails.application.routes.draw do
   root to: "home#show"
   
   # preview other menus
-  get "/menu/:id", to: "menu#show"
+  resources :menus, only: [:show]
 
   # get the menu for the week
   get "/menu", to: "menu#show"  
 
   # create a subscribers order for the week
   post "/orders", to: "orders#create"
+
+  resources :items, only: [:index]
 
   # sign in
   get '/auth' => redirect('/users/sign_in')

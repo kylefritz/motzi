@@ -13,10 +13,8 @@ export default class App extends React.Component {
     const { uid } = queryString.parse(location.search)
     let params = { uid }
     const id = _.get(location.pathname.match(/menu\/(.*)/), 1)
-    if (id) {
-      params.id = id
-    }
-    axios.get('/menu.json', { params }).then(({ data }) => {
+    const menuPath = id ? `/menu/${id}.json` : '/menu.json'
+    axios.get(menuPath).then(({ data }) => {
       this.setState(data) // expect: menu, user, order
       const { user } = data
       Sentry.configureScope((scope) => scope.setUser(user))

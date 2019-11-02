@@ -1,6 +1,3 @@
-i = menu_item.item
-json.id i.id
-json.name i.name
-json.description i.description
+json.extract! menu_item.item, :id, :name, :description, :image_path
 json.is_add_on !!menu_item.is_add_on
-json.image i.image_path
+json.menu_item_id menu_item.id
