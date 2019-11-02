@@ -8,7 +8,7 @@ module RenderCurrentOrder
       @menu = menu_id ? Menu.find(menu_id) : Menu.current
       @user = current_user
       @order = current_user&.order_for_menu(@menu)
-      render 'menu/show', format: :json
+      render 'menus/show', format: :json
     end
   end
 end
