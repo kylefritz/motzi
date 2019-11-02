@@ -1,9 +1,10 @@
 import React from 'react'
 import axios from 'axios'
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '@sentry/browser'
 import _ from 'lodash'
 
 import Item from './Item'
+import Adder from './Adder'
 
 export default class App extends React.Component {
   constructor(props) {
@@ -13,6 +14,7 @@ export default class App extends React.Component {
     const menuId = _.get(location.pathname.match(/menus\/(.*)/), 1)
     this.state = { menuId }
   }
+
   loadMenu() {
     const { menuId } = this.state
     axios.get(`/menus/${menuId}.json`).then(({ data: { menu, user } }) => {
@@ -37,66 +39,45 @@ export default class App extends React.Component {
     })
   }
 
-  handleAddItem(event) {
+  handleAddItem({ itemId, isAddOn }) {
     const { menuId } = this.state
-
-    const itemId = this.selectRef.current.value;
-    const isAddOn = this.cbRef.current.checked;
-
-    if (!itemId) {
-      alert('Select an item')
-      return
-    }
-
     const json = { itemId, isAddOn, menuId }
     console.log('add item', json)
-    axios.post('/admin/menu_items.json', json).then(() => {
-      this.loadMenu()
-      this.cbRef.current.checked = false
-      this.selectRef.current.value = _.get(this.selectRef.current, [0, 'value'])
-    })
+    axios.post('/admin/menu_items.json', json).then(() => this.loadMenu())
   }
 
   handleRemoveMenuItem(removeMenuItemId) {
     console.log('delete menu_item', removeMenuItemId)
-    axios.delete(`/admin/menu_items/${removeMenuItemId}.json`).then(() => {
-      this.loadMenu()
-    })
+    axios.delete(`/admin/menu_items/${removeMenuItemId}.json`).then(() => this.loadMenu())
   }
 
   render() {
-    const { error, items, menu } = this.state || {}
+    const { error, items: allItems, menu } = this.state || {}
     if (error) {
       return <h2>{error} :(</h2>
     }
-    if (!(items && menu)) {
+    if (!(allItems && menu)) {
       return <h2>Loading</h2>
     }
+    const { addons, items } = menu
+    const makeSet = (menuItems) => new Set(menuItems.map(({ name }) => name))
 
-    return (<>
-      <h4>Items</h4>
-      <ul>
-        {menu.items.map(i => <Item key={i.menuItemId} {...i} onRemove={this.handleRemoveMenuItem.bind(this)} />)}
-      </ul>
-      {menu.items.length == 0 && <p><em>no items</em></p>}
-
-      <h4>Add-ons</h4>
-      <ul>
-        {menu.addons.map(i => <Item key={i.menuItemId} {...i} onRemove={this.handleRemoveMenuItem.bind(this)} />)}
-      </ul>
-      {menu.addons.length == 0 && <p><em>no add-ons</em></p>}
-
-      <h4>Add item</h4>
-      <select ref={this.selectRef}>
-        {_.sortBy(items, ({ name }) => name).map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
-      </select>
-      {" "}
-      <label>
-        <input type="checkbox" name="Is add on?" ref={this.cbRef} />
-        Add on?
-      </label>
-      {" "}
-      <button type="button" onClick={this.handleAddItem.bind(this)}>Add</button>
-    </>)
+    return (
+      <>
+        <h4>Items</h4>
+        <ul>
+          {items.map(i => <Item key={i.menuItemId} {...i} onRemove={this.handleRemoveMenuItem.bind(this)} />)}
+        </ul>
+        {items.length == 0 && <p><em>no items</em></p>}
+        <Adder items={allItems} not={makeSet(items)} onAdd={(itemId) => this.handleAddItem({ itemId, isAddOn: false })} />
+        <hr />
+        <h4>Add-ons</h4>
+        <ul>
+          {addons.map(i => <Item key={i.menuItemId} {...i} onRemove={this.handleRemoveMenuItem.bind(this)} />)}
+        </ul>
+        {addons.length == 0 && <p><em>no add-ons</em></p>}
+        <Adder items={allItems} not={makeSet(addons)} onAdd={(itemId) => this.handleAddItem({ itemId, isAddOn: true })} />
+      </>
+    )
   }
 }
