@@ -7,4 +7,4 @@ Motzi Bread - <%= @menu.name %>
 
 You have <%= @user.credits %> credits remaining.
 
-This week's menu: <%= menu_url(uid: @user.hashid) %>
+This week's menu: <%= current_menu_url(uid: @user.hashid) %>

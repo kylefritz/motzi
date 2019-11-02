@@ -24,7 +24,7 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get menu by id" do
-    get "/menus/#{menus(:week1).id}/.json"
+    get "/menus/#{menus(:week2).id}.json"
     assert_menu_json
   end
 
@@ -39,7 +39,7 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     assert json =~ /isAddOn/, 'isAddOn serialized'
     assert json =~ /bakersNote/, 'bakersNote'
     menu = JSON.load(json)
-    
+
     validate_json_schema :menu, json
   end
 

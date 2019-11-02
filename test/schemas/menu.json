@@ -67,12 +67,21 @@
               "id",
               "name",
               "description",
-              "isAddOn"
+              "isAddOn",
+              "menuItemId"
             ],
             "properties": {
               "id": {
                 "type": "integer",
                 "title": "id",
+                "default": 0,
+                "examples": [
+                  871309743
+                ]
+              },
+              "menuItemId": {
+                "type": "integer",
+                "title": "menu item id",
                 "default": 0,
                 "examples": [
                   871309743
@@ -126,7 +135,8 @@
               "id",
               "name",
               "description",
-              "isAddOn"
+              "isAddOn",
+              "menuItemId"
             ],
             "properties": {
               "id": {
@@ -135,6 +145,14 @@
                 "default": 0,
                 "examples": [
                   985741370
+                ]
+              },
+              "menuItemId": {
+                "type": "integer",
+                "title": "menu item id",
+                "default": 0,
+                "examples": [
+                  871309743
                 ]
               },
               "name": {

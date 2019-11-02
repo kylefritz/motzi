@@ -5,10 +5,10 @@ json.menu do
   addons, items = @menu.menu_items.partition(&:is_add_on?)
 
   json.items items.map do |menu_item|
-    json.partial! "menu/item.json.jbuilder", menu_item: menu_item
+    json.partial! "menus/item.json.jbuilder", menu_item: menu_item
   end
   json.addons addons.map do |menu_item|
-    json.partial! "menu/item.json.jbuilder", menu_item: menu_item
+    json.partial! "menus/item.json.jbuilder", menu_item: menu_item
   end
 end
 
