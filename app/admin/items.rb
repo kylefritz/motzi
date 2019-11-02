@@ -1,6 +1,7 @@
 ActiveAdmin.register Item do
   permit_params :name, :description, :image
   config.sort_order = 'name_asc'
+  config.create_another = true
 
   index do
     selectable_column
