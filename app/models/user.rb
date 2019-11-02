@@ -9,6 +9,10 @@ class User < ApplicationRecord
   scope :for_weekly_email, -> { where(send_weekly_email: true) }
   scope :first_half, -> { where(send_weekly_email: true, is_first_half: true) }
   scope :second_half, -> { where(send_weekly_email: true, is_first_half: false) }
+  before_validation(on: :create) do
+    # if no password, set random passwords on user
+    self.password = SecureRandom.base64(16) if self.password.blank?
+  end
 
   def credits
     # TODO: not handing expiration
