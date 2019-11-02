@@ -114,7 +114,10 @@
                 ]
               },
               "image": {
-                "type": "string,null",
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "title": "image",
                 "default": "",
                 "examples": [
@@ -182,7 +185,10 @@
                 ]
               },
               "image": {
-                "type": "string,null",
+                "type": [
+                  "null",
+                  "string"
+                ],
                 "title": "image",
                 "default": "",
                 "examples": [
@@ -200,7 +206,10 @@
       }
     },
     "user": {
-      "type": "object,null",
+      "type": [
+        "object",
+        "null"
+      ],
       "title": "user",
       "required": [
         "id",
@@ -256,7 +265,10 @@
       }
     },
     "order": {
-      "type": "object,null",
+      "type": [
+        "object",
+        "null"
+      ],
       "title": "order",
       "required": [
         "items"
