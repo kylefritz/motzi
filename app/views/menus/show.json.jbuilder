@@ -14,7 +14,7 @@ end
 
 json.user do
   if @user
-    json.extract! @user, :id, :name, :email, :hashid, :credits
+    json.extract! @user, :id, :name, :email, :hashid, :credits, :is_first_half
   else
     json.null!
   end

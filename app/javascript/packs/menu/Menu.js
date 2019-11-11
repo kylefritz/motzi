@@ -3,6 +3,7 @@ import React from 'react'
 import Item from './Item.js'
 import AddOn from './AddOn.js'
 import BakersNote from './BakersNote.js'
+import User from './User.js'
 
 export default class Menu extends React.Component {
   constructor(props) {
@@ -53,20 +54,7 @@ export default class Menu extends React.Component {
 
     return (
       <>
-        <div className="row mt-5">
-          <div className="col">
-            <h5 className="text-center">Ordering for</h5>
-            <p className="text-center">
-              {user.name}
-              <small className="ml-3"><a href="/signout" className="text-nowrap">Not you?</a></small>
-            </p>
-
-          </div>
-          <div className="col">
-            <h5 className="text-center">Credits remaining</h5>
-            <p className="text-center">{user.credits}</p>
-          </div>
-        </div>
+        <User user={user} />
 
         <h2>{name}</h2>
 
@@ -112,6 +100,7 @@ export default class Menu extends React.Component {
           </button>
           </div>
         </div>
+        <User user={user} />
       </>
     )
   }
