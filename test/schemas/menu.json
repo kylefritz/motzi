@@ -108,10 +108,7 @@
               "isAddOn": {
                 "type": "boolean",
                 "title": "is addon",
-                "default": false,
-                "examples": [
-                  false
-                ]
+                "default": false
               },
               "image": {
                 "type": [
@@ -179,10 +176,7 @@
               "isAddOn": {
                 "type": "boolean",
                 "title": "is addon",
-                "default": false,
-                "examples": [
-                  true
-                ]
+                "default": false
               },
               "image": {
                 "type": [
@@ -201,7 +195,8 @@
         },
         "isCurrent": {
           "type": "boolean",
-          "title": "is this the current menu?"
+          "title": "is this the current menu?",
+          "default": false
         }
       }
     },
@@ -216,7 +211,8 @@
         "email",
         "name",
         "hashid",
-        "credits"
+        "credits",
+        "isFirstHalf"
       ],
       "properties": {
         "id": {
@@ -261,6 +257,11 @@
           "examples": [
             13
           ]
+        },
+        "isFirstHalf": {
+          "type": "boolean",
+          "title": "Which half of the week does this user pickup their order?",
+          "default": false
         }
       }
     },
