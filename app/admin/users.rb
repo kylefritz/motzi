@@ -70,6 +70,20 @@ ActiveAdmin.register User do
       row :updated_at      
     end
 
+    panel "Emails" do
+      table_for user.messages do
+        column "menu" do |email|
+          auto_link email.menu
+        end
+        column :sent_at
+        column :opened_at
+        column :clicked_at
+        column :to
+        column :subject
+        column :mailer
+      end
+    end
+
     active_admin_comments
   end
 

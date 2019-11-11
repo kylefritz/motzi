@@ -46,8 +46,12 @@ class MenuTest < ActiveSupport::TestCase
     assert_difference('MenuMailer.deliveries.count',
                       User.for_weekly_email.count,
                       'email sent to each user that send_weekly_email: true') do
-      emails = week3.publish_to_subscribers!(russel.id)
-      assert_equal emails.size, User.for_weekly_email.count, 'sent emails returned'
+      assert_difference('Ahoy::Message.count',
+                      User.for_weekly_email.count,
+                      'email audited for each user that send_weekly_email: true') do
+        emails = week3.publish_to_subscribers!
+        assert_equal emails.size, User.for_weekly_email.count, 'sent emails returned'
+      end
     end
 
     assert week3.current?
