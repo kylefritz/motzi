@@ -72,8 +72,14 @@ ActiveAdmin.register Menu do
   # action to make this menu "current" & email it to subscribers
   #
   member_action :email_menu, method: :post do
-    emails = resource.publish_to_subscribers!(current_admin_user.id)
-    redirect_to collection_path, notice: "Menu emailed to #{emails.size} subscribers!"
+    emails = resource.publish_to_subscribers!
+    notice = "Menu '#{resource.name}' was emailed to #{emails.size} subscribers"
+    ActiveAdmin::Comment.create(body: notice,
+                                namespace: 'admin',
+                                resource: resource,
+                                author: current_admin_user)
+
+    redirect_to collection_path, notice: notice
   end
 
   member_action :pickup_tues do
