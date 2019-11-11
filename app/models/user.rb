@@ -2,7 +2,8 @@ class User < ApplicationRecord
   include Hashid::Rails
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable, :trackable
   has_many :credit_entries
-  has_many :orders
+  has_many :messages, class_name: "Ahoy::Message", as: :user
+  has_many :orders # must come before order_items
   has_many :order_items, through: :orders
   has_many :visits, class_name: "Ahoy::Visit"
   has_paper_trail
@@ -15,7 +16,7 @@ class User < ApplicationRecord
   end
 
   def credits
-    # TODO: not handing expiration
+    # TODO: not handing credit expiration
     credits_purchased = credit_entries.pluck('quantity').sum
     credits_used = order_items.count
     credits_purchased - credits_used

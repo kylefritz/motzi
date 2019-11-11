@@ -11,7 +11,6 @@ class Order < ApplicationRecord
   end
 
   def self.for_menu_id(menu_id)
-    # TODO: make for_menu_id scope?
     self.includes(:user, :items).where(menu_id: menu_id).where("user_id is not null")
   end
 

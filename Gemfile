@@ -7,6 +7,7 @@ ruby '2.6.5'
 # please keep gems sorted; include comment for why a gem is needed
 #
 gem 'activeadmin' # admin ui
+gem 'ahoy_email' # email analytics
 gem 'ahoy_matey' # analytics
 gem 'bcrypt', '~> 3.1.7' # for devise
 gem 'blazer' # analytics
