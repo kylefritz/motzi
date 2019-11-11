@@ -14,7 +14,7 @@ export default class App extends React.Component {
     let params = { uid }
     const id = _.get(location.pathname.match(/menu\/(.*)/), 1)
     const menuPath = id ? `/menu/${id}.json` : '/menu.json'
-    axios.get(menuPath).then(({ data }) => {
+    axios.get(menuPath, { params }).then(({ data }) => {
       this.setState(data) // expect: menu, user, order
       const { user } = data
       Sentry.configureScope((scope) => scope.setUser(user))
