@@ -67,6 +67,22 @@ ActiveAdmin.register Menu do
     end
 
     active_admin_comments
+
+    panel "Emails" do
+      table_for menu.messages do
+        column :mailer
+        column :subject
+        column :to do |email|
+          div auto_link email.to
+        end
+        column :user do |email|
+          div auto_link email.user
+        end
+        column :sent_at
+        column :opened_at
+        column :clicked_at
+      end
+    end
   end
 
   #

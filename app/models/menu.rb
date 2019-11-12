@@ -2,6 +2,7 @@ class Menu < ApplicationRecord
   has_many :menu_items, dependent: :delete_all
   has_many :items, through: :menu_items
   has_many :orders
+  has_many :messages, class_name: "Ahoy::Message"
   has_paper_trail
 
   def self.current
