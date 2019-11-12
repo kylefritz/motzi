@@ -41,7 +41,6 @@ class MenuTest < ActiveSupport::TestCase
 
   test "sending weekly email" do
     week3 = menus(:week3)
-    russel = users(:russel)
 
     refute week3.current?, 'week 2 starts as the current menu'
 
