@@ -22,6 +22,8 @@ module Motzi
 
     # zeitwerk makes ruby file autoloading better?
     config.autoloader = :zeitwerk
+
+    config.time_zone = 'Eastern Time (US & Canada)'
   end
 end
 

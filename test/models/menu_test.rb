@@ -55,8 +55,8 @@ class MenuTest < ActiveSupport::TestCase
   
   def assert_menus_emailed(num_emails, &block)
     perform_enqueued_jobs do
-      assert_difference('MenuMailer.deliveries.count', num_emails) do
-        assert_difference('Ahoy::Message.count', num_emails) do
+      assert_difference('Ahoy::Message.count', num_emails, 'messages logged to ahoy') do
+        assert_difference('MenuMailer.deliveries.count', num_emails, 'emails delivered') do
           block.call
         end
       end
