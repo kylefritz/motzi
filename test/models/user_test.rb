@@ -14,19 +14,19 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "credits remaining" do
-    assert_equal users(:ljf).credits, 0
-    assert_equal users(:kyle).credits, 23
+    assert_equal 0, users(:ljf).credits
+    assert_equal 23, users(:kyle).credits
   end
 
   test "current order" do
     menus(:week2).make_current!
     assert_nil users(:ljf).current_order, 'shouldnt have an order'
-    assert_equal users(:kyle).current_order, orders(:kyle_week2), 'has already ordered'
+    assert_equal orders(:kyle_week2), users(:kyle).current_order, 'has already ordered'
   end
 
   test "blank name" do
     email = "someone@bread.com"
     user = User.create!(email: email, password: "sadfsfsdf")
-    assert_equal user.name, email, 'email is fallback for name'
+    assert_equal email, user.name, 'email is fallback for name'
   end
 end

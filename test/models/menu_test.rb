@@ -21,8 +21,8 @@ class MenuTest < ActiveSupport::TestCase
     assert_equal items(:donuts), add_ons.first.item
   end
 
-  test "current" do
-    assert_equal Menu.current, menus(:week2)
+  test "Menu.current" do
+    assert_equal menus(:week2), Menu.current
   end
 
   test "make current" do
