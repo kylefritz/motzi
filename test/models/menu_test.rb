@@ -27,12 +27,10 @@ class MenuTest < ActiveSupport::TestCase
   end
 
   test "make current" do
-    # there was a bug where calling make_current! when
-    # the menu was already current make Menu.current nil
     week2 = menus(:week2)
     week2.make_current!
     week2.make_current!
-    assert_equal Menu.current, week2
+    assert_equal Menu.current, week2, 'ok to call twice on same menu'
 
     week1 = menus(:week1)
     week1.make_current!
@@ -44,20 +42,24 @@ class MenuTest < ActiveSupport::TestCase
 
     refute week3.current?, 'week 2 starts as the current menu'
 
-    perform_enqueued_jobs do
-      assert_difference('MenuMailer.deliveries.count',
-                        User.for_weekly_email.count,
-                        'email sent to each user that send_weekly_email: true') do
-        assert_difference('Ahoy::Message.count',
-                        User.for_weekly_email.count,
-                        'email audited for each user that send_weekly_email: true') do
-          emails = week3.publish_to_subscribers!
-          assert_equal emails.size, User.for_weekly_email.count, 'sent emails returned'
-        end
-      end
+    assert_menus_emailed(User.for_weekly_email.count) do
+      emails = week3.publish_to_subscribers!
+      assert_equal emails.size, User.for_weekly_email.count, 'sent emails returned'
     end
 
     assert week3.current?
     assert week3.emailed_at.present?
+  end
+
+  private
+  
+  def assert_menus_emailed(num_emails, &block)
+    perform_enqueued_jobs do
+      assert_difference('MenuMailer.deliveries.count', num_emails) do
+        assert_difference('Ahoy::Message.count', num_emails) do
+          block.call
+        end
+      end
+    end
   end
 end
