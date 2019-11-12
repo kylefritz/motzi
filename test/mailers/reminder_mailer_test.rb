@@ -12,7 +12,11 @@ class ReminderMailerTest < ActionMailer::TestCase
 
     assert_equal [user.email], email.to
     assert_equal 'Motzi Bread pick up today!', email.subject
-    assert_match /Reminder to come grab your bread today/, email.html_part.body.to_s
-    assert_match /Reminder to come grab your bread today/, email.text_part.body.to_s
+    assert_in_both email, 'Reminder to come grab your bread today'
+  end
+
+  def assert_in_both(email, substring, msg=nil)
+    assert_includes email.html_part.body.to_s, substring, msg
+    assert_includes email.text_part.body.to_s, substring, msg
   end
 end
