@@ -18,6 +18,11 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
     refute_reminders_emailed(:thur, '5:00 AM', 'dont send too early')
   end
 
+  test "Doesnt send to users multiple times on same menu" do
+    assert_reminders_emailed(User.first_half.count, :tues, '7:00 AM', 'send on tues')
+    refute_reminders_emailed(:tues, '7:01 AM', 'dont send the second time')
+  end
+
   private
   def refute_reminders_emailed(day, time, msg)
     assert_reminders_emailed(0, day, time, msg)

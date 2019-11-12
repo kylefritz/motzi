@@ -25,7 +25,7 @@ class Menu < ApplicationRecord
       MenuMailer.with(menu: self, user: user).weekly_menu.deliver_later
     end.tap do |emails|
       # audit that email was sent
-      self.update(emailed_at: DateTime.now)
+      self.update(emailed_at: Time.zone.now)
     end
   end
 end
