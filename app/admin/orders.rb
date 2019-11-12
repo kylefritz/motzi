@@ -1,5 +1,6 @@
 ActiveAdmin.register Order do
   permit_params :feedback, :comments, :menu, :user
+  includes :menu, :user
 
   scope("all") { |scope| scope }
   scope("current menu") { |scope| scope.where(menu_id: Setting.menu_id) }

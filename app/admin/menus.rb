@@ -1,5 +1,6 @@
 ActiveAdmin.register Menu do
   permit_params :name, :bakers_note
+  includes menu_items: [:item]
 
   actions :all, except: [:destroy] # deleting menus can orphan orders, etc
 
