@@ -13,8 +13,8 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
   end
 
   test "Sends at right time" do
-    assert_reminders_emailed(User.for_weekly_email.count, :tues, '7:00 AM', 'send on tues')
-    assert_reminders_emailed(User.for_weekly_email.count, :thur, '7:00 AM', 'send on thurs')
+    assert_reminders_emailed(User.first_half.count, :tues, '7:00 AM', 'send on tues')
+    assert_reminders_emailed(User.second_half.count, :thur, '7:00 AM', 'send on thurs')
     refute_reminders_emailed(:thur, '5:00 AM', 'dont send too early')
   end
 
@@ -31,16 +31,14 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
     assert days.include?(day), 'pick a known day'
     datetime_str = "2019-#{days[day]} #{time} EST"
     date_time = DateTime.parse(datetime_str)
-    assert_difference('Ahoy::Message.count', num_emails, 'messages logged to ahoy') do
-      assert_difference('ReminderMailer.deliveries.count', num_emails, msg) do
-        perform_enqueued_jobs do
-          Timecop.freeze(date_time) do
+    Timecop.freeze(date_time) do
+      assert_difference('Ahoy::Message.count', num_emails, 'emails audited in ahoy') do
+        assert_difference('ReminderMailer.deliveries.count', num_emails, msg) do
+          perform_enqueued_jobs do
             SendDayOfReminderJob.perform_now
           end
         end
       end
     end
-
-    assert_equal ReminderMailer.deliveries.count, Ahoy::Message.count, 'messages logged to ahoy'
   end
 end
