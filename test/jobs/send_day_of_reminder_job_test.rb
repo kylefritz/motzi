@@ -13,9 +13,9 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
   end
 
   test "Sends at right time" do
+    refute_reminders_emailed(:thur, '5:00 AM', 'dont send too early')
     assert_reminders_emailed(User.first_half.count, :tues, '7:00 AM', 'send on tues')
     assert_reminders_emailed(User.second_half.count, :thur, '7:00 AM', 'send on thurs')
-    refute_reminders_emailed(:thur, '5:00 AM', 'dont send too early')
   end
 
   test "Doesnt send to users multiple times on same menu" do
@@ -44,6 +44,10 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
           end
         end
       end
+    end
+
+    if num_emails > 0
+      assert_equal 'ReminderMailer#day_of_email', Ahoy::Message.last.mailer, 'sent by right mailer action'
     end
   end
 end

@@ -1,17 +1,9 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
-  </head>
-  <body>
-    <h1>Motzi Bread - <%= @menu.name %></h1>
+<h1>Motzi Bread - <%= @menu.name %></h1>
 
-    <div class="bakers-note">
-      <%= @bakers_note_html %>
-    </div>
+<div class="bakers-note">
+  <%= @bakers_note_html %>
+</div>
 
-    <p><%= link_to "This week's menu", current_menu_url(uid: @user.hashid) %></p>
+<p><%= link_to "This week's menu", current_menu_url(uid: @user.hashid) %></p>
 
-    <p>You have <%= @user.credits %> credits remaining.</p>
-  </body>
-</html>
+<p>You have <%= @user.credits %> credits remaining.</p>

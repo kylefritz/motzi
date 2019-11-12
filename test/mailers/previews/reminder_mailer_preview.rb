@@ -5,4 +5,10 @@ class ReminderMailerPreview < ActionMailer::Preview
     user = User.last
     ReminderMailer.with(menu: menu, user: user).day_of_email
   end
+
+  def havent_ordered_email
+    menu = Menu.current
+    user = User.last
+    ReminderMailer.with(menu: menu, user: user).havent_ordered_email
+  end
 end
