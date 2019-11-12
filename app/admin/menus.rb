@@ -89,8 +89,8 @@ ActiveAdmin.register Menu do
   # action to make this menu "current" & email it to subscribers
   #
   member_action :email_menu, method: :post do
-    emails = resource.publish_to_subscribers!
-    notice = "Menu '#{resource.name}' was emailed to #{emails.size} subscribers"
+    num_emails = resource.publish_to_subscribers!
+    notice = "Menu '#{resource.name}' was emailed to #{num_emails} subscribers"
     ActiveAdmin::Comment.create(body: notice,
                                 namespace: 'admin',
                                 resource: resource,

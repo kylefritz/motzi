@@ -19,13 +19,8 @@ class Menu < ApplicationRecord
 
   def publish_to_subscribers!
     self.make_current!
-
-    # email each individual user
-    User.for_weekly_email.map do |user|
-      MenuMailer.with(menu: self, user: user).weekly_menu.deliver_later
-    end.tap do |emails|
-      # audit that email was sent
-      self.update(emailed_at: Time.zone.now)
-    end
+    self.touch :emailed_at # audit email was sent
+    SendWeeklyMenuJob.perform_later
+    User.for_weekly_email.count
   end
 end

@@ -33,7 +33,7 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
     assert_reminders_emailed(0, day, time, msg)
   end
 
-  def assert_reminders_emailed(num_emails, day, time, msg)
+  def assert_reminders_emailed(num_emails, day, time, msg=nil)
     days = {
       sun: '11-10',
       mon: '11-11',
