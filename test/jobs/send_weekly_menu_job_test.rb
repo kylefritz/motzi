@@ -9,6 +9,7 @@ class SendWeeklyMenuJobTest < ActiveJob::TestCase
 
   test "send weekly menu email" do
     assert_menu_emailed(User.for_weekly_email.count, :sun, '10:00 AM')
+    assert_menu_emailed(0, :sun, '10:01 AM', 'dont email people twice')
   end
 
   def assert_menu_emailed(num_emails, day, time, msg=nil)
@@ -34,7 +35,7 @@ class SendWeeklyMenuJobTest < ActiveJob::TestCase
       end
     end
     if num_emails > 0
-      assert_equal 'MenuMailer#weekly_menu', Ahoy::Message.last.mailer, 'sent by right mailer action'
+      assert_equal 'MenuMailer#weekly_menu_email', Ahoy::Message.last.mailer, 'sent by right mailer action'
     end
   end
 end
