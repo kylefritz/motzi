@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`snapshot 1`] = `
+<div
+  className="row mt-5"
+>
+  <div
+    className="col"
+  >
+    <h5
+      className="text-center"
+    >
+      Ordering for
+    </h5>
+    <p
+      className="text-center"
+    >
+      kyle
+      <small
+        className="ml-3"
+      >
+        <a
+          className="text-nowrap"
+          href="/signout"
+        >
+          Not you?
+        </a>
+      </small>
+    </p>
+  </div>
+  <div
+    className="col"
+  >
+    <h5
+      className="text-center"
+    >
+      Credits remaining
+    </h5>
+    <p
+      className="text-center"
+    >
+      6
+    </p>
+  </div>
+  <div
+    className="col"
+  >
+    <h5
+      className="text-center"
+    >
+      Pickup Day
+    </h5>
+    <p
+      className="text-center"
+    >
+      Thursday
+    </p>
+  </div>
+</div>
+`;

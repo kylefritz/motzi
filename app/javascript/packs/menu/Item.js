@@ -22,7 +22,6 @@ export default class Item extends React.Component {
           <label className="form-check-label">
             <input value={name} ref={this.cbRef} onChange={this.handleChanged.bind(this)}
               className={`form-check-input ${onChange ? '' : 'd-none'}`} type="radio" name="item" />
-            {/* technically you cant put an h6 inside of a label but this is working fine for us */}
             {name} <br />
             <small>{description}</small>
           </label>

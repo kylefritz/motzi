@@ -37,5 +37,10 @@ Working on the react apps
 $ ./bin/webpack-dev-server
 ```
 
+### Running js tests
+```
+npx jest
+```
+
 ### Checking emails
 visit `/letter_opener` to see emails sent by rails
