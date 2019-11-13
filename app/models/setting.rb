@@ -5,4 +5,5 @@ class Setting < RailsSettings::Base
 
   field :menu_id, type: :integer, default: nil
   field :motzi_phone, type: :string
+  field :google_analytics_tracker, default: nil, type: :string
 end
