@@ -1,11 +1,11 @@
 require 'test_helper'
 
 class MenuMailerTest < ActionMailer::TestCase
-  test "weekly_menu" do
+  test "weekly_menu_email" do
     user = users(:kyle)
     menu = menus(:week2)
 
-    email = MenuMailer.with(user: user, menu: menu).weekly_menu
+    email = MenuMailer.with(user: user, menu: menu).weekly_menu_email
     assert_emails 1 do
       email.deliver_now
     end

@@ -2,7 +2,7 @@ class MenuMailer < ApplicationMailer
   track extra: -> { {menu_id: params[:menu].id} }
   track open: true, click: true
 
-  def weekly_menu
+  def weekly_menu_email
     @menu = params[:menu]
     @user = params[:user]
     renderer = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)

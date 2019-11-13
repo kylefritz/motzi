@@ -51,18 +51,13 @@ ActiveAdmin.register Menu do
         html = markdown.render(menu.bakers_note)
         html.html_safe
       end
-      row :menu_items do                
-        # ul do 
-        #   menu.menu_items.map do |menu_item|
-        #     li "#{menu_item.item.name} #{menu_item.is_add_on? ? " (add-on)" : ""}"
-        #   end
-        # end
+      row :menu_items do
         render 'builder'
       end
       row :created_at
       row :updated_at
       row :emailed_at do
-        render 'publish', { menu: menu }
+        render 'email', { menu: menu }
       end
     end
 
