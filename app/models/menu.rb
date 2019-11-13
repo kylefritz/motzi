@@ -20,7 +20,6 @@ class Menu < ApplicationRecord
   def publish_to_subscribers!
     self.make_current!
     self.touch :emailed_at # audit email was sent
-    SendWeeklyMenuJob.perform_later
-    User.for_weekly_email.count
+    SendWeeklyMenuJob.perform_now.size
   end
 end
