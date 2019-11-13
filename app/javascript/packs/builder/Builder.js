@@ -63,21 +63,25 @@ export default class App extends React.Component {
     const makeSet = (menuItems) => new Set(menuItems.map(({ name }) => name))
 
     return (
-      <>
+      <div className="menu-builder">
         <h4>Items</h4>
-        <ul>
-          {items.map(i => <Item key={i.menuItemId} {...i} onRemove={this.handleRemoveMenuItem.bind(this)} />)}
-        </ul>
+        <table>
+          <tbody>
+            {items.map(i => <Item key={i.menuItemId} {...i} onRemove={this.handleRemoveMenuItem.bind(this)} />)}
+          </tbody>
+        </table>
         {items.length == 0 && <p><em>no items</em></p>}
         <Adder items={allItems} not={makeSet(items)} onAdd={(itemId) => this.handleAddItem({ itemId, isAddOn: false })} />
         <hr />
         <h4>Add-ons</h4>
-        <ul>
-          {addons.map(i => <Item key={i.menuItemId} {...i} onRemove={this.handleRemoveMenuItem.bind(this)} />)}
-        </ul>
+        <table>
+          <tbody>
+            {addons.map(i => <Item key={i.menuItemId} {...i} onRemove={this.handleRemoveMenuItem.bind(this)} />)}
+          </tbody>
+        </table>
         {addons.length == 0 && <p><em>no add-ons</em></p>}
         <Adder items={allItems} not={makeSet(addons)} onAdd={(itemId) => this.handleAddItem({ itemId, isAddOn: true })} />
-      </>
+      </div>
     )
   }
 }

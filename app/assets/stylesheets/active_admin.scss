@@ -24,3 +24,16 @@
 .mb-0 {
   margin-bottom: 0 !important;
 }
+
+.menu-builder {
+  table {
+    width: 300px;
+    margin-bottom: 0; // make Adder table adjacent to previous table
+    select {
+      height: 27px; // make <select> same height as button
+    }
+    td:last-child {
+      text-align: right;
+    }
+  }
+}

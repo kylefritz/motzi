@@ -14,12 +14,19 @@ export default function ({ items, not, onAdd }) {
 
   const choices = _.sortBy(items, ({ name }) => name).filter(i => !not.has(i.name))
   return (
-    <>
-      <select ref={selectRef}>
-        {choices.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
-      </select>
-      {" "}
-      <button type="button" onClick={handleAdd}>Add</button>
-    </>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+            <select ref={selectRef}>
+              {choices.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
+            </select>
+          </td>
+          <td>
+            <button type="button" onClick={handleAdd}>Add</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   )
 }

@@ -8,9 +8,12 @@ export default class Item extends React.Component {
   render() {
     const { name, isAddOn } = this.props || {}
     return (
-      <li>
-        {name}{" "}<button onClick={this.handleRemove.bind(this)}>x</button>
-      </li>
+      <tr>
+        <td>{name}</td>
+        <td>
+          <button onClick={this.handleRemove.bind(this)}>x</button>
+        </td>
+      </tr>
     )
   }
 }
