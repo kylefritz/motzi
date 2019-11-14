@@ -24,7 +24,7 @@ ActiveAdmin.register User do
     actions
   end
 
-  form title: 'A custom title' do |f|
+  form do |f|
     inputs 'Details' do
       input :first_name
       input :last_name

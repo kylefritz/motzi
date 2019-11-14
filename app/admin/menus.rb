@@ -1,6 +1,7 @@
 ActiveAdmin.register Menu do
   permit_params :name, :bakers_note
   includes menu_items: [:item]
+  config.sort_order = 'name_desc'
 
   actions :all, except: [:destroy] # deleting menus can orphan orders, etc
 
@@ -23,7 +24,12 @@ ActiveAdmin.register Menu do
   index do
     selectable_column()
     column :name do |menu|
-      para strong auto_link menu
+      para do 
+        strong auto_link menu
+        if menu.current?
+          span 'Current', class: 'status_tag yes', style: 'margin-left: 12px'
+        end
+      end
       small menu.bakers_note[0..140]
     end
     column :items do |menu|
@@ -41,6 +47,13 @@ ActiveAdmin.register Menu do
       a "preview", href: "/menu/#{menu.id}", target: "_blank"
       a 'tues', href: pickup_tues_admin_menu_path(menu)
       a 'thurs', href: pickup_thurs_admin_menu_path(menu)
+    end
+  end
+
+  form do |f|
+    inputs do
+      input :name
+      input :bakers_note
     end
   end
 
