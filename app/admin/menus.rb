@@ -1,7 +1,7 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :bakers_note
+  permit_params :name, :bakers_note, :week_id
   includes menu_items: [:item]
-  config.sort_order = 'name_desc'
+  config.sort_order = 'week_id_desc'
 
   actions :all, except: [:destroy] # deleting menus can orphan orders, etc
 
@@ -39,6 +39,11 @@ ActiveAdmin.register Menu do
         end
       end
     end
+    column :week_id do |menu|
+      para auto_link menu.week_id
+      t = Time.zone.from_week_id(menu.week_id)
+      small "#{t.strftime('%a %m/%d')}"
+    end
     column :created_at
     column :updated_at
     column :emailed_at
@@ -51,14 +56,26 @@ ActiveAdmin.register Menu do
   end
 
   form do |f|
+    def week_options(resource_week)
+      week_ids = (1..10).map {|i| (Time.zone.now + i.weeks).week_id }
+      week_ids.push(resource_week) if resource_week.present?
+      week_ids.uniq.sort.map do |week_id|
+        t = Time.zone.from_week_id(week_id).strftime('%a %m/%d')
+        ["#{week_id} starts #{t}", week_id]
+      end
+    end
+
     inputs do
+      input :week_id, :as => :select, :collection => week_options(resource.week_id)
       input :name
       input :bakers_note
     end
+    actions
   end
 
   show do |menu|
     attributes_table do
+      row :week_id
       row :bakers_note do
         markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
         html = markdown.render(menu.bakers_note)

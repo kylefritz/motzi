@@ -1,5 +1,6 @@
 week1:
   name: week1
+  week_id: 19w01
   bakers_note: "Hello, all! 
 
 Great to see many of you at market yesterday! Sorry for the late selection email! We had quite a week: we closed on our big construction loan, had our last construction permit approved, officially joined the Bread Baker's Guild of America, and made the most breads of any week yet (~330 to be exact!). Right now two generous Motzi subscribers and talented programmers are working on a new subscription platform for you all. It'll roll out in a few weeks and allow for easy tracking and adding of credits. Get excited!
@@ -14,6 +15,7 @@ Motzi Bread (Maya and Russell)"
 
 week2:
   name: week2
+  week_id: 19w02
   bakers_note: "Hello, all! 
 
 Another great market yesterday!
@@ -26,6 +28,7 @@ Motzi Bread (Maya and Russell)"
 
 week3:
   name: week3
+  week_id: 19w03
   bakers_note: "Hi friends! 
 
 Baking is great!
