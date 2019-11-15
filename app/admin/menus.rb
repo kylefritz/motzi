@@ -48,6 +48,7 @@ ActiveAdmin.register Menu do
     column :updated_at
     column :emailed_at
     actions defaults: false do |menu|
+      a "view", href: admin_menu_path(menu)
       a "edit", href: edit_admin_menu_path(menu)
       a "preview", href: "/menu/#{menu.id}", target: "_blank"
       a 'tues', href: pickup_tues_admin_menu_path(menu)
