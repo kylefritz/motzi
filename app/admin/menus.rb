@@ -75,7 +75,12 @@ ActiveAdmin.register Menu do
 
   show do |menu|
     attributes_table do
-      row :week_id
+      row :week_id do
+        span menu.week_id
+        if menu.current?
+          span 'Current', class: 'status_tag yes', style: 'margin-left: 12px'
+        end
+      end
       row :bakers_note do
         markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
         html = markdown.render(menu.bakers_note)
