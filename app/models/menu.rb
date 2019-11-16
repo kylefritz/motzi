@@ -4,6 +4,7 @@ class Menu < ApplicationRecord
   has_many :orders
   has_many :messages, class_name: "Ahoy::Message"
   has_paper_trail
+  default_scope { order("LOWER(week_id) desc") }
 
   def self.current
     Menu.find(Setting.menu_id)

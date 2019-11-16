@@ -1,7 +1,7 @@
 ActiveAdmin.register Menu do
   permit_params :name, :bakers_note, :week_id
   includes menu_items: [:item]
-  config.sort_order = 'week_id_desc'
+  config.sort_order = 'LOWER(week_id) desc'
 
   actions :all, except: [:destroy] # deleting menus can orphan orders, etc
 
@@ -27,7 +27,7 @@ ActiveAdmin.register Menu do
       para do 
         strong auto_link menu
         if menu.current?
-          span 'Current', class: 'status_tag yes', style: 'margin-left: 12px'
+          status_tag true, style: 'margin-left: 3px', label: 'Current'
         end
       end
       small menu.bakers_note[0..140]
@@ -79,7 +79,7 @@ ActiveAdmin.register Menu do
       row :week_id do
         span menu.week_id
         if menu.current?
-          span 'Current', class: 'status_tag yes', style: 'margin-left: 12px'
+          status_tag true, style: 'margin-left: 3px', label: 'Current'
         end
       end
       row :bakers_note do

@@ -1,6 +1,10 @@
 ActiveAdmin.register User do
   permit_params :first_name, :last_name, :email, :additional_email, :is_first_half, :is_admin, :send_weekly_email
-  config.sort_order = 'last_name_asc'
+  config.sort_order = 'LOWER(first_name), LOWER(last_name)'
+
+  preserve_default_filters!
+  remove_filter :credit_entries, :messages, :orders, :order_items, :versions, :visits, \
+    :created_at, :current_sign_in_at, :current_sign_in_ip, :encrypted_password, :last_sign_in_at, :last_sign_in_ip, :remember_created_at, :reset_password_sent_at, :reset_password_token, :sign_in_count, :updated_at
 
   scope("all") { |scope| scope }
   scope("tues") { |scope| scope.where(is_first_half: true) }
@@ -68,6 +72,16 @@ ActiveAdmin.register User do
       row :is_admin
       row :created_at
       row :updated_at      
+    end
+
+    panel "Credit Entries" do
+      h4 "Available credits: #{user.credits}"
+      table_for user.credit_entries do
+        column :quantity
+        column :memo
+        column :created_at
+        column :good_for_weeks
+      end
     end
 
     panel "Emails" do

@@ -1,6 +1,6 @@
 ActiveAdmin.register Item do
   permit_params :name, :description, :image
-  config.sort_order = 'name_asc'
+  config.sort_order = 'LOWER(name)'
   config.create_another = true
 
   index do
