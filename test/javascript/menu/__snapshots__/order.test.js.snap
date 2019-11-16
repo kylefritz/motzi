@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Order snapshot 1`] = `
+<Fragment>
+  <h2
+    className="mt-5"
+  >
+    We got your order!
+  </h2>
+  <div
+    className="row mt-5"
+  >
+    <div
+      className="col-sm-4"
+    />
+    <div
+      className="col-sm-4"
+    >
+      <h5>
+        Items
+      </h5>
+      <ul>
+        <li
+          key="0"
+        >
+          Bagette
+        </li>
+        <li
+          key="1"
+        >
+          Classic
+        </li>
+      </ul>
+    </div>
+    <div
+      className="col-sm-4"
+    />
+  </div>
+  <User
+    user={
+      Object {
+        "credits": 9,
+        "email": "kyle.p.fritz@gmail.com",
+        "hashid": "Dot9gKn9w",
+        "id": 584273342,
+        "isFirstHalf": true,
+        "name": "Kyle Fritz",
+      }
+    }
+  />
+  <hr
+    className="mb-5"
+  />
+  <h2
+    className="mt-3 mb-5"
+  >
+    week 5
+  </h2>
+  <_default
+    bakersNote="Orci varius"
+  />
+</Fragment>
+`;

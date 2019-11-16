@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Preview snapshot 1`] = `
+<Fragment>
+  <h2>
+    week 5
+  </h2>
+  <_default
+    bakersNote="Orci varius"
+  />
+  <h5>
+    Items
+  </h5>
+  <div
+    className="row mt-3"
+  >
+    <Item
+      description=""
+      id={985741369}
+      image="bread-baget.jpg"
+      isAddOn={false}
+      key="985741369"
+      menuItemId={993690591}
+      name="Bagette"
+    />
+  </div>
+  <h5>
+    Add-Ons
+  </h5>
+  <div
+    className="row mt-3 mb-5"
+  >
+    <div
+      className="col"
+    >
+      <ul>
+        <li
+          key="871309743"
+        >
+          Classic
+        </li>
+      </ul>
+    </div>
+  </div>
+</Fragment>
+`;

@@ -1,0 +1,125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Menu snapshot 1`] = `
+<Fragment>
+  <User
+    user={
+      Object {
+        "credits": 9,
+        "email": "kyle.p.fritz@gmail.com",
+        "hashid": "Dot9gKn9w",
+        "id": 584273342,
+        "isFirstHalf": true,
+        "name": "Kyle Fritz",
+      }
+    }
+  />
+  <h2>
+    week 5
+  </h2>
+  <_default
+    bakersNote="Orci varius"
+  />
+  <h5>
+    We'd love your feedback on last week's loaf.
+  </h5>
+  <div
+    className="row mt-3 mb-5"
+  >
+    <div
+      className="col"
+    >
+      <input
+        className="form-control"
+        onChange={[Function]}
+        placeholder="What did you think?"
+        type="text"
+      />
+    </div>
+  </div>
+  <h5>
+    Items
+  </h5>
+  <div
+    className="row mt-3"
+  >
+    <Item
+      description=""
+      id={985741369}
+      image="bread-baget.jpg"
+      isAddOn={false}
+      key="985741369"
+      menuItemId={993690591}
+      name="Bagette"
+      onChange={[Function]}
+    />
+  </div>
+  <h5>
+    Add-Ons
+  </h5>
+  <div
+    className="row mt-3 mb-5"
+  >
+    <div
+      className="col"
+    >
+      <AddOn
+        description="Mix of modern wheats and ancient Einkorn for the best of both worlds."
+        id={871309743}
+        image="bread2-002.webp"
+        isAddOn={true}
+        key="871309743"
+        menuItemId={993690592}
+        name="Classic"
+        onChange={[Function]}
+      />
+    </div>
+  </div>
+  <h5>
+    Other comments?
+  </h5>
+  <div
+    className="row mt-3 mb-5"
+  >
+    <div
+      className="col"
+    >
+      <input
+        className="form-control"
+        onChange={[Function]}
+        placeholder="Your comments"
+        type="text"
+      />
+    </div>
+  </div>
+  <div
+    className="row mt-3 mb-5"
+  >
+    <div
+      className="col"
+    >
+      <button
+        className="btn btn-primary btn-lg btn-block"
+        disabled={false}
+        onClick={[Function]}
+        title={null}
+        type="button"
+      >
+        Submit Order
+      </button>
+    </div>
+  </div>
+  <User
+    user={
+      Object {
+        "credits": 9,
+        "email": "kyle.p.fritz@gmail.com",
+        "hashid": "Dot9gKn9w",
+        "id": 584273342,
+        "isFirstHalf": true,
+        "name": "Kyle Fritz",
+      }
+    }
+  />
+</Fragment>
+`;

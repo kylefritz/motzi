@@ -17,7 +17,7 @@ exports[`snapshot 1`] = `
     >
       kyle
       <small
-        className="ml-3"
+        className="ml-2"
       >
         <a
           className="text-nowrap"
