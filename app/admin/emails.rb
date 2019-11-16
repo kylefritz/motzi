@@ -6,7 +6,7 @@ ActiveAdmin.register Ahoy::Message, as: "Email" do
 
   index do
     column :to do |email|
-      div auto_link email.to
+      div auto_link email.user, email.to
     end
     column :user do |email|
       div auto_link email.user

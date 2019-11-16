@@ -1,0 +1,5 @@
+<%= semantic_form_for admin_credit_entries_path, builder: ActiveAdmin::FormBuilder do |f| %>
+  <%= f.inputs :memo, :quantity, :good_for_weeks %>
+  <%= f.input :user_id, as: :hidden %>
+  <%= f.actions %>
+<% end %>

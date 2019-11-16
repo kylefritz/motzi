@@ -17,7 +17,7 @@ ActiveAdmin.register User do
     column :first_name
     column :last_name
     column :email do |user|
-      para user.email
+      para auto_link user, user.email
       small user.additional_email
     end
     column :is_first_half
@@ -64,7 +64,7 @@ ActiveAdmin.register User do
     attributes_table do
       row :name
       row :email do |user|
-        para strong auto_link user.email
+        para strong user.email
         small user.additional_email
       end
       row :is_first_half
@@ -82,6 +82,8 @@ ActiveAdmin.register User do
         column :created_at
         column :good_for_weeks
       end
+
+      render partial: 'admin/credit_items/form'
     end
 
     panel "Emails" do
