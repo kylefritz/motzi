@@ -7,7 +7,7 @@ export default function User({ user }) {
         <h5 className="text-center">Ordering for</h5>
         <p className="text-center">
           {user.name}
-          <small className="ml-3"><a href="/signout" className="text-nowrap">Not you?</a></small>
+          <small className="ml-2"><a href="/signout" className="text-nowrap">Not you?</a></small>
         </p>
 
       </div>

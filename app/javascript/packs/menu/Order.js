@@ -2,6 +2,7 @@ import React from 'react'
 import _ from 'lodash'
 
 import BakersNote from './BakersNote.js'
+import User from './User.js'
 
 export default function ({ menu, user, order }) {
   const { name, bakersNote, items, addons } = menu;
@@ -28,11 +29,8 @@ export default function ({ menu, user, order }) {
       <h2 className="mt-5">We got your order!</h2>
 
       <div className="row mt-5">
-        <div className="col">
-          <h5>For</h5>
-          <p>{user.name}</p>
-        </div>
-        <div className="col">
+        <div className="col-sm-4" />
+        <div className="col-sm-4">
           <h5>Items</h5>
           <ul>
             {sortedOrderItems.map(([id, count], i) => {
@@ -44,7 +42,10 @@ export default function ({ menu, user, order }) {
             }
           </ul>
         </div>
+        <div className="col-sm-4" />
       </div>
+
+      <User user={user} />
 
       <hr className="mb-5" />
 

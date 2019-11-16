@@ -35,6 +35,7 @@ export default class App extends React.Component {
     axios.post('/orders.json', order).then(({ data }) => {
       this.setState(data) // expect: menu, user, order
       console.debug('created order', data)
+      window.scrollTo(0, 0)
     }).catch((error) => {
       console.error("cant create order", error);
       window.alert("There was a problem submitting your order.")
