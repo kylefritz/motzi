@@ -64,7 +64,7 @@ ActiveAdmin.register User do
     attributes_table do
       row :name
       row :email do |user|
-        para strong user.email
+        div strong user.email
         small user.additional_email
       end
       row :is_first_half

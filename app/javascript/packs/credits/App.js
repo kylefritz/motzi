@@ -3,72 +3,61 @@ import axios from 'axios'
 import * as Sentry from '@sentry/browser'
 import _ from 'lodash'
 
-export default class App extends React.Component {
-  constructor(props) {
-    super(props)
-    this.selectRef = React.createRef()
-    this.cbRef = React.createRef()
-    const userId = _.get(location.pathname.match(/users\/(.*)/), 1)
-    this.state = { userId }
-  }
+export default function App() {
+  const memoRef = React.createRef()
+  const quantityRef = React.createRef()
+  const weeksRef = React.createRef()
+  const userId = _.get(location.pathname.match(/users\/(.*)/), 1)
 
-  loadMenu() {
-    const { userId } = this.state
-    axios.get(`/menus/${userId}.json`).then(({ data: { menu, user } }) => {
-      this.setState({ menu })
-      Sentry.configureScope((scope) => scope.setUser(user))
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    const credit = {
+      memo: memoRef.current.value,
+      quantity: quantityRef.current.value,
+      goodForWeeks: weeksRef.current.value,
+      userId
+    }
+    console.info(credit)
+    axios.post(`/admin/credit_entries.json`, credit).then(({ data }) => {
+      // reload page
+      document.location = document.location
     }).catch((error) => {
-      console.error("cant load menu", error)
+      console.error("couldn't create credit", error)
       Sentry.captureException(error)
-      this.setState({ error: "We can't load the menu" })
+      alert("Couldn't create credit?!")
     })
   }
 
-  componentDidMount() {
-    this.loadMenu()
+  return (
+    <details>
+      <summary>Add credit</summary>
+      <form onSubmit={handleSubmit.bind(this)}>
+        <fieldset>
+          <ol>
+            <li className="string input optional stringish">
+              <label htmlFor="credit_entry_memo" className="label">Memo</label>
+              <input type="text" ref={memoRef} />
+            </li>
 
-    axios.get(`/items.json`).then(({ data: { items } }) => {
-      this.setState({ items })
-    }).catch((error) => {
-      console.error("cant load items", error)
-      Sentry.captureException(error)
-      this.setState({ error: "We can't load the items" })
-    })
-  }
+            <li className="number input optional numeric stringish">
+              <label htmlFor="credit_entry_quantity" className="label">Quantity</label>
+              <input step="any" type="number" ref={quantityRef} />
+            </li>
 
-  render() {
-
-    return (
-      <details>
-        <summary>Add credit</summary>
-        <form>
-          <fieldset>
-            <ol>
-              <li className="string input optional stringish">
-                <label htmlFor="credit_entry_memo" className="label">Memo</label>
-                <input type="text" name="credit_entry[memo]" />
-              </li>
-
-              <li className="number input optional numeric stringish">
-                <label htmlFor="credit_entry_quantity" className="label">Quantity</label>
-                <input step="any" type="number" name="credit_entry[quantity]" />
-              </li>
-
-              <li className="number input optional numeric stringish">
-                <label htmlFor="credit_entry_good_for_weeks" className="label">Good for weeks</label>
-                <input step="any" type="number" name="credit_entry[good_for_weeks]" />
-              </li>
-            </ol>
-          </fieldset>
-          <fieldset>
-            <ol>
-              <li className="action input_action " id="credit_entry_submit_action">
-                <input type="submit" value="Add credit" />
-              </li>
-            </ol>
-          </fieldset>
-        </form >
-      </details>
-    )
-  }
+            <li className="number input optional numeric stringish">
+              <label htmlFor="credit_entry_good_for_weeks" className="label">Good for weeks</label>
+              <input step="any" type="number" ref={weeksRef} />
+            </li>
+          </ol>
+        </fieldset>
+        <fieldset>
+          <ol>
+            <li className="action input_action " id="credit_entry_submit_action">
+              <input type="submit" value="Add credit" />
+            </li>
+          </ol>
+        </fieldset>
+      </form >
+    </details>
+  )
 }

@@ -9,8 +9,6 @@ import Adder from './Adder'
 export default class App extends React.Component {
   constructor(props) {
     super(props)
-    this.selectRef = React.createRef()
-    this.cbRef = React.createRef()
     const menuId = _.get(location.pathname.match(/menus\/(.*)/), 1)
     this.state = { menuId }
   }
