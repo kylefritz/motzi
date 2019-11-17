@@ -5,6 +5,7 @@ class ReminderMailer < ApplicationMailer
   def day_of_email
     @menu = params[:menu]
     @user = params[:user]
+    @order = params[:order]
 
     mail(to: %("#{@user.name}" <#{@user.email}>),
          cc: @user.additional_email,
