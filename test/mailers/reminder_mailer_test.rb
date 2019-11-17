@@ -17,7 +17,7 @@ class ReminderMailerTest < ActionMailer::TestCase
 
   test "day_of email with order" do
     @user = users(:kyle)
-    @order = @menu.orders.find_by(user: @user)
+    @order = @user.order_for_menu(@menu)
     refute_nil @order
     @email = ReminderMailer.with(user: @user, menu: @menu, order: @order).day_of_email
     assert_emails(1) { @email.deliver_now }

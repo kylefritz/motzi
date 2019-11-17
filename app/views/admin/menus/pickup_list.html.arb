@@ -1,8 +1,18 @@
-table_for assigns[:orders].sort_by {|o| o.user.last_name.presence || o.user.email }, id: 'pickup-list' do
-  column ("Last Name") { |order| order.user.last_name.presence || order.user.email }
-  column ("First Name") { |order| order.user.first_name }
-  column ("Items") do |order|
-    render partial: 'admin/orders/items', locals: {items: order.items}
+tabs do
+  tab :orders do
+    table_for assigns[:orders].sort_by {|o| o.user.last_name.presence || o.user.email }, id: 'pickup-list' do
+      column ("Last Name") { |order| order.user.last_name.presence || order.user.email }
+      column ("First Name") { |order| order.user.first_name }
+      column ("Items") do |order|
+        render partial: 'admin/orders/items', locals: {items: order.items}
+      end
+      column ("Sign") { |order| "" }
+    end
   end
-  column ("Sign") { |order| "" }
+  tab :not_ordered do
+    table_for assigns[:users_not_ordered].sort_by {|user| user.last_name.presence || user.email }, id: 'not-ordered' do
+      column ("Last Name") { |user| user.last_name.presence || user.email }
+      column ("First Name") { |user| user.first_name }
+    end
+  end
 end

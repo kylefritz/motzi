@@ -11,7 +11,8 @@ class SendDayOfReminderJob < ApplicationJob
     # TODO: remind people who haven't ordered or skipped?
     users_to_remind.map do |user|
       next if already_reminded.include?(user.id)
-      order = menu.orders.find_by(user: user)
+      
+      order = user.order_for_menu(menu)
       ReminderMailer.with(user: user, menu: menu, order: order).day_of_email.deliver_now
     end
   end

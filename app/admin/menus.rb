@@ -132,12 +132,14 @@ ActiveAdmin.register Menu do
 
   member_action :pickup_tues do
     @orders = Order.for_menu_id(resource.id).select(&:is_first_half?)
+    @users_not_ordered = User.first_half.where.not(id: @orders.pluck(:user_id))
     @page_title = "Tuesday Pickup List"
     render :pickup_list
   end
 
   member_action :pickup_thurs do
     @orders = Order.for_menu_id(resource.id).reject(&:is_first_half?)
+    @users_not_ordered = User.second_half.where.not(id: @orders.pluck(:user_id))
     @page_title = "Thursday Pickup List"
     render :pickup_list
   end
