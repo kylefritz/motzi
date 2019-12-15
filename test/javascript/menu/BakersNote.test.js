@@ -1,0 +1,14 @@
+import React from 'react';
+require('../configure_enzyme');
+import { shallow } from 'enzyme';
+
+import BakersNote from 'Menu/BakersNote'
+
+test('Menu snapshot', () => {
+  const markdown = `# should be h3
+  visit www.motzibakery.com.
+  email motzi@gmail.com
+  `
+  const wrapper = shallow(<BakersNote bakersNote={markdown} />);
+  expect(wrapper).toMatchSnapshot();
+});
