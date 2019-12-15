@@ -4,6 +4,12 @@ namespace :reminders do
     SendHaventOrderedReminderJob.perform_now
   end
 
+  desc "Assigns bakers choice to ppl that havent ordered"
+  task :assign_bakers_choice => :environment do
+    # TODO: enable bakers choice job
+    # CreateBakersChoiceOrdersJob.perform_now
+  end
+
   desc "Morning, day-of reminder to pick-up your bread"
   task :pick_up_bread => :environment do
     SendDayOfReminderJob.perform_now

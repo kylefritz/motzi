@@ -1,6 +1,11 @@
 import React from 'react'
 
 export default function User({ user }) {
+  // TODO: add weeks remaining
+  // <div className="col">
+  //   <h5 className="text-center">Weeks remaining</h5>
+  //   <p className="text-center"></p>
+  // </div>
   return (
     <div className="row mt-5">
       <div className="col">

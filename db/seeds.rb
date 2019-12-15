@@ -5,3 +5,7 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+
+unless Item.bakers_choice
+  Item.create!(name: Item::BAKERS_CHOICE, description: "When you don't order in time, we make a great selection for you :)")
+end

@@ -15,3 +15,7 @@ rye:
 donuts:
   name: Donuts
   description: You want them
+
+bakers_choice:
+  name: Baker's Choice
+  description: you're late; we pick

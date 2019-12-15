@@ -1,7 +1,7 @@
 Reminder to come grab your bread today!
 
 <% if Setting.motzi_phone %>
-Please text us at <%=Setting.motzi_phone %> if you have any questions or issues or won't make it by 7pm.
+Please text us at <%= Setting.motzi_phone %> if you have any questions or issues or won't make it by 7pm.
 <% end %>
 
 <% if @order.present? %>
@@ -10,3 +10,5 @@ You ordered:
  * <%= i.name %>
 <% end %>
 <% end %>
+
+You have <%= @user.credits %> credits remaining.

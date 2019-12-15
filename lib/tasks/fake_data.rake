@@ -34,8 +34,8 @@ namespace :fake_data do
 
     menu = Menu.current
     addons, items = menu.menu_items.partition(&:is_add_on?)
-    User.where(send_weekly_email: true).each do |user|
-      # 15% change user forgets to order
+    User.for_weekly_email.each do |user|
+      # 15% chance user forgets to order
       if rand() < 0.15
         next
       end

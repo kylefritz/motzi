@@ -3,12 +3,11 @@ Rails.application.configure do
   console do
     PaperTrail.request.whodunnit = ->() {
       @paper_trail_whodunnit ||= (
-        kyle_id   = User.kyle&.id
-        adrian_id = User.adrian&.id
+        kyle_id = User.kyle&.id
 
         user_id = nil
         until user_id.present? do
-          print "Attribute change to which user_id [kyle: #{kyle_id} adrian: #{adrian_id}]? "
+          print "Attribute change to which user_id [kyle: #{kyle_id}]? "
           user_id = gets.chomp
         end
         puts "Papertrail user_id: #{user_id}"

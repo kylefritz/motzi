@@ -8,7 +8,7 @@ class SendDayOfReminderJob < ApplicationJob
 
     already_reminded = Set[*menu.messages.where(mailer: 'ReminderMailer#day_of_email').pluck(:user_id)]
 
-    # TODO: remind people who haven't ordered or skipped?
+    # TODO: don't remind people who have skipped?
     users_to_remind.map do |user|
       next if already_reminded.include?(user.id)
       

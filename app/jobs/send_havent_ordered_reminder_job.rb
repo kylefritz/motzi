@@ -2,7 +2,7 @@ class SendHaventOrderedReminderJob < ApplicationJob
 
   def perform(*args)
     return unless (19..23).include?(Time.zone.now.hour) # 7p-midnight
-    return unless Time.zone.now.wday == 0 # sunday
+    return unless Time.zone.now.sunday?
 
     menu = Menu.current
 

@@ -45,7 +45,10 @@ class User < ApplicationRecord
   def self.kyle
     User.find_by(email: 'kyle.p.fritz@gmail.com')
   end
-  def self.adrian
-    User.find_by(email: 'adrian.alday@gmail.com')
+  def self.maya
+    User.find_by(email: 'mayapamela@gmail.com')
+  end
+  def self.russell
+    User.find_by(email: 'trimmer.russell@gmail.com')
   end
 end
