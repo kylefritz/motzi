@@ -25,6 +25,7 @@ gem 'rails', '~> 6.0.0'
 gem 'redcarpet' # markdown the baker's note in admin
 gem 'sass-rails', '~> 5' # css
 gem 'sentry-raven' # debugging to sentry.io
+gem 'sql_query' # load SQL queries from erb templates
 gem 'webpacker', '~> 4.0' # compiles javascript
 gem "aws-sdk-s3", require: false # for s3/active storage
 gem "olive_branch" # convert snake_case to camelCase for json

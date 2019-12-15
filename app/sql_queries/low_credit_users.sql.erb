@@ -1,0 +1,27 @@
+with used_credits as (
+    select user_id, count(*) as value
+    from order_items
+    join orders on orders.id = order_items.order_id
+    group by user_id
+),
+bought_credits as (
+    select user_id, sum(quantity) as value
+    from credit_entries
+    group by user_id
+),
+user_credits as (
+select users.id as user_id,
+      used_credits.value as used_credits,
+      bought_credits.value as bought_credits,
+      bought_credits.value - used_credits.value as credit_balance
+from users
+join bought_credits on users.id = bought_credits.user_id
+join used_credits on users.id = used_credits.user_id
+)
+
+
+select user_id, credit_balance
+from users
+left join user_credits on users.id = user_credits.user_id
+where credit_balance <= <%= @balance %>
+order by credit_balance

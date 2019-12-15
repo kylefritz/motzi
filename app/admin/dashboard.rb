@@ -75,6 +75,7 @@ ActiveAdmin.register_page "Dashboard" do
     columns do
       column do
         panel "Low credit balance" do
+          low_credit_users = SqlQuery.new(:low_credit_users, balance: 5).execute
           h4 "TODO: credit balance"
         end
       end
