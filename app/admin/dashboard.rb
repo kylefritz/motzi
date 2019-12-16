@@ -28,7 +28,7 @@ ActiveAdmin.register_page "Dashboard" do
         num_have_ordered = Order.for_current_menu.where(user_id: week_users.must_order_weekly.pluck(:id)).count
         num_havent_ordered_yet = num_must_order - num_have_ordered
         if num_havent_ordered_yet > 0
-          counts["Baker's Choice (estimate)"] = num_havent_ordered_yet
+          counts[a("Baker's Choice (estimate)", {href: bakers_choice_admin_menu_path(Menu.current)})] = num_havent_ordered_yet
         end
 
         h4 a("#{num_have_ordered} / #{num_must_order} weekly subscribers have ordered", {href: href}), class: 'mb-0'

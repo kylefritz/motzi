@@ -1,3 +1,12 @@
+class GonFooter < ActiveAdmin::Component
+  builder_method :footer
+
+  def build(namespace)
+    # app/view/active_admin/base/_include_gon.html.erb
+    render partial: "include_gon"
+  end
+end
+
 ActiveAdmin.setup do |config|
   # == Site Title
   #
@@ -325,4 +334,6 @@ ActiveAdmin.setup do |config|
   # You can inherit it with own class and inject it for all resources
   #
   # config.order_clause = MyOrderClause
+
+  config.view_factory.register footer: GonFooter
 end

@@ -159,6 +159,11 @@ GEM
     geocoder (1.5.2)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
+    gon (6.3.2)
+      actionpack (>= 3.0.20)
+      i18n (>= 0.7)
+      multi_json
+      request_store (>= 1.0)
     has_scope (0.7.2)
       actionpack (>= 4.1)
       activesupport (>= 4.1)
@@ -425,6 +430,7 @@ DEPENDENCIES
   dotenv-rails
   faker
   fastri
+  gon
   hashid-rails
   image_processing (~> 1.2)
   jbuilder (~> 2.7)

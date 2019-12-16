@@ -20,7 +20,6 @@ gem 'jbuilder', '~> 2.7' # Build JSON APIs with ease. Read more: https://github.
 gem 'newrelic_rpm' # debugging to new relic
 gem 'paper_trail' # audits
 gem 'pg', '>= 0.18', '< 2.0'
-gem "puma", ">= 3.12.2" # web/app server
 gem 'rails', '~> 6.0.0'
 gem 'redcarpet' # markdown the baker's note in admin
 gem 'sass-rails', '~> 5' # css
@@ -28,7 +27,9 @@ gem 'sentry-raven' # debugging to sentry.io
 gem 'sql_query' # load SQL queries from erb templates
 gem 'webpacker', '~> 4.0' # compiles javascript
 gem "aws-sdk-s3", require: false # for s3/active storage
+gem "gon" # rails variables in javascript
 gem "olive_branch" # convert snake_case to camelCase for json
+gem "puma", ">= 3.12.2" # web/app server
 gem "rails-settings-cached" # site-wide settings
 
 

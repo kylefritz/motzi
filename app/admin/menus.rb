@@ -143,4 +143,14 @@ ActiveAdmin.register Menu do
     @page_title = "Thursday Pickup List"
     render :pickup_list
   end
+
+  member_action :bakers_choice do
+    must_order = User.must_order_weekly.pluck(:id)
+    have_ordered = Order.for_current_menu.where(user_id: must_order).pluck(:user_id)
+
+    @users = User.find(must_order - have_ordered)
+    gon.jbuilder template: 'app/views/admin/users/index.json.jbuilder', as: :havent_ordered
+
+    render :bakers_choice
+  end
 end
