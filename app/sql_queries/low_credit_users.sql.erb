@@ -23,4 +23,7 @@ select user_id, credit_balance
 from users
 left join user_credits on users.id = user_credits.user_id
 where credit_balance < <%= @balance %>
+<% if (owner_ids = [User.maya, User.russell].compact.map(&:id).join(',')).present? %>
+    and users.id not in (<%= owner_ids %>)
+<% end %>
 order by credit_balance
