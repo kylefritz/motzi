@@ -29,11 +29,11 @@ class MenuTest < ActiveSupport::TestCase
     week2 = menus(:week2)
     week2.make_current!
     week2.make_current!
-    assert_equal week2, Menu.current, 'ok to call twice on same menu'
+    assert_equal week2.id, Menu.current.id, 'ok to call twice on same menu'
 
     week1 = menus(:week1)
     week1.make_current!
-    assert_equal week1, Menu.current
+    assert_equal week1.id, Menu.current.id
   end
 
   test "sending weekly email" do

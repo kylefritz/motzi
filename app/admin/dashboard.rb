@@ -17,13 +17,22 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       
-      def what_to_bake(orders, num_subs, href)
+      def what_to_bake(orders, week_users, href)
         counts = Hash.new(0) # hash that defaults to 0 instead of nil
         orders.each do |order|
           order.items.each { |item| counts[item.name] += 1 }
         end
+        every_other = week_users.every_other_week.count
 
-        h4 a("#{orders.count} / #{num_subs} have ordered", {href: href}), class: 'mb-0'
+        num_must_order = week_users.must_order_weekly.count
+        num_have_ordered = Order.for_current_menu.where(user_id: week_users.must_order_weekly.pluck(:id)).count
+        num_havent_ordered_yet = num_must_order - num_have_ordered
+        if num_havent_ordered_yet > 0
+          counts["Baker's Choice (estimate)"] = num_havent_ordered_yet
+        end
+
+        h4 a("#{num_have_ordered} / #{num_must_order} weekly subscribers have ordered", {href: href}), class: 'mb-0'
+        h5 "#{every_other} \"every other\" subscribers", class: 'mt-0'
         table_for counts.keys.sort do
           column ("Item") { |item| item }
           column ("Count") { |item| counts[item] }
@@ -34,13 +43,13 @@ ActiveAdmin.register_page "Dashboard" do
 
       column id: 'what-to-bake-tues' do
         panel "Tuesday - What to bake" do
-          what_to_bake(tues, User.first_half.count, pickup_tues_admin_menu_path(menu.id))
+          what_to_bake(tues, User.first_half, pickup_tues_admin_menu_path(menu.id))
         end
       end
 
       column id: 'what-to-bake-thurs' do
         panel "Thursday - What to bake" do
-          what_to_bake(thurs, User.second_half.count, pickup_thurs_admin_menu_path(menu.id))
+          what_to_bake(thurs, User.second_half, pickup_thurs_admin_menu_path(menu.id))
         end
       end
     end

@@ -16,7 +16,7 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
     assert_equal 3, menus(:week1).orders.count
 
     assert_el_count 1, '#what-to-bake-tues'
-    assert_el_count 3, '#what-to-bake-tues table tr', 'bread for adrian & kyle'
+    assert_el_count 4, '#what-to-bake-tues table tr', 'two breads for adrian & kyle; plus 1 bakers choice'
     assert_el_count 1, '#what-to-bake-thurs'
     assert_el_count 2, '#what-to-bake-thurs table tr', 'bread for ljf'
   end
