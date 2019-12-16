@@ -71,12 +71,14 @@ ActiveAdmin.register_page "Dashboard" do
       
     end # end columns
     
-
     columns do
       column do
-        panel "Low credit balance" do
-          low_credit_users = SqlQuery.new(:low_credit_users, balance: 5).execute
-          h4 "TODO: credit balance"
+        panel "Credit balance < 4" do
+          low_credit_users = SqlQuery.new(:low_credit_users, balance: 4).execute
+          table_for low_credit_users do
+            column ("user") { |r| User.find(r["user_id"]) }
+            column ("balance") { |r| r["credit_balance"] }
+          end
         end
       end
 

@@ -10,18 +10,17 @@ bought_credits as (
     group by user_id
 ),
 user_credits as (
-select users.id as user_id,
-      used_credits.value as used_credits,
-      bought_credits.value as bought_credits,
-      bought_credits.value - used_credits.value as credit_balance
-from users
-join bought_credits on users.id = bought_credits.user_id
-join used_credits on users.id = used_credits.user_id
+    select users.id as user_id,
+        COALESCE(used_credits.value, 0) as used_credits,
+        COALESCE(bought_credits.value, 0) as bought_credits,
+        COALESCE(bought_credits.value, 0) - COALESCE(used_credits.value,0) as credit_balance
+    from users
+    left join bought_credits on users.id = bought_credits.user_id
+    left join used_credits on users.id = used_credits.user_id
 )
-
 
 select user_id, credit_balance
 from users
 left join user_credits on users.id = user_credits.user_id
-where credit_balance <= <%= @balance %>
+where credit_balance < <%= @balance %>
 order by credit_balance
