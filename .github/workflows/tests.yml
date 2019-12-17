@@ -46,8 +46,8 @@ jobs:
         PGUSER: postgres
         RAILS_ENV: test
       run: |
-      bundle exec rake test
-      bundle exec rake test:system
-      # npx jest test/javascript
-      # or Rspec
-      # bundle exec rspec
+        bundle exec rake test
+        bundle exec rake test:system
+        # npx jest test/javascript
+        # or Rspec
+        # bundle exec rspec
