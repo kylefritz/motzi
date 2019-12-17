@@ -151,6 +151,9 @@ ActiveAdmin.register Menu do
     @users = User.find(must_order - have_ordered)
     gon.jbuilder template: 'app/views/admin/users/index.json.jbuilder', as: :havent_ordered
 
+    @menu = Menu.current
+    gon.jbuilder template: 'app/views/admin/menus/bakers_choice_menu.json.jbuilder', as: :menu
+
     render :bakers_choice
   end
 end

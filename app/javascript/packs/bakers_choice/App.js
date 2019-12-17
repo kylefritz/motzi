@@ -15,6 +15,7 @@ export default function BakersChoice() {
             <th>Credits Remaining</th>
             <th>Breads per Week</th>
             <th>Tuesday Pickup?</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
