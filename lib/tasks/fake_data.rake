@@ -16,7 +16,7 @@ namespace :fake_data do
         password: Faker::Lorem.characters(number: 10),
         email: Faker::Internet.email,
       ).tap do |u|
-        u.is_first_half = rand_bool
+        u.tuesday_pickup = rand_bool
         if rand_bool
           u.additional_email = Faker::Internet.email
         end

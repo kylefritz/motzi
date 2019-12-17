@@ -212,7 +212,7 @@
         "name",
         "hashid",
         "credits",
-        "isFirstHalf"
+        "tuesdayPickup"
       ],
       "properties": {
         "id": {
@@ -258,9 +258,9 @@
             13
           ]
         },
-        "isFirstHalf": {
+        "tuesdayPickup": {
           "type": "boolean",
-          "title": "Which half of the week does this user pickup their order?",
+          "title": "Pickup on Tuesday or Thursday?",
           "default": false
         }
       }

@@ -43,8 +43,8 @@ exports[`Order snapshot 1`] = `
         "email": "kyle.p.fritz@gmail.com",
         "hashid": "Dot9gKn9w",
         "id": 584273342,
-        "isFirstHalf": true,
         "name": "Kyle Fritz",
+        "tuesdayPickup": true,
       }
     }
   />

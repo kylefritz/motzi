@@ -5,7 +5,7 @@ kyle:
   additional_email: meghan.l.ames@gmail.com
   encrypted_password: <%= Devise::Encryptor.digest(User, 'robots') %>
   is_admin: true
-  is_first_half: true
+  tuesday_pickup: true
 
 adrian:
   first_name: Adrian
@@ -14,7 +14,7 @@ adrian:
   encrypted_password: <%= Devise::Encryptor.digest(User, 'donuts') %>
   additional_email: null
   is_admin: true
-  is_first_half: true
+  tuesday_pickup: true
 
 ljf:
   first_name: Laura
@@ -23,7 +23,7 @@ ljf:
   encrypted_password: <%= Devise::Encryptor.digest(User, 'sparkles') %>
   additional_email: null
   is_admin: false
-  is_first_half: false
+  tuesday_pickup: false
 
 russel:
   first_name: Russel

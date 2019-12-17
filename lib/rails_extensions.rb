@@ -1,9 +1,9 @@
 class ActiveSupport::TimeWithZone
-  def is_first_half?
+  def tuesday_pickup?
     self.wday == 2 # tues
   end
 
-  def is_second_half?
+  def thursday_pickup?
     self.wday == 4 # thurs
   end
 

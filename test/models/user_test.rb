@@ -8,9 +8,9 @@ class UserTest < ActiveSupport::TestCase
     assert maya.is_admin
   end
 
-  test "half of the week" do
-    assert users(:kyle).is_first_half?
-    refute users(:ljf).is_first_half?
+  test "tuesday vs thursday pickup of the week" do
+    assert users(:kyle).tuesday_pickup?
+    refute users(:ljf).tuesday_pickup?
   end
 
   test "credits remaining" do

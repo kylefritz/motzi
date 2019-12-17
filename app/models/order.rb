@@ -18,5 +18,5 @@ class Order < ApplicationRecord
     "Order ##{id}"
   end
 
-  delegate :is_first_half?, to: :user
+  delegate :tuesday_pickup?, to: :user
 end

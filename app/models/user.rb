@@ -9,13 +9,17 @@ class User < ApplicationRecord
   has_many :visits, class_name: "Ahoy::Visit"
   has_paper_trail
   scope :for_weekly_email, -> { where(send_weekly_email: true) }
-  scope :first_half, -> { where(send_weekly_email: true, is_first_half: true) }
-  scope :second_half, -> { where(send_weekly_email: true, is_first_half: false) }
+  scope :tuesday_pickup, -> { where(send_weekly_email: true, tuesday_pickup: true) }
+  scope :thursday_pickup, -> { where(send_weekly_email: true, tuesday_pickup: false) }
   scope :must_order_weekly, -> { where("breads_per_week >= 1") }
   scope :every_other_week, -> { where("breads_per_week = 0.5") }
   before_validation(on: :create) do
     # if no password, set random passwords on user
     self.password = SecureRandom.base64(16) if self.password.blank?
+  end
+
+  def thursday_pickup?
+    !self.tuesday_pickup?
   end
 
   def credits

@@ -20,8 +20,8 @@ class SendDayOfReminderJob < ApplicationJob
   private
 
   def users_to_remind
-    return User.first_half if Time.zone.now.is_first_half?
-    return User.second_half if Time.zone.now.is_second_half?
+    return User.tuesday_pickup if Time.zone.now.tuesday_pickup?
+    return User.thursday_pickup if Time.zone.now.thursday_pickup?
 
     []
   end

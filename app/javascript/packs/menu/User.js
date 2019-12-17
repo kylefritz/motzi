@@ -22,7 +22,7 @@ export default function User({ user }) {
       </div>
       <div className="col">
         <h5 className="text-center">Pickup Day</h5>
-        <p className="text-center">{user.isFirstHalf ? "Tuesday" : "Thursday"}</p>
+        <p className="text-center">{user.tuesdayPickup ? "Tuesday" : "Thursday"}</p>
       </div>
     </div>
   );

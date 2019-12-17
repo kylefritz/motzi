@@ -1,5 +1,5 @@
 ActiveAdmin.register User do
-  permit_params :first_name, :last_name, :email, :additional_email, :is_first_half, :is_admin, :send_weekly_email
+  permit_params :first_name, :last_name, :email, :additional_email, :tuesday_pickup, :is_admin, :send_weekly_email
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'
 
   preserve_default_filters!
@@ -7,8 +7,8 @@ ActiveAdmin.register User do
     :created_at, :current_sign_in_at, :current_sign_in_ip, :encrypted_password, :last_sign_in_at, :last_sign_in_ip, :remember_created_at, :reset_password_sent_at, :reset_password_token, :sign_in_count, :updated_at
 
   scope("all") { |scope| scope }
-  scope("tues") { |scope| scope.where(is_first_half: true) }
-  scope("thurs") { |scope| scope.where(is_first_half: false) }
+  scope("tues") { |scope| scope.tuesday_pickup }
+  scope("thurs") { |scope| scope.thursday_pickup }
   scope("admin") { |scope| scope.where(is_admin: true) }
   scope("no weekly email") { |scope| scope.where(send_weekly_email: false) }
 
@@ -20,7 +20,7 @@ ActiveAdmin.register User do
       para auto_link user, user.email
       small user.additional_email
     end
-    column :is_first_half
+    column :tuesday_pickup
     column :send_weekly_email
     column :is_admin
     column :created_at
@@ -34,7 +34,7 @@ ActiveAdmin.register User do
       input :last_name
       input :email
       input :additional_email
-      input :is_first_half
+      input :tuesday_pickup
     end
     inputs 'Danger Zone' do
       input :send_weekly_email
@@ -67,7 +67,7 @@ ActiveAdmin.register User do
         div strong user.email
         small user.additional_email
       end
-      row :is_first_half
+      row :tuesday_pickup
       row :send_weekly_email
       row :is_admin
       row :created_at

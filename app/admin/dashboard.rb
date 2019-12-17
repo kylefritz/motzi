@@ -39,17 +39,17 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
 
-      tues, thurs = Order.for_current_menu.partition(&:is_first_half?)
+      tues, thurs = Order.for_current_menu.partition(&:tuesday_pickup?)
 
       column id: 'what-to-bake-tues' do
         panel "Tuesday - What to bake" do
-          what_to_bake(tues, User.first_half, pickup_tues_admin_menu_path(menu.id))
+          what_to_bake(tues, User.tuesday_pickup, pickup_tues_admin_menu_path(menu.id))
         end
       end
 
       column id: 'what-to-bake-thurs' do
         panel "Thursday - What to bake" do
-          what_to_bake(thurs, User.second_half, pickup_thurs_admin_menu_path(menu.id))
+          what_to_bake(thurs, User.thursday_pickup, pickup_thurs_admin_menu_path(menu.id))
         end
       end
     end
