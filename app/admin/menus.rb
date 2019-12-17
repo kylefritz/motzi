@@ -144,11 +144,22 @@ ActiveAdmin.register Menu do
     render :pickup_list
   end
 
-  member_action :bakers_choice do
-    must_order = User.must_order_weekly.pluck(:id)
-    have_ordered = Order.for_current_menu.where(user_id: must_order).pluck(:user_id)
+  member_action :bakers_choice, method: [:get, :post] do
+    if request.post?
+      menu = Menu.find(params[:id])
+      user = User.find(params[:user_id])
+      item = Item.find(params[:item_id])
+      order = Order.transaction do
+        user.orders.create!(menu: menu, comments: "Baker's Choice").tap do |order|
+          order.order_items.create!(item: item)
+        end
+      end
 
-    @users = User.find(must_order - have_ordered)
+      @users = User.for_bakers_choice
+      return render template: 'admin/users/index.json.jbuilder'
+    end
+
+    @users = User.for_bakers_choice
     gon.jbuilder template: 'app/views/admin/users/index.json.jbuilder', as: :havent_ordered
 
     @menu = Menu.current

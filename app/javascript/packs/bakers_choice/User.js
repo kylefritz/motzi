@@ -1,8 +1,11 @@
 import React from 'react';
 import _ from 'lodash'
 
-export default function User({ firstName, lastName, tuesdayPickup, credits, breadsPerWeek }) {
-  const menuItems = gon.menu.filter(({ name }) => !name.match(/skip/ig))
+export default function User({ id: userId, firstName, lastName, tuesdayPickup, credits, breadsPerWeek, onPickBread, menu }) {
+  const handleClick = (itemId) => {
+    onPickBread({ userId, itemId })
+  }
+
   return (
     <tr>
       <td>{firstName}</td>
@@ -10,7 +13,13 @@ export default function User({ firstName, lastName, tuesdayPickup, credits, brea
       <td>{credits}</td>
       <td>{breadsPerWeek}</td>
       <td>{tuesdayPickup ? "Tues" : "Thurs"}</td>
-      <td>Asign Bread</td>
+      <td>
+        {menu.items.map(({ id, name }) =>
+          <button key={id} onClick={() => handleClick(id)}>
+            {name}
+          </button>
+        )}
+      </td>
     </tr>
   )
 }
