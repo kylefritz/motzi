@@ -5,6 +5,8 @@ class Order < ApplicationRecord
   has_many :items, through: :order_items
   has_paper_trail
   visitable :ahoy_visit
+  scope :with_feedback, -> { where("COALESCE(TRIM(feedback), '') <> ''") }
+  scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> '' AND comments <> 'Baker''s Choice'") }
 
   def self.for_current_menu
     self.for_menu_id(Menu.current.id)

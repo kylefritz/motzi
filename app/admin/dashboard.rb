@@ -59,7 +59,7 @@ ActiveAdmin.register_page "Dashboard" do
 
       column do
         panel "Orders with comments" do
-          table_for menu.orders.where("comments is not null") do
+          table_for menu.orders.with_comments do
             column ("comments") { |order| order.comments }
             column ("order") { |order| order }
             column ("user") { |order| order.user }
@@ -69,7 +69,7 @@ ActiveAdmin.register_page "Dashboard" do
 
       column do
         panel "Orders with feedback" do
-          table_for menu.orders.where("feedback is not null") do
+          table_for menu.orders.with_feedback do
             column ("feedback") { |order| order.feedback }
             column ("order") { |order| order }
             column ("user") { |order| order.user }
