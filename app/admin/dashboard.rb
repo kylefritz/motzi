@@ -17,25 +17,34 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       
-      def what_to_bake(orders, week_users, href)
+      def what_to_bake(orders, week_users)
         counts = Hash.new(0) # hash that defaults to 0 instead of nil
         orders.each do |order|
           order.items.each { |item| counts[item.name] += 1 }
         end
-        every_other = week_users.every_other_week.count
-
         num_must_order = week_users.must_order_weekly.count
         num_have_ordered = Order.for_current_menu.where(user_id: week_users.must_order_weekly.pluck(:id)).count
         num_havent_ordered_yet = num_must_order - num_have_ordered
         if num_havent_ordered_yet > 0
-          counts[a("Baker's Choice (estimate)", {href: bakers_choice_admin_menus_path()})] = num_havent_ordered_yet
+          counts[a("Baker's Choice*", {href: bakers_choice_admin_menus_path()})] = num_havent_ordered_yet
         end
 
-        h4 a("#{num_have_ordered} / #{num_must_order} weekly subscribers have ordered", {href: href}), class: 'mb-0'
-        h5 "#{every_other} \"every other\" subscribers", class: 'mt-0'
-        table_for counts.keys.sort do
+        by_type = [
+          {sub: "Weekly", ordered: num_have_ordered, total: num_must_order},
+          {sub: "Every Other Week",
+           ordered: Order.for_current_menu.where(user_id: week_users.every_other_week.pluck(:id)).count,
+           total: week_users.every_other_week.count},
+        ]
+        table_for by_type, class: 'mt-0' do
+          column ("Subscriber Type") { |h| h[:sub] }
+          column ("Ordered") { |h| h[:ordered] }
+          column ("Not ordered") { |h| h[:total] - h[:ordered] }
+          column ("Total") { |h| h[:total] }
+        end
+
+        table_for counts.keys.sort, class: 'mt-0' do
           column ("Item") { |item| item }
-          column ("Count") { |item| counts[item] }
+          column ("Quantity") { |item| counts[item] }
         end
       end
 
@@ -43,13 +52,15 @@ ActiveAdmin.register_page "Dashboard" do
 
       column id: 'what-to-bake-tues' do
         panel "Tuesday - What to bake" do
-          what_to_bake(tues, User.tuesday_pickup, pickup_tues_admin_menus_path())
+          a("Tuesday Pickup List", href: pickup_tues_admin_menus_path())
+          what_to_bake(tues, User.tuesday_pickup)
         end
       end
 
       column id: 'what-to-bake-thurs' do
         panel "Thursday - What to bake" do
-          what_to_bake(thurs, User.thursday_pickup, pickup_thurs_admin_menus_path())
+          a("Thursday Pickup List", href: pickup_tues_admin_menus_path())
+          what_to_bake(thurs, User.thursday_pickup)
         end
       end
     end
@@ -61,8 +72,8 @@ ActiveAdmin.register_page "Dashboard" do
         panel "Orders with comments" do
           table_for menu.orders.with_comments do
             column ("comments") { |order| order.comments }
-            column ("order") { |order| order }
             column ("user") { |order| order.user }
+            column ("order") { |order| order }
           end
         end
       end
@@ -71,8 +82,8 @@ ActiveAdmin.register_page "Dashboard" do
         panel "Orders with feedback" do
           table_for menu.orders.with_feedback do
             column ("feedback") { |order| order.feedback }
-            column ("order") { |order| order }
             column ("user") { |order| order.user }
+            column ("order") { |order| order }
           end
         end
       end

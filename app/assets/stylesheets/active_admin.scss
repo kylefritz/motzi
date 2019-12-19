@@ -25,6 +25,12 @@
   margin-bottom: 0 !important;
 }
 
+// dashboard
+.col-user a,
+.col-order a {
+  white-space: nowrap;
+}
+
 .menu-builder {
   table {
     width: 300px;
