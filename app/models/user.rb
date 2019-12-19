@@ -9,11 +9,12 @@ class User < ApplicationRecord
   has_many :visits, class_name: "Ahoy::Visit"
   has_paper_trail
   scope :for_weekly_email, -> { where(send_weekly_email: true) }
-  scope :tuesday_pickup, -> { where(tuesday_pickup: true) }
-  scope :thursday_pickup, -> { where(tuesday_pickup: false) }
-  scope :must_order_weekly, -> { where("breads_per_week >= 1").where.not(email: [MAYA_EMAIL, RUSSELL_EMAIL]) }
+  scope :tuesday_pickup, -> { not_owners.where(tuesday_pickup: true) }
+  scope :thursday_pickup, -> { not_owners.where(tuesday_pickup: false) }
+  scope :must_order_weekly, -> { not_owners.where("breads_per_week >= 1") }
   scope :every_other_week, -> { where("breads_per_week = 0.5") }
   scope :owners, -> {where(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
+  scope :not_owners, -> {where.not(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   before_validation(on: :create) do
     # if no password, set random passwords on user
     self.password = SecureRandom.base64(16) if self.password.blank?

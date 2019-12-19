@@ -9,10 +9,34 @@ tabs do
       column ("Sign") { |order| "" }
     end
   end
+  tab :by_bread do
+    columns do
+      {}.tap do |breads|
+        assigns[:orders].each do |o|
+          o.items.each do |i|
+            unless breads.key?(i.name)
+              breads[i.name] = []
+            end
+            breads[i.name].push(o.user)
+          end
+        end
+      end.entries.sort_by {|bread,_| bread}.map do |bread, users|
+        column do
+          h3 bread
+          ol do
+            users.sort_by {|user| user.last_name.presence || user.email }.map do |user|
+              li user.name # auto_link(user)
+            end
+          end
+        end
+      end
+    end
+  end
   tab :not_ordered do
-    table_for assigns[:users_not_ordered].sort_by {|user| user.last_name.presence || user.email }, id: 'not-ordered' do
+    table_for assigns[:users_not_ordered].sort_by {|user| user.last_name.presence || user.email } do
       column ("Last Name") { |user| user.last_name.presence || user.email }
       column ("First Name") { |user| user.first_name }
+      column ("Breads per week") { |user| user.breads_per_week }
     end
   end
 end

@@ -65,7 +65,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "tuesday_pickup" do
-    assert_equal 4, User.tuesday_pickup.count, 'kf, adrian'
+    assert_equal 2, User.tuesday_pickup.count, 'kf, adrian'
   end
 
   test "thursday_pickup" do

@@ -26,8 +26,10 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_el_count 1, '#pickup-list'
-    assert_el_count 1, '#pickup-list tbody tr', 'just laura'
-    assert_el_count 4, '#not-ordered tbody tr', 'adrian, kyle, jess, russell'
+    assert_el_count 2, '#pickup-list tbody tr', 'adrian, kyle'
+    assert_el_count 2, '#by-bread .column', 'classic, pumpkin'
+    assert_el_count 1, '#not-ordered', 'exists'
+    assert_el_count 0, '#not-ordered tbody tr', 'no one'
   end
 
   test "thursday pickup list" do
