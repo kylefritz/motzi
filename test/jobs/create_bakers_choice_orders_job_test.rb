@@ -8,19 +8,19 @@ class CreateBakersChoiceOrdersJobTest < ActiveJob::TestCase
   end
 
   test "nothing on wrong day" do
-    assert_menu_emailed(0, :sun, '10:00 AM')
-    assert_menu_emailed(0, :sun, '10:01 AM', 'dont email people twice')
+    assert_bakers_choice(0, :sun, '10:00 AM')
+    assert_bakers_choice(0, :sun, '10:01 AM', 'dont email people twice')
   end
 
   test "create baker's choice orders" do
     refute_nil Item.bakers_choice
-    assert_menu_emailed(2, :mon, '3:00 AM', 'ljf & adrian but not maya or russel')
+    assert_bakers_choice(2, :mon, '3:00 AM', 'ljf & adrian but not maya or russel')
 
     ljf_order = users(:ljf).order_for_menu(Menu.current)
     assert_equal Item.bakers_choice, ljf_order.items.first, 'bakers choice assigned to ljf'
   end
 
-  def assert_menu_emailed(num_orders, day, time, msg=nil)
+  def assert_bakers_choice(num_orders, day, time, msg=nil)
     days = {
       sun: '11-10',
       mon: '11-11',
@@ -37,7 +37,5 @@ class CreateBakersChoiceOrdersJobTest < ActiveJob::TestCase
         end
       end
     end
-
-
   end
 end

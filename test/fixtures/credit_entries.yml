@@ -15,3 +15,9 @@ ljf:
   quantity: 1
   good_for_weeks: 7
   user: ljf
+
+jess:
+  memo: import
+  quantity: 1
+  good_for_weeks: 7
+  user: jess

@@ -9,10 +9,18 @@ class Item < ApplicationRecord
   def self.bakers_choice
     self.find_by(name: BAKERS_CHOICE)
   end
+  SKIP_ID = 0
+  def self.skip
+    self.find(SKIP_ID)
+  end
 
   def image_path
     if self.image.attached?
       Rails.application.routes.url_helpers.rails_blob_path(self.image, only_path: true)
     end
+  end
+
+  def skip?
+    self.id == SKIP_ID
   end
 end

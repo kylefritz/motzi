@@ -21,4 +21,5 @@ class Order < ApplicationRecord
   end
 
   delegate :tuesday_pickup?, to: :user
+  delegate :thursday_pickup?, to: :user
 end

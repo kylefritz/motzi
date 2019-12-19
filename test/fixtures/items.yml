@@ -1,5 +1,16 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+# special items
+skip:
+  id: <%= Item::SKIP_ID %>
+  name: Skip
+  description: skip this week
+
+bakers_choice:
+  name: <%= Item::BAKERS_CHOICE %>
+  description: you're late; we pick
+
+# regular
 classic:
   name: Classic
   description: same every week
@@ -15,7 +26,3 @@ rye:
 donuts:
   name: Donuts
   description: You want them
-
-bakers_choice:
-  name: Baker's Choice
-  description: you're late; we pick

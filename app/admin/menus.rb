@@ -12,13 +12,15 @@ ActiveAdmin.register Menu do
   
   # create big buttons on every menu page
   action_item :pickup_tues, except: [:index, :new] do
-    link_to 'Tuesday Pickup List', pickup_tues_admin_menu_path(params[:id])
+    link_to 'Tuesday Pickup List', pickup_tues_admin_menus_path()
   end
   action_item :pickup_thurs, except: [:index, :new] do
-    link_to 'Thursday Pickup List', pickup_thurs_admin_menu_path(params[:id])
+    link_to 'Thursday Pickup List', pickup_thurs_admin_menus_path()
   end
   action_item :preview, except: [:index, :new] do
-    link_to 'Preview Menu', menu_path(params[:id]), target: "_blank"
+    if params[:id].present?
+      link_to 'Preview Menu', menu_path(params[:id]), target: "_blank"
+    end
   end
 
   index do
@@ -51,8 +53,6 @@ ActiveAdmin.register Menu do
       a "view", href: admin_menu_path(menu)
       a "edit", href: edit_admin_menu_path(menu)
       a "preview", href: "/menu/#{menu.id}", target: "_blank"
-      a 'tues', href: pickup_tues_admin_menu_path(menu)
-      a 'thurs', href: pickup_thurs_admin_menu_path(menu)
     end
   end
 
@@ -130,23 +130,23 @@ ActiveAdmin.register Menu do
     redirect_to collection_path, notice: notice
   end
 
-  member_action :pickup_tues do
-    @orders = Order.for_menu_id(resource.id).select(&:tuesday_pickup?)
+  collection_action :pickup_tues do
+    @orders = Menu.current.orders.includes(:user).includes({order_items: :item}).select(&:thursday_pickup?)
     @users_not_ordered = User.tuesday_pickup.where.not(id: @orders.pluck(:user_id))
     @page_title = "Tuesday Pickup List"
     render :pickup_list
   end
 
-  member_action :pickup_thurs do
-    @orders = Order.for_menu_id(resource.id).reject(&:tuesday_pickup?)
+  collection_action :pickup_thurs do
+    @orders = Menu.current.orders.includes(:user).includes({order_items: :item}).select(&:thursday_pickup?)
     @users_not_ordered = User.thursday_pickup.where.not(id: @orders.pluck(:user_id))
     @page_title = "Thursday Pickup List"
     render :pickup_list
   end
 
-  member_action :bakers_choice, method: [:get, :post] do
+  collection_action :bakers_choice, method: [:get, :post] do
     if request.post?
-      menu = Menu.find(params[:id])
+      menu = Menu.current
       user = User.find(params[:user_id])
       item = Item.find(params[:item_id])
       order = Order.transaction do

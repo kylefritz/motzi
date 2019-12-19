@@ -28,14 +28,26 @@ ljf:
 russel:
   first_name: Russel
   last_name: Trimmer
-  email: trimmer.russell@gmail.com
+  email: <%= User::RUSSELL_EMAIL %>
   encrypted_password: <%= Devise::Encryptor.digest(User, 'bread') %>
   is_admin: true
+  tuesday_pickup: true
 
 maya:
   first_name: Maya
   last_name: Pamela
-  email: mayapamela@gmail.com
+  email: <%= User::MAYA_EMAIL %>
   encrypted_password: <%= Devise::Encryptor.digest(User, 'wine') %>
   is_admin: true
   send_weekly_email: false
+  tuesday_pickup: true
+
+jess:
+  first_name: Jess
+  last_name: Smith
+  email: jess@gmail.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'dry') %>
+  is_admin: false
+  send_weekly_email: true
+  breads_per_week: 0.5
+  tuesday_pickup: false

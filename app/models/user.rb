@@ -9,19 +9,20 @@ class User < ApplicationRecord
   has_many :visits, class_name: "Ahoy::Visit"
   has_paper_trail
   scope :for_weekly_email, -> { where(send_weekly_email: true) }
-  scope :tuesday_pickup, -> { where(send_weekly_email: true, tuesday_pickup: true) }
-  scope :thursday_pickup, -> { where(send_weekly_email: true, tuesday_pickup: false) }
-  scope :must_order_weekly, -> { where("breads_per_week >= 1") }
+  scope :tuesday_pickup, -> { where(tuesday_pickup: true) }
+  scope :thursday_pickup, -> { where(tuesday_pickup: false) }
+  scope :must_order_weekly, -> { where("breads_per_week >= 1").where.not(email: [MAYA_EMAIL, RUSSELL_EMAIL]) }
   scope :every_other_week, -> { where("breads_per_week = 0.5") }
+  scope :owners, -> {where(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   before_validation(on: :create) do
     # if no password, set random passwords on user
     self.password = SecureRandom.base64(16) if self.password.blank?
   end
   def self.for_bakers_choice
-    # havent_ordered_but_must
+    # users who havent ordered but must
     must_order = User.must_order_weekly.pluck(:id)
     have_ordered = Order.for_current_menu.where(user_id: must_order).pluck(:user_id)
-    User.find(must_order - have_ordered)
+    User.where(id: must_order - have_ordered)
   end
 
   def thursday_pickup?
@@ -31,7 +32,7 @@ class User < ApplicationRecord
   def credits
     # TODO: not handing credit expiration
     credits_purchased = credit_entries.pluck('quantity').sum
-    credits_used = order_items.count
+    credits_used = order_items.not_skip.count
     credits_purchased - credits_used
   end
 
@@ -57,10 +58,12 @@ class User < ApplicationRecord
   def self.kyle
     User.find_by(email: 'kyle.p.fritz@gmail.com')
   end
+  MAYA_EMAIL = 'mayapamela@gmail.com'
   def self.maya
-    User.find_by(email: 'mayapamela@gmail.com')
+    User.find_by(email: MAYA_EMAIL)
   end
+  RUSSELL_EMAIL = 'trimmer.russell@gmail.com'
   def self.russell
-    User.find_by(email: 'trimmer.russell@gmail.com')
+    User.find_by(email: RUSSELL_EMAIL)
   end
 end

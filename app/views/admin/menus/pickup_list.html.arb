@@ -4,7 +4,7 @@ tabs do
       column ("Last Name") { |order| order.user.last_name.presence || order.user.email }
       column ("First Name") { |order| order.user.first_name }
       column ("Items") do |order|
-        render partial: 'admin/orders/items', locals: {items: order.items}
+        render partial: 'admin/orders/items', locals: {items: order.order_items.map(&:item)}
       end
       column ("Sign") { |order| "" }
     end

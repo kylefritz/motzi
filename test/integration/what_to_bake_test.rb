@@ -16,32 +16,40 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
     assert_equal 3, menus(:week1).orders.count
 
     assert_el_count 1, '#what-to-bake-tues'
-    assert_el_count 4, '#what-to-bake-tues table tr', 'two breads for adrian & kyle; plus 1 bakers choice'
+    assert_el_count 2, '#what-to-bake-tues tbody tr', 'two breads for adrian & kyle; plus 1 bakers choice'
     assert_el_count 1, '#what-to-bake-thurs'
-    assert_el_count 2, '#what-to-bake-thurs table tr', 'bread for ljf'
+    assert_el_count 1, '#what-to-bake-thurs tbody tr', 'bread for ljf'
   end
 
   test "tuesday pickup list" do
-    get "/admin/menus/#{menus(:week2).id}/pickup_tues"
+    get "/admin/menus/pickup_tues"
     assert_response :success
 
     assert_el_count 1, '#pickup-list'
-    assert_el_count 2, '#pickup-list tr', 'two orders'    
+    assert_el_count 1, '#pickup-list tbody tr', 'just laura'
+    assert_el_count 4, '#not-ordered tbody tr', 'adrian, kyle, jess, russell'
   end
 
   test "thursday pickup list" do
-    get "/admin/menus/#{menus(:week2).id}/pickup_thurs"
+    get "/admin/menus/pickup_thurs"
     assert_response :success
 
     assert_el_count 1, '#pickup-list'
-    assert_el_count 1, '#pickup-list tr', '1 orders'
+    assert_el_count 1, '#pickup-list tbody tr', 'ljf'
+    assert_el_count 1, '#not-ordered tbody tr', 'jess'
+  end
+
+  test "bakers_choice" do
+    get "/admin/menus/bakers_choice"
+    assert_response :success
   end
 
   private
   def assert_el_count(expect_count, css, msg=nil)
     @html = document_root_element.css(css)
     if expect_count != @html.count
-      print @html.inner_html
+      puts document_root_element.css('#main_content')
+      puts "looking for $(#{css})"
     end
     assert_equal expect_count, @html.count, msg
   end

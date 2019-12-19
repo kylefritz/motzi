@@ -2,6 +2,7 @@ with used_credits as (
     select user_id, count(*) as value
     from order_items
     join orders on orders.id = order_items.order_id
+    where order_items.id <> <%= Item::SKIP_ID %>
     group by user_id
 ),
 bought_credits as (
@@ -23,7 +24,7 @@ select user_id, credit_balance
 from users
 left join user_credits on users.id = user_credits.user_id
 where credit_balance < <%= @balance %>
-<% if (owner_ids = [User.maya, User.russell].compact.map(&:id).join(',')).present? %>
+<% if (owner_ids = User.owners.map(&:id).join(',')).present? %>
     and users.id not in (<%= owner_ids %>)
 <% end %>
 order by credit_balance

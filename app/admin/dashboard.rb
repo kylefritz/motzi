@@ -28,7 +28,7 @@ ActiveAdmin.register_page "Dashboard" do
         num_have_ordered = Order.for_current_menu.where(user_id: week_users.must_order_weekly.pluck(:id)).count
         num_havent_ordered_yet = num_must_order - num_have_ordered
         if num_havent_ordered_yet > 0
-          counts[a("Baker's Choice (estimate)", {href: bakers_choice_admin_menu_path(Menu.current)})] = num_havent_ordered_yet
+          counts[a("Baker's Choice (estimate)", {href: bakers_choice_admin_menus_path()})] = num_havent_ordered_yet
         end
 
         h4 a("#{num_have_ordered} / #{num_must_order} weekly subscribers have ordered", {href: href}), class: 'mb-0'
@@ -43,13 +43,13 @@ ActiveAdmin.register_page "Dashboard" do
 
       column id: 'what-to-bake-tues' do
         panel "Tuesday - What to bake" do
-          what_to_bake(tues, User.tuesday_pickup, pickup_tues_admin_menu_path(menu.id))
+          what_to_bake(tues, User.tuesday_pickup, pickup_tues_admin_menus_path())
         end
       end
 
       column id: 'what-to-bake-thurs' do
         panel "Thursday - What to bake" do
-          what_to_bake(thurs, User.thursday_pickup, pickup_thurs_admin_menu_path(menu.id))
+          what_to_bake(thurs, User.thursday_pickup, pickup_thurs_admin_menus_path())
         end
       end
     end
