@@ -9,7 +9,7 @@ Neighborhood bakery's CSA site
 ```
 $ bundle
 $ yarn install --check-files
-$ rails db:create db:migrate
+$ rails db:setup
 ```
 
 #### Test data
@@ -24,7 +24,7 @@ $ rails fake_data:orders
 #### Migrations don't work?
 Sometimes we're pretty fast and loose with db migrations. If your dev db is stuck try:
 ```
-$ rails db:drop db:create db:migrate db:fixtures:load
+$ rails db:drop db:setup
 ```
 
 ### Running the app
