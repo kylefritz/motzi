@@ -59,7 +59,7 @@ ActiveAdmin.register_page "Dashboard" do
 
       column id: 'what-to-bake-thurs' do
         panel "Thursday - What to bake" do
-          a("Thursday Pickup List", href: pickup_tues_admin_menus_path())
+          a("Thursday Pickup List", href: pickup_thurs_admin_menus_path())
           what_to_bake(thurs, User.thursday_pickup)
         end
       end
