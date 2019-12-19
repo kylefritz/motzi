@@ -39,11 +39,6 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
     assert_el_count 1, '#not-ordered tbody tr', 'jess'
   end
 
-  test "bakers_choice" do
-    get "/admin/menus/bakers_choice"
-    assert_response :success
-  end
-
   private
   def assert_el_count(expect_count, css, msg=nil)
     @html = document_root_element.css(css)

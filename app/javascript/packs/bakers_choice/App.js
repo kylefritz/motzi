@@ -10,7 +10,7 @@ export default function BakersChoice() {
   const handlePickBread = ({ userId, itemId }) => {
     const order = { userId, itemId }
     console.log("create order", order, 'for menu:', menu.id)
-    axios.post(`/admin/menus/${menu.id}/bakers_choice.json`, order).then(({ data: users }) => {
+    axios.post(`/admin/menus/bakers_choice.json`, order).then(({ data: users }) => {
       setUsers(users)
     })
   }
