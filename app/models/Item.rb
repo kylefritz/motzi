@@ -11,7 +11,7 @@ class Item < ApplicationRecord
   end
   SKIP_ID = 0
   def self.skip
-    self.find(SKIP_ID)
+    self.find_by(id: SKIP_ID)
   end
 
   def image_path
