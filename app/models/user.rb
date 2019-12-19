@@ -29,6 +29,10 @@ class User < ApplicationRecord
     !self.tuesday_pickup?
   end
 
+  def must_order_weekly?
+    self.breads_per_week >= 1
+  end
+
   def credits
     # TODO: not handing credit expiration
     credits_purchased = credit_entries.pluck('quantity').sum

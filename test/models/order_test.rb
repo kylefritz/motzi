@@ -16,4 +16,16 @@ class OrderTest < ActiveSupport::TestCase
     kyle = users(:kyle)
     assert_equal 2, kyle.orders.count
   end
+
+  test "skip" do
+    kyle = users(:kyle)
+    order = kyle.orders.create!(menu: menus(:week2))
+    assert order.skip?, 'no items means skip'
+
+    order.order_items.create(item: Item.skip)
+    assert order.skip?, 'skip item means skip'
+
+    order.order_items.create(item: items(:classic))
+    refute order.skip?, 'any item means not skip'
+  end
 end

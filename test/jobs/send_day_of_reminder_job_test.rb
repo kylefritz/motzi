@@ -15,7 +15,17 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
   test "Sends at right time" do
     refute_reminders_emailed(:thur, '5:00 AM', 'dont send too early')
     assert_reminders_emailed(User.tuesday_pickup.count, :tues, '7:00 AM', 'send on tues')
-    assert_reminders_emailed(User.thursday_pickup.count, :thur, '7:00 AM', 'send on thurs')
+    assert_reminders_emailed(User.must_order_weekly.thursday_pickup.count, :thur, '7:00 AM', 'send on thurs; not to jess')
+  end
+
+  test "includes all users who've ordered" do
+    jess_order_item(items(:classic))
+    assert_reminders_emailed(User.thursday_pickup.count, :thur, '7:00 AM', 'sends to jess too')
+  end
+
+  test "but not users who've skipped" do
+    jess_order_item(Item.skip)
+    assert_reminders_emailed(User.thursday_pickup.count - 1, :thur, '7:00 AM', 'sends to jess too')
   end
 
   test "Doesnt send to users multiple times on same menu" do
@@ -24,6 +34,10 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
   end
 
   private
+  def jess_order_item(item)
+    users(:jess).orders.create!(menu: Menu.current).order_items.create!(item: item)
+  end
+
   def refute_reminders_emailed(day, time, msg)
     assert_reminders_emailed(0, day, time, msg)
   end

@@ -20,6 +20,11 @@ class Order < ApplicationRecord
     "Order ##{id}"
   end
 
+  def skip?
+    # order is skip if all items are skip
+    order_items.map(&:item).reject(&:skip?).blank?
+  end
+
   delegate :tuesday_pickup?, to: :user
   delegate :thursday_pickup?, to: :user
 end
