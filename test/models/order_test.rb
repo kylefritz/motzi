@@ -28,4 +28,34 @@ class OrderTest < ActiveSupport::TestCase
     order.order_items.create(item: items(:classic))
     refute order.skip?, 'any item means not skip'
   end
+
+  test "with_feedback" do
+    assert_difference 'Order.with_feedback.size', 1 do
+      Order.create!(feedback: 'asd', menu: menus(:week2), user: users(:ljf))
+    end
+    assert_difference 'Order.with_feedback.size', 0, 'empty string' do
+      Order.create!(feedback: '', menu: menus(:week2), user: users(:ljf))
+    end
+    assert_difference 'Order.with_feedback.size', 0, 'white space' do
+      Order.create!(feedback: '    ', menu: menus(:week2), user: users(:ljf))
+    end
+  end
+
+  test "with_comments" do
+    assert_difference 'Order.with_comments.size', 1 do
+      Order.create!(comments: 'asd', menu: menus(:week2), user: users(:ljf))
+    end
+
+    assert_difference 'Order.with_comments.size', 0, 'white space' do
+      Order.create!(comments: '   ', menu: menus(:week2), user: users(:ljf))
+    end
+
+    assert_difference 'Order.with_comments.size', 0, 'empty string' do
+      Order.create!(comments: '', menu: menus(:week2), user: users(:ljf))
+    end
+
+    assert_difference 'Order.with_comments.size', 0, 'Baker\'s choice isnt a comment' do
+      Order.create!(comments: Item.bakers_choice.name, menu: menus(:week2), user: users(:ljf))
+    end
+  end
 end
