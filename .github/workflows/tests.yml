@@ -41,6 +41,9 @@ jobs:
         bundle install --jobs 4 --retry 3
         bin/rails db:setup
 
+    - name: Webpack compilation
+      run: NODE_ENV=test bundle exec rails webpacker:compile
+
     - name: Run Tests
       env:
         PGHOST: localhost
