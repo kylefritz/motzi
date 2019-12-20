@@ -17,6 +17,7 @@ gem 'devise' # for authentication
 gem 'hashid-rails' # lookup models by hashid
 gem 'image_processing', '~> 1.2' # Use Active Storage variant
 gem 'jbuilder', '~> 2.7' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+gem 'naturalsort', :require => 'natural_sort_kernel' # implements a natural, human-friendly alphanumeric sort
 gem 'newrelic_rpm' # debugging to new relic
 gem 'paper_trail' # audits
 gem 'pg', '>= 0.18', '< 2.0'

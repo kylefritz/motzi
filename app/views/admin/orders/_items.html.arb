@@ -1,4 +1,4 @@
-item_names = items.map(&:name).sort
+item_names = items.map(&:name).natural_sort
 
 counts = Hash.new(0)
 item_names.each { |name| counts[name] += 1 }

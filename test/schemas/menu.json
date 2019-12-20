@@ -212,7 +212,8 @@
         "name",
         "hashid",
         "credits",
-        "tuesdayPickup"
+        "tuesdayPickup",
+        "breadsPerWeek"
       ],
       "properties": {
         "id": {
@@ -256,6 +257,16 @@
           "default": 0,
           "examples": [
             13
+          ]
+        },
+        "breadsPerWeek": {
+          "type": "number",
+          "title": "Breads per week",
+          "default": 1.0,
+          "examples": [
+            0.5,
+            1.0,
+            2.0
           ]
         },
         "tuesdayPickup": {

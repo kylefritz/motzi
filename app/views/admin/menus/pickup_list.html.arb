@@ -1,6 +1,6 @@
 tabs do
   tab :orders do
-    table_for assigns[:orders].sort_by {|o| o.user.last_name.presence || o.user.email }, id: 'pickup-list' do
+    table_for assigns[:orders].sort_by {|o| o.user.sort_key }, id: 'pickup-list' do
       column ("Last Name") { |order| order.user.last_name.presence || order.user.email }
       column ("First Name") { |order| order.user.first_name }
       column ("Items") do |order|
@@ -24,7 +24,7 @@ tabs do
         column do
           h3 bread
           ol do
-            users.sort_by {|user| user.last_name.presence || user.email }.map do |user|
+            users.sort_by {|user| user.name.downcase }.map do |user|
               li user.name # auto_link(user)
             end
           end
@@ -33,7 +33,7 @@ tabs do
     end
   end
   tab :not_ordered do
-    table_for assigns[:users_not_ordered].sort_by {|user| user.last_name.presence || user.email } do
+    table_for assigns[:users_not_ordered].sort_by(&:sort_key) do
       column ("Last Name") { |user| user.last_name.presence || user.email }
       column ("First Name") { |user| user.first_name }
       column ("Breads per week") { |user| user.breads_per_week }

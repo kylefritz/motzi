@@ -9,12 +9,14 @@ class User < ApplicationRecord
   has_many :visits, class_name: "Ahoy::Visit"
   has_paper_trail
   scope :for_weekly_email, -> { where(send_weekly_email: true) }
+  scope :no_weekly_email, -> { where(send_weekly_email: false) }
   scope :tuesday_pickup, -> { not_owners.where(tuesday_pickup: true) }
   scope :thursday_pickup, -> { not_owners.where(tuesday_pickup: false) }
   scope :must_order_weekly, -> { not_owners.where("breads_per_week >= 1") }
   scope :every_other_week, -> { where("breads_per_week = 0.5") }
   scope :owners, -> {where(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   scope :not_owners, -> {where.not(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
+  scope :admin, -> {where(is_admin: true)}
   before_validation(on: :create) do
     # if no password, set random passwords on user
     self.password = SecureRandom.base64(16) if self.password.blank?
@@ -28,6 +30,10 @@ class User < ApplicationRecord
 
   def thursday_pickup?
     !self.tuesday_pickup?
+  end
+  
+  def pickup_day
+    tuesday_pickup? ? "Tues" : "Thurs"
   end
 
   def must_order_weekly?
@@ -49,11 +55,16 @@ class User < ApplicationRecord
     [first_name, last_name].compact.join(' ').presence || email
   end
 
+  def sort_key
+    [last_name, email].compact.join(' ').downcase
+  end
+
   def current_order
-    order_for_menu(Menu.current.id)
+    order_for_menu(Menu.current)
   end
 
   def order_for_menu(menu_id)
+    # accept a menu instance also
     orders.where(menu_id: menu_id).includes(order_items: [:item]).first
   end
 

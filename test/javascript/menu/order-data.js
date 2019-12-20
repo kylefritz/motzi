@@ -28,7 +28,8 @@ export default {
     email: "kyle.p.fritz@gmail.com",
     hashid: "Dot9gKn9w",
     credits: 9,
-    tuesdayPickup: true
+    tuesdayPickup: true,
+    breadsPerWeek: 1.0
   },
   order: { items: [{ itemId: 985741369 }, { itemId: 871309743 }] }
 }

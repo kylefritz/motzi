@@ -39,6 +39,7 @@ exports[`Order snapshot 1`] = `
   <User
     user={
       Object {
+        "breadsPerWeek": 1,
         "credits": 9,
         "email": "kyle.p.fritz@gmail.com",
         "hashid": "Dot9gKn9w",

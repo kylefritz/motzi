@@ -6,23 +6,32 @@ ActiveAdmin.register User do
   remove_filter :credit_entries, :messages, :orders, :order_items, :versions, :visits, \
     :created_at, :current_sign_in_at, :current_sign_in_ip, :encrypted_password, :last_sign_in_at, :last_sign_in_ip, :remember_created_at, :reset_password_sent_at, :reset_password_token, :sign_in_count, :updated_at
 
-  scope("all") { |scope| scope }
-  scope("tues") { |scope| scope.tuesday_pickup }
-  scope("thurs") { |scope| scope.thursday_pickup }
-  scope("admin") { |scope| scope.where(is_admin: true) }
-  scope("no weekly email") { |scope| scope.where(send_weekly_email: false) }
+  scope :all, default: true
+  scope :tuesday_pickup
+  scope :thursday_pickup
+  scope :must_order_weekly
+  scope :every_other_week
+  scope :owners
+  scope :admin
+  scope :no_weekly_email
 
   index do
     selectable_column()
-    column :first_name
+    column :first_name do |user|
+      span user.first_name
+      if user.is_admin?
+        status_tag true, style: 'margin-left: 3px', label: 'admin'
+      end
+    end
     column :last_name
     column :email do |user|
       para auto_link user, user.email
       small user.additional_email
     end
-    column :tuesday_pickup
-    column :send_weekly_email
-    column :is_admin
+    column :pickup do |user|
+      status_tag !user.tuesday_pickup?, style: 'margin-left: 3px', label: user.pickup_day
+    end
+    column :breads_per_week
     column :created_at
     column :updated_at
     actions
@@ -35,6 +44,7 @@ ActiveAdmin.register User do
       input :email
       input :additional_email
       input :tuesday_pickup
+      input :breads_per_week
     end
     inputs 'Danger Zone' do
       input :send_weekly_email
@@ -67,7 +77,10 @@ ActiveAdmin.register User do
         div strong user.email
         small user.additional_email
       end
-      row :tuesday_pickup
+      row :pickup do |user|
+        status_tag !user.tuesday_pickup?, style: 'margin-left: 3px', label: user.pickup_day
+      end
+      row :breads_per_week
       row :send_weekly_email
       row :is_admin
       row :created_at
