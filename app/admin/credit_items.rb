@@ -1,3 +1,3 @@
-ActiveAdmin.register CreditEntry do
+ActiveAdmin.register CreditItem do
   permit_params :memo, :good_for_weeks, :quantity, :user, :user_id
 end

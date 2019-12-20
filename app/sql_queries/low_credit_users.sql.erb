@@ -7,7 +7,7 @@ with used_credits as (
 ),
 bought_credits as (
     select user_id, sum(quantity) as value
-    from credit_entries
+    from credit_items
     group by user_id
 ),
 user_credits as (

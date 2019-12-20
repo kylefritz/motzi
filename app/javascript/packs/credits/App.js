@@ -18,7 +18,7 @@ export default function App() {
       userId
     }
     console.info(credit)
-    axios.post(`/admin/credit_entries.json`, credit).then(({ data }) => {
+    axios.post(`/admin/credit_items.json`, credit).then(({ data }) => {
       // reload page
       document.location = document.location
     }).catch((error) => {

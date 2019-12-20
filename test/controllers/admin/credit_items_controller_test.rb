@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class Admin::CreditEntriesControllerTest < ActionDispatch::IntegrationTest
+class Admin::CreditItemsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
   def setup
@@ -9,19 +9,19 @@ class Admin::CreditEntriesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get index" do
-    get '/admin/credit_entries'
+    get '/admin/credit_items'
     assert_response :success
   end
 
   test "get show" do
-    ci = CreditEntry.first
-    get "/admin/credit_entries/#{ci.id}"
+    ci = CreditItem.first
+    get "/admin/credit_items/#{ci.id}"
     assert_response :success
   end
 
   test "get edit" do
-    ci = CreditEntry.first
-    get "/admin/credit_entries/#{ci.id}/edit"
+    ci = CreditItem.first
+    get "/admin/credit_items/#{ci.id}/edit"
     assert_response :success
   end
 end

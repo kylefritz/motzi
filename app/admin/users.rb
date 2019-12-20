@@ -4,7 +4,7 @@ ActiveAdmin.register User do
 
   # search filters on index page
   preserve_default_filters!
-  remove_filter :credit_entries, :messages, :orders, :order_items, :versions, :visits, \
+  remove_filter :credit_items, :messages, :orders, :order_items, :versions, :visits, \
     :created_at, :current_sign_in_at, :current_sign_in_ip, :encrypted_password, :last_sign_in_at, :last_sign_in_ip, :remember_created_at, :reset_password_sent_at, :reset_password_token, :sign_in_count, :updated_at
 
   scope :all, default: true
@@ -88,9 +88,9 @@ ActiveAdmin.register User do
       row :updated_at      
     end
 
-    panel "Credit Entries" do
+    panel "Credit Items" do
       h4 "Available credits: #{user.credits}"
-      table_for user.credit_entries do
+      table_for user.credit_items do
         column :quantity
         column :memo
         column :created_at
