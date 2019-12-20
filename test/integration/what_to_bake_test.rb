@@ -16,9 +16,11 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
     assert_equal 3, menus(:week1).orders.count
 
     assert_el_count 1, '#what-to-bake-tues'
-    assert_el_count 2, '#what-to-bake-tues tbody tr', 'two breads for adrian & kyle; plus 1 bakers choice'
+    assert_el_count 2, '#what-to-bake-tues .subscribers tbody tr', 'weekly & semi-weekly'
+    assert_el_count 2, '#what-to-bake-tues .breads tbody tr', 'two breads for adrian & kyle; plus 1 bakers choice'
     assert_el_count 1, '#what-to-bake-thurs'
-    assert_el_count 1, '#what-to-bake-thurs tbody tr', 'bread for ljf'
+    assert_el_count 2, '#what-to-bake-tues .subscribers tbody tr', 'weekly & semi-weekly'
+    assert_el_count 1, '#what-to-bake-thurs .breads tbody tr', 'bread for ljf'
   end
 
   test "tuesday pickup list" do
