@@ -13,8 +13,6 @@ Rails.application.routes.draw do
   # create a subscribers order for the week
   post "/orders", to: "orders#create"
 
-  resources :items, only: [:index]
-
   # sign in
   get '/auth' => redirect('/users/sign_in')
   get '/login' => redirect('/users/sign_in')

@@ -8,6 +8,23 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:kyle)
   end
 
+  test "get index" do
+    get '/admin/menus'
+    assert_response :success
+  end
+
+  test "get show" do
+    obj = menus(:week2)
+    get "/admin/menus/#{obj.id}"
+    assert_response :success
+  end
+
+  test "get edit" do
+    obj = menus(:week2)
+    get "/admin/menus/#{obj.id}/edit"
+    assert_response :success
+  end
+
   test "assign a bakers choice for a user" do
     user = users(:adrian)
     

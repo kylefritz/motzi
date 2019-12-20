@@ -28,7 +28,7 @@ export default class App extends React.Component {
   componentDidMount() {
     this.loadMenu()
 
-    axios.get(`/items.json`).then(({ data: { items } }) => {
+    axios.get(`/admin/items.json`).then(({ data: { items } }) => {
       this.setState({ items })
     }).catch((error) => {
       console.error("cant load items", error)
