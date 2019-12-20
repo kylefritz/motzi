@@ -2,6 +2,7 @@ ActiveAdmin.register User do
   permit_params :first_name, :last_name, :email, :additional_email, :tuesday_pickup, :is_admin, :send_weekly_email
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'
 
+  # search filters on index page
   preserve_default_filters!
   remove_filter :credit_entries, :messages, :orders, :order_items, :versions, :visits, \
     :created_at, :current_sign_in_at, :current_sign_in_ip, :encrypted_password, :last_sign_in_at, :last_sign_in_ip, :remember_created_at, :reset_password_sent_at, :reset_password_token, :sign_in_count, :updated_at

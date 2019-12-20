@@ -1,7 +1,8 @@
 ActiveAdmin.register Ahoy::Message, as: "Email" do
   actions :index, :show
   includes :menu, :user
-  scope("all") { |scope| scope }
+
+  scope :all, default: true
   scope("current menu") { |scope| scope.where(menu_id: Setting.menu_id) }
 
   index do

@@ -5,7 +5,7 @@ ActiveAdmin.register Menu do
 
   actions :all, except: [:destroy] # deleting menus can orphan orders, etc
 
-  scope("all") { |scope| scope }
+  scope :all, default: true
   scope("current menu") { |scope| scope.where(id: Setting.menu_id) }
   scope("emailed") { |scope| scope.where("emailed_at is not null") }
   scope("not emailed") { |scope| scope.where("emailed_at is null") }
