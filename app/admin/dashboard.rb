@@ -35,14 +35,14 @@ ActiveAdmin.register_page "Dashboard" do
            ordered: Order.for_current_menu.where(user_id: week_users.every_other_week.pluck(:id)).count,
            total: week_users.every_other_week.count},
         ]
-        table_for by_type, class: 'mt-0' do
+        table_for by_type, class: 'mt-0 subscribers' do
           column ("Subscriber Type") { |h| h[:sub] }
           column ("Ordered") { |h| h[:ordered] }
           column ("Not ordered") { |h| h[:total] - h[:ordered] }
           column ("Total") { |h| h[:total] }
         end
 
-        table_for counts.keys.sort, class: 'mt-0' do
+        table_for counts.keys.sort, class: 'mt-0 breads' do
           column ("Item") { |item| item }
           column ("Quantity") { |item| counts[item] }
         end
