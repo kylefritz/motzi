@@ -1,5 +1,5 @@
 ActiveAdmin.register User do
-  permit_params :first_name, :last_name, :email, :additional_email, :tuesday_pickup, :is_admin, :send_weekly_email
+  permit_params :first_name, :last_name, :email, :additional_email, :tuesday_pickup, :is_admin, :send_weekly_email, :breads_per_week
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'
 
   # search filters on index page
