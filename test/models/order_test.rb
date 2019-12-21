@@ -58,4 +58,32 @@ class OrderTest < ActiveSupport::TestCase
       Order.create!(comments: Item.bakers_choice.name, menu: menus(:week2), user: users(:ljf))
     end
   end
+
+  test "pickup_day" do
+    menu = menus(:week3) # no orders
+    menu.make_current!
+
+    assert_difference 'Menu.current.orders.tuesday_pickup.size', 0, 'no tuesday order' do
+      assert_difference 'Menu.current.orders.thursday_pickup.size', 1, 'add thursday order' do
+        thurs_user = users(:ljf)
+        assert thurs_user.thursday_pickup?, 'picks up thursday'
+        Order.create!(menu: menu, user: thurs_user)
+      end
+    end
+
+    assert_difference 'Menu.current.orders.thursday_pickup.size', 0, 'no thursday order' do
+      assert_difference 'Menu.current.orders.tuesday_pickup.size', 1, 'add tuesday order' do
+        tues_user = users(:kyle)
+        assert tues_user.tuesday_pickup?, 'picks up tuesday'
+        Order.create!(menu: menu, user: tues_user)
+      end
+    end
+
+    orders = menus(:week1).orders
+    assert_equal orders.size, orders.tuesday_pickup.size + orders.thursday_pickup.size, 'tues+thurs=total'
+
+    orders = menus(:week2).orders
+    assert_equal orders.size, orders.tuesday_pickup.size + orders.thursday_pickup.size, 'tues+thurs=total'
+  end
+
 end

@@ -13,13 +13,23 @@ class SendDayOfReminderJob < ApplicationJob
       
       order = user.order_for_menu(menu)
 
-      if (order && !order.skip?) || user.must_order_weekly?
+      if must_pickup?(order, user)
         ReminderMailer.with(user: user, menu: menu, order: order).day_of_email.deliver_now
       end
     end
   end
 
   private
+
+  def must_pickup?(order, user)
+    if order
+      # if there's an order, only remind if user hasn't skipped
+      !order.skip?
+    else
+        # if there's no order, only remind if user must order weekly
+      user.must_order_weekly?
+    end
+  end
 
   def users_to_remind
     return User.tuesday_pickup if Time.zone.now.tuesday_pickup?

@@ -11,7 +11,7 @@ namespace :reminders do
   desc "Assigns bakers choice to ppl that havent ordered"
   task :assign_bakers_choice => :environment do
     if Setting.automated_reminder_emails?
-      # TODO: enable bakers choice job
+      # TODO: enable bakers choice job?
       # CreateBakersChoiceOrdersJob.perform_now
     else
       Rails.logger.warn "CreateBakersChoiceOrdersJob automated_reminder_emails disabled; skipping"

@@ -22,6 +22,20 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "get pickup list tuesday" do
+    menus(:week1).make_current!
+    get "/admin/menus/pickup_tues"
+    assert_response :success
+    assert_select '#orders tbody tr', 2, "num_tues=#{menus(:week1).orders.tuesday_pickup.count}"
+  end
+
+  test "get pickup list thursday" do
+    menus(:week1).make_current!
+    get "/admin/menus/pickup_thurs"
+    assert_response :success
+    assert_select '#orders tbody tr', 1, "num_tues=#{menus(:week1).orders.thursday_pickup.count}"
+  end
+
   test "get edit" do
     obj = menus(:week2)
     get "/admin/menus/#{obj.id}/edit"

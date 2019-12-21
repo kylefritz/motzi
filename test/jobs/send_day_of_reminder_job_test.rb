@@ -19,13 +19,20 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
   end
 
   test "includes all users who've ordered" do
-    jess_order_item(items(:classic))
+    order_item(:jess, items(:classic))
     assert_reminders_emailed(User.thursday_pickup.count, :thur, '7:00 AM', 'sends to jess too')
   end
 
   test "but not users who've skipped" do
-    jess_order_item(Item.skip)
+    order_item(:jess, Item.skip)
     assert_reminders_emailed(User.thursday_pickup.count - 1, :thur, '7:00 AM', 'sends to jess too')
+  end
+
+  test "weekly orders who skipped shouldn't get reminders" do
+    Menu.current.orders.thursday_pickup.delete_all
+    assert Menu.current.orders.thursday_pickup.empty?, 'cleared the orders'
+    order_item(:ljf, Item.skip)
+    assert_reminders_emailed(0, :thur, '7:00 AM', 'shouldnt send to laura since skipped')
   end
 
   test "Doesnt send to users multiple times on same menu" do
@@ -34,8 +41,9 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
   end
 
   private
-  def jess_order_item(item)
-    users(:jess).orders.create!(menu: Menu.current).order_items.create!(item: item)
+
+  def order_item(user, item)
+    users(user).orders.create!(menu: Menu.current).order_items.create!(item: item)
   end
 
   def refute_reminders_emailed(day, time, msg)

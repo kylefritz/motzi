@@ -33,17 +33,20 @@ class User < ApplicationRecord
   end
   
   def pickup_day
-    tuesday_pickup? ? "Tues" : "Thurs"
+    self.tuesday_pickup? ? "Tues" : "Thurs"
   end
 
   def must_order_weekly?
     self.breads_per_week >= 1
   end
+  def every_other_week?
+    !must_order_weekly?
+  end
 
   def credits
     # TODO: not handing credit expiration
-    credits_purchased = credit_items.pluck('quantity').sum
-    credits_used = order_items.not_skip.count
+    credits_purchased = self.credit_items.pluck('quantity').sum
+    credits_used = self.order_items.not_skip.count
     credits_purchased - credits_used
   end
 
@@ -64,7 +67,7 @@ class User < ApplicationRecord
   end
 
   def order_for_menu(menu_id)
-    # accept a menu instance also
+    # accepts a menu instance also
     orders.where(menu_id: menu_id).includes(order_items: [:item]).first
   end
 

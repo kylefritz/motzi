@@ -6,8 +6,6 @@ class SendWeeklyMenuJob < ApplicationJob
   end
 
   def perform(*args)
-    # TODO: give SendWeeklyMenuJob a smart schedule?
-
     menu = Menu.current
 
     # email each individual user

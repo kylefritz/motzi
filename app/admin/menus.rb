@@ -131,14 +131,14 @@ ActiveAdmin.register Menu do
   end
 
   collection_action :pickup_tues do
-    @orders = Menu.current.orders.includes(:user).includes({order_items: :item}).select(&:tuesday_pickup?)
+    @orders = Menu.current.orders.tuesday_pickup.includes(:user).includes({order_items: :item})
     @users_not_ordered = User.tuesday_pickup.where.not(id: @orders.pluck(:user_id))
     @page_title = "Tuesday Pickup List"
     render :pickup_list
   end
 
   collection_action :pickup_thurs do
-    @orders = Menu.current.orders.includes(:user).includes({order_items: :item}).select(&:thursday_pickup?)
+    @orders = Menu.current.orders.thursday_pickup.includes(:user).includes({order_items: :item})
     @users_not_ordered = User.thursday_pickup.where.not(id: @orders.pluck(:user_id))
     @page_title = "Thursday Pickup List"
     render :pickup_list

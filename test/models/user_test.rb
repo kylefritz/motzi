@@ -6,6 +6,7 @@ class UserTest < ActiveSupport::TestCase
     assert maya.authenticate('wine')
     refute maya.authenticate('not-wine')
     assert maya.is_admin
+    assert_equal maya.id, User.maya.id
   end
 
   test "tuesday vs thursday pickup of the week" do
@@ -57,18 +58,22 @@ class UserTest < ActiveSupport::TestCase
 
   test "must_order_weekly" do
     assert_equal 3, User.must_order_weekly.count
+    assert User.must_order_weekly.first.must_order_weekly?
   end
 
   test "every_other_week" do
     assert_equal 1, User.every_other_week.count
     assert_equal users(:jess).id, User.every_other_week.first.id
+    assert User.every_other_week.first.every_other_week?
   end
 
   test "tuesday_pickup" do
     assert_equal 2, User.tuesday_pickup.count, 'kf, adrian'
+    assert User.tuesday_pickup.first.tuesday_pickup?
   end
 
   test "thursday_pickup" do
     assert_equal 2, User.thursday_pickup.count, 'ljf & jess'
+    assert User.thursday_pickup.first.thursday_pickup?
   end
 end
