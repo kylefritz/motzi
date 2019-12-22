@@ -52,7 +52,7 @@ jobs:
       run: |
         bundle exec rake test
         bundle exec rake test:system
-        # npx jest test/javascript
+        npx jest test/javascript
 
     - name: Deploy to Heroku
       env:
