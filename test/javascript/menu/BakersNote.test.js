@@ -2,7 +2,7 @@ import React from 'react';
 require('../configure_enzyme');
 import { shallow } from 'enzyme';
 
-import BakersNote from 'Menu/BakersNote'
+import BakersNote from 'menu/BakersNote'
 
 test('Menu snapshot', () => {
   const markdown = `# should be h3
