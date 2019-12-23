@@ -12,15 +12,15 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-    - name: Checkout the codez
+    - name: git checkout
       uses: actions/checkout@v1
 
-    - name: Set up Ruby 2.6
+    - name: Setup Ruby 2.6
       uses: actions/setup-ruby@v1
       with:
         ruby-version: 2.6.3
 
-    - name: Install yarn deps
+    - name: yarn install
       uses: borales/actions-yarn@v2.0.0
       with:
         cmd: install
@@ -36,26 +36,26 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gem-
 
-    - name: Install app deps
+    - name: bundle
       run: |
         gem install bundler
         bundle config path vendor/bundle
         bundle install --jobs 4 --retry 3
 
-    - name: Setup db; run Rails tests
+    - name: rails db:setup test test:system
       env:
         PGHOST: localhost
         PGUSER: postgres
         RAILS_ENV: test
       run: |
         bin/rails db:setup
-        bundle exec rake test
-        bundle exec rake test:system
+        bin/rails test
+        bin/rails test:system
 
-    - name: Run javascript tests
+    - name: jest
       run: npx jest test/javascript
 
-    - name: Deploy to Heroku
+    - name: git push heroku
       env:
         HEROKU_API_TOKEN: ${{ secrets.HEROKU_API_TOKEN }}
         HEROKU_APP_NAME: motzibread
