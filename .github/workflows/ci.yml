@@ -43,7 +43,7 @@ jobs:
         bundle install --jobs 4 --retry 3
 
     - name: Webpacker compile
-      run: NODE_ENV=test bundle exec rails webpacker:compile
+      run: bundle exec rails webpacker:compile
 
     - name: Setup db; run Rails tests
       env:
