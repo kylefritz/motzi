@@ -1,15 +1,9 @@
-name: Run Rails Tests & Deploy to Heroku
+name: CI
+description: Run Rails Tests, Jest test & then deploy to Heroku if pass & on master
 
-on:
-  pull_request:
-    branches:
-      - 'master'
-  push:
-    branches:
-      - 'master'
-
+on: [pull_request, push]
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
 
     services:
@@ -19,40 +13,43 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-    - uses: actions/checkout@v1
+    - name: Checkout the codez
+      uses: actions/checkout@v1
 
     - name: Set up Ruby 2.6
       uses: actions/setup-ruby@v1
       with:
         ruby-version: 2.6.3
 
-    - name: Install PostgreSQL 11 client
-      run: |
-        sudo apt-get -yqq install libpq-dev
+    - name: Install yarn deps
+      uses: borales/actions-yarn@v2.0.0
+      with:
+        cmd: install
 
-    - name: Build App
-      env:
-        PGHOST: localhost
-        PGUSER: postgres
-        RAILS_ENV: test
+    - name: Install PostgreSQL 11 client
+      run: sudo apt-get -yqq install libpq-dev
+
+    - name: Install app deps
       run: |
         gem install bundler
         bundle install --jobs 4 --retry 3
-        bin/rails db:setup
 
     # TODO(65): webpack fucked for GH actions
     # - name: Webpack compilation
     #   run: NODE_ENV=test bundle exec rails webpacker:compile
 
-    - name: Run Tests
+    - name: Setup db; run Rails tests
       env:
         PGHOST: localhost
         PGUSER: postgres
         RAILS_ENV: test
       run: |
+        bin/rails db:setup
         bundle exec rake test
         bundle exec rake test:system
-        npx jest test/javascript
+
+    - name: Setup javascript tests
+      run: npx jest test/javascript
 
     - name: Deploy to Heroku
       env:
