@@ -1,5 +1,5 @@
-name: CI
-# Run Rails Tests, Jest & deploy to Heroku if pass & on master
+name: ci
+# Run Rails tests & Jest. If pass & on master, deploy to Heroku.
 on: push
 jobs:
   ci:
