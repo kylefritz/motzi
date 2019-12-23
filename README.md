@@ -22,12 +22,6 @@ $ rails fake_data:users
 $ rails fake_data:orders
 ```
 
-#### Migrations don't work?
-Sometimes we're pretty fast and loose with db migrations. If your dev db is stuck try:
-```
-$ rails db:drop db:setup
-```
-
 ### Running the app
 ```
 $ rails server
