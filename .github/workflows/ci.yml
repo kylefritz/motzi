@@ -47,7 +47,7 @@ jobs:
         bundle exec rake test
         bundle exec rake test:system
 
-    - name: Setup javascript tests
+    - name: Run javascript tests
       run: npx jest test/javascript
 
     - name: Deploy to Heroku
