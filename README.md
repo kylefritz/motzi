@@ -1,6 +1,4 @@
-# Motzi
-
-![](https://github.com/kylefritz/motzi/workflows/ci/badge.svg)
+# Motzi ![](https://github.com/kylefritz/motzi/workflows/ci/badge.svg)
 
 Neighborhood bakery's CSA site
 
