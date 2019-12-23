@@ -53,8 +53,9 @@ development:
   <<: *default
   compile: true
 
+  # Integrity check will fail when run on GH actions
   # Verifies that correct packages and versions are installed by inspecting package.json, yarn.lock, and node_modules
-  check_yarn_integrity: true
+  # check_yarn_integrity: true
 
   # Reference: https://webpack.js.org/configuration/dev-server/
   dev_server:
@@ -79,9 +80,6 @@ development:
 test:
   <<: *default
   compile: true
-
-  # Integrity check will fail when run on GH actions
-  check_yarn_integrity: false
 
   # Compile test packs to a separate directory
   public_output_path: packs-test
