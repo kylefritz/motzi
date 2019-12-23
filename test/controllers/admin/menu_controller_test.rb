@@ -14,9 +14,6 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get show" do
-    if ENV.include?('GITHUB_ACTIONS')
-      skip "skipping /admin/menus test on GH because we don't have webpacker setup"
-    end
     obj = menus(:week2)
     get "/admin/menus/#{obj.id}"
     assert_response :success
