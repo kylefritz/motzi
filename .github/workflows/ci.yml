@@ -15,10 +15,20 @@ jobs:
     - name: git checkout
       uses: actions/checkout@v1
 
-    - name: Setup Ruby 2.6
-      uses: actions/setup-ruby@v1
+    # install ruby 2.6.5 with caching
+    - name: ruby cache
+      uses: actions/cache@preview
+      id: cache
       with:
-        ruby-version: 2.6.3
+        path: ~/local/rubies
+        key: ruby-2.6.5
+    - uses: clupprich/ruby-build-action@master
+      id: ruby
+      with:
+        ruby-version: 2.6.5
+        cache-available: ${{ steps.cache.outputs.cache-hit == 'true' }}
+    - name: Print version
+      run: ${{ steps.ruby.outputs.ruby-path }} --version
 
     - name: yarn install
       uses: borales/actions-yarn@v2.0.0
