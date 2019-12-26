@@ -119,11 +119,12 @@ ActiveAdmin.register_page "Dashboard" do
     columns do
       column do
         panel "Recently updated content" do
-          table_for PaperTrail::Version.order('id desc').limit(20) do # Use PaperTrail::Version if this throws an error
+          table_for PaperTrail::Version.order('id desc').limit(20) do
             column ("Object") { |v| v.item }
-            # column ("Item") { |v| link_to v.item, [:admin, v.item] } # Uncomment to display as link
             column ("Type") { |v| v.item_type.underscore.humanize }
-            column ("Modified at") { |v| v.created_at.to_s :long }
+            column ("Modified at") do |v|
+              link_to(v.created_at.to_s(:long), admin_version_path(v.id))
+            end
             column ("User") do |v|
               User.find_by(id: v.whodunnit)&.first_name.presence || "whodunnit: '#{v.whodunnit}'"
             end
