@@ -6,6 +6,7 @@ kyle:
   encrypted_password: <%= Devise::Encryptor.digest(User, 'robots') %>
   is_admin: true
   tuesday_pickup: true
+  phone: 555-123-4567
 
 adrian:
   first_name: Adrian
