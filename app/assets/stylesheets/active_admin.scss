@@ -27,8 +27,16 @@
 
 // dashboard
 .col-user a,
-.col-order a {
+.col-order a,
+.col-phone,
+.col-created_at,
+.col-updated_at {
   white-space: nowrap;
+}
+
+.col-created_at,
+.col-updated_at {
+  font-size: 0.7em;
 }
 
 .menu-builder {

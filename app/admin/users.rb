@@ -36,7 +36,9 @@ ActiveAdmin.register User do
       status_tag !user.tuesday_pickup?, style: 'margin-left: 3px', label: user.pickup_day
     end
     column :breads_per_week
-    column :phone
+    column :phone do |user|
+      number_to_phone(user.phone)
+    end
     column :created_at
     column :updated_at
     actions
@@ -83,7 +85,9 @@ ActiveAdmin.register User do
         div strong user.email
         small user.additional_email
       end
-      row :phone
+      row :phone do |user|
+        number_to_phone(user.phone)
+      end
       row :pickup do |user|
         status_tag !user.tuesday_pickup?, style: 'margin-left: 3px', label: user.pickup_day
       end
