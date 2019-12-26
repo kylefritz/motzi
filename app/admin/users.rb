@@ -1,11 +1,14 @@
 ActiveAdmin.register User do
-  permit_params :first_name, :last_name, :email, :additional_email, :tuesday_pickup, :is_admin, :send_weekly_email, :breads_per_week
+  permit_params :first_name, :last_name, :email, :additional_email, :tuesday_pickup, :is_admin, \
+    :send_weekly_email, :breads_per_week, :phone
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'
 
   # search filters on index page
   preserve_default_filters!
   remove_filter :credit_items, :messages, :orders, :order_items, :versions, :visits, \
-    :created_at, :current_sign_in_at, :current_sign_in_ip, :encrypted_password, :last_sign_in_at, :last_sign_in_ip, :remember_created_at, :reset_password_sent_at, :reset_password_token, :sign_in_count, :updated_at
+    :created_at, :current_sign_in_at, :current_sign_in_ip, :encrypted_password, \
+    :last_sign_in_at, :last_sign_in_ip, :remember_created_at, :reset_password_sent_at, \
+    :reset_password_token, :sign_in_count, :updated_at
 
   scope :all, default: true
   scope :tuesday_pickup
@@ -33,6 +36,7 @@ ActiveAdmin.register User do
       status_tag !user.tuesday_pickup?, style: 'margin-left: 3px', label: user.pickup_day
     end
     column :breads_per_week
+    column :phone
     column :created_at
     column :updated_at
     actions
@@ -44,6 +48,7 @@ ActiveAdmin.register User do
       input :last_name
       input :email
       input :additional_email
+      input :phone
       input :tuesday_pickup
       input :breads_per_week
     end
@@ -78,6 +83,7 @@ ActiveAdmin.register User do
         div strong user.email
         small user.additional_email
       end
+      row :phone
       row :pickup do |user|
         status_tag !user.tuesday_pickup?, style: 'margin-left: 3px', label: user.pickup_day
       end
