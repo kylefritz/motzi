@@ -1,0 +1,12 @@
+Motzi Bread - <%= @menu.name %>
+===============================================
+
+Oops, there was a bug in the ordering software earlier this morning and we didn't get your order.
+
+The problem is fixed now. Please place your order again.
+
+===============================================
+
+You have <%= @user.credits %> credits remaining.
+
+This week's menu: <%= current_menu_url(uid: @user.hashid) %>
