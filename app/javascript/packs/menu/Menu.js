@@ -4,6 +4,7 @@ import Item from './Item.js'
 import AddOn from './AddOn.js'
 import BakersNote from './BakersNote.js'
 import User from './User.js'
+import _ from 'lodash'
 
 export default class Menu extends React.Component {
   constructor(props) {
@@ -30,7 +31,7 @@ export default class Menu extends React.Component {
   }
   handleCreateOrder() {
     const { selectedItem, addOns, feedback, comments } = this.state;
-    if (!selectedItem) {
+    if (_.isNil(selectedItem)) {
       alert('Select a bread!')
       return
     }
