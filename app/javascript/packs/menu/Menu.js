@@ -38,6 +38,8 @@ export default class Menu extends React.Component {
     const { user } = this.props;
     let order = { feedback, comments, items: [], uid: user.hashid }
 
+    order.items.push(selectedItem)
+
     for (const addOn of addOns) {
       order.items.push(addOn)
     }
