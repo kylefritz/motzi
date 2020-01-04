@@ -1,6 +1,5 @@
 import React from 'react';
 require('../configure_enzyme');
-import sinon from 'sinon';
 import { shallow, mount } from 'enzyme';
 
 import Menu from 'menu/Menu'
