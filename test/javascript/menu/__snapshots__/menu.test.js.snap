@@ -54,6 +54,25 @@ exports[`Menu snapshot 1`] = `
       name="Bagette"
       onChange={[Function]}
     />
+    <Item
+      description="Mix of modern wheats and ancient Einkorn for the best of both worlds."
+      id={2}
+      image="bread2-002.webp"
+      isAddOn={false}
+      key="2"
+      menuItemId={993690592}
+      name="Classic"
+      onChange={[Function]}
+    />
+    <Item
+      description="Skip this week."
+      id={3}
+      isAddOn={false}
+      key="3"
+      menuItemId={0}
+      name="Skip"
+      onChange={[Function]}
+    />
   </div>
   <h5>
     Add-Ons
@@ -72,6 +91,16 @@ exports[`Menu snapshot 1`] = `
         key="871309743"
         menuItemId={993690592}
         name="Classic"
+        onChange={[Function]}
+      />
+      <AddOn
+        description=""
+        id={3}
+        image="bread-baget.jpg"
+        isAddOn={true}
+        key="3"
+        menuItemId={993690591}
+        name="Bagette"
         onChange={[Function]}
       />
     </div>

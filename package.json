@@ -16,7 +16,8 @@
     "query-string": "^6.8.3",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
-    "showdown": "^1.9.0"
+    "showdown": "^1.9.0",
+    "sinon": "^8.0.1"
   },
   "version": "0.1.0",
   "devDependencies": {
