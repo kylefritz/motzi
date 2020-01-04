@@ -19,17 +19,3 @@ test('Menu items & addons rendered', () => {
   const addOns = wrapper.find('input[type="checkbox"]')
   expect(addOns.length).toBe(2) // classic, baget
 });
-
-test.skip('Menu pick skip', () => {
-  const onCreateOrder = sinon.spy();
-  const wrapper = shallow(<Menu {...orderData} onCreateOrder={onCreateOrder} />);
-
-  // we cant use enzyme to simulate this
-  // because we're keeping the selection state of the radios in DOM
-  // enzyme doesn't simulate enough DOM
-  wrapper.find('input[value="Skip"]').simulate('change')
-  wrapper.find('button').simulate('click')
-
-  // debugger
-  expect(onCreateOrder.calledOnce).toBe(true);
-});
