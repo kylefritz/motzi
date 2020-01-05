@@ -18,6 +18,7 @@
     <% end %>
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= include_gon(:camel_case => true, :camel_depth => :recursive) %>
+    <script src="https://js.stripe.com/v3/"></script>
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
   </head>
 
