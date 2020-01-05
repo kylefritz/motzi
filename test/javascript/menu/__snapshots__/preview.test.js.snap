@@ -23,6 +23,23 @@ exports[`Preview snapshot 1`] = `
       menuItemId={993690591}
       name="Bagette"
     />
+    <Item
+      description="Mix of modern wheats and ancient Einkorn for the best of both worlds."
+      id={2}
+      image="bread2-002.webp"
+      isAddOn={false}
+      key="2"
+      menuItemId={993690592}
+      name="Classic"
+    />
+    <Item
+      description="Skip this week."
+      id={3}
+      isAddOn={false}
+      key="3"
+      menuItemId={0}
+      name="Skip"
+    />
   </div>
   <h5>
     Add-Ons
@@ -38,6 +55,11 @@ exports[`Preview snapshot 1`] = `
           key="871309743"
         >
           Classic
+        </li>
+        <li
+          key="3"
+        >
+          Bagette
         </li>
       </ul>
     </div>
