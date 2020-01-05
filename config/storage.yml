@@ -7,6 +7,7 @@ local:
   root: <%= Rails.root.join("storage") %>
 
 # set CORS on s3 bucket if using actiontext (which does s3 direct-upload)
+# https://guides.rubyonrails.org/active_storage_overview.html#cross-origin-resource-sharing-cors-configuration
 # https://mikerogers.io/2018/11/03/configuring-cors-on-s3-for-activestorage.html
 amazon:
   service: S3
