@@ -17,8 +17,8 @@ module Motzi
     # the framework and any gems in your application.
 
     # OliveBranch converts snake_case to camelCase
-    config.middleware.use OliveBranch::Middleware
-    config.middleware.use OliveBranch::Middleware, inflection: 'camel'
+    rails_routes = -> (env) { env['PATH_INFO'].match(/^\/rails/) }
+    config.middleware.use OliveBranch::Middleware, inflection: "camel", exclude_params: rails_routes, exclude_response: rails_routes
 
     # zeitwerk makes ruby file autoloading better?
     config.autoloader = :zeitwerk

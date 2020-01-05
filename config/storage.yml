@@ -6,6 +6,8 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage") %>
 
+# set CORS on s3 bucket if using actiontext (which does s3 direct-upload)
+# https://mikerogers.io/2018/11/03/configuring-cors-on-s3-for-activestorage.html
 amazon:
   service: S3
   access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] %>
