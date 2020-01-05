@@ -4,9 +4,9 @@ import * as Sentry from '@sentry/browser';
 import queryString from 'query-string'
 import _ from 'lodash'
 
-import Order from './Order.js'
-import Menu from './Menu.js'
-import Preview from './Preview.js'
+import Menu from './Menu'
+import Order from './Order'
+import Preview from './Preview'
 
 export default class App extends React.Component {
   componentDidMount() {

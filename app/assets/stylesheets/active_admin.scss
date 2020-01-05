@@ -34,6 +34,13 @@
   white-space: nowrap;
 }
 
+.col-feedback,
+.col-comments {
+  p {
+    margin-bottom: 0.1em;
+  }
+}
+
 .col-created_at,
 .col-updated_at {
   font-size: 0.7em;

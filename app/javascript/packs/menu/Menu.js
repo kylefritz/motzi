@@ -61,7 +61,7 @@ export default class Menu extends React.Component {
         <h5>We'd love your feedback on last week's loaf.</h5>
         <div className="row mt-3 mb-5">
           <div className="col">
-            <input className="form-control" type="text" placeholder="What did you think?" onChange={this.handleFeedback.bind(this)} />
+            <textarea className="form-control" placeholder="What did you think?" onChange={this.handleFeedback.bind(this)} />
           </div>
         </div>
 
@@ -83,8 +83,8 @@ export default class Menu extends React.Component {
         <h5>Other comments?</h5>
         <div className="row mt-3 mb-5">
           <div className="col">
-            <input placeholder="Your comments" onChange={this.handleComments.bind(this)}
-              className="form-control" type="text" />
+            <textarea placeholder="Your comments" onChange={this.handleComments.bind(this)}
+              className="form-control" />
           </div>
         </div>
 
