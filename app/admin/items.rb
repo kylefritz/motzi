@@ -1,7 +1,11 @@
 ActiveAdmin.register Item do
   permit_params :name, :description, :image
+  includes image_attachment: :blob
   config.sort_order = 'LOWER(name)'
   config.create_another = true
+
+  preserve_default_filters!
+  remove_filter :versions, :image_attachment, :image_blob, :menu_items
 
   index do
     selectable_column

@@ -5,6 +5,9 @@ ActiveAdmin.register Ahoy::Message, as: "Email" do
   scope :all, default: true
   scope("current menu") { |scope| scope.where(menu_id: Setting.menu_id) }
 
+  preserve_default_filters!
+  remove_filter :token
+
   index do
     column :to do |email|
       div auto_link email.user, email.to
