@@ -5,7 +5,7 @@ class OrderItem < ApplicationRecord
   scope :not_skip, -> { where("item_id <> #{Item::SKIP_ID}") }
 
   def name
-    "OrderItem##{id} in Order ##{order_id}"
+    "OrderItem ##{id} in Order ##{order_id}"
   end
 
   delegate :skip?, to: :item
