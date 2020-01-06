@@ -10,10 +10,11 @@ class User < ApplicationRecord
   has_paper_trail
   scope :for_weekly_email, -> { where(send_weekly_email: true) }
   scope :no_weekly_email, -> { where(send_weekly_email: false) }
-  scope :tuesday_pickup, -> { not_owners.where(tuesday_pickup: true) }
-  scope :thursday_pickup, -> { not_owners.where(tuesday_pickup: false) }
-  scope :must_order_weekly, -> { not_owners.where("breads_per_week >= 1") }
-  scope :every_other_week, -> { where("breads_per_week = 0.5") }
+  scope :tuesday_pickup, -> { customers.where(tuesday_pickup: true) }
+  scope :thursday_pickup, -> { customers.where(tuesday_pickup: false) }
+  scope :must_order_weekly, -> { customers.where("breads_per_week >= 1") }
+  scope :every_other_week, -> { customers.where("breads_per_week = 0.5") }
+  scope :customers, -> { not_owners.for_weekly_email }
   scope :owners, -> {where(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   scope :not_owners, -> {where.not(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   scope :admin, -> {where(is_admin: true)}

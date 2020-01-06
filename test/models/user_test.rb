@@ -76,4 +76,16 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 2, User.thursday_pickup.count, 'ljf & jess'
     assert User.thursday_pickup.first.thursday_pickup?
   end
+
+  test "only sends to weekly" do
+    User.all.update_all(send_weekly_email: false)
+    assert_equal 0, User.tuesday_pickup.count
+    assert_equal 0, User.thursday_pickup.count
+  end
+
+  test "customers" do
+    assert_equal 4, User.customers.count, 'kf, adrian, ljf, jess'
+    User.all.update_all(send_weekly_email: false)
+    assert_equal 0, User.customers.count
+  end
 end

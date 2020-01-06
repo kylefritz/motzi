@@ -16,13 +16,14 @@ user_credits as (
         COALESCE(bought_credits.value, 0) as bought_credits,
         COALESCE(bought_credits.value, 0) - COALESCE(used_credits.value,0) as credit_balance
     from users
-    left join bought_credits on users.id = bought_credits.user_id
-    left join used_credits on users.id = used_credits.user_id
+        left join bought_credits on users.id = bought_credits.user_id
+        left join used_credits on users.id = used_credits.user_id
+    where users.send_weekly_email
 )
 
 select user_id, credit_balance
 from users
-left join user_credits on users.id = user_credits.user_id
+    left join user_credits on users.id = user_credits.user_id
 where credit_balance < <%= @balance %>
 <% if (owner_ids = User.owners.map(&:id).join(',')).present? %>
     and users.id not in (<%= owner_ids %>)

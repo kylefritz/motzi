@@ -35,6 +35,11 @@ class LowCreditUsersTest < ActiveSupport::TestCase
     assert_equal 2, exec_low_credit_users.size, 'kyle is not in low credit users'
   end
 
+  test "dont show users who dont get emails" do
+    User.all.update_all(send_weekly_email: false)
+    assert_equal 0, exec_low_credit_users.size
+  end
+
   private
   def exec_low_credit_users
     SqlQuery.new(:low_credit_users, balance: 4).execute
