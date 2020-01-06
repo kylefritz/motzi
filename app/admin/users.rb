@@ -15,6 +15,7 @@ ActiveAdmin.register User do
   scope :thursday_pickup
   scope :must_order_weekly
   scope :every_other_week
+  scope :customers
   scope :owners
   scope :admin
   scope :no_weekly_email
