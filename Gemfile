@@ -9,29 +9,29 @@ ruby '2.6.5'
 gem 'activeadmin' # admin ui
 gem 'ahoy_email' # email analytics
 gem 'ahoy_matey' # analytics
+gem 'aws-sdk-s3', require: false # for s3/active storage
 gem 'bcrypt', '~> 3.1.7' # for devise
 gem 'blazer' # analytics
 gem 'bootsnap', '>= 1.4.2', require: false # Reduces boot times through caching; required in config/boot.rb
 gem 'bootstrap', '~> 4.3.1' # nice style
 gem 'devise' # for authentication
+gem 'gon' # rails variables in javascript
 gem 'hashid-rails' # lookup models by hashid
 gem 'image_processing', '~> 1.2' # Use Active Storage variant
 gem 'jbuilder', '~> 2.7' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'naturalsort', :require => 'natural_sort_kernel' # implements a natural, human-friendly alphanumeric sort
 gem 'newrelic_rpm' # debugging to new relic
+gem 'olive_branch' # convert snake_case to camelCase for json
 gem 'paper_trail' # audits
 gem 'pg', '>= 0.18', '< 2.0'
+gem 'puma', '>= 3.12.2' # web/app server
+gem 'rails-settings-cached' # site-wide settings
 gem 'rails', '~> 6.0.0'
 gem 'redcarpet' # markdown the baker's note in admin
 gem 'sass-rails', '~> 5' # css
 gem 'sentry-raven' # debugging to sentry.io
 gem 'sql_query' # load SQL queries from erb templates
 gem 'webpacker', '~> 4.0' # compiles javascript
-gem "aws-sdk-s3", require: false # for s3/active storage
-gem "gon" # rails variables in javascript
-gem "olive_branch" # convert snake_case to camelCase for json
-gem "puma", ">= 3.12.2" # web/app server
-gem "rails-settings-cached" # site-wide settings
 
 
 # gem 'redis', '~> 4.0' # Use Redis adapter to run Action Cable in production
