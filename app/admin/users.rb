@@ -11,10 +11,10 @@ ActiveAdmin.register User do
     :reset_password_token, :sign_in_count, :updated_at
 
   scope :all, default: true
-  scope :tuesday_pickup
-  scope :thursday_pickup
-  scope :must_order_weekly
-  scope :every_other_week
+  scope "Tuesday", :tuesday_pickup
+  scope "Thursday", :thursday_pickup
+  scope "Weekly", :must_order_weekly
+  scope "Semi-weekly", :every_other_week
   scope :customers
   scope :owners
   scope :admin
