@@ -2,7 +2,7 @@ with used_credits as (
     select user_id, count(*) as value
     from order_items
     join orders on orders.id = order_items.order_id
-    where order_items.id <> <%= Item::SKIP_ID %>
+    where order_items.item_id <> <%= Item::SKIP_ID %>
     group by user_id
 ),
 bought_credits as (
