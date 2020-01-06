@@ -10,7 +10,7 @@ ActiveAdmin.register Item do
     end
     column :image do |item|
       if item.image.attached?
-        span link_to(image_tag(item.image, size: "100x100", alt: item.name), admin_item_path(item))
+        span link_to(image_tag(item.image.representation(resize_to_limit: [100, 100]), alt: item.name), admin_item_path(item))
       end
     end
     column :description
@@ -25,7 +25,7 @@ ActiveAdmin.register Item do
       row :description
       row :image do |item|
         if item.image.attached?
-          image_tag url_for(item.image)
+          image_tag(item.image.representation(resize_to_limit: [250, 250]), alt: item.name)
         end
       end
     end
