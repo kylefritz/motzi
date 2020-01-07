@@ -1,0 +1,6 @@
+<%= partial :user_credits %>
+
+select users.id as user_id, COALESCE(credit_balance, 0) as credit_balance
+from users
+    left join user_credits on users.id = user_credits.user_id
+where users.id in (<%= @user_ids.join(',') %>)

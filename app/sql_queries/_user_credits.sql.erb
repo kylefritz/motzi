@@ -1,0 +1,22 @@
+with used_credits as (
+    select user_id, count(*) as value
+    from order_items
+    join orders on orders.id = order_items.order_id
+    where order_items.item_id <> <%= Item::SKIP_ID %>
+    group by user_id
+),
+bought_credits as (
+    select user_id, sum(quantity) as value
+    from credit_items
+    group by user_id
+),
+user_credits as (
+    select users.id as user_id,
+        COALESCE(used_credits.value, 0) as used_credits,
+        COALESCE(bought_credits.value, 0) as bought_credits,
+        COALESCE(bought_credits.value, 0) - COALESCE(used_credits.value,0) as credit_balance
+    from users
+        left join bought_credits on users.id = bought_credits.user_id
+        left join used_credits on users.id = used_credits.user_id
+    where users.send_weekly_email
+)

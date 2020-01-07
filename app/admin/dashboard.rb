@@ -9,7 +9,7 @@ ActiveAdmin.register_page "Dashboard" do
         panel "Current Menu - #{menu.name}" do
           h4 a(menu.name, href: admin_menu_path(menu.id), class: 'bigger')
           ul do 
-            menu.menu_items.map do |menu_item|
+            menu.menu_items.includes(:item).map do |menu_item|
               li "#{menu_item.item.name} #{menu_item.is_add_on? ? " (add-on)" : ""}"
             end
           end
@@ -71,7 +71,7 @@ ActiveAdmin.register_page "Dashboard" do
 
       column do
         panel "Orders with comments" do
-          table_for menu.orders.with_comments do
+          table_for menu.orders.includes(:user).with_comments do
             column ("comments") { |order| markdown.render(order.comments).html_safe }
             column ("user") { |order| order.user }
             column ("order") { |order| order }
@@ -82,7 +82,7 @@ ActiveAdmin.register_page "Dashboard" do
       column do
         
         panel "Orders with feedback" do
-          table_for menu.orders.with_feedback do
+          table_for menu.orders.includes(:user).with_feedback do
             column ("feedback") { |order| markdown.render(order.feedback).html_safe }
             column ("user") { |order| order.user }
             column ("order") { |order| order }
@@ -97,22 +97,40 @@ ActiveAdmin.register_page "Dashboard" do
       column do
         panel "Credit balance < 4" do
           low_credit_users = SqlQuery.new(:low_credit_users, balance: 4).execute
+          users = Hash[User.find(low_credit_users.map {|r| r["user_id"]}).map{|u| [u.id, u] }]
           table_for low_credit_users do
-            column ("user") { |r| User.find(r["user_id"]) }
+            column ("user") { |r| users[r["user_id"]] }
             column ("balance") { |r| r["credit_balance"] }
           end
         end
       end
 
+      def get_user_credits(users_ids)
+        rows = SqlQuery.new(:user_credits, user_ids: users_ids).execute
+        Hash[rows.map {|r| [r["user_id"], r["credit_balance"]]} ]
+      end
+
       column do
-        panel "New subscribers" do
-          h4 "TODO: subscribers"
+        panel "New Users" do
+          users = User.unscoped.customers.includes(:credit_items, orders: {order_items: :item}).order('created_at desc').limit(20)
+          credits = get_user_credits(users.map(&:id))
+          table_for users do
+            column ("user") { |u| u }
+            column ("balance") { |u| credits[u.id] }
+            column ("Created At") { |u| u.created_at }
+          end
         end
       end
 
       column do
-        panel "Recently renewed" do
-          h4 "TODO: Recently renewed"
+        panel "New Credits" do
+          credit_items = CreditItem.order('id desc').includes(:user).limit(20)
+          credits = get_user_credits(credit_items.map(&:user_id))
+          table_for credit_items do
+            column ("user") { |ci| ci.user }
+            column ("balance") { |ci| credits[ci.user.id] }
+            column ("Credit Added At") { |ci| ci.created_at }
+          end
         end
       end
     end
@@ -121,13 +139,15 @@ ActiveAdmin.register_page "Dashboard" do
     columns do
       column do
         panel "Recently updated content" do
-          table_for PaperTrail::Version.order('id desc').limit(20) do
+          versions = PaperTrail::Version.order('id desc').limit(20).includes(:item)
+          users = Hash[User.find(versions.map(&:whodunnit)).map{|u| [u.id.to_s, u] }]
+          table_for versions do
             column ("Version") { |v| link_to(v.id, admin_version_path(v.id)) }
             column ("Object") { |v| v.item }
             column ("Type") { |v| v.item_type.underscore.humanize }
             column ("Modified at") { |v| v.created_at }
             column ("User") do |v|
-              User.find_by(id: v.whodunnit)&.first_name.presence || "whodunnit: '#{v.whodunnit}'"
+              users[v.whodunnit]&.name.presence || "whodunnit: \"#{v.whodunnit}\""
             end
           end
         end
