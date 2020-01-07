@@ -13,7 +13,7 @@ tabs do
     columns do
       {}.tap do |breads|
         assigns[:orders].each do |o|
-          o.items.each do |i|
+          o.order_items.map(&:item).each do |i|
             unless breads.key?(i.name)
               breads[i.name] = []
             end

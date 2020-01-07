@@ -133,18 +133,20 @@ ActiveAdmin.register Menu do
     redirect_to collection_path, notice: notice
   end
 
-  collection_action :pickup_tues do
-    @orders = Menu.current.orders.tuesday_pickup.includes(:user).includes({order_items: :item})
-    @users_not_ordered = User.tuesday_pickup.where.not(id: @orders.pluck(:user_id))
-    @page_title = "Tuesday Pickup List"
-    render :pickup_list
-  end
+  # metaprogramming for pickup_tues, pickup_thurs
+  ["tues", "thurs"].each do |day|
+    day_pickup = "#{day}day_pickup"
 
-  collection_action :pickup_thurs do
-    @orders = Menu.current.orders.thursday_pickup.includes(:user).includes({order_items: :item})
-    @users_not_ordered = User.thursday_pickup.where.not(id: @orders.pluck(:user_id))
-    @page_title = "Thursday Pickup List"
-    render :pickup_list
+    collection_action "pickup_#{day}" do
+      @orders = Menu.current.orders.send(day_pickup).includes(:user).includes({order_items: :item})
+      @users_not_ordered = User.send(day_pickup).where.not(id: @orders.pluck(:user_id))
+      
+      # don't show skip orders on list
+      @orders = @orders.reject(&:skip?)
+
+      @page_title = day_pickup.titlecase
+      render :pickup_list
+    end
   end
 
   collection_action :bakers_choice, method: [:get, :post] do
