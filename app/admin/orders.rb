@@ -11,7 +11,7 @@ ActiveAdmin.register Order do
   remove_filter :ahoy_visit, :versions, :order_items
 
   index do
-    selectable_column()
+    selectable_column
     column :menu
     column :user
     column :items do |order|

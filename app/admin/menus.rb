@@ -27,7 +27,7 @@ ActiveAdmin.register Menu do
   end
 
   index do
-    selectable_column()
+    selectable_column
     column :name do |menu|
       para do 
         strong auto_link menu

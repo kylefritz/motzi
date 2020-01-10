@@ -9,6 +9,7 @@ ActiveAdmin.register Ahoy::Message, as: "Email" do
   remove_filter :token
 
   index do
+    selectable_column
     column :to do |email|
       div auto_link email.user, email.to
     end

@@ -21,7 +21,7 @@ ActiveAdmin.register User do
   scope :no_weekly_email
 
   index do
-    selectable_column()
+    selectable_column
     column :first_name do |user|
       span user.first_name
       if user.is_admin?
