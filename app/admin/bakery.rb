@@ -1,12 +1,12 @@
 ActiveAdmin.register_page "Dashboard" do
-  menu priority: 1, label: proc { I18n.t("active_admin.dashboard") }
+  menu priority: 1, label: "Bakery"
 
-  content title: proc { I18n.t("active_admin.dashboard") } do
+  content title: "Bakery" do
     menu = Menu.current
 
     columns do
       column do
-        panel "Current Menu - #{menu.name}" do
+        panel "Current Menu" do
           h4 a(menu.name, href: admin_menu_path(menu.id), class: 'bigger')
           ul do 
             menu.menu_items.includes(:item).map do |menu_item|
@@ -111,8 +111,8 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       column do
-        panel "New Users" do
-          users = User.unscoped.customers.includes(:credit_items, orders: {order_items: :item}).order('created_at desc').limit(20)
+        panel "New Users - last 2 weeks" do
+          users = User.unscoped.customers.where("created_at > ?", 2.weeks.ago).includes(:credit_items, orders: {order_items: :item}).order('created_at desc').limit(20)
           credits = get_user_credits(users.map(&:id))
           table_for users do
             column ("user") { |u| u }
@@ -123,8 +123,8 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       column do
-        panel "New Credits" do
-          credit_items = CreditItem.order('id desc').includes(:user).limit(20)
+        panel "New Credits - last 2 weeks" do
+          credit_items = CreditItem.order('id desc').where("created_at > ?", 2.weeks.ago).includes(:user).limit(20)
           credits = get_user_credits(credit_items.map(&:user_id))
           table_for credit_items do
             column ("user") { |ci| ci.user }
