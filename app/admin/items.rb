@@ -14,7 +14,11 @@ ActiveAdmin.register Item do
     end
     column :image do |item|
       if item.image.attached?
-        span link_to(image_tag(item.image.representation(resize_to_limit: [100, 100]), alt: item.name), admin_item_path(item))
+        if item.image.representable?
+          span link_to(image_tag(item.image.representation(resize_to_limit: [100, 100]), alt: item.name), admin_item_path(item))
+        else
+          render partial: "not_representable"
+        end
       end
     end
     column :description
@@ -28,8 +32,12 @@ ActiveAdmin.register Item do
       row :name
       row :description
       row :image do |item|
-        if item.image.attached?
-          image_tag(item.image.representation(resize_to_limit: [250, 250]), alt: item.name)
+        if item.image.attached? 
+          if item.image.representable?
+            image_tag(item.image.representation(resize_to_limit: [250, 250]), alt: item.name)
+          else
+            render partial: "not_representable"
+          end
         end
       end
     end
