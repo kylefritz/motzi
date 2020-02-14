@@ -106,6 +106,10 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       def get_user_credits(users_ids)
+        if users_ids.empty?
+          return {}
+        end
+        # can't send 0 users_ids to :user_credits
         rows = SqlQuery.new(:user_credits, user_ids: users_ids).execute
         Hash[rows.map {|r| [r["user_id"], r["credit_balance"]]} ]
       end
