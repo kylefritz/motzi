@@ -30,6 +30,18 @@ body {
   padding-bottom: $padding-left-right + 15px;
   margin-bottom: 100px;
 }
+@media (max-width: map-get($container-max-widths, sm)) {
+  .container {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  #react-buy{
+    .alert{
+      padding-left: 5px !important;
+      padding-right: 5px !important;
+    }
+  }
+}
 h1,
 h2,
 h3,
