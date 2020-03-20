@@ -7,19 +7,22 @@ import Choice from './Choice'
 import Feedback from './Feedback'
 import Payment from './Payment'
 
+const weeklyPrice = 172;
+const biweeklyPrice = 94;
+
 export default function Buy() {
-  const [choice, setChoice] = useState("weekly")
+  const [choice, setChoice] = useState()
 
   const dont = choice == "dont"
-  const price = choice == "bi-weekly" ? 94 : 172
+  const price = choice == "bi-weekly" ? biweeklyPrice : weeklyPrice
 
   return (
-    <>
-      <h2>Buy credits</h2>
-      <Choice name="Weekly" price={172} onChoose={setChoice} />
-      <Choice name="Bi-Weekly" price={94} onChoose={setChoice} />
+    <div className="alert alert-info" role="alert">
+      <h2>Renew your subscription</h2>
+      <Choice name="Weekly" price={weeklyPrice} onChoose={setChoice} />
+      <Choice name="Bi-Weekly" price={biweeklyPrice} onChoose={setChoice} />
       <Choice name="I don't want to renew" value="dont" onChoose={setChoice} />
-      {dont ? <Feedback /> : <Payment choice={choice} price={price} />}
-    </>
-  )
+      {choice && (dont ? <Feedback /> : <Payment choice={choice} price={price} />)}
+    </div>
+  );
 }

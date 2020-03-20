@@ -1,23 +1,61 @@
-import React, { Component } from 'react';
-import { CardElement } from 'react-stripe-elements';
+import React, { useState } from "react";
+import { CardElement } from "react-stripe-elements";
 
-export default class Card extends Component {
-  constructor(props) {
-    super(props);
-    this.submit = this.submit.bind(this);
+// You can customize your Elements to give it the look and feel of your site.
+const createOptions = () => {
+  return {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#424770',
+        fontFamily: 'Open Sans, sans-serif',
+        letterSpacing: '0.025em',
+        '::placeholder': {
+          color: '#aab7c4',
+        },
+      },
+      invalid: {
+        color: '#c23d4b',
+      },
+    }
   }
+};
 
-  async submit(ev) {
-    // User clicked submit
-  }
+export default function Card({ stripe, onToken, choice, price }){
+  const [errorMessage, setErrorMessage] = useState();
+  const [cardFilled, setCardFilled] = useState(false);
+  const handleCardChange = ({ error, complete }) => {
+    setErrorMessage(error ? error.message : null);
+    setCardFilled(complete);
+  };
 
-  render() {
-    return (
-      <div className="checkout">
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!stripe) {
+      console.log("Stripe.js hasn't loaded yet.");
+      return;
+    }
+    stripe.createToken().then(onToken);
+  };
+
+  return (
+    <div className="checkout">
+      <form onSubmit={handleSubmit}>
         <p>Pay by credit card</p>
-        <CardElement />
-        <button onClick={this.submit}>Purchase</button>
-      </div>
-    );
-  }
+        <CardElement onChange={handleCardChange} {...createOptions()} />
+        {errorMessage && (
+          <div className="error" role="alert">
+            {errorMessage}
+          </div>
+        )}
+        <button
+          disabled={!cardFilled}
+          className="btn btn-primary btn-lg btn-block"
+          type="submit"
+        >
+          Pay by credit card
+        </button>
+      </form>
+    </div>
+  );
 }
