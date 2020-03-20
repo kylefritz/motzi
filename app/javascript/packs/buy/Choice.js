@@ -11,7 +11,7 @@ export default function Choice({ frequency, credits, price, total, onChoose}) {
       <button type="button" className="btn btn-sm btn-light mb-3 mr-2" onClick={handleClick}>
         {frequency}<br/>
         <small>
-          {`${credits} breads at ${formatMoney(price)} ea`}<br/>
+          {`${credits} credits at ${formatMoney(price)} ea`}<br/>
         </small>
         {formatMoney(total)}
       </button>

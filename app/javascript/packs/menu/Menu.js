@@ -48,13 +48,13 @@ export default class Menu extends React.Component {
     this.props.onCreateOrder(order)
   }
   render() {
-    const { menu, user } = this.props;
+    const { menu, user, onRefreshUser } = this.props;
     const { name, bakersNote, items, addons, isCurrent } = menu;
 
     return (
       <>
         <User user={user} />
-        <BuyCredits />
+        <BuyCredits onComplete={onRefreshUser}/>
         <h2>{name}</h2>
 
         <BakersNote {...{ bakersNote }} />

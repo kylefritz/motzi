@@ -96,7 +96,7 @@ ActiveAdmin.register User do
       row :send_weekly_email
       row :is_admin
       row :created_at
-      row :updated_at      
+      row :updated_at
     end
 
     panel "Credit Items" do

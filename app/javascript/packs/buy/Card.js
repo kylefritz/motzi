@@ -22,7 +22,7 @@ const createOptions = () => {
   }
 };
 
-export default function Card({ stripe, onToken, choice, price }){
+export default function Card({ stripe, onToken, credits, price }){
   const [errorMessage, setErrorMessage] = useState();
   const [cardFilled, setCardFilled] = useState(false);
   const handleCardChange = ({ error, complete }) => {
@@ -54,7 +54,7 @@ export default function Card({ stripe, onToken, choice, price }){
           className="btn btn-primary btn-lg btn-block"
           type="submit"
         >
-          Pay {formatMoney(price)} by credit card
+          Charge credit card {formatMoney(price)} for {credits} credits
         </button>
       </form>
     </div>

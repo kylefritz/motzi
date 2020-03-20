@@ -10,11 +10,12 @@ import Payment from './Payment'
 // TODO: get prices & stripe key from rails via gon
 const stripeApiKey = "pk_test_uAmNwPrPVkEoywEZYTE66AnV00mGp7H2Ud";
 
-export default function Buy() {
+export default function Buy({onComplete}) {
   const [credits, setCredits] = useState();
   const [price, setPrice] = useState();
   const [user, setUser] = useState();
   const [error, setError] = useState();
+  const [receipt, setReceipt] = useState();
 
   // what is the current user?
   useEffect(() => {
@@ -56,12 +57,17 @@ export default function Buy() {
     console.log("card token=", token, { credits, price });
 
     // send stripe token to rails to complete purchase
-    axios.post("/credits.json", { userId: user.id, token: token.id, price, credits })
+    axios.post("/credit_items.json", { userId: user.id, token: token.id, price, credits })
       .then(({ data }) => {
-        console.debug("bought credits", data);
+        const {creditItem} = data
+        console.log("bought credits", data);
 
-        // this.setState(data)
-        // window.scrollTo(0, 0)
+        setReceipt(creditItem.stripeReceiptUrl);
+
+        if(onComplete)
+        {
+          onComplete(creditItem);
+        }
       })
       .catch(error => {
         console.error("cant buy credits order", error);
@@ -77,6 +83,17 @@ export default function Buy() {
     // TODO: send completed payment request to rails
   };
 
+  if(receipt)
+  {
+    return (
+      <div className="alert alert-success" role="alert">
+        <h2>Thanks for supporting Motzi!!</h2>
+
+        <p><a href={receipt} target="blank">Here's your receipt</a></p>
+      </div>
+    )
+  }
+
   if(error)
   {
     return <div>{error}</div>
@@ -88,7 +105,7 @@ export default function Buy() {
 
   return (
     <div className="alert alert-info" role="alert">
-      <h2 className="mb-3" style={{fontSize: '1.8rem'}}>Buy subscription credits</h2>
+      <h2 className="mb-3" style={{fontSize: '1.8rem'}}>Buy credits</h2>
 
       <h6>6-month</h6>
       <div>

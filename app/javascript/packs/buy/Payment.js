@@ -25,7 +25,7 @@ export default function Payment({ credits, price, stripeApiKey, onCardToken, onP
       </StripeProvider>
       <StripeProvider apiKey={stripeApiKey}>
         <Elements>
-          <WrappedCard onToken={onCardToken} price={price} />
+          <WrappedCard onToken={onCardToken} price={price} credits={credits} />
         </Elements>
       </StripeProvider>
     </>
