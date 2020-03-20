@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { CardElement } from "react-stripe-elements";
+import { formatMoney } from "accounting";
 
 // You can customize your Elements to give it the look and feel of your site.
 const createOptions = () => {
@@ -53,7 +54,7 @@ export default function Card({ stripe, onToken, choice, price }){
           className="btn btn-primary btn-lg btn-block"
           type="submit"
         >
-          Pay by credit card
+          Pay {formatMoney(price)} by credit card
         </button>
       </form>
     </div>

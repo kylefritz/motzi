@@ -5,21 +5,16 @@ import _ from 'lodash'
 import queryString from "query-string";
 
 import Choice from './Choice'
-import Feedback from './Feedback'
 import Payment from './Payment'
 
 // TODO: get prices & stripe key from rails via gon
-const weeklyPrice = 172;
-const biweeklyPrice = 94;
 const stripeApiKey = "pk_test_uAmNwPrPVkEoywEZYTE66AnV00mGp7H2Ud";
 
 export default function Buy() {
-  const [choice, setChoice] = useState("weekly")
+  const [credits, setCredits] = useState();
+  const [price, setPrice] = useState();
   const [user, setUser] = useState();
   const [error, setError] = useState();
-
-  const dont = choice === "dont"
-  const price = choice === "weekly" ? weeklyPrice : biweeklyPrice;
 
   // what is the current user?
   useEffect(() => {
@@ -41,12 +36,27 @@ export default function Buy() {
     });
   }, []);
 
+  const handleChoose = ({credits, price}) => {
+    setCredits(credits);
+    setPrice(price);
+    console.log("selelcted", credits, "for", "price");
+  };
+
+  const handlePriceChanged = (priceString) =>{
+    if(priceString){
+      const newPrice = parseFloat(priceString);
+
+      if (_.isFinite(newPrice) && newPrice > 0) {
+        setPrice(newPrice);
+      }
+    }
+  }
 
   const handleCardToken = ({ token }) => {
-    console.log("card token=", token, { choice, price });
+    console.log("card token=", token, { credits, price });
 
     // send stripe token to rails to complete purchase
-    axios.post("/credits.json", { userId: user.id, token: token.id, price, choice })
+    axios.post("/credits.json", { userId: user.id, token: token.id, price, credits })
       .then(({ data }) => {
         console.debug("bought credits", data);
 
@@ -78,33 +88,51 @@ export default function Buy() {
 
   return (
     <div className="alert alert-info" role="alert">
-      <h2 className="mb-3">Renew your subscription</h2>
-      <Choice
-        name="Weekly"
-        price={weeklyPrice}
-        onChoose={setChoice}
-        defaultChecked={true}
-      />
-      <Choice name="Bi-Weekly" price={biweeklyPrice} onChoose={setChoice} />
-      <h4>Payment amount</h4>
-      <p>
-        <small>
-          These are suggested prices based on the our costs. We want everyone to
-          have access to healthy food in this time of crisis and beyond,
-          regardless of ability to pay. If you are out of work or otherwise in a
-          challenging financial situation please pay what you can or nothing at
-          all. If you have the means to pay more we would welcome your support
-          in providing for the community and ensuring our continued stability as
-          a small business.
-        </small>
-      </p>
-      <Payment
-        choice={choice}
-        price={price}
-        stripeApiKey={stripeApiKey}
-        onCardToken={handleCardToken}
-        onPaymentResult={handlePaymentResult}
-      />
+      <h2 className="mb-3" style={{fontSize: '1.8rem'}}>Buy subscription credits</h2>
+
+      <h6>6-month</h6>
+      <div>
+        <Choice frequency="Weekly" credits={26} price={6.5} total={169} onChoose={handleChoose}/>
+        <Choice frequency="Bi-weekly" credits={13} price={7.0} total={91} onChoose={handleChoose}/>
+      </div>
+
+      <h6>3-month</h6>
+      <div>
+        <Choice frequency="Weekly" credits={13} price={7.0} total={91} onChoose={handleChoose}/>
+        <Choice frequency="Bi-weekly" credits={6} price={7.5} total={46} onChoose={handleChoose} />
+      </div>
+      {
+        (credits && price) && (
+          <>
+            <h4>Payment amount</h4>
+            <p>
+              <small>
+                These are suggested prices based on the our costs. We want everyone to
+                have access to healthy food in this time of crisis and beyond,
+                regardless of ability to pay. If you are out of work or otherwise in a
+                challenging financial situation please pay what you can or nothing at
+                all. If you have the means to pay more we would welcome your support
+                in providing for the community and ensuring our continued stability as
+                a small business.
+              </small>
+            </p>
+            <div className="input-group mb-3">
+              <div className="input-group-prepend">
+                <span className="input-group-text" id="you-pay">You pay $</span>
+              </div>
+              <input type="number" min="1" max="250" className="form-control" placeholder="Price" aria-label="Price"
+                    aria-describedby="you-pay" defaultValue={price} onBlur={(e) => handlePriceChanged(e.target.value)} />
+            </div>
+            <Payment
+              credits={credits}
+              price={price}
+              stripeApiKey={stripeApiKey}
+              onCardToken={handleCardToken}
+              onPaymentResult={handlePaymentResult}
+            />
+          </>
+        )
+      }
     </div>
   );
 }

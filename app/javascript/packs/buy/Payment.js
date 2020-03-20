@@ -11,22 +11,21 @@ import PaymentRequest from './PaymentRequest'
 const WrappedPaymentRequest = injectStripe(PaymentRequest);
 const WrappedCard = injectStripe(Card);
 
-export default function Payment({ choice, price, stripeApiKey, onCardToken, onPaymentResult }) {
+export default function Payment({ credits, price, stripeApiKey, onCardToken, onPaymentResult }) {
   return (
     <>
       <StripeProvider apiKey={stripeApiKey}>
         <Elements>
           <WrappedPaymentRequest
             onToken={onPaymentResult}
-            choice={choice}
+            credits={credits}
             price={price}
           />
         </Elements>
       </StripeProvider>
-      <br />
       <StripeProvider apiKey={stripeApiKey}>
         <Elements>
-          <WrappedCard onToken={onCardToken} />
+          <WrappedCard onToken={onCardToken} price={price} />
         </Elements>
       </StripeProvider>
     </>

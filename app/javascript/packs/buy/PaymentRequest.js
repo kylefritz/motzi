@@ -3,7 +3,7 @@ import { PaymentRequestButtonElement } from 'react-stripe-elements'
 
 // The Payment Request Button is a single integration that allows you to accept Apple Pay,
 // Google Pay, Microsoft Pay, and the Payment Request API.
-export default function PaymentRequest({ stripe, onToken, choice, price }) {
+export default function PaymentRequest({ stripe, onToken, credits, price }) {
   const [paymentRequest, setPaymentRequest] = useState()
   useEffect(() => {
     // For full documentation of the available paymentRequest options, see:
@@ -12,7 +12,7 @@ export default function PaymentRequest({ stripe, onToken, choice, price }) {
       country: "US",
       currency: "usd",
       total: {
-        label: choice,
+        label: `${credits} credits`,
         amount: price
       },
       // Requesting the payer’s name, email, or phone is optional, but recommended.
@@ -46,9 +46,12 @@ export default function PaymentRequest({ stripe, onToken, choice, price }) {
 
   // For more details on how to style the Payment Request Button, see:
   // https://stripe.com/docs/elements/payment-request-button#styling-the-element
-  return <PaymentRequestButtonElement
-    paymentRequest={paymentRequest}
-    className="PaymentRequestButton"
-    style={{ paymentRequestButton: { theme: 'light', height: '64px' } }}
-  />
+  return <>
+    <PaymentRequestButtonElement
+      paymentRequest={paymentRequest}
+      className="PaymentRequestButton"
+      style={{ paymentRequestButton: { theme: 'light', height: '64px' } }}
+    />
+    <br/>
+  </>;
 }

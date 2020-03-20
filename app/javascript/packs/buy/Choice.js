@@ -1,24 +1,19 @@
 import React, { useState } from 'react'
 import _ from 'lodash'
+import {formatMoney} from 'accounting'
 
-export default function Choice({ name, value: maybeValue, price, onChoose, defaultChecked }) {
-  const value = maybeValue || _.toLower(name)
+export default function Choice({ frequency, credits, price, total, onChoose}) {
+  const handleClick = ()=> {
+    onChoose({ credits, price: total });
+  };
+
   return (
-    <div className="col-6 mb-2">
-      <div className="form-check">
-        <label className="form-check-label">
-          <input
-            className="form-check-input"
-            type="radio"
-            name="checkout"
-            value={value}
-            onChange={() => onChoose(value)}
-            defaultChecked={defaultChecked}
-          />
-          {name} <br />
-          {price && <small>${price}</small>}
-        </label>
-      </div>
-    </div>
+      <button type="button" className="btn btn-sm btn-light mb-3 mr-2" onClick={handleClick}>
+        {frequency}<br/>
+        <small>
+          {`${credits} breads at ${formatMoney(price)} ea`}<br/>
+        </small>
+        {formatMoney(total)}
+      </button>
   );
 }

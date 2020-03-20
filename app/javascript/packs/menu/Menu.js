@@ -4,6 +4,7 @@ import Item from './Item.js'
 import AddOn from './AddOn.js'
 import BakersNote from './BakersNote.js'
 import User from './User.js'
+import BuyCredits from "../buy/App";
 import _ from 'lodash'
 
 export default class Menu extends React.Component {
@@ -53,7 +54,7 @@ export default class Menu extends React.Component {
     return (
       <>
         <User user={user} />
-
+        <BuyCredits />
         <h2>{name}</h2>
 
         <BakersNote {...{ bakersNote }} />
