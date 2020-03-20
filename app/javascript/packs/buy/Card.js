@@ -41,7 +41,7 @@ export default function Card({ stripe, onToken, choice, price }){
   return (
     <div className="checkout">
       <form onSubmit={handleSubmit}>
-        <p>Pay by credit card</p>
+        <h5>Pay by credit card</h5>
         <CardElement onChange={handleCardChange} {...createOptions()} />
         {errorMessage && (
           <div className="error" role="alert">

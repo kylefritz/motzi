@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import _ from 'lodash'
 
-export default function Choice({ name, value: maybeValue, price, onChoose }) {
+export default function Choice({ name, value: maybeValue, price, onChoose, defaultChecked }) {
   const value = maybeValue || _.toLower(name)
   return (
     <div className="col-6 mb-2">
@@ -13,6 +13,7 @@ export default function Choice({ name, value: maybeValue, price, onChoose }) {
             name="checkout"
             value={value}
             onChange={() => onChoose(value)}
+            defaultChecked={defaultChecked}
           />
           {name} <br />
           {price && <small>${price}</small>}

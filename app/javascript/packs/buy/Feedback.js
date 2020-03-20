@@ -8,8 +8,9 @@ export default function Feedback({ name, price }) {
     console.warn("TODO: wire submit feedback", feedback)
   }
   return <>
+    <br/>
     <h5>Give us feedback</h5>
-    <div className="row mt-3 mb-5">
+    <div className="row mt-3 mb-3">
       <div className="col">
         <textarea className="form-control" placeholder="Please give us feedback on why you're not renewing"
           onChange={({ target }) => setFeedback(_.trim(target.value))} />
