@@ -92,7 +92,7 @@ export default class Menu extends React.Component {
             </div>
           </>)}
 
-                <h5>Other comments?</h5>
+        <h5>Other comments?</h5>
         <div className="row mt-3 mb-5">
           <div className="col">
             <textarea placeholder="Your comments" onChange={this.handleComments.bind(this)}

@@ -1,75 +1,81 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`snapshot 1`] = `
-<div
-  className="row mt-5"
->
+<Fragment>
   <div
-    className="col"
+    className="row mt-5"
   >
-    <h5
-      className="text-center"
+    <div
+      className="col"
     >
-      Ordering for
-    </h5>
-    <p
-      className="text-center"
-    >
-      kyle
-      <small
-        className="ml-2"
+      <h5
+        className="text-center"
       >
-        <a
-          className="text-nowrap"
-          href="/signout"
-        >
-          Not you?
-        </a>
-      </small>
-    </p>
+        Ordering for
+      </h5>
+      <div
+        className="text-center mb-2"
+      >
+        <div>
+          kyle
+        </div>
+        <div>
+          <small
+            className="ml-2"
+          >
+            <a
+              className="text-nowrap"
+              href="/signout"
+            >
+              Not you?
+            </a>
+          </small>
+        </div>
+      </div>
+    </div>
+    <div
+      className="col"
+    >
+      <h5
+        className="text-center"
+      >
+        Ordering frequency
+      </h5>
+      <p
+        className="text-center"
+        title={1}
+      >
+        Every week
+      </p>
+    </div>
+    <div
+      className="col"
+    >
+      <h5
+        className="text-center"
+      >
+        Credits remaining
+      </h5>
+      <p
+        className="text-center"
+      >
+        6
+      </p>
+    </div>
+    <div
+      className="col"
+    >
+      <h5
+        className="text-center"
+      >
+        Pickup Day
+      </h5>
+      <p
+        className="text-center"
+      >
+        Thursday
+      </p>
+    </div>
   </div>
-  <div
-    className="col"
-  >
-    <h5
-      className="text-center"
-    >
-      Ordering frequency
-    </h5>
-    <p
-      className="text-center"
-      title={1}
-    >
-      Every week
-    </p>
-  </div>
-  <div
-    className="col"
-  >
-    <h5
-      className="text-center"
-    >
-      Credits remaining
-    </h5>
-    <p
-      className="text-center"
-    >
-      6
-    </p>
-  </div>
-  <div
-    className="col"
-  >
-    <h5
-      className="text-center"
-    >
-      Pickup Day
-    </h5>
-    <p
-      className="text-center"
-    >
-      Thursday
-    </p>
-  </div>
-</div>
+</Fragment>
 `;
