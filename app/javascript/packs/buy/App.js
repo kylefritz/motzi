@@ -7,9 +7,6 @@ import queryString from "query-string";
 import Choice from './Choice'
 import Payment from './Payment'
 
-// TODO: get prices & stripe key from rails via gon
-const stripeApiKey = "pk_test_uAmNwPrPVkEoywEZYTE66AnV00mGp7H2Ud";
-
 export default function Buy({onComplete, user: passedUser=null}) {
   const [credits, setCredits] = useState();
   const [price, setPrice] = useState();
@@ -155,7 +152,7 @@ export default function Buy({onComplete, user: passedUser=null}) {
             <Payment
               credits={credits}
               price={price}
-              stripeApiKey={stripeApiKey}
+              stripeApiKey={gon.stripeApiKey}
               onCardToken={handleCardToken}
               onPaymentResult={handlePaymentResult}
             />

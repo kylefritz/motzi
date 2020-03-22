@@ -4,7 +4,8 @@ class ApplicationController < ActionController::Base
   before_action :set_paper_trail_whodunnit
   before_action :authenticate_user!
   before_action :set_raven_context
-  
+  before_action :set_stripe_key
+
   protected
 
   def set_raven_context
@@ -23,10 +24,14 @@ class ApplicationController < ActionController::Base
       return redirect_to '/', alert: 'you must be an admin'
     end
   end
-  
+
   def current_admin_user
     if current_user&.is_admin?
       current_user
     end
+  end
+
+  def set_stripe_key
+    gon.push({stripe_api_key: ENV['STRIPE_PUBLISHABLE_KEY']})
   end
 end
