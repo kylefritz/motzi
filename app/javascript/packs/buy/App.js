@@ -113,7 +113,7 @@ export default function Buy({onComplete, user: passedUser=null}) {
   }
 
   return (
-    <div className="alert alert-info" role="alert">
+    <div className="alert alert-info padding-x-mobile-5px" role="alert">
       <h2 className="mb-3" style={{fontSize: '1.8rem'}}>Buy credits</h2>
 
       <h6>6-month</h6>
