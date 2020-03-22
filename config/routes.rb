@@ -3,9 +3,10 @@ Rails.application.routes.draw do
   ActiveAdmin.routes(self)
 
   root to: "home#show"
-  
+
   # preview other menus
   resources :menus, only: [:show]
+  resources :credit_items, only: [:new, :create]
 
   # get the menu for the week
   get "/menu", to: "menus#show", as: :current_menu

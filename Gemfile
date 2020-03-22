@@ -31,6 +31,7 @@ gem 'redcarpet' # markdown the baker's note in admin
 gem 'sass-rails', '~> 5' # css
 gem 'sentry-raven' # debugging to sentry.io
 gem 'sql_query' # load SQL queries from erb templates
+gem 'stripe' # accept credit cards
 gem 'webpacker', '~> 4.0' # compiles javascript
 
 
@@ -58,6 +59,7 @@ end
 
 group :test do
   gem 'capybara', '>= 2.15' # Adds support for Capybara system testing and selenium driver
+  gem 'fake_stripe' # test Stripe code without hitting Stripe's servers
   gem 'selenium-webdriver'
   gem 'timecop' # control what the current time is inside of tests
   gem 'webdrivers' # Easy installation and use of web drivers to run system tests with browsers

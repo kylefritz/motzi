@@ -10,6 +10,10 @@ import Preview from './Preview'
 
 export default class App extends React.Component {
   componentDidMount() {
+    this.fetchMenu();
+  }
+
+  fetchMenu(){
     const { uid } = queryString.parse(location.search)
     let params = { uid }
     const id = _.get(location.pathname.match(/menu\/(.*)/), 1)
@@ -57,13 +61,13 @@ export default class App extends React.Component {
     }
 
     if (order) {
-      return <Order {...{ user, order, menu }} />
+      return <Order {...{ user, order, menu, onRefreshUser: this.fetchMenu.bind(this) }} />
     }
 
     if (!user) {
       return <Preview {...{ order, menu }} />
     }
 
-    return <Menu {...{ user, order, menu, onCreateOrder: this.handleCreateOrder.bind(this) }} />
+    return <Menu {...{ user, order, menu, onCreateOrder: this.handleCreateOrder.bind(this), onRefreshUser: this.fetchMenu.bind(this) }} />
   }
 }

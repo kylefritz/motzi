@@ -4,6 +4,7 @@ import Item from './Item.js'
 import AddOn from './AddOn.js'
 import BakersNote from './BakersNote.js'
 import User from './User.js'
+import BuyCredits from "../buy/App";
 import _ from 'lodash'
 
 export default class Menu extends React.Component {
@@ -47,12 +48,23 @@ export default class Menu extends React.Component {
     this.props.onCreateOrder(order)
   }
   render() {
-    const { menu, user } = this.props;
+    const { menu, user, onRefreshUser } = this.props;
     const { name, bakersNote, items, addons, isCurrent } = menu;
+
+    if (user && user.credits < 1) {
+      // time to buy credits!
+      return (<>
+        <User user={user} />
+        <BuyCredits onComplete={onRefreshUser} />
+      </>)
+    }
 
     return (
       <>
-        <User user={user} />
+        <User user={user} onRefreshUser={onRefreshUser} />
+
+        {/* if low, show nag to buy credits*/}
+        {user && user.credits < 4 && <BuyCredits onComplete={onRefreshUser} />}
 
         <h2>{name}</h2>
 
@@ -98,8 +110,8 @@ export default class Menu extends React.Component {
           </button>
           </div>
         </div>
-        <User user={user} />
+        <User user={user} onRefreshUser={onRefreshUser} />
       </>
-    )
+    );
   }
 }
