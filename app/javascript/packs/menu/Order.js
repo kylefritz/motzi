@@ -4,7 +4,7 @@ import _ from 'lodash'
 import BakersNote from './BakersNote.js'
 import User from './User.js'
 
-export default function ({ menu, user, order }) {
+export default function ({ menu, user, order, onRefreshUser }) {
   const { name, bakersNote, items, addons } = menu;
 
   //
@@ -33,24 +33,25 @@ export default function ({ menu, user, order }) {
         <div className="col-sm-4">
           <h5>Items</h5>
           <ul>
-            {sortedOrderItems.map(([id, count], i) => {
-              return <li key={i}>
-                {count > 1 && <strong className="mr-2">{count}x</strong>}
-                {lookupMenuItem(id)}
-              </li>
-            })
-            }
+            {sortedOrderItems.map(([id, count], i) =>
+              (
+                <li key={i}>
+                  {count > 1 && <strong className="mr-2">{count}x</strong>}
+                  {lookupMenuItem(id)}
+                </li>
+              )
+            )}
           </ul>
         </div>
         <div className="col-sm-4" />
       </div>
 
-      <User user={user} />
+      <User user={user} onRefreshUser={onRefreshUser} />
 
       <hr className="mb-5" />
 
       <h2 className="mt-3 mb-5">{name}</h2>
       <BakersNote {...{ bakersNote }} />
     </>
-  )
+  );
 }

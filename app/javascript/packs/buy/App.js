@@ -10,10 +10,10 @@ import Payment from './Payment'
 // TODO: get prices & stripe key from rails via gon
 const stripeApiKey = "pk_test_uAmNwPrPVkEoywEZYTE66AnV00mGp7H2Ud";
 
-export default function Buy({onComplete}) {
+export default function Buy({onComplete, user: passedUser=null}) {
   const [credits, setCredits] = useState();
   const [price, setPrice] = useState();
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(passedUser);
   const [error, setError] = useState();
   const [receipt, setReceipt] = useState();
 
@@ -96,11 +96,15 @@ export default function Buy({onComplete}) {
 
   if(error)
   {
-    return <div>{error}</div>
+    return <div className="text-center my-3">{error}</div>;
   }
 
   if (!user) {
-    return <div>Loading user for subscription renewal...</div>;
+    return (
+      <h6 className="text-center my-3">
+        Loading user for subscription renewal...
+      </h6>
+    );
   }
 
   return (

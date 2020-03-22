@@ -51,10 +51,21 @@ export default class Menu extends React.Component {
     const { menu, user, onRefreshUser } = this.props;
     const { name, bakersNote, items, addons, isCurrent } = menu;
 
+    if (user && user.credits < 1) {
+      // time to buy credits!
+      return (<>
+        <User user={user} />
+        <BuyCredits onComplete={onRefreshUser} />
+      </>)
+    }
+
     return (
       <>
-        <User user={user} />
-        <BuyCredits onComplete={onRefreshUser}/>
+        <User user={user} onRefreshUser={onRefreshUser} />
+
+        {/* if low, show nag to buy credits*/}
+        {user && user.credits < 4 && <BuyCredits onComplete={onRefreshUser} />}
+
         <h2>{name}</h2>
 
         <BakersNote {...{ bakersNote }} />
@@ -81,7 +92,7 @@ export default class Menu extends React.Component {
             </div>
           </>)}
 
-        <h5>Other comments?</h5>
+                <h5>Other comments?</h5>
         <div className="row mt-3 mb-5">
           <div className="col">
             <textarea placeholder="Your comments" onChange={this.handleComments.bind(this)}
@@ -99,8 +110,8 @@ export default class Menu extends React.Component {
           </button>
           </div>
         </div>
-        <User user={user} />
+        <User user={user} onRefreshUser={onRefreshUser} />
       </>
-    )
+    );
   }
 }

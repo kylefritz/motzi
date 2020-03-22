@@ -61,7 +61,7 @@ export default class App extends React.Component {
     }
 
     if (order) {
-      return <Order {...{ user, order, menu }} />
+      return <Order {...{ user, order, menu, onRefreshUser: this.fetchMenu.bind(this) }} />
     }
 
     if (!user) {

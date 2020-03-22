@@ -6,7 +6,7 @@ Rails.application.routes.draw do
 
   # preview other menus
   resources :menus, only: [:show]
-  resources :credit_items, only: [:show, :create]
+  resources :credit_items, only: [:new, :create]
 
   # get the menu for the week
   get "/menu", to: "menus#show", as: :current_menu
