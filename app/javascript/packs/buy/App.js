@@ -13,12 +13,16 @@ const stripeApiKey = "pk_test_uAmNwPrPVkEoywEZYTE66AnV00mGp7H2Ud";
 export default function Buy({onComplete, user: passedUser=null}) {
   const [credits, setCredits] = useState();
   const [price, setPrice] = useState();
+  const [breadsPerWeek, setBreadsPerWeek] = useState();
   const [user, setUser] = useState(passedUser);
   const [error, setError] = useState();
   const [receipt, setReceipt] = useState();
 
   // what is the current user?
   useEffect(() => {
+    if(user) {
+      return;
+    }
     const { uid } = queryString.parse(location.search);
     const params = { uid };
     axios.get("/menu.json", { params }).then(({ data: {user} }) => {
@@ -37,9 +41,10 @@ export default function Buy({onComplete, user: passedUser=null}) {
     });
   }, []);
 
-  const handleChoose = ({credits, price}) => {
+  const handleChoose = ({ credits, price, breadsPerWeek }) => {
     setCredits(credits);
     setPrice(price);
+    setBreadsPerWeek(breadsPerWeek)
     console.log("selelcted", credits, "for", "price");
   };
 
@@ -57,7 +62,7 @@ export default function Buy({onComplete, user: passedUser=null}) {
     console.log("card token=", token, { credits, price });
 
     // send stripe token to rails to complete purchase
-    axios.post("/credit_items.json", { userId: user.id, token: token.id, price, credits })
+    axios.post("/credit_items.json", { userId: user.id, token: token.id, price, credits, breadsPerWeek })
       .then(({ data }) => {
         const {creditItem} = data
         console.log("bought credits", data);
@@ -88,10 +93,13 @@ export default function Buy({onComplete, user: passedUser=null}) {
     return (
       <div className="alert alert-success" role="alert">
         <h2>Thanks for supporting Motzi!!</h2>
-
-        <p><a href={receipt} target="blank">Here's your receipt</a></p>
+        <p className="text-center my-3">
+          <a href={receipt} target="blank">
+            Here's your receipt
+          </a>
+        </p>
       </div>
-    )
+    );
   }
 
   if(error)
@@ -113,14 +121,14 @@ export default function Buy({onComplete, user: passedUser=null}) {
 
       <h6>6-month</h6>
       <div>
-        <Choice frequency="Weekly" credits={26} price={6.5} total={169} onChoose={handleChoose}/>
-        <Choice frequency="Bi-weekly" credits={13} price={7.0} total={91} onChoose={handleChoose}/>
+        <Choice breadsPerWeek={1.0} credits={26} price={6.5} total={169} onChoose={handleChoose}/>
+        <Choice breadsPerWeek={0.5} credits={13} price={7.0} total={91} onChoose={handleChoose}/>
       </div>
 
       <h6>3-month</h6>
       <div>
-        <Choice frequency="Weekly" credits={13} price={7.0} total={91} onChoose={handleChoose}/>
-        <Choice frequency="Bi-weekly" credits={6} price={7.5} total={46} onChoose={handleChoose} />
+        <Choice breadsPerWeek={1.0} credits={13} price={7.0} total={91} onChoose={handleChoose}/>
+        <Choice breadsPerWeek={0.5} credits={6}  price={7.5} total={46} onChoose={handleChoose} />
       </div>
       {
         (credits && price) && (

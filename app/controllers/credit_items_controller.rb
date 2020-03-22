@@ -6,6 +6,9 @@ class CreditItemsController < ApplicationController
     price_cents = (price * 100).to_i
     credits = params[:credits].to_i.clamp(1, 50)
 
+    breads_per_week = params[:breads_per_week].to_f
+    frequency = breads_per_week == 1.0 ? "Weekly" : "Bi-Weekly";
+
     begin
       # make stripe change
       charge = Stripe::Charge.create({
@@ -13,16 +16,19 @@ class CreditItemsController < ApplicationController
         currency: 'usd',
         source: params[:token],
         metadata: {credits: credits},
-        description: "#{credits}x Subscription Credits",
+        description: "#{credits}x Subscription Credits, #{frequency}",
         receipt_email: current_user.email
       })
 
       # add credit_item for user
       @credit_item = current_user.credit_items.create!(stripe_charge_id: charge.id,
                                                        stripe_receipt_url: charge.try(:receipt_url),
-                                                       memo: "paid $#{price} via stripe",
+                                                       memo: "paid $#{price} via Stripe. #{frequency}",
                                                        quantity: credits,
                                                        good_for_weeks: 42)
+
+      # update user bread_per_week
+      current_user.update(breads_per_week: breads_per_week)
 
       # return a reasonable response object
       render "show", format: :json
