@@ -1,6 +1,6 @@
 module UserHashidable
   extend ActiveSupport::Concern
-  
+
   included do
     skip_before_action :authenticate_user!
     before_action :require_hashid_user_or_devise_user!
@@ -8,13 +8,13 @@ module UserHashidable
     # we're going to change the definition of current_user
     # rename current_user to devise_user
     alias_method :devise_user, :current_user
-    
+
     protected
 
     def current_user
       hashid_user || devise_user
     end
-  
+
     def require_hashid_user_or_devise_user!
       if hashid_user
         logger.info "found user {#{hashid_user.name}} for hashid=#{hashid}"

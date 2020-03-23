@@ -1,6 +1,6 @@
 module RenderCurrentOrder
   extend ActiveSupport::Concern
-  
+
   included do
     protected
 

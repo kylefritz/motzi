@@ -59,7 +59,7 @@ export default function Buy({onComplete, user: passedUser=null}) {
     console.log("card token=", token, { credits, price });
 
     // send stripe token to rails to complete purchase
-    axios.post("/credit_items.json", { userId: user.id, token: token.id, price, credits, breadsPerWeek })
+    axios.post("/credit_items.json", { uid: user.id, token: token.id, price, credits, breadsPerWeek })
       .then(({ data }) => {
         const {creditItem} = data
         console.log("bought credits", data);
