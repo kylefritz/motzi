@@ -86,4 +86,21 @@ class OrderTest < ActiveSupport::TestCase
     assert_equal orders.size, orders.day1_pickup.size + orders.day2_pickup.size, 'day1+day2=total'
   end
 
+  test "day1_pickup_maybe" do
+    menu = menus(:week3) # no orders
+    menu.make_current!
+    assert_equal 0, Menu.current.orders.size
+
+    thurs_user = users(:ljf)
+    assert thurs_user.day2_pickup?, 'picks up thursday'
+    order = Order.create!(menu: menu, user: thurs_user)
+    assert_equal 1, Menu.current.orders.size
+
+    assert order.day2_pickup?, 'picks up thursday'
+    assert_equal 1, Menu.current.orders.day2_pickup.size
+
+    order.update!(day1_pickup_maybe: true)
+    assert_equal 1, Menu.current.orders.day1_pickup.size, 'order moves to day1'
+    assert_equal 0, Menu.current.orders.day2_pickup.size, 'order moves to day1'
+  end
 end

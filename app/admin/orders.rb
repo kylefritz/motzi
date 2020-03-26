@@ -1,5 +1,5 @@
 ActiveAdmin.register Order do
-  permit_params :feedback, :comments, :menu, :user
+  permit_params :feedback, :comments, :menu, :user, :day1_pickup_maybe
   includes :menu, :user, order_items: :item
 
   scope :all, default: true
@@ -17,6 +17,13 @@ ActiveAdmin.register Order do
     column :items do |order|
       render partial: 'admin/orders/items', locals: {items: order.order_items.map(&:item)}
     end
+    column :pickup_day do |order|
+      if order.day1_pickup_maybe.nil?
+        "defer"
+      else
+        order.pickup_day
+      end
+    end
     column :feedback
     column :comments
     column :created_at
@@ -29,9 +36,10 @@ ActiveAdmin.register Order do
       row :menu
       row :feedback
       row :comments
-      row :order_items do |order_items|
+      row :order_items do
         render partial: 'admin/orders/items', locals: {items: order.items}
       end
+      row :pickup_day
       row :created_at
       row :updated_at
     end
