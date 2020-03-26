@@ -10,7 +10,9 @@ export default class Item extends React.Component {
     this.handleChanged()
   }
   handleChanged() {
-    this.props.onChange(this.cbRef.current.checked)
+    if (this.props.onChange){
+      this.props.onChange(this.cbRef.current.checked);
+    }
   }
   render() {
     const { name, description, image, onChange } = this.props;
