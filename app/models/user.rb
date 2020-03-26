@@ -32,7 +32,7 @@ class User < ApplicationRecord
   def thursday_pickup?
     !self.tuesday_pickup?
   end
-  
+
   def pickup_day
     self.tuesday_pickup? ? "Tues" : "Thurs"
   end

@@ -15,7 +15,12 @@ class CreditItemsController < ApplicationController
         amount: price_cents,
         currency: 'usd',
         source: params[:token],
-        metadata: {credits: credits},
+        metadata: {
+          user_id: current_user.id,
+          user_name: current_user.name,
+          credits: credits,
+          frequency: frequency,
+        },
         description: "#{credits}x Subscription Credits, #{frequency}",
         receipt_email: current_user.email
       })
