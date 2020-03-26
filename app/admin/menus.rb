@@ -135,11 +135,11 @@ ActiveAdmin.register Menu do
 
   # metaprogramming for day1_pickup, day2_pickup
   [1, 2].each do |day|
-    day_pickup = "day#{day}_pickup"
+    pickup_day = "day#{day}_pickup"
 
     collection_action "pickup_day#{day}" do
-      @orders = Menu.current.orders.send(day_pickup).includes(:user).includes({order_items: :item})
-      @users_not_ordered = User.send(day_pickup).where.not(id: @orders.pluck(:user_id))
+      @orders = Menu.current.orders.send(pickup_day).includes(:user).includes({order_items: :item})
+      @users_not_ordered = User.send(pickup_day).where.not(id: @orders.pluck(:user_id))
 
       # don't show skip orders on list
       @orders = @orders.reject(&:skip?)
