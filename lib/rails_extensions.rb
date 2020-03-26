@@ -19,6 +19,12 @@ class ActiveSupport::TimeWithZone
     self.wday == Date::DAYS_INTO_WEEK[Setting.pickup_day2.downcase.to_sym]
   end
 
+  def reminder_day?
+    day1_wday = Date::DAYS_INTO_WEEK[Setting.pickup_day1.downcase.to_sym]
+    reminder_wday = (day1_wday - 2) % 7
+    self.wday == reminder_wday
+  end
+
   def too_early?
     self.hour < 7 # before 7am
   end

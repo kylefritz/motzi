@@ -23,6 +23,12 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
     assert_equal @user_ids_to_remind, just_messaged, 'we sent messages to who we wanted to'
   end
 
+  test "If we move pickup day1, reminders sent on a different day" do
+    Setting.pickup_day1 = "Thursday"
+    refute_reminders_emailed(:sun, '7:00 PM', 'not sent sunday')
+    assert_reminders_emailed(@num_to_remind, :tues, '7:00 PM', 'send on tuesday night')
+  end
+
   test "Doesnt send to users multiple times on same menu" do
     assert_reminders_emailed(@num_to_remind, :sun, '7:00 PM', 'send on sunday night')
     refute_reminders_emailed(:sun, '7:01 PM', 'dont send the second time')
@@ -34,13 +40,13 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
   end
 
   def assert_reminders_emailed(num_emails, day, time, msg=nil)
-    days = {
-      sun: '11-10',
-      mon: '11-11',
-      tues: '11-12',
-      wed: '11-13',
-      thur: '11-14'
-    }
+    days = {mon:   '11-11',
+            tues:  '11-12',
+            wed:   '11-13',
+            thurs: '11-14',
+            fri:   '11-15',
+            sat:   '11-16',
+            sun:   '11-17'}
     assert days.include?(day), 'pick a known day'
 
     datetime_str = "2019-#{days[day]} #{time} EST"
