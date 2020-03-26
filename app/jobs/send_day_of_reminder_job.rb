@@ -8,32 +8,21 @@ class SendDayOfReminderJob < ApplicationJob
 
     already_reminded = Set[*menu.messages.where(mailer: 'ReminderMailer#day_of_email').pluck(:user_id)]
 
-    users_to_remind.map do |user|
-      next if already_reminded.include?(user.id)
+    orders_to_remind.map do |order|
+      next if already_reminded.include?(order.user_id)
 
-      order = user.order_for_menu(menu)
+      next if order.skip?
 
-      if must_pickup?(order, user)
-        ReminderMailer.with(user: user, menu: menu, order: order).day_of_email.deliver_now
-      end
+      ReminderMailer.with(user: order.user, menu: menu, order: order).day_of_email.deliver_now
     end
   end
 
   private
 
-  def must_pickup?(order, user)
-    if order
-      # if there's an order, only remind if user hasn't skipped
-      !order.skip?
-    else
-        # if there's no order, only remind if user must order weekly
-      user.must_order_weekly?
-    end
-  end
-
-  def users_to_remind
-    return User.day1_pickup if Time.zone.now.day1_pickup?
-    return User.day2_pickup if Time.zone.now.day2_pickup?
+  def orders_to_remind
+    # reminder users if they have an order for today
+    return Menu.current.orders.day1_pickup if Time.zone.now.day1_pickup?
+    return Menu.current.orders.day2_pickup if Time.zone.now.day2_pickup?
 
     []
   end

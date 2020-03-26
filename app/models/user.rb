@@ -68,8 +68,9 @@ class User < ApplicationRecord
   end
 
   def order_for_menu(menu_id)
-    # accepts a menu instance also
-    orders.where(menu_id: menu_id).includes(order_items: [:item]).first
+    # NB: order_for_menu logic is wacky; different value depending on day or week
+    sort_dir = Time.zone.now.day2_pickup? ? :asc : :desc
+    orders.where(menu_id: menu_id).includes(order_items: [:item]).order(day1_pickup_maybe: sort_dir).first
   end
 
   #
