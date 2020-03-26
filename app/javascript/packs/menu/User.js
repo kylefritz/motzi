@@ -66,7 +66,7 @@ export default function User({ user, onRefreshUser }) {
         <div className="col">
           <h5 className="text-center">Pickup Day</h5>
           <p className="text-center">
-            {user.tuesdayPickup ? "Tuesday" : "Thursday"}
+            {user.pickupDay}
           </p>
         </div>
       </div>

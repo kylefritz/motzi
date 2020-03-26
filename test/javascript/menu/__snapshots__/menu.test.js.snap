@@ -11,7 +11,7 @@ exports[`Menu snapshot 1`] = `
         "hashid": "Dot9gKn9w",
         "id": 584273342,
         "name": "Kyle Fritz",
-        "tuesdayPickup": true,
+        "pickupDay": "Tuesday",
       }
     }
   />
@@ -146,7 +146,7 @@ exports[`Menu snapshot 1`] = `
         "hashid": "Dot9gKn9w",
         "id": 584273342,
         "name": "Kyle Fritz",
-        "tuesdayPickup": true,
+        "pickupDay": "Tuesday",
       }
     }
   />

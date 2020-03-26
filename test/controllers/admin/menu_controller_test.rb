@@ -19,30 +19,30 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "get pickup list tuesday" do
+  test "get pickup list day1" do
     menus(:week1).make_current!
-    get "/admin/menus/pickup_tues"
+    get "/admin/menus/pickup_day1"
     assert_response :success
-    assert_select '#orders tbody tr', 2, "num_tues=#{menus(:week1).orders.tuesday_pickup.count}"
+    assert_select '#orders tbody tr', 2, "num_day1=#{menus(:week1).orders.day1_pickup.count}"
   end
 
   test "no skips in pickup list" do
     menus(:week1).make_current!
 
     # make this order into a skip
-    order = menus(:week1).orders.tuesday_pickup.first
+    order = menus(:week1).orders.day1_pickup.first
     order.order_items.update_all(item_id: Item::SKIP_ID) 
 
-    get "/admin/menus/pickup_tues"
+    get "/admin/menus/pickup_day1"
     assert_response :success
-    assert_select '#orders tbody tr', 1, "num_tues=#{menus(:week1).orders.tuesday_pickup.count}"
+    assert_select '#orders tbody tr', 1, "num_day1=#{menus(:week1).orders.day1_pickup.count}"
   end
 
   test "get pickup list thursday" do
     menus(:week1).make_current!
-    get "/admin/menus/pickup_thurs"
+    get "/admin/menus/pickup_day2"
     assert_response :success
-    assert_select '#orders tbody tr', 1, "num_tues=#{menus(:week1).orders.thursday_pickup.count}"
+    assert_select '#orders tbody tr', 1, "num_day2=#{menus(:week1).orders.day2_pickup.count}"
   end
 
   test "get edit" do

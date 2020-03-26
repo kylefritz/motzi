@@ -212,7 +212,7 @@
         "name",
         "hashid",
         "credits",
-        "tuesdayPickup",
+        "pickupDay",
         "breadsPerWeek"
       ],
       "properties": {
@@ -269,10 +269,9 @@
             2.0
           ]
         },
-        "tuesdayPickup": {
-          "type": "boolean",
-          "title": "Pickup on Tuesday or Thursday?",
-          "default": false
+        "pickupDay": {
+          "type": "string",
+          "title": "Day of the week to pickup bread"
         }
       }
     },

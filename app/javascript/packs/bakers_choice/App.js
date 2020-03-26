@@ -23,7 +23,7 @@ export default function BakersChoice() {
           <th>Last Name</th>
           <th>Credits Remaining</th>
           <th>Breads per Week</th>
-          <th>Tuesday Pickup?</th>
+          <th>Pickup Day</th>
           <th>Asign Bread</th>
         </tr>
       </thead>

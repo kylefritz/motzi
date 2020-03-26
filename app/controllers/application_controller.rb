@@ -9,8 +9,10 @@ class ApplicationController < ActionController::Base
   protected
 
   def set_raven_context
-    Raven.user_context(id: current_user&.id, email: current_user&.email, is_admin: current_user&.is_admin)
-    Raven.extra_context(params: params.to_unsafe_h, url: request.url)
+    unless Rails.env.test?
+      Raven.user_context(id: current_user&.id, email: current_user&.email, is_admin: current_user&.is_admin)
+      Raven.extra_context(params: params.to_unsafe_h, url: request.url)
+    end
   end
 
   def user_for_paper_trail

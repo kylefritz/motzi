@@ -10,7 +10,7 @@ class SendDayOfReminderJob < ApplicationJob
 
     users_to_remind.map do |user|
       next if already_reminded.include?(user.id)
-      
+
       order = user.order_for_menu(menu)
 
       if must_pickup?(order, user)
@@ -32,8 +32,8 @@ class SendDayOfReminderJob < ApplicationJob
   end
 
   def users_to_remind
-    return User.tuesday_pickup if Time.zone.now.tuesday_pickup?
-    return User.thursday_pickup if Time.zone.now.thursday_pickup?
+    return User.day1_pickup if Time.zone.now.day1_pickup?
+    return User.day2_pickup if Time.zone.now.day2_pickup?
 
     []
   end

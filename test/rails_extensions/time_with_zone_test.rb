@@ -21,6 +21,22 @@ class TimeWithZoneTest < ActiveSupport::TestCase
     assert_week_id '2010-01-03', '10w02'
   end
 
+  test 'reminder day' do
+    with_time do
+      monday = Time.zone.now
+      assert monday.monday?
+
+      Setting.pickup_day1 = "Tuesday"
+      sunday = monday - 1.day
+      assert sunday.reminder_day?, 'if day1 is tues, reminder is sunday'
+
+      Setting.pickup_day1 = "Thursday"
+      refute sunday.reminder_day?, 'if day1 is Thurs, reminder isnt sunday'
+      tuesday = monday + 1.day
+      assert tuesday.reminder_day?, 'if day1 is Thurs, reminder is tuesday'
+    end
+  end
+
   private
   def assert_week_id(date, week_id)
     datetime = DateTime.parse("#{date} 9:00 AM EST")

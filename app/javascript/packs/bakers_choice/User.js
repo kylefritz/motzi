@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash'
 
-export default function User({ id: userId, firstName, lastName, tuesdayPickup, credits, breadsPerWeek, onPickBread, menu }) {
+export default function User({ id: userId, firstName, lastName, pickupDay, credits, breadsPerWeek, onPickBread, menu }) {
   const handleClick = (itemId) => {
     onPickBread({ userId, itemId })
   }
@@ -12,14 +12,14 @@ export default function User({ id: userId, firstName, lastName, tuesdayPickup, c
       <td>{lastName}</td>
       <td>{credits}</td>
       <td>{breadsPerWeek}</td>
-      <td>{tuesdayPickup ? "Tues" : "Thurs"}</td>
+      <td>{pickupDay}</td>
       <td>
-        {menu.items.map(({ id, name }) =>
+        {menu.items.map(({ id, name }) => (
           <button key={id} onClick={() => handleClick(id)}>
             {name}
           </button>
-        )}
+        ))}
       </td>
     </tr>
-  )
+  );
 }

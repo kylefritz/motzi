@@ -1,5 +1,5 @@
 ActiveAdmin.register User do
-  permit_params :first_name, :last_name, :email, :additional_email, :tuesday_pickup, :is_admin, \
+  permit_params :first_name, :last_name, :email, :additional_email, :day1_pickup, :is_admin, \
     :send_weekly_email, :breads_per_week, :phone
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'
 
@@ -11,8 +11,8 @@ ActiveAdmin.register User do
     :reset_password_token, :sign_in_count, :updated_at
 
   scope :all, default: true
-  scope "Tuesday", :tuesday_pickup
-  scope "Thursday", :thursday_pickup
+  scope ->{Setting.pickup_day1}, :day1_pickup
+  scope ->{Setting.pickup_day2}, :day2_pickup
   scope "Weekly", :must_order_weekly
   scope "Semi-weekly", :every_other_week
   scope :customers
@@ -34,7 +34,7 @@ ActiveAdmin.register User do
       small user.additional_email
     end
     column :pickup do |user|
-      status_tag !user.tuesday_pickup?, style: 'margin-left: 3px', label: user.pickup_day
+      status_tag !user.day1_pickup?, style: 'margin-left: 3px', label: user.pickup_day
     end
     column :breads_per_week
     column :phone do |user|
@@ -52,7 +52,7 @@ ActiveAdmin.register User do
       input :email
       input :additional_email
       input :phone
-      input :tuesday_pickup
+      input :day1_pickup
       input :breads_per_week
     end
     inputs 'Danger Zone' do
@@ -90,7 +90,7 @@ ActiveAdmin.register User do
         number_to_phone(user.phone)
       end
       row :pickup do |user|
-        status_tag !user.tuesday_pickup?, style: 'margin-left: 3px', label: user.pickup_day
+        status_tag !user.day1_pickup?, style: 'margin-left: 3px', label: user.pickup_day
       end
       row :breads_per_week
       row :send_weekly_email
