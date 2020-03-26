@@ -48,19 +48,19 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
 
-      tues, thurs = Order.for_current_menu.partition(&:tuesday_pickup?)
+      day1, day2 = Order.for_current_menu.partition(&:day1_pickup?)
 
-      column id: 'what-to-bake-tues' do
-        panel "Tuesday - What to bake" do
-          a("Tuesday Pickup List", href: pickup_tues_admin_menus_path())
-          what_to_bake(tues, User.tuesday_pickup)
+      column id: 'what-to-bake-day1' do
+        panel "#{Setting.pickup_day1} - What to bake" do
+          a("#{Setting.pickup_day1} Pickup List", href: pickup_day1_admin_menus_path())
+          what_to_bake(day1, User.day1_pickup)
         end
       end
 
-      column id: 'what-to-bake-thurs' do
-        panel "Thursday - What to bake" do
-          a("Thursday Pickup List", href: pickup_thurs_admin_menus_path())
-          what_to_bake(thurs, User.thursday_pickup)
+      column id: 'what-to-bake-day2' do
+        panel "#{Setting.pickup_day2} - What to bake" do
+          a("#{Setting.pickup_day2} Pickup List", href: pickup_day2_admin_menus_path())
+          what_to_bake(day2, User.day2_pickup)
         end
       end
     end
@@ -80,7 +80,7 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       column do
-        
+
         panel "Orders with feedback" do
           table_for menu.orders.includes(:user).with_feedback do
             column ("feedback") { |order| markdown.render(order.feedback).html_safe }
@@ -89,10 +89,8 @@ ActiveAdmin.register_page "Dashboard" do
           end
         end
       end
-
-      
     end # end columns
-    
+
     columns do
       column do
         panel "Credit balance < 4" do

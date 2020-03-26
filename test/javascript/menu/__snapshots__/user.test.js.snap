@@ -72,9 +72,7 @@ exports[`snapshot 1`] = `
       </h5>
       <p
         className="text-center"
-      >
-        Thursday
-      </p>
+      />
     </div>
   </div>
 </Fragment>

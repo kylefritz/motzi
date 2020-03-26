@@ -5,7 +5,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   def setup
     menus(:week2).make_current!
   end
-  
+
   test "signed in user can create order" do
     sign_in users(:ljf)
     assert_order_placed

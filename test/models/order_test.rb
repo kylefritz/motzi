@@ -63,27 +63,27 @@ class OrderTest < ActiveSupport::TestCase
     menu = menus(:week3) # no orders
     menu.make_current!
 
-    assert_difference 'Menu.current.orders.tuesday_pickup.size', 0, 'no tuesday order' do
-      assert_difference 'Menu.current.orders.thursday_pickup.size', 1, 'add thursday order' do
+    assert_difference 'Menu.current.orders.day1_pickup.size', 0, 'no day1 order' do
+      assert_difference 'Menu.current.orders.day2_pickup.size', 1, 'add day2 order' do
         thurs_user = users(:ljf)
-        assert thurs_user.thursday_pickup?, 'picks up thursday'
+        assert thurs_user.day2_pickup?, 'picks up thursday'
         Order.create!(menu: menu, user: thurs_user)
       end
     end
 
-    assert_difference 'Menu.current.orders.thursday_pickup.size', 0, 'no thursday order' do
-      assert_difference 'Menu.current.orders.tuesday_pickup.size', 1, 'add tuesday order' do
-        tues_user = users(:kyle)
-        assert tues_user.tuesday_pickup?, 'picks up tuesday'
-        Order.create!(menu: menu, user: tues_user)
+    assert_difference 'Menu.current.orders.day2_pickup.size', 0, 'no day2 order' do
+      assert_difference 'Menu.current.orders.day1_pickup.size', 1, 'add day1 order' do
+        day1_user = users(:kyle)
+        assert day1_user.day1_pickup?, 'picks up day1'
+        Order.create!(menu: menu, user: day1_user)
       end
     end
 
     orders = menus(:week1).orders
-    assert_equal orders.size, orders.tuesday_pickup.size + orders.thursday_pickup.size, 'tues+thurs=total'
+    assert_equal orders.size, orders.day1_pickup.size + orders.day2_pickup.size, 'day1+day2=total'
 
     orders = menus(:week2).orders
-    assert_equal orders.size, orders.tuesday_pickup.size + orders.thursday_pickup.size, 'tues+thurs=total'
+    assert_equal orders.size, orders.day1_pickup.size + orders.day2_pickup.size, 'day1+day2=total'
   end
 
 end

@@ -7,8 +7,8 @@ class Order < ApplicationRecord
   visitable :ahoy_visit
   scope :with_feedback, -> { where("COALESCE(TRIM(feedback), '') <> ''") }
   scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> '' AND comments <> 'Baker''s Choice'") }
-  scope :tuesday_pickup, -> { joins(:user).where('users.tuesday_pickup = true') }
-  scope :thursday_pickup, -> { joins(:user).where('users.tuesday_pickup = false') }
+  scope :day1_pickup, -> { joins(:user).where('users.day1_pickup = true') }
+  scope :day2_pickup, -> { joins(:user).where('users.day1_pickup = false') }
 
   def self.for_current_menu
     self.for_menu_id(Menu.current.id)
@@ -27,6 +27,6 @@ class Order < ApplicationRecord
     order_items.map(&:item).reject(&:skip?).blank?
   end
 
-  delegate :tuesday_pickup?, to: :user
-  delegate :thursday_pickup?, to: :user
+  delegate :day1_pickup?, to: :user
+  delegate :day2_pickup?, to: :user
 end

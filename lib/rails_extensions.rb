@@ -11,12 +11,12 @@ class BigDecimal
 end
 
 class ActiveSupport::TimeWithZone
-  def tuesday_pickup?
-    self.wday == 2 # tues
+  def day1_pickup?
+    self.wday == Date::DAYS_INTO_WEEK[Setting.pickup_day1.downcase.to_sym]
   end
 
-  def thursday_pickup?
-    self.wday == 4 # thurs
+  def day2_pickup?
+    self.wday == Date::DAYS_INTO_WEEK[Setting.pickup_day2.downcase.to_sym]
   end
 
   def too_early?

@@ -12,13 +12,13 @@ ActiveAdmin.register Menu do
   scope("current menu") { |scope| scope.where(id: Setting.menu_id) }
   scope("emailed") { |scope| scope.where("emailed_at is not null") }
   scope("not emailed") { |scope| scope.where("emailed_at is null") }
-  
+
   # create big buttons on every menu page
-  action_item :pickup_tues, except: [:index, :new] do
-    link_to 'Tuesday Pickup List', pickup_tues_admin_menus_path()
+  action_item :pickup_day1, except: [:index, :new] do
+    link_to "#{Setting.pickup_day1} Pickup List", pickup_day1_admin_menus_path()
   end
-  action_item :pickup_thurs, except: [:index, :new] do
-    link_to 'Thursday Pickup List', pickup_thurs_admin_menus_path()
+  action_item :pickup_day2, except: [:index, :new] do
+    link_to "#{Setting.pickup_day2} Pickup List", pickup_day2_admin_menus_path()
   end
   action_item :preview, except: [:index, :new] do
     if params[:id].present?
@@ -29,7 +29,7 @@ ActiveAdmin.register Menu do
   index do
     selectable_column
     column :name do |menu|
-      para do 
+      para do
         strong auto_link menu
         if menu.current?
           status_tag true, style: 'margin-left: 3px', label: 'Current'
@@ -133,18 +133,18 @@ ActiveAdmin.register Menu do
     redirect_to collection_path, notice: notice
   end
 
-  # metaprogramming for pickup_tues, pickup_thurs
-  ["tues", "thurs"].each do |day|
-    day_pickup = "#{day}day_pickup"
+  # metaprogramming for day1_pickup, day2_pickup
+  [1, 2].each do |day|
+    day_pickup = "day#{day}_pickup"
 
-    collection_action "pickup_#{day}" do
+    collection_action "pickup_day#{day}" do
       @orders = Menu.current.orders.send(day_pickup).includes(:user).includes({order_items: :item})
       @users_not_ordered = User.send(day_pickup).where.not(id: @orders.pluck(:user_id))
-      
+
       # don't show skip orders on list
       @orders = @orders.reject(&:skip?)
 
-      @page_title = day_pickup.titlecase
+      @page_title = Setting.send("pickup_day#{day}")
       render :pickup_list
     end
   end

@@ -15,16 +15,16 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
 
     assert_equal 3, menus(:week1).orders.count
 
-    assert_el_count 1, '#what-to-bake-tues'
-    assert_el_count 2, '#what-to-bake-tues .subscribers tbody tr', 'weekly & semi-weekly'
-    assert_el_count 2, '#what-to-bake-tues .breads tbody tr', 'two breads for adrian & kyle; plus 1 bakers choice'
-    assert_el_count 1, '#what-to-bake-thurs'
-    assert_el_count 2, '#what-to-bake-tues .subscribers tbody tr', 'weekly & semi-weekly'
-    assert_el_count 1, '#what-to-bake-thurs .breads tbody tr', 'bread for ljf'
+    assert_el_count 1, '#what-to-bake-day1'
+    assert_el_count 2, '#what-to-bake-day1 .subscribers tbody tr', 'weekly & semi-weekly'
+    assert_el_count 2, '#what-to-bake-day1 .breads tbody tr', 'two breads for adrian & kyle; plus 1 bakers choice'
+    assert_el_count 1, '#what-to-bake-day2'
+    assert_el_count 2, '#what-to-bake-day1 .subscribers tbody tr', 'weekly & semi-weekly'
+    assert_el_count 1, '#what-to-bake-day2 .breads tbody tr', 'bread for ljf'
   end
 
-  test "tuesday pickup list" do
-    get "/admin/menus/pickup_tues"
+  test "day1 pickup list" do
+    get "/admin/menus/pickup_day1"
     assert_response :success
 
     assert_el_count 1, '#pickup-list'
@@ -34,8 +34,8 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
     assert_el_count 0, '#not-ordered tbody tr', 'no one'
   end
 
-  test "thursday pickup list" do
-    get "/admin/menus/pickup_thurs"
+  test "day2 pickup list" do
+    get "/admin/menus/pickup_day2"
     assert_response :success
 
     assert_el_count 1, '#pickup-list'

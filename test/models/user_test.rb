@@ -9,9 +9,9 @@ class UserTest < ActiveSupport::TestCase
     assert_equal maya.id, User.maya.id
   end
 
-  test "tuesday vs thursday pickup of the week" do
-    assert users(:kyle).tuesday_pickup?
-    refute users(:ljf).tuesday_pickup?
+  test "day1 vs day2 pickup of the week" do
+    assert users(:kyle).day1_pickup?
+    refute users(:ljf).day1_pickup?
   end
 
   test "credits remaining" do
@@ -67,20 +67,20 @@ class UserTest < ActiveSupport::TestCase
     assert User.every_other_week.first.every_other_week?
   end
 
-  test "tuesday_pickup" do
-    assert_equal 2, User.tuesday_pickup.count, 'kf, adrian'
-    assert User.tuesday_pickup.first.tuesday_pickup?
+  test "day1_pickup" do
+    assert_equal 2, User.day1_pickup.count, 'kf, adrian'
+    assert User.day1_pickup.first.day1_pickup?
   end
 
-  test "thursday_pickup" do
-    assert_equal 2, User.thursday_pickup.count, 'ljf & jess'
-    assert User.thursday_pickup.first.thursday_pickup?
+  test "day2" do
+    assert_equal 2, User.day2_pickup.count, 'ljf & jess'
+    assert User.day2_pickup.first.day2_pickup?
   end
 
   test "only sends to weekly" do
     User.all.update_all(send_weekly_email: false)
-    assert_equal 0, User.tuesday_pickup.count
-    assert_equal 0, User.thursday_pickup.count
+    assert_equal 0, User.day1_pickup.count
+    assert_equal 0, User.day2_pickup.count
   end
 
   test "customers" do
