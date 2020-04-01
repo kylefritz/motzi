@@ -55,7 +55,7 @@ ActiveAdmin.register Menu do
     actions defaults: false do |menu|
       a "view", href: admin_menu_path(menu)
       a "edit", href: edit_admin_menu_path(menu)
-      a "preview", href: "/menu/#{menu.id}", target: "_blank"
+      a "preview", href: menu_path(menu), target: "_blank"
     end
   end
 
