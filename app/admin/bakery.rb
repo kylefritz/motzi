@@ -8,7 +8,7 @@ ActiveAdmin.register_page "Dashboard" do
       column do
         panel "Current Menu" do
           h4 a(menu.name, href: admin_menu_path(menu.id), class: 'bigger')
-          ul do 
+          ul do
             menu.menu_items.includes(:item).map do |menu_item|
               li "#{menu_item.item.name} #{menu_item.is_add_on? ? " (add-on)" : ""}"
             end
@@ -16,7 +16,7 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
 
-      
+
       def what_to_bake(orders, week_users)
         counts = Hash.new(0) # hash that defaults to 0 instead of nil
         orders.each do |order|
@@ -42,7 +42,7 @@ ActiveAdmin.register_page "Dashboard" do
           column ("Total") { |h| h[:total] }
         end
 
-        table_for counts.keys.sort, class: 'mt-0 breads' do
+        table_for counts.keys.sort_by(&:to_s), class: 'mt-0 breads' do
           column ("Item") { |item| item }
           column ("Quantity") { |item| counts[item] }
         end
