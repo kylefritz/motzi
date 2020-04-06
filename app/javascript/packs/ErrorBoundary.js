@@ -1,5 +1,5 @@
-import React from 'react'
-import * as Sentry from '@sentry/browser';
+import React from "react";
+import * as Sentry from "@sentry/browser";
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -19,7 +19,7 @@ export default class ErrorBoundary extends React.Component {
       const eventId = Sentry.captureException(error);
       this.setState({ eventId });
     });
-    this.setState({ error: error.message, stack: error.stack.toString() })
+    this.setState({ error: error.message, stack: error.stack.toString() });
   }
 
   render() {
@@ -30,8 +30,11 @@ export default class ErrorBoundary extends React.Component {
         <>
           <h2>There was an error in this Bread software :(</h2>
           <div className="mt-3">
-            <button onClick={() => Sentry.showReportDialog({ eventId })}
-              className="btn-primary btn-lg btn-block" type="button">
+            <button
+              onClick={() => Sentry.showReportDialog({ eventId })}
+              className="btn-primary btn-lg btn-block"
+              type="button"
+            >
               Please tell us what happened!
             </button>
           </div>
@@ -40,9 +43,7 @@ export default class ErrorBoundary extends React.Component {
             <code>{error}</code>
           </div>
           <div className="mt-2">
-            <code className="stack-trace">
-              {stack}
-            </code>
+            <code className="stack-trace">{stack}</code>
           </div>
         </>
       );

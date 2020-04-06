@@ -12,66 +12,66 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-    - name: git checkout
-      uses: actions/checkout@v1
+      - name: git checkout
+        uses: actions/checkout@v1
 
-    # ruby 2.7.1 w/ cache
-    - name: Ruby cache
-      uses: actions/cache@preview
-      id: cache-ruby
-      with:
-        path: ~/local/rubies
-        key: ruby-2.7.1
-    - name: ruby-build 2.7.1
-      uses: clupprich/ruby-build-action@master
-      id: ruby
-      with:
-        ruby-version: 2.7.1
-        cache-available: ${{ steps.cache-ruby.outputs.cache-hit == 'true' }}
+      # ruby 2.7.1 w/ cache
+      - name: Ruby cache
+        uses: actions/cache@preview
+        id: cache-ruby
+        with:
+          path: ~/local/rubies
+          key: ruby-2.7.1
+      - name: ruby-build 2.7.1
+        uses: clupprich/ruby-build-action@master
+        id: ruby
+        with:
+          ruby-version: 2.7.1
+          cache-available: ${{ steps.cache-ruby.outputs.cache-hit == 'true' }}
 
-    - name: yarn install
-      uses: borales/actions-yarn@v2.0.0
-      with:
-        cmd: install
+      - name: yarn install
+        uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: install
 
-    - name: Install PostgreSQL 11 client
-      run: sudo apt-get -yqq install libpq-dev
+      - name: Install PostgreSQL 11 client
+        run: sudo apt-get -yqq install libpq-dev
 
-    # bundle w/ cache
-    - name: Bundler cache
-      uses: actions/cache@v1
-      with:
-        path: vendor/bundle
-        key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-gem-
-    - name: Increasing the amount of inotify watchers
-      # started getting this error around 20-03-01
-      # https://github.com/guard/listen/wiki/Increasing-the-amount-of-inotify-watchers
-      run: |
-        echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-    - name: bundle
-      run: |
-        gem install bundler
-        bundle config path vendor/bundle
-        bundle install --jobs 4 --retry 3
+      # bundle w/ cache
+      - name: Bundler cache
+        uses: actions/cache@v1
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gem-
+      - name: Increasing the amount of inotify watchers
+        # started getting this error around 20-03-01
+        # https://github.com/guard/listen/wiki/Increasing-the-amount-of-inotify-watchers
+        run: |
+          echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+      - name: bundle
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
 
-    - name: rails db:setup test test:system
-      env:
-        PGHOST: localhost
-        PGUSER: postgres
-        RAILS_ENV: test
-      run: |
-        bin/rails db:setup
-        bin/rails test
-        bin/rails test:system
+      - name: rails db:setup test test:system
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          RAILS_ENV: test
+        run: |
+          bin/rails db:setup
+          bin/rails test
+          bin/rails test:system
 
-    - name: jest
-      run: npx jest test/javascript
+      - name: jest
+        run: npx jest test/javascript
 
-    - name: git push heroku
-      env:
-        HEROKU_API_TOKEN: ${{ secrets.HEROKU_API_TOKEN }}
-        HEROKU_APP_NAME: motzibread
-      if: github.ref == 'refs/heads/master' && job.status == 'success'
-      run: git push https://heroku:$HEROKU_API_TOKEN@git.heroku.com/$HEROKU_APP_NAME.git origin/master:master
+      - name: git push heroku
+        env:
+          HEROKU_API_TOKEN: ${{ secrets.HEROKU_API_TOKEN }}
+          HEROKU_APP_NAME: motzibread
+        if: github.ref == 'refs/heads/master' && job.status == 'success'
+        run: git push https://heroku:$HEROKU_API_TOKEN@git.heroku.com/$HEROKU_APP_NAME.git origin/master:master

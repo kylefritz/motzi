@@ -1,40 +1,43 @@
 week1:
   name: week1
   week_id: 19w01
-  bakers_note: "Hello, all! 
+  bakers_note: |
+    Hello, all!
 
-Great to see many of you at market yesterday! Sorry for the late selection email! We had quite a week: we closed on our big construction loan, had our last construction permit approved, officially joined the Bread Baker's Guild of America, and made the most breads of any week yet (~330 to be exact!). Right now two generous Motzi subscribers and talented programmers are working on a new subscription platform for you all. It'll roll out in a few weeks and allow for easy tracking and adding of credits. Get excited!
+    Great to see many of you at market yesterday! Sorry for the late selection email! We had quite a week: we closed on our big construction loan, had our last construction permit approved, officially joined the Bread Baker's Guild of America, and made the most breads of any week yet (~330 to be exact!). Right now two generous Motzi subscribers and talented programmers are working on a new subscription platform for you all. It'll roll out in a few weeks and allow for easy tracking and adding of credits. Get excited!
 
-A couple breads we did for market yesterday will debut for subscribers this week. We've got Black Sesame Rye for you which has toasted and sprouted rye berries inside and is coated in black sesame. We're also going to do baguettes. Since they're a bit smaller that selection will also include two panela donuts as well. Other options include Classic and English Muffins.
+    A couple breads we did for market yesterday will debut for subscribers this week. We've got Black Sesame Rye for you which has toasted and sprouted rye berries inside and is coated in black sesame. We're also going to do baguettes. Since they're a bit smaller that selection will also include two panela donuts as well. Other options include Classic and English Muffins.
 
-Thanks for everything!
+    Thanks for everything!
 
-Warmly,
+    Warmly,
 
-Motzi Bread (Maya and Russell)"
+    Motzi Bread (Maya and Russell)
 
 week2:
   name: week2
   week_id: 19w02
-  bakers_note: "Hello, all! 
+  bakers_note: |
+    Hello, all!
 
-Another great market yesterday!
+    Another great market yesterday!
 
-Thanks for everything!
+    Thanks for everything!
 
-Warmly,
+    Warmly,
 
-Motzi Bread (Maya and Russell)"
+    Motzi Bread (Maya and Russell)
 
 week3:
   name: week3
   week_id: 19w03
-  bakers_note: "Hi friends! 
+  bakers_note: |
+    Hi friends!
 
-Baking is great!
+    Baking is great!
 
-Thanks for everything!
+    Thanks for everything!
 
-Warmly,
+    Warmly,
 
-Motzi Bread (Maya and Russell)"
+    Motzi Bread (Maya and Russell)
