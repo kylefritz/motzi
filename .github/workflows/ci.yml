@@ -45,6 +45,11 @@ jobs:
         key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
         restore-keys: |
           ${{ runner.os }}-gem-
+    - name: Increasing the amount of inotify watchers
+      # started getting this error around 20-03-01
+      # https://github.com/guard/listen/wiki/Increasing-the-amount-of-inotify-watchers
+      run: |
+        echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
     - name: bundle
       run: |
         gem install bundler
