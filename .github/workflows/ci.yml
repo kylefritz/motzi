@@ -15,18 +15,18 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v1
 
-      # ruby 2.6.5 w/ cache
+      # ruby 2.7.1 w/ cache
       - name: Ruby cache
         uses: actions/cache@preview
         id: cache-ruby
         with:
           path: ~/local/rubies
-          key: ruby-2.6.5
-      - name: ruby-build 2.6.5
+          key: ruby-2.7.1
+      - name: ruby-build 2.7.1
         uses: clupprich/ruby-build-action@master
         id: ruby
         with:
-          ruby-version: 2.6.5
+          ruby-version: 2.7.1
           cache-available: ${{ steps.cache-ruby.outputs.cache-hit == 'true' }}
 
       - name: yarn install
