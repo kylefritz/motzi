@@ -85,13 +85,13 @@ export default class Menu extends React.Component {
         <div className="row mt-3">
           <Day
             name="thursday"
-            description="5pm-7pm"
+            description="11am to 7pm"
             checked
             onChange={this.handleDay.bind(this)}
           />
           <Day
             name="saturday"
-            description="noon-7pm"
+            description="11am to 7pm"
             onChange={this.handleDay.bind(this)}
           />
         </div>
