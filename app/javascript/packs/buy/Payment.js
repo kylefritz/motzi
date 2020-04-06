@@ -1,11 +1,7 @@
-import React, { } from 'react';
-import {
-  injectStripe,
-  StripeProvider,
-  Elements,
-} from 'react-stripe-elements';
+import React from "react";
+import { injectStripe, StripeProvider, Elements } from "react-stripe-elements";
 
-import Card from './Card'
+import Card from "./Card";
 const WrappedCard = injectStripe(Card);
 
 /*
@@ -22,7 +18,13 @@ const WrappedPaymentRequest = injectStripe(PaymentRequest);
 </StripeProvider>;
 */
 
-export default function Payment({ credits, price, stripeApiKey, onCardToken, onPaymentResult }) {
+export default function Payment({
+  credits,
+  price,
+  stripeApiKey,
+  onCardToken,
+  onPaymentResult,
+}) {
   return (
     <>
       <StripeProvider apiKey={stripeApiKey}>

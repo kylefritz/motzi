@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState } from "react";
 import BuyCredits from "../buy/App";
 
 export const humanizeBreadsPerWeek = (perWeek) => {
@@ -15,10 +15,10 @@ export const humanizeBreadsPerWeek = (perWeek) => {
     return "Three breads per week";
   }
   return `${perWeek} breads per week`;
-}
+};
 
 export default function User({ user, onRefreshUser }) {
-  const [showBuy, setShowBuy] = useState(false)
+  const [showBuy, setShowBuy] = useState(false);
 
   // TODO: add weeks remaining
   // <div className="col">
@@ -65,9 +65,7 @@ export default function User({ user, onRefreshUser }) {
         </div>
         <div className="col">
           <h5 className="text-center">Pickup Day</h5>
-          <p className="text-center">
-            {user.pickupDay}
-          </p>
+          <p className="text-center">{user.pickupDay}</p>
         </div>
       </div>
       {showBuy && <BuyCredits onComplete={onRefreshUser} user={user} />}

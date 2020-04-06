@@ -7,22 +7,22 @@ const createOptions = () => {
   return {
     style: {
       base: {
-        fontSize: '16px',
-        color: '#424770',
-        fontFamily: 'Open Sans, sans-serif',
-        letterSpacing: '0.025em',
-        '::placeholder': {
-          color: '#aab7c4',
+        fontSize: "16px",
+        color: "#424770",
+        fontFamily: "Open Sans, sans-serif",
+        letterSpacing: "0.025em",
+        "::placeholder": {
+          color: "#aab7c4",
         },
       },
       invalid: {
-        color: '#c23d4b',
+        color: "#c23d4b",
       },
-    }
-  }
+    },
+  };
 };
 
-export default function Card({ stripe, onToken, credits, price }){
+export default function Card({ stripe, onToken, credits, price }) {
   const [errorMessage, setErrorMessage] = useState();
   const [cardFilled, setCardFilled] = useState(false);
   const handleCardChange = ({ error, complete }) => {

@@ -15,6 +15,6 @@ test:
   database: motzi_test
   host: localhost
 
-production:  
+production:
   <<: *default
   url: <%= ENV['DATABASE_URL'] %>

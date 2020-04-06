@@ -1,10 +1,19 @@
-import React from 'react';
-import _ from 'lodash'
+import React from "react";
+import _ from "lodash";
 
-export default function User({ id: userId, firstName, lastName, pickupDay, credits, breadsPerWeek, onPickBread, menu }) {
+export default function User({
+  id: userId,
+  firstName,
+  lastName,
+  pickupDay,
+  credits,
+  breadsPerWeek,
+  onPickBread,
+  menu,
+}) {
   const handleClick = (itemId) => {
-    onPickBread({ userId, itemId })
-  }
+    onPickBread({ userId, itemId });
+  };
 
   return (
     <tr>

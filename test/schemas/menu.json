@@ -3,11 +3,7 @@
   "$id": "/menu.json",
   "type": "object",
   "title": "Current Menu",
-  "required": [
-    "menu",
-    "user",
-    "order"
-  ],
+  "required": ["menu", "user", "order"],
   "properties": {
     "menu": {
       "type": "object",
@@ -26,17 +22,13 @@
           "type": "integer",
           "title": "menu id",
           "default": 0,
-          "examples": [
-            32122582
-          ]
+          "examples": [32122582]
         },
         "name": {
           "type": "string",
           "title": "menu name",
           "default": "",
-          "examples": [
-            "week2"
-          ],
+          "examples": ["week2"],
           "pattern": "^(.*)$"
         },
         "bakersNote": {
@@ -52,9 +44,7 @@
           "type": "string",
           "title": "created at",
           "default": "",
-          "examples": [
-            "2019-10-06T21:14:33.588Z"
-          ],
+          "examples": ["2019-10-06T21:14:33.588Z"],
           "pattern": "^(.*)$"
         },
         "items": {
@@ -63,37 +53,25 @@
           "items": {
             "type": "object",
             "title": "items",
-            "required": [
-              "id",
-              "name",
-              "description",
-              "isAddOn",
-              "menuItemId"
-            ],
+            "required": ["id", "name", "description", "isAddOn", "menuItemId"],
             "properties": {
               "id": {
                 "type": "integer",
                 "title": "id",
                 "default": 0,
-                "examples": [
-                  871309743
-                ]
+                "examples": [871309743]
               },
               "menuItemId": {
                 "type": "integer",
                 "title": "menu item id",
                 "default": 0,
-                "examples": [
-                  871309743
-                ]
+                "examples": [871309743]
               },
               "name": {
                 "type": "string",
                 "title": "name",
                 "default": "",
-                "examples": [
-                  "Classic"
-                ],
+                "examples": ["Classic"],
                 "pattern": "^(.*)$"
               },
               "description": {
@@ -111,10 +89,7 @@
                 "default": false
               },
               "image": {
-                "type": [
-                  "null",
-                  "string"
-                ],
+                "type": ["null", "string"],
                 "title": "image",
                 "default": "",
                 "examples": [
@@ -131,37 +106,25 @@
           "items": {
             "type": "object",
             "title": "items",
-            "required": [
-              "id",
-              "name",
-              "description",
-              "isAddOn",
-              "menuItemId"
-            ],
+            "required": ["id", "name", "description", "isAddOn", "menuItemId"],
             "properties": {
               "id": {
                 "type": "integer",
                 "title": "id",
                 "default": 0,
-                "examples": [
-                  985741370
-                ]
+                "examples": [985741370]
               },
               "menuItemId": {
                 "type": "integer",
                 "title": "menu item id",
                 "default": 0,
-                "examples": [
-                  871309743
-                ]
+                "examples": [871309743]
               },
               "name": {
                 "type": "string",
                 "title": "name",
                 "default": "",
-                "examples": [
-                  "English Muffins"
-                ],
+                "examples": ["English Muffins"],
                 "pattern": "^(.*)$"
               },
               "description": {
@@ -179,10 +142,7 @@
                 "default": false
               },
               "image": {
-                "type": [
-                  "null",
-                  "string"
-                ],
+                "type": ["null", "string"],
                 "title": "image",
                 "default": "",
                 "examples": [
@@ -201,10 +161,7 @@
       }
     },
     "user": {
-      "type": [
-        "object",
-        "null"
-      ],
+      "type": ["object", "null"],
       "title": "user",
       "required": [
         "id",
@@ -220,54 +177,40 @@
           "type": "integer",
           "title": "user id",
           "default": 0,
-          "examples": [
-            32122582
-          ]
+          "examples": [32122582]
         },
         "email": {
           "type": "string",
           "title": "email",
           "default": "",
-          "examples": [
-            "kyle@example.com"
-          ],
+          "examples": ["kyle@example.com"],
           "pattern": "^(.*)$"
         },
         "name": {
           "type": "string",
           "title": "The Name Schema",
           "default": "",
-          "examples": [
-            "Kyle Fritz"
-          ],
+          "examples": ["Kyle Fritz"],
           "pattern": "^(.*)$"
         },
         "hashid": {
           "type": "string",
           "title": "The Hashid Schema",
           "default": "",
-          "examples": [
-            "Dot9gKn9w"
-          ],
+          "examples": ["Dot9gKn9w"],
           "pattern": "^(.*)$"
         },
         "credits": {
           "type": "integer",
           "title": "The Credits Schema",
           "default": 0,
-          "examples": [
-            13
-          ]
+          "examples": [13]
         },
         "breadsPerWeek": {
           "type": "number",
           "title": "Breads per week",
           "default": 1.0,
-          "examples": [
-            0.5,
-            1.0,
-            2.0
-          ]
+          "examples": [0.5, 1.0, 2.0]
         },
         "pickupDay": {
           "type": "string",
@@ -276,14 +219,9 @@
       }
     },
     "order": {
-      "type": [
-        "object",
-        "null"
-      ],
+      "type": ["object", "null"],
       "title": "order",
-      "required": [
-        "items"
-      ],
+      "required": ["items"],
       "properties": {
         "items": {
           "type": "array",
@@ -291,17 +229,13 @@
           "items": {
             "type": "object",
             "title": "item",
-            "required": [
-              "itemId"
-            ],
+            "required": ["itemId"],
             "properties": {
               "itemId": {
                 "type": "integer",
                 "title": "itemid",
                 "default": 0,
-                "examples": [
-                  722547269
-                ]
+                "examples": [722547269]
               }
             }
           }
