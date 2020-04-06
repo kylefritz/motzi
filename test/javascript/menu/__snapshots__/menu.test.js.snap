@@ -38,6 +38,24 @@ exports[`Menu snapshot 1`] = `
     </div>
   </div>
   <h5>
+    Pickup day
+  </h5>
+  <div
+    className="row mt-3"
+  >
+    <Day
+      checked={true}
+      description="11am to 7pm"
+      name="thursday"
+      onChange={[Function]}
+    />
+    <Day
+      description="11am to 7pm"
+      name="saturday"
+      onChange={[Function]}
+    />
+  </div>
+  <h5>
     Items
   </h5>
   <div

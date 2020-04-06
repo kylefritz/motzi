@@ -16,10 +16,10 @@ test('Menu snapshot', () => {
 test('Menu items & addons rendered', () => {
   const wrapper = mount(<Menu {...orderData} />)
   const items = wrapper.find('input[type="radio"]')
-  expect(items.length).toBe(3) // classic, baget, skip
+  expect(items.length).toBe(5) // day1, day2, classic, baguette, skip
 
   const addOns = wrapper.find('input[type="checkbox"]')
-  expect(addOns.length).toBe(2) // classic, baget
+  expect(addOns.length).toBe(2) // classic, baguette
 });
 
 test("Menu pick skip jsdom", () => {
