@@ -1,7 +1,7 @@
 #
 # week 1
 #
-w1_classic: 
+w1_classic:
   menu: week1
   item: classic
 
@@ -12,7 +12,7 @@ w1_pumpkin:
 #
 # week 2
 #
-w2_classic: 
+w2_classic:
   menu: week2
   item: classic
 
@@ -20,7 +20,7 @@ w2_rye:
   menu: week2
   item: rye
 
-w2_donut: 
+w2_donut:
   menu: week2
   item: donuts
   is_add_on: true
