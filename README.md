@@ -22,6 +22,15 @@ $ rails fake_data:users
 $ rails fake_data:orders
 ```
 
+#### Real data
+
+Copy the db from heroku to your local postgres
+
+```
+$ dropdb motzi
+$ heroku pg:pull DATABASE_URL --app motzibread motzi
+```
+
 ### Running the app
 
 ```
