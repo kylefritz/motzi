@@ -7,15 +7,15 @@ export default {
     isCurrent: true,
     items: [
       {
-        id: 985741369,
-        name: "Bagette",
+        id: 3,
+        name: "Baguette",
         description: "",
-        image: "bread-baget.jpg",
+        image: "bread-baguette.jpg",
         isAddOn: false,
         menuItemId: 993690591,
       },
       {
-        id: 2,
+        id: 1,
         name: "Classic",
         description:
           "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
@@ -24,7 +24,7 @@ export default {
         menuItemId: 993690592,
       },
       {
-        id: 3,
+        id: 0,
         name: "Skip",
         description: "Skip this week.",
         isAddOn: false,
@@ -33,7 +33,7 @@ export default {
     ],
     addons: [
       {
-        id: 871309743,
+        id: 1,
         name: "Classic",
         description:
           "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
@@ -43,9 +43,9 @@ export default {
       },
       {
         id: 3,
-        name: "Bagette",
+        name: "Baguette",
         description: "",
-        image: "bread-baget.jpg",
+        image: "bread-baguette.jpg",
         isAddOn: true,
         menuItemId: 993690591,
       },
@@ -60,5 +60,5 @@ export default {
     pickupDay: "Tuesday",
     breadsPerWeek: 1.0,
   },
-  order: { items: [{ itemId: 985741369 }, { itemId: 871309743 }] },
+  order: { pickupDay: "Thursday", items: [{ itemId: 3 }, { itemId: 1 }] },
 };

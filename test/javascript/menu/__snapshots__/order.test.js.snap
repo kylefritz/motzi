@@ -16,6 +16,20 @@ exports[`Order snapshot 1`] = `
     <div
       className="col-sm-4"
     >
+      <h5
+        className="mb-3"
+      >
+        <span
+          className="pr-2"
+        >
+          Pickup:
+        </span>
+        <span
+          className="text-success"
+        >
+          Thursday
+        </span>
+      </h5>
       <h5>
         Items
       </h5>
@@ -23,7 +37,7 @@ exports[`Order snapshot 1`] = `
         <li
           key="0"
         >
-          Bagette
+          Baguette
         </li>
         <li
           key="1"

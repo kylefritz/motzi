@@ -63,29 +63,29 @@ exports[`Menu snapshot 1`] = `
   >
     <Item
       description=""
-      id={985741369}
-      image="bread-baget.jpg"
+      id={3}
+      image="bread-baguette.jpg"
       isAddOn={false}
-      key="985741369"
+      key="3"
       menuItemId={993690591}
-      name="Bagette"
+      name="Baguette"
       onChange={[Function]}
     />
     <Item
       description="Mix of modern wheats and ancient Einkorn for the best of both worlds."
-      id={2}
+      id={1}
       image="bread2-002.webp"
       isAddOn={false}
-      key="2"
+      key="1"
       menuItemId={993690592}
       name="Classic"
       onChange={[Function]}
     />
     <Item
       description="Skip this week."
-      id={3}
+      id={0}
       isAddOn={false}
-      key="3"
+      key="0"
       menuItemId={0}
       name="Skip"
       onChange={[Function]}
@@ -102,10 +102,10 @@ exports[`Menu snapshot 1`] = `
     >
       <AddOn
         description="Mix of modern wheats and ancient Einkorn for the best of both worlds."
-        id={871309743}
+        id={1}
         image="bread2-002.webp"
         isAddOn={true}
-        key="871309743"
+        key="1"
         menuItemId={993690592}
         name="Classic"
         onChange={[Function]}
@@ -113,17 +113,17 @@ exports[`Menu snapshot 1`] = `
       <AddOn
         description=""
         id={3}
-        image="bread-baget.jpg"
+        image="bread-baguette.jpg"
         isAddOn={true}
         key="3"
         menuItemId={993690591}
-        name="Bagette"
+        name="Baguette"
         onChange={[Function]}
       />
     </div>
   </div>
   <h5>
-    Other comments?
+    Special Requests
   </h5>
   <div
     className="row mt-3 mb-5"
@@ -134,7 +134,7 @@ exports[`Menu snapshot 1`] = `
       <textarea
         className="form-control"
         onChange={[Function]}
-        placeholder="Your comments"
+        placeholder="Special requests or concerns"
       />
     </div>
   </div>
@@ -149,7 +149,7 @@ exports[`Menu snapshot 1`] = `
         disabled={false}
         onClick={[Function]}
         title={null}
-        type="button"
+        type="submit"
       >
         Submit Order
       </button>

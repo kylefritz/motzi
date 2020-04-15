@@ -156,7 +156,7 @@ export default class Menu extends React.Component {
                   : "This is not the current menu; you cannot submit an order."
               }
               className="btn btn-primary btn-lg btn-block"
-              type="button"
+              type="submit"
             >
               Submit Order
             </button>
