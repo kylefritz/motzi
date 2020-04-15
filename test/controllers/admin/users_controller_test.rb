@@ -24,4 +24,12 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     get "/admin/users/#{obj.id}/edit"
     assert_response :success
   end
+
+  test "post resend email" do
+    obj = users(:kyle)
+    assert_difference('MenuMailer.deliveries.count', 1) do
+      post "/admin/users/#{obj.id}/resend_menu"
+    end
+    assert_response :redirect
+  end
 end

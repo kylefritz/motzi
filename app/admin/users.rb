@@ -26,6 +26,11 @@ ActiveAdmin.register User do
       link_to "Order for", current_menu_url(uid: user.hashid), target: "_blank"
     end
   end
+  action_item :order, except: [:index, :new] do
+    if params[:id].present?
+      link_to("Resend menu email", resend_menu_admin_user_path(params[:id]), { method: :post, data: {confirm: "Resend menu email?"}})
+    end
+  end
 
   index do
     selectable_column
@@ -51,6 +56,7 @@ ActiveAdmin.register User do
     column :updated_at
     actions do |user|
       a "Order", href: current_menu_url(uid: user.hashid), target: "_blank"
+      link_to("Resend menu", resend_menu_admin_user_path(user), { method: :post, data: {confirm: "Resend menu email?"}})
     end
   end
 
@@ -138,4 +144,21 @@ ActiveAdmin.register User do
   end
 
   actions :all, except: [:destroy] # deleting users can orphan orders, etc
+
+  #
+  # action to make this menu "current" & email it to subscribers
+  #
+  member_action :resend_menu, method: :post do
+    user = resource
+    menu = Menu.current
+    MenuMailer.with(menu: menu, user: user).weekly_menu_email.deliver_now
+
+    notice = "Menu '#{menu.name}' was emailed to #{user.name}"
+    ActiveAdmin::Comment.create(body: notice,
+                                namespace: 'admin',
+                                resource: menu,
+                                author: current_admin_user)
+
+    redirect_to collection_path, notice: notice
+  end
 end
