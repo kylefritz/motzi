@@ -4,6 +4,8 @@ Reminder to come grab your bread today 11am to 7pm!
 Please call us at <%= Setting.motzi_phone %> if you have any questions or issues or won't make it by 7pm.
 <% end %>
 
+<%= @menu.day_of_note %>
+
 <% if @order.present? %>
 You ordered:
 <% @order.items.map do |i| %>

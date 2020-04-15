@@ -1,5 +1,5 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :bakers_note, :week_id
+  permit_params :name, :bakers_note, :week_id, :day_of_note
   includes menu_items: [:item]
   config.sort_order = 'LOWER(week_id) desc'
 
@@ -35,7 +35,7 @@ ActiveAdmin.register Menu do
           status_tag true, style: 'margin-left: 3px', label: 'Current'
         end
       end
-      small menu.bakers_note[0..140]
+      small truncate(menu.bakers_note, length: 200)
     end
     column :items do |menu|
       ul style: 'list-style: 	disc outside none !important; white-space: nowrap' do
@@ -49,8 +49,10 @@ ActiveAdmin.register Menu do
       t = Time.zone.from_week_id(menu.week_id)
       small "#{t.strftime('%a %m/%d')}"
     end
+    column :day_of_note do |menu|
+      truncate(menu.day_of_note, length: 200)
+    end
     column :created_at
-    column :updated_at
     column :emailed_at
     actions defaults: false do |menu|
       a "view", href: admin_menu_path(menu)
@@ -72,7 +74,13 @@ ActiveAdmin.register Menu do
     inputs do
       input :week_id, :as => :select, :collection => week_options(resource.week_id)
       input :name
+      para style: 'margin-left: 20%; padding-left: 8px' do
+        text_node "You can use "
+        a("markdown", href: "https://wordpress.com/support/markdown-quick-reference/", target:"_blank" )
+        text_node "to give the notes nice formatting!"
+      end
       input :bakers_note
+      input :day_of_note, placeholder: 'Included in reminder emails sent out on pickup day'
     end
     actions
   end

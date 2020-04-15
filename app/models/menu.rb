@@ -24,10 +24,20 @@ class Menu < ApplicationRecord
     self.menu_items.create!(item: Item.skip)
   end
 
+  def bakers_note_html
+    @bakers_note_html ||= MARKDOWN.render(self.bakers_note || '').html_safe
+  end
+
+  def day_of_note_html
+    @day_of_note_html ||= MARKDOWN.render(self.day_of_note || '').html_safe
+  end
+
   def publish_to_subscribers!
     self.make_current!
     self.touch :emailed_at # audit email was sent
     self.add_skip!
     SendWeeklyMenuJob.perform_now.size
   end
+
+  MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
 end

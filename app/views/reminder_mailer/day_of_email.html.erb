@@ -3,6 +3,10 @@
 <p>Please call us at <%= Setting.motzi_phone %> if you have any questions/issues or won't make it by 7pm.</p>
 <% end %>
 
+<div class="day-of-note">
+    <%= @menu.day_of_note_html %>
+</div>
+
 <% if @order.present? %>
 <p>You ordered:</p>
 <ul>
