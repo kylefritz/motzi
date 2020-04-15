@@ -6,7 +6,7 @@ class MenuTest < ActiveSupport::TestCase
   def setup
     menus(:week2).make_current!
   end
-  
+
   test "items connected to menu through menu_items" do
     week1 = menus(:week1)
     assert_equal 'week1', week1.name
@@ -50,8 +50,19 @@ class MenuTest < ActiveSupport::TestCase
     assert week3.emailed_at.present?
   end
 
+  test "always have skip" do
+    menu = Menu.create!(week_id: "20-01")
+    assert_equal 0, menu.items.size
+    menu.add_skip!
+    menu.reload
+    assert_equal 1, menu.items.size
+    menu.add_skip!
+    menu.reload
+    assert_equal 1, menu.items.size
+  end
+
   private
-  
+
   def assert_menus_emailed(num_emails, &block)
     perform_enqueued_jobs do
       assert_difference('Ahoy::Message.count', num_emails, 'emails audited in ahoy') do
