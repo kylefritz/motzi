@@ -20,11 +20,6 @@ export const humanizeBreadsPerWeek = (perWeek) => {
 export default function User({ user, onRefreshUser }) {
   const [showBuy, setShowBuy] = useState(false);
 
-  // TODO: add weeks remaining
-  // <div className="col">
-  //   <h5 className="text-center">Weeks remaining</h5>
-  //   <p className="text-center"></p>
-  // </div>
   return (
     <>
       <div className="row mt-5">
@@ -62,10 +57,6 @@ export default function User({ user, onRefreshUser }) {
               </button>
             )}
           </p>
-        </div>
-        <div className="col">
-          <h5 className="text-center">Pickup Day</h5>
-          <p className="text-center">{user.pickupDay}</p>
         </div>
       </div>
       {showBuy && <BuyCredits onComplete={onRefreshUser} user={user} />}

@@ -70,7 +70,7 @@ ActiveAdmin.register_page "Dashboard" do
       markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
 
       column do
-        panel "Orders with comments" do
+        panel "Special Requests" do
           table_for menu.orders.includes(:user).with_comments do
             column ("comments") { |order| markdown.render(order.comments).html_safe }
             column ("user") { |order| order.user }
@@ -80,7 +80,6 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       column do
-
         panel "Orders with feedback" do
           table_for menu.orders.includes(:user).with_feedback do
             column ("feedback") { |order| markdown.render(order.feedback).html_safe }

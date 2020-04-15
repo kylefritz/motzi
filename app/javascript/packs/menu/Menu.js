@@ -7,21 +7,22 @@ import User from "./User.js";
 import BuyCredits from "../buy/App";
 import _ from "lodash";
 import Day from "./Day";
+import Quantity from "./Quantity.js";
 
 export default class Menu extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { selectedItem: null, addOns: new Set(), day: "thursday" };
+    this.state = { selectedItem: null, addOns: {}, day: "thursday" };
   }
   handleItemSelected(itemId) {
     this.setState({ selectedItem: itemId });
   }
-  handleAddOnSelected(itemId, isSelected) {
+  handleAddOnSelected(itemId, quantity) {
     let { addOns } = this.state;
-    if (isSelected) {
-      addOns.add(itemId);
+    if (quantity < 1) {
+      delete addOns[itemId];
     } else {
-      addOns.delete(itemId);
+      addOns[itemId] = quantity;
     }
     this.setState({ addOns });
   }
@@ -46,9 +47,10 @@ export default class Menu extends React.Component {
 
     order.items.push(selectedItem);
 
-    for (const addOn of addOns) {
-      order.items.push(addOn);
-    }
+    Object.entries(addOns).forEach(([addOn, quantity]) => {
+      _.times(quantity).forEach(() => order.items.push(addOn));
+    });
+
     this.props.onCreateOrder(order);
   }
   render() {
@@ -122,8 +124,8 @@ export default class Menu extends React.Component {
                   <AddOn
                     key={i.id}
                     {...i}
-                    onChange={(isSelected) =>
-                      this.handleAddOnSelected(i.id, isSelected)
+                    onChange={(quantity) =>
+                      this.handleAddOnSelected(i.id, quantity)
                     }
                   />
                 ))}
@@ -132,11 +134,11 @@ export default class Menu extends React.Component {
           </>
         )}
 
-        <h5>Other comments?</h5>
+        <h5>Special Requests</h5>
         <div className="row mt-3 mb-5">
           <div className="col">
             <textarea
-              placeholder="Your comments"
+              placeholder="Special requests or concerns"
               onChange={this.handleComments.bind(this)}
               className="form-control"
             />
