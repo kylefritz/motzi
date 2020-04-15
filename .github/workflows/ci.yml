@@ -61,6 +61,7 @@ jobs:
           PGHOST: localhost
           PGUSER: postgres
           RAILS_ENV: test
+          BUNDLE_BUILD__SASSC: --disable-march-tune-native
         run: |
           bin/rails db:setup
           bin/rails test
