@@ -37,6 +37,11 @@ export default function ({ menu, user, order, onRefreshUser }) {
       <div className="row mt-5">
         <div className="col-sm-4" />
         <div className="col-sm-4">
+          <h5 className="mb-3">
+            <span className="pr-2">Pickup:</span>
+            <span className="text-success">{order.pickupDay}</span>
+          </h5>
+
           <h5>Items</h5>
           <ul>
             {sortedOrderItems.map(([id, count], i) => (

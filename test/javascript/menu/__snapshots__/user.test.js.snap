@@ -62,18 +62,6 @@ exports[`snapshot 1`] = `
         6
       </p>
     </div>
-    <div
-      className="col"
-    >
-      <h5
-        className="text-center"
-      >
-        Pickup Day
-      </h5>
-      <p
-        className="text-center"
-      />
-    </div>
   </div>
 </Fragment>
 `;

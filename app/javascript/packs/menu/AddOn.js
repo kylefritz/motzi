@@ -1,19 +1,30 @@
 import React from "react";
 
+import Quantity from "./Quantity";
+
 export default class AddOn extends React.Component {
+  state = { isChecked: false, quantity: 0 };
   constructor(props) {
     super(props);
     this.cbRef = React.createRef();
   }
-  handleClick() {
-    this.cbRef.current.checked = !this.cbRef.current.checked;
-    this.handleChanged();
-  }
   handleChanged() {
-    this.props.onChange(this.cbRef.current.checked);
+    const isChecked = this.cbRef.current.checked;
+    this.setState({ isChecked });
+    if (isChecked) {
+      this.handleQuantityChanged(1);
+    } else {
+      // reset
+      this.handleQuantityChanged(0);
+    }
+  }
+  handleQuantityChanged(quantity) {
+    this.setState({ quantity });
+    this.props.onChange(quantity);
   }
   render() {
     const { name } = this.props;
+    const { isChecked, quantity } = this.state;
 
     return (
       <div className="form-check mb-1">
@@ -25,8 +36,12 @@ export default class AddOn extends React.Component {
             className="form-check-input"
             type="checkbox"
           />
+          {isChecked && <strong className="pr-3">{quantity}x</strong>}
           {name}
         </label>
+        {isChecked && (
+          <Quantity onChange={this.handleQuantityChanged.bind(this)} />
+        )}
       </div>
     );
   }

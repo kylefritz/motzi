@@ -22,6 +22,7 @@ end
 
 json.order do
   if @order
+    json.extract! @order, :pickup_day
     json.items @order.order_items.map do |item|
       json.extract! item, :item_id
     end
