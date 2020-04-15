@@ -20,6 +20,13 @@ ActiveAdmin.register User do
   scope :admin
   scope :no_weekly_email
 
+  action_item :order, except: [:index, :new] do
+    if params[:id].present?
+      user = User.find(params[:id])
+      link_to "Order for", current_menu_url(uid: user.hashid), target: "_blank"
+    end
+  end
+
   index do
     selectable_column
     column :first_name do |user|
@@ -42,7 +49,9 @@ ActiveAdmin.register User do
     end
     column :created_at
     column :updated_at
-    actions
+    actions do |user|
+      a "Order", href: current_menu_url(uid: user.hashid), target: "_blank"
+    end
   end
 
   form do |f|
