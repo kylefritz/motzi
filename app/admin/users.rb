@@ -145,9 +145,6 @@ ActiveAdmin.register User do
 
   actions :all, except: [:destroy] # deleting users can orphan orders, etc
 
-  #
-  # action to make this menu "current" & email it to subscribers
-  #
   member_action :resend_menu, method: :post do
     user = resource
     menu = Menu.current
