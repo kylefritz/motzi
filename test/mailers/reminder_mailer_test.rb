@@ -28,6 +28,7 @@ class ReminderMailerTest < ActionMailer::TestCase
     assert_in_email 'You ordered'
     assert_in_email 'Rye Five', 'item'
     assert_in_email 'Donuts', 'add-on'
+    assert_in_email 'Bread is at the shop now!', 'day of note'
   end
 
   test "havent_ordered email" do
