@@ -31,6 +31,12 @@ $ dropdb motzi
 $ heroku pg:pull DATABASE_URL --app motzibread motzi
 ```
 
+Download the menu images from s3
+
+```
+$ rake s3:download
+```
+
 ### Running the app
 
 ```
