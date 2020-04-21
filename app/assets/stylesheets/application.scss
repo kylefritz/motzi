@@ -4,6 +4,9 @@ $container-max-widths: (
   lg: 680px,
 );
 
+// TODO: make warning "purple" instead
+$warning-color: "#6f42c1";
+
 // Custom bootstrap variables must be set or imported *before* bootstrap.
 @import "bootstrap";
 
