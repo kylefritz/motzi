@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 
-import Item from "./Item.js";
-import BakersNote from "./BakersNote.js";
-import User from "./User.js";
+import Item from "./Item";
+import BakersNote from "./BakersNote";
+import User from "./User";
+import Cart from "./Cart";
 import BuyCredits from "../buy/App";
 import _ from "lodash";
 
@@ -100,7 +101,7 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
           />
         </div>
       </div>
-      <code>{JSON.stringify(cart)}</code>
+      <Cart cart={cart} menu={menu} />
       <div className="row mt-3 mb-5">
         <div className="col">
           <button

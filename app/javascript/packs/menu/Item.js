@@ -61,34 +61,50 @@ function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day }) {
   );
 }
 
-export default function Item({
-  name,
-  description,
-  image,
-  onChange,
-  defaultQuantity = 1,
-}) {
+function Ordering({ description, onChange }) {
   // TODO: make image square
   const [day, setDay] = useState(null);
-  const [quantity, setQuantity] = useState(defaultQuantity);
+  const [wasAdded, setWasAdded] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
-  const handleAdd = () => onChange({ day, quantity });
+  const handleAdd = () => {
+    onChange({ day, quantity });
+    setWasAdded(true);
+    const reset = () => {
+      setWasAdded(false);
+      setDay(null);
+      setQuantity(1);
+    };
 
+    setTimeout(reset, 1.5 * 1000);
+  };
+
+  if (wasAdded) {
+    return <p className="text-success my-3">Added to cart!</p>;
+  }
+
+  if (day) {
+    return (
+      <QuantityAdd
+        quantity={quantity}
+        onQuantity={setQuantity}
+        onAdd={handleAdd}
+        day={day}
+        onCancel={() => setDay(null)}
+      />
+    );
+  }
+
+  return <DayButtons description={description} onSetDay={setDay} />;
+}
+
+export default function Item(props) {
+  const { image, name } = props;
   return (
     <div className="col-6 mb-5">
       <img src={image} className="img-fluid" style={{ objectFit: "contain" }} />
       <div>{name}</div>
-      {day ? (
-        <QuantityAdd
-          quantity={quantity}
-          onQuantity={setQuantity}
-          onAdd={handleAdd}
-          day={day}
-          onCancel={() => setDay(null)}
-        />
-      ) : (
-        <DayButtons description={description} onSetDay={setDay} />
-      )}
+      <Ordering {...props} />
     </div>
   );
 }
