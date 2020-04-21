@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
-export default function Quantity({ onChange }) {
-  const [quantity, setQuantity] = useState(1);
+export default function Quantity({ defaultQuantity = 1, onChange }) {
+  const [quantity, setQuantity] = useState(defaultQuantity);
 
   const handlePlus = () => {
     const newQuantity = quantity + 1;
@@ -15,7 +15,7 @@ export default function Quantity({ onChange }) {
   };
 
   return (
-    <div className="mb-4">
+    <>
       <div
         className="btn-group btn-group-sm"
         role="group"
@@ -32,12 +32,12 @@ export default function Quantity({ onChange }) {
         <button
           type="button"
           className="btn btn-primary"
-          disabled={quantity >= 3}
+          disabled={quantity >= 4}
           onClick={handlePlus}
         >
           +
         </button>
       </div>
-    </div>
+    </>
   );
 }

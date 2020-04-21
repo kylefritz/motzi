@@ -40,7 +40,9 @@ export default class AddOn extends React.Component {
           {name}
         </label>
         {isChecked && (
-          <Quantity onChange={this.handleQuantityChanged.bind(this)} />
+          <div className="mb-4">
+            <Quantity onChange={this.handleQuantityChanged.bind(this)} />
+          </div>
         )}
       </div>
     );
