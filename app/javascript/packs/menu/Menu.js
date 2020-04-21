@@ -17,6 +17,16 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
     setCart([...cart, { itemId, quantity, day }]);
   };
 
+  const rmCartItem = (itemId, quantity, day) => {
+    const index = _.findIndex(
+      cart,
+      (ci) => ci.itemId === itemId && ci.quantity === quantity && ci.day === day
+    );
+    const nextCart = [...cart];
+    nextCart.splice(index, 1);
+    setCart(nextCart);
+  };
+
   const handleCreateOrder = () => {
     // TODO: migrate read from state
     const { selectedItem, addOns, day } = this.state;
@@ -101,7 +111,7 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
           />
         </div>
       </div>
-      <Cart cart={cart} menu={menu} />
+      <Cart cart={cart} menu={menu} rmCartItem={rmCartItem} />
       <div className="row mt-3 mb-5">
         <div className="col">
           <button

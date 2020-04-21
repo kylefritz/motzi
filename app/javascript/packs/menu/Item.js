@@ -62,7 +62,6 @@ function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day }) {
 }
 
 function Ordering({ description, onChange }) {
-  // TODO: make image square
   const [day, setDay] = useState(null);
   const [wasAdded, setWasAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -102,6 +101,7 @@ export default function Item(props) {
   const { image, name } = props;
   return (
     <div className="col-6 mb-5">
+      {/* TODO: make image square */}
       <img src={image} className="img-fluid" style={{ objectFit: "contain" }} />
       <div>{name}</div>
       <Ordering {...props} />
