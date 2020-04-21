@@ -1,8 +1,8 @@
 import React from "react";
 
-import Item from "./Item.js";
-import AddOn from "./AddOn.js";
-import BakersNote from "./BakersNote.js";
+import Item from "./Item";
+import AddOn from "./AddOn";
+import BakersNote from "./BakersNote";
 
 export default function ({ menu }) {
   const { name, bakersNote, items, addons } = menu;

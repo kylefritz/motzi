@@ -1,8 +1,8 @@
 import React from "react";
 import _ from "lodash";
 
-import BakersNote from "./BakersNote.js";
-import User from "./User.js";
+import BakersNote from "./BakersNote";
+import User from "./User";
 
 export default function ({ menu, user, order, onRefreshUser }) {
   const { name, bakersNote, items, addons } = menu;
