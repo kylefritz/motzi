@@ -6,9 +6,12 @@ import User from "./User";
 import Cart from "./Cart";
 import BuyCredits from "../buy/App";
 import _ from "lodash";
+import { PayItForward } from "./PayItForward";
+import createMenuItemLookup from "./createMenuItemLookup";
 
 export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
   const [cart, setCart] = useState([]);
+  const [isSkipping, setIsSkipping] = useState(false);
   const [feedback, setFeedback] = useState();
   const [specialRequests, setSpecialRequests] = useState([]);
 
@@ -25,6 +28,11 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
     const nextCart = [...cart];
     nextCart.splice(index, 1);
     setCart(nextCart);
+  };
+
+  const handleSkip = () => {
+    setIsSkipping(true);
+    setCart([]);
   };
 
   const handleCreateOrder = () => {
@@ -54,6 +62,7 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
   };
 
   const { name, bakersNote, items, isCurrent } = menu;
+  const { skip, payItForward } = createMenuItemLookup(menu);
 
   if (user && user.credits < 1) {
     // time to buy credits!
@@ -80,7 +89,7 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
       <BakersNote {...{ bakersNote }} />
 
       <h5>We'd love your feedback on last week's loaf.</h5>
-      <div className="row mt-3 mb-5">
+      <div className="row mt-2 mb-3">
         <div className="col">
           <textarea
             className="form-control"
@@ -89,20 +98,74 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
           />
         </div>
       </div>
+      <h5>Menu</h5>
+      {isSkipping ? (
+        <>
+          <p>
+            <strong>You'll skip this week.</strong>&nbsp;
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setIsSkipping(false);
+              }}
+              className="ml-1"
+            >
+              <small>I want to order</small>
+            </a>
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="row mt-2">
+            {items
+              .filter(({ id }) => id !== skip.id && id !== payItForward.id)
+              .map((i) => (
+                <Item
+                  key={i.id}
+                  {...i}
+                  onChange={({ quantity, day }) =>
+                    addToCart(i.id, quantity, day)
+                  }
+                />
+              ))}
+          </div>
 
-      <h5>Items</h5>
-      <div className="row mt-3">
-        {items.map((i) => (
-          <Item
-            key={i.id}
-            {...i}
-            onChange={({ quantity, day }) => addToCart(i.id, quantity, day)}
-          />
-        ))}
-      </div>
+          <h5>Skip this week?</h5>
+          <div className="row">
+            <div className="col-6 mb-3">
+              <div className="mb-2">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-dark"
+                  onClick={handleSkip}
+                >
+                  Skip
+                </button>
+              </div>
+              <div style={{ lineHeight: "normal" }}>
+                <small>
+                  {skip.description}{" "}
+                  <em>Removes any selected items from order.</em>
+                </small>
+              </div>
+            </div>
+          </div>
+
+          <h5>Pay it forward</h5>
+          <div className="row">
+            <div className="col-6 mb-3">
+              <PayItForward
+                description={payItForward.description}
+                onChange={({ quantity, day }) => addToCart(-1, quantity, day)}
+              />
+            </div>
+          </div>
+        </>
+      )}
 
       <h5>Special Requests</h5>
-      <div className="row mt-3 mb-5">
+      <div className="row mt-2 mb-3">
         <div className="col">
           <textarea
             placeholder="Special requests or concerns"
@@ -111,8 +174,8 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
           />
         </div>
       </div>
-      <Cart cart={cart} menu={menu} rmCartItem={rmCartItem} />
-      <div className="row mt-3 mb-5">
+      <Cart {...{ cart, menu, rmCartItem, isSkipping }} />
+      <div className="row mt-2 mb-3">
         <div className="col">
           <button
             onClick={handleCreateOrder}

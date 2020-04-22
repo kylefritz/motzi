@@ -1,17 +1,16 @@
-import React, { createFactory } from "react";
+import React from "react";
 import _ from "lodash";
+import createMenuItemLookup from "./createMenuItemLookup";
 
 function DaysCart({ menu, cart, rmCartItem }) {
-  const { items } = menu;
-
-  const menuItemLookup = _.keyBy(items, (i) => i.id);
-  const lookupMenuItemName = (id) => _.get(menuItemLookup[id], "name", id);
+  const { menuItems } = createMenuItemLookup(menu);
+  const lookupMenuItemName = (id) => _.get(menuItems[id], "name", id);
 
   return (
     <>
       <ul>
-        {cart.map(({ itemId, quantity, day }) => (
-          <li key={`${itemId}:${quantity}:${day}`} className="mb-2">
+        {cart.map(({ itemId, quantity, day }, index) => (
+          <li key={`${index}:${itemId}:${quantity}:${day}`} className="mb-2">
             {quantity > 1 && <strong className="mr-2">{quantity}x</strong>}
             {lookupMenuItemName(itemId)}
             <button
@@ -29,13 +28,23 @@ function DaysCart({ menu, cart, rmCartItem }) {
   );
 }
 
-function Days({ menu, cart, rmCartItem }) {
-  const [thurs, sat] = _.partition(cart, ({ day }) => day == "Thursday");
+function Days({ menu, cart, rmCartItem, isSkipping }) {
+  const thurs = cart.filter(({ day }) => day === "Thursday");
+  const sat = cart.filter(({ day }) => day === "Saturday");
+  const payItForwardId = createMenuItemLookup(menu).payItForward.id;
+  const payItForward = cart.filter(({ itemId }) => itemId === payItForwardId);
 
-  const days = [];
+  if (isSkipping) {
+    return (
+      <div>
+        <p>Skip this week</p>
+      </div>
+    );
+  }
 
+  const sections = [];
   if (thurs.length) {
-    days.push(
+    sections.push(
       <div key="thurs">
         <h6>Thursday</h6>
         <DaysCart {...{ menu, rmCartItem, cart: thurs }} />
@@ -44,7 +53,7 @@ function Days({ menu, cart, rmCartItem }) {
   }
 
   if (sat.length) {
-    days.push(
+    sections.push(
       <div key="sat">
         <h6>Saturday</h6>
         <DaysCart {...{ menu, rmCartItem, cart: sat }} />
@@ -52,7 +61,16 @@ function Days({ menu, cart, rmCartItem }) {
     );
   }
 
-  return days;
+  if (payItForward.length) {
+    sections.push(
+      <div key="pay-it-forward">
+        <h6>Pay It Forward</h6>
+        <DaysCart {...{ menu, rmCartItem, cart: payItForward }} />
+      </div>
+    );
+  }
+
+  return sections;
 }
 
 function Total({ cart }) {
@@ -61,19 +79,20 @@ function Total({ cart }) {
     <div>
       <h6>Total</h6>
       <div className="ml-4">
-        {total} credit{total > 1 && "s"}
+        {total} credit{total !== 1 && "s"}
       </div>
     </div>
   );
 }
 
-function Wrapped({ menu, cart, rmCartItem }) {
-  if (!cart.length) {
+function Wrapped(props) {
+  const { cart, isSkipping } = props;
+  if (!cart.length && !isSkipping) {
     return <p>No items</p>;
   }
   return (
     <>
-      <Days {...{ menu, cart, rmCartItem }} />
+      <Days {...props} />
       <Total cart={cart} />
     </>
   );
