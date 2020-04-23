@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 const skip = {
   id: 0,
   name: "Skip",

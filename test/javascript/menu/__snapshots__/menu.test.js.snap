@@ -25,7 +25,7 @@ exports[`Menu snapshot 1`] = `
     We'd love your feedback on last week's loaf.
   </h5>
   <div
-    className="row mt-3 mb-5"
+    className="row mt-2 mb-3"
   >
     <div
       className="col"
@@ -38,28 +38,10 @@ exports[`Menu snapshot 1`] = `
     </div>
   </div>
   <h5>
-    Pickup day
+    Menu
   </h5>
   <div
-    className="row mt-3"
-  >
-    <Day
-      checked={true}
-      description="11am to 7pm"
-      name="thursday"
-      onChange={[Function]}
-    />
-    <Day
-      description="11am to 7pm"
-      name="saturday"
-      onChange={[Function]}
-    />
-  </div>
-  <h5>
-    Items
-  </h5>
-  <div
-    className="row mt-3"
+    className="row mt-2"
   >
     <Item
       description=""
@@ -81,43 +63,55 @@ exports[`Menu snapshot 1`] = `
       name="Classic"
       onChange={[Function]}
     />
-    <Item
-      description="Skip this week."
-      id={0}
-      isAddOn={false}
-      key="0"
-      menuItemId={0}
-      name="Skip"
-      onChange={[Function]}
-    />
   </div>
   <h5>
-    Add-Ons
+    Skip this week?
   </h5>
   <div
-    className="row mt-3 mb-5"
+    className="row"
   >
     <div
-      className="col"
+      className="col-6 mb-3"
     >
-      <AddOn
-        description="Mix of modern wheats and ancient Einkorn for the best of both worlds."
-        id={1}
-        image="bread2-002.webp"
-        isAddOn={true}
-        key="1"
-        menuItemId={993690592}
-        name="Classic"
-        onChange={[Function]}
-      />
-      <AddOn
-        description=""
-        id={3}
-        image="bread-baguette.jpg"
-        isAddOn={true}
-        key="3"
-        menuItemId={993690591}
-        name="Baguette"
+      <div
+        className="mb-2"
+      >
+        <button
+          className="btn btn-sm btn-dark"
+          onClick={[Function]}
+          type="button"
+        >
+          Skip
+        </button>
+      </div>
+      <div
+        style={
+          Object {
+            "lineHeight": "normal",
+          }
+        }
+      >
+        <small>
+          Skip this week.
+           
+          <em>
+            Removes any selected items from order.
+          </em>
+        </small>
+      </div>
+    </div>
+  </div>
+  <h5>
+    Pay it forward
+  </h5>
+  <div
+    className="row"
+  >
+    <div
+      className="col-6 mb-3"
+    >
+      <PayItForward
+        description="Wild times out there. Support some else in need."
         onChange={[Function]}
       />
     </div>
@@ -126,7 +120,7 @@ exports[`Menu snapshot 1`] = `
     Special Requests
   </h5>
   <div
-    className="row mt-3 mb-5"
+    className="row mt-2 mb-3"
   >
     <div
       className="col"
@@ -138,8 +132,65 @@ exports[`Menu snapshot 1`] = `
       />
     </div>
   </div>
+  <Cart
+    cart={Array []}
+    isSkipping={false}
+    menu={
+      Object {
+        "addons": Array [
+          Object {
+            "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
+            "id": 1,
+            "image": "bread2-002.webp",
+            "isAddOn": true,
+            "menuItemId": 993690592,
+            "name": "Classic",
+          },
+          Object {
+            "description": "",
+            "id": 3,
+            "image": "bread-baguette.jpg",
+            "isAddOn": true,
+            "menuItemId": 993690591,
+            "name": "Baguette",
+          },
+        ],
+        "bakersNote": "Orci varius",
+        "createdAt": "2019-11-02T14:01:23.820-04:00",
+        "id": 921507399,
+        "isCurrent": true,
+        "items": Array [
+          Object {
+            "description": "",
+            "id": 3,
+            "image": "bread-baguette.jpg",
+            "isAddOn": false,
+            "menuItemId": 993690591,
+            "name": "Baguette",
+          },
+          Object {
+            "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
+            "id": 1,
+            "image": "bread2-002.webp",
+            "isAddOn": false,
+            "menuItemId": 993690592,
+            "name": "Classic",
+          },
+          Object {
+            "description": "Skip this week.",
+            "id": 0,
+            "isAddOn": false,
+            "menuItemId": 0,
+            "name": "Skip",
+          },
+        ],
+        "name": "week 5",
+      }
+    }
+    rmCartItem={[Function]}
+  />
   <div
-    className="row mt-3 mb-5"
+    className="row mt-2 mb-3"
   >
     <div
       className="col"
