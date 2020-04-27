@@ -2,9 +2,9 @@ class User < ApplicationRecord
   include Hashid::Rails
   default_scope { order("LOWER(first_name), LOWER(last_name)") }
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable, :trackable
-  has_many :credit_items
+  has_many :credit_items, dependent: :delete_all
   has_many :messages, class_name: "Ahoy::Message", as: :user
-  has_many :orders # must come before order_items
+  has_many :orders, dependent: :delete_all
   has_many :order_items, through: :orders
   has_many :visits, class_name: "Ahoy::Visit"
   has_paper_trail
@@ -68,9 +68,12 @@ class User < ApplicationRecord
   end
 
   def order_for_menu(menu_id)
-    # NB: order_for_menu logic is wacky; different value depending on day or week
-    sort_dir = Time.zone.now.day2_pickup? ? :asc : :desc
-    orders.where(menu_id: menu_id).includes(order_items: [:item]).order(day1_pickup_maybe: sort_dir).first
+    # TODO: can an menu have more than one order?
+    menu_orders = orders.where(menu_id: menu_id).includes(order_items: [:item])
+    if menu_orders.size > 1
+      logger.warn "user=#{user.id} has more than 1 order for menu #{menu_id}"
+    end
+    menu_orders.first
   end
 
   #

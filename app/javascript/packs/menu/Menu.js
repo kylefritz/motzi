@@ -1,19 +1,19 @@
 import React, { useState } from "react";
+import _ from "lodash";
 
 import Item from "./Item";
 import BakersNote from "./BakersNote";
 import User from "./User";
 import Cart from "./Cart";
 import BuyCredits from "../buy/App";
-import _ from "lodash";
 import { PayItForward } from "./PayItForward";
 import createMenuItemLookup from "./createMenuItemLookup";
 
 export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
   const [cart, setCart] = useState([]);
-  const [isSkipping, setIsSkipping] = useState(false);
+  const [skip, setSkip] = useState(false);
   const [feedback, setFeedback] = useState();
-  const [specialRequests, setSpecialRequests] = useState([]);
+  const [comments, setComments] = useState([]);
 
   const addToCart = (itemId, quantity, day) => {
     console.log("addToCart", itemId, quantity, day);
@@ -31,38 +31,27 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
   };
 
   const handleSkip = () => {
-    setIsSkipping(true);
+    setSkip(true);
     setCart([]);
   };
 
   const handleCreateOrder = () => {
-    // TODO: migrate read from state
-    const { selectedItem, addOns, day } = this.state;
-
-    if (_.isNil(selectedItem)) {
-      alert("Select a bread!");
+    if (_.isEmpty(cart) && !skip) {
+      alert("Make a selection!");
       return;
     }
 
-    let order = {
+    onCreateOrder({
       feedback,
-      comments: specialRequests,
-      items: [],
+      comments,
+      cart,
       uid: user.hashid,
-      day,
-    };
-
-    order.items.push(selectedItem);
-
-    Object.entries(addOns).forEach(([addOn, quantity]) => {
-      _.times(quantity).forEach(() => order.items.push(addOn));
+      skip,
     });
-
-    onCreateOrder(order);
   };
 
   const { name, bakersNote, items, isCurrent } = menu;
-  const { skip, payItForward } = createMenuItemLookup(menu);
+  const { skip: skipItem, payItForward } = createMenuItemLookup(menu);
 
   if (user && user.credits < 1) {
     // time to buy credits!
@@ -99,7 +88,7 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
         </div>
       </div>
       <h5>Menu</h5>
-      {isSkipping ? (
+      {skip ? (
         <>
           <p>
             <strong>You'll skip this week.</strong>&nbsp;
@@ -107,7 +96,7 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
               href="#"
               onClick={(e) => {
                 e.preventDefault();
-                setIsSkipping(false);
+                setSkip(false);
               }}
               className="ml-1"
             >
@@ -119,7 +108,7 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
         <>
           <div className="row mt-2">
             {items
-              .filter(({ id }) => id !== skip.id && id !== payItForward.id)
+              .filter(({ id }) => id !== skipItem.id && id !== payItForward.id)
               .map((i) => (
                 <Item
                   key={i.id}
@@ -145,7 +134,7 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
               </div>
               <div style={{ lineHeight: "normal" }}>
                 <small>
-                  {skip.description}{" "}
+                  {skipItem.description}{" "}
                   <em>Removes any selected items from order.</em>
                 </small>
               </div>
@@ -168,13 +157,13 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
       <div className="row mt-2 mb-3">
         <div className="col">
           <textarea
-            placeholder="Special requests or concerns"
-            onChange={(e) => setSpecialRequests(e.target.value)}
+            placeholder="Comments or special requests"
+            onChange={(e) => setComments(e.target.value)}
             className="form-control"
           />
         </div>
       </div>
-      <Cart {...{ cart, menu, rmCartItem, isSkipping }} />
+      <Cart {...{ cart, menu, rmCartItem, skip }} />
       <div className="row mt-2 mb-3">
         <div className="col">
           <button

@@ -13,6 +13,10 @@ class Item < ApplicationRecord
   def self.skip
     self.find_by(id: SKIP_ID)
   end
+  PAY_IT_FORWARD_ID = -1
+  def self.pay_it_forward
+    self.find_by(id: PAY_IT_FORWARD_ID)
+  end
 
   def image_path
     if self.image.attached?

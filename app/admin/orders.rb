@@ -1,5 +1,5 @@
 ActiveAdmin.register Order do
-  permit_params :feedback, :comments, :menu, :user, :day1_pickup_maybe
+  permit_params :feedback, :comments, :menu, :user
   includes :menu, :user, order_items: :item
 
   scope :all, default: true
@@ -15,14 +15,8 @@ ActiveAdmin.register Order do
     column :menu
     column :user
     column :items do |order|
+      # TODO: show item day, quantity
       render partial: 'admin/orders/items', locals: {items: order.order_items.map(&:item)}
-    end
-    column :pickup_day do |order|
-      if order.day1_pickup_maybe.nil?
-        "defer"
-      else
-        order.pickup_day
-      end
     end
     column :feedback
     column :comments

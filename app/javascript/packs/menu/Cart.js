@@ -13,14 +13,16 @@ function DaysCart({ menu, cart, rmCartItem }) {
           <li key={`${index}:${itemId}:${quantity}:${day}`} className="mb-2">
             {quantity > 1 && <strong className="mr-2">{quantity}x</strong>}
             {lookupMenuItemName(itemId)}
-            <button
-              type="button"
-              className="mr-5 close"
-              aria-label="Close"
-              onClick={() => rmCartItem(itemId, quantity, day)}
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
+            {rmCartItem && (
+              <button
+                type="button"
+                className="mr-5 close"
+                aria-label="Close"
+                onClick={() => rmCartItem(itemId, quantity, day)}
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            )}
           </li>
         ))}
       </ul>
