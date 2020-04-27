@@ -6,20 +6,11 @@ class ReminderMailerTest < ActionMailer::TestCase
     @menu = menus(:week2)
   end
 
-  test "day_of email" do
-    @email = ReminderMailer.with(user: @user, menu: @menu).day_of_email
-    assert_emails(1) { @email.deliver_now }
-
-    assert_equal [@user.email], @email.to
-    assert_equal 'Motzi Bread pick up today!', @email.subject
-    assert_in_email 'Reminder to come grab your bread today'
-  end
-
   test "day_of email with order" do
     @user = users(:kyle)
     @order = @user.order_for_menu(@menu)
     refute_nil @order
-    @email = ReminderMailer.with(user: @user, menu: @menu, order: @order).day_of_email
+    @email = ReminderMailer.with(user: @user, menu: @menu, order_items: @order.order_items).day_of_email_day1
     assert_emails(1) { @email.deliver_now }
 
     assert_equal [@user.email], @email.to

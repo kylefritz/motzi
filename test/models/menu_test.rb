@@ -50,17 +50,6 @@ class MenuTest < ActiveSupport::TestCase
     assert week3.emailed_at.present?
   end
 
-  test "always have skip" do
-    menu = Menu.create!(week_id: "20-01")
-    assert_equal 0, menu.items.size
-    menu.add_skip!
-    menu.reload
-    assert_equal 1, menu.items.size
-    menu.add_skip!
-    menu.reload
-    assert_equal 1, menu.items.size
-  end
-
   private
 
   def assert_menus_emailed(num_emails, &block)

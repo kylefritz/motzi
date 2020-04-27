@@ -35,8 +35,6 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
 
     json  = @response.body
     assert json =~ /Rye Five Ways/, 'items serialized'
-    assert json =~ /Donuts/, 'items serialized'
-    assert json =~ /isAddOn/, 'isAddOn serialized'
     assert json =~ /bakersNote/, 'bakersNote'
     menu = JSON.load(json)
 

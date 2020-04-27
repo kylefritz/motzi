@@ -1,19 +1,24 @@
 k_w1_pumpkin:
   order: kyle_week1
   item: pumpkin
+  day1_pickup: true
 
 a_w1_class:
   order: adrian_week1
   item: classic
+  day1_pickup: true
 
 ljf_w1_class:
   order: ljf_week1
   item: classic
+  day1_pickup: false
 
 k_w2_rye:
   order: kyle_week2
   item: rye
+  day1_pickup: true
 
 k_w2_donuts:
   order: kyle_week2
   item: donuts
+  day1_pickup: true

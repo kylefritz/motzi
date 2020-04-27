@@ -6,7 +6,7 @@ class Order < ApplicationRecord
   has_paper_trail
   visitable :ahoy_visit
   scope :with_feedback, -> { where("COALESCE(TRIM(feedback), '') <> ''") }
-  scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> '' AND comments <> 'Baker''s Choice'") }
+  scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> '' AND comments <> ?", BAKERS_CHOICE) }
   scope :not_skip, -> { where("skip is FALSE") }
   scope :skip, -> { where("skip is TRUE") }
 
@@ -21,4 +21,5 @@ class Order < ApplicationRecord
   def name
     "Order ##{id}"
   end
+  BAKERS_CHOICE = "Baker's Choice"
 end

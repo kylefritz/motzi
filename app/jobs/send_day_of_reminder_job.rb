@@ -3,27 +3,29 @@ class SendDayOfReminderJob < ApplicationJob
 
   def perform(*args)
     return if Time.zone.now.too_early?
+    if Time.zone.now.day1_pickup?
+      send_reminders_for_day(true)
+    end
 
-    menu = Menu.current
-
-    already_reminded = Set[*menu.messages.where(mailer: 'ReminderMailer#day_of_email').pluck(:user_id)]
-
-    orders_to_remind.map do |order|
-      next if already_reminded.include?(order.user_id)
-
-      next if order.skip?
-
-      ReminderMailer.with(user: order.user, menu: menu, order: order).day_of_email.deliver_now
+    if Time.zone.now.day2_pickup?
+      send_reminders_for_day(false)
     end
   end
 
-  private
+  def send_reminders_for_day(day1_pickup)
+    mailer = "day_of_email_day#{day1_pickup ? 1 : 2}"
+    menu = Menu.current
 
-  def orders_to_remind
-    # reminder users if they have an order for today
-    return Menu.current.orders.day1_pickup if Time.zone.now.day1_pickup?
-    return Menu.current.orders.day2_pickup if Time.zone.now.day2_pickup?
+    already_reminded = Set[*menu.messages.where(mailer: "ReminderMailer##{mailer}").pluck(:user_id)]
 
-    []
+    Menu.current.orders.map do |order|
+      next if already_reminded.include?(order.user_id)
+
+      order_items_for_day = order.order_items.filter {|oi| oi.day1_pickup == day1_pickup}
+
+      next if order_items_for_day.empty?
+
+      ReminderMailer.with(user: order.user, menu: menu, order_items: order_items_for_day).send(mailer).deliver_now
+    end
   end
 end

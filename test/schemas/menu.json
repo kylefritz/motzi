@@ -14,7 +14,6 @@
         "bakersNote",
         "createdAt",
         "items",
-        "addons",
         "isCurrent"
       ],
       "properties": {
@@ -100,59 +99,6 @@
             }
           }
         },
-        "addons": {
-          "type": "array",
-          "title": "menu addons",
-          "items": {
-            "type": "object",
-            "title": "items",
-            "required": ["id", "name", "description", "isAddOn", "menuItemId"],
-            "properties": {
-              "id": {
-                "type": "integer",
-                "title": "id",
-                "default": 0,
-                "examples": [985741370]
-              },
-              "menuItemId": {
-                "type": "integer",
-                "title": "menu item id",
-                "default": 0,
-                "examples": [871309743]
-              },
-              "name": {
-                "type": "string",
-                "title": "name",
-                "default": "",
-                "examples": ["English Muffins"],
-                "pattern": "^(.*)$"
-              },
-              "description": {
-                "type": "string",
-                "title": "description",
-                "default": "",
-                "examples": [
-                  " (with chocolate this week) - Pan style Bavarian rye with Peabody Heights beer."
-                ],
-                "pattern": "^(.*)$"
-              },
-              "isAddOn": {
-                "type": "boolean",
-                "title": "is addon",
-                "default": false
-              },
-              "image": {
-                "type": ["null", "string"],
-                "title": "image",
-                "default": "",
-                "examples": [
-                  "/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBDdz09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--2dadc4cc6c64a137aafd37e542c74cde865363c7/bread-muffins.jpg"
-                ],
-                "pattern": "^(.*)$"
-              }
-            }
-          }
-        },
         "isCurrent": {
           "type": "boolean",
           "title": "is this the current menu?",
@@ -163,15 +109,7 @@
     "user": {
       "type": ["object", "null"],
       "title": "user",
-      "required": [
-        "id",
-        "email",
-        "name",
-        "hashid",
-        "credits",
-        "pickupDay",
-        "breadsPerWeek"
-      ],
+      "required": ["id", "email", "name", "hashid", "credits", "breadsPerWeek"],
       "properties": {
         "id": {
           "type": "integer",
@@ -211,10 +149,6 @@
           "title": "Breads per week",
           "default": 1.0,
           "examples": [0.5, 1.0, 2.0]
-        },
-        "pickupDay": {
-          "type": "string",
-          "title": "Day of the week to pickup bread"
         }
       }
     },

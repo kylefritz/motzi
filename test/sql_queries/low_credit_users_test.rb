@@ -25,14 +25,6 @@ class LowCreditUsersTest < ActiveSupport::TestCase
     end
     assert_equal 0, kyle.credits, 'now kyle has no credits'
     assert_equal 3, exec_low_credit_users.size, 'kyle included in low credit users'
-    
-    # make all the new orders into *skip*, shouldnt charge user
-    new_kyle_orders.each do |order|
-      oi = order.order_items.first
-      oi.update!(item_id: Item::SKIP_ID)
-    end
-    refute_equal 0, kyle.credits, 'kyle should have credits again'
-    assert_equal 2, exec_low_credit_users.size, 'kyle is not in low credit users'
   end
 
   test "dont show users who dont get emails" do
