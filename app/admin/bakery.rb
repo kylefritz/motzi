@@ -20,10 +20,14 @@ ActiveAdmin.register_page "Dashboard" do
         panel "Subscribers" do
           def compute(name, subs)
             total = subs.count
+            orders = Order.for_current_menu.where(user_id: subs.pluck(:id))
+            ordered = orders.not_skip.count
+            skipped = orders.skip.count
             orders = Order.for_current_menu.where(user_id: subs.pluck(:id)).count
             {
-              name: name,
-              orders: orders,
+              type: name,
+              ordered: ordered,
+              skipped: skipped,
               not_ordered: total - orders,
               total: total,
             }
@@ -33,10 +37,11 @@ ActiveAdmin.register_page "Dashboard" do
           weekly = compute("Weekly", customers.must_order_weekly)
           by_type = [weekly, compute("Every Other Week", customers.every_other_week)]
           table_for by_type, class: 'subscribers' do
-            column ("Type") { |h| h[:name] }
-            column ("Ordered") { |h| h[:orders] }
-            column ("Not ordered") { |h| h[:total] - h[:orders] }
-            column ("Total") { |h| h[:total] }
+            column :type
+            column :not_ordered
+            column :ordered
+            column :skipped
+            column(:total) { |h| strong(h[:total]) }
           end
 
           if (num_bakers_choice = weekly[:not_ordered]) > 0
@@ -57,7 +62,7 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
 
-      day1, day2 = Order.for_current_menu.flat_map(&:order_items).partition(&:day1_pickup?)
+      day1, day2 = Order.for_current_menu.includes(order_items: :item).flat_map(&:order_items).partition(&:day1_pickup?)
 
       column id: 'what-to-bake-day1' do
         panel "#{Setting.pickup_day1} - What to bake" do
@@ -135,10 +140,9 @@ ActiveAdmin.register_page "Dashboard" do
       column do
         panel "New Credits - last 2 weeks" do
           credit_items = CreditItem.order('id desc').where("created_at > ?", 2.weeks.ago).includes(:user).limit(20)
-          credits = get_user_credits(credit_items.map(&:user_id))
           table_for credit_items do
             column ("user") { |ci| ci.user }
-            column ("balance") { |ci| credits[ci.user.id] }
+            column ("Amount") { |ci| ci.quantity }
             column ("Credit Added At") { |ci| ci.created_at }
           end
         end

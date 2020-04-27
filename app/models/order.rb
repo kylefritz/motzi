@@ -1,13 +1,14 @@
 class Order < ApplicationRecord
   belongs_to :user
   belongs_to :menu
-  has_many :order_items, dependent: :delete_all
+  has_many :order_items, dependent: :destroy
   has_many :items, through: :order_items
   has_paper_trail
   visitable :ahoy_visit
   scope :with_feedback, -> { where("COALESCE(TRIM(feedback), '') <> ''") }
   scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> '' AND comments <> 'Baker''s Choice'") }
   scope :not_skip, -> { where("skip is FALSE") }
+  scope :skip, -> { where("skip is TRUE") }
 
   def self.for_current_menu
     self.for_menu_id(Menu.current.id)

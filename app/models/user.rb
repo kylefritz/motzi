@@ -2,9 +2,9 @@ class User < ApplicationRecord
   include Hashid::Rails
   default_scope { order("LOWER(first_name), LOWER(last_name)") }
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable, :trackable
-  has_many :credit_items, dependent: :delete_all
+  has_many :credit_items, dependent: :destroy
   has_many :messages, class_name: "Ahoy::Message", as: :user
-  has_many :orders, dependent: :delete_all
+  has_many :orders, dependent: :destroy
   has_many :order_items, through: :orders
   has_many :visits, class_name: "Ahoy::Visit"
   has_paper_trail
@@ -37,7 +37,7 @@ class User < ApplicationRecord
   def credits
     # TODO: not handing credit expiration
     credits_purchased = self.credit_items.pluck('quantity').sum
-    credits_used = self.order_items.not_skip.count
+    credits_used = self.order_items.pluck('quantity').sum
     credits_purchased - credits_used
   end
 
