@@ -52,17 +52,11 @@
           "items": {
             "type": "object",
             "title": "items",
-            "required": ["id", "name", "description", "isAddOn", "menuItemId"],
+            "required": ["id", "name", "description"],
             "properties": {
               "id": {
                 "type": "integer",
                 "title": "id",
-                "default": 0,
-                "examples": [871309743]
-              },
-              "menuItemId": {
-                "type": "integer",
-                "title": "menu item id",
                 "default": 0,
                 "examples": [871309743]
               },
@@ -81,11 +75,6 @@
                   "Mix of modern wheats and ancient Einkorn for the best of both worlds."
                 ],
                 "pattern": "^(.*)$"
-              },
-              "isAddOn": {
-                "type": "boolean",
-                "title": "is addon",
-                "default": false
               },
               "image": {
                 "type": ["null", "string"],

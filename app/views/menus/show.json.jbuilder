@@ -4,8 +4,9 @@ json.menu do
 
   addons, items = @menu.menu_items.partition(&:is_add_on?)
 
-  json.items items.map do |menu_item|
-    json.partial! "menus/item.json.jbuilder", menu_item: menu_item
+  json.items [items.map(&:item), Item.pay_it_forward].flatten.map do |item|
+    json.extract! item, :id, :name, :description
+    json.image item.image_path
   end
 end
 

@@ -20,24 +20,6 @@ exports[`Order snapshot 1`] = `
     }
     menu={
       Object {
-        "addons": Array [
-          Object {
-            "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
-            "id": 1,
-            "image": "bread2-002.webp",
-            "isAddOn": true,
-            "menuItemId": 993690592,
-            "name": "Classic",
-          },
-          Object {
-            "description": "",
-            "id": 3,
-            "image": "bread-baguette.jpg",
-            "isAddOn": true,
-            "menuItemId": 993690591,
-            "name": "Baguette",
-          },
-        ],
         "bakersNote": "Orci varius",
         "createdAt": "2019-11-02T14:01:23.820-04:00",
         "id": 921507399,
@@ -47,23 +29,17 @@ exports[`Order snapshot 1`] = `
             "description": "",
             "id": 3,
             "image": "bread-baguette.jpg",
-            "isAddOn": false,
-            "menuItemId": 993690591,
             "name": "Baguette",
           },
           Object {
             "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
             "id": 1,
             "image": "bread2-002.webp",
-            "isAddOn": false,
-            "menuItemId": 993690592,
             "name": "Classic",
           },
           Object {
             "description": "Skip this week.",
             "id": 0,
-            "isAddOn": false,
-            "menuItemId": 0,
             "name": "Skip",
           },
         ],

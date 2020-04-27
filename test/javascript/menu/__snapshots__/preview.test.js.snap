@@ -18,51 +18,22 @@ exports[`Preview snapshot 1`] = `
       description=""
       id={3}
       image="bread-baguette.jpg"
-      isAddOn={false}
       key="3"
-      menuItemId={993690591}
       name="Baguette"
     />
     <Item
       description="Mix of modern wheats and ancient Einkorn for the best of both worlds."
       id={1}
       image="bread2-002.webp"
-      isAddOn={false}
       key="1"
-      menuItemId={993690592}
       name="Classic"
     />
     <Item
       description="Skip this week."
       id={0}
-      isAddOn={false}
       key="0"
-      menuItemId={0}
       name="Skip"
     />
-  </div>
-  <h5>
-    Add-Ons
-  </h5>
-  <div
-    className="row mt-3 mb-5"
-  >
-    <div
-      className="col"
-    >
-      <ul>
-        <li
-          key="1"
-        >
-          Classic
-        </li>
-        <li
-          key="3"
-        >
-          Baguette
-        </li>
-      </ul>
-    </div>
   </div>
 </Fragment>
 `;

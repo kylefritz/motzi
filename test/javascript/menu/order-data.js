@@ -11,8 +11,6 @@ export default {
         name: "Baguette",
         description: "",
         image: "bread-baguette.jpg",
-        isAddOn: false,
-        menuItemId: 993690591,
       },
       {
         id: 1,
@@ -20,34 +18,11 @@ export default {
         description:
           "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
         image: "bread2-002.webp",
-        isAddOn: false,
-        menuItemId: 993690592,
       },
       {
         id: 0,
         name: "Skip",
         description: "Skip this week.",
-        isAddOn: false,
-        menuItemId: 0,
-      },
-    ],
-    addons: [
-      {
-        id: 1,
-        name: "Classic",
-        description:
-          "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
-        image: "bread2-002.webp",
-        isAddOn: true,
-        menuItemId: 993690592,
-      },
-      {
-        id: 3,
-        name: "Baguette",
-        description: "",
-        image: "bread-baguette.jpg",
-        isAddOn: true,
-        menuItemId: 993690591,
       },
     ],
   },
