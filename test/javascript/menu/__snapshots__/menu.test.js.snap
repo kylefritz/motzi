@@ -128,13 +128,12 @@ exports[`Menu snapshot 1`] = `
       <textarea
         className="form-control"
         onChange={[Function]}
-        placeholder="Special requests or concerns"
+        placeholder="Comments or special requests"
       />
     </div>
   </div>
   <Cart
     cart={Array []}
-    isSkipping={false}
     menu={
       Object {
         "addons": Array [
@@ -188,6 +187,7 @@ exports[`Menu snapshot 1`] = `
       }
     }
     rmCartItem={[Function]}
+    skip={false}
   />
   <div
     className="row mt-2 mb-3"
