@@ -3,9 +3,8 @@ import _ from "lodash";
 
 export default function User({
   id: userId,
-  firstName,
-  lastName,
-  pickupDay,
+  name,
+  hashid,
   credits,
   breadsPerWeek,
   onPickBread,
@@ -17,17 +16,22 @@ export default function User({
 
   return (
     <tr>
-      <td>{firstName}</td>
-      <td>{lastName}</td>
+      <td>
+        <a href={`/admin/users/${userId}`}>{name}</a>
+      </td>
       <td>{credits}</td>
       <td>{breadsPerWeek}</td>
-      <td>{pickupDay}</td>
       <td>
         {menu.items.map(({ id, name }) => (
           <button key={id} onClick={() => handleClick(id)}>
             {name}
           </button>
         ))}
+      </td>
+      <td>
+        <a href={`/menu?uid=${hashid}`} target="_blank">
+          Order with real menu
+        </a>
       </td>
     </tr>
   );

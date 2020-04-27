@@ -165,9 +165,10 @@ ActiveAdmin.register Menu do
       menu = Menu.current
       user = User.find(params[:user_id])
       item = Item.find(params[:item_id])
+      day1_pickup = !(Setting.pickup_day2.casecmp?(params[:day])) # default to day 1
       order = Order.transaction do
         user.orders.create!(menu: menu, comments: "Baker's Choice").tap do |order|
-          order.order_items.create!(item: item)
+          order.order_items.create!(item: item, day1_pickup: day1_pickup)
         end
       end
 

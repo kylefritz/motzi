@@ -16,7 +16,7 @@ ActiveAdmin.register Order do
     column :user
     column :items do |order|
       # TODO: show item day, quantity
-      render partial: 'admin/orders/items', locals: {items: order.order_items.map(&:item)}
+      render partial: 'admin/orders/order_items', locals: {order_items: order.order_items}
     end
     column :feedback
     column :comments
@@ -31,7 +31,7 @@ ActiveAdmin.register Order do
       row :feedback
       row :comments
       row :order_items do
-        render partial: 'admin/orders/items', locals: {items: order.items}
+        render partial: 'admin/orders/order_items', locals: {order_items: order.order_items}
       end
       row :pickup_day
       row :created_at
