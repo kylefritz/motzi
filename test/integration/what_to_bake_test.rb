@@ -15,11 +15,11 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
 
     assert_equal 3, menus(:week1).orders.count
 
+    assert_el_count 2, '.subscribers tbody tr', 'subscribers summary weekly & semi-weekly'
+
     assert_el_count 1, '#what-to-bake-day1'
-    assert_el_count 2, '#what-to-bake-day1 .subscribers tbody tr', 'weekly & semi-weekly'
     assert_el_count 2, '#what-to-bake-day1 .breads tbody tr', 'two breads for adrian & kyle; plus 1 bakers choice'
     assert_el_count 1, '#what-to-bake-day2'
-    assert_el_count 2, '#what-to-bake-day1 .subscribers tbody tr', 'weekly & semi-weekly'
     assert_el_count 1, '#what-to-bake-day2 .breads tbody tr', 'bread for ljf'
   end
 
@@ -30,8 +30,6 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
     assert_el_count 1, '#pickup-list'
     assert_el_count 2, '#pickup-list tbody tr', 'adrian, kyle'
     assert_el_count 2, '#by-bread .column', 'classic, pumpkin'
-    assert_el_count 1, '#not-ordered', 'exists'
-    assert_el_count 0, '#not-ordered tbody tr', 'no one'
   end
 
   test "day2 pickup list" do
@@ -40,7 +38,6 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
 
     assert_el_count 1, '#pickup-list'
     assert_el_count 1, '#pickup-list tbody tr', 'ljf'
-    assert_el_count 1, '#not-ordered tbody tr', 'jess'
   end
 
   private

@@ -6,11 +6,9 @@ Please call us at <%= Setting.motzi_phone %> if you have any questions or issues
 
 <%= @menu.day_of_note %>
 
-<% if @order.present? %>
 You ordered:
-<% @order.items.map do |i| %>
- * <%= i.name %>
-<% end %>
+<% @order_items.map do |oi| %>
+<%= oi.quantity %>x <%= oi.item.name %>
 <% end %>
 
 You have <%= @user.credits %> credits remaining.

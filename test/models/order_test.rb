@@ -17,18 +17,6 @@ class OrderTest < ActiveSupport::TestCase
     assert_equal 2, kyle.orders.count
   end
 
-  test "skip" do
-    kyle = users(:kyle)
-    order = kyle.orders.create!(menu: menus(:week2))
-    assert order.skip?, 'no items means skip'
-
-    order.order_items.create(item: Item.skip)
-    assert order.skip?, 'skip item means skip'
-
-    order.order_items.create(item: items(:classic))
-    refute order.skip?, 'any item means not skip'
-  end
-
   test "with_feedback" do
     assert_difference 'Order.with_feedback.size', 1 do
       Order.create!(feedback: 'asd', menu: menus(:week2), user: users(:ljf))
@@ -55,76 +43,8 @@ class OrderTest < ActiveSupport::TestCase
     end
 
     assert_difference 'Order.with_comments.size', 0, 'Baker\'s choice isnt a comment' do
-      Order.create!(comments: Item.bakers_choice.name, menu: menus(:week2), user: users(:ljf))
+      Order.create!(comments: Order::BAKERS_CHOICE, menu: menus(:week2), user: users(:ljf))
     end
-  end
-
-  test "pickup_day" do
-    menu = menus(:week3) # no orders
-    menu.make_current!
-
-    assert_difference 'Menu.current.orders.day1_pickup.size', 0, 'no day1 order' do
-      assert_difference 'Menu.current.orders.day2_pickup.size', 1, 'add day2 order' do
-        thurs_user = users(:ljf)
-        assert thurs_user.day2_pickup?, 'picks up thursday'
-        Order.create!(menu: menu, user: thurs_user)
-      end
-    end
-
-    assert_difference 'Menu.current.orders.day2_pickup.size', 0, 'no day2 order' do
-      assert_difference 'Menu.current.orders.day1_pickup.size', 1, 'add day1 order' do
-        day1_user = users(:kyle)
-        assert day1_user.day1_pickup?, 'picks up day1'
-        Order.create!(menu: menu, user: day1_user)
-      end
-    end
-
-    orders = menus(:week1).orders
-    assert_equal orders.size, orders.day1_pickup.size + orders.day2_pickup.size, 'day1+day2=total'
-
-    orders = menus(:week2).orders
-    assert_equal orders.size, orders.day1_pickup.size + orders.day2_pickup.size, 'day1+day2=total'
-  end
-
-  test "day1_pickup_maybe" do
-    menu = menus(:week3) # no orders
-    menu.make_current!
-    assert_equal 0, Menu.current.orders.size
-
-    thurs_user = users(:ljf)
-    assert thurs_user.day2_pickup?, 'picks up thursday'
-    order = Order.create!(menu: menu, user: thurs_user)
-    assert_equal 1, Menu.current.orders.size
-
-    assert order.day2_pickup?, 'picks up thursday'
-    assert_equal 1, Menu.current.orders.day2_pickup.size
-
-    order.update!(day1_pickup_maybe: true)
-    assert_equal 1, Menu.current.orders.day1_pickup.size, 'order moves to day1'
-    assert_equal 0, Menu.current.orders.day2_pickup.size, 'order moves to day1'
-  end
-
-  test "current_order when we have 2 orders" do
-    menu = menus(:week3) # no orders
-    menu.make_current!
-
-    user = users(:ljf)
-    day1 = Order.create!(menu: menu, user: user, day1_pickup_maybe: true)
-    day2 = Order.create!(menu: menu, user: user, day1_pickup_maybe: false)
-    assert_equal 2, Menu.current.orders.size
-    assert_equal 2, user.orders.where(menu: menu).size
-
-    with_known_day(:tues) do
-      assert_equal day1, user.current_order, 'default get day1'
-    end
-    with_known_day(:wed) do
-      assert_equal day1, user.current_order, 'default get day1'
-    end
-    with_known_day(:thurs) do
-      assert Time.zone.now.day2_pickup?, 'should be day2 now'
-      assert_equal day2, user.current_order, 'only on day2 do we get day2 order'
-    end
-    refute_nil user.current_order, 'regardless of day we get one of them'
   end
 
   private

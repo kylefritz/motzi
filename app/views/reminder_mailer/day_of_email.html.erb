@@ -7,13 +7,14 @@
     <%= @menu.day_of_note_html %>
 </div>
 
-<% if @order.present? %>
 <p>You ordered:</p>
-<ul>
-    <% @order.items.map do |i| %>
-    <li><%= i.name %></li>
+<table>
+    <% @order_items.map do |oi| %>
+    <tr>
+        <td><%= oi.quantity %>x</td>
+        <td><%= oi.item.name %></td>
+    </tr>
     <% end %>
-</ul>
-<% end %>
+</table>
 
 <p>You have <%= @user.credits %> credits remaining.</p>

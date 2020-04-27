@@ -65,7 +65,7 @@ export default class App extends React.Component {
     if (!(allItems && menu)) {
       return <h2>Loading</h2>;
     }
-    const { addons, items } = menu;
+    const { items } = menu;
     const makeSet = (menuItems) => new Set(menuItems.map(({ name }) => name));
 
     return (
@@ -91,29 +91,6 @@ export default class App extends React.Component {
           items={allItems}
           not={makeSet(items)}
           onAdd={(itemId) => this.handleAddItem({ itemId, isAddOn: false })}
-        />
-        <hr />
-        <h4>Add-ons</h4>
-        <table>
-          <tbody>
-            {addons.map((i) => (
-              <Item
-                key={i.menuItemId}
-                {...i}
-                onRemove={this.handleRemoveMenuItem.bind(this)}
-              />
-            ))}
-          </tbody>
-        </table>
-        {addons.length == 0 && (
-          <p>
-            <em>no add-ons</em>
-          </p>
-        )}
-        <Adder
-          items={allItems}
-          not={makeSet(addons)}
-          onAdd={(itemId) => this.handleAddItem({ itemId, isAddOn: true })}
         />
       </div>
     );

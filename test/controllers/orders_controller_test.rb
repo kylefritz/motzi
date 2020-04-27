@@ -23,7 +23,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
   def order_attrs
     item_id = Menu.current.items.first.id
-    order_attrs = {comment: 'test order', feedback: 'last week was great', items: [item_id]}
+    order_attrs = {comment: 'test order', feedback: 'last week was great', cart: [{item_id: item_id}]}
   end
 
   def assert_order_placed(params=nil)

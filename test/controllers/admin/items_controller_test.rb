@@ -18,7 +18,7 @@ class Admin::ItemsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     json  = @response.body
     assert json =~ /Classic/, 'items serialized'
-    assert json =~ /Baker's Choice/, 'items serialized'
+    assert json =~ /Pay it forward/, 'items serialized'
     items = JSON.load(json)
 
     validate_json_schema :admin_items, json

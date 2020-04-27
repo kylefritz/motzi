@@ -2,16 +2,14 @@ class User < ApplicationRecord
   include Hashid::Rails
   default_scope { order("LOWER(first_name), LOWER(last_name)") }
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable, :trackable
-  has_many :credit_items
+  has_many :credit_items, dependent: :destroy
   has_many :messages, class_name: "Ahoy::Message", as: :user
-  has_many :orders # must come before order_items
+  has_many :orders, dependent: :destroy
   has_many :order_items, through: :orders
   has_many :visits, class_name: "Ahoy::Visit"
   has_paper_trail
   scope :for_weekly_email, -> { where(send_weekly_email: true) }
   scope :no_weekly_email, -> { where(send_weekly_email: false) }
-  scope :day1_pickup, -> { customers.where(day1_pickup: true) }
-  scope :day2_pickup, -> { customers.where(day1_pickup: false) }
   scope :must_order_weekly, -> { customers.where("breads_per_week >= 1") }
   scope :every_other_week, -> { customers.where("breads_per_week = 0.5") }
   scope :customers, -> { not_owners.for_weekly_email }
@@ -29,14 +27,6 @@ class User < ApplicationRecord
     User.where(id: must_order - have_ordered)
   end
 
-  def day2_pickup?
-    !self.day1_pickup?
-  end
-
-  def pickup_day
-    self.day1_pickup? ? Setting.pickup_day1 : Setting.pickup_day2
-  end
-
   def must_order_weekly?
     self.breads_per_week >= 1
   end
@@ -47,7 +37,7 @@ class User < ApplicationRecord
   def credits
     # TODO: not handing credit expiration
     credits_purchased = self.credit_items.pluck('quantity').sum
-    credits_used = self.order_items.not_skip.count
+    credits_used = self.order_items.pluck('quantity').sum
     credits_purchased - credits_used
   end
 
@@ -68,9 +58,12 @@ class User < ApplicationRecord
   end
 
   def order_for_menu(menu_id)
-    # NB: order_for_menu logic is wacky; different value depending on day or week
-    sort_dir = Time.zone.now.day2_pickup? ? :asc : :desc
-    orders.where(menu_id: menu_id).includes(order_items: [:item]).order(day1_pickup_maybe: sort_dir).first
+    # TODO: can an menu have more than one order?
+    menu_orders = orders.where(menu_id: menu_id).includes(order_items: [:item])
+    if menu_orders.size > 1
+      logger.warn "user=#{user.id} has more than 1 order for menu #{menu_id}"
+    end
+    menu_orders.first
   end
 
   #

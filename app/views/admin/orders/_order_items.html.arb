@@ -1,0 +1,27 @@
+def for_day(day_name, order_items)
+  if order_items.empty?
+    return
+  end
+
+  counts = Hash.new(0)
+  order_items.each { |oi| counts[oi.item.name] += oi.quantity }
+
+  div do
+    strong("#{day_name}: ")
+
+    items = counts.keys.natural_sort
+    items.each_with_index do |name, i|
+      is_last = i+1 == items.size
+      span do
+        if (count = counts[name]) > 1
+          strong "#{count}x "
+        end
+        span "#{name}#{is_last ? "": ","}"
+      end
+    end
+  end
+end
+
+day1, day2 = order_items.partition(&:day1_pickup)
+for_day(Setting.pickup_day1_abbr, day1)
+for_day(Setting.pickup_day2_abbr, day2)

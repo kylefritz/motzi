@@ -9,11 +9,6 @@ class UserTest < ActiveSupport::TestCase
     assert_equal maya.id, User.maya.id
   end
 
-  test "day1 vs day2 pickup of the week" do
-    assert users(:kyle).day1_pickup?
-    refute users(:ljf).day1_pickup?
-  end
-
   test "credits remaining" do
     assert_equal 0, users(:ljf).credits
     assert_equal 23, users(:kyle).credits
@@ -24,14 +19,6 @@ class UserTest < ActiveSupport::TestCase
     kyle = users(:kyle)
     assert_difference 'kyle.credits', -1, 'added an item' do
       kyle.current_order.order_items.create!(item: items(:classic))
-    end
-  end
-
-  test "skips dont cost credits" do
-    menus(:week2).make_current!
-    kyle = users(:kyle)
-    assert_difference 'kyle.credits', 0, 'added a skip item' do
-      kyle.current_order.order_items.create!(item: Item.skip)
     end
   end
 
@@ -65,22 +52,6 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 1, User.every_other_week.count
     assert_equal users(:jess).id, User.every_other_week.first.id
     assert User.every_other_week.first.every_other_week?
-  end
-
-  test "day1_pickup" do
-    assert_equal 2, User.day1_pickup.count, 'kf, adrian'
-    assert User.day1_pickup.first.day1_pickup?
-  end
-
-  test "day2" do
-    assert_equal 2, User.day2_pickup.count, 'ljf & jess'
-    assert User.day2_pickup.first.day2_pickup?
-  end
-
-  test "only sends to weekly" do
-    User.all.update_all(send_weekly_email: false)
-    assert_equal 0, User.day1_pickup.count
-    assert_equal 0, User.day2_pickup.count
   end
 
   test "customers" do

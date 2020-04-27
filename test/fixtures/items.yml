@@ -1,14 +1,10 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 # special items
-skip:
-  id: <%= Item::SKIP_ID %>
-  name: Skip
-  description: skip this week
-
-bakers_choice:
-  name: <%= Item::BAKERS_CHOICE %>
-  description: you're late; we pick
+pay_it_foward:
+  id: <%= Item::PAY_IT_FORWARD_ID %>
+  name: Pay it forward
+  description: buy for someone else
 
 # regular
 classic:

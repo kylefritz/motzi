@@ -1,42 +1,45 @@
 tabs do
   tab :orders do
-    table_for assigns[:orders].sort_by {|o| o.user.sort_key }, id: 'pickup-list' do
-      column ("Last Name") { |order| order.user.last_name.presence || order.user.email }
-      column ("First Name") { |order| order.user.first_name }
-      column ("Items") do |order|
-        render partial: 'admin/orders/items', locals: {items: order.order_items.map(&:item)}
+    table_for assigns[:rows].sort_by {|user, _| user.sort_key }, id: 'pickup-list' do
+      column ("Last Name") { |user, _| user.last_name.presence || user.email }
+      column ("First Name") { |user, _| user.first_name }
+      column ("Items") do |user, order_items|
+        render partial: 'admin/orders/order_items', locals: {order_items: order_items}
       end
-      column ("Sign") { |order| "" }
+      column ("Sign") { "" }
     end
   end
   tab :by_bread do
     columns do
       {}.tap do |breads|
-        assigns[:orders].each do |o|
-          o.order_items.map(&:item).each do |i|
-            unless breads.key?(i.name)
-              breads[i.name] = []
+        assigns[:rows].each do |user, order_items|
+          order_items.each do |oi|
+            item_name = oi.item.name
+            unless breads.key?(item_name)
+              breads[item_name] = []
             end
-            breads[i.name].push(o.user)
+            breads[item_name].push([user, oi.quantity])
           end
         end
-      end.entries.sort_by {|bread,_| bread}.map do |bread, users|
+      end.entries.sort_by {|bread,_| bread}.map do |bread, rows|
+        users = Hash.new(0).tap do |counts|
+          rows.each { |user, quantity| counts[user.name.downcase] += quantity }
+        end
+
         column do
           h3 bread
           ol do
-            users.sort_by {|user| user.name.downcase }.map do |user|
-              li user.name # auto_link(user)
+            users.entries.sort_by {|user, _| user }.map do |user, quantity|
+              li do
+                span user
+                if quantity > 1
+                  strong("x#{quantity}")
+                end
+              end
             end
           end
         end
       end
-    end
-  end
-  tab :not_ordered do
-    table_for assigns[:users_not_ordered].sort_by(&:sort_key) do
-      column ("Last Name") { |user| user.last_name.presence || user.email }
-      column ("First Name") { |user| user.first_name }
-      column ("Breads per week") { |user| user.breads_per_week }
     end
   end
 end

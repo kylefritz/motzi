@@ -143,14 +143,17 @@ ActiveAdmin.register Menu do
 
   # metaprogramming for day1_pickup, day2_pickup
   [1, 2].each do |day|
+    day1_pickup = day == 1
     pickup_day = "day#{day}_pickup"
 
     collection_action "pickup_day#{day}" do
-      @orders = Menu.current.orders.send(pickup_day).includes(:user).includes({order_items: :item})
-      @users_not_ordered = User.send(pickup_day).where.not(id: @orders.pluck(:user_id))
-
-      # don't show skip orders on list
-      @orders = @orders.reject(&:skip?)
+      orders = Menu.current.orders.not_skip.includes(:user).includes({order_items: :item})
+      @rows = orders.map do |order|
+        order_items = order.order_items.filter {|oi| oi.day1_pickup == day1_pickup}
+        unless order_items.empty?
+          [order.user, order_items]
+        end
+      end.compact
 
       @page_title = Setting.send("pickup_day#{day}")
       render :pickup_list
@@ -162,9 +165,10 @@ ActiveAdmin.register Menu do
       menu = Menu.current
       user = User.find(params[:user_id])
       item = Item.find(params[:item_id])
+      day1_pickup = !(Setting.pickup_day2.casecmp?(params[:day])) # default to day 1
       order = Order.transaction do
-        user.orders.create!(menu: menu, comments: "Baker's Choice").tap do |order|
-          order.order_items.create!(item: item)
+        user.orders.create!(menu: menu, comments: Order::BAKERS_CHOICE).tap do |order|
+          order.order_items.create!(item: item, day1_pickup: day1_pickup)
         end
       end
 

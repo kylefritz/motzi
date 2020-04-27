@@ -3,53 +3,74 @@
 exports[`Order snapshot 1`] = `
 <Fragment>
   <h2
-    className="mt-5"
+    className="mt-5 mb-4"
   >
     We got your order!
   </h2>
-  <div
-    className="row mt-5"
-  >
-    <div
-      className="col-sm-4"
-    />
-    <div
-      className="col-sm-4"
-    >
-      <h5
-        className="mb-3"
-      >
-        <span
-          className="pr-2"
-        >
-          Pickup:
-        </span>
-        <span
-          className="text-success"
-        >
-          Thursday
-        </span>
-      </h5>
-      <h5>
-        Items
-      </h5>
-      <ul>
-        <li
-          key="0"
-        >
-          Baguette
-        </li>
-        <li
-          key="1"
-        >
-          Classic
-        </li>
-      </ul>
-    </div>
-    <div
-      className="col-sm-4"
-    />
-  </div>
+  <Cart
+    cart={
+      Array [
+        Object {
+          "itemId": 3,
+        },
+        Object {
+          "itemId": 1,
+        },
+      ]
+    }
+    menu={
+      Object {
+        "addons": Array [
+          Object {
+            "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
+            "id": 1,
+            "image": "bread2-002.webp",
+            "isAddOn": true,
+            "menuItemId": 993690592,
+            "name": "Classic",
+          },
+          Object {
+            "description": "",
+            "id": 3,
+            "image": "bread-baguette.jpg",
+            "isAddOn": true,
+            "menuItemId": 993690591,
+            "name": "Baguette",
+          },
+        ],
+        "bakersNote": "Orci varius",
+        "createdAt": "2019-11-02T14:01:23.820-04:00",
+        "id": 921507399,
+        "isCurrent": true,
+        "items": Array [
+          Object {
+            "description": "",
+            "id": 3,
+            "image": "bread-baguette.jpg",
+            "isAddOn": false,
+            "menuItemId": 993690591,
+            "name": "Baguette",
+          },
+          Object {
+            "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
+            "id": 1,
+            "image": "bread2-002.webp",
+            "isAddOn": false,
+            "menuItemId": 993690592,
+            "name": "Classic",
+          },
+          Object {
+            "description": "Skip this week.",
+            "id": 0,
+            "isAddOn": false,
+            "menuItemId": 0,
+            "name": "Skip",
+          },
+        ],
+        "name": "week 5",
+      }
+    }
+  />
   <User
     user={
       Object {

@@ -40,7 +40,7 @@ export default class App extends React.Component {
       return;
     }
 
-    console.debug("creating order", order);
+    console.log("creating order", order);
     axios
       .post("/orders.json", order)
       .then(({ data }) => {

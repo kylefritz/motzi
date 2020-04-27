@@ -1,169 +1,187 @@
-import React from "react";
-
-import Item from "./Item.js";
-import AddOn from "./AddOn.js";
-import BakersNote from "./BakersNote.js";
-import User from "./User.js";
-import BuyCredits from "../buy/App";
+import React, { useState } from "react";
 import _ from "lodash";
-import Day from "./Day";
-import Quantity from "./Quantity.js";
 
-export default class Menu extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { selectedItem: null, addOns: {}, day: "thursday" };
-  }
-  handleItemSelected(itemId) {
-    this.setState({ selectedItem: itemId });
-  }
-  handleAddOnSelected(itemId, quantity) {
-    let { addOns } = this.state;
-    if (quantity < 1) {
-      delete addOns[itemId];
-    } else {
-      addOns[itemId] = quantity;
-    }
-    this.setState({ addOns });
-  }
-  handleComments(e) {
-    this.setState({ comments: e.target.value });
-  }
-  handleFeedback(e) {
-    this.setState({ feedback: e.target.value });
-  }
-  handleDay(day) {
-    this.setState({ day });
-  }
-  handleCreateOrder() {
-    const { selectedItem, addOns, feedback, comments, day } = this.state;
-    if (_.isNil(selectedItem)) {
-      alert("Select a bread!");
+import Item from "./Item";
+import BakersNote from "./BakersNote";
+import User from "./User";
+import Cart from "./Cart";
+import BuyCredits from "../buy/App";
+import { PayItForward } from "./PayItForward";
+import createMenuItemLookup from "./createMenuItemLookup";
+
+export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
+  const [cart, setCart] = useState([]);
+  const [skip, setSkip] = useState(false);
+  const [feedback, setFeedback] = useState();
+  const [comments, setComments] = useState([]);
+
+  const addToCart = (itemId, quantity, day) => {
+    console.log("addToCart", itemId, quantity, day);
+    setCart([...cart, { itemId, quantity, day }]);
+  };
+
+  const rmCartItem = (itemId, quantity, day) => {
+    const index = _.findIndex(
+      cart,
+      (ci) => ci.itemId === itemId && ci.quantity === quantity && ci.day === day
+    );
+    const nextCart = [...cart];
+    nextCart.splice(index, 1);
+    setCart(nextCart);
+  };
+
+  const handleSkip = () => {
+    setSkip(true);
+    setCart([]);
+  };
+
+  const handleCreateOrder = () => {
+    if (_.isEmpty(cart) && !skip) {
+      alert("Make a selection!");
       return;
     }
 
-    const { user } = this.props;
-    let order = { feedback, comments, items: [], uid: user.hashid, day };
-
-    order.items.push(selectedItem);
-
-    Object.entries(addOns).forEach(([addOn, quantity]) => {
-      _.times(quantity).forEach(() => order.items.push(addOn));
+    onCreateOrder({
+      feedback,
+      comments,
+      cart,
+      uid: user.hashid,
+      skip,
     });
+  };
 
-    this.props.onCreateOrder(order);
-  }
-  render() {
-    const { menu, user, onRefreshUser } = this.props;
-    const { name, bakersNote, items, addons, isCurrent } = menu;
+  const { name, bakersNote, items, isCurrent } = menu;
+  const { skip: skipItem, payItForward } = createMenuItemLookup(menu);
 
-    if (user && user.credits < 1) {
-      // time to buy credits!
-      return (
-        <>
-          <User user={user} />
-          <BuyCredits onComplete={onRefreshUser} />
-        </>
-      );
-    }
-
+  if (user && user.credits < 1) {
+    // time to buy credits!
     return (
       <>
-        <User user={user} onRefreshUser={onRefreshUser} />
-
-        {/* if low, show nag to buy credits*/}
-        {user && user.credits < 4 && <BuyCredits onComplete={onRefreshUser} />}
-
-        <h2>{name}</h2>
-
-        <BakersNote {...{ bakersNote }} />
-
-        <h5>We'd love your feedback on last week's loaf.</h5>
-        <div className="row mt-3 mb-5">
-          <div className="col">
-            <textarea
-              className="form-control"
-              placeholder="What did you think?"
-              onChange={this.handleFeedback.bind(this)}
-            />
-          </div>
-        </div>
-
-        <h5>Pickup day</h5>
-        <div className="row mt-3">
-          <Day
-            name="thursday"
-            description="11am to 7pm"
-            checked
-            onChange={this.handleDay.bind(this)}
-          />
-          <Day
-            name="saturday"
-            description="11am to 7pm"
-            onChange={this.handleDay.bind(this)}
-          />
-        </div>
-
-        <h5>Items</h5>
-        <div className="row mt-3">
-          {items.map((i) => (
-            <Item
-              key={i.id}
-              {...i}
-              onChange={() => this.handleItemSelected(i.id)}
-            />
-          ))}
-        </div>
-
-        {!!addons.length && (
-          <>
-            <h5>Add-Ons</h5>
-            <div className="row mt-3 mb-5">
-              <div className="col">
-                {addons.map((i) => (
-                  <AddOn
-                    key={i.id}
-                    {...i}
-                    onChange={(quantity) =>
-                      this.handleAddOnSelected(i.id, quantity)
-                    }
-                  />
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        <h5>Special Requests</h5>
-        <div className="row mt-3 mb-5">
-          <div className="col">
-            <textarea
-              placeholder="Special requests or concerns"
-              onChange={this.handleComments.bind(this)}
-              className="form-control"
-            />
-          </div>
-        </div>
-
-        <div className="row mt-3 mb-5">
-          <div className="col">
-            <button
-              onClick={this.handleCreateOrder.bind(this)}
-              disabled={!isCurrent}
-              title={
-                isCurrent
-                  ? null
-                  : "This is not the current menu; you cannot submit an order."
-              }
-              className="btn btn-primary btn-lg btn-block"
-              type="submit"
-            >
-              Submit Order
-            </button>
-          </div>
-        </div>
-        <User user={user} onRefreshUser={onRefreshUser} />
+        <User user={user} />
+        <p className="my-2">
+          We love baking yummy things for you but you're out of credits.
+        </p>
+        <BuyCredits onComplete={onRefreshUser} />
       </>
     );
   }
+
+  return (
+    <>
+      <User user={user} onRefreshUser={onRefreshUser} />
+
+      {/* if low, show nag to buy credits*/}
+      {user && user.credits < 4 && <BuyCredits onComplete={onRefreshUser} />}
+
+      <h2>{name}</h2>
+
+      <BakersNote {...{ bakersNote }} />
+
+      <h5>We'd love your feedback on last week's loaf.</h5>
+      <div className="row mt-2 mb-3">
+        <div className="col">
+          <textarea
+            className="form-control"
+            placeholder="What did you think?"
+            onChange={(e) => setFeedback(e.target.value)}
+          />
+        </div>
+      </div>
+      <h5>Menu</h5>
+      {skip ? (
+        <>
+          <p>
+            <strong>You'll skip this week.</strong>&nbsp;
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setSkip(false);
+              }}
+              className="ml-1"
+            >
+              <small>I want to order</small>
+            </a>
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="row mt-2">
+            {items
+              .filter(({ id }) => id !== skipItem.id && id !== payItForward.id)
+              .map((i) => (
+                <Item
+                  key={i.id}
+                  {...i}
+                  onChange={({ quantity, day }) =>
+                    addToCart(i.id, quantity, day)
+                  }
+                />
+              ))}
+          </div>
+
+          <h5>Skip this week?</h5>
+          <div className="row">
+            <div className="col-6 mb-3">
+              <div className="mb-2">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-dark"
+                  onClick={handleSkip}
+                >
+                  Skip
+                </button>
+              </div>
+              <div style={{ lineHeight: "normal" }}>
+                <small>
+                  {skipItem.description}{" "}
+                  <em>Removes any selected items from order.</em>
+                </small>
+              </div>
+            </div>
+          </div>
+
+          <h5>Pay it forward</h5>
+          <div className="row">
+            <div className="col-6 mb-3">
+              <PayItForward
+                description={payItForward.description}
+                onChange={({ quantity, day }) => addToCart(-1, quantity, day)}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      <h5>Special Requests</h5>
+      <div className="row mt-2 mb-3">
+        <div className="col">
+          <textarea
+            placeholder="Comments or special requests"
+            onChange={(e) => setComments(e.target.value)}
+            className="form-control"
+          />
+        </div>
+      </div>
+      <Cart {...{ cart, menu, rmCartItem, skip }} />
+      <div className="row mt-2 mb-3">
+        <div className="col">
+          <button
+            onClick={handleCreateOrder}
+            disabled={!isCurrent}
+            title={
+              isCurrent
+                ? null
+                : "This is not the current menu; you cannot submit an order."
+            }
+            className="btn btn-primary btn-lg btn-block"
+            type="submit"
+          >
+            Submit Order
+          </button>
+        </div>
+      </div>
+      <User user={user} onRefreshUser={onRefreshUser} />
+    </>
+  );
 }
