@@ -11,7 +11,7 @@ end
 
 json.user do
   if @user
-    json.extract! @user, :id, :name, :email, :hashid, :credits, :pickup_day, :breads_per_week
+    json.extract! @user, :id, :name, :email, :hashid, :credits, :breads_per_week
   else
     json.null!
   end

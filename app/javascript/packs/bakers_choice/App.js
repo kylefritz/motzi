@@ -37,3 +37,11 @@ export default function BakersChoice() {
     </table>
   );
 }
+
+// tab :not_ordered do
+//     table_for assigns[:users_not_ordered].sort_by(&:sort_key) do
+//         column ("Last Name") { |user| user.last_name.presence || user.email }
+//         column ("First Name") { |user| user.first_name }
+//         column ("Breads per week") { |user| user.breads_per_week }
+//     end
+// end

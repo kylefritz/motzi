@@ -10,8 +10,6 @@ class User < ApplicationRecord
   has_paper_trail
   scope :for_weekly_email, -> { where(send_weekly_email: true) }
   scope :no_weekly_email, -> { where(send_weekly_email: false) }
-  scope :day1_pickup, -> { customers.where(day1_pickup: true) }
-  scope :day2_pickup, -> { customers.where(day1_pickup: false) }
   scope :must_order_weekly, -> { customers.where("breads_per_week >= 1") }
   scope :every_other_week, -> { customers.where("breads_per_week = 0.5") }
   scope :customers, -> { not_owners.for_weekly_email }
@@ -27,14 +25,6 @@ class User < ApplicationRecord
     must_order = User.must_order_weekly.pluck(:id)
     have_ordered = Order.for_current_menu.where(user_id: must_order).pluck(:user_id)
     User.where(id: must_order - have_ordered)
-  end
-
-  def day2_pickup?
-    !self.day1_pickup?
-  end
-
-  def pickup_day
-    self.day1_pickup? ? Setting.pickup_day1 : Setting.pickup_day2
   end
 
   def must_order_weekly?

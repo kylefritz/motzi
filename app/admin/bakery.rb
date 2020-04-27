@@ -16,30 +16,39 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
 
+      column do
+        panel "Subscribers" do
+          def compute(name, subs)
+            total = subs.count
+            orders = Order.for_current_menu.where(user_id: subs.pluck(:id)).count
+            {
+              name: name,
+              orders: orders,
+              not_ordered: total - orders,
+              total: total,
+            }
+          end
 
-      def what_to_bake(orders, week_users)
-        counts = Hash.new(0) # hash that defaults to 0 instead of nil
-        orders.each do |order|
-          order.items.each { |item| counts[item.name] += 1 }
-        end
-        num_must_order = week_users.must_order_weekly.count
-        num_have_ordered = Order.for_current_menu.where(user_id: week_users.must_order_weekly.pluck(:id)).count
-        num_havent_ordered_yet = num_must_order - num_have_ordered
-        if num_havent_ordered_yet > 0
-          counts[a("Baker's Choice*", {href: bakers_choice_admin_menus_path()})] = num_havent_ordered_yet
-        end
+          customers = User.customers
+          weekly = compute("Weekly", customers.must_order_weekly)
+          by_type = [weekly, compute("Every Other Week", customers.every_other_week)]
+          table_for by_type, class: 'subscribers' do
+            column ("Type") { |h| h[:name] }
+            column ("Ordered") { |h| h[:orders] }
+            column ("Not ordered") { |h| h[:total] - h[:orders] }
+            column ("Total") { |h| h[:total] }
+          end
 
-        by_type = [
-          {sub: "Weekly", ordered: num_have_ordered, total: num_must_order},
-          {sub: "Every Other Week",
-           ordered: Order.for_current_menu.where(user_id: week_users.every_other_week.pluck(:id)).count,
-           total: week_users.every_other_week.count},
-        ]
-        table_for by_type, class: 'mt-0 subscribers' do
-          column ("Subscriber Type") { |h| h[:sub] }
-          column ("Ordered") { |h| h[:ordered] }
-          column ("Not ordered") { |h| h[:total] - h[:ordered] }
-          column ("Total") { |h| h[:total] }
+          if (num_bakers_choice = weekly[:not_ordered]) > 0
+            para(a("Set Baker's Choice for #{num_bakers_choice} subscribers", {href: bakers_choice_admin_menus_path()}))
+          end
+        end
+      end
+
+
+      def what_to_bake(order_items)
+        counts = Hash.new(0).tap do |counts|
+          order_items.each { |order_item| counts[order_item.item.name] += order_item.quantity }
         end
 
         table_for counts.keys.sort_by(&:to_s), class: 'mt-0 breads' do
@@ -48,19 +57,19 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
 
-      day1, day2 = Order.for_current_menu.partition(&:day1_pickup?)
+      day1, day2 = Order.for_current_menu.flat_map(&:order_items).partition(&:day1_pickup?)
 
       column id: 'what-to-bake-day1' do
         panel "#{Setting.pickup_day1} - What to bake" do
           a("#{Setting.pickup_day1} Pickup List", href: pickup_day1_admin_menus_path())
-          what_to_bake(day1, User.day1_pickup)
+          what_to_bake(day1)
         end
       end
 
       column id: 'what-to-bake-day2' do
         panel "#{Setting.pickup_day2} - What to bake" do
           a("#{Setting.pickup_day2} Pickup List", href: pickup_day2_admin_menus_path())
-          what_to_bake(day2, User.day2_pickup)
+          what_to_bake(day2)
         end
       end
     end

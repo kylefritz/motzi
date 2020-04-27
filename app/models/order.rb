@@ -7,6 +7,7 @@ class Order < ApplicationRecord
   visitable :ahoy_visit
   scope :with_feedback, -> { where("COALESCE(TRIM(feedback), '') <> ''") }
   scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> '' AND comments <> 'Baker''s Choice'") }
+  scope :not_skip, -> { where("skip is FALSE") }
 
   def self.for_current_menu
     self.for_menu_id(Menu.current.id)

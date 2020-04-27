@@ -1,0 +1,13 @@
+counts = Hash.new(0)
+order_items.each { |oi| counts[oi.item.name] += oi.quantity }
+
+items = counts.keys.natural_sort
+items.each_with_index do |name, i|
+  is_last = i+1 == items.size
+  span do
+    if (count = counts[name]) > 1
+      strong "#{count}x "
+    end
+    span "#{name}#{is_last ? "": ","}"
+  end
+end

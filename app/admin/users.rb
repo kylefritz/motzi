@@ -1,5 +1,5 @@
 ActiveAdmin.register User do
-  permit_params :first_name, :last_name, :email, :additional_email, :day1_pickup, :is_admin, \
+  permit_params :first_name, :last_name, :email, :additional_email, :is_admin, \
     :send_weekly_email, :breads_per_week, :phone
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'
 
