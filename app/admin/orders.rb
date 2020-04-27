@@ -6,6 +6,8 @@ ActiveAdmin.register Order do
   scope("current menu") { |scope| scope.where(menu_id: Setting.menu_id) }
   scope :with_comments
   scope :with_feedback
+  scope :skip
+  scope :not_skip
 
   preserve_default_filters!
   remove_filter :ahoy_visit, :versions, :order_items
@@ -15,8 +17,7 @@ ActiveAdmin.register Order do
     column :menu
     column :user
     column :items do |order|
-      # TODO: show item day, quantity
-      render partial: 'admin/orders/order_items', locals: {order_items: order.order_items}
+      render partial: 'admin/orders/order', locals: {order: order}
     end
     column :feedback
     column :comments
@@ -24,14 +25,14 @@ ActiveAdmin.register Order do
     actions
   end
 
-  show do |order|
+  show do
     attributes_table do
       row :user
       row :menu
       row :feedback
       row :comments
-      row :order_items do
-        render partial: 'admin/orders/order_items', locals: {order_items: order.order_items}
+      row :order_items do |order|
+        render partial: 'admin/orders/order', locals: {order: order}
       end
       row :pickup_day
       row :created_at

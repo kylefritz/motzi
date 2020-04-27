@@ -7,7 +7,7 @@ def for_day(day_name, order_items)
   order_items.each { |oi| counts[oi.item.name] += oi.quantity }
 
   div do
-    strong("#{day_name}: ")
+    em("#{day_name}: ")
 
     items = counts.keys.natural_sort
     items.each_with_index do |name, i|

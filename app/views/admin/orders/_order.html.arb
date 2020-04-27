@@ -1,0 +1,5 @@
+if order.skip
+  em "Skip"
+else
+  render partial: 'admin/orders/order_items', locals: {order_items: order.order_items}
+end

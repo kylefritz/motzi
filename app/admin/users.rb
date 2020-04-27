@@ -82,7 +82,7 @@ ActiveAdmin.register User do
           auto_link order
         end
         column :items do |order|
-          render partial: 'admin/orders/order_items', locals: {order_items: order.order_items}
+          render partial: 'admin/orders/order', locals: {order: order}
         end
         column :feedback
         column :comments
