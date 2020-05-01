@@ -110,6 +110,24 @@ ActiveAdmin.register Menu do
 
     active_admin_comments
 
+    panel "Orders" do
+      columns do
+        day1, day2 = menu.orders.includes(order_items: :item).flat_map(&:order_items).partition(&:day1_pickup?)
+
+        column id: 'what-to-bake-day1' do
+          panel "#{Setting.pickup_day1}" do
+            render 'admin/menus/what_to_bake', { order_items: day1 }
+          end
+        end
+
+        column id: 'what-to-bake-day2' do
+          panel "#{Setting.pickup_day2}" do
+            render 'admin/menus/what_to_bake', { order_items: day2}
+          end
+        end
+      end
+    end
+
     panel "Emails" do
       table_for menu.messages do
         column :mailer

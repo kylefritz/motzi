@@ -18,9 +18,9 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
     assert_el_count 2, '.subscribers tbody tr', 'subscribers summary weekly & semi-weekly'
 
     assert_el_count 1, '#what-to-bake-day1'
-    assert_el_count 2, '#what-to-bake-day1 .breads tbody tr', 'two breads for adrian & kyle; plus 1 bakers choice'
+    assert_el_count 3, '#what-to-bake-day1 .breads tbody tr', 'two breads for adrian & kyle; plus 1 bakers choice; plus total'
     assert_el_count 1, '#what-to-bake-day2'
-    assert_el_count 1, '#what-to-bake-day2 .breads tbody tr', 'bread for ljf'
+    assert_el_count 2, '#what-to-bake-day2 .breads tbody tr', 'bread for ljf'
   end
 
   test "day1 pickup list" do

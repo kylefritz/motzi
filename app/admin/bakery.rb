@@ -50,31 +50,19 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
 
-
-      def what_to_bake(order_items)
-        counts = Hash.new(0).tap do |counts|
-          order_items.each { |order_item| counts[order_item.item.name] += order_item.quantity }
-        end
-
-        table_for counts.keys.sort_by(&:to_s), class: 'mt-0 breads' do
-          column ("Item") { |item| item }
-          column ("Quantity") { |item| counts[item] }
-        end
-      end
-
       day1, day2 = Order.for_current_menu.includes(order_items: :item).flat_map(&:order_items).partition(&:day1_pickup?)
 
       column id: 'what-to-bake-day1' do
         panel "#{Setting.pickup_day1} - What to bake" do
           a("#{Setting.pickup_day1} Pickup List", href: pickup_day1_admin_menus_path())
-          what_to_bake(day1)
+          render 'admin/menus/what_to_bake', { order_items: day1 }
         end
       end
 
       column id: 'what-to-bake-day2' do
         panel "#{Setting.pickup_day2} - What to bake" do
           a("#{Setting.pickup_day2} Pickup List", href: pickup_day2_admin_menus_path())
-          what_to_bake(day2)
+          render 'admin/menus/what_to_bake', { order_items: day2}
         end
       end
     end
