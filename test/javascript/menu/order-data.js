@@ -5,6 +5,7 @@ export default {
     bakersNote: "Orci varius",
     createdAt: "2019-11-02T14:01:23.820-04:00",
     isCurrent: true,
+    deadlineDay: "Sunday",
     items: [
       {
         id: 3,

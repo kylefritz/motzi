@@ -15,6 +15,12 @@ module UserHashidable
       hashid_user || devise_user
     end
 
+    def current_admin_user
+      if devise_user&.is_admin?
+        devise_user
+      end
+    end
+
     def require_hashid_user_or_devise_user!
       if hashid_user
         logger.info "found user {#{hashid_user.name}} for hashid=#{hashid}"

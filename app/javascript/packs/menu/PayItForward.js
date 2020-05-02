@@ -24,7 +24,7 @@ function QuantityAdd({ quantity, onAdd, onQuantity, onCancel }) {
   );
 }
 
-export function PayItForward({ description, onChange }) {
+export default function PayItForward({ description, onChange }) {
   const [willPay, setWillPay] = useState(false);
   const [wasAdded, setWasAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);

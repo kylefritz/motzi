@@ -11,6 +11,8 @@
       "required": [
         "id",
         "name",
+        "deadline",
+        "deadlineDay",
         "bakersNote",
         "createdAt",
         "items",
@@ -44,6 +46,20 @@
           "title": "created at",
           "default": "",
           "examples": ["2019-10-06T21:14:33.588Z"],
+          "pattern": "^(.*)$"
+        },
+        "deadline": {
+          "type": "string",
+          "title": "deadline",
+          "default": "",
+          "examples": ["2019-10-06T21:14:33.588Z"],
+          "pattern": "^(.*)$"
+        },
+        "deadlineDay": {
+          "type": "string",
+          "title": "deadline day",
+          "default": "",
+          "examples": ["Tuesday"],
           "pattern": "^(.*)$"
         },
         "items": {

@@ -50,6 +50,10 @@ class MenuTest < ActiveSupport::TestCase
     assert week3.emailed_at.present?
   end
 
+  test "deadline" do
+    assert_equal Time.zone.parse("Tue, 15 Jan 2019 23:59:59 -0500"),  menus(:week3).deadline
+  end
+
   private
 
   def assert_menus_emailed(num_emails, &block)

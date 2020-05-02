@@ -5,8 +5,9 @@ import Item from "./Item";
 import BakersNote from "./BakersNote";
 import User from "./User";
 import Cart from "./Cart";
+import Deadline from "./Deadline";
 import BuyCredits from "../buy/App";
-import { PayItForward } from "./PayItForward";
+import PayItForward from "./PayItForward";
 import createMenuItemLookup from "./createMenuItemLookup";
 
 export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
@@ -50,7 +51,7 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
     });
   };
 
-  const { name, bakersNote, items, isCurrent } = menu;
+  const { name, bakersNote, items, isCurrent, deadlineDay } = menu;
   const { skip: skipItem, payItForward } = createMenuItemLookup(menu);
 
   if (user && user.credits < 1) {
@@ -68,13 +69,13 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
 
   return (
     <>
-      <User user={user} onRefreshUser={onRefreshUser} />
+      <User {...{ user, onRefreshUser, deadlineDay }} />
 
       {/* if low, show nag to buy credits*/}
       {user && user.credits < 4 && <BuyCredits onComplete={onRefreshUser} />}
 
       <h2>{name}</h2>
-
+      <Deadline menu={menu} />
       <BakersNote {...{ bakersNote }} />
 
       <h5>We'd love your feedback on last week's loaf.</h5>

@@ -1,15 +1,19 @@
 import React from "react";
 
-import Item from "./Item";
 import BakersNote from "./BakersNote";
+import Deadline from "./Deadline";
+import Item from "./Item";
+import User from "./User";
 
-export default function ({ menu }) {
-  const { name, bakersNote, items } = menu;
+export default function ({ user, menu }) {
+  const { name, bakersNote, items, deadlineDay } = menu;
 
   return (
     <>
-      <h2>{name}</h2>
+      {user && <User {...{ user, deadlineDay }} />}
 
+      <h2>{name}</h2>
+      <Deadline menu={menu} />
       <BakersNote {...{ bakersNote }} />
 
       <h5>Items</h5>

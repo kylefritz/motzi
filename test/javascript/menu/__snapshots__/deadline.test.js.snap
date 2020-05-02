@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`After deadline snapshot 1`] = `
+<div
+  className="alert alert-warning text-center"
+  role="alert"
+>
+  <h4
+    className="alert-heading"
+  >
+    Ordering is closed for this menu
+  </h4>
+  Order by 
+  Sunday
+   at midnight for each week's menu.
+</div>
+`;
+
+exports[`Before deadline snapshot 1`] = `""`;

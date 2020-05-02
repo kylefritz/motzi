@@ -16,6 +16,10 @@ class Setting < RailsSettings::Base
   def self.pickup_day2_abbr
     abbr_day(Setting.pickup_day2)
   end
+  def self.deadline_day
+    day1_wday = Date::DAYS_INTO_WEEK[Setting.pickup_day1.downcase.to_sym]
+    Date::DAYS_INTO_WEEK.invert[day1_wday - 2].to_s.titlecase
+  end
 
   private
   def self.abbr_day(day)

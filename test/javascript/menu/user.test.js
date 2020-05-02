@@ -11,7 +11,7 @@ test("snapshot", () => {
     firstHalf: true,
     breadsPerWeek: 1.0,
   };
-  const wrapper = shallow(<User user={user} />);
+  const wrapper = shallow(<User user={user} deadlineDay="Sunday" />);
   expect(wrapper).toMatchSnapshot();
 });
 

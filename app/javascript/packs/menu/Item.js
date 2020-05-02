@@ -9,25 +9,27 @@ function shortDay(day) {
   return "Sat";
 }
 
-function DayButtons({ description, onSetDay }) {
+function DayButtons({ description, onSetDay, showButtons }) {
   const days = [
     ["Thursday", "info"],
     ["Saturday", "warning"],
   ];
   return (
     <>
-      <div className="my-2">
-        {days.map(([day, btn]) => (
-          <button
-            key={day}
-            type="button"
-            className={`btn btn-${btn} btn-sm mr-2`}
-            onClick={() => onSetDay(day)}
-          >
-            {shortDay(day)}
-          </button>
-        ))}
-      </div>
+      {showButtons && (
+        <div className="my-2">
+          {days.map(([day, btn]) => (
+            <button
+              key={day}
+              type="button"
+              className={`btn btn-${btn} btn-sm mr-2`}
+              onClick={() => onSetDay(day)}
+            >
+              {shortDay(day)}
+            </button>
+          ))}
+        </div>
+      )}
       <div style={{ lineHeight: "normal" }}>
         <small>{description}</small>
       </div>
@@ -94,7 +96,13 @@ function Ordering({ description, onChange }) {
     );
   }
 
-  return <DayButtons description={description} onSetDay={setDay} />;
+  return (
+    <DayButtons
+      description={description}
+      onSetDay={setDay}
+      showButtons={!!onChange}
+    />
+  );
 }
 
 export default function Item(props) {

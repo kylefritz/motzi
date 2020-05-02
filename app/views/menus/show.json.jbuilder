@@ -1,7 +1,7 @@
 json.menu do
-  json.extract! @menu, :id, :name, :bakers_note, :created_at
+  json.extract! @menu, :id, :name, :bakers_note, :created_at, :deadline
   json.is_current @menu.current?
-
+  json.deadline_day Setting.deadline_day
   addons, items = @menu.menu_items.partition(&:is_add_on?)
 
   json.items [items.map(&:item), Item.pay_it_forward].flatten.map do |item|

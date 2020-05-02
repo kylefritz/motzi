@@ -17,7 +17,7 @@ export const humanizeBreadsPerWeek = (perWeek) => {
   return `${perWeek} breads per week`;
 };
 
-export default function User({ user, onRefreshUser }) {
+export default function User({ user, onRefreshUser, deadlineDay }) {
   const [showBuy, setShowBuy] = useState(false);
 
   return (
@@ -40,6 +40,12 @@ export default function User({ user, onRefreshUser }) {
           <h5 className="text-center">Ordering frequency</h5>
           <p className="text-center" title={user.breadsPerWeek}>
             {humanizeBreadsPerWeek(user.breadsPerWeek)}
+          </p>
+        </div>
+        <div className="col">
+          <h5 className="text-center">Order By</h5>
+          <p className="text-center" title={user.breadsPerWeek}>
+            {deadlineDay} Midnight
           </p>
         </div>
         <div className="col">

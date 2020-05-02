@@ -2,9 +2,54 @@
 
 exports[`Preview snapshot 1`] = `
 <Fragment>
+  <User
+    deadlineDay="Sunday"
+    user={
+      Object {
+        "breadsPerWeek": 1,
+        "credits": 9,
+        "email": "kyle.p.fritz@gmail.com",
+        "hashid": "Dot9gKn9w",
+        "id": 584273342,
+        "name": "Kyle Fritz",
+        "pickupDay": "Tuesday",
+      }
+    }
+  />
   <h2>
     week 5
   </h2>
+  <Deadline
+    menu={
+      Object {
+        "bakersNote": "Orci varius",
+        "createdAt": "2019-11-02T14:01:23.820-04:00",
+        "deadlineDay": "Sunday",
+        "id": 921507399,
+        "isCurrent": true,
+        "items": Array [
+          Object {
+            "description": "",
+            "id": 3,
+            "image": "bread-baguette.jpg",
+            "name": "Baguette",
+          },
+          Object {
+            "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
+            "id": 1,
+            "image": "bread2-002.webp",
+            "name": "Classic",
+          },
+          Object {
+            "description": "Skip this week.",
+            "id": 0,
+            "name": "Skip",
+          },
+        ],
+        "name": "week 5",
+      }
+    }
+  />
   <_default
     bakersNote="Orci varius"
   />

@@ -22,6 +22,7 @@ exports[`Order snapshot 1`] = `
       Object {
         "bakersNote": "Orci varius",
         "createdAt": "2019-11-02T14:01:23.820-04:00",
+        "deadlineDay": "Sunday",
         "id": 921507399,
         "isCurrent": true,
         "items": Array [

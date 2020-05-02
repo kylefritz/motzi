@@ -1,39 +1,41 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
 import _ from "lodash";
+import moment from "moment";
 
 import Menu from "./Menu";
 import Order from "./Order";
 import Preview from "./Preview";
 
-export default class App extends React.Component {
-  componentDidMount() {
-    this.fetchMenu();
-  }
+export default function App() {
+  const [data, setData] = useState({}); // expect: menu, user, order
+  const [error, setError] = useState();
+  const { uid, ignoredeadline } = queryString.parse(location.search);
 
-  fetchMenu() {
-    const { uid } = queryString.parse(location.search);
+  const fetchMenu = () => {
     let params = { uid };
     const id = _.get(location.pathname.match(/menu\/(.*)/), 1);
     const menuPath = id ? `/menu/${id}.json` : "/menu.json";
     axios
       .get(menuPath, { params })
-      .then(({ data }) => {
-        this.setState(data); // expect: menu, user, order
-        const { user } = data;
+      .then(({ data: newData }) => {
+        setData(newData); // expect: menu, user, order
+        const { user } = newData;
         Sentry.configureScope((scope) => scope.setUser(user));
       })
-      .catch((error) => {
-        console.error("cant load menu", error);
-        Sentry.captureException(error);
-        this.setState({ error: "We can't load the menu" });
+      .catch((err) => {
+        console.error("cant load menu", err);
+        Sentry.captureException(err);
+        setError("We can't load the menu");
       });
-  }
+  };
 
-  handleCreateOrder(order) {
-    if (this.state.order) {
+  useEffect(fetchMenu, []);
+
+  const handleCreateOrder = (order) => {
+    if (data.order) {
       window.alert(
         "Weird. This web site thinks you already placed an order. Refresh the page?!"
       );
@@ -43,57 +45,51 @@ export default class App extends React.Component {
     console.log("creating order", order);
     axios
       .post("/orders.json", order)
-      .then(({ data }) => {
-        this.setState(data); // expect: menu, user, order
-        console.debug("created order", data);
+      .then(({ data: newData }) => {
+        setData(newData); // expect: menu, user, order
+        console.debug("created order", newData);
         window.scrollTo(0, 0);
       })
-      .catch((error) => {
-        console.error("cant create order", error);
-        window.alert("There was a problem submitting your order.");
-        Sentry.captureException(error);
+      .catch((err) => {
+        const { message } = err.response.data || {};
+        console.error("Couldn't create order", err, err.response.data);
+        window.alert(`Couldn't create order: ${message || err}`);
+        Sentry.captureException(err);
       });
-  }
+  };
 
-  render() {
-    const { menu, user, order, error } = this.state || {};
-    if (error) {
-      return (
-        <>
-          <h2 className="mt-5">{error}</h2>
-          <p className="text-center">
-            Sorry. Maybe try again or try back later?
-          </p>
-        </>
-      );
-    }
-
-    if (!menu) {
-      return <h2 className="mt-5">loading...</h2>;
-    }
-
-    if (order) {
-      return (
-        <Order
-          {...{ user, order, menu, onRefreshUser: this.fetchMenu.bind(this) }}
-        />
-      );
-    }
-
-    if (!user) {
-      return <Preview {...{ order, menu }} />;
-    }
-
+  const { menu, user, order } = data;
+  if (error) {
     return (
-      <Menu
-        {...{
-          user,
-          order,
-          menu,
-          onCreateOrder: this.handleCreateOrder.bind(this),
-          onRefreshUser: this.fetchMenu.bind(this),
-        }}
-      />
+      <>
+        <h2 className="mt-5">{error}</h2>
+        <p className="text-center">Sorry. Maybe try again or try back later?</p>
+      </>
     );
   }
+
+  if (!menu) {
+    return <h2 className="mt-5">loading...</h2>;
+  }
+
+  if (order) {
+    return <Order {...{ user, order, menu, onRefreshUser: fetchMenu }} />;
+  }
+
+  const pastDeadline = moment() > moment(menu.deadline);
+  if (!user || (!ignoredeadline && pastDeadline)) {
+    return <Preview {...{ order, menu }} />;
+  }
+
+  return (
+    <Menu
+      {...{
+        user,
+        order,
+        menu,
+        onCreateOrder: handleCreateOrder,
+        onRefreshUser: fetchMenu,
+      }}
+    />
+  );
 }

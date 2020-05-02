@@ -21,7 +21,7 @@ ActiveAdmin.register User do
   action_item :order, except: [:index, :new] do
     if params[:id].present?
       user = User.find(params[:id])
-      link_to "Order for", current_menu_url(uid: user.hashid), target: "_blank"
+      link_to "Order for", current_menu_url(uid: user.hashid, ignoredeadline: true), target: "_blank"
     end
   end
   action_item :order, except: [:index, :new] do

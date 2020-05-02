@@ -33,5 +33,13 @@ class Menu < ApplicationRecord
     SendWeeklyMenuJob.perform_now.size
   end
 
+  def deadline
+     Time.zone.from_week_id(week_id) + 2.days + 14.hours + 59.minutes + 59.seconds
+  end
+
+  def ordering_closed?
+    Time.zone.now > deadline
+  end
+
   MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
 end
