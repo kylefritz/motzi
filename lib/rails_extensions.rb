@@ -42,7 +42,7 @@ class ActiveSupport::TimeZone
   def from_week_id(week_id)
     yr, num_weeks = week_id.split('w')
     num_weeks = num_weeks.to_i - 1
-    jan1 = DateTime.parse("20#{yr}-01-01 9:00 AM EST")
+    jan1 = ActiveSupport::TimeZone['America/New_York'].parse("20#{yr}-01-01 9:00 AM")
     jan1.beginning_of_week + num_weeks.weeks - 1.day + 9.hours
   end
 end
