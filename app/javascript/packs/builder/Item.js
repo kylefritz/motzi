@@ -3,15 +3,15 @@ import _ from "lodash";
 
 export default class Item extends React.Component {
   handleRemove(event) {
-    this.props.onRemove(this.props.menuItemId);
+    this.props.onRemove(this.props.id);
   }
   render() {
-    const { name, isAddOn } = this.props || {};
+    const { id, name } = this.props || {};
     return (
       <tr>
         <td>{name}</td>
         <td>
-          <button onClick={this.handleRemove.bind(this)}>x</button>
+          {id > 0 && <button onClick={this.handleRemove.bind(this)}>x</button>}
         </td>
       </tr>
     );

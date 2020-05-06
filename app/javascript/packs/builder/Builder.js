@@ -50,11 +50,14 @@ export default class App extends React.Component {
     axios.post("/admin/menu_items.json", json).then(() => this.loadMenu());
   }
 
-  handleRemoveMenuItem(removeMenuItemId) {
-    console.log("delete menu_item", removeMenuItemId);
-    axios
-      .delete(`/admin/menu_items/${removeMenuItemId}.json`)
-      .then(() => this.loadMenu());
+  handleRemoveItem(itemId) {
+    const { menuId } = this.state;
+    console.log("remove item", itemId);
+    axios({
+      method: "delete",
+      data: { itemId },
+      url: `/admin/menus/${menuId}/item.json`,
+    }).then(() => this.loadMenu());
   }
 
   render() {
@@ -75,9 +78,9 @@ export default class App extends React.Component {
           <tbody>
             {items.map((i) => (
               <Item
-                key={i.menuItemId}
+                key={i.id}
                 {...i}
-                onRemove={this.handleRemoveMenuItem.bind(this)}
+                onRemove={this.handleRemoveItem.bind(this)}
               />
             ))}
           </tbody>

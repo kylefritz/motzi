@@ -129,7 +129,7 @@ ActiveAdmin.register Menu do
     end
 
     panel "Emails" do
-      table_for menu.messages do
+      table_for menu.messages.includes(:user) do
         column :mailer
         column :subject
         column :to do |email|
@@ -176,6 +176,12 @@ ActiveAdmin.register Menu do
       @page_title = Setting.send("pickup_day#{day}")
       render :pickup_list
     end
+  end
+
+  member_action :item, method: :delete do
+    menu = Menu.find(params[:id])
+    MenuItem.where(menu: menu, item_id: params[:item_id]).destroy_all
+    render json: {message: "deleted!"}
   end
 
   collection_action :bakers_choice, method: [:get, :post] do
