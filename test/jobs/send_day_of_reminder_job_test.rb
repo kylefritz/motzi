@@ -43,6 +43,15 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
     refute_reminders_emailed(:tues, '7:01 AM', 'dont send the second time')
   end
 
+  test "dont send reminders for pay it forward items" do
+    # change all the items to pay it forward
+    day_1_items = Menu.current.order_items.day1_pickup
+    refute day_1_items.empty?
+    day_1_items.update_all(item_id: Item.pay_it_forward.id)
+
+    refute_reminders_emailed(:tues, '7:00 AM', 'no emails should be sent since all items are now pay it forward')
+  end
+
   private
 
   def order_item(user, item)

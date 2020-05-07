@@ -21,7 +21,7 @@ class SendDayOfReminderJob < ApplicationJob
     Menu.current.orders.map do |order|
       next if already_reminded.include?(order.user_id)
 
-      order_items_for_day = order.order_items.filter {|oi| oi.day1_pickup == day1_pickup}
+      order_items_for_day = order.order_items.send(day1_pickup ? :day1_pickup : :day2_pickup)
 
       next if order_items_for_day.empty?
 
