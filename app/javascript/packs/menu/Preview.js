@@ -5,7 +5,7 @@ import Deadline from "./Deadline";
 import Item from "./Item";
 import User from "./User";
 
-export default function ({ user, menu }) {
+export default function Preview({ user, menu }) {
   const { name, bakersNote, items, deadlineDay } = menu;
 
   return (

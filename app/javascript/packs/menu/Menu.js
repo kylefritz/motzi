@@ -161,7 +161,7 @@ export default function Menu({
         </>
       )}
 
-      <h5>Special Requests</h5>
+      <h5>Comments & Special Requests</h5>
       <div className="row mt-2 mb-3">
         <div className="col">
           <textarea

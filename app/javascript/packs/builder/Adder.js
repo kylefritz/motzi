@@ -1,7 +1,7 @@
 import React from "react";
 import _ from "lodash";
 
-export default function ({ items, not, onAdd }) {
+export default function Adder({ items, not, onAdd }) {
   const selectRef = React.createRef();
   const handleAdd = () => {
     const itemId = selectRef.current.value;

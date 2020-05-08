@@ -1,7 +1,7 @@
 import React from "react";
 import { Converter } from "showdown";
 
-export default function ({ bakersNote }) {
+export default function BakersNote({ bakersNote }) {
   const converter = new Converter({
     encodeEmails: false, // adds uncessary obfuscation to email addresses
     excludeTrailingPunctuationFromURLs: true,

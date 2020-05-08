@@ -50,7 +50,7 @@ exports[`Menu snapshot 1`] = `
       }
     }
   />
-  <_default
+  <BakersNote
     bakersNote="Orci varius"
   />
   <h5>
@@ -146,7 +146,7 @@ exports[`Menu snapshot 1`] = `
     </div>
   </div>
   <h5>
-    Special Requests
+    Comments & Special Requests
   </h5>
   <div
     className="row mt-2 mb-3"
@@ -279,7 +279,7 @@ exports[`Menu with order snapshot 1`] = `
       }
     }
   />
-  <_default
+  <BakersNote
     bakersNote="Orci varius"
   />
   <h5>
@@ -375,7 +375,7 @@ exports[`Menu with order snapshot 1`] = `
     </div>
   </div>
   <h5>
-    Special Requests
+    Comments & Special Requests
   </h5>
   <div
     className="row mt-2 mb-3"

@@ -41,12 +41,13 @@ export default function App() {
 
     const method = orderId ? "put" : "post";
     const url = orderId ? `/orders/${orderId}.json` : "/orders.json";
-    console.log("save_order", method, url, order);
+    console.debug("saving order", method, url, order);
 
     axios({ method, url, data: order })
       .then(({ data: newData }) => {
         setData(newData); // expect: menu, user, order
-        console.debug("created order", newData);
+        setIsEditingOrder(false);
+        console.log("save_order success", newData);
         window.scrollTo(0, 0);
       })
       .catch((err) => {

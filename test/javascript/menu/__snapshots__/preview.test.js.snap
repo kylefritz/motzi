@@ -50,7 +50,7 @@ exports[`Preview snapshot 1`] = `
       }
     }
   />
-  <_default
+  <BakersNote
     bakersNote="Orci varius"
   />
   <h5>

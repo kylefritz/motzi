@@ -56,6 +56,26 @@ exports[`Order snapshot 1`] = `
     }
     skip={false}
   />
+  <div
+    className="ml-2 mt-3"
+  >
+    <h6>
+      Feedback
+    </h6>
+    <p>
+      <em>
+        none
+      </em>
+    </p>
+    <h6>
+      Comments & Special Requests
+    </h6>
+    <p>
+      <em>
+        none
+      </em>
+    </p>
+  </div>
   <User
     user={
       Object {
@@ -76,7 +96,7 @@ exports[`Order snapshot 1`] = `
   >
     week 5
   </h2>
-  <_default
+  <BakersNote
     bakersNote="Orci varius"
   />
 </Fragment>
