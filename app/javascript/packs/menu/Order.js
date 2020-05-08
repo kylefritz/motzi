@@ -5,7 +5,7 @@ import BakersNote from "./BakersNote";
 import User from "./User";
 import Cart from "./Cart";
 
-export default function ({ menu, user, order, onRefreshUser }) {
+export default function ({ menu, user, order, onRefreshUser, onEditOrder }) {
   const { name, bakersNote } = menu;
   const { items: cart, skip } = order;
 
@@ -14,6 +14,16 @@ export default function ({ menu, user, order, onRefreshUser }) {
       <h2 className="mt-5 mb-4">We got your order!</h2>
 
       <Cart {...{ cart, menu, skip }} />
+
+      {onEditOrder && (
+        <button
+          type="button"
+          className="btn btn-outline-primary btn-sm mt-3"
+          onClick={onEditOrder}
+        >
+          Edit Order
+        </button>
+      )}
 
       <User user={user} onRefreshUser={onRefreshUser} />
 

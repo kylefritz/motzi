@@ -10,6 +10,12 @@ import orderData from "./order-data";
 import { renderMenu, clickItem, submitForm } from "./helpers";
 
 test("Menu snapshot", () => {
+  delete orderData.order;
+  const wrapper = shallow(<Menu {...orderData} />);
+  expect(wrapper).toMatchSnapshot();
+});
+
+test("Menu with order snapshot", () => {
   const wrapper = shallow(<Menu {...orderData} />);
   expect(wrapper).toMatchSnapshot();
 });

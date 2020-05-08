@@ -4,15 +4,17 @@ Rails.application.routes.draw do
 
   root to: "home#show"
 
+  # pay for credit items
+  resources :credit_items, only: [:new, :create]
+
   # preview other menus
   resources :menus, only: [:show]
-  resources :credit_items, only: [:new, :create]
 
   # get the menu for the week
   get "/menu", to: "menus#show", as: :current_menu
 
-  # create a subscribers order for the week
-  post "/orders", to: "orders#create"
+  # create/update order for a menu
+  resources :orders, only: [:create, :update]
 
   # sign in
   get '/auth' => redirect('/users/sign_in')

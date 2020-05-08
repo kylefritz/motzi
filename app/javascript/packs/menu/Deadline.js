@@ -1,13 +1,11 @@
 import React from "react";
-import moment from "moment";
+
+import { pastDeadline } from "./pastDeadline";
 
 export default function Deadline({ menu }) {
-  const { deadlineDay } = menu;
+  const { deadlineDay, deadline } = menu;
 
-  const now = moment();
-  const deadline = moment(menu.deadline);
-  const pastDeadline = now > deadline;
-  if (!pastDeadline) {
+  if (!pastDeadline(deadline)) {
     return null;
   }
 

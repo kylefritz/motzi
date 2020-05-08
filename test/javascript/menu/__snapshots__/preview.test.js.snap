@@ -12,7 +12,6 @@ exports[`Preview snapshot 1`] = `
         "hashid": "Dot9gKn9w",
         "id": 584273342,
         "name": "Kyle Fritz",
-        "pickupDay": "Tuesday",
       }
     }
   />
@@ -24,6 +23,7 @@ exports[`Preview snapshot 1`] = `
       Object {
         "bakersNote": "Orci varius",
         "createdAt": "2019-11-02T14:01:23.820-04:00",
+        "deadline": "2019-11-03T23:59:59.000-04:00",
         "deadlineDay": "Sunday",
         "id": 921507399,
         "isCurrent": true,

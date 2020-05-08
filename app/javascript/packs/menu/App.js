@@ -8,10 +8,12 @@ import moment from "moment";
 import Menu from "./Menu";
 import Order from "./Order";
 import Preview from "./Preview";
+import { pastDeadline } from "./pastDeadline";
 
 export default function App() {
   const [data, setData] = useState({}); // expect: menu, user, order
   const [error, setError] = useState();
+  const [isEditingOrder, setIsEditingOrder] = useState(false);
   const { uid, ignoredeadline } = queryString.parse(location.search);
 
   const fetchMenu = () => {
@@ -35,16 +37,13 @@ export default function App() {
   useEffect(fetchMenu, []);
 
   const handleCreateOrder = (order) => {
-    if (data.order) {
-      window.alert(
-        "Weird. This web site thinks you already placed an order. Refresh the page?!"
-      );
-      return;
-    }
+    const orderId = _.get(data, "order.id");
 
-    console.log("creating order", order);
-    axios
-      .post("/orders.json", order)
+    const method = orderId ? "put" : "post";
+    const url = orderId ? `/orders/${orderId}.json` : "/orders.json";
+    console.log("save_order", method, url, order);
+
+    axios({ method, url, data: order })
       .then(({ data: newData }) => {
         setData(newData); // expect: menu, user, order
         console.debug("created order", newData);
@@ -72,12 +71,26 @@ export default function App() {
     return <h2 className="mt-5">loading...</h2>;
   }
 
-  if (order) {
-    return <Order {...{ user, order, menu, onRefreshUser: fetchMenu }} />;
+  const deadlineExceeded = pastDeadline(menu.deadline) && !ignoredeadline;
+
+  if (order && !isEditingOrder) {
+    const handleEditOrder = deadlineExceeded
+      ? null
+      : () => setIsEditingOrder(true);
+    return (
+      <Order
+        {...{
+          user,
+          order,
+          menu,
+          onRefreshUser: fetchMenu,
+          onEditOrder: handleEditOrder,
+        }}
+      />
+    );
   }
 
-  const pastDeadline = moment() > moment(menu.deadline);
-  if (!user || (!ignoredeadline && pastDeadline)) {
+  if (!user || deadlineExceeded) {
     return <Preview {...{ order, menu }} />;
   }
 

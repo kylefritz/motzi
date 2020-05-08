@@ -4,15 +4,39 @@ import { shallow } from "enzyme";
 
 import Deadline from "menu/Deadline";
 import orderData from "./order-data";
-import moment from "moment";
+
+//
+// setup a mock for past deadline
+//
+import { pastDeadline } from "menu/pastDeadline";
+jest.mock("menu/pastDeadline", () => {
+  let areWePastDeadline = true;
+  function __setPastDeadline(newValue) {
+    areWePastDeadline = newValue;
+  }
+
+  return { __setPastDeadline, pastDeadline: () => areWePastDeadline };
+});
+import { __setPastDeadline } from "menu/pastDeadline";
+
+test("__setPastDeadline back and forth in same test", () => {
+  __setPastDeadline(false);
+  expect(pastDeadline()).toBe(false);
+
+  __setPastDeadline(true);
+  expect(pastDeadline()).toBe(true);
+});
 
 test("Before deadline snapshot", () => {
+  __setPastDeadline(false);
+
   const wrapper = shallow(<Deadline {...orderData} />);
   expect(wrapper).toMatchSnapshot();
 });
 
 test("After deadline snapshot", () => {
-  orderData.menu.deadline = moment().add(-1, "days");
+  __setPastDeadline(true);
+
   const wrapper = shallow(<Deadline {...orderData} />);
   expect(wrapper).toMatchSnapshot();
 });
