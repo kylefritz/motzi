@@ -2,7 +2,6 @@
   "definitions": {},
   "$id": "/menu.json",
   "type": "object",
-  "title": "Current Menu",
   "required": ["menu", "user", "order"],
   "properties": {
     "menu": {
@@ -19,96 +18,35 @@
         "isCurrent"
       ],
       "properties": {
-        "id": {
-          "type": "integer",
-          "title": "menu id",
-          "default": 0,
-          "examples": [32122582]
-        },
-        "name": {
-          "type": "string",
-          "title": "menu name",
-          "default": "",
-          "examples": ["week2"],
-          "pattern": "^(.*)$"
-        },
-        "bakersNote": {
-          "type": "string",
-          "title": "bakersnote",
-          "default": "",
-          "examples": [
-            "Hello, all!\r\n\r\nBack in January we bought a several thousand pound, three deck, electric, stone hearth oven at an auction in NJ and put it into storage. Last week we took it up to a repair company along with a rare diving arm style mixer that's perfect for our breads and (lucky for us!) happened to be at Second Chance here in town. We got word yesterday that they're both in great working order and ready for us! An exciting week! All our breads are currently hand mixed and we can't wait to have more flexibility that will come with the proper equipment setup. Here's looking at you, challah!\r\n\r\nThis week we've got Roasted Pumpkin bread for you in honor of Halloween. We're adding another celebratory selection by adding a bit of chocolate to the Caraway Beer Rye. And don't neglect the classic (it's still my favorite bread)!\r\n\r\nAlso have donuts again this week. ANYONE WHO RENEWS GETS A PACK OF TWO DONUTS FREE - if you have renewed and not gotten donuts indicate such below and grab a pack this week.\r\n\r\nHave a great week! We'll see you Tuesday between 3-7pm for pickup.\r\n\r\nWarmly,\r\n\r\nMotzi Bread (Maya and Russell)"
-          ],
-          "pattern": "^(.*)$"
-        },
+        "id": { "type": "integer" },
+        "name": { "type": "string" },
+        "bakersNote": { "type": "string" },
         "createdAt": {
           "type": "string",
-          "title": "created at",
-          "default": "",
-          "examples": ["2019-10-06T21:14:33.588Z"],
-          "pattern": "^(.*)$"
+          "title": "created at"
         },
-        "deadline": {
-          "type": "string",
-          "title": "deadline",
-          "default": "",
-          "examples": ["2019-10-06T21:14:33.588Z"],
-          "pattern": "^(.*)$"
-        },
-        "deadlineDay": {
-          "type": "string",
-          "title": "deadline day",
-          "default": "",
-          "examples": ["Tuesday"],
-          "pattern": "^(.*)$"
-        },
+        "deadline": { "type": "string" },
+        "deadlineDay": { "type": "string" },
         "items": {
           "type": "array",
-          "title": "menu items",
           "items": {
             "type": "object",
-            "title": "items",
             "required": ["id", "name", "description"],
             "properties": {
-              "id": {
-                "type": "integer",
-                "title": "id",
-                "default": 0,
-                "examples": [871309743]
-              },
-              "name": {
-                "type": "string",
-                "title": "name",
-                "default": "",
-                "examples": ["Classic"],
-                "pattern": "^(.*)$"
-              },
-              "description": {
-                "type": "string",
-                "title": "description",
-                "default": "",
-                "examples": [
-                  "Mix of modern wheats and ancient Einkorn for the best of both worlds."
-                ],
-                "pattern": "^(.*)$"
-              },
+              "id": { "type": "integer" },
+              "name": { "type": "string" },
+              "description": { "type": "string" },
               "image": {
                 "type": ["null", "string"],
                 "title": "image",
-                "default": "",
                 "examples": [
                   "/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBCZz09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--f5152334760abf53540d2df5ba6caa61b3d4635a/RussellBread2-002.webp"
-                ],
-                "pattern": "^(.*)$"
+                ]
               }
             }
           }
         },
-        "isCurrent": {
-          "type": "boolean",
-          "title": "is this the current menu?",
-          "default": false
-        }
+        "isCurrent": { "type": "boolean" }
       }
     },
     "user": {
@@ -116,44 +54,17 @@
       "title": "user",
       "required": ["id", "email", "name", "hashid", "credits", "breadsPerWeek"],
       "properties": {
-        "id": {
-          "type": "integer",
-          "title": "user id",
-          "default": 0,
-          "examples": [32122582]
-        },
-        "email": {
-          "type": "string",
-          "title": "email",
-          "default": "",
-          "examples": ["kyle@example.com"],
-          "pattern": "^(.*)$"
-        },
-        "name": {
-          "type": "string",
-          "title": "The Name Schema",
-          "default": "",
-          "examples": ["Kyle Fritz"],
-          "pattern": "^(.*)$"
-        },
+        "id": { "type": "integer" },
+        "email": { "type": "string" },
+        "name": { "type": "string" },
         "hashid": {
           "type": "string",
-          "title": "The Hashid Schema",
-          "default": "",
-          "examples": ["Dot9gKn9w"],
-          "pattern": "^(.*)$"
+          "examples": ["Dot9gKn9w"]
         },
-        "credits": {
-          "type": "integer",
-          "title": "The Credits Schema",
-          "default": 0,
-          "examples": [13]
-        },
+        "credits": { "type": "integer" },
         "breadsPerWeek": {
           "type": "number",
-          "title": "Breads per week",
-          "default": 1.0,
-          "examples": [0.5, 1.0, 2.0]
+          "default": 1.0
         }
       }
     },
@@ -170,51 +81,20 @@
             "title": "item",
             "required": ["itemId", "quantity", "day", "day1Pickup"],
             "properties": {
-              "itemId": {
-                "type": "integer",
-                "title": "item id",
-                "default": 0,
-                "examples": [722547269]
-              },
+              "itemId": { "type": "integer" },
               "quantity": {
                 "type": "integer",
-                "title": "quantity",
-                "default": 1,
-                "examples": [5]
+                "default": 1
               },
-              "day": {
-                "type": "string",
-                "title": "day",
-                "examples": ["Thursday"]
-              },
-              "day1Pickup": {
-                "type": "boolean",
-                "title": "day 1 pickup"
-              }
+              "day": { "type": "string" },
+              "day1Pickup": { "type": "boolean" }
             }
           }
         },
-        "id": {
-          "type": "integer",
-          "title": "order id",
-          "default": 0,
-          "examples": [32122582]
-        },
-        "comments": {
-          "type": "string",
-          "title": "Comments",
-          "default": null
-        },
-        "feedback": {
-          "type": "string",
-          "title": "feedback",
-          "default": null
-        },
-        "skip": {
-          "type": "boolean",
-          "title": "skip",
-          "default": false
-        }
+        "id": { "type": "integer" },
+        "comments": { "type": "string" },
+        "feedback": { "type": "string" },
+        "skip": { "type": "boolean" }
       }
     }
   }
