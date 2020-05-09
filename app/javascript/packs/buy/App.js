@@ -14,6 +14,7 @@ export default function Buy({ onComplete, user: passedUser = null }) {
   const [user, setUser] = useState(passedUser);
   const [error, setError] = useState();
   const [receipt, setReceipt] = useState();
+  const [submitting, setSubmitting] = useState(false);
 
   // what is the current user?
   useEffect(() => {
@@ -58,6 +59,7 @@ export default function Buy({ onComplete, user: passedUser = null }) {
 
   const handleCardToken = ({ token }) => {
     console.log("card token=", token, { credits, price });
+    setSubmitting(true);
 
     // send stripe token to rails to complete purchase
     axios
@@ -82,7 +84,8 @@ export default function Buy({ onComplete, user: passedUser = null }) {
         console.error("cant buy credits order", error);
         window.alert("There was a problem buying credits.");
         Sentry.captureException(error);
-      });
+      })
+      .then(() => setSubmitting(false));
   };
 
   const handlePaymentResult = ({ token }) => {
@@ -196,6 +199,7 @@ export default function Buy({ onComplete, user: passedUser = null }) {
             stripeApiKey={gon.stripeApiKey}
             onCardToken={handleCardToken}
             onPaymentResult={handlePaymentResult}
+            submitting={submitting}
           />
         </>
       )}

@@ -22,7 +22,7 @@ const createOptions = () => {
   };
 };
 
-export default function Card({ stripe, onToken, credits, price }) {
+export default function Card({ stripe, onToken, credits, price, submitting }) {
   const [errorMessage, setErrorMessage] = useState();
   const [cardFilled, setCardFilled] = useState(false);
   const handleCardChange = ({ error, complete }) => {
@@ -50,11 +50,24 @@ export default function Card({ stripe, onToken, credits, price }) {
           </div>
         )}
         <button
-          disabled={!cardFilled}
+          disabled={!cardFilled || submitting}
           className="btn btn-primary btn-lg btn-block"
           type="submit"
         >
-          Charge credit card {formatMoney(price)} for {credits} credits
+          {submitting ? (
+            <>
+              <span
+                className="spinner-border spinner-border-sm mr-2"
+                role="status"
+                aria-hidden="true"
+              />
+              Purchasing...
+            </>
+          ) : (
+            <>
+              Charge credit card {formatMoney(price)} for {credits} credits
+            </>
+          )}
         </button>
       </form>
     </div>
