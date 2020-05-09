@@ -2,7 +2,7 @@ import React from "react";
 require("../configure_enzyme");
 import { shallow } from "enzyme";
 
-import User, { humanizeBreadsPerWeek } from "menu/User";
+import Subscription, { humanizeBreadsPerWeek } from "menu/Subscription";
 
 test("snapshot", () => {
   const user = {
@@ -11,7 +11,7 @@ test("snapshot", () => {
     firstHalf: true,
     breadsPerWeek: 1.0,
   };
-  const wrapper = shallow(<User user={user} deadlineDay="Sunday" />);
+  const wrapper = shallow(<Subscription user={user} deadlineDay="Sunday" />);
   expect(wrapper).toMatchSnapshot();
 });
 

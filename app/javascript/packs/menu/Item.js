@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import accounting from "accounting";
 
 import Quantity from "./Quantity";
 
@@ -106,12 +107,13 @@ function Ordering({ description, onChange }) {
 }
 
 export default function Item(props) {
-  const { image, name } = props;
+  const { price, image, name, showPrice = false } = props;
   return (
     <div className="col-6 mb-4">
       {/* TODO: make image square */}
       <img src={image} className="img-fluid" style={{ objectFit: "contain" }} />
       <div>{name}</div>
+      {showPrice && <div>{accounting.formatMoney(price)}</div>}
       <Ordering {...props} />
     </div>
   );

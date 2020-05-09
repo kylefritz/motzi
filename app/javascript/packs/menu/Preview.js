@@ -3,14 +3,14 @@ import React from "react";
 import BakersNote from "./BakersNote";
 import Deadline from "./Deadline";
 import Item from "./Item";
-import User from "./User";
+import Subscription from "./Subscription";
 
 export default function Preview({ user, menu }) {
   const { name, bakersNote, items, deadlineDay } = menu;
 
   return (
     <>
-      {user && <User {...{ user, deadlineDay }} />}
+      {user && <Subscription {...{ user, deadlineDay }} />}
 
       <h2>{name}</h2>
       <Deadline menu={menu} />
@@ -19,7 +19,7 @@ export default function Preview({ user, menu }) {
       <h5>Items</h5>
       <div className="row mt-3">
         {items.map((i) => (
-          <Item key={i.id} {...i} />
+          <Item key={i.id} showPrice {...i} />
         ))}
       </div>
     </>

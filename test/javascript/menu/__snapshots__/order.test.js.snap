@@ -76,7 +76,7 @@ exports[`Order snapshot 1`] = `
       </em>
     </p>
   </div>
-  <User
+  <Subscription
     deadlineDay="Sunday"
     user={
       Object {

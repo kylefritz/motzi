@@ -3,12 +3,13 @@ import _ from "lodash";
 
 import Item from "./Item";
 import BakersNote from "./BakersNote";
-import User from "./User";
+import Subscription from "./Subscription";
 import Cart from "./Cart";
 import Deadline from "./Deadline";
 import BuyCredits from "../buy/App";
 import PayItForward from "./PayItForward";
 import createMenuItemLookup from "./createMenuItemLookup";
+import useCart from "./useCart";
 
 export default function Menu({
   menu,
@@ -17,25 +18,11 @@ export default function Menu({
   onRefreshUser,
   onCreateOrder,
 }) {
-  const [cart, setCart] = useState(_.get(order, "items", []));
+  const { cart, addToCart, rmCartItem, setCart } = useCart(order);
+
   const [skip, setSkip] = useState(_.get(order, "skip", false));
   const [feedback, setFeedback] = useState(_.get(order, "feedback", null));
   const [comments, setComments] = useState(_.get(order, "comments", null));
-
-  const addToCart = (itemId, quantity, day) => {
-    console.log("addToCart", itemId, quantity, day);
-    setCart([...cart, { itemId, quantity, day }]);
-  };
-
-  const rmCartItem = (itemId, quantity, day) => {
-    const index = _.findIndex(
-      cart,
-      (ci) => ci.itemId === itemId && ci.quantity === quantity && ci.day === day
-    );
-    const nextCart = [...cart];
-    nextCart.splice(index, 1);
-    setCart(nextCart);
-  };
 
   const handleSkip = () => {
     setSkip(true);
@@ -64,7 +51,7 @@ export default function Menu({
     // time to buy credits!
     return (
       <>
-        <User {...{ user, deadlineDay }} />
+        <Subscription {...{ user, deadlineDay }} />
         <p className="my-2">
           We love baking yummy things for you but you're out of credits.
         </p>
@@ -75,7 +62,7 @@ export default function Menu({
 
   return (
     <>
-      <User {...{ user, onRefreshUser, deadlineDay }} />
+      <Subscription {...{ user, onRefreshUser, deadlineDay }} />
 
       {/* if low, show nag to buy credits*/}
       {user && user.credits < 4 && <BuyCredits onComplete={onRefreshUser} />}
@@ -190,7 +177,7 @@ export default function Menu({
           </button>
         </div>
       </div>
-      <User {...{ user, onRefreshUser, deadlineDay }} />
+      <Subscription {...{ user, onRefreshUser, deadlineDay }} />
     </>
   );
 }

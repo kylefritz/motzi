@@ -3,9 +3,9 @@ import axios from "axios";
 import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
 import _ from "lodash";
-import moment from "moment";
 
 import Menu from "./Menu";
+import Marketplace from "./Marketplace";
 import Order from "./Order";
 import Preview from "./Preview";
 import { pastDeadline } from "./pastDeadline";

@@ -2,7 +2,7 @@
 
 exports[`Menu snapshot 1`] = `
 <Fragment>
-  <User
+  <Subscription
     deadlineDay="Sunday"
     user={
       Object {
@@ -214,7 +214,7 @@ exports[`Menu snapshot 1`] = `
       </button>
     </div>
   </div>
-  <User
+  <Subscription
     deadlineDay="Sunday"
     user={
       Object {
@@ -232,7 +232,7 @@ exports[`Menu snapshot 1`] = `
 
 exports[`Menu with order snapshot 1`] = `
 <Fragment>
-  <User
+  <Subscription
     deadlineDay="Sunday"
     user={
       Object {
@@ -444,7 +444,7 @@ exports[`Menu with order snapshot 1`] = `
       </button>
     </div>
   </div>
-  <User
+  <Subscription
     deadlineDay="Sunday"
     user={
       Object {

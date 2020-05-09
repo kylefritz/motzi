@@ -1,5 +1,5 @@
 ActiveAdmin.register Item do
-  permit_params :name, :description, :image
+  permit_params :name, :description, :image, :price
   includes image_attachment: :blob
   config.sort_order = 'LOWER(name)'
   config.create_another = true
@@ -21,6 +21,7 @@ ActiveAdmin.register Item do
         end
       end
     end
+    column :price
     column :description
     column :created_at
     column :updated_at
@@ -30,6 +31,7 @@ ActiveAdmin.register Item do
   show do
     attributes_table do
       row :name
+      row :price
       row :description
       row :image do |item|
         if item.image.attached? 

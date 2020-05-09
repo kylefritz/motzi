@@ -2,7 +2,7 @@ import React from "react";
 import _ from "lodash";
 
 import BakersNote from "./BakersNote";
-import User from "./User";
+import Subscription from "./Subscription";
 import Cart from "./Cart";
 
 export default function Order({
@@ -40,7 +40,7 @@ export default function Order({
         </div>
       )}
 
-      <User {...{ user, onRefreshUser, deadlineDay }} />
+      <Subscription {...{ user, onRefreshUser, deadlineDay }} />
 
       <hr className="mb-5" />
 

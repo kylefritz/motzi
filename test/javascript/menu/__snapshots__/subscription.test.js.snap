@@ -58,7 +58,6 @@ exports[`snapshot 1`] = `
       </h5>
       <p
         className="text-center"
-        title={1}
       >
         Sunday
          Midnight

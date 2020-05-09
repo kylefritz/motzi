@@ -2,7 +2,7 @@
 
 exports[`Preview snapshot 1`] = `
 <Fragment>
-  <User
+  <Subscription
     deadlineDay="Sunday"
     user={
       Object {
@@ -65,6 +65,7 @@ exports[`Preview snapshot 1`] = `
       image="bread-baguette.jpg"
       key="3"
       name="Baguette"
+      showPrice={true}
     />
     <Item
       description="Mix of modern wheats and ancient Einkorn for the best of both worlds."
@@ -72,12 +73,14 @@ exports[`Preview snapshot 1`] = `
       image="bread2-002.webp"
       key="1"
       name="Classic"
+      showPrice={true}
     />
     <Item
       description="Skip this week."
       id={0}
       key="0"
       name="Skip"
+      showPrice={true}
     />
   </div>
 </Fragment>
