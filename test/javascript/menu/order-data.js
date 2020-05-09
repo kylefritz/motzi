@@ -4,6 +4,7 @@ export default {
     name: "week 5",
     bakersNote: "Orci varius",
     createdAt: "2019-11-02T14:01:23.820-04:00",
+    deadline: "2019-11-03T23:59:59.000-04:00",
     isCurrent: true,
     deadlineDay: "Sunday",
     items: [
@@ -33,8 +34,23 @@ export default {
     email: "kyle.p.fritz@gmail.com",
     hashid: "Dot9gKn9w",
     credits: 9,
-    pickupDay: "Tuesday",
     breadsPerWeek: 1.0,
   },
-  order: { pickupDay: "Thursday", items: [{ itemId: 3 }, { itemId: 1 }] },
+  order: {
+    skip: false,
+    items: [
+      {
+        itemId: 3,
+        quantity: 1,
+        day1Pickup: true,
+        day: "Tuesday",
+      },
+      {
+        itemId: 1,
+        quantity: 1,
+        day1Pickup: true,
+        day: "Thursday",
+      },
+    ],
+  },
 };

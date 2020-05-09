@@ -11,10 +11,16 @@ exports[`Order snapshot 1`] = `
     cart={
       Array [
         Object {
+          "day": "Tuesday",
+          "day1Pickup": true,
           "itemId": 3,
+          "quantity": 1,
         },
         Object {
+          "day": "Thursday",
+          "day1Pickup": true,
           "itemId": 1,
+          "quantity": 1,
         },
       ]
     }
@@ -22,6 +28,7 @@ exports[`Order snapshot 1`] = `
       Object {
         "bakersNote": "Orci varius",
         "createdAt": "2019-11-02T14:01:23.820-04:00",
+        "deadline": "2019-11-03T23:59:59.000-04:00",
         "deadlineDay": "Sunday",
         "id": 921507399,
         "isCurrent": true,
@@ -47,7 +54,28 @@ exports[`Order snapshot 1`] = `
         "name": "week 5",
       }
     }
+    skip={false}
   />
+  <div
+    className="ml-2 mt-3"
+  >
+    <h6>
+      Feedback
+    </h6>
+    <p>
+      <em>
+        none
+      </em>
+    </p>
+    <h6>
+      Comments & Special Requests
+    </h6>
+    <p>
+      <em>
+        none
+      </em>
+    </p>
+  </div>
   <User
     user={
       Object {
@@ -57,7 +85,6 @@ exports[`Order snapshot 1`] = `
         "hashid": "Dot9gKn9w",
         "id": 584273342,
         "name": "Kyle Fritz",
-        "pickupDay": "Tuesday",
       }
     }
   />
@@ -69,7 +96,7 @@ exports[`Order snapshot 1`] = `
   >
     week 5
   </h2>
-  <_default
+  <BakersNote
     bakersNote="Orci varius"
   />
 </Fragment>

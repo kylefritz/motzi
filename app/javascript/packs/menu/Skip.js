@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function () {
+export default function Skip() {
   return (
     <div className="col-6 mb-5">
       <div className="form-check">

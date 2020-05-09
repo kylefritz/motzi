@@ -13,6 +13,15 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     assert_menu_json
   end
 
+  test "should get menu & order once placed" do
+    sign_in users(:ljf)
+    order = orders(:ljf_week1)
+    order.update(menu: Menu.current)
+
+    get '/menu.json'
+    assert_menu_json
+  end
+
   test "should get menu if hashid" do
     get "/menu.json?uid=#{users(:ljf).hashid}"
     assert_menu_json

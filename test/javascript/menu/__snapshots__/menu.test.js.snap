@@ -12,7 +12,6 @@ exports[`Menu snapshot 1`] = `
         "hashid": "Dot9gKn9w",
         "id": 584273342,
         "name": "Kyle Fritz",
-        "pickupDay": "Tuesday",
       }
     }
   />
@@ -24,6 +23,7 @@ exports[`Menu snapshot 1`] = `
       Object {
         "bakersNote": "Orci varius",
         "createdAt": "2019-11-02T14:01:23.820-04:00",
+        "deadline": "2019-11-03T23:59:59.000-04:00",
         "deadlineDay": "Sunday",
         "id": 921507399,
         "isCurrent": true,
@@ -50,7 +50,7 @@ exports[`Menu snapshot 1`] = `
       }
     }
   />
-  <_default
+  <BakersNote
     bakersNote="Orci varius"
   />
   <h5>
@@ -64,6 +64,7 @@ exports[`Menu snapshot 1`] = `
     >
       <textarea
         className="form-control"
+        defaultValue={null}
         onChange={[Function]}
         placeholder="What did you think?"
       />
@@ -145,7 +146,7 @@ exports[`Menu snapshot 1`] = `
     </div>
   </div>
   <h5>
-    Special Requests
+    Comments & Special Requests
   </h5>
   <div
     className="row mt-2 mb-3"
@@ -155,6 +156,7 @@ exports[`Menu snapshot 1`] = `
     >
       <textarea
         className="form-control"
+        defaultValue={null}
         onChange={[Function]}
         placeholder="Comments or special requests"
       />
@@ -166,6 +168,7 @@ exports[`Menu snapshot 1`] = `
       Object {
         "bakersNote": "Orci varius",
         "createdAt": "2019-11-02T14:01:23.820-04:00",
+        "deadline": "2019-11-03T23:59:59.000-04:00",
         "deadlineDay": "Sunday",
         "id": 921507399,
         "isCurrent": true,
@@ -220,7 +223,235 @@ exports[`Menu snapshot 1`] = `
         "hashid": "Dot9gKn9w",
         "id": 584273342,
         "name": "Kyle Fritz",
-        "pickupDay": "Tuesday",
+      }
+    }
+  />
+</Fragment>
+`;
+
+exports[`Menu with order snapshot 1`] = `
+<Fragment>
+  <User
+    deadlineDay="Sunday"
+    user={
+      Object {
+        "breadsPerWeek": 1,
+        "credits": 9,
+        "email": "kyle.p.fritz@gmail.com",
+        "hashid": "Dot9gKn9w",
+        "id": 584273342,
+        "name": "Kyle Fritz",
+      }
+    }
+  />
+  <h2>
+    week 5
+  </h2>
+  <Deadline
+    menu={
+      Object {
+        "bakersNote": "Orci varius",
+        "createdAt": "2019-11-02T14:01:23.820-04:00",
+        "deadline": "2019-11-03T23:59:59.000-04:00",
+        "deadlineDay": "Sunday",
+        "id": 921507399,
+        "isCurrent": true,
+        "items": Array [
+          Object {
+            "description": "",
+            "id": 3,
+            "image": "bread-baguette.jpg",
+            "name": "Baguette",
+          },
+          Object {
+            "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
+            "id": 1,
+            "image": "bread2-002.webp",
+            "name": "Classic",
+          },
+          Object {
+            "description": "Skip this week.",
+            "id": 0,
+            "name": "Skip",
+          },
+        ],
+        "name": "week 5",
+      }
+    }
+  />
+  <BakersNote
+    bakersNote="Orci varius"
+  />
+  <h5>
+    We'd love your feedback on last week's loaf.
+  </h5>
+  <div
+    className="row mt-2 mb-3"
+  >
+    <div
+      className="col"
+    >
+      <textarea
+        className="form-control"
+        defaultValue={null}
+        onChange={[Function]}
+        placeholder="What did you think?"
+      />
+    </div>
+  </div>
+  <h5>
+    Menu
+  </h5>
+  <div
+    className="row mt-2"
+  >
+    <Item
+      description=""
+      id={3}
+      image="bread-baguette.jpg"
+      key="3"
+      name="Baguette"
+      onChange={[Function]}
+    />
+    <Item
+      description="Mix of modern wheats and ancient Einkorn for the best of both worlds."
+      id={1}
+      image="bread2-002.webp"
+      key="1"
+      name="Classic"
+      onChange={[Function]}
+    />
+  </div>
+  <h5>
+    Skip this week?
+  </h5>
+  <div
+    className="row"
+  >
+    <div
+      className="col-6 mb-3"
+    >
+      <div
+        className="mb-2"
+      >
+        <button
+          className="btn btn-sm btn-dark"
+          onClick={[Function]}
+          type="button"
+        >
+          Skip
+        </button>
+      </div>
+      <div
+        style={
+          Object {
+            "lineHeight": "normal",
+          }
+        }
+      >
+        <small>
+          Skip this week.
+           
+          <em>
+            Removes any selected items from order.
+          </em>
+        </small>
+      </div>
+    </div>
+  </div>
+  <h5>
+    Pay it forward
+  </h5>
+  <div
+    className="row"
+  >
+    <div
+      className="col-6 mb-3"
+    >
+      <PayItForward
+        description="Wild times out there. Support some else in need."
+        onChange={[Function]}
+      />
+    </div>
+  </div>
+  <h5>
+    Comments & Special Requests
+  </h5>
+  <div
+    className="row mt-2 mb-3"
+  >
+    <div
+      className="col"
+    >
+      <textarea
+        className="form-control"
+        defaultValue={null}
+        onChange={[Function]}
+        placeholder="Comments or special requests"
+      />
+    </div>
+  </div>
+  <Cart
+    cart={Array []}
+    menu={
+      Object {
+        "bakersNote": "Orci varius",
+        "createdAt": "2019-11-02T14:01:23.820-04:00",
+        "deadline": "2019-11-03T23:59:59.000-04:00",
+        "deadlineDay": "Sunday",
+        "id": 921507399,
+        "isCurrent": true,
+        "items": Array [
+          Object {
+            "description": "",
+            "id": 3,
+            "image": "bread-baguette.jpg",
+            "name": "Baguette",
+          },
+          Object {
+            "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
+            "id": 1,
+            "image": "bread2-002.webp",
+            "name": "Classic",
+          },
+          Object {
+            "description": "Skip this week.",
+            "id": 0,
+            "name": "Skip",
+          },
+        ],
+        "name": "week 5",
+      }
+    }
+    rmCartItem={[Function]}
+    skip={false}
+  />
+  <div
+    className="row mt-2 mb-3"
+  >
+    <div
+      className="col"
+    >
+      <button
+        className="btn btn-primary btn-lg btn-block"
+        disabled={false}
+        onClick={[Function]}
+        title={null}
+        type="submit"
+      >
+        Submit Order
+      </button>
+    </div>
+  </div>
+  <User
+    user={
+      Object {
+        "breadsPerWeek": 1,
+        "credits": 9,
+        "email": "kyle.p.fritz@gmail.com",
+        "hashid": "Dot9gKn9w",
+        "id": 584273342,
+        "name": "Kyle Fritz",
       }
     }
   />

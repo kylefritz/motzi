@@ -20,7 +20,7 @@ end
 
 json.order do
   if @order
-    json.extract! @order, :comments, :feedback, :skip
+    json.extract! @order, :id, :comments, :feedback, :skip
     json.items @order.order_items.map do |item|
       json.extract! item, :item_id, :quantity, :day1_pickup
       json.day item.day1_pickup ? Setting.pickup_day1 : Setting.pickup_day2

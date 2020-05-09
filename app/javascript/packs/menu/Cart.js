@@ -30,13 +30,13 @@ function DaysCart({ menu, cart, rmCartItem }) {
   );
 }
 
-function Days({ menu, cart, rmCartItem, isSkipping }) {
+function Days({ menu, cart, rmCartItem, skip }) {
   const thurs = cart.filter(({ day }) => day === "Thursday");
   const sat = cart.filter(({ day }) => day === "Saturday");
   const payItForwardId = createMenuItemLookup(menu).payItForward.id;
   const payItForward = cart.filter(({ itemId }) => itemId === payItForwardId);
 
-  if (isSkipping) {
+  if (skip) {
     return (
       <div>
         <p>Skip this week</p>
@@ -88,8 +88,8 @@ function Total({ cart }) {
 }
 
 function Wrapped(props) {
-  const { cart, isSkipping } = props;
-  if (!cart.length && !isSkipping) {
+  const { cart, skip } = props;
+  if (!cart.length && !skip) {
     return <p>No items</p>;
   }
   return (

@@ -10,11 +10,17 @@ import BuyCredits from "../buy/App";
 import PayItForward from "./PayItForward";
 import createMenuItemLookup from "./createMenuItemLookup";
 
-export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
-  const [cart, setCart] = useState([]);
-  const [skip, setSkip] = useState(false);
-  const [feedback, setFeedback] = useState();
-  const [comments, setComments] = useState([]);
+export default function Menu({
+  menu,
+  order,
+  user,
+  onRefreshUser,
+  onCreateOrder,
+}) {
+  const [cart, setCart] = useState(_.get(order, "items", []));
+  const [skip, setSkip] = useState(_.get(order, "skip", false));
+  const [feedback, setFeedback] = useState(_.get(order, "feedback", null));
+  const [comments, setComments] = useState(_.get(order, "comments", null));
 
   const addToCart = (itemId, quantity, day) => {
     console.log("addToCart", itemId, quantity, day);
@@ -84,6 +90,7 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
           <textarea
             className="form-control"
             placeholder="What did you think?"
+            defaultValue={feedback}
             onChange={(e) => setFeedback(e.target.value)}
           />
         </div>
@@ -154,11 +161,12 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
         </>
       )}
 
-      <h5>Special Requests</h5>
+      <h5>Comments & Special Requests</h5>
       <div className="row mt-2 mb-3">
         <div className="col">
           <textarea
             placeholder="Comments or special requests"
+            defaultValue={comments}
             onChange={(e) => setComments(e.target.value)}
             className="form-control"
           />
@@ -178,7 +186,7 @@ export default function Menu({ menu, user, onRefreshUser, onCreateOrder }) {
             className="btn btn-primary btn-lg btn-block"
             type="submit"
           >
-            Submit Order
+            {order ? "Update Order" : "Submit Order"}
           </button>
         </div>
       </div>

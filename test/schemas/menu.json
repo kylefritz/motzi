@@ -160,7 +160,7 @@
     "order": {
       "type": ["object", "null"],
       "title": "order",
-      "required": ["items"],
+      "required": ["items", "id", "comments", "feedback", "skip"],
       "properties": {
         "items": {
           "type": "array",
@@ -168,16 +168,52 @@
           "items": {
             "type": "object",
             "title": "item",
-            "required": ["itemId"],
+            "required": ["itemId", "quantity", "day", "day1Pickup"],
             "properties": {
               "itemId": {
                 "type": "integer",
-                "title": "itemid",
+                "title": "item id",
                 "default": 0,
                 "examples": [722547269]
+              },
+              "quantity": {
+                "type": "integer",
+                "title": "quantity",
+                "default": 1,
+                "examples": [5]
+              },
+              "day": {
+                "type": "string",
+                "title": "day",
+                "examples": ["Thursday"]
+              },
+              "day1Pickup": {
+                "type": "boolean",
+                "title": "day 1 pickup"
               }
             }
           }
+        },
+        "id": {
+          "type": "integer",
+          "title": "order id",
+          "default": 0,
+          "examples": [32122582]
+        },
+        "comments": {
+          "type": "string",
+          "title": "Comments",
+          "default": null
+        },
+        "feedback": {
+          "type": "string",
+          "title": "feedback",
+          "default": null
+        },
+        "skip": {
+          "type": "boolean",
+          "title": "skip",
+          "default": false
         }
       }
     }
