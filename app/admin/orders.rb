@@ -22,7 +22,15 @@ ActiveAdmin.register Order do
     column :feedback
     column :comments
     column :created_at
-    actions
+    actions defaults: false do |order|
+      if order.menu_id == Setting.menu_id
+        item "Update", current_menu_url(uid: order.user.hashid, ignoredeadline: true), target: "_blank", class: "edit_link member_link"
+      else
+        item "View", resource_path(order), class: "view_link member_link"
+        item "Edit", edit_resource_path(order), class: "edit_link member_link"
+      end
+      item "Delete", resource_path(order), method: :delete, data: { confirm: "Delete Order?" }, class: "delete_link member_link"
+    end
   end
 
   show do
