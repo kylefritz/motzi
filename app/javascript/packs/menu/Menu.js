@@ -64,7 +64,7 @@ export default function Menu({
     // time to buy credits!
     return (
       <>
-        <User user={user} />
+        <User {...{ user, deadlineDay }} />
         <p className="my-2">
           We love baking yummy things for you but you're out of credits.
         </p>
@@ -190,7 +190,7 @@ export default function Menu({
           </button>
         </div>
       </div>
-      <User user={user} onRefreshUser={onRefreshUser} />
+      <User {...{ user, onRefreshUser, deadlineDay }} />
     </>
   );
 }

@@ -215,6 +215,7 @@ exports[`Menu snapshot 1`] = `
     </div>
   </div>
   <User
+    deadlineDay="Sunday"
     user={
       Object {
         "breadsPerWeek": 1,
@@ -444,6 +445,7 @@ exports[`Menu with order snapshot 1`] = `
     </div>
   </div>
   <User
+    deadlineDay="Sunday"
     user={
       Object {
         "breadsPerWeek": 1,

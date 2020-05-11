@@ -12,7 +12,7 @@ export default function Order({
   onRefreshUser,
   onEditOrder,
 }) {
-  const { name, bakersNote } = menu;
+  const { name, bakersNote, deadlineDay } = menu;
   const { items: cart, skip, comments, feedback } = order;
 
   return (
@@ -40,7 +40,7 @@ export default function Order({
         </div>
       )}
 
-      <User user={user} onRefreshUser={onRefreshUser} />
+      <User {...{ user, onRefreshUser, deadlineDay }} />
 
       <hr className="mb-5" />
 
