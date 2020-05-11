@@ -50,8 +50,8 @@ ActiveAdmin.register User do
     column :created_at
     column :updated_at
     actions do |user|
-      a "Order", href: current_menu_url(uid: user.hashid, ignoredeadline: true), target: "_blank"
-      link_to("Resend menu", resend_menu_admin_user_path(user), { method: :post, data: {confirm: "Resend menu email?"}})
+      item "Order", current_menu_url(uid: user.hashid, ignoredeadline: true), target: "_blank", class: "member_link", title: "Order for this user"
+      item "Resend menu", resend_menu_admin_user_path(user), method: :post, data: {confirm: "Resend menu email?"}, class: "member_link"
     end
   end
 

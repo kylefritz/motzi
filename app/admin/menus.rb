@@ -55,9 +55,9 @@ ActiveAdmin.register Menu do
     column :created_at
     column :emailed_at
     actions defaults: false do |menu|
-      a "view", href: admin_menu_path(menu)
-      a "edit", href: edit_admin_menu_path(menu)
-      a "preview", href: menu_path(menu), target: "_blank"
+      item "View", admin_menu_path(menu), class: "member_link"
+      item "Edit", edit_admin_menu_path(menu), class: "member_link"
+      item "Preview", menu_path(menu), target: "_blank", class: "member_link"
     end
   end
 
