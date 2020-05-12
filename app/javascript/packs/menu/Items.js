@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import accounting from "accounting";
 
+import Price from "./Price";
 import Quantity from "./Quantity";
 
 function shortDay(day) {
@@ -106,15 +106,31 @@ function Ordering({ description, onChange }) {
   );
 }
 
-export default function Item(props) {
-  const { price, image, name, showPrice = false } = props;
+function Item(props) {
+  const { price, image, name } = props;
   return (
     <div className="col-6 mb-4">
       {/* TODO: make image square */}
       <img src={image} className="img-fluid" style={{ objectFit: "contain" }} />
       <div>{name}</div>
-      {showPrice && <div>{accounting.formatMoney(price)}</div>}
+      <Price {...{ price }} />
       <Ordering {...props} />
+    </div>
+  );
+}
+
+export default function Items({ items, onAddToCart: handleAddToCart }) {
+  return (
+    <div className="row mt-2">
+      {items.map((i) => (
+        <Item
+          key={i.id}
+          {...i}
+          onChange={({ quantity, day }) =>
+            handleAddToCart({ ...i, quantity, day })
+          }
+        />
+      ))}
     </div>
   );
 }

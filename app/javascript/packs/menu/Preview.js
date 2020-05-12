@@ -2,7 +2,7 @@ import React from "react";
 
 import BakersNote from "./BakersNote";
 import Deadline from "./Deadline";
-import Item from "./Item";
+import Items from "./Items";
 import Subscription from "./Subscription";
 
 export default function Preview({ user, menu }) {
@@ -17,11 +17,7 @@ export default function Preview({ user, menu }) {
       <BakersNote {...{ bakersNote }} />
 
       <h5>Items</h5>
-      <div className="row mt-3">
-        {items.map((i) => (
-          <Item key={i.id} showPrice {...i} />
-        ))}
-      </div>
+      <Items items={items} />
     </>
   );
 }

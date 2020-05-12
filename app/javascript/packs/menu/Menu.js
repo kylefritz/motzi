@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import _ from "lodash";
 
-import Item from "./Item";
 import BakersNote from "./BakersNote";
-import Subscription from "./Subscription";
+import BuyCredits from "../buy/App";
 import Cart from "./Cart";
 import Deadline from "./Deadline";
-import BuyCredits from "../buy/App";
+import Items from "./Items";
 import PayItForward from "./PayItForward";
-import createMenuItemLookup from "./createMenuItemLookup";
+import SkipThisWeek from "./SkipThisWeek";
+import Subscription from "./Subscription";
 import useCart from "./useCart";
 
 export default function Menu({
@@ -45,7 +45,6 @@ export default function Menu({
   };
 
   const { name, bakersNote, items, isCurrent, deadlineDay } = menu;
-  const { skip: skipItem, payItForward } = createMenuItemLookup(menu);
 
   if (user && user.credits < 1) {
     // time to buy credits!
@@ -101,50 +100,10 @@ export default function Menu({
         </>
       ) : (
         <>
-          <div className="row mt-2">
-            {items
-              .filter(({ id }) => id !== skipItem.id && id !== payItForward.id)
-              .map((i) => (
-                <Item
-                  key={i.id}
-                  {...i}
-                  onChange={({ quantity, day }) =>
-                    addToCart(i.id, quantity, day)
-                  }
-                />
-              ))}
-          </div>
+          <Items items={items} onAddToCart={addToCart} />
 
-          <h5>Skip this week?</h5>
-          <div className="row">
-            <div className="col-6 mb-3">
-              <div className="mb-2">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-dark"
-                  onClick={handleSkip}
-                >
-                  Skip
-                </button>
-              </div>
-              <div style={{ lineHeight: "normal" }}>
-                <small>
-                  {skipItem.description}{" "}
-                  <em>Removes any selected items from order.</em>
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <h5>Pay it forward</h5>
-          <div className="row">
-            <div className="col-6 mb-3">
-              <PayItForward
-                description={payItForward.description}
-                onChange={({ quantity, day }) => addToCart(-1, quantity, day)}
-              />
-            </div>
-          </div>
+          <SkipThisWeek {...menu.skip} onSkip={handleSkip} />
+          <PayItForward {...menu.payItForward} onAddToCart={addToCart} />
         </>
       )}
 

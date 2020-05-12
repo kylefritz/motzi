@@ -4,11 +4,93 @@ import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
 import _ from "lodash";
 
+import { UserContext } from "./Contexts";
 import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
 import Preview from "./Preview";
 import { pastDeadline } from "./pastDeadline";
+
+function munge(menu) {
+  const { items } = menu;
+  const menuItems = _.keyBy(items, (i) => i.id);
+  // identify _skip_ item and _payItForward_ item
+  // filter them out of the collection of _regular_ items
+  return {
+    ...menu,
+    skip: menuItems[0] || {},
+    payItForward: menuItems[-1] || {},
+    items: items.filter(({ id }) => id !== 0 && id !== -1),
+  };
+}
+
+function Layout({
+  error,
+  fetchMenu,
+  handleCreateOrder,
+  ignoredeadline,
+  isEditingOrder,
+  menu,
+  order,
+  setIsEditingOrder,
+  user,
+}) {
+  if (error) {
+    return (
+      <>
+        <h2 className="mt-5">{error}</h2>
+        <p className="text-center">Sorry. Maybe try again or try back later?</p>
+      </>
+    );
+  }
+
+  if (!menu) {
+    return <h2 className="mt-5">loading...</h2>;
+  }
+
+  menu = munge(menu);
+
+  const deadlineExceeded = pastDeadline(menu.deadline) && !ignoredeadline;
+
+  if (order && !isEditingOrder) {
+    const handleEditOrder = deadlineExceeded
+      ? null
+      : () => setIsEditingOrder(true);
+    return (
+      <Order
+        {...{
+          user,
+          order,
+          menu,
+          onRefreshUser: fetchMenu,
+          onEditOrder: handleEditOrder,
+        }}
+      />
+    );
+  }
+
+  if (deadlineExceeded) {
+    return <Preview {...{ order, menu }} />;
+  }
+
+  if (!user) {
+    return (
+      <Marketplace {...{ order, menu, onCreateOrder: handleCreateOrder }} />
+    );
+  }
+
+  return (
+    <Menu
+      {...{
+        user,
+        order,
+        menu,
+        onCreateOrder: handleCreateOrder,
+        onRefreshUser: fetchMenu,
+      }}
+    />
+  );
+}
 
 export default function App() {
   const [data, setData] = useState({}); // expect: menu, user, order
@@ -57,53 +139,21 @@ export default function App() {
         Sentry.captureException(err);
       });
   };
-
-  const { menu, user, order } = data;
-  if (error) {
-    return (
-      <>
-        <h2 className="mt-5">{error}</h2>
-        <p className="text-center">Sorry. Maybe try again or try back later?</p>
-      </>
-    );
-  }
-
-  if (!menu) {
-    return <h2 className="mt-5">loading...</h2>;
-  }
-
-  const deadlineExceeded = pastDeadline(menu.deadline) && !ignoredeadline;
-
-  if (order && !isEditingOrder) {
-    const handleEditOrder = deadlineExceeded
-      ? null
-      : () => setIsEditingOrder(true);
-    return (
-      <Order
-        {...{
-          user,
-          order,
-          menu,
-          onRefreshUser: fetchMenu,
-          onEditOrder: handleEditOrder,
-        }}
-      />
-    );
-  }
-
-  if (!user || deadlineExceeded) {
-    return <Preview {...{ order, menu }} />;
-  }
+  const { user } = data;
 
   return (
-    <Menu
-      {...{
-        user,
-        order,
-        menu,
-        onCreateOrder: handleCreateOrder,
-        onRefreshUser: fetchMenu,
-      }}
-    />
+    <UserContext.Provider value={user}>
+      <Layout
+        {...{
+          ...data,
+          error,
+          fetchMenu,
+          handleCreateOrder,
+          ignoredeadline,
+          isEditingOrder,
+          setIsEditingOrder,
+        }}
+      />
+    </UserContext.Provider>
   );
 }

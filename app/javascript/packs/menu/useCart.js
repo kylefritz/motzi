@@ -4,9 +4,9 @@ import _ from "lodash";
 export default function useCart(order) {
   const [cart, setCart] = useState(_.get(order, "items", []));
 
-  const addToCart = (itemId, quantity, day) => {
+  const addToCart = ({ id: itemId, price, quantity, day }) => {
     console.log("addToCart", itemId, quantity, day);
-    setCart([...cart, { itemId, quantity, day }]);
+    setCart([...cart, { itemId, price, quantity, day }]);
   };
 
   const rmCartItem = (itemId, quantity, day) => {

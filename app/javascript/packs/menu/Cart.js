@@ -1,10 +1,17 @@
 import React from "react";
 import _ from "lodash";
-import createMenuItemLookup from "./createMenuItemLookup";
+
+import Price from "./Price";
+
+function buildMenuItemLookup(menu) {
+  const { items } = menu;
+  const menuItems = _.keyBy(items, (i) => i.id);
+  menuItems[menu.payItForward.id] = menu.payItForward;
+  return menuItems;
+}
 
 function DaysCart({ menu, cart, rmCartItem }) {
-  const { menuItems } = createMenuItemLookup(menu);
-  const lookupMenuItemName = (id) => _.get(menuItems[id], "name", id);
+  const menuItemsById = buildMenuItemLookup(menu);
 
   return (
     <>
@@ -12,7 +19,7 @@ function DaysCart({ menu, cart, rmCartItem }) {
         {cart.map(({ itemId, quantity, day }, index) => (
           <li key={`${index}:${itemId}:${quantity}:${day}`} className="mb-2">
             {quantity > 1 && <strong className="mr-2">{quantity}x</strong>}
-            {lookupMenuItemName(itemId)}
+            {_.get(menuItemsById[itemId], "name", `Item ${itemId}`)}
             {rmCartItem && (
               <button
                 type="button"
@@ -33,8 +40,9 @@ function DaysCart({ menu, cart, rmCartItem }) {
 function Days({ menu, cart, rmCartItem, skip }) {
   const thurs = cart.filter(({ day }) => day === "Thursday");
   const sat = cart.filter(({ day }) => day === "Saturday");
-  const payItForwardId = createMenuItemLookup(menu).payItForward.id;
-  const payItForward = cart.filter(({ itemId }) => itemId === payItForwardId);
+  const payItForward = cart.filter(
+    ({ itemId }) => itemId === menu.payItForward.id
+  );
 
   if (skip) {
     return (
@@ -75,13 +83,17 @@ function Days({ menu, cart, rmCartItem, skip }) {
   return sections;
 }
 
-function Total({ cart }) {
-  const total = _.sum(cart.map(({ quantity }) => quantity));
+function Total({ cart, menu }) {
+  const menuItemsById = buildMenuItemLookup(menu);
+  const credits = _.sum(cart.map(({ quantity }) => quantity));
+  const price = _.sum(
+    cart.map(({ itemId }) => _.get(menuItemsById[itemId], "price", 0))
+  );
   return (
     <div>
       <h6>Total</h6>
       <div className="ml-4">
-        {total} credit{total !== 1 && "s"}
+        <Price {...{ price, credits }} />
       </div>
     </div>
   );
@@ -95,7 +107,7 @@ function Cart(props) {
   return (
     <>
       <Days {...props} />
-      <Total cart={cart} />
+      <Total {...props} />
     </>
   );
 }

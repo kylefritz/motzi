@@ -56,32 +56,28 @@ exports[`Preview snapshot 1`] = `
   <h5>
     Items
   </h5>
-  <div
-    className="row mt-3"
-  >
-    <Item
-      description=""
-      id={3}
-      image="bread-baguette.jpg"
-      key="3"
-      name="Baguette"
-      showPrice={true}
-    />
-    <Item
-      description="Mix of modern wheats and ancient Einkorn for the best of both worlds."
-      id={1}
-      image="bread2-002.webp"
-      key="1"
-      name="Classic"
-      showPrice={true}
-    />
-    <Item
-      description="Skip this week."
-      id={0}
-      key="0"
-      name="Skip"
-      showPrice={true}
-    />
-  </div>
+  <Items
+    items={
+      Array [
+        Object {
+          "description": "",
+          "id": 3,
+          "image": "bread-baguette.jpg",
+          "name": "Baguette",
+        },
+        Object {
+          "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
+          "id": 1,
+          "image": "bread2-002.webp",
+          "name": "Classic",
+        },
+        Object {
+          "description": "Skip this week.",
+          "id": 0,
+          "name": "Skip",
+        },
+      ]
+    }
+  />
 </Fragment>
 `;
