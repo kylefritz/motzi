@@ -22,6 +22,7 @@ class OrdersController < ApplicationController
           day1_pickup = !(Setting.pickup_day2.casecmp?(cart_item_params[:day])) # default to day 1
           order.order_items.create!(cart_item_params.permit(:item_id, :quantity).merge(day1_pickup: day1_pickup))
         end
+        ahoy.track "order_created"
       end
     end
 
@@ -48,6 +49,7 @@ class OrdersController < ApplicationController
         day1_pickup = !(Setting.pickup_day2.casecmp?(cart_item_params[:day])) # default to day 1
         order.order_items.create!(cart_item_params.permit(:item_id, :quantity).merge(day1_pickup: day1_pickup))
       end
+      ahoy.track "order_updated"
     end
 
     render_current_order
