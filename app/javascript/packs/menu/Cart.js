@@ -87,7 +87,7 @@ function Total({ cart }) {
   );
 }
 
-function Wrapped(props) {
+function Cart(props) {
   const { cart, skip } = props;
   if (!cart.length && !skip) {
     return <p>No items</p>;
@@ -100,12 +100,12 @@ function Wrapped(props) {
   );
 }
 
-export default function Cart(props) {
+export default function CartWrapper(props) {
   return (
     <>
       <h5>Your order</h5>
       <div className="ml-2">
-        <Wrapped {...props} />
+        <Cart {...props} />
       </div>
     </>
   );

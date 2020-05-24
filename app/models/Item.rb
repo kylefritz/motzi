@@ -10,6 +10,10 @@ class Item < ApplicationRecord
     self.find_by(id: PAY_IT_FORWARD_ID)
   end
 
+  def pay_it_forward?
+    self.id == PAY_IT_FORWARD_ID
+  end
+
   def image_path
     if self.image.attached?
       Rails.application.routes.url_helpers.rails_blob_path(self.image, only_path: true)

@@ -1,7 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 # special items
-pay_it_foward:
+pay_it_forward:
   id: <%= Item::PAY_IT_FORWARD_ID %>
   name: Pay it forward
   description: buy for someone else

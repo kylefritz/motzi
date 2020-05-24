@@ -9,4 +9,12 @@ class OrderItem < ApplicationRecord
   def name
     "OrderItem ##{id} in Order ##{order_id}"
   end
+
+  def day
+    if self.item_id == Item::PAY_IT_FORWARD_ID
+      return nil
+    end
+
+    self.day1_pickup ? Setting.pickup_day1 : Setting.pickup_day2
+  end
 end
