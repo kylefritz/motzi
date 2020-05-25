@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import _ from "lodash";
 
-export default function useCart(order) {
+export default function useCart(order = null) {
   const [cart, setCart] = useState(_.get(order, "items", []));
 
   const addToCart = ({ id: itemId, price, quantity, day }) => {

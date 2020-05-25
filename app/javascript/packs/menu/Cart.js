@@ -15,9 +15,12 @@ function DaysCart({ menu, cart, rmCartItem }) {
 
   return (
     <>
-      <ul>
+      <ul className="list-unstyled">
         {cart.map(({ itemId, quantity, day }, index) => (
-          <li key={`${index}:${itemId}:${quantity}:${day}`} className="mb-2">
+          <li
+            key={`${index}:${itemId}:${quantity}:${day}`}
+            className="mb-2 ml-4"
+          >
             {quantity > 1 && <strong className="mr-2">{quantity}x</strong>}
             {_.get(menuItemsById[itemId], "name", `Item ${itemId}`)}
             {rmCartItem && (
@@ -83,12 +86,16 @@ function Days({ menu, cart, rmCartItem, skip }) {
   return sections;
 }
 
-function Total({ cart, menu }) {
+export function cartTotal({ cart, menu }) {
   const menuItemsById = buildMenuItemLookup(menu);
-  const credits = _.sum(cart.map(({ quantity }) => quantity));
-  const price = _.sum(
+  return _.sum(
     cart.map(({ itemId }) => _.get(menuItemsById[itemId], "price", 0))
   );
+}
+
+function Total({ cart, menu }) {
+  const credits = _.sum(cart.map(({ quantity }) => quantity));
+  const price = cartTotal({ cart, menu });
   return (
     <div>
       <h6>Total</h6>

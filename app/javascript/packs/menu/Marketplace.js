@@ -2,31 +2,41 @@ import React, { useState } from "react";
 import _ from "lodash";
 
 import BakersNote from "./BakersNote";
-import Cart from "./Cart";
+import Cart, { cartTotal } from "./Cart";
 import Deadline from "./Deadline";
+import EmailName from "./EmailName";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
+import Payment from "../buy/Payment";
 import useCart from "./useCart";
 
-export default function Marketplace({ menu, order, onCreateOrder }) {
-  const { cart, addToCart, rmCartItem } = useCart(order);
+export default function Marketplace({ menu, onCreateOrder }) {
+  const { cart, addToCart, rmCartItem } = useCart();
 
-  const [comments, setComments] = useState(_.get(order, "comments", null));
+  const [submitting, setSubmitting] = useState(false);
+  const [comments, setComments] = useState();
+  const [emailName, setEmailName] = useState({});
 
-  const handleCreateOrder = () => {
-    if (_.isEmpty(cart)) {
-      return alert("Make a selection!");
+  const totalPrice = cartTotal({ cart, menu });
+
+  const handleCardToken = ({ token }) => {
+    if (_.isEmpty(emailName.email)) {
+      return alert("Enter email!");
     }
 
+    console.log("handleCardToken", { token, totalPrice });
+    setSubmitting(true);
+
+    // send stripe token to rails to complete purchase
     onCreateOrder({
+      ...emailName,
       comments,
       cart,
-      // uid: user.hashid, // going to need email or something to tell person
-    });
+      token,
+    }).then(() => setSubmitting(false));
   };
 
-  const { name, bakersNote, items, isCurrent } = menu;
-
+  const { name, bakersNote, items } = menu;
   return (
     <>
       <h2>{name}</h2>
@@ -51,23 +61,16 @@ export default function Marketplace({ menu, order, onCreateOrder }) {
 
       <Cart {...{ cart, menu, rmCartItem }} />
 
-      <div className="row mt-2 mb-3">
-        <div className="col">
-          <button
-            onClick={handleCreateOrder}
-            disabled={!isCurrent}
-            title={
-              isCurrent
-                ? null
-                : "This is not the current menu; you cannot submit an order."
-            }
-            className="btn btn-primary btn-lg btn-block"
-            type="submit"
-          >
-            {order ? "Update Order" : "Place Order"}
-          </button>
-        </div>
+      <div className="mt-3">
+        <EmailName onChange={setEmailName} />
       </div>
+
+      <Payment
+        price={totalPrice}
+        stripeApiKey={gon.stripeApiKey}
+        onCardToken={handleCardToken}
+        submitting={submitting}
+      />
     </>
   );
 }

@@ -38,7 +38,7 @@ export default function Card({ stripe, onToken, credits, price, submitting }) {
     }
     stripe.createToken().then(onToken);
   };
-
+  const isZeroPrice = !_.isNumber(price) || price === 0;
   return (
     <div className="checkout">
       <form onSubmit={handleSubmit}>
@@ -50,7 +50,7 @@ export default function Card({ stripe, onToken, credits, price, submitting }) {
           </div>
         )}
         <button
-          disabled={!cardFilled || submitting}
+          disabled={!cardFilled || submitting || isZeroPrice}
           className="btn btn-primary btn-lg btn-block"
           type="submit"
         >
@@ -63,10 +63,12 @@ export default function Card({ stripe, onToken, credits, price, submitting }) {
               />
               Purchasing...
             </>
+          ) : isZeroPrice ? (
+            "Select an item"
           ) : (
-            <>
-              Charge credit card {formatMoney(price)} for {credits} credits
-            </>
+            `Charge credit card ${formatMoney(price)} ${
+              credits ? ` for ${credits} credits` : ""
+            }`
           )}
         </button>
       </form>

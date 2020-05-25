@@ -69,14 +69,12 @@ function Layout({
     );
   }
 
-  if (deadlineExceeded) {
-    return <Preview {...{ order, menu }} />;
+  if (deadlineExceeded || !menu.isCurrent) {
+    return <Preview menu={menu} />;
   }
 
   if (!user) {
-    return (
-      <Marketplace {...{ order, menu, onCreateOrder: handleCreateOrder }} />
-    );
+    return <Marketplace {...{ menu, onCreateOrder: handleCreateOrder }} />;
   }
 
   return (
@@ -125,7 +123,7 @@ export default function App() {
     const url = orderId ? `/orders/${orderId}.json` : "/orders.json";
     console.debug("saving order", method, url, order);
 
-    axios({ method, url, data: order })
+    return axios({ method, url, data: order })
       .then(({ data: newData }) => {
         setData(newData); // expect: menu, user, order
         setIsEditingOrder(false);

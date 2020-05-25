@@ -13,13 +13,20 @@ export default function Order({
   onEditOrder,
 }) {
   const { name, bakersNote, deadlineDay } = menu;
-  const { items: cart, skip, comments, feedback } = order;
+  const { items: cart, skip, comments, feedback, stripeReceiptUrl } = order;
 
   return (
     <>
       <h2 className="mt-5 mb-4">We got your order!</h2>
 
       <Cart {...{ cart, menu, skip }} />
+      {stripeReceiptUrl && (
+        <p className="text-center my-2">
+          <a href={stripeReceiptUrl} target="blank">
+            View receipt
+          </a>
+        </p>
+      )}
       <div className="ml-2 mt-3">
         <h6>Feedback</h6>
         <p>{feedback || <em>none</em>}</p>

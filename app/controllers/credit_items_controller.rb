@@ -28,6 +28,7 @@ class CreditItemsController < ApplicationController
       # add credit_item for user
       @credit_item = current_user.credit_items.create!(stripe_charge_id: charge.id,
                                                        stripe_receipt_url: charge.try(:receipt_url),
+                                                       stripe_charge_amount: price,
                                                        memo: "paid $#{price} via Stripe. #{frequency}",
                                                        quantity: credits,
                                                        good_for_weeks: 42)

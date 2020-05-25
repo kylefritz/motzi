@@ -21,7 +21,9 @@ ActiveAdmin.register Item do
         end
       end
     end
-    column :price
+    column :price do |item|
+      number_to_currency(item.price)
+    end
     column :description
     column :created_at
     column :updated_at
@@ -34,7 +36,7 @@ ActiveAdmin.register Item do
       row :price
       row :description
       row :image do |item|
-        if item.image.attached? 
+        if item.image.attached?
           if item.image.representable?
             image_tag(item.image.representation(resize_to_limit: [250, 250]), alt: item.name)
           else

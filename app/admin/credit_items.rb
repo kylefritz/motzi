@@ -22,6 +22,11 @@ ActiveAdmin.register CreditItem do
         a "receipt", href: credit_item.stripe_receipt_url, target: '_blank'
       end
     end
+    column :price do |credit_item|
+      if credit_item.stripe_charge_amount.present?
+        number_to_currency(credit_item.stripe_charge_amount)
+      end
+    end
     actions
   end
 
