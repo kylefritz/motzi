@@ -162,7 +162,7 @@ exports[`Menu snapshot 1`] = `
       />
     </div>
   </div>
-  <Cart
+  <CartWrapper
     cart={Array []}
     menu={
       Object {
@@ -392,7 +392,7 @@ exports[`Menu with order snapshot 1`] = `
       />
     </div>
   </div>
-  <Cart
+  <CartWrapper
     cart={Array []}
     menu={
       Object {

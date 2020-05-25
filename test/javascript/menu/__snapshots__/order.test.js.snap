@@ -7,7 +7,7 @@ exports[`Order snapshot 1`] = `
   >
     We got your order!
   </h2>
-  <Cart
+  <CartWrapper
     cart={
       Array [
         Object {
