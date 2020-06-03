@@ -59,4 +59,17 @@ class UserTest < ActiveSupport::TestCase
     User.all.update_all(send_weekly_email: false)
     assert_equal 0, User.customers.count
   end
+
+  test "order for menu" do
+    menu = menus(:week2)
+
+    refute_nil users(:kyle).order_for_menu(menu), "customer has order"
+
+    assert_nil users(:maya).order_for_menu(menu), "owner doesn't have order"
+
+    menu.orders.create!(user: users(:kyle))
+    assert_equal 2, users(:kyle).orders.where(menu: menu).count
+    refute_nil users(:kyle).order_for_menu(menu), "if two, finds one"
+    assert_equal orders(:kyle_week2).id, users(:kyle).order_for_menu(menu).id
+  end
 end
