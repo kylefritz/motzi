@@ -20,6 +20,9 @@ class User < ApplicationRecord
     # if no password, set random passwords on user
     self.password = SecureRandom.base64(16) if self.password.blank?
   end
+  before_validation do
+    self.email = self.email.strip.downcase
+  end
   def self.for_bakers_choice
     # users who havent ordered but must
     must_order = User.must_order_weekly.pluck(:id)

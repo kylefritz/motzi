@@ -54,7 +54,7 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
 
     Timecop.freeze(date_time) do
       assert_difference('Ahoy::Message.count', num_emails, 'emails audited in ahoy') do
-        assert_difference('ReminderMailer.deliveries.count', num_emails, msg) do
+        assert_difference('ApplicationMailer.deliveries.count', num_emails, msg) do
           perform_enqueued_jobs do
             SendHaventOrderedReminderJob.perform_now
           end

@@ -95,7 +95,8 @@
         "id": { "type": "integer" },
         "comments": { "type": "string" },
         "feedback": { "type": "string" },
-        "skip": { "type": "boolean" }
+        "skip": { "type": "boolean" },
+        "stripeReceiptUrl": { "type": ["string", "null"] }
       }
     }
   }

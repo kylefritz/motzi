@@ -129,6 +129,7 @@ GEM
     childprocess (3.0.0)
     concurrent-ruby (1.1.6)
     crass (1.0.6)
+    dante (0.2.0)
     device_detector (1.0.3)
     devise (4.7.1)
       bcrypt (~> 3.0)
@@ -380,6 +381,10 @@ GEM
       rubocop (~> 0.80.1)
       rubocop-performance (~> 1.5.2)
     stripe (5.17.0)
+    stripe-ruby-mock (3.0.1)
+      dante (>= 0.2.0)
+      multi_json (~> 1.0)
+      stripe (> 5, < 6)
     thor (1.0.1)
     thread_safe (0.3.6)
     tilt (2.0.10)
@@ -454,6 +459,7 @@ DEPENDENCIES
   sql_query
   standard
   stripe
+  stripe-ruby-mock (~> 3.0.1)
   timecop
   web-console (>= 3.3.0)
   webdrivers

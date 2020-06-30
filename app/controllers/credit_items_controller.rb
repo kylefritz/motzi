@@ -1,5 +1,6 @@
 class CreditItemsController < ApplicationController
   include UserHashidable
+  before_action :require_hashid_user_or_devise_user!
 
   def create
     price = params[:price].to_f.clamp(1, 250)

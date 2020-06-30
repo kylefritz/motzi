@@ -72,4 +72,10 @@ class UserTest < ActiveSupport::TestCase
     refute_nil users(:kyle).order_for_menu(menu), "if two, finds one"
     assert_equal orders(:kyle_week2).id, users(:kyle).order_for_menu(menu).id
   end
+
+  test "email normalized" do
+    email = "someone@bread.com"
+    user = User.create!(email: "   #{email.upcase}   ", password: "sadfsfsdf")
+    assert_equal email, user.email
+  end
 end

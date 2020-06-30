@@ -1,10 +1,26 @@
 class OrdersController < ApplicationController
+  class OrderError < StandardError;end
+
   include UserHashidable
   include RenderCurrentOrder
   before_action :require_not_skip_and_cart_items
 
+  def current_user_or_create_user
+    if !params.include?(:email)
+      require_hashid_user_or_devise_user!
+      return current_user
+    end
+
+    # TOOD: addition email
+    if (existing_user = User.find_by(email: params.fetch(:email).strip.downcase)).present?
+      return existing_user
+    end
+
+    User.create!(params.permit(:first_name, :last_name, :email))
+  end
+
   def create
-    if current_user.current_order
+    if current_user.present? && current_user.current_order
       logger.warn "user=#{current_user.email} already placed an order. returning that order"
       return render_current_order
     end
@@ -14,19 +30,62 @@ class OrdersController < ApplicationController
       return render_ordering_closed
     end
 
-    order_params = params.permit(:feedback, :comments, :skip).merge(menu: menu, user: current_user)
-
     Order.transaction do
+      current_user = current_user_or_create_user()
+      order_params = params.permit(:feedback, :comments, :skip).merge(menu: menu, user: current_user)
+
       Order.create!(order_params).tap do |order|
-        params[:cart].each do |cart_item_params|
+        params.fetch(:cart).each do |cart_item_params|
           day1_pickup = !(Setting.pickup_day2.casecmp?(cart_item_params[:day])) # default to day 1
           order.order_items.create!(cart_item_params.permit(:item_id, :quantity).merge(day1_pickup: day1_pickup))
         end
+
+        # figure out if we need to charge this person or if we're using credits
+        if params[:price].present?
+
+          # we let the customer set the price so ok to trust customer input
+          price = params[:price].to_f.clamp(1, 250)
+          price_cents = (price * 100).to_i
+
+          # make stripe change
+          if params[:token].blank?
+            raise OrderError.new("Stripe credit card not submitted")
+          end
+          charge = Stripe::Charge.create({
+            amount: price_cents,
+            currency: 'usd',
+            source: params[:token],
+            metadata: {
+              user_id: current_user.id,
+              order_id: order.id,
+            },
+            description: "Order ##{order.id} - #{order.item_list}",
+            receipt_email: current_user.email
+          })
+          order.update!(
+            stripe_charge_id: charge.id,
+            stripe_receipt_url: charge.try(:receipt_url),
+            stripe_charge_amount: price,
+          )
+
+          # send confirmation email
+          OrderMailer.with(order: order).confirmation_email.deliver_later
+        end
+
         ahoy.track "order_created"
       end
     end
 
     render_current_order
+
+    rescue OrderError => e
+      render_validation_failed(e.message)
+    rescue Stripe::CardError => e
+      # https://stripe.com/docs/api/errors/handling
+      logger.warn "Stripe::CardError Status=#{e.http_status} Type=#{e.error.type} Charge ID=#{e.error.charge} \
+        Code=#{e.error.code} decline_code=#{e.error.decline_code} param=#{e.error.param} message=#{e.error.message}"
+
+      render_validation_failed(e.error.message)
   end
 
   def update
@@ -63,6 +122,10 @@ class OrdersController < ApplicationController
   end
 
   def render_ordering_closed
-    render json: { message: "ordering for this menu is closed" }, status: :unprocessable_entity
+    return render_validation_failed("ordering for this menu is closed")
+  end
+
+  def render_validation_failed(message)
+    return render json: { message: message }, status: :unprocessable_entity
   end
 end
