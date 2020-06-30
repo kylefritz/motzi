@@ -40,7 +40,8 @@ class User < ApplicationRecord
   def credits
     # TODO: not handing credit expiration
     credits_purchased = self.credit_items.pluck('quantity').sum
-    credits_used = self.order_items.pluck('quantity').sum
+    credits_used = OrderItem.where(order_id: self.orders.where("stripe_charge_id is null")).pluck('quantity').sum
+
     credits_purchased - credits_used
   end
 

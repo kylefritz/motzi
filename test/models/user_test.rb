@@ -22,6 +22,15 @@ class UserTest < ActiveSupport::TestCase
     end
   end
 
+  test "credits dont change if we pay for order seperately" do
+    menus(:week2).make_current!
+    kyle = users(:kyle)
+    kyle.current_order.update(stripe_charge_id: "fake-value")
+    assert_difference 'kyle.credits', 0, 'added an item' do
+      kyle.current_order.order_items.create!(item: items(:classic))
+    end
+  end
+
   test "current order" do
     menus(:week2).make_current!
     assert_nil users(:ljf).current_order, 'shouldnt have an order'

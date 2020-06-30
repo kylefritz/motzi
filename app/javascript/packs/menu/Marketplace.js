@@ -33,7 +33,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
       comments,
       cart,
       price: totalPrice,
-      token,
+      token: token.id,
     }).then(() => setSubmitting(false));
   };
 

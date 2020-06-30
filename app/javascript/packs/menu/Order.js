@@ -15,6 +15,7 @@ export default function Order({
   const { name, bakersNote, deadlineDay } = menu;
   const { items: cart, skip, comments, feedback, stripeReceiptUrl } = order;
 
+  const isSubscriptionOrder = !stripeReceiptUrl;
   return (
     <>
       <h2 className="mt-5 mb-4">We got your order!</h2>
@@ -35,7 +36,7 @@ export default function Order({
         <p>{comments || <em>none</em>}</p>
       </div>
 
-      {onEditOrder && (
+      {onEditOrder && isSubscriptionOrder && (
         <div>
           <button
             type="button"
@@ -47,7 +48,9 @@ export default function Order({
         </div>
       )}
 
-      <Subscription {...{ user, onRefreshUser, deadlineDay }} />
+      {isSubscriptionOrder && (
+        <Subscription {...{ user, onRefreshUser, deadlineDay }} />
+      )}
 
       <hr className="mb-5" />
 
