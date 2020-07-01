@@ -16,9 +16,14 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
   end
 
   test "not logged in user can pay for order" do
-    assert_order(build_order_attrs, 1, 1, 1)
+    order_attrs = build_order_attrs
+    assert_order(order_attrs, 1, 1, 1)
     assert_response :success
-    refute User.last.subscriber?, "created user isn't a subscriber"
+
+    new_user = User.unscoped.order("created_at desc").last
+    assert_equal order_attrs[:email], new_user.email
+    refute new_user.subscriber?, "created user isn't a subscriber"
+    refute new_user.send_weekly_email?, "shouldn't get weekly email"
 
     new_order = Order.last
     refute_nil new_order.stripe_charge_id
