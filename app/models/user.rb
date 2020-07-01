@@ -45,6 +45,10 @@ class User < ApplicationRecord
     credits_purchased - credits_used
   end
 
+  def subscriber?
+    self.credit_items.any?
+  end
+
   def authenticate(password)
     Devise::Encryptor.compare(User, self.encrypted_password, password)
   end

@@ -14,6 +14,11 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 23, users(:kyle).credits
   end
 
+  test "subscriber" do
+    refute users(:maya).subscriber?
+    assert users(:kyle).subscriber?
+  end
+
   test "credit go down with items" do
     menus(:week2).make_current!
     kyle = users(:kyle)

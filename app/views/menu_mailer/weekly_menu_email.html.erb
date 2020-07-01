@@ -8,4 +8,4 @@
 
 <p>Please order by midnight on <%= Setting.deadline_day %></p>
 
-<p>You have <%= @user.credits %> credits remaining.</p>
+<%= render partial: 'menu_mailer/credits_remaining' %>

@@ -11,4 +11,4 @@ You ordered:
 <%= oi.quantity %>x <%= oi.item.name %>
 <% end %>
 
-You have <%= @user.credits %> credits remaining.
+<%= render partial: 'menu_mailer/credits_remaining' %>
