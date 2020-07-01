@@ -11,7 +11,6 @@ class OrdersController < ApplicationController
       return current_user
     end
 
-    # TOOD: addition email
     if (existing_user = User.find_by(email: params.fetch(:email).strip.downcase)).present?
       return existing_user
     end
@@ -20,7 +19,7 @@ class OrdersController < ApplicationController
   end
 
   def create
-    if current_user.present? && current_user.current_order
+    if current_user&.current_order
       logger.warn "user=#{current_user.email} already placed an order. returning that order"
       return render_current_order
     end

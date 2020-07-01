@@ -2,16 +2,16 @@ import React, { useState } from "react";
 import BuyCredits from "../buy/App";
 
 export const humanizeBreadsPerWeek = (perWeek) => {
-  if (perWeek == 0.5) {
+  if (perWeek === 0.5) {
     return "Every other week";
   }
-  if (perWeek == 1.0) {
+  if (perWeek === 1.0) {
     return "Every week";
   }
-  if (perWeek == 2.0) {
+  if (perWeek === 2.0) {
     return "Two breads per week";
   }
-  if (perWeek == 3.0) {
+  if (perWeek === 3.0) {
     return "Three breads per week";
   }
   return `${perWeek} breads per week`;

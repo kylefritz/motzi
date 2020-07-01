@@ -96,7 +96,8 @@
         "comments": { "type": "string" },
         "feedback": { "type": "string" },
         "skip": { "type": "boolean" },
-        "stripeReceiptUrl": { "type": ["string", "null"] }
+        "stripeReceiptUrl": { "type": ["string", "null"] },
+        "stripeChargeAmount": { "type": ["number", "null"] }
       }
     }
   }

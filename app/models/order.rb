@@ -19,38 +19,37 @@ class Order < ApplicationRecord
   end
 
   def item_list
-    s = StringIO.new
+    StringIO.new.tap do |s|
 
-    prior_day_had_items = false
+      prior_day_had_items = false
 
-    day1, day2 = order_items.partition(&:day1_pickup)
-    [
-      [Setting.pickup_day1_abbr, day1],
-      [Setting.pickup_day2_abbr, day2],
-    ].each do |day_name, day_items|
-      next if day_items.empty?
+      day1, day2 = order_items.partition(&:day1_pickup)
+      [
+        [Setting.pickup_day1_abbr, day1],
+        [Setting.pickup_day2_abbr, day2],
+      ].each do |day_name, day_items|
+        next if day_items.empty?
 
-      s << "#{prior_day_had_items ? "; " : ""}#{day_name}: "
+        s << "#{prior_day_had_items ? "; " : ""}#{day_name}: "
 
-      prior_day_had_items = true
+        prior_day_had_items = true
 
-      counts = Hash.new(0).tap do |counts|
-        day_items.each { |oi| counts[oi.item.name] += oi.quantity }
-      end
-      day_item_names = counts.keys.natural_sort
-      day_item_names.each_with_index do |name, i|
-        if (count = counts[name]) > 1
-          s << "#{count}x "
+        counts = Hash.new(0).tap do |counts|
+          day_items.each { |oi| counts[oi.item.name] += oi.quantity }
+        end
+        day_item_names = counts.keys.natural_sort
+        day_item_names.each_with_index do |name, i|
+          if (count = counts[name]) > 1
+            s << "#{count}x "
+          end
+
+          is_last = i+1 == day_item_names.size
+
+          s << "#{name}#{is_last ? "" : ", "}"
         end
 
-        is_last = i+1 == day_item_names.size
-
-        s << "#{name}#{is_last ? "" : ", "}"
       end
-
-    end
-
-    s.string
+    end.string
   end
 
   def name
