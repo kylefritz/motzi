@@ -11,6 +11,10 @@ class ActiveSupport::TestCase
 
   # Add more helper methods to be used by all tests here...
 
+  teardown do
+    Setting.clear_cache
+  end
+
   def validate_json_schema(object_name, json)
     schema_directory = "#{Dir.pwd}/test/schemas"
     schema_path = "#{schema_directory}/#{object_name}.json"
