@@ -116,7 +116,7 @@ exports[`Menu snapshot 1`] = `
         className="form-control"
         defaultValue={null}
         onChange={[Function]}
-        placeholder="Comments or special requests"
+        placeholder="Comments & special requests"
       />
     </div>
   </div>
@@ -304,7 +304,7 @@ exports[`Menu with order snapshot 1`] = `
         className="form-control"
         defaultValue={null}
         onChange={[Function]}
-        placeholder="Comments or special requests"
+        placeholder="Comments & special requests"
       />
     </div>
   </div>
