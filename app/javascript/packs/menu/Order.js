@@ -2,7 +2,7 @@ import React from "react";
 import _ from "lodash";
 
 import BakersNote from "./BakersNote";
-import User from "./User";
+import Subscription from "./Subscription";
 import Cart from "./Cart";
 
 export default function Order({
@@ -13,22 +13,41 @@ export default function Order({
   onEditOrder,
 }) {
   const { name, bakersNote, deadlineDay } = menu;
-  const { items: cart, skip, comments, feedback } = order;
+  const {
+    items: cart,
+    skip,
+    comments,
+    feedback,
+    stripeReceiptUrl,
+    stripeChargeAmount,
+  } = order;
 
+  const isSubscriptionOrder = !stripeReceiptUrl;
   return (
     <>
       <h2 className="mt-5 mb-4">We got your order!</h2>
 
-      <Cart {...{ cart, menu, skip }} />
+      <Cart {...{ cart, menu, skip, stripeChargeAmount }} />
+      {stripeReceiptUrl && (
+        <p className="text-center my-2">
+          <a href={stripeReceiptUrl} target="blank">
+            View receipt
+          </a>
+        </p>
+      )}
       <div className="ml-2 mt-3">
-        <h6>Feedback</h6>
-        <p>{feedback || <em>none</em>}</p>
+        {isSubscriptionOrder && (
+          <>
+            <h6>Feedback</h6>
+            <p>{feedback || <em>none</em>}</p>
+          </>
+        )}
 
         <h6>Comments & Special Requests</h6>
         <p>{comments || <em>none</em>}</p>
       </div>
 
-      {onEditOrder && (
+      {onEditOrder && isSubscriptionOrder && (
         <div>
           <button
             type="button"
@@ -40,7 +59,9 @@ export default function Order({
         </div>
       )}
 
-      <User {...{ user, onRefreshUser, deadlineDay }} />
+      {isSubscriptionOrder && (
+        <Subscription {...{ user, onRefreshUser, deadlineDay }} />
+      )}
 
       <hr className="mb-5" />
 

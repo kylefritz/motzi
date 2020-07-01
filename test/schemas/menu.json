@@ -31,11 +31,12 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["id", "name", "description"],
+            "required": ["id", "name", "description", "price"],
             "properties": {
               "id": { "type": "integer" },
               "name": { "type": "string" },
               "description": { "type": "string" },
+              "price": { "type": "number" },
               "image": {
                 "type": ["null", "string"],
                 "title": "image",
@@ -94,7 +95,9 @@
         "id": { "type": "integer" },
         "comments": { "type": "string" },
         "feedback": { "type": "string" },
-        "skip": { "type": "boolean" }
+        "skip": { "type": "boolean" },
+        "stripeReceiptUrl": { "type": ["string", "null"] },
+        "stripeChargeAmount": { "type": ["number", "null"] }
       }
     }
   }

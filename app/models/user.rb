@@ -20,6 +20,9 @@ class User < ApplicationRecord
     # if no password, set random passwords on user
     self.password = SecureRandom.base64(16) if self.password.blank?
   end
+  before_validation do
+    self.email = self.email.strip.downcase
+  end
   def self.for_bakers_choice
     # users who havent ordered but must
     must_order = User.must_order_weekly.pluck(:id)
@@ -37,8 +40,13 @@ class User < ApplicationRecord
   def credits
     # TODO: not handing credit expiration
     credits_purchased = self.credit_items.pluck('quantity').sum
-    credits_used = self.order_items.pluck('quantity').sum
+    credits_used = OrderItem.where(order_id: self.orders.where("stripe_charge_id is null")).pluck('quantity').sum
+
     credits_purchased - credits_used
+  end
+
+  def subscriber?
+    self.credit_items.any?
   end
 
   def authenticate(password)

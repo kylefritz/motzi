@@ -2,4 +2,4 @@
 
 <p><%= link_to "This week's menu!", current_menu_url(uid: @user.hashid) %></p>
 
-<p>You have <%= @user.credits %> credits remaining.</p
+<%= render partial: 'menu_mailer/credits_remaining' %>

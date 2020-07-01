@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+import Price from "./Price";
 import Quantity from "./Quantity";
 
 function shortDay(day) {
@@ -52,7 +53,7 @@ function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day }) {
         </div>
       </div>
       <div>
-        <button onClick={onAdd} className="btn btn-primary btn-sm mr-2">
+        <button onClick={onAdd} className="btn btn-primary btn-sm mr-2 mb-2">
           Add to cart
         </button>
         <button onClick={onCancel} className="btn btn-secondary btn-sm">
@@ -105,14 +106,31 @@ function Ordering({ description, onChange }) {
   );
 }
 
-export default function Item(props) {
-  const { image, name } = props;
+function Item(props) {
+  const { price, image, name } = props;
   return (
     <div className="col-6 mb-4">
       {/* TODO: make image square */}
       <img src={image} className="img-fluid" style={{ objectFit: "contain" }} />
       <div>{name}</div>
+      <Price {...{ price }} />
       <Ordering {...props} />
+    </div>
+  );
+}
+
+export default function Items({ items, onAddToCart: handleAddToCart }) {
+  return (
+    <div className="row mt-2">
+      {items.map((i) => (
+        <Item
+          key={i.id}
+          {...i}
+          onChange={({ quantity, day }) =>
+            handleAddToCart({ ...i, quantity, day })
+          }
+        />
+      ))}
     </div>
   );
 }

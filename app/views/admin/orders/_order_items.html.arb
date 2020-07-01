@@ -9,13 +9,14 @@ def for_day(day_name, order_items)
   div do
     em("#{day_name}: ")
 
-    items = counts.keys.natural_sort
-    items.each_with_index do |name, i|
-      is_last = i+1 == items.size
+    item_names = counts.keys.natural_sort
+    item_names.each_with_index do |name, i|
       span do
         if (count = counts[name]) > 1
           strong "#{count}x "
         end
+
+        is_last = i+1 == item_names.size
         span "#{name}#{is_last ? "": ","}"
       end
     end

@@ -47,6 +47,17 @@ class OrderTest < ActiveSupport::TestCase
     end
   end
 
+  test "item_list" do
+    assert_equal "Tue: Donuts, Rye Five Ways", orders(:kyle_week2).item_list
+
+    o = orders(:ljf_week1)
+    o.order_items.create!(item: items(:pumpkin), quantity: 5, day1_pickup: true)
+    o.order_items.create!(item: items(:pumpkin), quantity: 1, day1_pickup: true)
+    o.order_items.create!(item: items(:classic), quantity: 1, day1_pickup: true)
+    assert_equal "Tue: Classic, 6x Pumpkin; Thu: Classic", o.item_list
+  end
+
+
   private
 
   # TODO: extract into test_helper

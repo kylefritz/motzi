@@ -3,7 +3,6 @@ module UserHashidable
 
   included do
     skip_before_action :authenticate_user!
-    before_action :require_hashid_user_or_devise_user!
 
     # we're going to change the definition of current_user
     # rename current_user to devise_user

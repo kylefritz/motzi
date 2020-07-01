@@ -5,7 +5,7 @@ json.menu do
   items = @menu.menu_items.reject(&:is_add_on?)
 
   json.items [items.map(&:item), Item.pay_it_forward].flatten.map do |item|
-    json.extract! item, :id, :name, :description
+    json.extract! item, :id, :name, :description, :price
     json.image item.image_path
   end
 end
@@ -20,7 +20,7 @@ end
 
 json.order do
   if @order
-    json.extract! @order, :id, :comments, :feedback, :skip
+    json.extract! @order, :id, :comments, :feedback, :skip, :stripe_receipt_url, :stripe_charge_amount
     json.items @order.order_items.map do |order_item|
       json.extract! order_item, :item_id, :quantity, :day1_pickup, :day
     end

@@ -1,5 +1,6 @@
 class CreditItemsController < ApplicationController
   include UserHashidable
+  before_action :require_hashid_user_or_devise_user!
 
   def create
     price = params[:price].to_f.clamp(1, 250)
@@ -28,6 +29,7 @@ class CreditItemsController < ApplicationController
       # add credit_item for user
       @credit_item = current_user.credit_items.create!(stripe_charge_id: charge.id,
                                                        stripe_receipt_url: charge.try(:receipt_url),
+                                                       stripe_charge_amount: price,
                                                        memo: "paid $#{price} via Stripe. #{frequency}",
                                                        quantity: credits,
                                                        good_for_weeks: 42)

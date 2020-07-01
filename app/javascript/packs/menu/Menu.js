@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import _ from "lodash";
 
-import Item from "./Item";
 import BakersNote from "./BakersNote";
-import User from "./User";
+import BuyCredits from "../buy/App";
 import Cart from "./Cart";
 import Deadline from "./Deadline";
-import BuyCredits from "../buy/App";
+import Items from "./Items";
 import PayItForward from "./PayItForward";
-import createMenuItemLookup from "./createMenuItemLookup";
+import SkipThisWeek from "./SkipThisWeek";
+import Subscription from "./Subscription";
+import useCart from "./useCart";
 
 export default function Menu({
   menu,
@@ -17,25 +18,11 @@ export default function Menu({
   onRefreshUser,
   onCreateOrder,
 }) {
-  const [cart, setCart] = useState(_.get(order, "items", []));
+  const { cart, addToCart, rmCartItem, setCart } = useCart(order);
+
   const [skip, setSkip] = useState(_.get(order, "skip", false));
   const [feedback, setFeedback] = useState(_.get(order, "feedback", null));
   const [comments, setComments] = useState(_.get(order, "comments", null));
-
-  const addToCart = (itemId, quantity, day) => {
-    console.log("addToCart", itemId, quantity, day);
-    setCart([...cart, { itemId, quantity, day }]);
-  };
-
-  const rmCartItem = (itemId, quantity, day) => {
-    const index = _.findIndex(
-      cart,
-      (ci) => ci.itemId === itemId && ci.quantity === quantity && ci.day === day
-    );
-    const nextCart = [...cart];
-    nextCart.splice(index, 1);
-    setCart(nextCart);
-  };
 
   const handleSkip = () => {
     setSkip(true);
@@ -58,13 +45,12 @@ export default function Menu({
   };
 
   const { name, bakersNote, items, isCurrent, deadlineDay } = menu;
-  const { skip: skipItem, payItForward } = createMenuItemLookup(menu);
 
   if (user && user.credits < 1) {
     // time to buy credits!
     return (
       <>
-        <User {...{ user, deadlineDay }} />
+        <Subscription {...{ user, deadlineDay }} />
         <p className="my-2">
           We love baking yummy things for you but you're out of credits.
         </p>
@@ -75,7 +61,7 @@ export default function Menu({
 
   return (
     <>
-      <User {...{ user, onRefreshUser, deadlineDay }} />
+      <Subscription {...{ user, onRefreshUser, deadlineDay }} />
 
       {/* if low, show nag to buy credits*/}
       {user && user.credits < 4 && <BuyCredits onComplete={onRefreshUser} />}
@@ -114,50 +100,10 @@ export default function Menu({
         </>
       ) : (
         <>
-          <div className="row mt-2">
-            {items
-              .filter(({ id }) => id !== skipItem.id && id !== payItForward.id)
-              .map((i) => (
-                <Item
-                  key={i.id}
-                  {...i}
-                  onChange={({ quantity, day }) =>
-                    addToCart(i.id, quantity, day)
-                  }
-                />
-              ))}
-          </div>
+          <Items items={items} onAddToCart={addToCart} />
 
-          <h5>Skip this week?</h5>
-          <div className="row">
-            <div className="col-6 mb-3">
-              <div className="mb-2">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-dark"
-                  onClick={handleSkip}
-                >
-                  Skip
-                </button>
-              </div>
-              <div style={{ lineHeight: "normal" }}>
-                <small>
-                  {skipItem.description}{" "}
-                  <em>Removes any selected items from order.</em>
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <h5>Pay it forward</h5>
-          <div className="row">
-            <div className="col-6 mb-3">
-              <PayItForward
-                description={payItForward.description}
-                onChange={({ quantity, day }) => addToCart(-1, quantity, day)}
-              />
-            </div>
-          </div>
+          <SkipThisWeek {...menu.skip} onSkip={handleSkip} />
+          <PayItForward {...menu.payItForward} onAddToCart={addToCart} />
         </>
       )}
 
@@ -165,7 +111,7 @@ export default function Menu({
       <div className="row mt-2 mb-3">
         <div className="col">
           <textarea
-            placeholder="Comments or special requests"
+            placeholder="Comments & special requests"
             defaultValue={comments}
             onChange={(e) => setComments(e.target.value)}
             className="form-control"
@@ -190,7 +136,7 @@ export default function Menu({
           </button>
         </div>
       </div>
-      <User {...{ user, onRefreshUser, deadlineDay }} />
+      <Subscription {...{ user, onRefreshUser, deadlineDay }} />
     </>
   );
 }

@@ -2,7 +2,7 @@
 
 exports[`Menu snapshot 1`] = `
 <Fragment>
-  <User
+  <Subscription
     deadlineDay="Sunday"
     user={
       Object {
@@ -73,78 +73,36 @@ exports[`Menu snapshot 1`] = `
   <h5>
     Menu
   </h5>
-  <div
-    className="row mt-2"
-  >
-    <Item
-      description=""
-      id={3}
-      image="bread-baguette.jpg"
-      key="3"
-      name="Baguette"
-      onChange={[Function]}
-    />
-    <Item
-      description="Mix of modern wheats and ancient Einkorn for the best of both worlds."
-      id={1}
-      image="bread2-002.webp"
-      key="1"
-      name="Classic"
-      onChange={[Function]}
-    />
-  </div>
-  <h5>
-    Skip this week?
-  </h5>
-  <div
-    className="row"
-  >
-    <div
-      className="col-6 mb-3"
-    >
-      <div
-        className="mb-2"
-      >
-        <button
-          className="btn btn-sm btn-dark"
-          onClick={[Function]}
-          type="button"
-        >
-          Skip
-        </button>
-      </div>
-      <div
-        style={
-          Object {
-            "lineHeight": "normal",
-          }
-        }
-      >
-        <small>
-          Skip this week.
-           
-          <em>
-            Removes any selected items from order.
-          </em>
-        </small>
-      </div>
-    </div>
-  </div>
-  <h5>
-    Pay it forward
-  </h5>
-  <div
-    className="row"
-  >
-    <div
-      className="col-6 mb-3"
-    >
-      <PayItForward
-        description="Wild times out there. Support some else in need."
-        onChange={[Function]}
-      />
-    </div>
-  </div>
+  <Items
+    items={
+      Array [
+        Object {
+          "description": "",
+          "id": 3,
+          "image": "bread-baguette.jpg",
+          "name": "Baguette",
+        },
+        Object {
+          "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
+          "id": 1,
+          "image": "bread2-002.webp",
+          "name": "Classic",
+        },
+        Object {
+          "description": "Skip this week.",
+          "id": 0,
+          "name": "Skip",
+        },
+      ]
+    }
+    onAddToCart={[Function]}
+  />
+  <SkipThisWeek
+    onSkip={[Function]}
+  />
+  <PayItForward
+    onAddToCart={[Function]}
+  />
   <h5>
     Comments & Special Requests
   </h5>
@@ -158,7 +116,7 @@ exports[`Menu snapshot 1`] = `
         className="form-control"
         defaultValue={null}
         onChange={[Function]}
-        placeholder="Comments or special requests"
+        placeholder="Comments & special requests"
       />
     </div>
   </div>
@@ -214,7 +172,7 @@ exports[`Menu snapshot 1`] = `
       </button>
     </div>
   </div>
-  <User
+  <Subscription
     deadlineDay="Sunday"
     user={
       Object {
@@ -232,7 +190,7 @@ exports[`Menu snapshot 1`] = `
 
 exports[`Menu with order snapshot 1`] = `
 <Fragment>
-  <User
+  <Subscription
     deadlineDay="Sunday"
     user={
       Object {
@@ -303,78 +261,36 @@ exports[`Menu with order snapshot 1`] = `
   <h5>
     Menu
   </h5>
-  <div
-    className="row mt-2"
-  >
-    <Item
-      description=""
-      id={3}
-      image="bread-baguette.jpg"
-      key="3"
-      name="Baguette"
-      onChange={[Function]}
-    />
-    <Item
-      description="Mix of modern wheats and ancient Einkorn for the best of both worlds."
-      id={1}
-      image="bread2-002.webp"
-      key="1"
-      name="Classic"
-      onChange={[Function]}
-    />
-  </div>
-  <h5>
-    Skip this week?
-  </h5>
-  <div
-    className="row"
-  >
-    <div
-      className="col-6 mb-3"
-    >
-      <div
-        className="mb-2"
-      >
-        <button
-          className="btn btn-sm btn-dark"
-          onClick={[Function]}
-          type="button"
-        >
-          Skip
-        </button>
-      </div>
-      <div
-        style={
-          Object {
-            "lineHeight": "normal",
-          }
-        }
-      >
-        <small>
-          Skip this week.
-           
-          <em>
-            Removes any selected items from order.
-          </em>
-        </small>
-      </div>
-    </div>
-  </div>
-  <h5>
-    Pay it forward
-  </h5>
-  <div
-    className="row"
-  >
-    <div
-      className="col-6 mb-3"
-    >
-      <PayItForward
-        description="Wild times out there. Support some else in need."
-        onChange={[Function]}
-      />
-    </div>
-  </div>
+  <Items
+    items={
+      Array [
+        Object {
+          "description": "",
+          "id": 3,
+          "image": "bread-baguette.jpg",
+          "name": "Baguette",
+        },
+        Object {
+          "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
+          "id": 1,
+          "image": "bread2-002.webp",
+          "name": "Classic",
+        },
+        Object {
+          "description": "Skip this week.",
+          "id": 0,
+          "name": "Skip",
+        },
+      ]
+    }
+    onAddToCart={[Function]}
+  />
+  <SkipThisWeek
+    onSkip={[Function]}
+  />
+  <PayItForward
+    onAddToCart={[Function]}
+  />
   <h5>
     Comments & Special Requests
   </h5>
@@ -388,7 +304,7 @@ exports[`Menu with order snapshot 1`] = `
         className="form-control"
         defaultValue={null}
         onChange={[Function]}
-        placeholder="Comments or special requests"
+        placeholder="Comments & special requests"
       />
     </div>
   </div>
@@ -444,7 +360,7 @@ exports[`Menu with order snapshot 1`] = `
       </button>
     </div>
   </div>
-  <User
+  <Subscription
     deadlineDay="Sunday"
     user={
       Object {

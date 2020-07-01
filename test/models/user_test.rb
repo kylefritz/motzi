@@ -14,10 +14,24 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 23, users(:kyle).credits
   end
 
+  test "subscriber" do
+    refute users(:maya).subscriber?
+    assert users(:kyle).subscriber?
+  end
+
   test "credit go down with items" do
     menus(:week2).make_current!
     kyle = users(:kyle)
     assert_difference 'kyle.credits', -1, 'added an item' do
+      kyle.current_order.order_items.create!(item: items(:classic))
+    end
+  end
+
+  test "credits dont change if we pay for order seperately" do
+    menus(:week2).make_current!
+    kyle = users(:kyle)
+    kyle.current_order.update(stripe_charge_id: "fake-value")
+    assert_difference 'kyle.credits', 0, 'added an item' do
       kyle.current_order.order_items.create!(item: items(:classic))
     end
   end
@@ -71,5 +85,11 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 2, users(:kyle).orders.where(menu: menu).count
     refute_nil users(:kyle).order_for_menu(menu), "if two, finds one"
     assert_equal orders(:kyle_week2).id, users(:kyle).order_for_menu(menu).id
+  end
+
+  test "email normalized" do
+    email = "someone@bread.com"
+    user = User.create!(email: "   #{email.upcase}   ", password: "sadfsfsdf")
+    assert_equal email, user.email
   end
 end
