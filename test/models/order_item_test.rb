@@ -6,8 +6,8 @@ class OrderItemTest < ActiveSupport::TestCase
   end
 
   test "day" do
-    assert_equal "Tuesday", order_items(:k_w1_pumpkin_day1).day
-    assert_equal "Thursday", order_items(:ljf_w1_classic_day2).day
+    assert_equal Setting.pickup_day1, order_items(:k_w1_pumpkin_day1).day
+    assert_equal Setting.pickup_day2, order_items(:ljf_w1_classic_day2).day
 
     assert_nil make_order_item(item: Item.pay_it_forward).day
   end
