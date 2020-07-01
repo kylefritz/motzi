@@ -2,7 +2,7 @@ with used_credits as (
     select user_id, sum(quantity) as value
     from order_items
     join orders on orders.id = order_items.order_id
-    where orders.stripe_charge_id is null -- subscription order not marketplace order
+    where orders.stripe_charge_id is null /* subscription orders not marketplace orders */
     group by user_id
 ),
 bought_credits as (
