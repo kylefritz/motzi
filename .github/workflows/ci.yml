@@ -68,6 +68,7 @@ jobs:
           PGHOST: localhost
           PGUSER: postgres
           RAILS_ENV: test
+          RUBYOPT: "-W:no-deprecated -W:no-experimental"
         run: |
           bin/rails db:setup
           bin/rails test

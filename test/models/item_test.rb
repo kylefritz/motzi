@@ -12,6 +12,6 @@ class ItemTest < ActiveSupport::TestCase
   end
 
   test "image_path when no image attached" do
-    assert_equal nil, items(:classic).image_path
+    assert_nil items(:classic).image_path
   end
 end
