@@ -6,6 +6,7 @@ import queryString from "query-string";
 
 import Choice from "./Choice";
 import Payment from "./Payment";
+import PayWhatYouCan from "./PayWhatYouCan";
 
 export default function Buy({ onComplete, user: passedUser = null }) {
   const [credits, setCredits] = useState();
@@ -164,35 +165,7 @@ export default function Buy({ onComplete, user: passedUser = null }) {
       {credits && price && (
         <>
           <h4>Payment amount</h4>
-          <p>
-            <small>
-              These are suggested prices based on the our costs. We want
-              everyone to have access to healthy food in this time of crisis and
-              beyond, regardless of ability to pay. If you are out of work or
-              otherwise in a challenging financial situation please pay what you
-              can or nothing at all. If you have the means to pay more we would
-              welcome your support in providing for the community and ensuring
-              our continued stability as a small business.
-            </small>
-          </p>
-          <div className="input-group mb-3">
-            <div className="input-group-prepend">
-              <span className="input-group-text" id="you-pay">
-                You pay $
-              </span>
-            </div>
-            <input
-              type="number"
-              min="1"
-              max="250"
-              className="form-control"
-              placeholder="Price"
-              aria-label="Price"
-              aria-describedby="you-pay"
-              defaultValue={price}
-              onBlur={(e) => handlePriceChanged(e.target.value)}
-            />
-          </div>
+          <PayWhatYouCan price={price} onPricedChanged={handlePriceChanged} />
           <Payment
             credits={credits}
             price={price}

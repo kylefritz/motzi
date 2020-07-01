@@ -8,6 +8,7 @@ import EmailName from "./EmailName";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
 import Payment from "../buy/Payment";
+import PayWhatYouCan from "../buy/PayWhatYouCan";
 import useCart from "./useCart";
 
 export default function Marketplace({ menu, onCreateOrder }) {
@@ -17,14 +18,14 @@ export default function Marketplace({ menu, onCreateOrder }) {
   const [comments, setComments] = useState();
   const [emailName, setEmailName] = useState({});
 
-  const totalPrice = cartTotal({ cart, menu });
+  const [price, setPrice] = useState(cartTotal({ cart, menu }));
 
   const handleCardToken = ({ token }) => {
     if (_.isEmpty(emailName.email)) {
       return alert("Enter email!");
     }
 
-    console.log("handleCardToken", { token, totalPrice });
+    console.log("handleCardToken", { token, price });
     setSubmitting(true);
 
     // send stripe token to rails to complete purchase
@@ -32,9 +33,22 @@ export default function Marketplace({ menu, onCreateOrder }) {
       ...emailName,
       comments,
       cart,
-      price: totalPrice,
+      price,
       token: token.id,
     }).then(() => setSubmitting(false));
+  };
+
+  const resetPrice = (nextCart) =>
+    setPrice(cartTotal({ cart: nextCart, menu }));
+
+  const handleAddToCart = (item) => {
+    const nextCart = addToCart(item);
+    resetPrice(nextCart);
+  };
+
+  const handleRemoveFromCart = (item) => {
+    const nextCart = rmCartItem(item);
+    resetPrice(nextCart);
   };
 
   const { name, bakersNote, items } = menu;
@@ -45,14 +59,14 @@ export default function Marketplace({ menu, onCreateOrder }) {
       <BakersNote {...{ bakersNote }} />
 
       <h5>Menu</h5>
-      <Items items={items} onAddToCart={addToCart} />
-      <PayItForward {...menu.payItForward} onAddToCart={addToCart} />
+      <Items items={items} onAddToCart={handleAddToCart} />
+      <PayItForward {...menu.payItForward} onAddToCart={handleAddToCart} />
 
       <h5>Comments & Special Requests</h5>
       <div className="row mt-2 mb-3">
         <div className="col">
           <textarea
-            placeholder="Comments or special requests"
+            placeholder="Comments & special requests"
             defaultValue={comments}
             onChange={(e) => setComments(e.target.value)}
             className="form-control"
@@ -60,14 +74,14 @@ export default function Marketplace({ menu, onCreateOrder }) {
         </div>
       </div>
 
-      <Cart {...{ cart, menu, rmCartItem }} />
+      <Cart {...{ cart, menu, rmCartItem: handleRemoveFromCart }} />
 
       <div className="mt-3">
         <EmailName onChange={setEmailName} />
       </div>
-
+      <PayWhatYouCan price={price} onPricedChanged={setPrice} />
       <Payment
-        price={totalPrice}
+        price={price}
         stripeApiKey={gon.stripeApiKey}
         onCardToken={handleCardToken}
         submitting={submitting}

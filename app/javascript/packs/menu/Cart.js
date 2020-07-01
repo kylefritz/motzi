@@ -86,21 +86,24 @@ function Days({ menu, cart, rmCartItem, skip }) {
   return sections;
 }
 
-export function cartTotal({ cart, menu }) {
+export function cartTotal({ cart, menu, stripeChargeAmount }) {
   const menuItemsById = buildMenuItemLookup(menu);
   return _.sum(
-    cart.map(({ itemId }) => _.get(menuItemsById[itemId], "price", 0))
+    cart.map(
+      ({ itemId, quantity }) =>
+        _.get(menuItemsById[itemId], "price", 0) * quantity
+    )
   );
 }
 
-function Total({ cart, menu }) {
+function Total({ cart, menu, stripeChargeAmount }) {
   const credits = _.sum(cart.map(({ quantity }) => quantity));
   const price = cartTotal({ cart, menu });
   return (
     <div>
       <h6>Total</h6>
       <div className="ml-4">
-        <Price {...{ price, credits }} />
+        <Price {...{ price, credits, stripeChargeAmount }} />
       </div>
     </div>
   );

@@ -4,8 +4,12 @@ import pluralize from "pluralize";
 
 import { UserContext } from "./Contexts";
 
-export default function Price({ price, credits = 1 }) {
+export default function Price({ price, credits = 1, stripeChargeAmount }) {
   const user = useContext(UserContext);
+
+  if (!_.isNil(stripeChargeAmount)) {
+    return <div>{accounting.formatMoney(stripeChargeAmount)}</div>;
+  }
 
   if (user) {
     return (

@@ -6,7 +6,9 @@ export default function useCart(order = null) {
 
   const addToCart = ({ id: itemId, price, quantity, day }) => {
     console.log("addToCart", itemId, quantity, day);
-    setCart([...cart, { itemId, price, quantity, day }]);
+    const nextCart = [...cart, { itemId, price, quantity, day }];
+    setCart(nextCart);
+    return nextCart;
   };
 
   const rmCartItem = (itemId, quantity, day) => {
@@ -17,6 +19,7 @@ export default function useCart(order = null) {
     const nextCart = [...cart];
     nextCart.splice(index, 1);
     setCart(nextCart);
+    return nextCart;
   };
 
   return { cart, addToCart, rmCartItem, setCart };

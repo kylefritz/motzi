@@ -111,7 +111,7 @@ export default function Menu({
       <div className="row mt-2 mb-3">
         <div className="col">
           <textarea
-            placeholder="Comments or special requests"
+            placeholder="Comments & special requests"
             defaultValue={comments}
             onChange={(e) => setComments(e.target.value)}
             className="form-control"
