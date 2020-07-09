@@ -9,7 +9,7 @@ class Setting < RailsSettings::Base
   field :automated_reminder_emails, default: true, type: :boolean
   field :pickup_day1, default: "Tuesday", type: :string
   field :pickup_day2, default: "Thursday", type: :string
-  field :site_id, default: "motzi", type: :string
+  field :site_id, default: ENV.fetch("MOTZI_SITE_ID", "motzi"), readonly: true
 
   def self.site
     if site_id == "motzi"
