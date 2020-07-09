@@ -126,8 +126,9 @@ export default function Items({ items, onAddToCart: handleAddToCart }) {
         <Item
           key={i.id}
           {...i}
-          onChange={({ quantity, day }) =>
-            handleAddToCart({ ...i, quantity, day })
+          onChange={
+            handleAddToCart &&
+            (({ quantity, day }) => handleAddToCart({ ...i, quantity, day }))
           }
         />
       ))}
