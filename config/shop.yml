@@ -1,0 +1,21 @@
+#
+# store shop settings that aren't meant to be modified here
+# if something might reasonably be modified, put it in Setting.rb
+# kind of a fine line to draw :)
+#
+#
+# if one shop has a setting, the other shop should have one too
+
+motzi:
+  name: Motzi Bread
+  credit_prices:
+    - 6.50 # 26
+    - 7.00 # 13
+    - 7.50 # 6
+
+jinji:
+  name: Jinji Chocolate
+  credit_prices:
+    - 7.00 # 26
+    - 8.00 # 13
+    - 8.50 # 6

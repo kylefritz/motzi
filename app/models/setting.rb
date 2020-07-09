@@ -1,7 +1,6 @@
 # RailsSettings Model
 class Setting < RailsSettings::Base
   has_paper_trail
-  cache_prefix { "v1" }
 
   field :menu_id, type: :integer, default: nil
   field :motzi_phone, type: :string
@@ -9,15 +8,7 @@ class Setting < RailsSettings::Base
   field :automated_reminder_emails, default: true, type: :boolean
   field :pickup_day1, default: "Tuesday", type: :string
   field :pickup_day2, default: "Thursday", type: :string
-  field :site_id, default: ENV.fetch("MOTZI_SITE_ID", "motzi"), readonly: true
-
-  def self.site
-    if site_id == "motzi"
-      "Motzi Bread"
-    else
-      "Jinji Chocolate"
-    end
-  end
+  field :shop_id, default: ENV.fetch("SHOP_ID", "motzi"), readonly: true
 
   def self.pickup_day1_abbr
     abbr_day(Setting.pickup_day1)
@@ -33,5 +24,17 @@ class Setting < RailsSettings::Base
   private
   def self.abbr_day(day)
     I18n.t('date.abbr_day_names')[Date::DAYS_INTO_WEEK[day.downcase.to_sym]]
+  end
+
+  def self.shop
+    get_shop!(Setting.shop_id) # perf: reading from disk kind multiple times per request
+  end
+  def self.get_shop!(shop_id)
+    Rails.application.config_for(:shop, env: shop_id).tap do |shop_hash|
+      if shop_hash.empty?
+        throw "No shop settings for #{Setting.shop_id}"
+      end
+      shop_hash[:id] = shop_id
+    end
   end
 end

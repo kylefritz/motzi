@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= Setting.site %></title>
+    <title><%= Setting.shop.name %></title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <%= csrf_meta_tags %>
@@ -22,13 +22,13 @@
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
   </head>
 
-  <body class="<%= Setting.site_id%>">
+  <body class="<%= Setting.shop.id%>">
       <div class="background">
       <div class="banner-container">
         <div class="banner" />
       </div>
       <div class="container">
-        <h1><%= Setting.site %></h1>
+        <h1><%= Setting.shop.name %></h1>
         <% if notice%>
           <div class="alert alert-warning text-center" role="alert"><%= notice %></div>
         <% end%>
