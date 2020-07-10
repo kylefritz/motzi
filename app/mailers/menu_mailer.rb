@@ -10,6 +10,6 @@ class MenuMailer < ApplicationMailer
 
     mail(to: %("#{@user.name}" <#{@user.email}>),
          cc: @user.additional_email,
-         subject: "Motzi Bread - #{@menu.name}")
+         subject: "#{Setting.shop.name} - #{@menu.name}")
   end
 end

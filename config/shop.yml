@@ -12,6 +12,8 @@ motzi:
     - 6.50 # 26
     - 7.00 # 13
     - 7.50 # 6
+  email: crap@monster.gov
+  email_domain: motzibread
 
 jinji:
   name: Jinji Chocolate
@@ -19,3 +21,5 @@ jinji:
     - 7.00 # 26
     - 8.00 # 13
     - 8.50 # 6
+  email: poop@fart.com
+  email_domain: jinjichocolate
