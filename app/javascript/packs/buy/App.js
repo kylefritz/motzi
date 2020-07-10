@@ -45,7 +45,7 @@ export default function Buy({ onComplete, user: passedUser = null }) {
     setCredits(credits);
     setPrice(price);
     setBreadsPerWeek(breadsPerWeek);
-    console.log("selelcted", credits, "for", "price");
+    console.log("selected", credits, "for", "price");
   };
 
   const handlePriceChanged = (priceString) => {

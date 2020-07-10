@@ -4,7 +4,7 @@ export default function PayWhatYouCan({
   price,
   onPricedChanged: handlePriceChanged,
 }) {
-  const [tempPrice, setTempPrice] = useState(price);
+  const [tempPrice, setTempPrice] = useState(null);
 
   const handleInputChanged = ({ target }) => {
     const nextPrice = parseFloat(target.value);
