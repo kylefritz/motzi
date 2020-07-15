@@ -52,8 +52,8 @@ function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day }) {
           Day: <strong className="pr-3">{shortDay(day)}</strong>
         </div>
       </div>
-      <div>
-        <button onClick={onAdd} className="btn btn-primary btn-sm mr-2 mb-2">
+      <div className="mb-2">
+        <button onClick={onAdd} className="btn btn-primary btn-sm mr-2">
           Add to cart
         </button>
         <button onClick={onCancel} className="btn btn-secondary btn-sm">

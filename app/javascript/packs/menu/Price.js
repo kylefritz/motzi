@@ -4,28 +4,24 @@ import pluralize from "pluralize";
 
 import { UserContext } from "./Contexts";
 
-export default function Price({ price, credits = 1, stripeChargeAmount }) {
+function Format({ price, credits = 1, stripeChargeAmount }) {
   const user = useContext(UserContext);
 
   if (!_.isNil(stripeChargeAmount)) {
-    return <div>{accounting.formatMoney(stripeChargeAmount)}</div>;
+    return accounting.formatMoney(stripeChargeAmount);
   }
 
   if (user) {
-    return (
-      <div>
-        {pluralize("credit", credits, true)}{" "}
-        <span className="text-muted">or {accounting.formatMoney(price)} </span>
-      </div>
-    );
+    return pluralize("credit", credits, true);
   }
 
+  return accounting.formatMoney(price);
+}
+
+export default function Price(props) {
   return (
     <div>
-      {accounting.formatMoney(price)}{" "}
-      <span className="text-success">
-        or {pluralize("credit", credits, true)}
-      </span>
+      <Format {...props} />
     </div>
   );
 }
