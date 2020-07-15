@@ -53,12 +53,11 @@
 //
 // try to flatten everything out
 //
-@import url("https://fonts.googleapis.com/css?family=Oswald:regular,bold&subset=latin,latin-ext");
-@import url("https://fonts.googleapis.com/css?family=EB+Garamond:regular&subset=latin,latin-ext");
-@import url("https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@500;600&display=swap");
 body {
-  font-family: "Open Sans", Arial, sans-serif;
-  background-color: white; // #e9f2ec
+  font-family: "Raleway", sans-serif;
+  color: #2e2927;
+  background-color: white;
   line-height: 1.25;
 }
 #active_admin_content {
@@ -73,15 +72,15 @@ body {
   box-shadow: none;
   text-shadow: none;
 }
-$primary: #507a4e;
+$primary: rgb(214, 124, 104);
 
 #header {
   background-color: $primary;
-  // font-family: "Oswald", Arial, sans-serif;
+  // font-family: "Raleway", sans-serif;
   font-size: 1em;
   h1 {
     font-size: 1.5em;
-    font-family: "Oswald", Arial, sans-serif;
+    font-family: "Raleway", sans-serif;
     text-transform: uppercase;
   }
   h1,
@@ -111,6 +110,10 @@ $primary: #507a4e;
   background: transparent;
   color: lightsalmon;
   text-decoration: underline;
+}
+
+#title_bar {
+  background-color: rgb(255, 238, 214);
 }
 
 //
