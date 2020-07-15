@@ -16,20 +16,19 @@ class Setting < RailsSettings::Base
   def self.pickup_day2_abbr
     abbr_day(Setting.pickup_day2)
   end
+  private_class_method def self.abbr_day(day)
+    I18n.t('date.abbr_day_names')[Date::DAYS_INTO_WEEK[day.downcase.to_sym]]
+  end
+
   def self.deadline_day
     day1_wday = Date::DAYS_INTO_WEEK[Setting.pickup_day1.downcase.to_sym]
     Date::DAYS_INTO_WEEK.invert[day1_wday - 2].to_s.titlecase
   end
 
-  private
-  def self.abbr_day(day)
-    I18n.t('date.abbr_day_names')[Date::DAYS_INTO_WEEK[day.downcase.to_sym]]
-  end
-
   def self.shop
-    get_shop!(Setting.shop_id) # perf: reading from disk kind multiple times per request
+    find_shop_by_shop_id!(Setting.shop_id) # perf: reading from disk kind multiple times per request
   end
-  def self.get_shop!(shop_id)
+  def self.find_shop_by_shop_id!(shop_id)
     Rails.application.config_for(:shop, env: shop_id).tap do |shop_hash|
       if shop_hash.empty?
         throw "No shop settings for #{Setting.shop_id}"

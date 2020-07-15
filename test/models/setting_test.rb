@@ -3,7 +3,7 @@ require 'test_helper'
 class SettingTest < ActiveSupport::TestCase
   test "same keys; has keys" do
     motzi, jinji = ["motzi", "jinji"].map() do |shop_id|
-      lookup_shop(shop_id)
+      Setting.find_shop_by_shop_id!(shop_id)
     end
 
     assert_equal motzi.keys, jinji.keys, "should have same keys"
@@ -19,12 +19,7 @@ class SettingTest < ActiveSupport::TestCase
 
   test "non-existant shop" do
     assert_raise do
-      lookup_shop("shoppy")
+      Setting.find_shop_by_shop_id!("shoppy")
     end
-  end
-
-  private
-  def lookup_shop(shop_id)
-    Setting.send(:get_shop!, shop_id) # call private method get_shop!
   end
 end
