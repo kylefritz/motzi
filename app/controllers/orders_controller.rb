@@ -66,10 +66,10 @@ class OrdersController < ApplicationController
               stripe_receipt_url: charge.try(:receipt_url),
               stripe_charge_amount: price,
             )
-
-            # send confirmation email
-            OrderMailer.with(order: order).confirmation_email.deliver_later
           end
+
+          # send confirmation email
+          OrderMailer.with(order: order).confirmation_email.deliver_later
 
           ahoy.track "order_created"
         end
@@ -108,6 +108,10 @@ class OrdersController < ApplicationController
         day1_pickup = !(Setting.pickup_day2.casecmp?(cart_item_params[:day])) # default to day 1
         order.order_items.create!(cart_item_params.permit(:item_id, :quantity).merge(day1_pickup: day1_pickup))
       end
+
+      # send confirmation email
+      OrderMailer.with(order: order).confirmation_email.deliver_later
+
       ahoy.track "order_updated"
     end
 

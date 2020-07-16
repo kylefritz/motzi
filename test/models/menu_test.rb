@@ -41,7 +41,7 @@ class MenuTest < ActiveSupport::TestCase
 
     refute week3.current?, 'week 2 starts as the current menu'
 
-    assert_menus_emailed(User.for_weekly_email.count) do
+    assert_emails_sent(User.for_weekly_email.count) do
       num_emails = week3.publish_to_subscribers!
       assert_equal num_emails, User.for_weekly_email.count, 'sent emails returned'
     end
@@ -52,17 +52,5 @@ class MenuTest < ActiveSupport::TestCase
 
   test "deadline" do
     assert_equal Time.zone.parse("Tue, 15 Jan 2019 23:59:59 -0500"),  menus(:week3).deadline
-  end
-
-  private
-
-  def assert_menus_emailed(num_emails, &block)
-    perform_enqueued_jobs do
-      assert_difference('Ahoy::Message.count', num_emails, 'emails audited in ahoy') do
-        assert_difference('ApplicationMailer.deliveries.count', num_emails, 'emails delivered') do
-          block.call
-        end
-      end
-    end
   end
 end

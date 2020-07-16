@@ -94,9 +94,7 @@ ActiveAdmin.register Menu do
         end
       end
       row :bakers_note do
-        markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
-        html = markdown.render(menu.bakers_note)
-        html.html_safe
+        menu.bakers_note_html
       end
       row :menu_items do
         render 'builder'

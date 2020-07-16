@@ -74,12 +74,8 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
     datetime_str = "2019-#{days[day]} #{time} EST"
     date_time = DateTime.parse(datetime_str)
     Timecop.freeze(date_time) do
-      assert_difference('Ahoy::Message.count', num_emails, 'emails audited in ahoy') do
-        assert_difference('ApplicationMailer.deliveries.count', num_emails, msg) do
-          perform_enqueued_jobs do
-            SendDayOfReminderJob.perform_now
-          end
-        end
+      assert_emails_sent(num_emails) do
+        SendDayOfReminderJob.perform_now
       end
     end
 

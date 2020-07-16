@@ -22,4 +22,14 @@ class ActiveSupport::TestCase
     # and all objects `"additionalProperties": false`
     JSON::Validator.validate!(schema_path, json, strict: true)
   end
+
+  def assert_emails_sent(num_emails, &block)
+    perform_enqueued_jobs do
+      assert_difference('Ahoy::Message.count', num_emails, 'emails audited in ahoy') do
+        assert_difference('ApplicationMailer.deliveries.count', num_emails, 'emails delivered') do
+          block.call
+        end
+      end
+    end
+  end
 end

@@ -79,12 +79,8 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
   def assert_order(order_attrs, num_orders, num_users, num_emails)
     assert_difference 'Order.count', num_orders, 'order created' do
       assert_difference 'User.count', num_users, 'user created' do
-        assert_difference('Ahoy::Message.count', num_emails, 'emails audited in ahoy') do
-          assert_difference('ApplicationMailer.deliveries.count', num_emails, "confirmation email sent") do
-            perform_enqueued_jobs do
-              post '/orders.json', params: order_attrs, as: :json
-            end
-          end
+        assert_emails_sent(num_emails) do
+          post '/orders.json', params: order_attrs, as: :json
         end
       end
     end

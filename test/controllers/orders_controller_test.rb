@@ -90,10 +90,11 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
   def assert_order_placed(hashid=nil)
     users(:ljf).hashid
-
-    assert_difference 'Order.count', 1, 'order should be created' do
-      post '/orders.json', params: order_attrs(hashid), as: :json
-      assert_response :success
+    assert_emails_sent(1) do
+      assert_difference 'Order.count', 1, 'order should be created' do
+        post '/orders.json', params: order_attrs(hashid), as: :json
+        assert_response :success
+      end
     end
   end
 

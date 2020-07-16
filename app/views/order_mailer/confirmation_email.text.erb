@@ -1,8 +1,8 @@
 Thanks for ordering from Motzi.
 
 Your order: <%= @order.item_list%>
+<% if @order.stripe_charge_amount.present? %>
 You were charged: <%= number_to_currency(@order.stripe_charge_amount) %>
-
-<% if Setting.motzi_phone %>
-Please call us at <%= Setting.motzi_phone %> if you have any questions or issues.
 <% end %>
+
+<%= Setting.pickup_instructions %>

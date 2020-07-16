@@ -1,8 +1,8 @@
 <h2>Thanks for ordering from Motzi.</h2>
 
 <p>Your order: <%= @order.item_list%></p>
+<% if @order.stripe_charge_amount.present? %>
 <p>You were charged: <%= number_to_currency(@order.stripe_charge_amount) %></p>
-
-<% if Setting.motzi_phone %>
-<p>Please call us at <%= Setting.motzi_phone %> if you have any questions or issues.</p>
 <% end %>
+
+<%= Setting.pickup_instructions_html %>

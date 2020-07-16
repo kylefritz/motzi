@@ -8,6 +8,7 @@ class Setting < RailsSettings::Base
   field :automated_reminder_emails, default: true, type: :boolean
   field :pickup_day1, default: "Tuesday", type: :string
   field :pickup_day2, default: "Thursday", type: :string
+  field :pickup_instructions, type: :string
   field :shop_id, default: ENV.fetch("SHOP_ID", "motzi"), readonly: true
 
   def self.pickup_day1_abbr
@@ -18,6 +19,10 @@ class Setting < RailsSettings::Base
   end
   private_class_method def self.abbr_day(day)
     I18n.t('date.abbr_day_names')[Date::DAYS_INTO_WEEK[day.downcase.to_sym]]
+  end
+
+  def self.pickup_instructions_html
+    Menu::MARKDOWN.render(Setting.pickup_instructions || '').html_safe
   end
 
   def self.deadline_day

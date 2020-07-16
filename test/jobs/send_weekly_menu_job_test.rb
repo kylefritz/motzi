@@ -26,12 +26,8 @@ class SendWeeklyMenuJobTest < ActiveJob::TestCase
     date_time = DateTime.parse(datetime_str)
 
     Timecop.freeze(date_time) do
-      assert_difference('Ahoy::Message.count', num_emails, 'emails audited in ahoy') do
-        assert_difference('ApplicationMailer.deliveries.count', num_emails, msg) do
-          perform_enqueued_jobs do
-            SendWeeklyMenuJob.perform_now
-          end
-        end
+      assert_emails_sent(num_emails) do
+        SendWeeklyMenuJob.perform_now
       end
     end
     if num_emails > 0
