@@ -9,6 +9,10 @@ export default function PayWhatYouCan({
   const handleInputChanged = ({ target }) => {
     const nextPrice = parseFloat(target.value);
     setTempPrice(nextPrice);
+
+    if (nextPrice === 0 || price === 0) {
+      handlePriceChanged(nextPrice);
+    }
   };
 
   const handleBlur = ({ target }) => {
@@ -37,13 +41,13 @@ export default function PayWhatYouCan({
         </div>
         <input
           type="number"
-          min="1"
+          min="0"
           max="250"
           className="form-control"
           placeholder="Price"
           aria-label="Price"
           aria-describedby="you-pay"
-          value={tempPrice || price}
+          value={tempPrice === null ? (price === null ? 0 : price) : tempPrice}
           onChange={handleInputChanged}
           onBlur={handleBlur}
         />

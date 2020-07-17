@@ -87,6 +87,10 @@ function Days({ menu, cart, rmCartItem, skip }) {
 }
 
 export function cartTotal({ cart, menu, stripeChargeAmount }) {
+  if (cart.length === 0) {
+    return null;
+  }
+
   const menuItemsById = buildMenuItemLookup(menu);
   return _.sum(
     cart.map(

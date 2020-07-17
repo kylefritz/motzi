@@ -15,8 +15,7 @@ function Format({ price, credits = 1, stripeChargeAmount }) {
   if (user) {
     return pluralize("credit", credits, true);
   }
-
-  return accounting.formatMoney(price);
+  return accounting.formatMoney(price || 0);
 }
 
 export default function Price(props) {

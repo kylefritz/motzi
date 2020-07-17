@@ -43,26 +43,28 @@ class OrdersController < ApplicationController
           if params[:price].present?
 
             # we let the customer set the price so ok to trust customer input
-            price = params[:price].to_f.clamp(1, 250)
+            price = params[:price].to_f.clamp(0, 250)
             price_cents = (price * 100).to_i
 
             # make stripe change
-            if params[:token].blank?
-              raise OrderError.new("Stripe credit card not submitted")
+            if price > 0
+              if params[:token].blank?
+                raise OrderError.new("Stripe credit card not submitted")
+              end
+              charge = Stripe::Charge.create({
+                amount: price_cents,
+                currency: 'usd',
+                source: params[:token],
+                metadata: {
+                  user_id: current_user.id,
+                  order_id: order.id,
+                },
+                description: "Order ##{order.id} - #{order.item_list}",
+                receipt_email: current_user.email
+              })
             end
-            charge = Stripe::Charge.create({
-              amount: price_cents,
-              currency: 'usd',
-              source: params[:token],
-              metadata: {
-                user_id: current_user.id,
-                order_id: order.id,
-              },
-              description: "Order ##{order.id} - #{order.item_list}",
-              receipt_email: current_user.email
-            })
             order.update!(
-              stripe_charge_id: charge.id,
+              stripe_charge_id: charge.try(:id),
               stripe_receipt_url: charge.try(:receipt_url),
               stripe_charge_amount: price,
             )

@@ -50,15 +50,15 @@ export default function EmailName({ onChange }) {
           />
         </label>
       </div>
-      <div className="form-check">
+      <div className="form-group form-check">
         <input
           type="checkbox"
           className="form-check-input"
-          id="exampleCheck1"
+          id="sendWeeklyEmail"
           checked={sendWeeklyEmail}
           onChange={handle(setSendWeeklyEmail)}
         />
-        <label className="form-check-label" for="exampleCheck1">
+        <label className="form-check-label" htmlFor="sendWeeklyEmail">
           Receive an email with week's menu?
         </label>
       </div>

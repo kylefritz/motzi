@@ -36,9 +36,39 @@ export default function Card({ stripe, onToken, credits, price, submitting }) {
       console.log("Stripe.js hasn't loaded yet.");
       return;
     }
-    stripe.createToken().then(onToken);
+    if (price > 0) {
+      stripe.createToken().then(onToken);
+    } else {
+      onToken({ token: { id: null } });
+    }
   };
-  const isZeroPrice = !_.isNumber(price) || price === 0;
+  const isZeroPrice = price === 0;
+  const isNullPrice = price === null;
+  if (isZeroPrice) {
+    return (
+      <div className="checkout">
+        <button
+          disabled={submitting}
+          className="btn btn-primary btn-lg btn-block"
+          onClick={handleSubmit}
+          type="submit"
+        >
+          {submitting ? (
+            <>
+              <span
+                className="spinner-border spinner-border-sm mr-2"
+                role="status"
+                aria-hidden="true"
+              />
+              Purchasing...
+            </>
+          ) : (
+            "Submit Order"
+          )}
+        </button>
+      </div>
+    );
+  }
   return (
     <div className="checkout">
       <form onSubmit={handleSubmit}>
@@ -50,7 +80,7 @@ export default function Card({ stripe, onToken, credits, price, submitting }) {
           </div>
         )}
         <button
-          disabled={!cardFilled || submitting || isZeroPrice}
+          disabled={!cardFilled || submitting || isNullPrice}
           className="btn btn-primary btn-lg btn-block"
           type="submit"
         >
@@ -63,7 +93,7 @@ export default function Card({ stripe, onToken, credits, price, submitting }) {
               />
               Purchasing...
             </>
-          ) : isZeroPrice ? (
+          ) : isNullPrice ? (
             "Select an item"
           ) : (
             `Charge credit card ${formatMoney(price)} ${

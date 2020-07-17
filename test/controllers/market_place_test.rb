@@ -51,11 +51,21 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     assert new_user.send_weekly_email?, "shouldn't get weekly email"
   end
 
+  test "$0 price is ok" do
+    order_attrs = build_order_attrs
+    order_attrs[:price] = 0
+    order_attrs[:token] = nil
+    assert_user_created { assert_ordered_emailed(order_attrs) }
+
+    new_order = Order.last
+    assert_nil new_order.stripe_charge_id
+    assert_equal 0, new_order.stripe_charge_amount
+  end
+
   test "missing stripe token" do
     order_attrs = build_order_attrs
     order_attrs[:token] = nil
     refute_order(order_attrs)
-    assert_response :unprocessable_entity
     assert_equal "Stripe credit card not submitted", response.parsed_body["message"]
   end
 
@@ -63,7 +73,6 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     StripeMock.prepare_card_error(:card_declined)
     order_attrs = build_order_attrs
     refute_order(order_attrs)
-    assert_response :unprocessable_entity
     assert_equal "The card was declined", response.parsed_body["message"]
   end
 
@@ -98,6 +107,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
       refute_ordered do
         refute_emails_sent do
           post '/orders.json', params: order_attrs, as: :json
+          assert_response :unprocessable_entity
         end
       end
     end
