@@ -13,6 +13,7 @@ export default {
         name: "Baguette",
         description: "",
         image: "bread-baguette.jpg",
+        price: 3.0,
       },
       {
         id: 1,
@@ -20,6 +21,7 @@ export default {
         description:
           "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
         image: "bread2-002.webp",
+        price: 4.0,
       },
       {
         id: 0,

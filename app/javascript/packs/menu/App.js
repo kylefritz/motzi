@@ -11,7 +11,7 @@ import Order from "./Order";
 import Preview from "./Preview";
 import { pastDeadline } from "./pastDeadline";
 
-function munge(menu) {
+export function munge(menu) {
   const { items } = menu;
   const menuItems = _.keyBy(items, (i) => i.id);
   // identify _skip_ item and _payItForward_ item

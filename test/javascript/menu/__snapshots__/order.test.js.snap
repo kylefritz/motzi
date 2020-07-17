@@ -38,12 +38,14 @@ exports[`Order snapshot 1`] = `
             "id": 3,
             "image": "bread-baguette.jpg",
             "name": "Baguette",
+            "price": 3,
           },
           Object {
             "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
             "id": 1,
             "image": "bread2-002.webp",
             "name": "Classic",
+            "price": 4,
           },
           Object {
             "description": "Skip this week.",

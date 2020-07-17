@@ -4,8 +4,7 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
   def setup
-    week1 = menus(:week2)
-    week1.make_current!
+    menus(:week2).make_current!
     sign_in users(:kyle)
   end
 

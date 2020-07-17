@@ -63,7 +63,7 @@ ActiveAdmin.register Menu do
 
   form do |f|
     def week_options(resource_week)
-      week_ids = (1..10).map {|i| (Time.zone.now + i.weeks).week_id }
+      week_ids = (-10..10).map {|i| (Time.zone.now + i.weeks).week_id } - Menu.pluck(:week_id)
       week_ids.push(resource_week) if resource_week.present?
       week_ids.uniq.sort.map do |week_id|
         t = Time.zone.from_week_id(week_id).strftime('%a %m/%d')
