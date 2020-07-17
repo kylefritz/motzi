@@ -29,8 +29,8 @@ function DayButtons({ description, onSetDay, showButtons, day1, day2 }) {
               className={`btn btn-${btn} btn-sm mr-2`}
               onClick={() => onSetDay(day)}
             >
-              <span className="d-block d-xs-none">{day}</span>
-              <span className="d-none d-xs-block">{shortDay(day)}</span>
+              <span className="d-block d-md-none">{shortDay(day)}</span>
+              <span className="d-none d-md-block">{day}</span>
             </button>
           ))}
         </div>

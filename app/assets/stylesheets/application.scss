@@ -45,11 +45,14 @@ body {
   font-weight: 400;
   font-size: 20px;
 }
+$container-margin: 15px;
+$container-margin-padding: 34px + $container-margin;
+
 #menu-name {
-  margin-left: -49px;
-  margin-right: -49px;
-  padding-left: 49px;
-  padding-right: 49px;
+  margin-left: -$container-margin-padding;
+  margin-right: -$container-margin-padding;
+  padding-left: $container-margin-padding;
+  padding-right: $container-margin-padding;
   color: white;
   background: $motzi-purple;
   text-transform: none;
@@ -63,16 +66,22 @@ body {
 .container {
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.37);
   background: white;
-  $padding-left-right: 34px + 15px;
-  padding-left: $padding-left-right;
-  padding-right: $padding-left-right;
-  padding-bottom: $padding-left-right + 15px;
+  padding-left: $container-margin-padding;
+  padding-right: $container-margin-padding;
+  padding-bottom: $container-margin-padding + $container-margin;
   margin-bottom: 100px;
 }
 @media (max-width: map-get($container-max-widths, sm)) {
   .container {
     padding-left: 10px !important;
     padding-right: 10px !important;
+    overflow: hidden;
+  }
+  #menu-name {
+    margin-left: -10px;
+    margin-right: -10px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
   .padding-x-mobile-5px {
     padding-left: 5px !important;
