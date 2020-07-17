@@ -15,7 +15,7 @@ export default function SkipThisWeek({
               className="btn btn-sm btn-dark"
               onClick={onSkip}
             >
-              Skip
+              Skip Now
             </button>
           </div>
           <div style={{ lineHeight: "normal" }}>

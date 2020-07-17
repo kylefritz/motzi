@@ -64,7 +64,7 @@ export default function Menu({
       {/* if low, show nag to buy credits*/}
       {user && user.credits < 4 && <BuyCredits onComplete={onRefreshUser} />}
 
-      <h2>{name}</h2>
+      <h2 id="menu-name">{name}</h2>
       <Deadline menu={menu} />
       <BakersNote note={subscriberNote} />
 
@@ -98,6 +98,7 @@ export default function Menu({
       <div className="row mt-2 mb-3">
         <div className="col">
           <textarea
+            style={{ minHeight: 120 }}
             placeholder="We'd love to hear your feedback on previous loaves or any comments/special requests you may have"
             defaultValue={comments}
             onChange={(e) => setComments(e.target.value)}

@@ -20,7 +20,7 @@ function Format({ price, credits = 1, stripeChargeAmount }) {
 
 export default function Price(props) {
   return (
-    <div>
+    <div className="price my-2">
       <Format {...props} />
     </div>
   );

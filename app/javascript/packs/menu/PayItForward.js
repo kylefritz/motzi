@@ -29,10 +29,10 @@ export default function PayItForward({
           <div className="mb-2">
             <button
               type="button"
-              className={`btn btn-success btn-sm mr-2`}
+              className={`btn btn-secondary btn-sm mr-2`}
               onClick={handleAdd}
             >
-              Donate
+              Donate Now
             </button>
           </div>
           <Price {...{ price }} />

@@ -24,9 +24,9 @@ export default function Subscription({ user, onRefreshUser, deadlineDay }) {
     <>
       <div className="row mt-5">
         <div className="col">
-          <h5 className="text-center">Ordering for</h5>
+          <h5 className="text-center">Subscriber</h5>
           <div className="text-center mb-2">
-            <div>{user.name}</div>
+            <div className="subscriber-info">{user.name}</div>
             <div>
               <small className="ml-2">
                 <a href="/signout" className="text-nowrap">
@@ -37,19 +37,19 @@ export default function Subscription({ user, onRefreshUser, deadlineDay }) {
           </div>
         </div>
         <div className="col">
-          <h5 className="text-center">Ordering frequency</h5>
-          <p className="text-center" title={user.breadsPerWeek}>
+          <h5 className="text-center">Frequency</h5>
+          <p className="text-center subscriber-info" title={user.breadsPerWeek}>
             {humanizeBreadsPerWeek(user.breadsPerWeek)}
           </p>
         </div>
         <div className="col">
           <h5 className="text-center">Order By</h5>
-          <p className="text-center">{deadlineDay} Midnight</p>
+          <p className="text-center subscriber-info">{deadlineDay} Midnight</p>
         </div>
         <div className="col">
-          <h5 className="text-center">Credits remaining</h5>
+          <h5 className="text-center">Credits</h5>
           <p className="text-center">
-            {user.credits}
+            <div className="subscriber-info">{user.credits}</div>
             {onRefreshUser && (
               <button
                 type="button"

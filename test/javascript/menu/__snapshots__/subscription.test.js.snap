@@ -11,12 +11,14 @@ exports[`snapshot 1`] = `
       <h5
         className="text-center"
       >
-        Ordering for
+        Subscriber
       </h5>
       <div
         className="text-center mb-2"
       >
-        <div>
+        <div
+          className="subscriber-info"
+        >
           kyle
         </div>
         <div>
@@ -39,10 +41,10 @@ exports[`snapshot 1`] = `
       <h5
         className="text-center"
       >
-        Ordering frequency
+        Frequency
       </h5>
       <p
-        className="text-center"
+        className="text-center subscriber-info"
         title={1}
       >
         Every week
@@ -57,7 +59,7 @@ exports[`snapshot 1`] = `
         Order By
       </h5>
       <p
-        className="text-center"
+        className="text-center subscriber-info"
       >
         Sunday
          Midnight
@@ -69,12 +71,16 @@ exports[`snapshot 1`] = `
       <h5
         className="text-center"
       >
-        Credits remaining
+        Credits
       </h5>
       <p
         className="text-center"
       >
-        6
+        <div
+          className="subscriber-info"
+        >
+          6
+        </div>
       </p>
     </div>
   </div>

@@ -4,13 +4,18 @@ $container-max-widths: (
   lg: 680px,
 );
 
-// TODO: make warning "purple" instead
-$warning-color: "#6f42c1";
+$motzi-purple: rgb(53, 44, 99);
+$motzi-red: rgb(213, 72, 44);
+
+$secondary: $motzi-red; // day1
+$primary: $motzi-purple; // day2
+$btn-padding-x-sm: 0.75rem;
 
 // Custom bootstrap variables must be set or imported *before* bootstrap.
 @import "bootstrap";
 
-@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@300;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@400&display=swap");
 body {
   background-color: rgb(255, 238, 214);
   font-family: "Raleway", sans-serif;
@@ -25,23 +30,37 @@ body {
   height: 278px;
 }
 
-//
-// JINJI overrides
-//
-.jinji {
-  .banner {
-    background-image: image-url("background-chocolate.jpg");
-  }
-  .container {
-    border-top-color: purple;
-  }
+#logo-wrapper {
+  text-align: center;
+  padding-top: 20px;
+}
+#logo {
+  height: 100px;
+}
+.subscriber-info {
+  color: $motzi-red;
+  font-family: "Oswald", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+}
+#menu-name {
+  margin-left: -49px;
+  margin-right: -49px;
+  padding-left: 49px;
+  padding-right: 49px;
+  color: white;
+  background: $motzi-purple;
+  text-transform: none;
+  padding-top: 45px;
+  padding-bottom: 25px;
+  font-size: 1.6rem;
+  letter-spacing: 0.05rem;
 }
 
 .container {
   margin-top: -100px;
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.37);
   background: white;
-  border-top: 10px solid rgb(214, 124, 104);
   $padding-left-right: 34px + 15px;
   padding-left: $padding-left-right;
   padding-right: $padding-left-right;
@@ -65,22 +84,55 @@ h4,
 h5,
 h6 {
   font-family: "Raleway", sans-serif;
-  color: #5b4062;
+  color: $motzi-purple;
   text-transform: uppercase;
+}
+h5 {
+  font-weight: 300;
 }
 h1,
 h2 {
   text-align: center;
 }
+.btn-primary,
+.btn-secondary,
+.btn-dark,
+.price {
+  text-transform: uppercase;
+  font-family: "Oswald", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.05rem;
+}
+.price {
+  font-size: 0.8rem;
+}
+.btn-link,
+a {
+  text-decoration: underline;
+}
 
 .bakers-note {
   font-size: 0.8em;
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: 0.05rem;
 }
 
 @media only screen and (min-width: 1025px) {
   .wrapper {
     max-width: 900px;
     margin: auto;
+  }
+}
+
+//
+// JINJI overrides
+//
+.jinji {
+  .banner {
+    background-image: image-url("background-chocolate.jpg");
+  }
+  .container {
+    border-top-color: purple;
   }
 }
 

@@ -13,10 +13,10 @@ function shortDay(day) {
 function DayButtons({ description, onSetDay, showButtons, day1, day2 }) {
   const days = [];
   if (day1) {
-    days.push(["Thursday", "info"]);
+    days.push(["Thursday", "secondary"]);
   }
   if (day2) {
-    days.push(["Saturday", "warning"]);
+    days.push(["Saturday", "primary"]);
   }
   return (
     <>
@@ -29,7 +29,8 @@ function DayButtons({ description, onSetDay, showButtons, day1, day2 }) {
               className={`btn btn-${btn} btn-sm mr-2`}
               onClick={() => onSetDay(day)}
             >
-              {shortDay(day)}
+              <span className="d-block d-xs-none">{day}</span>
+              <span className="d-none d-xs-block">{shortDay(day)}</span>
             </button>
           ))}
         </div>
