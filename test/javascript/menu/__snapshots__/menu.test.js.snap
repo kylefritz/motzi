@@ -54,23 +54,6 @@ exports[`Menu snapshot 1`] = `
     bakersNote="Orci varius"
   />
   <h5>
-    We'd love your feedback on last week's loaf.
-  </h5>
-  <div
-    className="row mt-2 mb-3"
-  >
-    <div
-      className="col"
-    >
-      <textarea
-        className="form-control"
-        defaultValue={null}
-        onChange={[Function]}
-        placeholder="What did you think?"
-      />
-    </div>
-  </div>
-  <h5>
     Menu
   </h5>
   <Items
@@ -104,7 +87,7 @@ exports[`Menu snapshot 1`] = `
     onAddToCart={[Function]}
   />
   <h5>
-    Comments & Special Requests
+    Feedback, Comments & Special Requests
   </h5>
   <div
     className="row mt-2 mb-3"
@@ -116,7 +99,7 @@ exports[`Menu snapshot 1`] = `
         className="form-control"
         defaultValue={null}
         onChange={[Function]}
-        placeholder="Comments & special requests"
+        placeholder="We'd love to hear your feedback on previous loaves or any comments/special requests you may have"
       />
     </div>
   </div>
@@ -242,23 +225,6 @@ exports[`Menu with order snapshot 1`] = `
     bakersNote="Orci varius"
   />
   <h5>
-    We'd love your feedback on last week's loaf.
-  </h5>
-  <div
-    className="row mt-2 mb-3"
-  >
-    <div
-      className="col"
-    >
-      <textarea
-        className="form-control"
-        defaultValue={null}
-        onChange={[Function]}
-        placeholder="What did you think?"
-      />
-    </div>
-  </div>
-  <h5>
     Menu
   </h5>
   <Items
@@ -292,7 +258,7 @@ exports[`Menu with order snapshot 1`] = `
     onAddToCart={[Function]}
   />
   <h5>
-    Comments & Special Requests
+    Feedback, Comments & Special Requests
   </h5>
   <div
     className="row mt-2 mb-3"
@@ -304,7 +270,7 @@ exports[`Menu with order snapshot 1`] = `
         className="form-control"
         defaultValue={null}
         onChange={[Function]}
-        placeholder="Comments & special requests"
+        placeholder="We'd love to hear your feedback on previous loaves or any comments/special requests you may have"
       />
     </div>
   </div>

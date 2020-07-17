@@ -60,15 +60,7 @@ exports[`Order snapshot 1`] = `
     className="ml-2 mt-3"
   >
     <h6>
-      Feedback
-    </h6>
-    <p>
-      <em>
-        none
-      </em>
-    </p>
-    <h6>
-      Comments & Special Requests
+      Feedback, Comments & Special Requests
     </h6>
     <p>
       <em>
