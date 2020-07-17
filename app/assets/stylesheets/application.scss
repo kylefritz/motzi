@@ -21,13 +21,13 @@ body {
   font-family: "Raleway", sans-serif;
   color: #2e2927;
 }
-.banner {
+#background {
   background-image: image-url("background-bread.jpg");
-  background-size: cover;
+  background-size: auto;
   background-position-x: center;
-  background-position-y: -435px;
-  color: rgba(255, 255, 255, 1);
-  height: 278px;
+  background-position-y: -600px;
+  background-repeat: no-repeat;
+  padding-top: 200px;
 }
 
 #logo-wrapper {
@@ -55,10 +55,10 @@ body {
   padding-bottom: 25px;
   font-size: 1.6rem;
   letter-spacing: 0.05rem;
+  margin-bottom: 2rem;
 }
 
 .container {
-  margin-top: -100px;
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.37);
   background: white;
   $padding-left-right: 34px + 15px;
