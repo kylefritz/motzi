@@ -40,12 +40,11 @@ namespace :fake_data do
         next
       end
 
-      # a small number of people have feedback or comments
-      feedback = rand() < 0.05 ? Faker::Lorem.paragraph(sentence_count: 1, random_sentences_to_add: 1) : nil
+      # a small number of people have comments
       comments = rand() < 0.10 ? Faker::Lorem.paragraph(sentence_count: 1, random_sentences_to_add: 1) : nil
 
       Order.transaction do
-        Order.create!(user: user, menu: menu, feedback: feedback, comments: comments).tap do |order|
+        Order.create!(user: user, menu: menu, comments: comments).tap do |order|
 
           # pick a random item
           order.order_items.create!(item: items.sample.item)

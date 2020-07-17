@@ -84,7 +84,6 @@ ActiveAdmin.register User do
         column :items do |order|
           render partial: 'admin/orders/order', locals: {order: order}
         end
-        column :feedback
         column :comments
       end
     end

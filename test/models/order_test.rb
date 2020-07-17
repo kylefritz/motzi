@@ -17,18 +17,6 @@ class OrderTest < ActiveSupport::TestCase
     assert_equal 2, kyle.orders.count
   end
 
-  test "with_feedback" do
-    assert_difference 'Order.with_feedback.size', 1 do
-      Order.create!(feedback: 'asd', menu: menus(:week2), user: users(:ljf))
-    end
-    assert_difference 'Order.with_feedback.size', 0, 'empty string' do
-      Order.create!(feedback: '', menu: menus(:week2), user: users(:ljf))
-    end
-    assert_difference 'Order.with_feedback.size', 0, 'white space' do
-      Order.create!(feedback: '    ', menu: menus(:week2), user: users(:ljf))
-    end
-  end
-
   test "with_comments" do
     assert_difference 'Order.with_comments.size', 1 do
       Order.create!(comments: 'asd', menu: menus(:week2), user: users(:ljf))

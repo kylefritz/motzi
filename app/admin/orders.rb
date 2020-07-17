@@ -1,11 +1,10 @@
 ActiveAdmin.register Order do
-  permit_params :feedback, :comments, :menu, :user
+  permit_params :comments, :menu, :user
   includes :menu, :user, order_items: :item
 
   scope :all, default: true
   scope("current menu") { |scope| scope.where(menu_id: Setting.menu_id) }
   scope :with_comments
-  scope :with_feedback
   scope :skip
   scope :not_skip
 
@@ -19,8 +18,7 @@ ActiveAdmin.register Order do
     column :items do |order|
       render partial: 'admin/orders/order', locals: {order: order}
     end
-    column :feedback
-    column :comments
+    column(:comments, &:comments_html)
     column :created_at
     column :paid do |order|
       if order.stripe_charge_amount.present?
@@ -45,7 +43,6 @@ ActiveAdmin.register Order do
     attributes_table do
       row :user
       row :menu
-      row :feedback
       row :comments
       row :order_items do |order|
         render partial: 'admin/orders/order', locals: {order: order}

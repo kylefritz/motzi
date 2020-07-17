@@ -31,7 +31,7 @@ class OrdersController < ApplicationController
 
     user = Order.transaction do
       current_user_or_create_user.tap do |current_user|
-        order_params = params.permit(:feedback, :comments, :skip).merge(menu: menu, user: current_user)
+        order_params = params.permit(:comments, :skip).merge(menu: menu, user: current_user)
 
         Order.create!(order_params).tap do |order|
           params.fetch(:cart).each do |cart_item_params|
@@ -102,7 +102,7 @@ class OrdersController < ApplicationController
     end
 
     Order.transaction do
-      order.update!(params.permit(:feedback, :comments, :skip))
+      order.update!(params.permit(:comments, :skip))
       order.order_items.destroy_all
       params[:cart].each do |cart_item_params|
         day1_pickup = !(Setting.pickup_day2.casecmp?(cart_item_params[:day])) # default to day 1

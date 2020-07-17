@@ -21,7 +21,6 @@ export default function Menu({
   const { cart, addToCart, rmCartItem, setCart } = useCart(order);
 
   const [skip, setSkip] = useState(_.get(order, "skip", false));
-  const [feedback, setFeedback] = useState(_.get(order, "feedback", null));
   const [comments, setComments] = useState(_.get(order, "comments", null));
 
   const handleSkip = () => {
@@ -36,7 +35,6 @@ export default function Menu({
     }
 
     onCreateOrder({
-      feedback,
       comments,
       cart,
       uid: user.hashid,
@@ -70,17 +68,6 @@ export default function Menu({
       <Deadline menu={menu} />
       <BakersNote {...{ bakersNote }} />
 
-      <h5>We'd love your feedback on last week's loaf.</h5>
-      <div className="row mt-2 mb-3">
-        <div className="col">
-          <textarea
-            className="form-control"
-            placeholder="What did you think?"
-            defaultValue={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
-          />
-        </div>
-      </div>
       <h5>Menu</h5>
       {skip ? (
         <>
@@ -107,11 +94,11 @@ export default function Menu({
         </>
       )}
 
-      <h5>Comments & Special Requests</h5>
+      <h5>Feedback, Comments & Special Requests</h5>
       <div className="row mt-2 mb-3">
         <div className="col">
           <textarea
-            placeholder="Comments & special requests"
+            placeholder="We'd love to hear your feedback on previous loaves or any comments/special requests you may have"
             defaultValue={comments}
             onChange={(e) => setComments(e.target.value)}
             className="form-control"

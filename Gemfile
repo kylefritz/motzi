@@ -24,6 +24,7 @@ gem 'newrelic_rpm' # debugging to new relic
 gem 'olive_branch' # convert snake_case to camelCase for json
 gem 'paper_trail' # audits
 gem 'pg', '>= 0.18', '< 2.0'
+gem 'progress_bar'
 gem 'puma', '>= 3.12.2' # web/app server
 gem 'rails-settings-cached' # site-wide settings
 gem 'rails', '~> 6.0.3.2'

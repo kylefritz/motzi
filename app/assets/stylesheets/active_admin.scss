@@ -25,11 +25,11 @@
 .col-updated_at {
   white-space: nowrap;
 }
-.col-name small {
+.col-name small,
+#index_table_orders .col-items {
   white-space: normal; // baker's note on menu
 }
 
-.col-feedback,
 .col-comments {
   p {
     margin-bottom: 0.1em;

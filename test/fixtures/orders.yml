@@ -3,7 +3,6 @@
 kyle_week1:
   user: kyle
   menu: week1
-  feedback: cant have feedback
   comments: cant wait for my bread
 
 adrian_week1:
@@ -13,11 +12,9 @@ adrian_week1:
 ljf_week1:
   user: ljf
   menu: week1
-  feedback: yumm
   comments: i'm using my last credit
 
 kyle_week2:
   user: kyle
   menu: week2
-  feedback: last week was great
   comments: more bread!

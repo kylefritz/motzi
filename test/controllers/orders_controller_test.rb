@@ -76,14 +76,14 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
   def order_attrs(hashid)
     item_id = Menu.current.items.first.id
-    {comment: 'test order', feedback: 'last week was great', cart: [{item_id: item_id}]}.tap do |attrs|
+    {comment: 'test order', cart: [{item_id: item_id}]}.tap do |attrs|
       attrs[:uid] = hashid if hashid
     end
   end
 
   def different_order_attrs(hashid=nil)
     item_id = items(:rye).id
-    {comment: 'different', feedback: 'different', cart: [{item_id: item_id, quantity: 3}]}.tap do |attrs|
+    {comment: 'different', cart: [{item_id: item_id, quantity: 3}]}.tap do |attrs|
       attrs[:uid] = hashid if hashid
     end
   end

@@ -17,7 +17,6 @@ export default function Order({
     items: cart,
     skip,
     comments,
-    feedback,
     stripeReceiptUrl,
     stripeChargeAmount,
   } = order;
@@ -36,14 +35,7 @@ export default function Order({
         </p>
       )}
       <div className="ml-2 mt-3">
-        {isSubscriptionOrder && (
-          <>
-            <h6>Feedback</h6>
-            <p>{feedback || <em>none</em>}</p>
-          </>
-        )}
-
-        <h6>Comments & Special Requests</h6>
+        <h6>Feedback, Comments & Special Requests</h6>
         <p>{comments || <em>none</em>}</p>
       </div>
 
