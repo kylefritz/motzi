@@ -10,11 +10,14 @@ function shortDay(day) {
   return "Sat";
 }
 
-function DayButtons({ description, onSetDay, showButtons }) {
-  const days = [
-    ["Thursday", "info"],
-    ["Saturday", "warning"],
-  ];
+function DayButtons({ description, onSetDay, showButtons, day1, day2 }) {
+  const days = [];
+  if (day1) {
+    days.push(["Thursday", "info"]);
+  }
+  if (day2) {
+    days.push(["Saturday", "warning"]);
+  }
   return (
     <>
       {showButtons && (
@@ -64,7 +67,7 @@ function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day }) {
   );
 }
 
-function Ordering({ description, onChange }) {
+function Ordering({ description, onChange, day1, day2 }) {
   const [day, setDay] = useState(null);
   const [wasAdded, setWasAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -99,9 +102,9 @@ function Ordering({ description, onChange }) {
 
   return (
     <DayButtons
-      description={description}
       onSetDay={setDay}
       showButtons={!!onChange}
+      {...{ description, day1, day2 }}
     />
   );
 }
@@ -119,7 +122,14 @@ function Item(props) {
   );
 }
 
-export default function Items({ items, onAddToCart: handleAddToCart }) {
+export default function Items({
+  items,
+  onAddToCart: handleAddToCart,
+  subscriberOnly = true,
+}) {
+  if (!subscriberOnly) {
+    items = items.filter(({ subscriberOnly }) => !subscriberOnly);
+  }
   return (
     <div className="row mt-2">
       {items.map((i) => (

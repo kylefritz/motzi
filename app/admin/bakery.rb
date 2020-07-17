@@ -10,7 +10,7 @@ ActiveAdmin.register_page "Dashboard" do
           h4 a(menu.name, href: admin_menu_path(menu.id), class: 'bigger')
           ul do
             menu.menu_items.includes(:item).map do |menu_item|
-              li "#{menu_item.item.name} #{menu_item.is_add_on? ? " (add-on)" : ""}"
+              li "#{menu_item.item.name}"
             end
           end
         end

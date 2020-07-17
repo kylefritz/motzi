@@ -17,7 +17,7 @@ class LowCreditUsersTest < ActiveSupport::TestCase
     menu = menus(:week2)
 
     # synthesize enough orders that kyle will be in the "low-credit" list
-    _, items = menu.menu_items.partition(&:is_add_on?)
+    items = menu.menu_items
     new_kyle_orders = kyle.credits.times.map do
       kyle.orders.create!(menu: menu).tap do |order|
         order.order_items.create!(item: items.sample.item)

@@ -33,7 +33,7 @@ namespace :fake_data do
     end
 
     menu = Menu.current
-    addons, items = menu.menu_items.partition(&:is_add_on?)
+    items = menu.menu_items
     User.for_weekly_email.each do |user|
       # 15% chance user forgets to order
       if rand() < 0.15
@@ -48,13 +48,6 @@ namespace :fake_data do
 
           # pick a random item
           order.order_items.create!(item: items.sample.item)
-
-          # 10% chance of adding any add on
-          addons.each do |add_on|
-            if rand() < 0.10
-              order.order_items.create!(item: add_on.item)
-            end
-          end
         end
       end
     end

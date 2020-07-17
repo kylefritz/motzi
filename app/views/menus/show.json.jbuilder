@@ -2,9 +2,12 @@ json.menu do
   json.extract! @menu, :id, :name, :menu_note, :subscriber_note, :created_at, :deadline
   json.is_current @menu.current?
   json.deadline_day Setting.deadline_day
-  items = @menu.menu_items.reject(&:is_add_on?)
 
-  json.items [items.map(&:item), Item.pay_it_forward].flatten.map do |item|
+  menu_items = @menu.menu_items.map {|mi| [mi, mi.item]}
+  menu_items.push([MenuItem.new, Item.pay_it_forward])
+
+  json.items menu_items.map do |menu_item, item|
+    json.extract! menu_item, :subscriber_only, :day1, :day2
     json.extract! item, :id, :name, :description, :price
     json.image item.image_path
   end

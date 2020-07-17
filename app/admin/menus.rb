@@ -40,7 +40,7 @@ ActiveAdmin.register Menu do
     column :items do |menu|
       ul style: 'list-style: 	disc outside none !important; white-space: nowrap' do
         menu.menu_items.map do |menu_item|
-          li "#{menu_item.item.name} #{menu_item.is_add_on? ? " (add-on)" : ""}"
+          li "#{menu_item.item.name}"
         end
       end
     end

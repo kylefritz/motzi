@@ -23,4 +23,3 @@ w2_rye:
 w2_donut:
   menu: week2
   item: donuts
-  is_add_on: true

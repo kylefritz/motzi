@@ -13,14 +13,6 @@ class MenuTest < ActiveSupport::TestCase
     assert_equal 2, week1.items.count
   end
 
-  test "menus can have add_ons" do
-    week2 = menus(:week2)
-    assert_equal 3, week2.items.count, 'three items'
-    add_ons = week2.menu_items.select {|i| i.is_add_on?}
-    assert_equal 1, add_ons.count, '1 add on (donuts)'
-    assert_equal items(:donuts), add_ons.first.item
-  end
-
   test "Menu.current" do
     assert_equal menus(:week2), Menu.current
   end

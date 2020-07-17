@@ -43,9 +43,9 @@ export default class App extends React.Component {
       });
   }
 
-  handleAddItem({ itemId, isAddOn }) {
+  handleAddItem(props) {
     const { menuId } = this.state;
-    const json = { itemId, isAddOn, menuId };
+    const json = { ...props, menuId };
     console.log("add item", json);
     axios.post("/admin/menu_items.json", json).then(() => this.loadMenu());
   }
@@ -75,6 +75,15 @@ export default class App extends React.Component {
       <div className="menu-builder">
         <h4>Items</h4>
         <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Subscriber Only?</th>
+              <th>Day 1?</th>
+              <th>Day 2?</th>
+              <th></th>
+            </tr>
+          </thead>
           <tbody>
             {items.map((i) => (
               <Item
@@ -93,7 +102,7 @@ export default class App extends React.Component {
         <Adder
           items={allItems}
           not={makeSet(items)}
-          onAdd={(itemId) => this.handleAddItem({ itemId, isAddOn: false })}
+          onAdd={(item) => this.handleAddItem(item)}
         />
       </div>
     );
