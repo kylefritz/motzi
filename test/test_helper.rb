@@ -23,13 +23,30 @@ class ActiveSupport::TestCase
     JSON::Validator.validate!(schema_path, json, strict: true)
   end
 
-  def assert_emails_sent(num_emails, &block)
+  EMAIL_MODEL_COUNTS = ['ApplicationMailer.deliveries.count', 'Ahoy::Message.count']
+  def assert_email_sent(num_emails=1, &block)
     perform_enqueued_jobs do
-      assert_difference('Ahoy::Message.count', num_emails, 'emails audited in ahoy') do
-        assert_difference('ApplicationMailer.deliveries.count', num_emails, 'emails delivered') do
-          block.call
-        end
+      assert_difference(EMAIL_MODEL_COUNTS, num_emails, 'emails delivered & audited in ahoy') do
+        block.call
       end
+    end
+  end
+  def refute_emails_sent(&block)
+    perform_enqueued_jobs do
+      assert_no_difference EMAIL_MODEL_COUNTS do
+        block.call
+      end
+    end
+  end
+
+  def assert_ordered(&block)
+    assert_difference 'Order.count', 1, 'order created' do
+      block.call
+    end
+  end
+  def refute_ordered(&block)
+    assert_no_difference 'Order.count' do
+      block.call
     end
   end
 end

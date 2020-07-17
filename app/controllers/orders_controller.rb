@@ -15,7 +15,7 @@ class OrdersController < ApplicationController
       return existing_user
     end
 
-    User.create!(params.permit(:first_name, :last_name, :email).merge(send_weekly_email: false))
+    User.create!(params.permit(:first_name, :last_name, :email, :send_weekly_email))
   end
 
   def create

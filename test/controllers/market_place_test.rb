@@ -15,10 +15,9 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     StripeMock.stop
   end
 
-  test "not logged in user can pay for order" do
+  test "new, not logged in user can pay for order" do
     order_attrs = build_order_attrs
-    assert_order(order_attrs, 1, 1, 1)
-    assert_response :success
+    assert_user_created { assert_ordered_emailed(order_attrs) }
 
     new_user = User.unscoped.order("created_at desc").last
     assert_equal order_attrs[:email], new_user.email
@@ -30,24 +29,32 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     refute_nil new_order.stripe_charge_amount
 
     # after second order, no user created
-    assert_order(build_order_attrs, 1, 0, 1)
+    refute_user_created { assert_ordered_emailed(build_order_attrs) }
   end
 
   test "existing user can pay for order" do
     order_attrs = build_order_attrs
     order_attrs[:email] = users(:kyle).email
-    assert_order(order_attrs, 1, 0, 1)
-    assert_response :success
+    refute_user_created { assert_ordered_emailed(order_attrs) }
 
     new_order = Order.last
     refute_nil new_order.stripe_charge_id
     refute_nil new_order.stripe_charge_amount
   end
 
+  test "set send_weekly_email" do
+    order_attrs = build_order_attrs
+    order_attrs[:send_weekly_email] = true
+    assert_user_created { assert_ordered_emailed(order_attrs) }
+
+    new_user = User.unscoped.order("created_at desc").last
+    assert new_user.send_weekly_email?, "shouldn't get weekly email"
+  end
+
   test "missing stripe token" do
     order_attrs = build_order_attrs
     order_attrs[:token] = nil
-    assert_order(order_attrs, 0, 0, 0)
+    refute_order(order_attrs)
     assert_response :unprocessable_entity
     assert_equal "Stripe credit card not submitted", response.parsed_body["message"]
   end
@@ -55,7 +62,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
   test "credit card declined" do
     StripeMock.prepare_card_error(:card_declined)
     order_attrs = build_order_attrs
-    assert_order(order_attrs, 0, 0, 0)
+    refute_order(order_attrs)
     assert_response :unprocessable_entity
     assert_equal "The card was declined", response.parsed_body["message"]
   end
@@ -72,18 +79,39 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
       firstName: "Jef",
       lastName: "Fritz",
       price: 10.00,
+      send_weekly_email: false,
       token: @stripe_helper.generate_card_token
     }
   end
 
-  def assert_order(order_attrs, num_orders, num_users, num_emails)
-    assert_difference 'Order.count', num_orders, 'order created' do
-      assert_difference 'User.count', num_users, 'user created' do
-        assert_emails_sent(num_emails) do
+  def assert_ordered_emailed(order_attrs)
+    assert_ordered do
+      assert_email_sent do
+        post '/orders.json', params: order_attrs, as: :json
+        assert_response :success
+      end
+    end
+  end
+
+  def refute_order(order_attrs)
+    refute_user_created do
+      refute_ordered do
+        refute_emails_sent do
           post '/orders.json', params: order_attrs, as: :json
         end
       end
     end
   end
 
+  def assert_user_created(&block)
+    assert_difference 'User.count', 1, 'user created' do
+      block.call
+    end
+  end
+
+  def refute_user_created(&block)
+    assert_no_difference 'User.count' do
+      block.call
+    end
+  end
 end

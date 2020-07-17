@@ -26,7 +26,7 @@ class SendWeeklyMenuJobTest < ActiveJob::TestCase
     date_time = DateTime.parse(datetime_str)
 
     Timecop.freeze(date_time) do
-      assert_emails_sent(num_emails) do
+      assert_email_sent(num_emails) do
         SendWeeklyMenuJob.perform_now
       end
     end

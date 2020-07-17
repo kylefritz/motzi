@@ -17,7 +17,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
   test "hashid_user cant order past deadline" do
     Timecop.freeze(Menu.current.deadline + 2.hours) do
-      assert_no_order_placed users(:ljf).hashid
+      refute_order_placed users(:ljf).hashid
       assert_response :unprocessable_entity
     end
   end
@@ -68,7 +68,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "unknown user cannot create order" do
-    assert_no_order_placed
+    refute_order_placed
     assert_response :unauthorized
   end
 
@@ -89,17 +89,16 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   end
 
   def assert_order_placed(hashid=nil)
-    users(:ljf).hashid
-    assert_emails_sent(1) do
-      assert_difference 'Order.count', 1, 'order should be created' do
+    assert_email_sent do
+      assert_ordered do
         post '/orders.json', params: order_attrs(hashid), as: :json
         assert_response :success
       end
     end
   end
 
-  def assert_no_order_placed(hashid=nil)
-    assert_no_difference 'Order.count', 'order should NOT be created' do
+  def refute_order_placed(hashid=nil)
+    refute_ordered do
       post '/orders.json', params: order_attrs(hashid), as: :json
     end
   end

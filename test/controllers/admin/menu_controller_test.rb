@@ -58,7 +58,7 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_nil user.current_order, 'user hasnt ordered yet'
     order_params = {user_id: user.id, item_id: items(:classic).id}
 
-    assert_difference 'Order.count', 1, 'order should be created' do
+    assert_ordered do
       post '/admin/menus/bakers_choice.json', params: order_params, as: :json
       assert_response :success
     end
