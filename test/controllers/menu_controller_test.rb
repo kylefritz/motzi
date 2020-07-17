@@ -44,7 +44,7 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
 
     json  = @response.body
     assert json =~ /Rye Five Ways/, 'items serialized'
-    assert json =~ /bakersNote/, 'bakersNote'
+    assert json =~ /subscriberNote/, 'subscriberNote'
     menu = JSON.load(json)
 
     validate_json_schema :menu, json

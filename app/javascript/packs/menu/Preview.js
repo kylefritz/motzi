@@ -6,7 +6,7 @@ import Items from "./Items";
 import Subscription from "./Subscription";
 
 export default function Preview({ user, menu }) {
-  const { name, bakersNote, items, deadlineDay } = menu;
+  const { name, subscriberNote, items, deadlineDay } = menu;
 
   return (
     <>
@@ -14,7 +14,7 @@ export default function Preview({ user, menu }) {
 
       <h2>{name}</h2>
       <Deadline menu={menu} />
-      <BakersNote {...{ bakersNote }} />
+      <BakersNote note={subscriberNote} />
 
       <h5>Items</h5>
       <Items items={items} />

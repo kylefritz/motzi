@@ -9,6 +9,6 @@ test("Menu snapshot", () => {
   visit www.motzibakery.com.
   email motzi@gmail.com
   `;
-  const wrapper = shallow(<BakersNote bakersNote={markdown} />);
+  const wrapper = shallow(<BakersNote note={markdown} />);
   expect(wrapper).toMatchSnapshot();
 });

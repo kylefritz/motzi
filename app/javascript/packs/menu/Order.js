@@ -12,7 +12,7 @@ export default function Order({
   onRefreshUser,
   onEditOrder,
 }) {
-  const { name, bakersNote, deadlineDay } = menu;
+  const { name, subscriberNote, deadlineDay } = menu;
   const {
     items: cart,
     skip,
@@ -58,7 +58,7 @@ export default function Order({
       <hr className="mb-5" />
 
       <h2 className="mt-3 mb-5">{name}</h2>
-      <BakersNote {...{ bakersNote }} />
+      <BakersNote note={subscriberNote} />
     </>
   );
 }

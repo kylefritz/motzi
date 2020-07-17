@@ -51,12 +51,12 @@ export default function Marketplace({ menu, onCreateOrder }) {
     resetPrice(nextCart);
   };
 
-  const { name, bakersNote, items } = menu;
+  const { name, menuNote, items } = menu;
   return (
     <>
       <h2>{name}</h2>
       <Deadline menu={menu} />
-      <BakersNote {...{ bakersNote }} />
+      <BakersNote note={menuNote} />
 
       <h5>Menu</h5>
       <Items items={items} onAddToCart={handleAddToCart} />

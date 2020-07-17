@@ -12,7 +12,8 @@
         "name",
         "deadline",
         "deadlineDay",
-        "bakersNote",
+        "menuNote",
+        "subscriberNote",
         "createdAt",
         "items",
         "isCurrent"
@@ -20,7 +21,8 @@
       "properties": {
         "id": { "type": "integer" },
         "name": { "type": "string" },
-        "bakersNote": { "type": "string" },
+        "subscriberNote": { "type": "string" },
+        "menuNote": { "type": ["null", "string"] },
         "createdAt": {
           "type": "string",
           "title": "created at"

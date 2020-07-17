@@ -26,7 +26,6 @@ exports[`Order snapshot 1`] = `
     }
     menu={
       Object {
-        "bakersNote": "Orci varius",
         "createdAt": "2019-11-02T14:01:23.820-04:00",
         "deadline": "2019-11-03T23:59:59.000-04:00",
         "deadlineDay": "Sunday",
@@ -54,6 +53,7 @@ exports[`Order snapshot 1`] = `
           },
         ],
         "name": "week 5",
+        "subscriberNote": "Orci varius",
       }
     }
     skip={false}
@@ -92,7 +92,7 @@ exports[`Order snapshot 1`] = `
     week 5
   </h2>
   <BakersNote
-    bakersNote="Orci varius"
+    note="Orci varius"
   />
 </Fragment>
 `;

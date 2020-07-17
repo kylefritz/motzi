@@ -19,8 +19,8 @@ class Menu < ApplicationRecord
     self.id == Setting.menu_id
   end
 
-  def bakers_note_html
-    @bakers_note_html ||= MARKDOWN.render(self.bakers_note || '').html_safe
+  def subscriber_note_html
+    @subscriber_note_html ||= MARKDOWN.render(self.subscriber_note || '').html_safe
   end
 
   def day_of_note_html

@@ -21,7 +21,6 @@ exports[`Preview snapshot 1`] = `
   <Deadline
     menu={
       Object {
-        "bakersNote": "Orci varius",
         "createdAt": "2019-11-02T14:01:23.820-04:00",
         "deadline": "2019-11-03T23:59:59.000-04:00",
         "deadlineDay": "Sunday",
@@ -49,11 +48,12 @@ exports[`Preview snapshot 1`] = `
           },
         ],
         "name": "week 5",
+        "subscriberNote": "Orci varius",
       }
     }
   />
   <BakersNote
-    bakersNote="Orci varius"
+    note="Orci varius"
   />
   <h5>
     Items

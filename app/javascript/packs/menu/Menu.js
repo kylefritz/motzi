@@ -42,7 +42,7 @@ export default function Menu({
     });
   };
 
-  const { name, bakersNote, items, isCurrent, deadlineDay } = menu;
+  const { name, subscriberNote, items, isCurrent, deadlineDay } = menu;
 
   if (user && user.credits < 1) {
     // time to buy credits!
@@ -66,7 +66,7 @@ export default function Menu({
 
       <h2>{name}</h2>
       <Deadline menu={menu} />
-      <BakersNote {...{ bakersNote }} />
+      <BakersNote note={subscriberNote} />
 
       <h5>Menu</h5>
       {skip ? (

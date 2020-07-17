@@ -2,7 +2,7 @@ export default {
   menu: {
     id: 921507399,
     name: "week 5",
-    bakersNote: "Orci varius",
+    subscriberNote: "Orci varius",
     createdAt: "2019-11-02T14:01:23.820-04:00",
     deadline: "2019-11-03T23:59:59.000-04:00",
     isCurrent: true,

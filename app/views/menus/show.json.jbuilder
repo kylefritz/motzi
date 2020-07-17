@@ -1,5 +1,5 @@
 json.menu do
-  json.extract! @menu, :id, :name, :bakers_note, :created_at, :deadline
+  json.extract! @menu, :id, :name, :menu_note, :subscriber_note, :created_at, :deadline
   json.is_current @menu.current?
   json.deadline_day Setting.deadline_day
   items = @menu.menu_items.reject(&:is_add_on?)
