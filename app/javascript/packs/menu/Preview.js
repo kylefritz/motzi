@@ -12,7 +12,7 @@ export default function Preview({ user, menu }) {
     <>
       {user && <Subscription {...{ user, deadlineDay }} />}
 
-      <h2>{name}</h2>
+      <h2 id="menu-name">{name}</h2>
       <Deadline menu={menu} />
       <BakersNote note={subscriberNote} />
 

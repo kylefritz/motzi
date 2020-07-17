@@ -10,9 +10,9 @@ export default function Deadline({ menu }) {
   }
 
   return (
-    <div className="alert alert-warning text-center" role="alert">
-      <h4 className="alert-heading">Ordering is closed for this menu</h4>
-      Order by {deadlineDay} at midnight for each week's menu.
+    <div className="alert alert-secondary text-center py-3 my-4" role="alert">
+      <h6 className="alert-heading">Ordering is closed for this menu</h6>
+      The cut off for ordering is midnight {deadlineDay} every week
     </div>
   );
 }

@@ -2,17 +2,17 @@
 
 exports[`After deadline snapshot 1`] = `
 <div
-  className="alert alert-warning text-center"
+  className="alert alert-secondary text-center py-3 my-4"
   role="alert"
 >
-  <h4
+  <h6
     className="alert-heading"
   >
     Ordering is closed for this menu
-  </h4>
-  Order by 
+  </h6>
+  The cut off for ordering is midnight 
   Sunday
-   at midnight for each week's menu.
+   every week
 </div>
 `;
 

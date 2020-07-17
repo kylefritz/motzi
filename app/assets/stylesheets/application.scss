@@ -7,6 +7,8 @@ $container-max-widths: (
 $motzi-purple: rgb(53, 44, 99);
 $motzi-red: rgb(213, 72, 44);
 
+// override boostrap colors/variables
+// https://github.com/twbs/bootstrap-rubygem/blob/master/assets/stylesheets/bootstrap/_variables.scss
 $secondary: $motzi-red; // day1
 $primary: $motzi-purple; // day2
 $btn-padding-x-sm: 0.75rem;
@@ -25,7 +27,7 @@ body {
   background-image: image-url("background-bread.jpg");
   background-size: auto;
   background-position-x: center;
-  background-position-y: -600px;
+  background-position-y: -720px;
   background-repeat: no-repeat;
   padding-top: 200px;
 }
@@ -102,6 +104,11 @@ h2 {
   font-family: "Oswald", sans-serif;
   font-weight: 400;
   letter-spacing: 0.05rem;
+}
+.alert-secondary {
+  border: none;
+  background: $motzi-red;
+  color: white;
 }
 .price {
   font-size: 0.8rem;

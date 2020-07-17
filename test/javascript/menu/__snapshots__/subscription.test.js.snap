@@ -3,7 +3,7 @@
 exports[`snapshot 1`] = `
 <Fragment>
   <div
-    className="row mt-5"
+    className="row"
   >
     <div
       className="col"

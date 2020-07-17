@@ -52,12 +52,12 @@ export default function Order({
       )}
 
       {isSubscriptionOrder && (
-        <Subscription {...{ user, onRefreshUser, deadlineDay }} />
+        <div className="mt-3">
+          <Subscription {...{ user, onRefreshUser, deadlineDay }} />
+        </div>
       )}
 
-      <hr className="mb-5" />
-
-      <h2 className="mt-3 mb-5">{name}</h2>
+      <h2 id="menu-name">{name}</h2>
       <BakersNote note={subscriberNote} />
     </>
   );

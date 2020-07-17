@@ -79,24 +79,25 @@ exports[`Order snapshot 1`] = `
       </em>
     </p>
   </div>
-  <Subscription
-    deadlineDay="Sunday"
-    user={
-      Object {
-        "breadsPerWeek": 1,
-        "credits": 9,
-        "email": "kyle.p.fritz@gmail.com",
-        "hashid": "Dot9gKn9w",
-        "id": 584273342,
-        "name": "Kyle Fritz",
+  <div
+    className="mt-3"
+  >
+    <Subscription
+      deadlineDay="Sunday"
+      user={
+        Object {
+          "breadsPerWeek": 1,
+          "credits": 9,
+          "email": "kyle.p.fritz@gmail.com",
+          "hashid": "Dot9gKn9w",
+          "id": 584273342,
+          "name": "Kyle Fritz",
+        }
       }
-    }
-  />
-  <hr
-    className="mb-5"
-  />
+    />
+  </div>
   <h2
-    className="mt-3 mb-5"
+    id="menu-name"
   >
     week 5
   </h2>

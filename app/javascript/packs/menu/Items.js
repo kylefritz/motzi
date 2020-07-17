@@ -45,18 +45,14 @@ function DayButtons({ description, onSetDay, showButtons, day1, day2 }) {
 function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day }) {
   return (
     <>
-      <div className="row my-2">
-        <div className="col col-md-auto">
-          <div>
-            Qty: <strong className="pr-3">{quantity}</strong>
-          </div>
-          <Quantity defaultQuantity={quantity} onChange={onQuantity} />
-        </div>
-        <div className="col col-md-auto">
-          Day: <strong className="pr-3">{shortDay(day)}</strong>
-        </div>
+      <div>
+        Pickup: <strong className="pr-3">{day}</strong>
       </div>
-      <div className="mb-2">
+      <div>
+        Qty: <strong className="pr-3">{quantity}</strong>
+      </div>
+      <Quantity defaultQuantity={quantity} onChange={onQuantity} />
+      <div className="mt-2">
         <button onClick={onAdd} className="btn btn-primary btn-sm mr-2">
           Add to cart
         </button>

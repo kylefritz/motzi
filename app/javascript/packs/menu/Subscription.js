@@ -22,7 +22,7 @@ export default function Subscription({ user, onRefreshUser, deadlineDay }) {
 
   return (
     <>
-      <div className="row mt-5">
+      <div className="row">
         <div className="col">
           <h5 className="text-center">Subscriber</h5>
           <div className="text-center mb-2">
