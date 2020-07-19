@@ -5,6 +5,9 @@ class Item < ApplicationRecord
   has_one_attached :image
   default_scope { order("LOWER(name)") }
 
+  validates :name, :description, :price, presence: true
+  validates :price, numericality: true
+
   PAY_IT_FORWARD_ID = -1
   def self.pay_it_forward
     self.find_by(id: PAY_IT_FORWARD_ID)
