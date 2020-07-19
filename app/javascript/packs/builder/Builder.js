@@ -78,6 +78,7 @@ export default class App extends React.Component {
           <thead>
             <tr>
               <th>Name</th>
+              <th>Marketplace Only?</th>
               <th>Subscriber Only?</th>
               <th>Day 1?</th>
               <th>Day 2?</th>

@@ -8,8 +8,9 @@ export default function Adder({ items, not, onAdd }) {
   const [day2, setDay2] = useState(true);
 
   const selectRef = React.createRef();
-  const handleAdd = () => {
-    const itemId = selectRef.current.value;
+  const handleAdd = (e) => {
+    e.preventDefault();
+    const itemId = parseInt(selectRef.current.value);
     if (!itemId) {
       alert("Select an item");
       return;
@@ -27,8 +28,7 @@ export default function Adder({ items, not, onAdd }) {
     (i) => !not.has(i.name)
   );
   return (
-    <div>
-      <h6>Add Item</h6>
+    <form onSubmit={handleAdd} style={{ marginTop: 30, marginBottom: 20 }}>
       <div>
         <select ref={selectRef}>
           {choices.map(({ id, name }) => (
@@ -40,15 +40,6 @@ export default function Adder({ items, not, onAdd }) {
       </div>
       <div style={{ marginTop: 5 }}>
         <label>
-          Subscriber only?
-          <input
-            style={{ marginLeft: 3 }}
-            type="checkbox"
-            checked={subscriberOnly}
-            onChange={(e) => setSubscriberOnly(e.target.checked)}
-          />
-        </label>
-        <label>
           Marketplace only?
           <input
             style={{ marginLeft: 3 }}
@@ -57,7 +48,16 @@ export default function Adder({ items, not, onAdd }) {
             onChange={(e) => setMarketplaceOnly(e.target.checked)}
           />
         </label>
-        <label style={{ marginLeft: 10 }}>
+        <label style={{ marginLeft: 20 }}>
+          Subscriber only?
+          <input
+            style={{ marginLeft: 3 }}
+            type="checkbox"
+            checked={subscriberOnly}
+            onChange={(e) => setSubscriberOnly(e.target.checked)}
+          />
+        </label>
+        <label style={{ marginLeft: 20 }}>
           Day 1
           <input
             style={{ marginLeft: 3 }}
@@ -66,7 +66,7 @@ export default function Adder({ items, not, onAdd }) {
             onChange={(e) => setDay1(e.target.checked)}
           />
         </label>
-        <label style={{ marginLeft: 10 }}>
+        <label style={{ marginLeft: 20 }}>
           Day 2
           <input
             style={{ marginLeft: 3 }}
@@ -76,10 +76,9 @@ export default function Adder({ items, not, onAdd }) {
           />
         </label>
         <br />
-        <button type="button" onClick={handleAdd}>
-          Add Item
-        </button>
+        <br />
+        <button type="submit">Add Item</button>
       </div>
-    </div>
+    </form>
   );
 }
