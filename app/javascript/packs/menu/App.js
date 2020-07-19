@@ -98,8 +98,8 @@ export default function App() {
 
   const fetchMenu = () => {
     let params = { uid };
-    const id = _.get(location.pathname.match(/menu\/(.*)/), 1);
-    const menuPath = id ? `/menu/${id}.json` : "/menu.json";
+    const id = _.get(location.pathname.match(/menus\/(.*)/), 1);
+    const menuPath = id ? `/menus/${id}.json` : "/menu.json";
     axios
       .get(menuPath, { params })
       .then(({ data: newData }) => {
