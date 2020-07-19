@@ -1,25 +1,32 @@
 #
 # week 1
 #
-w1_classic:
+w1_classic: &default
   menu: week1
   item: classic
+  subscriber: true
+  marketplace: true
+  day1: true
+  day2: true
 
 w1_pumpkin:
-  menu: week1
+  <<: *default
   item: pumpkin
 
 #
 # week 2
 #
 w2_classic:
+  <<: *default
   menu: week2
   item: classic
 
 w2_rye:
+  <<: *default
   menu: week2
   item: rye
 
 w2_donut:
+  <<: *default
   menu: week2
   item: donuts

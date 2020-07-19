@@ -6,13 +6,12 @@ export default class Item extends React.Component {
     this.props.onRemove(this.props.id);
   }
   render() {
-    const { id, name, subscriberOnly, marketplaceOnly, day1, day2 } =
-      this.props || {};
+    const { id, name, subscriber, marketplace, day1, day2 } = this.props || {};
     return (
       <tr>
         <td>{name}</td>
-        <td>{marketplaceOnly ? "yes" : ""}</td>
-        <td>{subscriberOnly ? "yes" : ""}</td>
+        <td>{marketplace ? "" : "no"}</td>
+        <td>{subscriber ? "" : "no"}</td>
         <td>{day1 ? "" : "no"}</td>
         <td>{day2 ? "" : "no"}</td>
         <td>

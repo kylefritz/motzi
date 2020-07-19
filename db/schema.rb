@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_19_174423) do
+ActiveRecord::Schema.define(version: 2020_07_19_185355) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -190,10 +190,10 @@ ActiveRecord::Schema.define(version: 2020_07_19_174423) do
     t.bigint "item_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.boolean "subscriber_only", default: false
     t.boolean "day1", default: true
     t.boolean "day2", default: true
-    t.boolean "marketplace_only", default: false
+    t.boolean "subscriber", default: true
+    t.boolean "marketplace", default: true
     t.index ["item_id"], name: "index_menu_items_on_item_id"
     t.index ["menu_id"], name: "index_menu_items_on_menu_id"
   end

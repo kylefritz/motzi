@@ -38,8 +38,8 @@
               "name",
               "description",
               "price",
-              "subscriberOnly",
-              "marketplaceOnly",
+              "subscriber",
+              "marketplace",
               "day1",
               "day2"
             ],
@@ -48,8 +48,8 @@
               "name": { "type": "string" },
               "description": { "type": "string" },
               "price": { "type": "number" },
-              "subscriberOnly": { "type": "boolean" },
-              "marketplaceOnly": { "type": "boolean" },
+              "subscriber": { "type": "boolean" },
+              "marketplace": { "type": "boolean" },
               "day1": { "type": "boolean" },
               "day2": { "type": "boolean" },
               "image": {

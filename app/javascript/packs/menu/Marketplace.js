@@ -59,11 +59,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
       <BakersNote note={menuNote} />
 
       <h5>Menu</h5>
-      <Items
-        items={items}
-        onAddToCart={handleAddToCart}
-        marketplaceView={true}
-      />
+      <Items marketplace items={items} onAddToCart={handleAddToCart} />
       <PayItForward {...menu.payItForward} onAddToCart={handleAddToCart} />
 
       <h5>Comments & Special Requests</h5>

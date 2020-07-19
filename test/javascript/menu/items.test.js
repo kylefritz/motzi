@@ -9,7 +9,7 @@ import Items from "menu/Items";
 test("marketplace render menu", () => {
   const { items } = munge(orderData.menu);
 
-  const marketplace = shallow(<Items items={items} marketplaceView={true} />);
+  const marketplace = shallow(<Items marketplace items={items} />);
   expect(marketplace.find("Item").length).toBe(4);
 
   const subscriberMenu = shallow(<Items items={items} />);
