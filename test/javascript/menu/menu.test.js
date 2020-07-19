@@ -6,7 +6,7 @@ import { renderMenu } from "./helpers";
 test("menu for uid-user, before order", () => {
   const menu = renderMenu({ menu: orderData.menu, user: orderData.user });
 
-  expect(menu.items().length).toBe(2);
+  expect(menu.items().length).toBe(3);
   expect(menu.submitOrderBtn().text()).toBe("Submit Order");
 });
 
@@ -50,7 +50,7 @@ test("menu for uid-user, add item to cart", () => {
 
 test("menu for uid-user, after order", () => {
   const menu = renderMenu(orderData);
-  expect(menu.items().length).toBe(2);
+  expect(menu.items().length).toBe(3);
   expect(menu.submitOrderBtn().text()).toBe("Update Order");
 });
 

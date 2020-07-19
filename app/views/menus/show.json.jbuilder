@@ -7,7 +7,7 @@ json.menu do
   menu_items.push([MenuItem.new, Item.pay_it_forward])
 
   json.items menu_items.map do |menu_item, item|
-    json.extract! menu_item, :subscriber_only, :day1, :day2
+    json.extract! menu_item, :subscriber_only, :marketplace_only, :day1, :day2
     json.extract! item, :id, :name, :description, :price
     json.image item.image_path
   end

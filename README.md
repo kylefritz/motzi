@@ -52,7 +52,13 @@ $ ./bin/webpack-dev-server
 ### Running js tests
 
 ```
-npx jest
+$ npx jest -u
+```
+
+Debug js jest tests
+
+```
+$ node --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.js
 ```
 
 ### Checking emails

@@ -3,6 +3,7 @@ import _ from "lodash";
 
 export default function Adder({ items, not, onAdd }) {
   const [subscriberOnly, setSubscriberOnly] = useState(false);
+  const [marketplaceOnly, setMarketplaceOnly] = useState(false);
   const [day1, setDay1] = useState(true);
   const [day2, setDay2] = useState(true);
 
@@ -13,10 +14,11 @@ export default function Adder({ items, not, onAdd }) {
       alert("Select an item");
       return;
     }
-    onAdd({ itemId, subscriberOnly, day1, day2 });
+    onAdd({ itemId, subscriberOnly, marketplaceOnly, day1, day2 });
 
     // reset form
     setSubscriberOnly(false);
+    setMarketplaceOnly(false);
     setDay1(true);
     setDay2(true);
   };
@@ -44,6 +46,15 @@ export default function Adder({ items, not, onAdd }) {
             type="checkbox"
             checked={subscriberOnly}
             onChange={(e) => setSubscriberOnly(e.target.checked)}
+          />
+        </label>
+        <label>
+          Marketplace only?
+          <input
+            style={{ marginLeft: 3 }}
+            type="checkbox"
+            checked={marketplaceOnly}
+            onChange={(e) => setMarketplaceOnly(e.target.checked)}
           />
         </label>
         <label style={{ marginLeft: 10 }}>

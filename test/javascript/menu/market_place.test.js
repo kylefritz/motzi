@@ -7,7 +7,7 @@ import { renderMenu } from "./market_place_helpers";
 test("marketplace render menu", () => {
   const menu = renderMenu({ menu: orderData.menu });
 
-  expect(menu.items().length).toBe(2);
+  expect(menu.items().length).toBe(4);
   expect(menu.submitOrderBtn().text()).toBe("Select an item");
 });
 

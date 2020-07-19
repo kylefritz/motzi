@@ -62,7 +62,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
       <Items
         items={items}
         onAddToCart={handleAddToCart}
-        subscriberOnly={false}
+        marketplaceView={true}
       />
       <PayItForward {...menu.payItForward} onAddToCart={handleAddToCart} />
 

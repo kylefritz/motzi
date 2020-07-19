@@ -122,10 +122,13 @@ function Item(props) {
 export default function Items({
   items,
   onAddToCart: handleAddToCart,
-  subscriberOnly = true,
+  marketplaceView = false,
 }) {
-  if (!subscriberOnly) {
+  if (marketplaceView) {
     items = items.filter(({ subscriberOnly }) => !subscriberOnly);
+  } else {
+    // subscriber view
+    items = items.filter(({ marketplaceOnly }) => !marketplaceOnly);
   }
   return (
     <div className="row mt-2">
