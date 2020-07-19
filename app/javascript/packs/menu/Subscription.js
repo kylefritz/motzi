@@ -48,7 +48,7 @@ export default function Subscription({ user, onRefreshUser, deadlineDay }) {
         </div>
         <div className="col">
           <h5 className="text-center">Credits</h5>
-          <p className="text-center">
+          <div className="text-center">
             <div className="subscriber-info">{user.credits}</div>
             {onRefreshUser && (
               <button
@@ -60,7 +60,7 @@ export default function Subscription({ user, onRefreshUser, deadlineDay }) {
                 Buy more
               </button>
             )}
-          </p>
+          </div>
         </div>
       </div>
       {showBuy && <BuyCredits onComplete={onRefreshUser} user={user} />}

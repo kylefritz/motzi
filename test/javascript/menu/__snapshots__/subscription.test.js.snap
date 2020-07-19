@@ -73,7 +73,7 @@ exports[`snapshot 1`] = `
       >
         Credits
       </h5>
-      <p
+      <div
         className="text-center"
       >
         <div
@@ -81,7 +81,7 @@ exports[`snapshot 1`] = `
         >
           6
         </div>
-      </p>
+      </div>
     </div>
   </div>
 </Fragment>
