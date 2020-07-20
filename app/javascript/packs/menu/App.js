@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
 import _ from "lodash";
 
-import { UserContext } from "./Contexts";
+import { DayContext, UserContext } from "./Contexts";
 import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
@@ -137,21 +137,24 @@ export default function App() {
         Sentry.captureException(err);
       });
   };
-  const { user } = data;
+  const { user, menu } = data;
+  const { day1, day2 } = menu;
 
   return (
     <UserContext.Provider value={user}>
-      <Layout
-        {...{
-          ...data,
-          error,
-          fetchMenu,
-          handleCreateOrder,
-          ignoredeadline,
-          isEditingOrder,
-          setIsEditingOrder,
-        }}
-      />
+      <DayContext.Provider value={{ day1, day2 }}>
+        <Layout
+          {...{
+            ...data,
+            error,
+            fetchMenu,
+            handleCreateOrder,
+            ignoredeadline,
+            isEditingOrder,
+            setIsEditingOrder,
+          }}
+        />
+      </DayContext.Provider>
     </UserContext.Provider>
   );
 }

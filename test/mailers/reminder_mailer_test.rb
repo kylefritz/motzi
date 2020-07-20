@@ -1,6 +1,7 @@
 require 'test_helper'
 
 class ReminderMailerTest < ActionMailer::TestCase
+  include DeadlineHelper
   def setup
     @user = users(:ljf)
     @menu = menus(:week2)
@@ -41,7 +42,7 @@ class ReminderMailerTest < ActionMailer::TestCase
     assert_equal [@user.email], @email.to
     assert_includes @email.subject, 'Make your selection soon'
     assert_in_email @menu.name
-    assert_in_email "Please order by midnight on #{Setting.deadline_day}"
+    assert_in_email day_to_order_by_text
   end
   private
 

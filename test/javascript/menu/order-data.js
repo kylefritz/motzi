@@ -5,9 +5,11 @@ export default {
     subscriberNote: "subscribers note copy",
     menuNote: "menu note copy",
     createdAt: "2019-11-02T14:01:23.820-04:00",
-    deadline: "2019-11-03T23:59:59.000-04:00",
+    day1Deadline: "2019-11-03T23:59:59.000-04:00",
+    day2Deadline: "2019-11-05T23:59:59.000-04:00",
+    day1: "Tuesday",
+    day2: "Thursday",
     isCurrent: true,
-    deadlineDay: "Sunday",
     items: [
       {
         id: 3,

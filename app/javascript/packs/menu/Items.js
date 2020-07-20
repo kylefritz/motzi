@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 
 import Price from "./Price";
 import Quantity from "./Quantity";
+import { DayContext } from "./Contexts";
 
 function shortDay(day) {
   if (day == "Thursday") {
@@ -10,13 +11,27 @@ function shortDay(day) {
   return "Sat";
 }
 
-function DayButtons({ description, onSetDay, showButtons, day1, day2 }) {
-  const days = [];
-  if (day1) {
-    days.push(["Thursday", "secondary"]);
+function DayButtons({
+  description,
+  onSetDay,
+  showButtons,
+  day1: availableDay1,
+  day2: availableDay2,
+}) {
+  let day1 = "Thursday";
+  let day2 = "Saturday";
+  const fromContext = useContext(DayContext);
+  if (fromContext !== undefined) {
+    day1 = fromContext.day1;
+    day2 = fromContext.day2;
   }
-  if (day2) {
-    days.push(["Saturday", "primary"]);
+
+  const days = [];
+  if (availableDay1) {
+    days.push([day1, "secondary"]);
+  }
+  if (availableDay2) {
+    days.push([day2, "primary"]);
   }
   return (
     <>
