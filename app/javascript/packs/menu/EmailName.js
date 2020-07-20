@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function EmailName({ onChange }) {
+export default function EmailName({ onChange, disabled }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -18,24 +18,13 @@ export default function EmailName({ onChange }) {
       <h5>Your info</h5>
       <div className="form-group">
         <label>
-          Email
-          <input
-            required
-            type="email"
-            value={email}
-            onChange={handle(setEmail)}
-            className="form-control"
-          />
-        </label>
-      </div>
-      <div className="form-group">
-        <label>
           First Name
           <input
             required
             value={firstName}
             onChange={handle(setFirstName)}
             className="form-control"
+            disabled={disabled}
           />
         </label>
       </div>
@@ -47,6 +36,20 @@ export default function EmailName({ onChange }) {
             value={lastName}
             onChange={handle(setLastName)}
             className="form-control"
+            disabled={disabled}
+          />
+        </label>
+      </div>
+      <div className="form-group">
+        <label>
+          Email
+          <input
+            required
+            type="email"
+            value={email}
+            onChange={handle(setEmail)}
+            className="form-control"
+            disabled={disabled}
           />
         </label>
       </div>

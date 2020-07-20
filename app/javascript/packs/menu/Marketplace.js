@@ -10,6 +10,7 @@ import PayItForward from "./PayItForward";
 import Payment from "../buy/Payment";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
 import useCart from "./useCart";
+import { getDayContext } from "./Contexts";
 
 export default function Marketplace({ menu, onCreateOrder }) {
   const { cart, addToCart, rmCartItem } = useCart();
@@ -52,6 +53,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
   };
 
   const { menuNote, items } = menu;
+  const { pastDay2Deadline: menuClosed } = getDayContext();
   return (
     <>
       <Title menu={menu} />
@@ -59,8 +61,17 @@ export default function Marketplace({ menu, onCreateOrder }) {
       <BakersNote note={menuNote} />
 
       <h5>Menu</h5>
-      <Items marketplace items={items} onAddToCart={handleAddToCart} />
-      <PayItForward {...menu.payItForward} onAddToCart={handleAddToCart} />
+      <Items
+        marketplace
+        items={items}
+        onAddToCart={handleAddToCart}
+        disabled={menuClosed}
+      />
+      <PayItForward
+        {...menu.payItForward}
+        onAddToCart={handleAddToCart}
+        disabled={menuClosed}
+      />
 
       <h5>Comments & Special Requests</h5>
       <div className="row mt-2 mb-3">
@@ -70,6 +81,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
             defaultValue={comments}
             onChange={(e) => setComments(e.target.value)}
             className="form-control"
+            disabled={menuClosed}
           />
         </div>
       </div>
@@ -77,14 +89,19 @@ export default function Marketplace({ menu, onCreateOrder }) {
       <Cart {...{ cart, menu, rmCartItem: handleRemoveFromCart }} />
 
       <div className="mt-3">
-        <EmailName onChange={setEmailName} />
+        <EmailName onChange={setEmailName} disabled={menuClosed} />
       </div>
-      <PayWhatYouCan price={price} onPricedChanged={setPrice} />
+      <PayWhatYouCan
+        price={price}
+        onPricedChanged={setPrice}
+        disabled={menuClosed}
+      />
       <Payment
         price={price}
         stripeApiKey={gon.stripeApiKey}
         onCardToken={handleCardToken}
         submitting={submitting}
+        disabled={menuClosed}
       />
     </>
   );

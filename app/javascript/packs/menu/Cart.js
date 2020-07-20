@@ -42,7 +42,7 @@ function DaysCart({ menu, cart, rmCartItem }) {
 }
 
 function Days({ menu, cart, rmCartItem, skip }) {
-  const { day1, pastDay1Deadline, day2, pastDay2Deadline } = getDayContext();
+  const { day1, day1Closed, day2, day2Closed } = getDayContext();
 
   const thurs = cart.filter(({ day }) => day === day1);
   const sat = cart.filter(({ day }) => day === day2);
@@ -66,7 +66,7 @@ function Days({ menu, cart, rmCartItem, skip }) {
         <DaysCart
           {...{
             menu,
-            rmCartItem: !pastDay1Deadline && rmCartItem,
+            rmCartItem: !day1Closed && rmCartItem,
             cart: thurs,
           }}
         />
@@ -81,7 +81,7 @@ function Days({ menu, cart, rmCartItem, skip }) {
         <DaysCart
           {...{
             menu,
-            rmCartItem: !pastDay2Deadline && rmCartItem,
+            rmCartItem: !day2Closed && rmCartItem,
             cart: sat,
           }}
         />
@@ -96,7 +96,7 @@ function Days({ menu, cart, rmCartItem, skip }) {
         <DaysCart
           {...{
             menu,
-            rmCartItem: !pastDay2Deadline && rmCartItem,
+            rmCartItem: !day2Closed && rmCartItem,
             cart: payItForward,
           }}
         />

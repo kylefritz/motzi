@@ -20,18 +20,18 @@ function DayButtons({
 }) {
   const {
     day1,
-    pastDay1Deadline,
+    day1Closed,
     day1DeadlineDay,
     day2,
-    pastDay2Deadline,
+    day2Closed,
     day2DeadlineDay,
   } = getDayContext();
   const days = [];
   if (availableDay1) {
-    days.push([day1, "secondary", pastDay1Deadline, day1DeadlineDay]);
+    days.push([day1, "secondary", day1Closed, day1DeadlineDay]);
   }
   if (availableDay2) {
-    days.push([day2, "primary", pastDay2Deadline, day2DeadlineDay]);
+    days.push([day2, "primary", day2Closed, day2DeadlineDay]);
   }
   return (
     <>

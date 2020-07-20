@@ -44,7 +44,7 @@ export default function Menu({
   };
 
   const { subscriberNote, items, isCurrent } = menu;
-  const { pastDay2Deadline: menuClosed } = getDayContext();
+  const { day2Closed: menuClosed } = getDayContext();
   if (user && user.credits < 1) {
     // time to buy credits!
     return (

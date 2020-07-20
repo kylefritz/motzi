@@ -26,7 +26,7 @@ test("marketplace, add item to cart", () => {
   expect(menu.cartTotal()).toContain("$3.00");
 
   // fill out customer info
-  menu.fillUser("k@k.com", "k", "f");
+  menu.fillUser("kyle", "fritz", "kf@woo.com");
 
   // set payWhatYouCan to $0
   const payWhatYouCan = menu.wrapper.find("PayWhatYouCan").find("input");

@@ -26,7 +26,6 @@ function Layout({
   error,
   fetchMenu,
   handleCreateOrder,
-  ignoredeadline,
   isEditingOrder,
   menu,
   order,
@@ -47,13 +46,11 @@ function Layout({
   }
 
   menu = munge(menu);
-  const { pastDay2Deadline } = getDayContext();
+  const { day2Closed } = getDayContext();
 
   if (order && !isEditingOrder) {
     const handleEditOrder =
-      menu.isCurrent && !pastDay2Deadline
-        ? () => setIsEditingOrder(true)
-        : null;
+      menu.isCurrent && !day2Closed ? () => setIsEditingOrder(true) : null;
     return (
       <Order
         {...{
@@ -77,7 +74,6 @@ function Layout({
         user,
         order,
         menu,
-        ignoredeadline,
         onCreateOrder: handleCreateOrder,
         onRefreshUser: fetchMenu,
       }}
@@ -89,7 +85,9 @@ export default function App() {
   const [data, setData] = useState({}); // expect: menu, user, order
   const [error, setError] = useState();
   const [isEditingOrder, setIsEditingOrder] = useState(false);
-  const { uid, ignoredeadline } = queryString.parse(location.search);
+  const { uid, ignoredeadline: ignoreDeadline } = queryString.parse(
+    location.search
+  );
 
   const fetchMenu = () => {
     let params = { uid };
@@ -152,6 +150,7 @@ export default function App() {
           day2,
           day2Deadline,
           day2DeadlineDay,
+          ignoreDeadline,
         }}
       >
         <Layout
@@ -160,7 +159,6 @@ export default function App() {
             error,
             fetchMenu,
             handleCreateOrder,
-            ignoredeadline,
             isEditingOrder,
             setIsEditingOrder,
           }}
