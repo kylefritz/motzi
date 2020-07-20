@@ -17,7 +17,7 @@ export const humanizeBreadsPerWeek = (perWeek) => {
   return `${perWeek} breads per week`;
 };
 
-export default function Subscription({ user, onRefreshUser, deadlineDay }) {
+export default function Subscription({ user, onRefreshUser }) {
   const [showBuy, setShowBuy] = useState(false);
 
   return (
@@ -36,32 +36,26 @@ export default function Subscription({ user, onRefreshUser, deadlineDay }) {
             </div>
           </div>
         </div>
-        <div className="col">
-          <h5 className="text-center">Frequency</h5>
-          <p className="text-center subscriber-info" title={user.breadsPerWeek}>
-            {humanizeBreadsPerWeek(user.breadsPerWeek)}
-          </p>
-        </div>
-        <div className="col">
-          <h5 className="text-center">Order By</h5>
-          <p className="text-center subscriber-info">{deadlineDay} Midnight</p>
-        </div>
-        <div className="col">
-          <h5 className="text-center">Credits</h5>
-          <div className="text-center">
-            <div className="subscriber-info">{user.credits}</div>
-            {onRefreshUser && (
-              <button
-                type="button"
-                className="btn btn-sm btn-link text-nowrap"
-                style={{ fontSize: "80%" }}
-                onClick={() => setShowBuy(!showBuy)}
-              >
-                Buy more
-              </button>
-            )}
-          </div>
-        </div>
+        {user.sendWeeklyEmail && (
+          <>
+            <div className="col">
+              <h5 className="text-center">Credits</h5>
+              <div className="text-center">
+                <div className="subscriber-info">{user.credits}</div>
+                {onRefreshUser && (
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-link text-nowrap"
+                    style={{ fontSize: "80%" }}
+                    onClick={() => setShowBuy(!showBuy)}
+                  >
+                    Buy more
+                  </button>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </div>
       {showBuy && <BuyCredits onComplete={onRefreshUser} user={user} />}
     </>

@@ -71,7 +71,7 @@ class User < ApplicationRecord
     if menu_orders.size > 1
       logger.warn "user=#{self.id} has more than 1 order for menu #{menu_id}"
     end
-    menu_orders.first
+    menu_orders.last
   end
 
   #

@@ -68,7 +68,15 @@
     "user": {
       "type": ["object", "null"],
       "title": "user",
-      "required": ["id", "email", "name", "hashid", "credits", "breadsPerWeek"],
+      "required": [
+        "id",
+        "email",
+        "name",
+        "hashid",
+        "credits",
+        "breadsPerWeek",
+        "sendWeeklyEmail"
+      ],
       "properties": {
         "id": { "type": "integer" },
         "email": { "type": "string" },
@@ -81,7 +89,8 @@
         "breadsPerWeek": {
           "type": "number",
           "default": 1.0
-        }
+        },
+        "sendWeeklyEmail": { "type": "boolean" }
       }
     },
     "order": {

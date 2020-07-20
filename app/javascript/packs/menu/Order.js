@@ -12,7 +12,7 @@ export default function Order({
   onRefreshUser,
   onEditOrder,
 }) {
-  const { name, subscriberNote, deadlineDay } = menu;
+  const { name, deadlineDay } = menu;
   const {
     items: cart,
     skip,
@@ -21,10 +21,12 @@ export default function Order({
     stripeChargeAmount,
   } = order;
 
-  const isSubscriptionOrder = !stripeReceiptUrl;
+  const isSubscriptionOrder = _.get(user, "sendWeeklyEmail");
   return (
     <>
-      <h2 className="mt-5 mb-4">We got your order!</h2>
+      <h2 id="menu-name">{name}</h2>
+
+      <h3 className="mt-5 mb-4">We've got your order!</h3>
 
       <Cart {...{ cart, menu, skip, stripeChargeAmount }} />
       {stripeReceiptUrl && (
@@ -52,13 +54,10 @@ export default function Order({
       )}
 
       {isSubscriptionOrder && (
-        <div className="mt-3">
+        <div className="mt-5">
           <Subscription {...{ user, onRefreshUser, deadlineDay }} />
         </div>
       )}
-
-      <h2 id="menu-name">{name}</h2>
-      <BakersNote note={subscriberNote} />
     </>
   );
 }

@@ -3,10 +3,15 @@
 exports[`Order snapshot 1`] = `
 <Fragment>
   <h2
+    id="menu-name"
+  >
+    week 5
+  </h2>
+  <h3
     className="mt-5 mb-4"
   >
-    We got your order!
-  </h2>
+    We've got your order!
+  </h3>
   <CartWrapper
     cart={
       Array [
@@ -93,8 +98,9 @@ exports[`Order snapshot 1`] = `
             "subscriber": true,
           },
         ],
+        "menuNote": "menu note copy",
         "name": "week 5",
-        "subscriberNote": "Orci varius",
+        "subscriberNote": "subscribers note copy",
       }
     }
     skip={false}
@@ -111,30 +117,5 @@ exports[`Order snapshot 1`] = `
       </em>
     </p>
   </div>
-  <div
-    className="mt-3"
-  >
-    <Subscription
-      deadlineDay="Sunday"
-      user={
-        Object {
-          "breadsPerWeek": 1,
-          "credits": 9,
-          "email": "kyle.p.fritz@gmail.com",
-          "hashid": "Dot9gKn9w",
-          "id": 584273342,
-          "name": "Kyle Fritz",
-        }
-      }
-    />
-  </div>
-  <h2
-    id="menu-name"
-  >
-    week 5
-  </h2>
-  <BakersNote
-    note="Orci varius"
-  />
 </Fragment>
 `;

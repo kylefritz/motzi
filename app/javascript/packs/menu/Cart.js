@@ -15,27 +15,27 @@ function DaysCart({ menu, cart, rmCartItem }) {
 
   return (
     <>
-      <ul className="list-unstyled">
-        {cart.map(({ itemId, quantity, day }, index) => (
-          <li
-            key={`${index}:${itemId}:${quantity}:${day}`}
-            className="mb-2 ml-4"
-          >
+      {cart.map(({ itemId, quantity, day }, index) => (
+        <div className="row mb-3" key={`${index}:${itemId}:${quantity}:${day}`}>
+          <div className="col-1" />
+          <div className="col">
             {quantity > 1 && <strong className="mr-2">{quantity}x</strong>}
             {_.get(menuItemsById[itemId], "name", `Item ${itemId}`)}
-            {rmCartItem && (
+          </div>
+          {rmCartItem && (
+            <div className="col">
               <button
                 type="button"
-                className="mr-5 close"
+                className="close"
                 aria-label="Close"
                 onClick={() => rmCartItem(itemId, quantity, day)}
               >
                 <span aria-hidden="true">&times;</span>
               </button>
-            )}
-          </li>
-        ))}
-      </ul>
+            </div>
+          )}
+        </div>
+      ))}
     </>
   );
 }
@@ -106,8 +106,11 @@ function Total({ cart, menu, stripeChargeAmount }) {
   return (
     <div>
       <h6>Total</h6>
-      <div className="ml-4">
-        <Price {...{ price, credits, stripeChargeAmount }} />
+      <div className="row">
+        <div className="col-1" />
+        <div className="col">
+          <Price {...{ price, credits, stripeChargeAmount }} />
+        </div>
       </div>
     </div>
   );

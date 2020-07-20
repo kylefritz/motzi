@@ -54,7 +54,8 @@ function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day }) {
       <Quantity defaultQuantity={quantity} onChange={onQuantity} />
       <div className="mt-2">
         <button onClick={onAdd} className="btn btn-primary btn-sm mr-2">
-          Add to cart
+          <span className="d-block d-md-none">Add</span>
+          <span className="d-none d-md-block">Add to cart</span>
         </button>
         <button onClick={onCancel} className="btn btn-secondary btn-sm">
           Cancel

@@ -124,7 +124,6 @@ export default function Menu({
           </button>
         </div>
       </div>
-      <Subscription {...{ user, onRefreshUser, deadlineDay }} />
     </>
   );
 }

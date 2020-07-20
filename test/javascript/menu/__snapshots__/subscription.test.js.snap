@@ -41,36 +41,6 @@ exports[`snapshot 1`] = `
       <h5
         className="text-center"
       >
-        Frequency
-      </h5>
-      <p
-        className="text-center subscriber-info"
-        title={1}
-      >
-        Every week
-      </p>
-    </div>
-    <div
-      className="col"
-    >
-      <h5
-        className="text-center"
-      >
-        Order By
-      </h5>
-      <p
-        className="text-center subscriber-info"
-      >
-        Sunday
-         Midnight
-      </p>
-    </div>
-    <div
-      className="col"
-    >
-      <h5
-        className="text-center"
-      >
         Credits
       </h5>
       <div

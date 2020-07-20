@@ -90,13 +90,14 @@ exports[`Preview snapshot 1`] = `
             "subscriber": true,
           },
         ],
+        "menuNote": "menu note copy",
         "name": "week 5",
-        "subscriberNote": "Orci varius",
+        "subscriberNote": "subscribers note copy",
       }
     }
   />
   <BakersNote
-    note="Orci varius"
+    note="menu note copy"
   />
   <h5>
     Items
@@ -166,6 +167,7 @@ exports[`Preview snapshot 1`] = `
         },
       ]
     }
+    marketplace={true}
   />
 </Fragment>
 `;

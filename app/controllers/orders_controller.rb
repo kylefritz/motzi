@@ -29,56 +29,55 @@ class OrdersController < ApplicationController
       return render_ordering_closed
     end
 
-    user = Order.transaction do
-      current_user_or_create_user.tap do |current_user|
-        order_params = params.permit(:comments, :skip).merge(menu: menu, user: current_user)
+    current_user, order = Order.transaction do
+      current_user = current_user_or_create_user
+      order_params = params.permit(:comments, :skip).merge(menu: menu, user: current_user)
 
-        Order.create!(order_params).tap do |order|
-          params.fetch(:cart).each do |cart_item_params|
-            day1_pickup = !(Setting.pickup_day2.casecmp?(cart_item_params[:day])) # default to day 1
-            order.order_items.create!(cart_item_params.permit(:item_id, :quantity).merge(day1_pickup: day1_pickup))
-          end
-
-          # figure out if we need to charge this person or if we're using credits
-          if params[:price].present?
-
-            # we let the customer set the price so ok to trust customer input
-            price = params[:price].to_f.clamp(0, 250)
-            price_cents = (price * 100).to_i
-
-            # make stripe change
-            if price > 0
-              if params[:token].blank?
-                raise OrderError.new("Stripe credit card not submitted")
-              end
-              charge = Stripe::Charge.create({
-                amount: price_cents,
-                currency: 'usd',
-                source: params[:token],
-                metadata: {
-                  user_id: current_user.id,
-                  order_id: order.id,
-                },
-                description: "Order ##{order.id} - #{order.item_list}",
-                receipt_email: current_user.email
-              })
-            end
-            order.update!(
-              stripe_charge_id: charge.try(:id),
-              stripe_receipt_url: charge.try(:receipt_url),
-              stripe_charge_amount: price,
-            )
-          end
-
-          # send confirmation email
-          OrderMailer.with(order: order).confirmation_email.deliver_later
-
-          ahoy.track "order_created"
-        end
+      order = Order.create!(order_params)
+      params.fetch(:cart).each do |cart_item_params|
+        day1_pickup = !(Setting.pickup_day2.casecmp?(cart_item_params[:day])) # default to day 1
+        order.order_items.create!(cart_item_params.permit(:item_id, :quantity).merge(day1_pickup: day1_pickup))
       end
+
+      # figure out if we need to charge this person or if we're using credits
+      if params[:price].present?
+
+        # we let the customer set the price so ok to trust customer input
+        price = params[:price].to_f.clamp(0, 250)
+        price_cents = (price * 100).to_i
+
+        # make stripe change
+        if price > 0
+          if params[:token].blank?
+            raise OrderError.new("Stripe credit card not submitted")
+          end
+          charge = Stripe::Charge.create({
+            amount: price_cents,
+            currency: 'usd',
+            source: params[:token],
+            metadata: {
+              user_id: current_user.id,
+              order_id: order.id,
+            },
+            description: "Order ##{order.id} - #{order.item_list}",
+            receipt_email: current_user.email
+          })
+        end
+        order.update!(
+          stripe_charge_id: charge.try(:id),
+          stripe_receipt_url: charge.try(:receipt_url),
+          stripe_charge_amount: price,
+        )
+      end
+
+      ahoy.track "order_created"
+      [current_user, order]
     end
 
-    render_current_order(menu.id, user)
+    # send confirmation email
+    OrderMailer.with(order: order).confirmation_email.deliver_later
+
+    render_current_order(menu.id, current_user)
 
     rescue OrderError => e
       render_validation_failed(e.message)

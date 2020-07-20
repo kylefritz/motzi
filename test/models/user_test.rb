@@ -81,10 +81,10 @@ class UserTest < ActiveSupport::TestCase
 
     assert_nil users(:maya).order_for_menu(menu), "owner doesn't have order"
 
-    menu.orders.create!(user: users(:kyle))
+    recent_order = menu.orders.create!(user: users(:kyle))
     assert_equal 2, users(:kyle).orders.where(menu: menu).count
     refute_nil users(:kyle).order_for_menu(menu), "if two, finds one"
-    assert_equal orders(:kyle_week2).id, users(:kyle).order_for_menu(menu).id
+    assert_equal recent_order.id, users(:kyle).order_for_menu(menu).id
   end
 
   test "email normalized" do
