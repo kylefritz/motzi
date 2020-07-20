@@ -1,7 +1,7 @@
 require("../configure_enzyme");
 
 import orderData from "./order-data";
-import { renderMenu } from "./helpers";
+import { renderMenu } from "./menu_helpers";
 
 test("menu for uid-user, before order", () => {
   const menu = renderMenu({ menu: orderData.menu, user: orderData.user });

@@ -32,6 +32,15 @@ class Setting < RailsSettings::Base
   def self.pickup_day2_deadline_wday
     self.pickup_day2_wday - 2
   end
+  def self.pickup_day1_deadline_day
+    day_from_wday(self.pickup_day1_deadline_wday)
+  end
+  def self.pickup_day2_deadline_day
+    day_from_wday(self.pickup_day2_deadline_wday)
+  end
+  private_class_method def self.day_from_wday(wday)
+    Date::DAYS_INTO_WEEK.invert[wday].to_s.capitalize
+  end
 
   def self.pickup_instructions_html
     Menu::MARKDOWN.render(Setting.pickup_instructions || '').html_safe

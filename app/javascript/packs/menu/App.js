@@ -4,12 +4,10 @@ import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
 import _ from "lodash";
 
-import { DayContext, UserContext } from "./Contexts";
+import { getDayContext, DayContext, UserContext } from "./Contexts";
 import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
-import Preview from "./Preview";
-import { pastDeadline } from "./pastDeadline";
 
 export function munge(menu) {
   const { items } = menu;
@@ -49,13 +47,13 @@ function Layout({
   }
 
   menu = munge(menu);
-
-  const deadlineExceeded = pastDeadline(menu.deadline) && !ignoredeadline;
+  const { pastDay2Deadline } = getDayContext();
 
   if (order && !isEditingOrder) {
-    const handleEditOrder = deadlineExceeded
-      ? null
-      : () => setIsEditingOrder(true);
+    const handleEditOrder =
+      menu.isCurrent && !pastDay2Deadline
+        ? () => setIsEditingOrder(true)
+        : null;
     return (
       <Order
         {...{
@@ -69,10 +67,6 @@ function Layout({
     );
   }
 
-  if (deadlineExceeded || !menu.isCurrent) {
-    return <Preview menu={menu} />;
-  }
-
   if (!user) {
     return <Marketplace {...{ menu, onCreateOrder: handleCreateOrder }} />;
   }
@@ -83,6 +77,7 @@ function Layout({
         user,
         order,
         menu,
+        ignoredeadline,
         onCreateOrder: handleCreateOrder,
         onRefreshUser: fetchMenu,
       }}
@@ -138,11 +133,27 @@ export default function App() {
       });
   };
   const { user, menu } = data;
-  const { day1, day2 } = menu;
+  const {
+    day1,
+    day1Deadline,
+    day1DeadlineDay,
+    day2,
+    day2Deadline,
+    day2DeadlineDay,
+  } = menu || {};
 
   return (
     <UserContext.Provider value={user}>
-      <DayContext.Provider value={{ day1, day2 }}>
+      <DayContext.Provider
+        value={{
+          day1,
+          day1Deadline,
+          day1DeadlineDay,
+          day2,
+          day2Deadline,
+          day2DeadlineDay,
+        }}
+      >
         <Layout
           {...{
             ...data,

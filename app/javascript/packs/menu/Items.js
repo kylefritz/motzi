@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 
 import Price from "./Price";
 import Quantity from "./Quantity";
-import { DayContext } from "./Contexts";
+import { getDayContext } from "./Contexts";
 
 function shortDay(day) {
   if (day == "Thursday") {
@@ -18,31 +18,37 @@ function DayButtons({
   day1: availableDay1,
   day2: availableDay2,
 }) {
-  let day1 = "Thursday";
-  let day2 = "Saturday";
-  const fromContext = useContext(DayContext);
-  if (fromContext !== undefined) {
-    day1 = fromContext.day1;
-    day2 = fromContext.day2;
-  }
-
+  const {
+    day1,
+    pastDay1Deadline,
+    day1DeadlineDay,
+    day2,
+    pastDay2Deadline,
+    day2DeadlineDay,
+  } = getDayContext();
   const days = [];
   if (availableDay1) {
-    days.push([day1, "secondary"]);
+    days.push([day1, "secondary", pastDay1Deadline, day1DeadlineDay]);
   }
   if (availableDay2) {
-    days.push([day2, "primary"]);
+    days.push([day2, "primary", pastDay2Deadline, day2DeadlineDay]);
   }
   return (
     <>
       {showButtons && (
         <div className="my-2">
-          {days.map(([day, btn]) => (
+          {days.map(([day, btn, isPastDeadline, deadlineDay]) => (
             <button
               key={day}
               type="button"
               className={`btn btn-${btn} btn-sm mr-2`}
               onClick={() => onSetDay(day)}
+              disabled={isPastDeadline}
+              title={
+                isPastDeadline
+                  ? `Order by midnight ${deadlineDay} for ${day}.`
+                  : undefined
+              }
             >
               <span className="d-block d-md-none">{shortDay(day)}</span>
               <span className="d-none d-md-block">{day}</span>

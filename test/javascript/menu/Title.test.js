@@ -2,7 +2,7 @@ import React from "react";
 require("../configure_enzyme");
 import { shallow } from "enzyme";
 
-import Deadline from "menu/Deadline";
+import Title from "menu/Title";
 import orderData from "./order-data";
 
 //
@@ -30,13 +30,13 @@ test("__setPastDeadline back and forth in same test", () => {
 test("Before deadline snapshot", () => {
   __setPastDeadline(false);
 
-  const wrapper = shallow(<Deadline {...orderData} />);
+  const wrapper = shallow(<Title {...orderData} />);
   expect(wrapper).toMatchSnapshot();
 });
 
 test("After deadline snapshot", () => {
   __setPastDeadline(true);
 
-  const wrapper = shallow(<Deadline {...orderData} />);
+  const wrapper = shallow(<Title {...orderData} />);
   expect(wrapper).toMatchSnapshot();
 });

@@ -3,7 +3,7 @@ import _ from "lodash";
 
 import BakersNote from "./BakersNote";
 import Cart, { cartTotal } from "./Cart";
-import Deadline from "./Deadline";
+import Title from "./Title";
 import EmailName from "./EmailName";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
@@ -51,11 +51,11 @@ export default function Marketplace({ menu, onCreateOrder }) {
     resetPrice(nextCart);
   };
 
-  const { name, menuNote, items } = menu;
+  const { menuNote, items } = menu;
   return (
     <>
-      <h2>{name}</h2>
-      <Deadline menu={menu} />
+      <Title menu={menu} />
+
       <BakersNote note={menuNote} />
 
       <h5>Menu</h5>

@@ -3,6 +3,7 @@ import React from "react";
 export default function SkipThisWeek({
   onSkip,
   description = "I'd like to skip this week, please credit me for a future week (limit 3 per 6 month period).",
+  disabled,
 }) {
   return (
     <>
@@ -14,6 +15,7 @@ export default function SkipThisWeek({
               type="button"
               className="btn btn-sm btn-dark"
               onClick={onSkip}
+              disabled={disabled}
             >
               Skip Now
             </button>

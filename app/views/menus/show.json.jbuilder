@@ -13,6 +13,8 @@ json.menu do
 
   json.day1 Setting.pickup_day1
   json.day2 Setting.pickup_day2
+  json.day1_deadline_day Setting.pickup_day1_deadline_day
+  json.day2_deadline_day Setting.pickup_day2_deadline_day
 end
 
 json.user do
