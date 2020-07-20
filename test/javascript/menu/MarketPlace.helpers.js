@@ -3,7 +3,7 @@ import { mount } from "enzyme";
 
 import Marketplace from "menu/Marketplace";
 
-export function renderMenu({ menu }) {
+export default function renderMenu({ menu }) {
   window.gon = { stripeApiKey: "no-such-key" };
 
   // Mocking Stripe object

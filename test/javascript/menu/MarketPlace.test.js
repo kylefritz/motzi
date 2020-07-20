@@ -1,7 +1,7 @@
 require("../configure_enzyme");
 
 import mockMenuJson from "./mockMenuJson";
-import { renderMenu } from "./market_place_helpers";
+import renderMenu from "./MarketPlace.helpers";
 
 test("marketplace render menu", () => {
   const menuJson = mockMenuJson();

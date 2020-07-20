@@ -1,7 +1,7 @@
 require("../configure_enzyme");
 
 import mockMenuJson from "./mockMenuJson";
-import { renderMenu } from "./menu_helpers";
+import renderMenu from "./Menu.helpers";
 
 test("menu for uid-user, before order", () => {
   const menuJson = mockMenuJson();

@@ -4,7 +4,7 @@ import { mount } from "enzyme";
 import { UserContext } from "menu/Contexts";
 import Menu from "menu/Menu";
 
-export function renderMenu({ user, menu, order }) {
+export default function renderMenu({ user, menu, order }) {
   const onCreateOrder = jest.fn();
 
   const wrapper = mount(
