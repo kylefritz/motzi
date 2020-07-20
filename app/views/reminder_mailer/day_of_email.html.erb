@@ -1,20 +1,21 @@
-<h2>Reminder to come grab your bread today 11am to 7pm!!</h2>
-<% if Setting.motzi_phone %>
-<p>Please call us at <a href="tel:<%= Setting.motzi_phone %>"><%= Setting.motzi_phone %></a> if you have any questions/issues or won't make it by 7pm.</p>
-<% end %>
+<h2>Reminder to come grab your bread today!!</h2>
+
+<div>
+  <%= Setting.pickup_instructions_html %>
+</div>
 
 <div class="day-of-note">
-    <%= @menu.day_of_note_html %>
+  <%= @menu.day_of_note_html %>
 </div>
 
 <p>You ordered:</p>
 <table>
-    <% @order_items.map do |oi| %>
-    <tr>
-        <td><%= oi.quantity %>x</td>
-        <td><%= oi.item.name %></td>
-    </tr>
-    <% end %>
+  <% @order_items.map do |oi| %>
+  <tr>
+    <td><%= oi.quantity %>x</td>
+    <td><%= oi.item.name %></td>
+  </tr>
+  <% end %>
 </table>
 
 <%= render partial: 'menu_mailer/credits_remaining' %>
