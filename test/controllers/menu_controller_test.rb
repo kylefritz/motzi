@@ -49,5 +49,4 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
 
     validate_json_schema :menu, json
   end
-
 end

@@ -1,9 +1,9 @@
 import React from "react";
 require("../configure_enzyme");
-import { shallow } from "enzyme";
+import { mount } from "enzyme";
 
-import Deadline from "menu/Deadline";
-import orderData from "./order-data";
+import { DayContext } from "menu/Contexts";
+import Title from "menu/Title";
 
 //
 // setup a mock for past deadline
@@ -27,16 +27,26 @@ test("__setPastDeadline back and forth in same test", () => {
   expect(pastDeadline()).toBe(true);
 });
 
-test("Before deadline snapshot", () => {
-  __setPastDeadline(false);
-
-  const wrapper = shallow(<Deadline {...orderData} />);
-  expect(wrapper).toMatchSnapshot();
+function makeTitle() {
+  return mount(
+    <DayContext.Provider
+      value={{
+        day1: "Tuesday",
+        day1DeadlineDay: "Sunday",
+        day2: "Wednesday",
+        day2DeadlineDay: "Monday",
+      }}
+    >
+      <Title menu={{ name: "Week 6: toast" }} />
+    </DayContext.Provider>
+  );
+}
+test("After deadline: ordering close", () => {
+  __setPastDeadline(true);
+  expect(makeTitle()).toMatchSnapshot();
 });
 
-test("After deadline snapshot", () => {
-  __setPastDeadline(true);
-
-  const wrapper = shallow(<Deadline {...orderData} />);
-  expect(wrapper).toMatchSnapshot();
+test("Before deadline: small warning", () => {
+  __setPastDeadline(false);
+  expect(makeTitle()).toMatchSnapshot();
 });

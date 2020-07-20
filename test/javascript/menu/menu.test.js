@@ -1,17 +1,19 @@
 require("../configure_enzyme");
 
-import orderData from "./order-data";
-import { renderMenu } from "./helpers";
+import mockMenuJson from "./mockMenuJson";
+import renderMenu from "./Menu.helpers";
 
 test("menu for uid-user, before order", () => {
-  const menu = renderMenu({ menu: orderData.menu, user: orderData.user });
+  const menuJson = mockMenuJson();
+  const menu = renderMenu({ menu: menuJson.menu, user: menuJson.user });
 
   expect(menu.items().length).toBe(3);
   expect(menu.submitOrderBtn().text()).toBe("Submit Order");
 });
 
 test("menu for uid-user, add item to cart", () => {
-  const menu = renderMenu({ menu: orderData.menu, user: orderData.user });
+  const menuJson = mockMenuJson();
+  const menu = renderMenu({ menu: menuJson.menu, user: menuJson.user });
   expect(menu.cart().text()).toContain("No items");
 
   // click "thurs"
@@ -49,13 +51,13 @@ test("menu for uid-user, add item to cart", () => {
 });
 
 test("menu for uid-user, after order", () => {
-  const menu = renderMenu(orderData);
+  const menu = renderMenu(mockMenuJson());
   expect(menu.items().length).toBe(3);
   expect(menu.submitOrderBtn().text()).toBe("Update Order");
 });
 
 test("Menu pick skip", () => {
-  const menu = renderMenu(orderData);
+  const menu = renderMenu(mockMenuJson());
 
   expect(menu.cartTotal()).toContain("2 credits");
 

@@ -2,12 +2,12 @@ require("../configure_enzyme");
 import React from "react";
 import { shallow } from "enzyme";
 
-import orderData from "./order-data";
-import { munge } from "menu/App";
+import mockMenuJson from "./mockMenuJson";
 import Items from "menu/Items";
 
 test("marketplace render menu", () => {
-  const { items } = munge(orderData.menu);
+  const { menu } = mockMenuJson();
+  const { items } = menu;
 
   const marketplace = shallow(<Items marketplace items={items} />);
   expect(marketplace.find("Item").length).toBe(4);

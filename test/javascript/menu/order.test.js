@@ -1,11 +1,14 @@
 import React from "react";
 require("../configure_enzyme");
-import { shallow } from "enzyme";
+import { mount } from "enzyme";
 
 import Order from "menu/Order";
-import orderData from "./order-data";
+import mockMenuJson from "./mockMenuJson";
 
 test("Order snapshot", () => {
-  const wrapper = shallow(<Order {...orderData} />);
-  expect(wrapper).toMatchSnapshot();
+  const wrapper = mount(<Order {...mockMenuJson()} />);
+
+  expect(wrapper.find("DaysCart").length).toBe(1);
+  expect(wrapper.find("DaysCart").text()).toContain("Classic");
+  expect(wrapper.find("h3").text()).toContain("got your order");
 });

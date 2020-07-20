@@ -4,12 +4,13 @@ import _ from "lodash";
 import BakersNote from "./BakersNote";
 import BuyCredits from "../buy/App";
 import Cart from "./Cart";
-import Deadline from "./Deadline";
+import Title from "./Title";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
 import SkipThisWeek from "./SkipThisWeek";
 import Subscription from "./Subscription";
 import useCart from "./useCart";
+import { getDayContext } from "./Contexts";
 
 export default function Menu({
   menu,
@@ -42,13 +43,13 @@ export default function Menu({
     });
   };
 
-  const { name, subscriberNote, items, isCurrent, deadlineDay } = menu;
-
+  const { subscriberNote, items, isCurrent } = menu;
+  const { day2Closed: menuClosed } = getDayContext();
   if (user && user.credits < 1) {
     // time to buy credits!
     return (
       <>
-        <Subscription {...{ user, deadlineDay }} />
+        <Subscription {...{ user }} />
         <p className="my-2">
           We love baking yummy things for you but you're out of credits.
         </p>
@@ -59,13 +60,13 @@ export default function Menu({
 
   return (
     <>
-      <Subscription {...{ user, onRefreshUser, deadlineDay }} />
+      <Subscription {...{ user, onRefreshUser }} />
 
       {/* if low, show nag to buy credits*/}
       {user && user.credits < 4 && <BuyCredits onComplete={onRefreshUser} />}
 
-      <h2 id="menu-name">{name}</h2>
-      <Deadline menu={menu} />
+      <Title menu={menu} />
+
       <BakersNote note={subscriberNote} />
 
       <h5>Menu</h5>
@@ -89,8 +90,16 @@ export default function Menu({
         <>
           <Items items={items} onAddToCart={addToCart} />
 
-          <SkipThisWeek {...menu.skip} onSkip={handleSkip} />
-          <PayItForward {...menu.payItForward} onAddToCart={addToCart} />
+          <SkipThisWeek
+            {...menu.skip}
+            onSkip={handleSkip}
+            disabled={menuClosed}
+          />
+          <PayItForward
+            {...menu.payItForward}
+            onAddToCart={addToCart}
+            disabled={menuClosed}
+          />
         </>
       )}
 
@@ -103,6 +112,7 @@ export default function Menu({
             defaultValue={comments}
             onChange={(e) => setComments(e.target.value)}
             className="form-control"
+            disabled={menuClosed}
           />
         </div>
       </div>
@@ -111,10 +121,12 @@ export default function Menu({
         <div className="col">
           <button
             onClick={handleCreateOrder}
-            disabled={!isCurrent}
+            disabled={!isCurrent || menuClosed}
             title={
               isCurrent
-                ? null
+                ? menuClosed
+                  ? "Ordering for this menu is closed"
+                  : null
                 : "This is not the current menu; you cannot submit an order."
             }
             className="btn btn-primary btn-lg btn-block"

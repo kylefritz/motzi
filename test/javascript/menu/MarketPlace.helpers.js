@@ -2,9 +2,8 @@ import React from "react";
 import { mount } from "enzyme";
 
 import Marketplace from "menu/Marketplace";
-import { munge } from "menu/App";
 
-export function renderMenu({ menu }) {
+export default function renderMenu({ menu }) {
   window.gon = { stripeApiKey: "no-such-key" };
 
   // Mocking Stripe object
@@ -47,7 +46,7 @@ export function renderMenu({ menu }) {
   const onCreateOrder = jest.fn(() => Promise.resolve());
 
   const wrapper = mount(
-    <Marketplace menu={munge(menu)} onCreateOrder={onCreateOrder} />
+    <Marketplace menu={menu} onCreateOrder={onCreateOrder} />
   );
 
   return new MarketplaceWrapper(wrapper, onCreateOrder);
@@ -74,15 +73,18 @@ class MarketplaceWrapper {
     return this.wrapper.find("SkipThisWeek").find("button");
   }
   submitOrder() {
-    this.submitOrderBtn().simulate("click");
+    const btn = this.submitOrderBtn();
+    expect(btn.prop("disabled")).toBe(false);
+    btn.simulate("click");
   }
   submittedOrder() {
     return this.onCreateOrder.mock.calls[0][0];
   }
-  fillUser(email, firstName, lastName) {
+  fillUser(firstName, lastName, email) {
     const inputs = this.wrapper.find("input");
-    inputs.at(0).simulate("change", { target: { value: email } });
-    inputs.at(1).simulate("change", { target: { value: firstName } });
-    inputs.at(2).simulate("change", { target: { value: lastName } });
+    // idk why but the email field needs to get automated first
+    inputs.at(2).simulate("change", { target: { value: email } });
+    inputs.at(0).simulate("change", { target: { value: firstName } });
+    inputs.at(1).simulate("change", { target: { value: lastName } });
   }
 }

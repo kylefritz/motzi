@@ -1,0 +1,88 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`After deadline: ordering close 1`] = `
+<Title
+  menu={
+    Object {
+      "name": "Week 6: toast",
+    }
+  }
+>
+  <h2
+    id="menu-name"
+  >
+    Week 6: toast
+  </h2>
+  <div
+    className="alert alert-secondary text-center py-3 my-4"
+    role="alert"
+  >
+    <h6
+      className="alert-heading"
+    >
+      Ordering is closed for this menu
+    </h6>
+    <When
+      br={true}
+      menu={
+        Object {
+          "name": "Week 6: toast",
+        }
+      }
+    >
+      Order by midnight 
+      Sunday
+       for 
+      Tuesday
+       pickup 
+      <br />
+      or midnight 
+      Monday
+       for 
+      Wednesday
+       pickup.
+    </When>
+  </div>
+</Title>
+`;
+
+exports[`Before deadline: small warning 1`] = `
+<Title
+  menu={
+    Object {
+      "name": "Week 6: toast",
+    }
+  }
+>
+  <h2
+    id="menu-name"
+  >
+    Week 6: toast
+  </h2>
+  <div
+    id="deadline"
+  >
+    <small>
+      <When
+        br={false}
+        menu={
+          Object {
+            "name": "Week 6: toast",
+          }
+        }
+      >
+        Order by midnight 
+        Sunday
+         for 
+        Tuesday
+         pickup 
+        or midnight 
+        Monday
+         for 
+        Wednesday
+         pickup.
+      </When>
+    </small>
+  </div>
+</Title>
+`;

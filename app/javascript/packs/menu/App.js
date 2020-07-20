@@ -4,16 +4,14 @@ import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
 import _ from "lodash";
 
-import { UserContext } from "./Contexts";
+import { getDayContext, DayContext, UserContext } from "./Contexts";
 import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
-import Preview from "./Preview";
-import { pastDeadline } from "./pastDeadline";
 
-export function munge(menu) {
+export function separatePayItForwardAndSkip(menu) {
   const { items } = menu;
-  const menuItems = _.keyBy(items, (i) => i.id);
+  const menuItems = _.keyBy(items, ({ id }) => id);
   // identify _skip_ item and _payItForward_ item
   // filter them out of the collection of _regular_ items
   return {
@@ -28,7 +26,6 @@ function Layout({
   error,
   fetchMenu,
   handleCreateOrder,
-  ignoredeadline,
   isEditingOrder,
   menu,
   order,
@@ -48,14 +45,12 @@ function Layout({
     return <h2 className="mt-5">loading...</h2>;
   }
 
-  menu = munge(menu);
-
-  const deadlineExceeded = pastDeadline(menu.deadline) && !ignoredeadline;
+  menu = separatePayItForwardAndSkip(menu);
+  const { day2Closed } = getDayContext();
 
   if (order && !isEditingOrder) {
-    const handleEditOrder = deadlineExceeded
-      ? null
-      : () => setIsEditingOrder(true);
+    const handleEditOrder =
+      menu.isCurrent && !day2Closed ? () => setIsEditingOrder(true) : null;
     return (
       <Order
         {...{
@@ -67,10 +62,6 @@ function Layout({
         }}
       />
     );
-  }
-
-  if (deadlineExceeded || !menu.isCurrent) {
-    return <Preview menu={menu} />;
   }
 
   if (!user) {
@@ -94,7 +85,9 @@ export default function App() {
   const [data, setData] = useState({}); // expect: menu, user, order
   const [error, setError] = useState();
   const [isEditingOrder, setIsEditingOrder] = useState(false);
-  const { uid, ignoredeadline } = queryString.parse(location.search);
+  const { uid, ignoredeadline: ignoreDeadline } = queryString.parse(
+    location.search
+  );
 
   const fetchMenu = () => {
     let params = { uid };
@@ -137,21 +130,40 @@ export default function App() {
         Sentry.captureException(err);
       });
   };
-  const { user } = data;
+  const { user, menu } = data;
+  const {
+    day1,
+    day1Deadline,
+    day1DeadlineDay,
+    day2,
+    day2Deadline,
+    day2DeadlineDay,
+  } = menu || {};
 
   return (
     <UserContext.Provider value={user}>
-      <Layout
-        {...{
-          ...data,
-          error,
-          fetchMenu,
-          handleCreateOrder,
-          ignoredeadline,
-          isEditingOrder,
-          setIsEditingOrder,
+      <DayContext.Provider
+        value={{
+          day1,
+          day1Deadline,
+          day1DeadlineDay,
+          day2,
+          day2Deadline,
+          day2DeadlineDay,
+          ignoreDeadline,
         }}
-      />
+      >
+        <Layout
+          {...{
+            ...data,
+            error,
+            fetchMenu,
+            handleCreateOrder,
+            isEditingOrder,
+            setIsEditingOrder,
+          }}
+        />
+      </DayContext.Provider>
     </UserContext.Provider>
   );
 }

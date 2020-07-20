@@ -12,17 +12,15 @@ end
 
 class ActiveSupport::TimeWithZone
   def day1_pickup?
-    self.wday == Date::DAYS_INTO_WEEK[Setting.pickup_day1.downcase.to_sym]
+    self.wday == Setting.pickup_day1_wday
   end
 
   def day2_pickup?
-    self.wday == Date::DAYS_INTO_WEEK[Setting.pickup_day2.downcase.to_sym]
+    self.wday == Setting.pickup_day2_wday
   end
 
   def reminder_day?
-    day1_wday = Date::DAYS_INTO_WEEK[Setting.pickup_day1.downcase.to_sym]
-    reminder_wday = (day1_wday - 2) % 7
-    self.wday == reminder_wday
+    self.wday == Setting.pickup_day1_deadline_wday
   end
 
   def too_early?

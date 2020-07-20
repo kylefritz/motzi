@@ -25,13 +25,14 @@ export default function Payment({
   onCardToken,
   onPaymentResult,
   submitting,
+  disabled,
 }) {
   return (
     <>
       <StripeProvider apiKey={stripeApiKey}>
         <Elements>
           <WrappedCard
-            {...{ price, credits, submitting, onToken: onCardToken }}
+            {...{ price, credits, submitting, onToken: onCardToken, disabled }}
           />
         </Elements>
       </StripeProvider>

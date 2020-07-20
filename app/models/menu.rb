@@ -35,13 +35,21 @@ class Menu < ApplicationRecord
     end
   end
 
-  def deadline
-     Time.zone.from_week_id(week_id) + 2.days + 14.hours + 59.minutes + 59.seconds
+  def day1_deadline
+    compute_deadline(Setting.pickup_day1_wday)
+  end
+  def day2_deadline
+    compute_deadline(Setting.pickup_day2_wday)
   end
 
   def ordering_closed?
-    Time.zone.now > deadline
+    Time.zone.now > day2_deadline
   end
 
   MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
+
+  private
+  def compute_deadline(wday)
+    Time.zone.from_week_id(week_id) + ((wday - 2) % 7).days + 14.hours + 59.minutes + 59.seconds
+  end
 end

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 export default function PayWhatYouCan({
   price,
   onPricedChanged: handlePriceChanged,
+  disabled,
 }) {
   const [tempPrice, setTempPrice] = useState(null);
 
@@ -50,6 +51,7 @@ export default function PayWhatYouCan({
           value={tempPrice === null ? (price === null ? 0 : price) : tempPrice}
           onChange={handleInputChanged}
           onBlur={handleBlur}
+          disabled={disabled}
         />
       </div>
     </>

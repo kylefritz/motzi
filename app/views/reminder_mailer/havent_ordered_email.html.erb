@@ -1,5 +1,5 @@
-<h2>Please order by midnight on <%= Setting.deadline_day %> for <%= @menu.name %>!!</h2>
+<h2>For <%= @menu.name %>, please order by <%= day_to_order_by_text %>!!</h2>
 
-<p><%= link_to "This week's menu!", current_menu_url(uid: @user.hashid) %></p>
+<p><%= link_to @menu.name, current_menu_url(uid: @user.hashid) %></p>
 
 <%= render partial: 'menu_mailer/credits_remaining' %>

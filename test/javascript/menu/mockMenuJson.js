@@ -1,13 +1,17 @@
-export default {
-  menu: {
+import { separatePayItForwardAndSkip } from "menu/App";
+
+export default function () {
+  const menu = separatePayItForwardAndSkip({
     id: 921507399,
     name: "week 5",
     subscriberNote: "subscribers note copy",
     menuNote: "menu note copy",
     createdAt: "2019-11-02T14:01:23.820-04:00",
-    deadline: "2019-11-03T23:59:59.000-04:00",
+    day1Deadline: "2019-11-03T23:59:59.000-04:00",
+    day2Deadline: "2019-11-05T23:59:59.000-04:00",
+    day1: "Tuesday",
+    day2: "Thursday",
     isCurrent: true,
-    deadlineDay: "Sunday",
     items: [
       {
         id: 3,
@@ -71,16 +75,18 @@ export default {
         subscriber: true,
       },
     ],
-  },
-  user: {
+  });
+
+  const user = {
     id: 584273342,
     name: "Kyle Fritz",
     email: "kyle.p.fritz@gmail.com",
     hashid: "Dot9gKn9w",
     credits: 9,
     breadsPerWeek: 1.0,
-  },
-  order: {
+  };
+
+  const order = {
     skip: false,
     items: [
       {
@@ -96,5 +102,7 @@ export default {
         day: "Thursday",
       },
     ],
-  },
-};
+  };
+
+  return { menu, order, user };
+}

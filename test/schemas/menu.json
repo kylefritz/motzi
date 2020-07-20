@@ -10,8 +10,12 @@
       "required": [
         "id",
         "name",
-        "deadline",
-        "deadlineDay",
+        "day1Deadline",
+        "day2Deadline",
+        "day1DeadlineDay",
+        "day2DeadlineDay",
+        "day1",
+        "day2",
         "menuNote",
         "subscriberNote",
         "createdAt",
@@ -27,8 +31,12 @@
           "type": "string",
           "title": "created at"
         },
-        "deadline": { "type": "string" },
-        "deadlineDay": { "type": "string" },
+        "day1Deadline": { "type": "string" },
+        "day2Deadline": { "type": "string" },
+        "day1DeadlineDay": { "type": "string" },
+        "day2DeadlineDay": { "type": "string" },
+        "day1": { "type": "string" },
+        "day2": { "type": "string" },
         "items": {
           "type": "array",
           "items": {

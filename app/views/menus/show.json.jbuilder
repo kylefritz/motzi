@@ -1,7 +1,6 @@
 json.menu do
-  json.extract! @menu, :id, :name, :menu_note, :subscriber_note, :created_at, :deadline
+  json.extract! @menu, :id, :name, :menu_note, :subscriber_note, :created_at, :day1_deadline, :day2_deadline
   json.is_current @menu.current?
-  json.deadline_day Setting.deadline_day
 
   menu_items = @menu.menu_items.map {|mi| [mi, mi.item]}
   menu_items.push([MenuItem.new, Item.pay_it_forward])
@@ -11,6 +10,11 @@ json.menu do
     json.extract! item, :id, :name, :description, :price
     json.image item.image_path
   end
+
+  json.day1 Setting.pickup_day1
+  json.day2 Setting.pickup_day2
+  json.day1_deadline_day Setting.pickup_day1_deadline_day
+  json.day2_deadline_day Setting.pickup_day2_deadline_day
 end
 
 json.user do

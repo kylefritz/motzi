@@ -22,7 +22,14 @@ const createOptions = () => {
   };
 };
 
-export default function Card({ stripe, onToken, credits, price, submitting }) {
+export default function Card({
+  stripe,
+  onToken,
+  credits,
+  price,
+  submitting,
+  disabled,
+}) {
   const [errorMessage, setErrorMessage] = useState();
   const [cardFilled, setCardFilled] = useState(false);
   const handleCardChange = ({ error, complete }) => {
@@ -73,7 +80,9 @@ export default function Card({ stripe, onToken, credits, price, submitting }) {
     <div className="checkout">
       <form onSubmit={handleSubmit}>
         <h5>Pay by credit card</h5>
-        <CardElement onChange={handleCardChange} {...createOptions()} />
+        {!disabled && (
+          <CardElement onChange={handleCardChange} {...createOptions()} />
+        )}
         {errorMessage && (
           <div className="error" role="alert">
             {errorMessage}

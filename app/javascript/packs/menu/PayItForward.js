@@ -8,6 +8,7 @@ export default function PayItForward({
   description = "Wild times out there. Support some else in need.",
   price = 5,
   onAddToCart: addToCart,
+  disabled,
 }) {
   const [wasAdded, setWasAdded] = useState(false);
 
@@ -31,6 +32,7 @@ export default function PayItForward({
               type="button"
               className={`btn btn-secondary btn-sm mr-2`}
               onClick={handleAdd}
+              disabled={disabled}
             >
               Donate Now
             </button>

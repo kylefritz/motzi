@@ -2,6 +2,7 @@ import React from "react";
 import _ from "lodash";
 
 import Price from "./Price";
+import { getDayContext } from "./Contexts";
 
 function buildMenuItemLookup(menu) {
   const { items } = menu;
@@ -41,8 +42,10 @@ function DaysCart({ menu, cart, rmCartItem }) {
 }
 
 function Days({ menu, cart, rmCartItem, skip }) {
-  const thurs = cart.filter(({ day }) => day === "Thursday");
-  const sat = cart.filter(({ day }) => day === "Saturday");
+  const { day1, day1Closed, day2, day2Closed } = getDayContext();
+
+  const thurs = cart.filter(({ day }) => day === day1);
+  const sat = cart.filter(({ day }) => day === day2);
   const payItForward = cart.filter(
     ({ itemId }) => itemId === menu.payItForward.id
   );
@@ -58,18 +61,30 @@ function Days({ menu, cart, rmCartItem, skip }) {
   const sections = [];
   if (thurs.length) {
     sections.push(
-      <div key="thurs">
-        <h6>Thursday</h6>
-        <DaysCart {...{ menu, rmCartItem, cart: thurs }} />
+      <div key="day1">
+        <h6>{day1}</h6>
+        <DaysCart
+          {...{
+            menu,
+            rmCartItem: !day1Closed && rmCartItem,
+            cart: thurs,
+          }}
+        />
       </div>
     );
   }
 
   if (sat.length) {
     sections.push(
-      <div key="sat">
-        <h6>Saturday</h6>
-        <DaysCart {...{ menu, rmCartItem, cart: sat }} />
+      <div key="day2">
+        <h6>{day2}</h6>
+        <DaysCart
+          {...{
+            menu,
+            rmCartItem: !day2Closed && rmCartItem,
+            cart: sat,
+          }}
+        />
       </div>
     );
   }
@@ -78,7 +93,13 @@ function Days({ menu, cart, rmCartItem, skip }) {
     sections.push(
       <div key="pay-it-forward">
         <h6>Pay It Forward</h6>
-        <DaysCart {...{ menu, rmCartItem, cart: payItForward }} />
+        <DaysCart
+          {...{
+            menu,
+            rmCartItem: !day2Closed && rmCartItem,
+            cart: payItForward,
+          }}
+        />
       </div>
     );
   }

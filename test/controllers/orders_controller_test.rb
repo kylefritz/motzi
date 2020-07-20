@@ -4,7 +4,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
   def setup
     menus(:week2).make_current!
-    Timecop.freeze(Menu.current.deadline - 2.hours)
+    Timecop.freeze(Menu.current.day1_deadline - 2.hours)
   end
 
   def teardown
@@ -16,7 +16,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "hashid_user cant order past deadline" do
-    Timecop.freeze(Menu.current.deadline + 2.hours) do
+    Timecop.freeze(Menu.current.day2_deadline + 2.hours) do
       refute_order_placed users(:ljf).hashid
       assert_response :unprocessable_entity
     end
@@ -41,7 +41,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
   test "hashid_user cannot update their own order past deadline" do
     assert_order_placed users(:ljf).hashid
-    Timecop.freeze(Menu.current.deadline + 2.hours) do
+    Timecop.freeze(Menu.current.day2_deadline + 2.hours) do
       order_id = users(:ljf).current_order.id
       put "/orders/#{order_id}.json", params: different_order_attrs(users(:ljf).hashid), as: :json
       assert_response :unprocessable_entity
@@ -57,7 +57,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
   test "admin can order past deadline" do
     sign_in users(:maya)
-    Timecop.freeze(Menu.current.deadline + 2.hours) do
+    Timecop.freeze(Menu.current.day2_deadline + 2.hours) do
       assert_order_placed
     end
   end

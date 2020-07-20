@@ -21,7 +21,11 @@ $btn-padding-x-sm: 0.75rem;
 body {
   background-color: rgb(255, 238, 214);
   font-family: "Raleway", sans-serif;
+  font-weight: 300;
   color: #2e2927;
+}
+strong {
+  font-weight: 500;
 }
 #background {
   background-image: image-url("background-bread.jpg");
@@ -53,6 +57,7 @@ $container-margin-padding: 34px + $container-margin;
   margin-right: -$container-margin-padding;
   padding-left: $container-margin-padding;
   padding-right: $container-margin-padding;
+  margin-bottom: 0;
   color: white;
   background: $motzi-purple;
   text-transform: none;
@@ -60,7 +65,16 @@ $container-margin-padding: 34px + $container-margin;
   padding-bottom: 25px;
   font-size: 1.6rem;
   letter-spacing: 0.05rem;
+}
+#deadline {
+  color: white;
+  background: $motzi-purple;
+  margin-left: -$container-margin-padding;
+  margin-right: -$container-margin-padding;
+  padding-left: $container-margin-padding;
+  padding-right: $container-margin-padding;
   margin-bottom: 2rem;
+  text-align: center;
 }
 
 .container {
