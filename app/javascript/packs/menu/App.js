@@ -9,9 +9,9 @@ import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
 
-export function munge(menu) {
+export function separatePayItForwardAndSkip(menu) {
   const { items } = menu;
-  const menuItems = _.keyBy(items, (i) => i.id);
+  const menuItems = _.keyBy(items, ({ id }) => id);
   // identify _skip_ item and _payItForward_ item
   // filter them out of the collection of _regular_ items
   return {
@@ -45,7 +45,7 @@ function Layout({
     return <h2 className="mt-5">loading...</h2>;
   }
 
-  menu = munge(menu);
+  menu = separatePayItForwardAndSkip(menu);
   const { day2Closed } = getDayContext();
 
   if (order && !isEditingOrder) {

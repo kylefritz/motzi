@@ -1,5 +1,7 @@
-export default {
-  menu: {
+import { separatePayItForwardAndSkip } from "menu/App";
+
+export default function () {
+  const menu = separatePayItForwardAndSkip({
     id: 921507399,
     name: "week 5",
     subscriberNote: "subscribers note copy",
@@ -73,16 +75,18 @@ export default {
         subscriber: true,
       },
     ],
-  },
-  user: {
+  });
+
+  const user = {
     id: 584273342,
     name: "Kyle Fritz",
     email: "kyle.p.fritz@gmail.com",
     hashid: "Dot9gKn9w",
     credits: 9,
     breadsPerWeek: 1.0,
-  },
-  order: {
+  };
+
+  const order = {
     skip: false,
     items: [
       {
@@ -98,5 +102,7 @@ export default {
         day: "Thursday",
       },
     ],
-  },
-};
+  };
+
+  return { menu, order, user };
+}

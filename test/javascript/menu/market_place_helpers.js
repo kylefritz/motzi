@@ -2,7 +2,6 @@ import React from "react";
 import { mount } from "enzyme";
 
 import Marketplace from "menu/Marketplace";
-import { munge } from "menu/App";
 
 export function renderMenu({ menu }) {
   window.gon = { stripeApiKey: "no-such-key" };
@@ -47,7 +46,7 @@ export function renderMenu({ menu }) {
   const onCreateOrder = jest.fn(() => Promise.resolve());
 
   const wrapper = mount(
-    <Marketplace menu={munge(menu)} onCreateOrder={onCreateOrder} />
+    <Marketplace menu={menu} onCreateOrder={onCreateOrder} />
   );
 
   return new MarketplaceWrapper(wrapper, onCreateOrder);

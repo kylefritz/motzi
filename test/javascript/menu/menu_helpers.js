@@ -3,18 +3,13 @@ import { mount } from "enzyme";
 
 import { UserContext } from "menu/Contexts";
 import Menu from "menu/Menu";
-import { munge } from "menu/App";
 
 export function renderMenu({ user, menu, order }) {
   const onCreateOrder = jest.fn();
 
   const wrapper = mount(
     <UserContext.Provider value={user}>
-      <Menu
-        {...{ user, order }}
-        menu={munge(menu)}
-        onCreateOrder={onCreateOrder}
-      />
+      <Menu {...{ user, order, menu }} onCreateOrder={onCreateOrder} />
     </UserContext.Provider>
   );
 
