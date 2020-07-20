@@ -10,7 +10,6 @@ class ReminderMailer < ApplicationMailer
     day_of_email
   end
 
-  private
   def day_of_email
     @menu = params[:menu]
     @user = params[:user]
@@ -22,7 +21,6 @@ class ReminderMailer < ApplicationMailer
          template_name: 'day_of_email')
   end
 
-  public
   def havent_ordered_email
     @menu = params[:menu]
     @user = params[:user]

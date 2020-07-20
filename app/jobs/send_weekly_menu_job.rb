@@ -14,7 +14,6 @@ class SendWeeklyMenuJob < ApplicationJob
     end
   end
 
-  private
   def self.users_to_email(menu)
     # dont send to same people twice
     already_got_menu = Set[*menu.messages.where(mailer: 'MenuMailer#weekly_menu_email').pluck(:user_id)]
