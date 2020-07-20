@@ -1,11 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`After deadline snapshot 1`] = `
-<Fragment>
+exports[`After deadline: ordering close 1`] = `
+<Title
+  menu={
+    Object {
+      "name": "Week 6: toast",
+    }
+  }
+>
   <h2
     id="menu-name"
   >
-    week 5
+    Week 6: toast
   </h2>
   <div
     className="alert alert-secondary text-center py-3 my-4"
@@ -20,91 +26,38 @@ exports[`After deadline snapshot 1`] = `
       br={true}
       menu={
         Object {
-          "createdAt": "2019-11-02T14:01:23.820-04:00",
-          "day1": "Tuesday",
-          "day1Deadline": "2019-11-03T23:59:59.000-04:00",
-          "day2": "Thursday",
-          "day2Deadline": "2019-11-05T23:59:59.000-04:00",
-          "id": 921507399,
-          "isCurrent": true,
-          "items": Array [
-            Object {
-              "day1": true,
-              "day2": true,
-              "description": "",
-              "id": 3,
-              "image": "bread-baguette.jpg",
-              "marketplace": true,
-              "name": "Baguette",
-              "price": 3,
-              "subscriber": true,
-            },
-            Object {
-              "day1": true,
-              "day2": true,
-              "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
-              "id": 1,
-              "image": "bread2-002.webp",
-              "marketplace": true,
-              "name": "Classic",
-              "price": 4,
-              "subscriber": true,
-            },
-            Object {
-              "day1": true,
-              "day2": true,
-              "description": "ony subscribers can get cookies",
-              "id": 2,
-              "marketplace": false,
-              "name": "Cookies",
-              "price": 4,
-              "subscriber": true,
-            },
-            Object {
-              "day1": true,
-              "day2": true,
-              "description": "too small for subscribers",
-              "id": 4,
-              "marketplace": true,
-              "name": "Marketplace only item",
-              "price": 2,
-              "subscriber": false,
-            },
-            Object {
-              "day1": true,
-              "day2": true,
-              "description": "too small for subscribers",
-              "id": 5,
-              "marketplace": true,
-              "name": "Another small item",
-              "price": 1.5,
-              "subscriber": false,
-            },
-            Object {
-              "day1": true,
-              "day2": true,
-              "description": "Skip this week.",
-              "id": 0,
-              "name": "Skip",
-              "subscriber": true,
-            },
-          ],
-          "menuNote": "menu note copy",
-          "name": "week 5",
-          "subscriberNote": "subscribers note copy",
+          "name": "Week 6: toast",
         }
       }
-    />
+    >
+      Order by midnight 
+      Sunday
+       for 
+      Tuesday
+       pickup 
+      <br />
+      or midnight 
+      Monday
+       for 
+      Wednesday
+       pickup.
+    </When>
   </div>
-</Fragment>
+</Title>
 `;
 
-exports[`Before deadline snapshot 1`] = `
-<Fragment>
+exports[`Before deadline: small warning 1`] = `
+<Title
+  menu={
+    Object {
+      "name": "Week 6: toast",
+    }
+  }
+>
   <h2
     id="menu-name"
   >
-    week 5
+    Week 6: toast
   </h2>
   <div
     id="deadline"
@@ -114,82 +67,22 @@ exports[`Before deadline snapshot 1`] = `
         br={false}
         menu={
           Object {
-            "createdAt": "2019-11-02T14:01:23.820-04:00",
-            "day1": "Tuesday",
-            "day1Deadline": "2019-11-03T23:59:59.000-04:00",
-            "day2": "Thursday",
-            "day2Deadline": "2019-11-05T23:59:59.000-04:00",
-            "id": 921507399,
-            "isCurrent": true,
-            "items": Array [
-              Object {
-                "day1": true,
-                "day2": true,
-                "description": "",
-                "id": 3,
-                "image": "bread-baguette.jpg",
-                "marketplace": true,
-                "name": "Baguette",
-                "price": 3,
-                "subscriber": true,
-              },
-              Object {
-                "day1": true,
-                "day2": true,
-                "description": "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
-                "id": 1,
-                "image": "bread2-002.webp",
-                "marketplace": true,
-                "name": "Classic",
-                "price": 4,
-                "subscriber": true,
-              },
-              Object {
-                "day1": true,
-                "day2": true,
-                "description": "ony subscribers can get cookies",
-                "id": 2,
-                "marketplace": false,
-                "name": "Cookies",
-                "price": 4,
-                "subscriber": true,
-              },
-              Object {
-                "day1": true,
-                "day2": true,
-                "description": "too small for subscribers",
-                "id": 4,
-                "marketplace": true,
-                "name": "Marketplace only item",
-                "price": 2,
-                "subscriber": false,
-              },
-              Object {
-                "day1": true,
-                "day2": true,
-                "description": "too small for subscribers",
-                "id": 5,
-                "marketplace": true,
-                "name": "Another small item",
-                "price": 1.5,
-                "subscriber": false,
-              },
-              Object {
-                "day1": true,
-                "day2": true,
-                "description": "Skip this week.",
-                "id": 0,
-                "name": "Skip",
-                "subscriber": true,
-              },
-            ],
-            "menuNote": "menu note copy",
-            "name": "week 5",
-            "subscriberNote": "subscribers note copy",
+            "name": "Week 6: toast",
           }
         }
-      />
+      >
+        Order by midnight 
+        Sunday
+         for 
+        Tuesday
+         pickup 
+        or midnight 
+        Monday
+         for 
+        Wednesday
+         pickup.
+      </When>
     </small>
   </div>
-</Fragment>
+</Title>
 `;

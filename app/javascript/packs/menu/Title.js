@@ -1,10 +1,10 @@
 import React from "react";
 import _ from "lodash";
 
-import { pastDeadline } from "./pastDeadline";
+import { getDayContext } from "./Contexts";
 
-function When({ menu, br }) {
-  const { day1, day1DeadlineDay, day2, day2DeadlineDay } = menu;
+function When({ br }) {
+  const { day1, day1DeadlineDay, day2, day2DeadlineDay } = getDayContext();
 
   return (
     <>
@@ -15,9 +15,8 @@ function When({ menu, br }) {
 }
 
 export default function Title({ menu }) {
-  const { name, day2Deadline } = menu;
-
-  const isClosed = pastDeadline(day2Deadline);
+  const { name } = menu;
+  const { pastDay2Deadline: isClosed } = getDayContext();
 
   return (
     <>

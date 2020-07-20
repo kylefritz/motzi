@@ -10,7 +10,7 @@ import PayItForward from "./PayItForward";
 import SkipThisWeek from "./SkipThisWeek";
 import Subscription from "./Subscription";
 import useCart from "./useCart";
-import { pastDeadline } from "./pastDeadline";
+import { getDayContext } from "./Contexts";
 
 export default function Menu({
   menu,
@@ -43,8 +43,8 @@ export default function Menu({
     });
   };
 
-  const { subscriberNote, items, isCurrent, day2Deadline } = menu;
-  const menuClosed = pastDeadline(day2Deadline);
+  const { subscriberNote, items, isCurrent } = menu;
+  const { pastDay2Deadline: menuClosed } = getDayContext();
   if (user && user.credits < 1) {
     // time to buy credits!
     return (
