@@ -1,3 +1,4 @@
+include PriceHelper
 ActiveAdmin.register_page "Dashboard" do
   menu priority: 1, label: "Bakery"
 
@@ -54,6 +55,32 @@ ActiveAdmin.register_page "Dashboard" do
             para(a("Set Baker's Choice for #{num_bakers_choice} subscribers", {href: bakers_choice_admin_menus_path()}))
           end
         end
+
+        panel "Pay what you can stats for menu" do
+          marketplace = Order.for_current_menu.includes(order_items: :item).marketplace
+          mp = {
+            type: "Market Place",
+            qty: marketplace.count,
+            retail: marketplace.map(&:retail_price).sum,
+            paid: marketplace.map(&:stripe_charge_amount).sum,
+          }
+
+          credit_items = CreditItem.for_current_menu.bought
+          ci = {
+            type: "Credits",
+            qty: credit_items.map(&:quantity).sum,
+            retail: credit_items.map(&:retail_price).sum,
+            paid: credit_items.map(&:stripe_charge_amount).sum,
+          }
+
+          table_for [mp, ci], class: 'subscribers' do
+            column :type
+            column :qty
+            column :retail do |r|number_to_currency r[:retail] end
+            column :paid do |r|number_to_currency r[:paid] end
+            column :diff do |r|price_diff(r[:retail], r[:paid]) end
+          end
+        end
       end
 
       day1, day2 = Order.for_current_menu.includes(order_items: :item).flat_map(&:order_items).partition(&:day1_pickup?)
@@ -84,6 +111,17 @@ ActiveAdmin.register_page "Dashboard" do
           end
         end
       end
+
+      column do
+        panel "New Opt-In - last 2 weeks" do
+          users = User.opt_in.subscribers.where("created_at > ?", 2.weeks.ago).order('created_at desc').limit(20)
+          table_for users do
+            column ("user") { |u| u }
+            column ("Created At") { |u| u.created_at }
+          end
+        end
+      end
+
     end # end columns
 
     columns do

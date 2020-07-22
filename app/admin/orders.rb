@@ -1,3 +1,4 @@
+include PriceHelper
 ActiveAdmin.register Order do
   permit_params :comments, :menu, :user
   includes :menu, :user, order_items: :item
@@ -32,12 +33,7 @@ ActiveAdmin.register Order do
     column :retail_price do |order|
       if order.stripe_charge_amount.present?
         div number_to_currency(order.retail_price), class: "text-right"
-        price_diff = order.stripe_charge_amount - order.retail_price
-        unless price_diff == 0
-          cls = price_diff > 0 ? "success" : "danger"
-          prefix = price_diff > 0 ? "+" : ""
-          div "#{prefix}#{number_to_currency(price_diff)}".html_safe, class: "text-#{cls} text-right"
-        end
+        price_diff(order.retail_price, order.stripe_charge_amount)
       end
     end
     actions defaults: false do |order|
