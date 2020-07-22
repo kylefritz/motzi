@@ -18,7 +18,7 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       column do
-        panel "Subscribers" do
+        panel "Orders" do
           def compute(name, subs)
             total = subs.count
             orders = Order.for_current_menu.where(user_id: subs.pluck(:id))
@@ -60,7 +60,7 @@ ActiveAdmin.register_page "Dashboard" do
           marketplace = Order.for_current_menu.includes(order_items: :item).marketplace
           mp = {
             type: "Market Place",
-            qty: marketplace.count,
+            qty: marketplace.map {|o| o.order_items.map(&:quantity).sum}.sum,
             retail: marketplace.map(&:retail_price).sum,
             paid: marketplace.map(&:stripe_charge_amount).sum,
           }
