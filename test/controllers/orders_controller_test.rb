@@ -4,71 +4,78 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
   def setup
     menus(:week2).make_current!
-    Timecop.freeze(Menu.current.day1_deadline - 2.hours)
-  end
-
-  def teardown
-    Timecop.return
   end
 
   test "hashid_user can create order" do
-    assert_order_placed users(:ljf).hashid
-  end
-
-  test "hashid_user cant order past deadline" do
-    Timecop.freeze(Menu.current.day2_deadline + 2.hours) do
-      refute_order_placed users(:ljf).hashid
-      assert_response :unprocessable_entity
+    before_deadline do
+      assert_order_placed users(:ljf).hashid
     end
   end
 
-  test "hashid_user can update their own order" do
-    assert_order_placed users(:ljf).hashid
-    order_id = users(:ljf).current_order.id
+  test "hashid_user cant order past deadline" do
+    after_deadline do
+      refute_order_placed users(:ljf).hashid
+    end
+    assert_response :unprocessable_entity
+  end
 
-    put "/orders/#{order_id}.json", params: different_order_attrs(users(:ljf).hashid), as: :json
+  test "hashid_user can update their own order" do
+    before_deadline do
+      assert_order_placed users(:ljf).hashid
+
+      put_order users(:ljf).current_order.id, different_order_attrs(users(:ljf).hashid)
+    end
     assert_response :success
   end
 
   test "hashid_user cannot update someone else's order" do
-    assert_order_placed users(:ljf).hashid
-    order = users(:ljf).current_order
-    order.update(user: users(:jess))
+    before_deadline do
+      assert_order_placed users(:ljf).hashid
+      order = users(:ljf).current_order
+      order.update(user: users(:jess))
 
-    put "/orders/#{order.id}.json", params: different_order_attrs(users(:ljf).hashid), as: :json
+      put_order order.id, different_order_attrs(users(:ljf).hashid)
+    end
     assert_response :unauthorized
   end
 
   test "hashid_user cannot update their own order past deadline" do
-    assert_order_placed users(:ljf).hashid
-    Timecop.freeze(Menu.current.day2_deadline + 2.hours) do
-      order_id = users(:ljf).current_order.id
-      put "/orders/#{order_id}.json", params: different_order_attrs(users(:ljf).hashid), as: :json
-      assert_response :unprocessable_entity
+    before_deadline do
+      assert_order_placed users(:ljf).hashid
     end
+
+    after_deadline do
+      put_order users(:ljf).current_order.id, different_order_attrs(users(:ljf).hashid)
+    end
+    assert_response :unprocessable_entity
   end
 
   test "admin can update any order" do
     sign_in users(:maya)
-    order_id = Order.last.id
-    put "/orders/#{order_id}.json", params: different_order_attrs, as: :json
+    before_deadline do
+      put_order Order.last.id, different_order_attrs
+    end
     assert_response :success
   end
 
   test "admin can order past deadline" do
     sign_in users(:maya)
-    Timecop.freeze(Menu.current.day2_deadline + 2.hours) do
+    after_deadline do
       assert_order_placed
     end
   end
 
   test "signed in user can create order" do
     sign_in users(:ljf)
-    assert_order_placed
+    before_deadline do
+      assert_order_placed
+    end
   end
 
   test "unknown user cannot create order" do
-    refute_order_placed
+    before_deadline do
+      refute_order_placed
+    end
     assert_response :unauthorized
   end
 
@@ -100,6 +107,22 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   def refute_order_placed(hashid=nil)
     refute_ordered do
       post '/orders.json', params: order_attrs(hashid), as: :json
+    end
+  end
+
+  def put_order(order_id, params)
+    put "/orders/#{order_id}.json", params: params, as: :json
+  end
+
+  def before_deadline(&block)
+    travel_to(Menu.current.day1_deadline - 2.hours) do
+      block.call
+    end
+  end
+
+  def after_deadline(&block)
+    travel_to(Menu.current.day2_deadline + 2.hours) do
+      block.call
     end
   end
 end

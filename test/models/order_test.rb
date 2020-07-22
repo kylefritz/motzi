@@ -70,7 +70,7 @@ class OrderTest < ActiveSupport::TestCase
   end
 
   def with_known_day(day, &block)
-    Timecop.freeze(known_day(day)) do
+    travel_to(known_day(day)) do
       block.call
     end
   end

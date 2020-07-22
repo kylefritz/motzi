@@ -5,13 +5,13 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
   def setup
     menus(:week2).make_current!
-    Timecop.freeze(Menu.current.day1_deadline - 2.hours)
+    travel_to(Menu.current.day1_deadline - 2.hours)
     StripeMock.start
     @stripe_helper = StripeMock.create_test_helper
   end
 
   def teardown
-    Timecop.return
+    travel_back
     StripeMock.stop
   end
 

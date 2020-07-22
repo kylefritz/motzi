@@ -73,7 +73,7 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
     assert days.include?(day), 'pick a known day'
     datetime_str = "2019-#{days[day]} #{time} EST"
     date_time = DateTime.parse(datetime_str)
-    Timecop.freeze(date_time) do
+    travel_to(date_time) do
       assert_email_sent(num_emails) do
         SendDayOfReminderJob.perform_now
       end

@@ -45,7 +45,7 @@ class TimeWithZoneTest < ActiveSupport::TestCase
   end
 
   def with_time(&block)
-    Timecop.freeze(DateTime.parse("2019-11-11 9:00 AM EST")) do
+    travel_to(DateTime.parse("2019-11-11 9:00 AM EST")) do
       block.call
     end
   end

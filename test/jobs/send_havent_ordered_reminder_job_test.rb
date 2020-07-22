@@ -52,7 +52,7 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
     datetime_str = "2019-#{days[day]} #{time} EST"
     date_time = DateTime.parse(datetime_str)
 
-    Timecop.freeze(date_time) do
+    travel_to(date_time) do
       assert_email_sent(num_emails) do
         SendHaventOrderedReminderJob.perform_now
       end
