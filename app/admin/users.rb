@@ -1,6 +1,6 @@
 ActiveAdmin.register User do
   permit_params :first_name, :last_name, :email, :additional_email, :is_admin, \
-    :subscriber, :marketing_emails, :breads_per_week, :phone
+    :subscriber, :opt_in, :breads_per_week, :phone
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'
 
   # search filters on index page
@@ -63,7 +63,7 @@ ActiveAdmin.register User do
       input :additional_email
       input :phone
       input :breads_per_week
-      input :marketing_emails
+      input :opt_in
     end
     inputs 'Danger Zone' do
       input :subscriber

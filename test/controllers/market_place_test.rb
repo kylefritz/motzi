@@ -41,13 +41,13 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     refute_nil new_order.stripe_charge_amount
   end
 
-  test "set marketing_emails" do
+  test "set opt_in" do
     order_attrs = build_order_attrs
-    order_attrs[:marketing_emails] = true
+    order_attrs[:opt_in] = true
     assert_user_created { assert_ordered_emailed(order_attrs) }
 
     new_user = User.unscoped.order("created_at desc").last
-    assert new_user.marketing_emails?, "shouldn't get marketing emails"
+    assert new_user.opt_in?, "shouldn't get marketing emails"
   end
 
   test "$0 price is ok" do
@@ -87,7 +87,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
       firstName: "Jef",
       lastName: "Fritz",
       price: 10.00,
-      marketing_emails: false,
+      opt_in: false,
       token: @stripe_helper.generate_card_token
     }
   end

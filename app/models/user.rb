@@ -10,6 +10,7 @@ class User < ApplicationRecord
   has_paper_trail
   scope :subscribers, -> { not_owners.where(subscriber: true) }
   scope :nonsubscribers, -> { where(subscriber: false) }
+  scope :opt_in, -> { where(opt_in: true) }
   scope :must_order_weekly, -> { subscribers.where("breads_per_week >= 1") }
   scope :every_other_week, -> { subscribers.where("breads_per_week = 0.5") }
   scope :owners, -> {where(email: [MAYA_EMAIL, RUSSELL_EMAIL])}

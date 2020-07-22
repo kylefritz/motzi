@@ -4,12 +4,12 @@ export default function EmailName({ onChange, disabled }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [marketingEmails, setMarketingEmails] = useState(false);
+  const [optIn, setOptIn] = useState(false);
 
   const handle = (setterFunc) => {
     return (event) => {
       setterFunc(event.target.value);
-      onChange({ email, firstName, lastName, marketingEmails });
+      onChange({ email, firstName, lastName, optIn });
     };
   };
 
@@ -57,11 +57,11 @@ export default function EmailName({ onChange, disabled }) {
         <input
           type="checkbox"
           className="form-check-input"
-          id="marketingEmails"
-          checked={marketingEmails}
-          onChange={handle(setMarketingEmails)}
+          id="optIn"
+          checked={optIn}
+          onChange={handle(setOptIn)}
         />
-        <label className="form-check-label" htmlFor="marketingEmails">
+        <label className="form-check-label" htmlFor="optIn">
           Receive newsletter from Motzi?
         </label>
       </div>
