@@ -28,6 +28,17 @@ ActiveAdmin.register Order do
         a "Receipt", href: order.stripe_receipt_url, target: '_blank', title: "Stripe Receipt"
       end
     end
+    column :retail_price do |order|
+      if order.stripe_charge_amount.present?
+        div number_to_currency(order.retail_price), class: "text-right"
+        price_diff = order.stripe_charge_amount - order.retail_price
+        unless price_diff == 0
+          cls = price_diff > 0 ? "success" : "danger"
+          prefix = price_diff > 0 ? "+" : ""
+          div "#{prefix}#{number_to_currency(price_diff)}".html_safe, class: "text-#{cls} text-right"
+        end
+      end
+    end
     actions defaults: false do |order|
       item "View", resource_path(order), class: "member_link"
       if order.menu_id == Setting.menu_id

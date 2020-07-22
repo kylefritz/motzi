@@ -4,6 +4,17 @@
 @import "active_admin/mixins";
 @import "active_admin/base";
 
+// colors like bootstrap
+.text-success {
+  color: #28a745 !important;
+}
+.text-danger {
+  color: #dc3545 !important;
+}
+.text-right {
+  text-align: right !important;
+}
+
 // margins like bootstrap
 .mt-0,
 .panel h4 {

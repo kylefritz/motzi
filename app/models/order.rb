@@ -17,6 +17,10 @@ class Order < ApplicationRecord
     self.includes(:user, :items).where(menu_id: menu_id).where("user_id is not null")
   end
 
+  def retail_price
+    order_items.map {|oi| oi.item.price * oi.quantity}.sum
+  end
+
   def item_list
     StringIO.new.tap do |s|
 

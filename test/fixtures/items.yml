@@ -10,15 +10,19 @@ pay_it_forward:
 classic:
   name: Classic
   description: same every week
+  price: 5
 
 pumpkin:
   name: Pumpkin
   description: For fall
+  price: 5
 
 rye:
   name: Rye Five Ways
   description: ryumm
+  price: 5
 
 donuts:
   name: Donuts
   description: You want them
+  price: 6
