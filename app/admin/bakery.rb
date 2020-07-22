@@ -33,10 +33,16 @@ ActiveAdmin.register_page "Dashboard" do
             }
           end
 
-          customers = User.customers
+          customers = User.subscribers
           weekly = compute("Weekly", customers.must_order_weekly)
-          by_type = [weekly, compute("Every Other Week", customers.every_other_week)]
-          table_for by_type, class: 'subscribers' do
+          biweekly = compute("Every Other Week", customers.every_other_week)
+          num_marketplace = Order.for_current_menu.marketplace.count
+          marketplace = {
+            type: "Marketplace",
+            ordered: num_marketplace,
+            total: num_marketplace,
+          }
+          table_for [weekly, biweekly, marketplace], class: 'subscribers' do
             column :type
             column :not_ordered
             column :ordered
@@ -103,7 +109,7 @@ ActiveAdmin.register_page "Dashboard" do
 
       column do
         panel "New Users - last 2 weeks" do
-          users = User.unscoped.customers.where("created_at > ?", 2.weeks.ago).includes(:credit_items, orders: {order_items: :item}).order('created_at desc').limit(20)
+          users = User.unscoped.subscribers.where("created_at > ?", 2.weeks.ago).includes(:credit_items, orders: {order_items: :item}).order('created_at desc').limit(20)
           credits = get_user_credits(users.map(&:id))
           table_for users do
             column ("user") { |u| u }

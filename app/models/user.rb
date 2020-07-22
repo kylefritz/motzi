@@ -8,11 +8,10 @@ class User < ApplicationRecord
   has_many :order_items, through: :orders
   has_many :visits, class_name: "Ahoy::Visit"
   has_paper_trail
-  scope :for_weekly_email, -> { where(send_weekly_email: true) }
-  scope :no_weekly_email, -> { where(send_weekly_email: false) }
-  scope :must_order_weekly, -> { customers.where("breads_per_week >= 1") }
-  scope :every_other_week, -> { customers.where("breads_per_week = 0.5") }
-  scope :customers, -> { not_owners.for_weekly_email }
+  scope :subscribers, -> { not_owners.where(subscriber: true) }
+  scope :nonsubscribers, -> { where(subscriber: false) }
+  scope :must_order_weekly, -> { subscribers.where("breads_per_week >= 1") }
+  scope :every_other_week, -> { subscribers.where("breads_per_week = 0.5") }
   scope :owners, -> {where(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   scope :not_owners, -> {where.not(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   scope :admin, -> {where(is_admin: true)}
@@ -43,10 +42,6 @@ class User < ApplicationRecord
     credits_used = OrderItem.where(order_id: self.orders.where("stripe_charge_id is null")).pluck('quantity').sum
 
     credits_purchased - credits_used
-  end
-
-  def subscriber?
-    self.credit_items.any?
   end
 
   def authenticate(password)

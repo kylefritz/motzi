@@ -26,7 +26,7 @@ class ReminderMailerTest < ActionMailer::TestCase
 
   test "day_of email without credits (marketplace)" do
     @user = users(:kyle)
-    @user.credit_items.delete_all
+    @user.update(subscriber: false)
     @order = @user.order_for_menu(@menu)
 
     @email = ReminderMailer.with(user: @user, menu: @menu, order_items: @order.order_items).day_of_email_day1

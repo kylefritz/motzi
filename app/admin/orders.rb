@@ -4,6 +4,7 @@ ActiveAdmin.register Order do
 
   scope :all, default: true
   scope("current menu") { |scope| scope.where(menu_id: Setting.menu_id) }
+  scope :marketplace
   scope :with_comments
   scope :skip
   scope :not_skip

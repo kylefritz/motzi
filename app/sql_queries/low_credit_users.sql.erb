@@ -4,7 +4,7 @@ select users.id as user_id, COALESCE(credit_balance, 0) as credit_balance
 from users
     left join user_credits on users.id = user_credits.user_id
 where credit_balance < <%= @balance %>
-    and send_weekly_email = TRUE
+    and subscriber
 <% if (owner_ids = User.owners.map(&:id).join(',')).present? %>
     and users.id not in (<%= owner_ids %>)
 <% end %>

@@ -84,6 +84,7 @@ export default function () {
     hashid: "Dot9gKn9w",
     credits: 9,
     breadsPerWeek: 1.0,
+    subscriber: true,
   };
 
   const order = {

@@ -36,7 +36,7 @@ export default function Subscription({ user, onRefreshUser }) {
             </div>
           </div>
         </div>
-        {user.sendWeeklyEmail && (
+        {user.subscriber && (
           <>
             <div className="col">
               <h5 className="text-center">Credits</h5>

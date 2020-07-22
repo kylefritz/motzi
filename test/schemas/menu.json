@@ -83,7 +83,7 @@
         "hashid",
         "credits",
         "breadsPerWeek",
-        "sendWeeklyEmail"
+        "subscriber"
       ],
       "properties": {
         "id": { "type": "integer" },
@@ -98,7 +98,7 @@
           "type": "number",
           "default": 1.0
         },
-        "sendWeeklyEmail": { "type": "boolean" }
+        "subscriber": { "type": "boolean" }
       }
     },
     "order": {

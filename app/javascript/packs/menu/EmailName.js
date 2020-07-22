@@ -4,12 +4,12 @@ export default function EmailName({ onChange, disabled }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [sendWeeklyEmail, setSendWeeklyEmail] = useState(false);
+  const [marketingEmails, setMarketingEmails] = useState(false);
 
   const handle = (setterFunc) => {
     return (event) => {
       setterFunc(event.target.value);
-      onChange({ email, firstName, lastName, sendWeeklyEmail });
+      onChange({ email, firstName, lastName, marketingEmails });
     };
   };
 
@@ -57,12 +57,12 @@ export default function EmailName({ onChange, disabled }) {
         <input
           type="checkbox"
           className="form-check-input"
-          id="sendWeeklyEmail"
-          checked={sendWeeklyEmail}
-          onChange={handle(setSendWeeklyEmail)}
+          id="marketingEmails"
+          checked={marketingEmails}
+          onChange={handle(setMarketingEmails)}
         />
-        <label className="form-check-label" htmlFor="sendWeeklyEmail">
-          Receive an email with week's menu?
+        <label className="form-check-label" htmlFor="marketingEmails">
+          Receive newsletter from Motzi?
         </label>
       </div>
     </>

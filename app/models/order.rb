@@ -8,6 +8,7 @@ class Order < ApplicationRecord
   scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> '' AND comments <> ?", BAKERS_CHOICE) }
   scope :not_skip, -> { where("skip is FALSE") }
   scope :skip, -> { where("skip is TRUE") }
+  scope :marketplace, -> { where("stripe_charge_amount is not NULL")}
 
   def self.for_current_menu
     self.for_menu_id(Menu.current.id)

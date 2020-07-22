@@ -5,7 +5,7 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
 
   def setup
     menus(:week2).make_current!
-    @user_ids = Set[*User.for_weekly_email.pluck(:id)]
+    @user_ids = Set[*User.subscribers.pluck(:id)]
     @user_ids_ordered = Set[*Menu.current.orders.pluck(:user_id)]
     @user_ids_to_remind = @user_ids - @user_ids_ordered
     @num_to_remind = @user_ids_to_remind.size

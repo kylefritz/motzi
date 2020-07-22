@@ -68,10 +68,10 @@ class UserTest < ActiveSupport::TestCase
     assert User.every_other_week.first.every_other_week?
   end
 
-  test "customers" do
-    assert_equal 4, User.customers.count, 'kf, adrian, ljf, jess'
-    User.all.update_all(send_weekly_email: false)
-    assert_equal 0, User.customers.count
+  test "subscribers" do
+    assert_equal 4, User.subscribers.count, 'kf, adrian, ljf, jess'
+    User.all.update_all(subscriber: false)
+    assert_equal 0, User.subscribers.count
   end
 
   test "order for menu" do

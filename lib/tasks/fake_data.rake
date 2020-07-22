@@ -34,7 +34,7 @@ namespace :fake_data do
 
     menu = Menu.current
     items = menu.menu_items
-    User.for_weekly_email.each do |user|
+    User.subscribers.each do |user|
       # 15% chance user forgets to order
       if rand() < 0.15
         next

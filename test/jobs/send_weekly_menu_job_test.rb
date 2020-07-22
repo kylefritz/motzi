@@ -8,7 +8,7 @@ class SendWeeklyMenuJobTest < ActiveJob::TestCase
   end
 
   test "send weekly menu email" do
-    assert_menu_emailed(User.for_weekly_email.count, :sun, '10:00 AM')
+    assert_menu_emailed(User.subscribers.count, :sun, '10:00 AM')
     assert_menu_emailed(0, :sun, '10:01 AM', 'dont email people twice')
   end
 

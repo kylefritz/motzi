@@ -9,7 +9,7 @@ class SendHaventOrderedReminderJob < ApplicationJob
     already_reminded = Set[*menu.messages.where(mailer: 'ReminderMailer#havent_ordered_email').pluck(:user_id)]
     already_ordered = Set[*menu.orders.pluck(:user_id)]
 
-    User.for_weekly_email.map do |user|
+    User.subscribers.map do |user|
       next if already_reminded.include?(user.id)
       next if already_ordered.include?(user.id)
 

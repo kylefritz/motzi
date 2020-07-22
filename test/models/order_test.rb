@@ -48,6 +48,11 @@ class OrderTest < ActiveSupport::TestCase
     assert_equal 40, o.retail_price
   end
 
+  test "marketplace" do
+    assert_equal 0, Order.marketplace.count
+    Order.update_all(stripe_charge_amount: 6.0)
+    assert_equal Order.count, Order.marketplace.count
+  end
 
   private
 

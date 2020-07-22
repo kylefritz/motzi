@@ -33,9 +33,9 @@ class MenuTest < ActiveSupport::TestCase
 
     refute week3.current?, 'week 2 starts as the current menu'
 
-    assert_email_sent(User.for_weekly_email.count) do
+    assert_email_sent(User.subscribers.count) do
       num_emails = week3.publish_to_subscribers!
-      assert_equal num_emails, User.for_weekly_email.count, 'sent emails returned'
+      assert_equal num_emails, User.subscribers.count, 'sent emails returned'
     end
 
     assert week3.current?

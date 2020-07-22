@@ -18,5 +18,5 @@ user_credits as (
     from users
         left join bought_credits on users.id = bought_credits.user_id
         left join used_credits on users.id = used_credits.user_id
-    where users.send_weekly_email
+    where users.subscriber
 )

@@ -1,6 +1,6 @@
 ActiveAdmin.register User do
   permit_params :first_name, :last_name, :email, :additional_email, :is_admin, \
-    :send_weekly_email, :breads_per_week, :phone
+    :subscriber, :marketing_emails, :breads_per_week, :phone
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'
 
   # search filters on index page
@@ -13,10 +13,10 @@ ActiveAdmin.register User do
   scope :all, default: true
   scope "Weekly", :must_order_weekly
   scope "Semi-weekly", :every_other_week
-  scope :customers
+  scope :subscribers
+  scope :nonsubscribers
   scope :owners
   scope :admin
-  scope :no_weekly_email
 
   action_item :order, except: [:index, :new] do
     if params[:id].present?
@@ -63,9 +63,10 @@ ActiveAdmin.register User do
       input :additional_email
       input :phone
       input :breads_per_week
+      input :marketing_emails
     end
     inputs 'Danger Zone' do
-      input :send_weekly_email
+      input :subscriber
       input :is_admin
     end
     actions
@@ -98,7 +99,7 @@ ActiveAdmin.register User do
         number_to_phone(user.phone)
       end
       row :breads_per_week
-      row :send_weekly_email
+      row :subscriber
       row :is_admin
       row :created_at
       row :updated_at

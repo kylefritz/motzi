@@ -21,7 +21,7 @@ export default function Order({
     stripeChargeAmount,
   } = order;
 
-  const isSubscriptionOrder = _.get(user, "sendWeeklyEmail");
+  const isSubscriptionOrder = _.get(user, "subscriber");
   return (
     <>
       <h2 id="menu-name">{name}</h2>

@@ -22,7 +22,6 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     new_user = User.unscoped.order("created_at desc").last
     assert_equal order_attrs[:email], new_user.email
     refute new_user.subscriber?, "created user isn't a subscriber"
-    refute new_user.send_weekly_email?, "shouldn't get weekly email"
 
     new_order = Order.last
     refute_nil new_order.stripe_charge_id
@@ -42,13 +41,13 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     refute_nil new_order.stripe_charge_amount
   end
 
-  test "set send_weekly_email" do
+  test "set marketing_emails" do
     order_attrs = build_order_attrs
-    order_attrs[:send_weekly_email] = true
+    order_attrs[:marketing_emails] = true
     assert_user_created { assert_ordered_emailed(order_attrs) }
 
     new_user = User.unscoped.order("created_at desc").last
-    assert new_user.send_weekly_email?, "shouldn't get weekly email"
+    assert new_user.marketing_emails?, "shouldn't get marketing emails"
   end
 
   test "$0 price is ok" do
@@ -88,7 +87,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
       firstName: "Jef",
       lastName: "Fritz",
       price: 10.00,
-      send_weekly_email: false,
+      marketing_emails: false,
       token: @stripe_helper.generate_card_token
     }
   end

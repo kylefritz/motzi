@@ -9,7 +9,7 @@ test("snapshot", () => {
     name: "kyle",
     credits: 6,
     breadsPerWeek: 1.0,
-    sendWeeklyEmail: true,
+    subscriber: true,
   };
   const wrapper = shallow(<Subscription user={user} deadlineDay="Sunday" />);
   expect(wrapper).toMatchSnapshot();
