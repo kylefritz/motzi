@@ -23,6 +23,10 @@ class Menu < ApplicationRecord
     @subscriber_note_html ||= MARKDOWN.render(self.subscriber_note || '').html_safe
   end
 
+  def menu_note_html
+    @menu_note_html ||= MARKDOWN.render(self.menu_note || '').html_safe
+  end
+
   def day_of_note_html
     @day_of_note_html ||= MARKDOWN.render(self.day_of_note || '').html_safe
   end

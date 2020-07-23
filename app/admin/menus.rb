@@ -29,13 +29,11 @@ ActiveAdmin.register Menu do
   index do
     selectable_column
     column :name do |menu|
-      para do
-        strong auto_link menu
-        if menu.current?
-          status_tag true, style: 'margin-left: 3px', label: 'Current'
-        end
+      div auto_link menu
+      if menu.current?
+        br
+        status_tag true, style: 'margin-left: 3px', label: 'Current'
       end
-      small truncate(menu.subscriber_note, length: 200)
     end
     column :items do |menu|
       ul style: 'list-style: 	disc outside none !important; white-space: nowrap' do
@@ -49,10 +47,9 @@ ActiveAdmin.register Menu do
       t = Time.zone.from_week_id(menu.week_id)
       small "#{t.strftime('%a %m/%d')}"
     end
-    column :day_of_note do |menu|
-      truncate(menu.day_of_note, length: 200)
+    column :stats do |menu|
+      render 'admin/menus/pay_what_you_can_stats', {menu: menu}
     end
-    column :created_at
     column :emailed_at
     actions defaults: false do |menu|
       item "View", admin_menu_path(menu), class: "member_link"
@@ -97,6 +94,12 @@ ActiveAdmin.register Menu do
       row :subscriber_note do
         menu.subscriber_note_html
       end
+      row :menu_note do
+        menu.menu_note_html
+      end
+      row :day_of_note do
+        menu.day_of_note_html
+      end
       row :menu_items do
         render 'builder'
       end
@@ -105,6 +108,11 @@ ActiveAdmin.register Menu do
       row :emailed_at do
         render 'email', { menu: menu }
       end
+    end
+
+    panel "Pay what you can" do
+      # NB: this is an N+1 query but let's leave it for now because it's valuable
+      render 'admin/menus/pay_what_you_can_stats', {menu: menu}
     end
 
     active_admin_comments

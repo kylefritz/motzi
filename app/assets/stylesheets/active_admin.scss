@@ -25,26 +25,9 @@
   margin-bottom: 0 !important;
 }
 
-// table wrapping
-.col-user a,
-.col-order a,
-.col-phone,
-.col-items,
-.col-menu,
-.col-name,
-.col-created_at,
-.col-updated_at {
-  white-space: nowrap;
-}
-.col-name small,
-#index_table_orders .col-items {
-  white-space: normal; // baker's note on menu
-}
-
+// table column overrides
 .col-comments {
-  p {
-    margin-bottom: 0.1em;
-  }
+  max-width: 200px;
 }
 
 // building menus

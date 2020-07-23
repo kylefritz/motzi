@@ -57,29 +57,7 @@ ActiveAdmin.register_page "Dashboard" do
         end
 
         panel "Pay what you can stats for menu" do
-          marketplace = Order.for_current_menu.includes(order_items: :item).marketplace
-          mp = {
-            type: "Market Place",
-            qty: marketplace.map {|o| o.order_items.map(&:quantity).sum}.sum,
-            retail: marketplace.map(&:retail_price).sum,
-            paid: marketplace.map(&:stripe_charge_amount).sum,
-          }
-
-          credit_items = CreditItem.for_current_menu.bought
-          ci = {
-            type: "Credits",
-            qty: credit_items.map(&:quantity).sum,
-            retail: credit_items.map(&:retail_price).sum,
-            paid: credit_items.map(&:stripe_charge_amount).sum,
-          }
-
-          table_for [mp, ci], class: 'subscribers' do
-            column :type
-            column :qty
-            column :retail do |r|number_to_currency r[:retail] end
-            column :paid do |r|number_to_currency r[:paid] end
-            column :diff do |r|price_diff(r[:retail], r[:paid]) end
-          end
+          render 'admin/menus/pay_what_you_can_stats', {menu: Menu.current}
         end
       end
 
