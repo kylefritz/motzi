@@ -25,6 +25,9 @@ export default function Marketplace({ menu, onCreateOrder }) {
     if (_.isEmpty(emailName.email)) {
       return alert("Enter email!");
     }
+    if (!/\S+@\S+\.\S+/.test(emailName.email)) {
+      return alert("Invalid email");
+    }
 
     console.log("handleCardToken", { token, price });
     setSubmitting(true);
@@ -97,7 +100,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
         disabled={menuClosed}
       />
       <Payment
-        price={price}
+        price={_.isEmpty(cart) ? null : price}
         stripeApiKey={gon.stripeApiKey}
         onCardToken={handleCardToken}
         submitting={submitting}

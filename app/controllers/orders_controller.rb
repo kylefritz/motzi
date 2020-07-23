@@ -34,6 +34,11 @@ class OrdersController < ApplicationController
       order_params = params.permit(:comments, :skip).merge(menu: menu, user: current_user)
 
       order = Order.create!(order_params)
+      unless order.skip?
+        if params.fetch(:cart).empty?
+          raise OrderError.new("Add an item to your cart")
+        end
+      end
       params.fetch(:cart).each do |cart_item_params|
         day1_pickup = !(Setting.pickup_day2.casecmp?(cart_item_params[:day])) # default to day 1
         order.order_items.create!(cart_item_params.permit(:item_id, :quantity).merge(day1_pickup: day1_pickup))

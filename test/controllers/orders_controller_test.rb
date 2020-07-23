@@ -12,6 +12,30 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "hashid_user cant place empty order" do
+    order = order_attrs(users(:ljf).hashid)
+    order[:cart] = []
+    before_deadline do
+      refute_ordered do
+        post '/orders.json', params: order, as: :json
+      end
+    end
+    assert_response :unprocessable_entity
+  end
+
+  test "hashid_user can skip" do
+    order = order_attrs(users(:ljf).hashid)
+    order[:cart] = []
+    order[:skip] = true
+    before_deadline do
+      assert_ordered do
+        post '/orders.json', params: order, as: :json
+      end
+    end
+    assert_response :success
+    assert Order.last.skip
+  end
+
   test "hashid_user cant order past deadline" do
     after_deadline do
       refute_order_placed users(:ljf).hashid
