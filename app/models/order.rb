@@ -27,6 +27,7 @@ class Order < ApplicationRecord
 
       prior_day_had_items = false
 
+      pay_it_forwards = []
       day1, day2 = order_items.partition(&:day1_pickup)
       [
         [Setting.pickup_day1_abbr, day1],
@@ -39,7 +40,13 @@ class Order < ApplicationRecord
         prior_day_had_items = true
 
         counts = Hash.new(0).tap do |counts|
-          day_items.each { |oi| counts[oi.item.name] += oi.quantity }
+          day_items.each do |oi|
+            if oi.item.pay_it_forward?
+              pay_it_forwards.push(oi)
+            else
+              counts[oi.item.name] += oi.quantity
+            end
+          end
         end
         day_item_names = counts.keys.natural_sort
         day_item_names.each_with_index do |name, i|
@@ -52,6 +59,14 @@ class Order < ApplicationRecord
           s << "#{name}#{is_last ? "" : ", "}"
         end
 
+      end
+      unless pay_it_forwards.empty?
+        num = pay_it_forwards.map(&:quantity).sum
+        s << "; "
+        if num > 1
+          s << "#{num}x "
+        end
+        s << pay_it_forwards.first.item.name
       end
     end.string
   end

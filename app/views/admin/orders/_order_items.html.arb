@@ -16,13 +16,26 @@ def for_day(day_name, order_items)
           strong "#{count}x "
         end
 
-        is_last = i+1 == item_names.size
-        span "#{name}#{is_last ? "": ","}"
+        is_last = i + 1 == item_names.size
+        span "#{name}#{is_last ? "" : ","}"
       end
     end
   end
 end
 
-day1, day2 = order_items.partition(&:day1_pickup)
+pay_it_forward, rest = order_items.partition { |oi| oi.item.pay_it_forward? }
+day1, day2 = rest.partition(&:day1_pickup)
 for_day(Setting.pickup_day1_abbr, day1)
 for_day(Setting.pickup_day2_abbr, day2)
+if pay_it_forward.any?
+  num = pay_it_forward.map(&:quantity).sum
+  div do
+    em do
+      if num > 1
+        strong "#{num}x "
+      end
+
+      span pay_it_forward.first.item.name
+    end
+  end
+end

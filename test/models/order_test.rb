@@ -39,13 +39,23 @@ class OrderTest < ActiveSupport::TestCase
     assert_equal "Tue: Donuts, Rye Five Ways", orders(:kyle_week2).item_list
     assert_equal 11, orders(:kyle_week2).retail_price
 
-    o = orders(:ljf_week1)
-    o.order_items.create!(item: items(:pumpkin), quantity: 5, day1_pickup: true)
-    o.order_items.create!(item: items(:pumpkin), quantity: 1, day1_pickup: true)
-    o.order_items.create!(item: items(:classic), quantity: 1, day1_pickup: true)
-    assert_equal "Tue: Classic, 6x Pumpkin; Thu: Classic", o.item_list
+    orders(:ljf_week1).tap do |o|
+      o.order_items.create!(item: items(:pumpkin), quantity: 5, day1_pickup: true)
+      o.order_items.create!(item: items(:pumpkin), quantity: 1, day1_pickup: true)
+      o.order_items.create!(item: items(:classic), quantity: 1, day1_pickup: true)
+      assert_equal "Tue: Classic, 6x Pumpkin; Thu: Classic", o.item_list
 
-    assert_equal 40, o.retail_price
+      assert_equal 40, o.retail_price
+    end
+
+    Order.create!(menu: menus(:week1), user: users(:kyle)).tap do |o|
+      o.order_items.create!(item: items(:pumpkin), quantity: 1, day1_pickup: true)
+      o.order_items.create!(item: items(:pay_it_forward), quantity: 1, day1_pickup: true)
+      assert_equal "Tue: Pumpkin; Pay it forward", o.item_list
+
+      o.order_items.create!(item: items(:pay_it_forward), quantity: 2, day1_pickup: true)
+      assert_equal "Tue: Pumpkin; 3x Pay it forward", o.item_list
+    end
   end
 
   test "marketplace" do
