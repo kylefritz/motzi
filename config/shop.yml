@@ -7,7 +7,7 @@
 # if one shop has a setting, the other shop should have one too
 
 motzi:
-  name: Motzi
+  name: Motzi Bread
   short_name: Motzi
   marketing_domain: motzibread.com
   app_domain: motzibread.herokuapp.com
