@@ -19,3 +19,10 @@ jinji:
     - 7.00 # 26
     - 8.00 # 13
     - 8.50 # 6
+
+dutch_courage:
+  name: Dutch Courage
+  credit_prices:
+    - 7.00 # 26
+    - 8.00 # 13
+    - 8.50 # 6
