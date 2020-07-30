@@ -1,8 +1,8 @@
 include PriceHelper
 ActiveAdmin.register_page "Dashboard" do
-  menu priority: 1, label: "Bakery"
+  menu priority: 1
 
-  content title: "Bakery" do
+  content title: "Hello friend" do
     menu = Menu.current
 
     columns do

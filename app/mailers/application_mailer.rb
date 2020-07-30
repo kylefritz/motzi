@@ -1,5 +1,5 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: 'Motzi Bread <no-reply@motzibread.com>', reply_to: 'motzi.bread@gmail.com'
+  default from: "#{Setting.shop.name} <no-reply@#{Setting.shop.marketing_domain}>", reply_to: Setting.shop.email_reply_to
   layout 'mailer'
 
   add_template_helper DeadlineHelper

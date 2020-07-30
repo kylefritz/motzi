@@ -62,7 +62,7 @@ export default function EmailName({ onChange, disabled }) {
           onChange={handle(setOptIn)}
         />
         <label className="form-check-label" htmlFor="optIn">
-          Receive newsletter from Motzi?
+          Receive newsletter?
         </label>
       </div>
     </>

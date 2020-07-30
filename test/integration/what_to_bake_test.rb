@@ -29,7 +29,7 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
 
     assert_el_count 1, '#pickup-list'
     assert_el_count 2, '#pickup-list tbody tr', 'adrian, kyle'
-    assert_el_count 2, '#by-bread .column', 'classic, pumpkin'
+    assert_el_count 2, '#by-item .column', 'classic, pumpkin'
   end
 
   test "day2 pickup list" do

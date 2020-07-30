@@ -1,4 +1,4 @@
-<h2>Thanks for ordering from Motzi.</h2>
+<h2>Thanks for ordering from <%= Setting.shop.name %>.</h2>
 
 <p>Your order: <%= @order.item_list%></p>
 <% if @order.stripe_charge_amount.present? %>

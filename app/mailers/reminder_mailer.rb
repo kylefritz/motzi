@@ -17,7 +17,7 @@ class ReminderMailer < ApplicationMailer
 
     mail(to: %("#{@user.name}" <#{@user.email}>),
          cc: @user.additional_email,
-         subject: "Motzi Bread pick up today!",
+         subject: "Pick up #{Setting.shop.name} today!",
          template_name: 'day_of_email')
   end
 
@@ -27,6 +27,6 @@ class ReminderMailer < ApplicationMailer
 
     mail(to: %("#{@user.name}" <#{@user.email}>),
          cc: @user.additional_email,
-         subject: "Make your selection soon! Motzi Bread - #{@menu.name}")
+         subject: "Make your selection soon! #{Setting.shop.name} - #{@menu.name}")
   end
 end

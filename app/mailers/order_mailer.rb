@@ -9,6 +9,6 @@ class OrderMailer < ApplicationMailer
 
     mail(to: %("#{@user.name}" <#{@user.email}>),
          cc: @user.additional_email,
-         subject: "Order Confirmation - Motzi Bread - #{@menu.name}")
+         subject: "Order Confirmation - #{Setting.shop.name} - #{@menu.name}")
   end
 end

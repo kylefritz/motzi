@@ -28,7 +28,7 @@ export default class ErrorBoundary extends React.Component {
       // render fallback UI
       return (
         <>
-          <h2>There was an error in this Bread software :(</h2>
+          <h2>There was an error in this software :(</h2>
           <div className="mt-3">
             <button
               onClick={() => Sentry.showReportDialog({ eventId })}

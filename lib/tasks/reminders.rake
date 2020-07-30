@@ -8,7 +8,7 @@ namespace :reminders do
     end
   end
 
-  desc "Morning, day-of reminder to pick-up your bread"
+  desc "Morning, day-of reminder to pick-up your order"
   task :pick_up_bread => :environment do
     if Setting.automated_reminder_emails?
       SendDayOfReminderJob.perform_now

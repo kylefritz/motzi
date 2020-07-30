@@ -7,7 +7,11 @@
 # if one shop has a setting, the other shop should have one too
 
 motzi:
-  name: Motzi Bread
+  name: Motzi
+  short_name: Motzi
+  marketing_domain: motzibread.com
+  app_domain: motzibread.herokuapp.com
+  email_reply_to: motzi.bread@gmail.com
   credit_prices:
     - 6.50 # 26
     - 7.00 # 13
@@ -15,6 +19,10 @@ motzi:
 
 jinji:
   name: Jinji Chocolate
+  short_name: Jinji
+  marketing_domain: jinjichocolate.com
+  app_domain: jinjichocolate.herokuapp.com
+  email_reply_to: info@jinjichocolate.com
   credit_prices:
     - 7.00 # 26
     - 8.00 # 13
@@ -22,6 +30,10 @@ jinji:
 
 dutch_courage:
   name: Dutch Courage
+  short_name: Dutch Courage
+  marketing_domain: dutchcouragebar.com
+  app_domain: dutchcourage.herokuapp.com
+  email_reply_to: bjdorr@gmail.com
   credit_prices:
     - 7.00 # 26
     - 8.00 # 13

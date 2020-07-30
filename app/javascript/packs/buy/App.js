@@ -99,7 +99,7 @@ export default function Buy({ onComplete, user: passedUser = null }) {
   if (receipt) {
     return (
       <div className="alert alert-success" role="alert">
-        <h2>Thanks for supporting Motzi!!</h2>
+        <h2>Thanks for your support!!</h2>
         <p className="text-center my-3">
           <a href={receipt} target="blank">
             Here's your receipt

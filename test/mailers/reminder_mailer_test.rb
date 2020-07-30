@@ -15,8 +15,8 @@ class ReminderMailerTest < ActionMailer::TestCase
     assert_emails(1) { @email.deliver_now }
 
     assert_equal [@user.email], @email.to
-    assert_equal 'Motzi Bread pick up today!', @email.subject
-    assert_in_email 'Reminder to come grab your bread today'
+    assert_equal "Pick up #{Setting.shop.name} today!", @email.subject
+    assert_in_email 'Reminder to come grab your order today'
     assert_in_email 'You ordered'
     assert_in_email 'Rye Five', 'item'
     assert_in_email 'Donuts', 'add-on'

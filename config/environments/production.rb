@@ -61,7 +61,7 @@ Rails.application.configure do
   # config.active_job.queue_name_prefix = "motzi_production"
 
   # Setup the mailer config
-  config.action_mailer.default_url_options = { host: 'motzibread.herokuapp.com' }
+  config.action_mailer.default_url_options = { host: Setting.shop.app_domain }
   config.action_mailer.perform_caching = false
   config.action_mailer.perform_deliveries = true
   # from send grid
@@ -69,7 +69,7 @@ Rails.application.configure do
   config.action_mailer.smtp_settings = {
     :user_name => ENV['SENDGRID_USERNAME'],
     :password => ENV['SENDGRID_PASSWORD'],
-    :domain => 'motzibread.com',
+    :domain => Setting.shop.marketing_domain,
     :address => 'smtp.sendgrid.net',
     :port => 587,
     :authentication => :plain,
