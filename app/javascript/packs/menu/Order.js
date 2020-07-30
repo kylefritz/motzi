@@ -9,6 +9,7 @@ export default function Order({
   menu,
   user,
   order,
+  bundles,
   onRefreshUser,
   onEditOrder,
 }) {
@@ -55,7 +56,7 @@ export default function Order({
 
       {isSubscriptionOrder && (
         <div className="mt-5">
-          <Subscription {...{ user, onRefreshUser, deadlineDay }} />
+          <Subscription {...{ user, onRefreshUser, deadlineDay, bundles }} />
         </div>
       )}
     </>

@@ -3,13 +3,14 @@ import { mount } from "enzyme";
 
 import { UserContext } from "menu/Contexts";
 import Menu from "menu/Menu";
+import mockMenuJson from "./mockMenuJson";
 
-export default function renderMenu({ user, menu, order }) {
+export default function renderMenu(mockMenuJsonOptions) {
   const onCreateOrder = jest.fn();
-
+  const data = mockMenuJson(mockMenuJsonOptions);
   const wrapper = mount(
-    <UserContext.Provider value={user}>
-      <Menu {...{ user, order, menu }} onCreateOrder={onCreateOrder} />
+    <UserContext.Provider value={data.user}>
+      <Menu {...data} onCreateOrder={onCreateOrder} />
     </UserContext.Provider>
   );
 

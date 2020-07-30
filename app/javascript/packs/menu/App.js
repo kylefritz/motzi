@@ -23,6 +23,7 @@ export function separatePayItForwardAndSkip(menu) {
 }
 
 function Layout({
+  bundles,
   error,
   fetchMenu,
   handleCreateOrder,
@@ -57,6 +58,7 @@ function Layout({
           user,
           order,
           menu,
+          bundles,
           onRefreshUser: fetchMenu,
           onEditOrder: handleEditOrder,
         }}
@@ -74,6 +76,7 @@ function Layout({
         user,
         order,
         menu,
+        bundles,
         onCreateOrder: handleCreateOrder,
         onRefreshUser: fetchMenu,
       }}

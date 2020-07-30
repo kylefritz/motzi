@@ -2,7 +2,7 @@
   "definitions": {},
   "$id": "/menu.json",
   "type": "object",
-  "required": ["menu", "user", "order"],
+  "required": ["menu", "user", "order", "bundles"],
   "properties": {
     "menu": {
       "type": "object",
@@ -20,7 +20,9 @@
         "subscriberNote",
         "createdAt",
         "items",
-        "isCurrent"
+        "isCurrent",
+        "payItForward",
+        "payWhatYouCan"
       ],
       "properties": {
         "id": { "type": "integer" },
@@ -70,7 +72,9 @@
             }
           }
         },
-        "isCurrent": { "type": "boolean" }
+        "isCurrent": { "type": "boolean" },
+        "payItForward": { "type": "boolean" },
+        "payWhatYouCan": { "type": "boolean" }
       }
     },
     "user": {
@@ -129,6 +133,33 @@
         "skip": { "type": "boolean" },
         "stripeReceiptUrl": { "type": ["string", "null"] },
         "stripeChargeAmount": { "type": ["number", "null"] }
+      }
+    },
+    "bundles": {
+      "type": "array",
+      "title": "bundles",
+      "items": {
+        "type": "object",
+        "title": "bundle",
+        "required": [
+          "category",
+          "name",
+          "description",
+          "credits",
+          "price",
+          "breadsPerWeek"
+        ],
+        "properties": {
+          "category": { "type": ["string", "null"] },
+          "name": { "type": "string" },
+          "description": { "type": ["string", "null"] },
+          "price": { "type": "number" },
+          "credits": { "type": "integer" },
+          "breadsPerWeek": {
+            "type": "number",
+            "default": 1.0
+          }
+        }
       }
     }
   }

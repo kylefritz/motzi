@@ -1,19 +1,16 @@
 require("../configure_enzyme");
 
-import mockMenuJson from "./mockMenuJson";
 import renderMenu from "./MarketPlace.helpers";
 
 test("marketplace render menu", () => {
-  const menuJson = mockMenuJson();
-  const menu = renderMenu({ menu: menuJson.menu });
+  const menu = renderMenu({ order: false, user: false });
 
   expect(menu.items().length).toBe(4);
   expect(menu.submitOrderBtn().text()).toBe("Select an item");
 });
 
 test("marketplace, add item to cart", () => {
-  const menuJson = mockMenuJson();
-  const menu = renderMenu({ menu: menuJson.menu, user: menuJson.user });
+  const menu = renderMenu({ order: false, user: false });
   expect(menu.cart().text()).toContain("No items");
 
   // click "thurs"

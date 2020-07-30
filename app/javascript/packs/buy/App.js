@@ -8,27 +8,33 @@ import Choice from "./Choice";
 import Payment from "./Payment";
 import PayWhatYouCan from "./PayWhatYouCan";
 
-export default function Buy({ onComplete, user: passedUser = null }) {
+export default function Buy({
+  onComplete,
+  user: passedUser = null,
+  bundles: passedBundles = [],
+}) {
   const [credits, setCredits] = useState();
   const [price, setPrice] = useState();
   const [breadsPerWeek, setBreadsPerWeek] = useState();
   const [user, setUser] = useState(passedUser);
+  const [bundles, setBundles] = useState(passedBundles);
   const [error, setError] = useState();
   const [receipt, setReceipt] = useState();
   const [submitting, setSubmitting] = useState(false);
 
   // what is the current user?
   useEffect(() => {
-    if (user) {
+    if (user && bundles.length) {
       return;
     }
     const { uid } = queryString.parse(location.search);
     const params = { uid };
     axios
       .get("/menu.json", { params })
-      .then(({ data: { user } }) => {
+      .then(({ data: { user, bundles: nextBundles } }) => {
         if (user) {
           setUser(user);
+          setBundles(nextBundles);
           Sentry.configureScope((scope) => scope.setUser(user));
         } else {
           setError("We can't load your user account");
@@ -48,13 +54,9 @@ export default function Buy({ onComplete, user: passedUser = null }) {
     console.log("selected", credits, "for", "price");
   };
 
-  const handlePriceChanged = (priceString) => {
-    if (priceString) {
-      const newPrice = parseFloat(priceString);
-
-      if (_.isFinite(newPrice) && newPrice > 0) {
-        setPrice(newPrice);
-      }
+  const handlePriceChanged = (newPrice) => {
+    if (_.isNumber(newPrice) && newPrice > 0) {
+      setPrice(newPrice);
     }
   };
 
@@ -121,47 +123,27 @@ export default function Buy({ onComplete, user: passedUser = null }) {
     );
   }
 
+  const grouped = Object.entries(
+    _.groupBy(bundles, ({ category }) => category)
+  );
+
   return (
     <div className="alert alert-info padding-x-mobile-5px" role="alert">
       <h2 className="mb-3" style={{ fontSize: "1.8rem" }}>
         Buy credits
       </h2>
-
-      <h6>6-month</h6>
-      <div>
-        <Choice
-          breadsPerWeek={1.0}
-          credits={26}
-          price={6.5}
-          total={169}
-          onChoose={handleChoose}
-        />
-        <Choice
-          breadsPerWeek={0.5}
-          credits={13}
-          price={7.0}
-          total={91}
-          onChoose={handleChoose}
-        />
-      </div>
-
-      <h6>3-month</h6>
-      <div>
-        <Choice
-          breadsPerWeek={1.0}
-          credits={13}
-          price={7.0}
-          total={91}
-          onChoose={handleChoose}
-        />
-        <Choice
-          breadsPerWeek={0.5}
-          credits={6}
-          price={7.5}
-          total={46}
-          onChoose={handleChoose}
-        />
-      </div>
+      {grouped.map(([category, choices]) => {
+        return (
+          <div key={category}>
+            <h6>{category}</h6>
+            <div>
+              {choices.map((choice) => (
+                <Choice key={choice.name} {...choice} onChoose={handleChoose} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
       {credits && price && (
         <>
           <h4>Payment amount</h4>

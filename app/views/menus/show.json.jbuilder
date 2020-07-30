@@ -15,6 +15,9 @@ json.menu do
   json.day2 Setting.pickup_day2
   json.day1_deadline_day Setting.pickup_day1_deadline_day
   json.day2_deadline_day Setting.pickup_day2_deadline_day
+
+  json.pay_it_forward Setting.shop.pay_it_forward
+  json.pay_what_you_can Setting.shop.pay_what_you_can
 end
 
 json.user do
@@ -34,4 +37,8 @@ json.order do
   else
     json.null!
   end
+end
+
+json.bundles CreditBundle.all do |b|
+  json.extract! b, :category, :name, :description, :credits, :price, :breads_per_week
 end
