@@ -14,7 +14,12 @@ class SettingTest < ActiveSupport::TestCase
   test "has important keys" do
     refute_nil Setting.shop.id
     refute_nil Setting.shop.name
-    refute_nil Setting.shop.credit_prices
+    refute_nil Setting.shop.short_name
+    refute_nil Setting.shop.marketing_domain
+    refute_nil Setting.shop.app_domain
+    refute_nil Setting.shop.email_reply_to
+    refute_nil Setting.shop.pay_it_forward
+    refute_nil Setting.shop.pay_what_you_can
   end
 
   test "non-existant shop" do
