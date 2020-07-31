@@ -13,6 +13,7 @@ import useCart from "./useCart";
 import { getDayContext } from "./Contexts";
 
 export default function Menu({
+  bundles,
   menu,
   order,
   user,
@@ -49,7 +50,7 @@ export default function Menu({
     // time to buy credits!
     return (
       <>
-        <Subscription {...{ user }} />
+        <Subscription {...{ user, bundles }} />
         <p className="my-2">
           We love baking yummy things for you but you're out of credits.
         </p>
@@ -60,7 +61,7 @@ export default function Menu({
 
   return (
     <>
-      <Subscription {...{ user, onRefreshUser }} />
+      <Subscription {...{ user, onRefreshUser, bundles }} />
 
       {/* if low, show nag to buy credits*/}
       {user && user.credits < 4 && <BuyCredits onComplete={onRefreshUser} />}

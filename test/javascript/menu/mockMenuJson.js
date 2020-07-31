@@ -1,6 +1,9 @@
 import { separatePayItForwardAndSkip } from "menu/App";
 
-export default function () {
+export default function ({
+  order: withOrder = true,
+  user: withUser = true,
+} = {}) {
   const menu = separatePayItForwardAndSkip({
     id: 921507399,
     name: "week 5",
@@ -105,5 +108,43 @@ export default function () {
     ],
   };
 
-  return { menu, order, user };
+  const bundles = [
+    {
+      category: "6-Month",
+      name: "Weekly",
+      credits: 26,
+      price: 169,
+      breadsPerWeek: 1,
+    },
+    {
+      category: "6-Month",
+      name: "Bi-Weekly",
+      credits: 13,
+      price: 91,
+      breadsPerWeek: 0.5,
+    },
+    {
+      category: "3-Month",
+      name: "Weekly",
+      credits: 13,
+      price: 91,
+      breadsPerWeek: 1,
+    },
+    {
+      category: "3-Month",
+      name: "Bi-Weekly",
+      credits: 6,
+      price: 46,
+      breadsPerWeek: 0.5,
+    },
+  ];
+
+  let data = { menu, bundles };
+  if (withUser) {
+    data = { ...data, user };
+  }
+  if (withOrder) {
+    data = { ...data, order };
+  }
+  return data;
 }

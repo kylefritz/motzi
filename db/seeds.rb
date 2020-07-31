@@ -9,3 +9,10 @@ unless Item.pay_it_forward
     description: 'Support some else in need. Make a 1.5 loaf donation.',
   )
 end
+
+unless Rails.env.test?
+  unless CreditBundle.any?
+    CreditBundle.create!("6-Month", credits: 25, price: 125, breads_per_week: 1.0)
+    CreditBundle.create!("3-Month", credits: 12, price: 72, breads_per_week: 1.0)
+  end
+end

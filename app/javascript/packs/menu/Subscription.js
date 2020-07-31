@@ -17,7 +17,7 @@ export const humanizeBreadsPerWeek = (perWeek) => {
   return `${perWeek} breads per week`;
 };
 
-export default function Subscription({ user, onRefreshUser }) {
+export default function Subscription({ user, onRefreshUser, bundles }) {
   const [showBuy, setShowBuy] = useState(false);
 
   return (
@@ -57,7 +57,9 @@ export default function Subscription({ user, onRefreshUser }) {
           </>
         )}
       </div>
-      {showBuy && <BuyCredits onComplete={onRefreshUser} user={user} />}
+      {showBuy && (
+        <BuyCredits onComplete={onRefreshUser} {...{ user, bundles }} />
+      )}
     </>
   );
 }

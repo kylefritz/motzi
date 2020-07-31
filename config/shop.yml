@@ -4,7 +4,7 @@
 # kind of a fine line to draw :)
 #
 #
-# if one shop has a setting, the other shop should have one too
+# if one shop has a setting, the other shops should have it too
 
 motzi:
   name: Motzi Bread
@@ -12,10 +12,8 @@ motzi:
   marketing_domain: motzibread.com
   app_domain: motzibread.herokuapp.com
   email_reply_to: motzi.bread@gmail.com
-  credit_prices:
-    - 6.50 # 26
-    - 7.00 # 13
-    - 7.50 # 6
+  pay_it_forward: true
+  pay_what_you_can: true
 
 jinji:
   name: Jinji Chocolate
@@ -23,10 +21,8 @@ jinji:
   marketing_domain: jinjichocolate.com
   app_domain: jinjichocolate.herokuapp.com
   email_reply_to: info@jinjichocolate.com
-  credit_prices:
-    - 7.00 # 26
-    - 8.00 # 13
-    - 8.50 # 6
+  pay_it_forward: false
+  pay_what_you_can: false
 
 dutch_courage:
   name: Dutch Courage
@@ -34,7 +30,5 @@ dutch_courage:
   marketing_domain: dutchcouragebar.com
   app_domain: dutchcourage.herokuapp.com
   email_reply_to: bjdorr@gmail.com
-  credit_prices:
-    - 7.00 # 26
-    - 8.00 # 13
-    - 8.50 # 6
+  pay_it_forward: false
+  pay_what_you_can: false

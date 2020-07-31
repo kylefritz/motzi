@@ -2,29 +2,11 @@ import React from "react";
 import { mount } from "enzyme";
 
 import Marketplace from "menu/Marketplace";
+import mockMenuJson from "./mockMenuJson";
+import stripeMock from "./stripeMock";
 
-export default function renderMenu({ menu }) {
+export default function renderMenu(menuJsonOptions) {
   window.gon = { stripeApiKey: "no-such-key" };
-
-  // Mocking Stripe object
-  const elementMock = {
-    mount: jest.fn(),
-    destroy: jest.fn(),
-    on: jest.fn(),
-    update: jest.fn(),
-  };
-
-  const elementsMock = {
-    create: jest.fn().mockReturnValue(elementMock),
-  };
-
-  const stripeMock = {
-    elements: jest.fn().mockReturnValue(elementsMock),
-    createToken: jest.fn(() => Promise.resolve()),
-    createSource: jest.fn(() => Promise.resolve()),
-  };
-
-  // Set the global Stripe
   window.Stripe = jest.fn().mockReturnValue(stripeMock);
 
   // Ex. of a token successfully created mock
@@ -46,7 +28,10 @@ export default function renderMenu({ menu }) {
   const onCreateOrder = jest.fn(() => Promise.resolve());
 
   const wrapper = mount(
-    <Marketplace menu={menu} onCreateOrder={onCreateOrder} />
+    <Marketplace
+      {...mockMenuJson(menuJsonOptions)}
+      onCreateOrder={onCreateOrder}
+    />
   );
 
   return new MarketplaceWrapper(wrapper, onCreateOrder);
