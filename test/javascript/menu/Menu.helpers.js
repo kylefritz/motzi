@@ -21,22 +21,25 @@ class MenuWrapper {
     this.wrapper = wrapper;
     this.onCreateOrder = onCreateOrder;
   }
+  find(selector) {
+    return this.wrapper.find(selector);
+  }
   cart() {
-    return this.wrapper.find("Cart");
+    return this.find("Cart");
   }
   cartTotal() {
     return this.cart().find("Total").text();
   }
   submitOrderBtn() {
-    const btn = this.wrapper.find("button[type='submit']");
+    const btn = this.find("button[type='submit']");
     expect(btn.text()).toContain("Order");
     return btn;
   }
   items() {
-    return this.wrapper.find("Item");
+    return this.find("Item");
   }
   skipBtn() {
-    return this.wrapper.find("SkipThisWeek").find("button");
+    return this.find("SkipThisWeek").find("button");
   }
   submitOrder() {
     this.submitOrderBtn().simulate("click");

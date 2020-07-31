@@ -57,20 +57,23 @@ class MarketplaceWrapper {
     this.wrapper = wrapper;
     this.onCreateOrder = onCreateOrder;
   }
+  find(selector) {
+    return this.wrapper.find(selector);
+  }
   cart() {
-    return this.wrapper.find("Cart");
+    return this.find("Cart");
   }
   cartTotal() {
     return this.cart().find("Total").text();
   }
   submitOrderBtn() {
-    return this.wrapper.find("button[type='submit']");
+    return this.find("button[type='submit']");
   }
   items() {
-    return this.wrapper.find("Item");
+    return this.find("Item");
   }
   skipBtn() {
-    return this.wrapper.find("SkipThisWeek").find("button");
+    return this.find("SkipThisWeek").find("button");
   }
   submitOrder() {
     const btn = this.submitOrderBtn();
@@ -81,10 +84,12 @@ class MarketplaceWrapper {
     return this.onCreateOrder.mock.calls[0][0];
   }
   fillUser(firstName, lastName, email) {
-    const inputs = this.wrapper.find("input");
-    // idk why but the email field needs to get automated first
-    inputs.at(2).simulate("change", { target: { value: email } });
-    inputs.at(0).simulate("change", { target: { value: firstName } });
-    inputs.at(1).simulate("change", { target: { value: lastName } });
+    const inputs = this.find("input");
+    const setInput = (index, value) =>
+      inputs.at(index).simulate("change", { target: { value } });
+
+    setInput(0, firstName);
+    setInput(1, lastName);
+    setInput(2, email);
   }
 }

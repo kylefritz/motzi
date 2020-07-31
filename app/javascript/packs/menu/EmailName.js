@@ -1,18 +1,22 @@
 import React, { useState } from "react";
 
 export default function EmailName({ onChange, disabled }) {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [optIn, setOptIn] = useState(false);
+  const [account, setAccount] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    optIn: false,
+  });
 
-  const handle = (setterFunc) => {
+  const handle = (fieldName) => {
     return (event) => {
-      setterFunc(event.target.value);
-      onChange({ email, firstName, lastName, optIn });
+      const fieldValue = event.target.value;
+      const nextAccount = { ...account, [fieldName]: fieldValue };
+      setAccount(nextAccount);
+      onChange(nextAccount);
     };
   };
-
+  const { firstName, lastName, email, optIn } = account;
   return (
     <>
       <h5>Your info</h5>
@@ -21,8 +25,9 @@ export default function EmailName({ onChange, disabled }) {
           First Name
           <input
             required
+            name="firstName"
             value={firstName}
-            onChange={handle(setFirstName)}
+            onChange={handle("firstName")}
             className="form-control"
             disabled={disabled}
           />
@@ -33,8 +38,9 @@ export default function EmailName({ onChange, disabled }) {
           Last Name
           <input
             required
+            name="lastName"
             value={lastName}
-            onChange={handle(setLastName)}
+            onChange={handle("lastName")}
             className="form-control"
             disabled={disabled}
           />
@@ -46,8 +52,9 @@ export default function EmailName({ onChange, disabled }) {
           <input
             required
             type="email"
+            name="email"
             value={email}
-            onChange={handle(setEmail)}
+            onChange={handle("email")}
             className="form-control"
             disabled={disabled}
           />
@@ -58,8 +65,9 @@ export default function EmailName({ onChange, disabled }) {
           type="checkbox"
           className="form-check-input"
           id="optIn"
+          name="optIn"
           checked={optIn}
-          onChange={handle(setOptIn)}
+          onChange={handle("optIn")}
         />
         <label className="form-check-label" htmlFor="optIn">
           Receive newsletter?

@@ -43,8 +43,8 @@ test("marketplace, add item to cart", () => {
   // order is the 0th arg of the 0th call
   const order = menu.submittedOrder();
   expect(order).toBeTruthy();
-  const { cart } = order;
-  console.log("submitted card", cart);
+  const { email, firstName, lastName, cart } = order;
+  console.log("submitted order", order);
 
   // uid is assigned and skip is true
   expect(cart.length).toBe(1);
@@ -54,4 +54,7 @@ test("marketplace, add item to cart", () => {
     quantity: 1,
     day: "Thursday",
   });
+  expect(email).toBe("kf@woo.com");
+  expect(lastName).toBe("fritz");
+  expect(firstName).toBe("kyle");
 });
