@@ -1,18 +1,18 @@
 import React from "react";
 import { mount } from "enzyme";
 
-import { MenuContext } from "menu/Contexts";
 import Menu from "menu/Menu";
 import mockMenuJson from "./mockMenuJson";
+import { SettingsContext } from "menu/Contexts";
 
 export default function renderMenu(mockMenuJsonOptions) {
   const onCreateOrder = jest.fn();
-  const onRefreshUser = jest.fn();
   const data = mockMenuJson(mockMenuJsonOptions);
+
   const wrapper = mount(
-    <MenuContext.Provider value={{ ...data, onRefreshUser }}>
+    <SettingsContext.Provider value={{ showCredits: true }}>
       <Menu {...data} onCreateOrder={onCreateOrder} />
-    </MenuContext.Provider>
+    </SettingsContext.Provider>
   );
 
   return new MenuWrapper(wrapper, onCreateOrder);

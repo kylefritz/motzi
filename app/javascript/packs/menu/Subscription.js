@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import BuyCredits from "../buy/App";
-import { getMenuContext } from "./Contexts";
 
 export const humanizeBreadsPerWeek = (perWeek) => {
   if (perWeek === 0.5) {
@@ -18,13 +17,7 @@ export const humanizeBreadsPerWeek = (perWeek) => {
   return `${perWeek} breads per week`;
 };
 
-export default function Subscription({ showBuyMoreButton = true }) {
-  const {
-    user,
-    onRefreshUser,
-    bundles,
-    menu: { enablePayWhatYouCan },
-  } = getMenuContext();
+export default function Subscription({ user, showBuyMoreButton = true }) {
   const [showForm, setShowForm] = useState(false);
   return (
     <>
@@ -63,12 +56,7 @@ export default function Subscription({ showBuyMoreButton = true }) {
           </>
         )}
       </div>
-      {showForm && (
-        <BuyCredits
-          onComplete={onRefreshUser}
-          {...{ user, bundles, enablePayWhatYouCan }}
-        />
-      )}
+      {showForm && <BuyCredits user={user} />}
     </>
   );
 }

@@ -1,7 +1,6 @@
 import React from "react";
 import _ from "lodash";
 
-import BakersNote from "./BakersNote";
 import Subscription from "./Subscription";
 import Cart from "./Cart";
 
@@ -49,7 +48,7 @@ export default function Order({ menu, user, order, onEditOrder }) {
 
       {isSubscriptionOrder && (
         <div className="mt-5">
-          <Subscription />
+          <Subscription user={user} />
         </div>
       )}
     </>

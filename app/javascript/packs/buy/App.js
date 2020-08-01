@@ -7,13 +7,15 @@ import queryString from "query-string";
 import Choice from "./Choice";
 import Payment from "./Payment";
 import PayWhatYouCan from "./PayWhatYouCan";
+import { getSettingsContext } from "../menu/Contexts";
 
-export default function Buy({
-  onComplete,
-  user: passedUser = null,
-  bundles: passedBundles = [],
-  enablePayWhatYouCan: passedEnablePayWhatYouCan,
-}) {
+export default function Buy({ user: passedUser }) {
+  const {
+    bundles: passedBundles,
+    enablePayWhatYouCan: passedEnablePayWhatYouCan,
+    onRefresh: onComplete,
+  } = getSettingsContext();
+
   const [credits, setCredits] = useState();
   const [price, setPrice] = useState();
   const [breadsPerWeek, setBreadsPerWeek] = useState();

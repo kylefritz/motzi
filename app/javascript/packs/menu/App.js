@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
 import _ from "lodash";
 
-import { getDayContext, DayContext, MenuContext } from "./Contexts";
+import { getDayContext, DayContext, SettingsContext } from "./Contexts";
 import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
@@ -59,7 +59,6 @@ function Layout({
           order,
           menu,
           bundles,
-          onRefreshUser: fetchMenu,
           onEditOrder: handleEditOrder,
         }}
       />
@@ -78,7 +77,6 @@ function Layout({
         menu,
         bundles,
         onCreateOrder: handleCreateOrder,
-        onRefreshUser: fetchMenu,
       }}
     />
   );
@@ -133,7 +131,7 @@ export default function App() {
         Sentry.captureException(err);
       });
   };
-  const { user, menu } = data;
+  const { menu, bundles, user } = data;
   const {
     day1,
     day1Deadline,
@@ -141,10 +139,20 @@ export default function App() {
     day2,
     day2Deadline,
     day2DeadlineDay,
+    enablePayWhatYouCan,
+    enablePayItForward,
   } = menu || {};
 
   return (
-    <MenuContext.Provider value={{ ...data, onRefreshUser: fetchMenu }}>
+    <SettingsContext.Provider
+      value={{
+        enablePayWhatYouCan,
+        enablePayItForward,
+        bundles,
+        onRefresh: fetchMenu,
+        showCredits: !_.isNil(user), // TODO: could push this setting into marketplace vs menu!
+      }}
+    >
       <DayContext.Provider
         value={{
           day1,
@@ -167,6 +175,6 @@ export default function App() {
           }}
         />
       </DayContext.Provider>
-    </MenuContext.Provider>
+    </SettingsContext.Provider>
   );
 }

@@ -3,14 +3,14 @@ import { pastDeadline } from "./pastDeadline";
 import _ from "lodash";
 
 const DayContext = React.createContext();
-const MenuContext = React.createContext();
+const SettingsContext = React.createContext();
 
-export { DayContext, MenuContext };
+export { DayContext, SettingsContext };
 
-export function getMenuContext() {
-  const ctx = useContext(MenuContext);
+export function getSettingsContext() {
+  const ctx = useContext(SettingsContext);
   if (_.isNil(ctx)) {
-    console.trace("getMenuContext is nil", ctx);
+    console.warn("SettingsContext is nil", ctx);
   }
   return ctx || {};
 }

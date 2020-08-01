@@ -43,21 +43,21 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
     // time to buy credits!
     return (
       <>
-        <Subscription showBuyMoreButton={false} />
+        <Subscription user={user} showBuyMoreButton={false} />
         <p className="my-2">
           We love baking yummy things for you but you're out of credits.
         </p>
-        <BuyCredits onComplete={onRefreshUser} />
+        <BuyCredits user={user} />
       </>
     );
   }
 
   return (
     <>
-      <Subscription />
+      <Subscription user={user} />
 
       {/* if low, show nag to buy credits*/}
-      {user && user.credits < 4 && <BuyCredits onComplete={onRefreshUser} />}
+      {user && user.credits < 4 && <BuyCredits user={user} />}
 
       <Title menu={menu} />
 

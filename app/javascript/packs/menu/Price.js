@@ -3,16 +3,16 @@ import accounting from "accounting";
 import pluralize from "pluralize";
 import _ from "lodash";
 
-import { getMenuContext } from "./Contexts";
+import { getSettingsContext } from "./Contexts";
 
 function Format({ price, credits = 1, stripeChargeAmount }) {
-  const { user } = getMenuContext();
+  const { showCredits } = getSettingsContext();
 
   if (!_.isNil(stripeChargeAmount)) {
     return accounting.formatMoney(stripeChargeAmount);
   }
 
-  if (user) {
+  if (showCredits) {
     return pluralize("credit", credits, true);
   }
   return accounting.formatMoney(price || 0);

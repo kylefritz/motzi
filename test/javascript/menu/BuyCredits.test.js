@@ -3,7 +3,7 @@ require("../configure_enzyme");
 import { mount } from "enzyme";
 
 import Subscription, { humanizeBreadsPerWeek } from "menu/Subscription";
-import { MenuContext } from "menu/Contexts";
+import { SettingsContext } from "menu/Contexts";
 import mockMenuJson from "./mockMenuJson";
 import stripeMock from "./stripeMock";
 
@@ -11,14 +11,12 @@ test("buy credits", () => {
   window.gon = { stripeApiKey: "no-such-key" };
   window.Stripe = jest.fn().mockReturnValue(stripeMock);
 
-  const json = mockMenuJson();
-  const { user, bundles } = json;
-  const onRefreshUser = jest.fn();
+  const { user, bundles } = mockMenuJson();
 
   const wrapper = mount(
-    <MenuContext.Provider value={{ ...json, onRefreshUser }}>
-      <Subscription />
-    </MenuContext.Provider>
+    <SettingsContext.Provider value={{ bundles, enablePayWhatYouCan: true }}>
+      <Subscription user={user} />
+    </SettingsContext.Provider>
   );
 
   // user name
@@ -57,14 +55,11 @@ test("no payWhatYouCan", () => {
   window.gon = { stripeApiKey: "no-such-key" };
   window.Stripe = jest.fn().mockReturnValue(stripeMock);
 
-  const json = mockMenuJson({ enablePayWhatYouCan: false });
-  const { user, bundles } = json;
-  const onRefreshUser = jest.fn();
-
+  const { user, bundles } = mockMenuJson();
   const wrapper = mount(
-    <MenuContext.Provider value={{ onRefreshUser, ...json }}>
-      <Subscription />
-    </MenuContext.Provider>
+    <SettingsContext.Provider value={{ bundles, enablePayWhatYouCan: false }}>
+      <Subscription user={user} />
+    </SettingsContext.Provider>
   );
 
   // click buy credits button
