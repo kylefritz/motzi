@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import BuyCredits from "../buy/App";
+import { getMenuContext } from "./Contexts";
 
 export const humanizeBreadsPerWeek = (perWeek) => {
   if (perWeek === 0.5) {
@@ -17,9 +18,14 @@ export const humanizeBreadsPerWeek = (perWeek) => {
   return `${perWeek} breads per week`;
 };
 
-export default function Subscription({ user, onRefreshUser, bundles }) {
-  const [showBuy, setShowBuy] = useState(false);
-
+export default function Subscription({ showBuyMoreButton = true }) {
+  const {
+    user,
+    onRefreshUser,
+    bundles,
+    menu: { enablePayWhatYouCan },
+  } = getMenuContext();
+  const [showForm, setShowForm] = useState(false);
   return (
     <>
       <div className="row">
@@ -42,12 +48,12 @@ export default function Subscription({ user, onRefreshUser, bundles }) {
               <h5 className="text-center">Credits</h5>
               <div className="text-center">
                 <div className="subscriber-info">{user.credits}</div>
-                {onRefreshUser && (
+                {showBuyMoreButton && (
                   <button
                     type="button"
                     className="btn btn-sm btn-link text-nowrap"
                     style={{ fontSize: "80%" }}
-                    onClick={() => setShowBuy(!showBuy)}
+                    onClick={() => setShowForm(!showForm)}
                   >
                     Buy more
                   </button>
@@ -57,8 +63,11 @@ export default function Subscription({ user, onRefreshUser, bundles }) {
           </>
         )}
       </div>
-      {showBuy && (
-        <BuyCredits onComplete={onRefreshUser} {...{ user, bundles }} />
+      {showForm && (
+        <BuyCredits
+          onComplete={onRefreshUser}
+          {...{ user, bundles, enablePayWhatYouCan }}
+        />
       )}
     </>
   );

@@ -2,8 +2,29 @@ import React, { useState } from "react";
 import _ from "lodash";
 import { formatMoney } from "accounting";
 
+function ChoiceText({ description, credits, price }) {
+  if (description) {
+    return (
+      <>
+        {description}
+        <br />
+        <small>
+          {`${credits} credits at ${formatMoney(price / credits)} ea`}
+        </small>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {`${credits} credits`}
+      <br />
+      <small>{`${formatMoney(price / credits)} ea`}</small>
+    </>
+  );
+}
+
 export default function Choice({
-  name,
   description,
   credits,
   price,
@@ -19,13 +40,8 @@ export default function Choice({
       className="btn btn-sm btn-light mb-3 mr-2"
       onClick={handleClick}
     >
-      {name}
+      <ChoiceText {...{ description, credits, price }} />
       <br />
-      {description}
-      <small>
-        {`${credits} credits at ${formatMoney(price / credits)} ea`}
-        <br />
-      </small>
       {formatMoney(price)}
     </button>
   );

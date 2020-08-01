@@ -7,6 +7,12 @@ test("menu for uid-user, before order", () => {
 
   expect(menu.items().length).toBe(3);
   expect(menu.submitOrderBtn().text()).toBe("Submit Order");
+  expect(menu.payItForward().length).toBe(1);
+});
+
+test("payItForward false", () => {
+  const menu = renderMenu({ enablePayItForward: false });
+  expect(menu.payItForward().length).toBe(0);
 });
 
 test("menu for uid-user, add item to cart", () => {

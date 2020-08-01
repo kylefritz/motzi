@@ -3,10 +3,10 @@ import accounting from "accounting";
 import pluralize from "pluralize";
 import _ from "lodash";
 
-import { UserContext } from "./Contexts";
+import { getMenuContext } from "./Contexts";
 
 function Format({ price, credits = 1, stripeChargeAmount }) {
-  const user = useContext(UserContext);
+  const { user } = getMenuContext();
 
   if (!_.isNil(stripeChargeAmount)) {
     return accounting.formatMoney(stripeChargeAmount);

@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
 import _ from "lodash";
 
-import { getDayContext, DayContext, UserContext } from "./Contexts";
+import { getDayContext, DayContext, MenuContext } from "./Contexts";
 import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
@@ -12,8 +12,8 @@ import Order from "./Order";
 export function separatePayItForwardAndSkip(menu) {
   const { items } = menu;
   const menuItems = _.keyBy(items, ({ id }) => id);
-  // identify _skip_ item and _payItForward_ item
-  // filter them out of the collection of _regular_ items
+  // identify *skip* & *payItForward*
+  // & filter them out of *regular* items
   return {
     ...menu,
     skip: menuItems[0] || {},
@@ -144,7 +144,7 @@ export default function App() {
   } = menu || {};
 
   return (
-    <UserContext.Provider value={user}>
+    <MenuContext.Provider value={{ ...data, onRefreshUser: fetchMenu }}>
       <DayContext.Provider
         value={{
           day1,
@@ -167,6 +167,6 @@ export default function App() {
           }}
         />
       </DayContext.Provider>
-    </UserContext.Provider>
+    </MenuContext.Provider>
   );
 }

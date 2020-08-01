@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_31_051528) do
+ActiveRecord::Schema.define(version: 2020_07_31_152907) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -164,9 +164,8 @@ ActiveRecord::Schema.define(version: 2020_07_31_051528) do
   end
 
   create_table "credit_bundles", force: :cascade do |t|
-    t.string "category"
-    t.string "name", null: false
-    t.text "description"
+    t.string "name"
+    t.string "description"
     t.integer "credits", null: false
     t.decimal "price", precision: 8, scale: 2, null: false
     t.decimal "breads_per_week", precision: 8, scale: 2, default: "1.0", null: false

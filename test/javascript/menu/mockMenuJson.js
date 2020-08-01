@@ -3,6 +3,8 @@ import { separatePayItForwardAndSkip } from "menu/App";
 export default function ({
   order: withOrder = true,
   user: withUser = true,
+  enablePayItForward = true,
+  enablePayWhatYouCan = true,
 } = {}) {
   const menu = separatePayItForwardAndSkip({
     id: 921507399,
@@ -12,9 +14,13 @@ export default function ({
     createdAt: "2019-11-02T14:01:23.820-04:00",
     day1Deadline: "2019-11-03T23:59:59.000-04:00",
     day2Deadline: "2019-11-05T23:59:59.000-04:00",
+    isCurrent: true,
     day1: "Tuesday",
     day2: "Thursday",
-    isCurrent: true,
+    day1DeadlineDay: "Sunday",
+    day2DeadlineDay: "Tuesday",
+    enablePayItForward,
+    enablePayWhatYouCan,
     items: [
       {
         id: 3,
@@ -110,29 +116,29 @@ export default function ({
 
   const bundles = [
     {
-      category: "6-Month",
-      name: "Weekly",
+      name: "6-Month",
+      description: "Weekly",
       credits: 26,
       price: 169,
       breadsPerWeek: 1,
     },
     {
-      category: "6-Month",
-      name: "Bi-Weekly",
+      name: "6-Month",
+      description: "Bi-Weekly",
       credits: 13,
       price: 91,
       breadsPerWeek: 0.5,
     },
     {
-      category: "3-Month",
-      name: "Weekly",
+      name: "3-Month",
+      description: "Weekly",
       credits: 13,
       price: 91,
       breadsPerWeek: 1,
     },
     {
-      category: "3-Month",
-      name: "Bi-Weekly",
+      name: "3-Month",
+      description: "Bi-Weekly",
       credits: 6,
       price: 46,
       breadsPerWeek: 0.5,

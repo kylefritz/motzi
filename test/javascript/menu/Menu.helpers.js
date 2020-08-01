@@ -1,17 +1,18 @@
 import React from "react";
 import { mount } from "enzyme";
 
-import { UserContext } from "menu/Contexts";
+import { MenuContext } from "menu/Contexts";
 import Menu from "menu/Menu";
 import mockMenuJson from "./mockMenuJson";
 
 export default function renderMenu(mockMenuJsonOptions) {
   const onCreateOrder = jest.fn();
+  const onRefreshUser = jest.fn();
   const data = mockMenuJson(mockMenuJsonOptions);
   const wrapper = mount(
-    <UserContext.Provider value={data.user}>
+    <MenuContext.Provider value={{ ...data, onRefreshUser }}>
       <Menu {...data} onCreateOrder={onCreateOrder} />
-    </UserContext.Provider>
+    </MenuContext.Provider>
   );
 
   return new MenuWrapper(wrapper, onCreateOrder);
@@ -27,6 +28,9 @@ class MenuWrapper {
   }
   cart() {
     return this.find("Cart");
+  }
+  payItForward() {
+    return this.find("PayItForward");
   }
   cartTotal() {
     return this.cart().find("Total").text();

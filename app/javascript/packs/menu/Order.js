@@ -5,15 +5,8 @@ import BakersNote from "./BakersNote";
 import Subscription from "./Subscription";
 import Cart from "./Cart";
 
-export default function Order({
-  menu,
-  user,
-  order,
-  bundles,
-  onRefreshUser,
-  onEditOrder,
-}) {
-  const { name, deadlineDay } = menu;
+export default function Order({ menu, user, order, onEditOrder }) {
+  const { name } = menu;
   const {
     items: cart,
     skip,
@@ -56,7 +49,7 @@ export default function Order({
 
       {isSubscriptionOrder && (
         <div className="mt-5">
-          <Subscription {...{ user, onRefreshUser, deadlineDay, bundles }} />
+          <Subscription />
         </div>
       )}
     </>

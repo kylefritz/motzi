@@ -21,8 +21,8 @@
         "createdAt",
         "items",
         "isCurrent",
-        "payItForward",
-        "payWhatYouCan"
+        "enablePayItForward",
+        "enablePayWhatYouCan"
       ],
       "properties": {
         "id": { "type": "integer" },
@@ -73,8 +73,8 @@
           }
         },
         "isCurrent": { "type": "boolean" },
-        "payItForward": { "type": "boolean" },
-        "payWhatYouCan": { "type": "boolean" }
+        "enablePayItForward": { "type": "boolean" },
+        "enablePayWhatYouCan": { "type": "boolean" }
       }
     },
     "user": {
@@ -142,7 +142,6 @@
         "type": "object",
         "title": "bundle",
         "required": [
-          "category",
           "name",
           "description",
           "credits",
@@ -150,7 +149,6 @@
           "breadsPerWeek"
         ],
         "properties": {
-          "category": { "type": ["string", "null"] },
           "name": { "type": "string" },
           "description": { "type": ["string", "null"] },
           "price": { "type": "number" },
