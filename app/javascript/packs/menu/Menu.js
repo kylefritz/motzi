@@ -3,7 +3,7 @@ import _ from "lodash";
 
 import BakersNote from "./BakersNote";
 import BuyCredits from "../buy/App";
-import Cart from "./Cart";
+import Cart, { cartTotal } from "./Cart";
 import Title from "./Title";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
@@ -39,25 +39,26 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
 
   const { subscriberNote, items, isCurrent, enablePayItForward } = menu;
   const { day2Closed: menuClosed } = getDayContext();
-  if (user && user.credits < 1) {
-    // time to buy credits!
+  if (user.credits < 1) {
+    // Must buy credits!
     return (
       <>
         <Subscription user={user} showBuyMoreButton={false} />
         <p className="my-2">
-          We love baking yummy things for you but you're out of credits.
+          We love making yummy things but you more credits.
         </p>
         <BuyCredits user={user} />
       </>
     );
   }
 
+  const insufficientCredits = cartTotal({ cart, menu }).credits > user.credits;
   return (
     <>
       <Subscription user={user} />
 
       {/* if low, show nag to buy credits*/}
-      {user && user.credits < 4 && <BuyCredits user={user} />}
+      {(user.credits < 4 || insufficientCredits) && <BuyCredits user={user} />}
 
       <Title menu={menu} />
 
@@ -115,23 +116,51 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
       <Cart {...{ cart, menu, rmCartItem, skip }} />
       <div className="row mt-2 mb-3">
         <div className="col">
-          <button
+          <SubmitButton
             onClick={handleCreateOrder}
-            disabled={!isCurrent || menuClosed}
-            title={
-              isCurrent
-                ? menuClosed
-                  ? "Ordering for this menu is closed"
-                  : null
-                : "This is not the current menu; you cannot submit an order."
-            }
-            className="btn btn-primary btn-lg btn-block"
-            type="submit"
-          >
-            {order ? "Update Order" : "Submit Order"}
-          </button>
+            status={{
+              isCurrent,
+              menuClosed,
+              insufficientCredits,
+              isEditing: !!order,
+            }}
+          />
         </div>
       </div>
     </>
+  );
+}
+
+function buttonText({ isCurrent, menuClosed, insufficientCredits, isEditing }) {
+  const no = (text, title) => ({ disabled: true, title, text });
+  if (!isCurrent) {
+    return no(
+      "Old menu",
+      "This is not the current menu; you cannot submit an order."
+    );
+  }
+  if (menuClosed) {
+    return no("Ordering closed", "Ordering for this menu is closed");
+  }
+  if (insufficientCredits) {
+    return no(
+      "Buy more credits :)",
+      "You don't have enough credits to cover your cart."
+    );
+  }
+  const text = isEditing ? "Update Order" : "Submit Order";
+  return { disabled: false, title: null, text };
+}
+
+function SubmitButton({ onClick, status }) {
+  const { disabled, title, text } = buttonText(status);
+  return (
+    <button
+      {...{ onClick, disabled, title }}
+      className="btn btn-primary btn-lg btn-block"
+      type="submit"
+    >
+      {text}
+    </button>
   );
 }

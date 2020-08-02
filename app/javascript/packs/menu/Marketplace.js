@@ -19,7 +19,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
   const [comments, setComments] = useState();
   const [emailName, setEmailName] = useState({});
 
-  const [price, setPrice] = useState(cartTotal({ cart, menu }));
+  const [price, setPrice] = useState(cartTotal({ cart, menu }).price);
 
   const handleCardToken = ({ token }) => {
     if (_.isEmpty(emailName.email)) {

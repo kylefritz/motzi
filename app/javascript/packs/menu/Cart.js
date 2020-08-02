@@ -107,9 +107,9 @@ function Days({ menu, cart, rmCartItem, skip }) {
   return sections;
 }
 
-function cartPriceCredits({ cart, menu }) {
+export function cartTotal({ cart, menu }) {
   if (cart.length === 0) {
-    return [null, 0];
+    return { price: null, credits: 0 };
   }
 
   const menuItemsById = buildMenuItemLookup(menu);
@@ -121,15 +121,11 @@ function cartPriceCredits({ cart, menu }) {
       )
     );
 
-  return [addBy("price"), addBy("credits")];
-}
-
-export function cartTotal({ cart, menu }) {
-  cartPriceCredits({ cart, menu })[0];
+  return { price: addBy("price"), credits: addBy("credits") };
 }
 
 function Total({ cart, menu, stripeChargeAmount }) {
-  const [price, credits] = cartPriceCredits({ cart, menu });
+  const { price, credits } = cartTotal({ cart, menu });
   return (
     <div>
       <h6>Total</h6>

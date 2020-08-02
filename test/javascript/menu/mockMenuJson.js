@@ -149,10 +149,10 @@ export default function ({
 
   let data = { menu, bundles };
   if (withUser) {
-    data = { ...data, user };
+    data = { ...data, user: withUser === true ? user : withUser };
   }
   if (withOrder) {
-    data = { ...data, order };
+    data = { ...data, user: withOrder === true ? order : withOrder };
   }
   return data;
 }
