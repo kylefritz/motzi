@@ -16,7 +16,7 @@ class UserTest < ActiveSupport::TestCase
     # buy a multi-credit item
     order = users(:kyle).orders.create!(menu: menus(:week1))
     item = Item.create!(name: 'multi-credit item', credits: 6)
-    order.order_items.create!(item: item,)
+    order.order_items.create!(item: item)
     assert_equal 23 - item.credits, users(:kyle).credits
   end
 
