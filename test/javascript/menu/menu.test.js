@@ -55,6 +55,7 @@ test("menu for uid-user, add item to cart", () => {
 
 test("menu for uid-user, after order", () => {
   const menu = renderMenu();
+  expect(menu.cartTotal()).toContain("3 credits");
   expect(menu.items()).toHaveLength(3);
   expect(menu.submitOrderBtn().text()).toBe("Update Order");
 });
@@ -62,7 +63,7 @@ test("menu for uid-user, after order", () => {
 test("Menu pick skip", () => {
   const menu = renderMenu();
 
-  expect(menu.cartTotal()).toContain("2 credits");
+  expect(menu.cartTotal()).toContain("3 credits");
 
   // click skip
   menu.skipBtn().simulate("click");

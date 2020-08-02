@@ -3,14 +3,14 @@ json.menu do
   json.is_current @menu.current?
 
   menu_items = @menu.menu_items.map {|mi| [mi, mi.item]}
-  if Setting.shop.pay_it_forward
+  if Setting.shop.pay_it_forward && Item.pay_it_forward.present?
     menu_items.push([MenuItem.new, Item.pay_it_forward])
   end
 
   json.items menu_items.map do |menu_item, item|
     json.extract! menu_item, :subscriber, :marketplace, :day1, :day2
     json.menu_item_id menu_item.id # use by the menu_builder app
-    json.extract! item, :id, :name, :description, :price
+    json.extract! item, :id, :name, :description, :price, :credits
     json.image item.image_path
   end
 

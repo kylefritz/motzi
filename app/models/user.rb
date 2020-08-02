@@ -38,11 +38,7 @@ class User < ApplicationRecord
   end
 
   def credits
-    # TODO: not handing credit expiration
-    credits_purchased = self.credit_items.pluck('quantity').sum
-    credits_used = OrderItem.where(order_id: self.orders.where("stripe_charge_id is null")).pluck('quantity').sum
-
-    credits_purchased - credits_used
+    SqlQuery.new(:user_credits, user_ids: [self.id]).execute.first.values.last.to_i
   end
 
   def authenticate(password)

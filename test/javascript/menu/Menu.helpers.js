@@ -33,7 +33,7 @@ class MenuWrapper {
     return this.find("PayItForward");
   }
   cartTotal() {
-    return this.cart().find("Total").text();
+    return this.cart().find("Total").find("Price").text();
   }
   submitOrderBtn() {
     const btn = this.find("button[type='submit']");
