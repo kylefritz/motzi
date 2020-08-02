@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
 import _ from "lodash";
 
-import { getDayContext, DayContext, UserContext } from "./Contexts";
+import { getDayContext, DayContext, SettingsContext } from "./Contexts";
 import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
@@ -12,8 +12,8 @@ import Order from "./Order";
 export function separatePayItForwardAndSkip(menu) {
   const { items } = menu;
   const menuItems = _.keyBy(items, ({ id }) => id);
-  // identify _skip_ item and _payItForward_ item
-  // filter them out of the collection of _regular_ items
+  // identify *skip* & *payItForward*
+  // & filter them out of *regular* items
   return {
     ...menu,
     skip: menuItems[0] || {},
@@ -59,7 +59,6 @@ function Layout({
           order,
           menu,
           bundles,
-          onRefreshUser: fetchMenu,
           onEditOrder: handleEditOrder,
         }}
       />
@@ -78,7 +77,6 @@ function Layout({
         menu,
         bundles,
         onCreateOrder: handleCreateOrder,
-        onRefreshUser: fetchMenu,
       }}
     />
   );
@@ -133,7 +131,7 @@ export default function App() {
         Sentry.captureException(err);
       });
   };
-  const { user, menu } = data;
+  const { menu, bundles, user } = data;
   const {
     day1,
     day1Deadline,
@@ -141,10 +139,20 @@ export default function App() {
     day2,
     day2Deadline,
     day2DeadlineDay,
+    enablePayWhatYouCan,
+    enablePayItForward,
   } = menu || {};
 
   return (
-    <UserContext.Provider value={user}>
+    <SettingsContext.Provider
+      value={{
+        enablePayWhatYouCan,
+        enablePayItForward,
+        bundles,
+        onRefresh: fetchMenu,
+        showCredits: !_.isNil(user), // could push this setting into marketplace vs menu?
+      }}
+    >
       <DayContext.Provider
         value={{
           day1,
@@ -167,6 +175,6 @@ export default function App() {
           }}
         />
       </DayContext.Provider>
-    </UserContext.Provider>
+    </SettingsContext.Provider>
   );
 }

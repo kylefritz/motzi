@@ -3,6 +3,7 @@ require("../configure_enzyme");
 import { mount } from "enzyme";
 
 import Subscription, { humanizeBreadsPerWeek } from "menu/Subscription";
+import { SettingsContext } from "menu/Contexts";
 import mockMenuJson from "./mockMenuJson";
 import stripeMock from "./stripeMock";
 
@@ -11,9 +12,12 @@ test("buy credits", () => {
   window.Stripe = jest.fn().mockReturnValue(stripeMock);
 
   const { user, bundles } = mockMenuJson();
-  const onRefreshUser = jest.fn().mockReturnValue(user);
 
-  const wrapper = mount(<Subscription {...{ user, bundles, onRefreshUser }} />);
+  const wrapper = mount(
+    <SettingsContext.Provider value={{ bundles, enablePayWhatYouCan: true }}>
+      <Subscription user={user} />
+    </SettingsContext.Provider>
+  );
 
   // user name
   expect(wrapper.find(".subscriber-info").first().text()).toEqual(user.name);
@@ -40,10 +44,33 @@ test("buy credits", () => {
   wrapper.find("Choice").first().find("button").first().simulate("click");
 
   expect(wrapper.find("Payment").length).toBe(1);
+  expect(wrapper.find("PayWhatYouCan").length).toBe(1);
   expect(wrapper.find("Card").length).toBe(1);
 
   expect(wrapper.find("Payment").props().credits).toBe(26);
   expect(wrapper.find("Payment").props().price).toBe(169);
+});
+
+test("no payWhatYouCan", () => {
+  window.gon = { stripeApiKey: "no-such-key" };
+  window.Stripe = jest.fn().mockReturnValue(stripeMock);
+
+  const { user, bundles } = mockMenuJson();
+  const wrapper = mount(
+    <SettingsContext.Provider value={{ bundles, enablePayWhatYouCan: false }}>
+      <Subscription user={user} />
+    </SettingsContext.Provider>
+  );
+
+  // click buy credits button
+  wrapper.find("button").simulate("click");
+
+  // click a bundle
+  wrapper.find("Choice").first().find("button").first().simulate("click");
+
+  expect(wrapper.find("Payment").length).toBe(1);
+  expect(wrapper.find("PayWhatYouCan").length).toBe(0);
+  expect(wrapper.find("Card").length).toBe(1);
 });
 
 test("humanizeBreadsPerWeek", () => {

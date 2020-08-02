@@ -1,27 +1,27 @@
 mo6_weekly:
-  category: 6-Month
-  name: Weekly
+  name: 6-Month
+  description: Weekly
   credits: 26
   price: 169
   breads_per_week: 1.0
 
 mo6_bi-weekly:
-  category: 6-Month
-  name: Bi-Weekly
+  name: 6-Month
+  description: Bi-Weekly
   credits: 13
   price: 91
   breads_per_week: 0.5
 
 mo3_weekly:
-  category: 3-Month
-  name: Weekly
+  name: 3-Month
+  description: Weekly
   credits: 13
   price: 91
   breads_per_week: 1.0
 
 mo3_bi-weekly:
-  category: 3-Month
-  name: Bi-Weekly
+  name: 3-Month
+  description: Bi-Weekly
   credits: 6
   price: 46
   breads_per_week: 0.5

@@ -12,14 +12,7 @@ import Subscription from "./Subscription";
 import useCart from "./useCart";
 import { getDayContext } from "./Contexts";
 
-export default function Menu({
-  bundles,
-  menu,
-  order,
-  user,
-  onRefreshUser,
-  onCreateOrder,
-}) {
+export default function Menu({ menu, order, user, onCreateOrder }) {
   const { cart, addToCart, rmCartItem, setCart } = useCart(order);
 
   const [skip, setSkip] = useState(_.get(order, "skip", false));
@@ -44,27 +37,27 @@ export default function Menu({
     });
   };
 
-  const { subscriberNote, items, isCurrent } = menu;
+  const { subscriberNote, items, isCurrent, enablePayItForward } = menu;
   const { day2Closed: menuClosed } = getDayContext();
   if (user && user.credits < 1) {
     // time to buy credits!
     return (
       <>
-        <Subscription {...{ user, bundles }} />
+        <Subscription user={user} showBuyMoreButton={false} />
         <p className="my-2">
           We love baking yummy things for you but you're out of credits.
         </p>
-        <BuyCredits onComplete={onRefreshUser} />
+        <BuyCredits user={user} />
       </>
     );
   }
 
   return (
     <>
-      <Subscription {...{ user, onRefreshUser, bundles }} />
+      <Subscription user={user} />
 
       {/* if low, show nag to buy credits*/}
-      {user && user.credits < 4 && <BuyCredits onComplete={onRefreshUser} />}
+      {user && user.credits < 4 && <BuyCredits user={user} />}
 
       <Title menu={menu} />
 
@@ -96,11 +89,13 @@ export default function Menu({
             onSkip={handleSkip}
             disabled={menuClosed}
           />
-          <PayItForward
-            {...menu.payItForward}
-            onAddToCart={addToCart}
-            disabled={menuClosed}
-          />
+          {enablePayItForward && (
+            <PayItForward
+              {...menu.payItForward}
+              onAddToCart={addToCart}
+              disabled={menuClosed}
+            />
+          )}
         </>
       )}
 

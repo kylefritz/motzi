@@ -3,6 +3,8 @@ import { separatePayItForwardAndSkip } from "menu/App";
 export default function ({
   order: withOrder = true,
   user: withUser = true,
+  enablePayItForward = true,
+  enablePayWhatYouCan = true,
 } = {}) {
   const menu = separatePayItForwardAndSkip({
     id: 921507399,
@@ -12,12 +14,17 @@ export default function ({
     createdAt: "2019-11-02T14:01:23.820-04:00",
     day1Deadline: "2019-11-03T23:59:59.000-04:00",
     day2Deadline: "2019-11-05T23:59:59.000-04:00",
+    isCurrent: true,
     day1: "Tuesday",
     day2: "Thursday",
-    isCurrent: true,
+    day1DeadlineDay: "Sunday",
+    day2DeadlineDay: "Tuesday",
+    enablePayItForward,
+    enablePayWhatYouCan,
     items: [
       {
         id: 3,
+        menuItemId: 13,
         name: "Baguette",
         description: "",
         image: "bread-baguette.jpg",
@@ -29,6 +36,7 @@ export default function ({
       },
       {
         id: 1,
+        menuItemId: 11,
         name: "Classic",
         description:
           "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
@@ -41,6 +49,7 @@ export default function ({
       },
       {
         id: 2,
+        menuItemId: 12,
         name: "Cookies",
         description: "ony subscribers can get cookies",
         price: 4.0,
@@ -51,6 +60,7 @@ export default function ({
       },
       {
         id: 4,
+        menuItemId: 14,
         name: "Marketplace only item",
         description: "too small for subscribers",
         price: 2.0,
@@ -61,6 +71,7 @@ export default function ({
       },
       {
         id: 5,
+        menuItemId: null,
         name: "Another small item",
         description: "too small for subscribers",
         price: 1.5,
@@ -71,6 +82,7 @@ export default function ({
       },
       {
         id: 0,
+        menuItemId: 10,
         name: "Skip",
         description: "Skip this week.",
         day1: true,
@@ -110,29 +122,29 @@ export default function ({
 
   const bundles = [
     {
-      category: "6-Month",
-      name: "Weekly",
+      name: "6-Month",
+      description: "Weekly",
       credits: 26,
       price: 169,
       breadsPerWeek: 1,
     },
     {
-      category: "6-Month",
-      name: "Bi-Weekly",
+      name: "6-Month",
+      description: "Bi-Weekly",
       credits: 13,
       price: 91,
       breadsPerWeek: 0.5,
     },
     {
-      category: "3-Month",
-      name: "Weekly",
+      name: "3-Month",
+      description: "Weekly",
       credits: 13,
       price: 91,
       breadsPerWeek: 1,
     },
     {
-      category: "3-Month",
-      name: "Bi-Weekly",
+      name: "3-Month",
+      description: "Bi-Weekly",
       credits: 6,
       price: 46,
       breadsPerWeek: 0.5,

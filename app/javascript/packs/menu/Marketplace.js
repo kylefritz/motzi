@@ -55,7 +55,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
     resetPrice(nextCart);
   };
 
-  const { menuNote, items } = menu;
+  const { menuNote, items, enablePayItForward } = menu;
   const { pastDay2Deadline: menuClosed } = getDayContext();
   return (
     <>
@@ -70,11 +70,13 @@ export default function Marketplace({ menu, onCreateOrder }) {
         onAddToCart={handleAddToCart}
         disabled={menuClosed}
       />
-      <PayItForward
-        {...menu.payItForward}
-        onAddToCart={handleAddToCart}
-        disabled={menuClosed}
-      />
+      {enablePayItForward && (
+        <PayItForward
+          {...menu.payItForward}
+          onAddToCart={handleAddToCart}
+          disabled={menuClosed}
+        />
+      )}
 
       <h5>Comments & Special Requests</h5>
       <div className="row mt-2 mb-3">

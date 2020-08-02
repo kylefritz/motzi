@@ -3,10 +3,13 @@ json.menu do
   json.is_current @menu.current?
 
   menu_items = @menu.menu_items.map {|mi| [mi, mi.item]}
-  menu_items.push([MenuItem.new, Item.pay_it_forward])
+  if Setting.shop.pay_it_forward
+    menu_items.push([MenuItem.new, Item.pay_it_forward])
+  end
 
   json.items menu_items.map do |menu_item, item|
     json.extract! menu_item, :subscriber, :marketplace, :day1, :day2
+    json.menu_item_id menu_item.id # use by the menu_builder app
     json.extract! item, :id, :name, :description, :price
     json.image item.image_path
   end
@@ -16,8 +19,8 @@ json.menu do
   json.day1_deadline_day Setting.pickup_day1_deadline_day
   json.day2_deadline_day Setting.pickup_day2_deadline_day
 
-  json.pay_it_forward Setting.shop.pay_it_forward
-  json.pay_what_you_can Setting.shop.pay_what_you_can
+  json.enable_pay_it_forward Setting.shop.pay_it_forward
+  json.enable_pay_what_you_can Setting.shop.pay_what_you_can
 end
 
 json.user do
@@ -40,5 +43,5 @@ json.order do
 end
 
 json.bundles CreditBundle.all do |b|
-  json.extract! b, :category, :name, :description, :credits, :price, :breads_per_week
+  json.extract! b, :name, :description, :credits, :price, :breads_per_week
 end

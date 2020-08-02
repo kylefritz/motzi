@@ -1,9 +1,19 @@
 import React, { useContext } from "react";
 import { pastDeadline } from "./pastDeadline";
+import _ from "lodash";
 
-const UserContext = React.createContext();
 const DayContext = React.createContext();
-export { DayContext, UserContext };
+const SettingsContext = React.createContext();
+
+export { DayContext, SettingsContext };
+
+export function getSettingsContext() {
+  const ctx = useContext(SettingsContext);
+  if (_.isNil(ctx)) {
+    console.warn("SettingsContext is nil", ctx);
+  }
+  return ctx || {};
+}
 
 export function getDayContext() {
   const ctx = useContext(DayContext);

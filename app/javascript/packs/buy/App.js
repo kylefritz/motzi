@@ -7,17 +7,23 @@ import queryString from "query-string";
 import Choice from "./Choice";
 import Payment from "./Payment";
 import PayWhatYouCan from "./PayWhatYouCan";
+import { getSettingsContext } from "../menu/Contexts";
 
-export default function Buy({
-  onComplete,
-  user: passedUser = null,
-  bundles: passedBundles = [],
-}) {
+export default function Buy({ user: passedUser }) {
+  const {
+    bundles: passedBundles,
+    enablePayWhatYouCan: passedEnablePayWhatYouCan,
+    onRefresh: onComplete,
+  } = getSettingsContext();
+
   const [credits, setCredits] = useState();
   const [price, setPrice] = useState();
   const [breadsPerWeek, setBreadsPerWeek] = useState();
   const [user, setUser] = useState(passedUser);
   const [bundles, setBundles] = useState(passedBundles);
+  const [enablePayWhatYouCan, setEnablePayWhatYouCan] = useState(
+    passedEnablePayWhatYouCan
+  );
   const [error, setError] = useState();
   const [receipt, setReceipt] = useState();
   const [submitting, setSubmitting] = useState(false);
@@ -31,15 +37,24 @@ export default function Buy({
     const params = { uid };
     axios
       .get("/menu.json", { params })
-      .then(({ data: { user, bundles: nextBundles } }) => {
-        if (user) {
-          setUser(user);
-          setBundles(nextBundles);
-          Sentry.configureScope((scope) => scope.setUser(user));
-        } else {
-          setError("We can't load your user account");
+      .then(
+        ({
+          data: {
+            user,
+            bundles: nextBundles,
+            menu: { enablePayWhatYouCan: nextEnablePayWhatYouCan },
+          },
+        }) => {
+          if (user) {
+            setUser(user);
+            setBundles(nextBundles);
+            setEnablePayWhatYouCan(nextEnablePayWhatYouCan);
+            Sentry.configureScope((scope) => scope.setUser(user));
+          } else {
+            setError("We can't load your user account");
+          }
         }
-      })
+      )
       .catch((error) => {
         console.error("cant load user from menu page", error);
         Sentry.captureException(error);
@@ -93,7 +108,7 @@ export default function Buy({
 
   const handlePaymentResult = ({ token }) => {
     // with payment request, the price sent to stripe
-    console.log("paymentResult token=", token);
+    console.error("paymentResult token=", token);
 
     // TODO: send completed payment request to rails
   };
@@ -123,22 +138,24 @@ export default function Buy({
     );
   }
 
-  const grouped = Object.entries(
-    _.groupBy(bundles, ({ category }) => category)
-  );
+  const grouped = Object.entries(_.groupBy(bundles, ({ name }) => name));
 
   return (
     <div className="alert alert-info padding-x-mobile-5px" role="alert">
       <h2 className="mb-3" style={{ fontSize: "1.8rem" }}>
         Buy credits
       </h2>
-      {grouped.map(([category, choices]) => {
+      {grouped.map(([name, choices]) => {
         return (
-          <div key={category}>
-            <h6>{category}</h6>
-            <div>
+          <div key={name}>
+            {name && name !== "null" && <h6>{name}</h6>}
+            <div className="text-center">
               {choices.map((choice) => (
-                <Choice key={choice.name} {...choice} onChoose={handleChoose} />
+                <Choice
+                  key={choice.credits}
+                  {...choice}
+                  onChoose={handleChoose}
+                />
               ))}
             </div>
           </div>
@@ -146,8 +163,17 @@ export default function Buy({
       })}
       {credits && price && (
         <>
-          <h4>Payment amount</h4>
-          <PayWhatYouCan price={price} onPricedChanged={handlePriceChanged} />
+          {enablePayWhatYouCan ? (
+            <>
+              <h4>Payment amount</h4>
+              <PayWhatYouCan
+                price={price}
+                onPricedChanged={handlePriceChanged}
+              />
+            </>
+          ) : (
+            <br />
+          )}
           <Payment
             credits={credits}
             price={price}

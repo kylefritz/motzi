@@ -21,8 +21,8 @@
         "createdAt",
         "items",
         "isCurrent",
-        "payItForward",
-        "payWhatYouCan"
+        "enablePayItForward",
+        "enablePayWhatYouCan"
       ],
       "properties": {
         "id": { "type": "integer" },
@@ -45,6 +45,7 @@
             "type": "object",
             "required": [
               "id",
+              "menuItemId",
               "name",
               "description",
               "price",
@@ -55,6 +56,7 @@
             ],
             "properties": {
               "id": { "type": "integer" },
+              "menuItemId": { "type": ["integer", "null"] },
               "name": { "type": "string" },
               "description": { "type": "string" },
               "price": { "type": "number" },
@@ -73,8 +75,8 @@
           }
         },
         "isCurrent": { "type": "boolean" },
-        "payItForward": { "type": "boolean" },
-        "payWhatYouCan": { "type": "boolean" }
+        "enablePayItForward": { "type": "boolean" },
+        "enablePayWhatYouCan": { "type": "boolean" }
       }
     },
     "user": {
@@ -142,7 +144,6 @@
         "type": "object",
         "title": "bundle",
         "required": [
-          "category",
           "name",
           "description",
           "credits",
@@ -150,7 +151,6 @@
           "breadsPerWeek"
         ],
         "properties": {
-          "category": { "type": ["string", "null"] },
           "name": { "type": "string" },
           "description": { "type": ["string", "null"] },
           "price": { "type": "number" },
