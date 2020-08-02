@@ -21,5 +21,7 @@ Sentry.init({
 });
 
 // ahoy
-import ahoy from "ahoy.js";
-ahoy.trackAll();
+if (gon && gon.jsTracking) {
+  import ahoy from "ahoy.js";
+  ahoy.trackAll();
+}

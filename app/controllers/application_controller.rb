@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
   before_action :set_paper_trail_whodunnit
   before_action :authenticate_user!
   before_action :set_raven_context
-  before_action :set_stripe_key
+  before_action :push_gon
 
   protected
 
@@ -33,7 +33,10 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def set_stripe_key
-    gon.push({stripe_api_key: ENV['STRIPE_PUBLISHABLE_KEY']})
+  def push_gon
+    gon.push({
+      stripe_api_key: ENV['STRIPE_PUBLISHABLE_KEY'],
+      js_tracking: Setting.shop.js_tracking,
+    })
   end
 end

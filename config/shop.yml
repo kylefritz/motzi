@@ -14,6 +14,7 @@ motzi:
   email_reply_to: motzi.bread@gmail.com
   pay_it_forward: true
   pay_what_you_can: true
+  js_tracking: true
 
 jinji:
   name: Jinji Chocolate
@@ -23,6 +24,7 @@ jinji:
   email_reply_to: info@jinjichocolate.com
   pay_it_forward: false
   pay_what_you_can: false
+  js_tracking: false
 
 dutch_courage:
   name: Dutch Courage
@@ -32,3 +34,4 @@ dutch_courage:
   email_reply_to: bjdorr@gmail.com
   pay_it_forward: false
   pay_what_you_can: false
+  js_tracking: false
