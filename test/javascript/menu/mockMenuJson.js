@@ -152,7 +152,7 @@ export default function ({
     data = { ...data, user: withUser === true ? user : withUser };
   }
   if (withOrder) {
-    data = { ...data, user: withOrder === true ? order : withOrder };
+    data = { ...data, order: withOrder === true ? order : withOrder };
   }
   return data;
 }
