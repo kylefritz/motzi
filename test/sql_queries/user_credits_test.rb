@@ -9,8 +9,9 @@ class UserCreditsTest < ActiveSupport::TestCase
     assert_equal users.size, rows.size, "same number of users as rows"
     assert_equal users.size, balances.size, "same number of users as balances"
 
-    users.each do |user|
-      assert_equal user.credits, balances[user.id], "#{user.name}"
-    end    
+    assert_equal 23, balances[users(:kyle).id]
+    assert_equal 12, balances[users(:adrian).id]
+    assert_equal 1, balances[users(:jess).id]
+    assert_equal 0, balances[users(:ljf).id]
   end
 end

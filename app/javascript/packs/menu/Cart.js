@@ -107,23 +107,25 @@ function Days({ menu, cart, rmCartItem, skip }) {
   return sections;
 }
 
-export function cartTotal({ cart, menu, stripeChargeAmount }) {
+export function cartTotal({ cart, menu }) {
   if (cart.length === 0) {
-    return null;
+    return { price: null, credits: 0 };
   }
 
   const menuItemsById = buildMenuItemLookup(menu);
-  return _.sum(
-    cart.map(
-      ({ itemId, quantity }) =>
-        _.get(menuItemsById[itemId], "price", 0) * quantity
-    )
-  );
+  const addBy = (attribute) =>
+    _.sum(
+      cart.map(
+        ({ itemId, quantity }) =>
+          _.get(menuItemsById[itemId], attribute, 0) * quantity
+      )
+    );
+
+  return { price: addBy("price"), credits: addBy("credits") };
 }
 
 function Total({ cart, menu, stripeChargeAmount }) {
-  const credits = _.sum(cart.map(({ quantity }) => quantity));
-  const price = cartTotal({ cart, menu });
+  const { price, credits } = cartTotal({ cart, menu });
   return (
     <div>
       <h6>Total</h6>

@@ -55,14 +55,40 @@ test("menu for uid-user, add item to cart", () => {
 
 test("menu for uid-user, after order", () => {
   const menu = renderMenu();
+  expect(menu.cartTotal()).toContain("3 credits");
   expect(menu.items()).toHaveLength(3);
   expect(menu.submitOrderBtn().text()).toBe("Update Order");
+});
+
+test("insufficientCredits", () => {
+  const menu = renderMenu({ user: { credits: 2 } });
+  expect(menu.cartTotal()).toContain("3 credits");
+  expect(menu.submitOrderBtn().text()).toBe("Buy more credits :)");
+  expect(menu.submitOrderBtn().prop("disabled")).toBe(true);
+});
+
+test("nag buy more credits", () => {
+  const noNag = renderMenu({ user: { credits: 5 }, order: false });
+  expect(noNag.find("Buy")).toHaveLength(0);
+
+  const menu = renderMenu({ user: { credits: 1 }, order: false });
+  expect(menu.find("Buy")).toHaveLength(1);
+});
+
+test("must buy more credits", () => {
+  const must = renderMenu({ user: { credits: 0 }, order: false });
+  expect(must.find("Buy")).toHaveLength(1);
+  expect(must.find("Items")).toHaveLength(0);
+
+  const regular = renderMenu({ user: { credits: 5 }, order: false });
+  expect(regular.find("Buy")).toHaveLength(0);
+  expect(regular.find("Items")).toHaveLength(1);
 });
 
 test("Menu pick skip", () => {
   const menu = renderMenu();
 
-  expect(menu.cartTotal()).toContain("2 credits");
+  expect(menu.cartTotal()).toContain("3 credits");
 
   // click skip
   menu.skipBtn().simulate("click");

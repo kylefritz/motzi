@@ -29,6 +29,7 @@ export default function ({
         description: "",
         image: "bread-baguette.jpg",
         price: 3.0,
+        credits: 1,
         day1: true,
         day2: true,
         subscriber: true,
@@ -42,6 +43,7 @@ export default function ({
           "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
         image: "bread2-002.webp",
         price: 4.0,
+        credits: 2,
         day1: true,
         day2: true,
         subscriber: true,
@@ -53,6 +55,7 @@ export default function ({
         name: "Cookies",
         description: "ony subscribers can get cookies",
         price: 4.0,
+        credits: 1,
         day1: true,
         day2: true,
         subscriber: true,
@@ -64,6 +67,7 @@ export default function ({
         name: "Marketplace only item",
         description: "too small for subscribers",
         price: 2.0,
+        credits: 1,
         day1: true,
         day2: true,
         subscriber: false,
@@ -75,19 +79,11 @@ export default function ({
         name: "Another small item",
         description: "too small for subscribers",
         price: 1.5,
+        credits: 1,
         day1: true,
         day2: true,
         subscriber: false,
         marketplace: true,
-      },
-      {
-        id: 0,
-        menuItemId: 10,
-        name: "Skip",
-        description: "Skip this week.",
-        day1: true,
-        day2: true,
-        subscriber: true,
       },
     ],
   });
@@ -153,10 +149,10 @@ export default function ({
 
   let data = { menu, bundles };
   if (withUser) {
-    data = { ...data, user };
+    data = { ...data, user: withUser === true ? user : withUser };
   }
   if (withOrder) {
-    data = { ...data, order };
+    data = { ...data, order: withOrder === true ? order : withOrder };
   }
   return data;
 }

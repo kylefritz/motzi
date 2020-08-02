@@ -1,5 +1,5 @@
 ActiveAdmin.register Item do
-  permit_params :name, :description, :image, :price
+  permit_params :name, :description, :image, :price, :credits
   includes image_attachment: :blob
   config.sort_order = 'LOWER(name)'
   config.create_another = true
@@ -21,6 +21,7 @@ ActiveAdmin.register Item do
         end
       end
     end
+    column :credits
     column :price do |item|
       number_to_currency(item.price)
     end
@@ -33,6 +34,7 @@ ActiveAdmin.register Item do
   show do
     attributes_table do
       row :name
+      row :credits
       row :price
       row :description
       row :image do |item|

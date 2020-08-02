@@ -8,9 +8,10 @@ import { SettingsContext } from "menu/Contexts";
 export default function renderMenu(mockMenuJsonOptions) {
   const onCreateOrder = jest.fn();
   const data = mockMenuJson(mockMenuJsonOptions);
+  const { bundles } = data;
 
   const wrapper = mount(
-    <SettingsContext.Provider value={{ showCredits: true }}>
+    <SettingsContext.Provider value={{ showCredits: true, bundles }}>
       <Menu {...data} onCreateOrder={onCreateOrder} />
     </SettingsContext.Provider>
   );
@@ -33,11 +34,11 @@ class MenuWrapper {
     return this.find("PayItForward");
   }
   cartTotal() {
-    return this.cart().find("Total").text();
+    return this.cart().find("Total").find("Price").text();
   }
   submitOrderBtn() {
-    const btn = this.find("button[type='submit']");
-    expect(btn.text()).toContain("Order");
+    const btn = this.find("SubmitButton").find("button");
+    expect(btn).toHaveLength(1);
     return btn;
   }
   items() {

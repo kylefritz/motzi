@@ -129,13 +129,13 @@ function Ordering({ description, onChange, day1, day2 }) {
 }
 
 function Item(props) {
-  const { price, image, name } = props;
+  const { price, credits, image, name } = props;
   return (
     <div className="col-6 mb-4">
       {/* TODO: make image square */}
       <img src={image} className="img-fluid" style={{ objectFit: "contain" }} />
       <div>{name}</div>
-      <Price {...{ price }} />
+      <Price {...{ price, credits }} />
       <Ordering {...props} />
     </div>
   );
