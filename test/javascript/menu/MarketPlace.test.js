@@ -5,7 +5,7 @@ import renderMenu from "./MarketPlace.helpers";
 test("marketplace render menu", () => {
   const menu = renderMenu({ order: false, user: false });
 
-  expect(menu.items().length).toBe(4);
+  expect(menu.items()).toHaveLength(4);
   expect(menu.submitOrderBtn().text()).toBe("Select an item");
 });
 
@@ -44,7 +44,7 @@ test("marketplace, add item to cart", () => {
   console.log("submitted order", order);
 
   // uid is assigned and skip is true
-  expect(cart.length).toBe(1);
+  expect(cart).toHaveLength(1);
   expect(cart[0]).toStrictEqual({
     itemId: 3,
     price: 3,

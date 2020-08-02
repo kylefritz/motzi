@@ -5,14 +5,14 @@ import renderMenu from "./Menu.helpers";
 test("menu for uid-user, before order", () => {
   const menu = renderMenu({ order: false });
 
-  expect(menu.items().length).toBe(3);
+  expect(menu.items()).toHaveLength(3);
   expect(menu.submitOrderBtn().text()).toBe("Submit Order");
-  expect(menu.payItForward().length).toBe(1);
+  expect(menu.payItForward()).toHaveLength(1);
 });
 
 test("payItForward false", () => {
   const menu = renderMenu({ enablePayItForward: false });
-  expect(menu.payItForward().length).toBe(0);
+  expect(menu.payItForward()).toHaveLength(0);
 });
 
 test("menu for uid-user, add item to cart", () => {
@@ -44,7 +44,7 @@ test("menu for uid-user, add item to cart", () => {
   // uid is assigned and skip is true
   expect(uid).toBe("Dot9gKn9w");
   expect(skip).toBe(false);
-  expect(cart.length).toBe(1);
+  expect(cart).toHaveLength(1);
   expect(cart[0]).toStrictEqual({
     itemId: 3,
     price: 3,
@@ -55,7 +55,7 @@ test("menu for uid-user, add item to cart", () => {
 
 test("menu for uid-user, after order", () => {
   const menu = renderMenu();
-  expect(menu.items().length).toBe(3);
+  expect(menu.items()).toHaveLength(3);
   expect(menu.submitOrderBtn().text()).toBe("Update Order");
 });
 

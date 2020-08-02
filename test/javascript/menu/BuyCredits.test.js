@@ -31,21 +31,21 @@ test("buy credits", () => {
   wrapper.find("button").simulate("click");
 
   // for each choice in the bundle
-  expect(wrapper.find("Choice").length).toEqual(bundles.length);
+  expect(wrapper.find("Choice")).toHaveLength(bundles.length);
   expect(wrapper.find("Choice").first().text()).toEqual(
     "Weekly26 credits at $6.50 ea$169.00"
   );
 
   // 6-month, 3-month headers
-  expect(wrapper.find("h6").length).toEqual(2);
+  expect(wrapper.find("h6")).toHaveLength(2);
   expect(wrapper.find("h6").first().text()).toEqual("6-Month");
 
   // click a bundle
   wrapper.find("Choice").first().find("button").first().simulate("click");
 
-  expect(wrapper.find("Payment").length).toBe(1);
-  expect(wrapper.find("PayWhatYouCan").length).toBe(1);
-  expect(wrapper.find("Card").length).toBe(1);
+  expect(wrapper.find("Payment")).toHaveLength(1);
+  expect(wrapper.find("PayWhatYouCan")).toHaveLength(1);
+  expect(wrapper.find("Card")).toHaveLength(1);
 
   expect(wrapper.find("Payment").props().credits).toBe(26);
   expect(wrapper.find("Payment").props().price).toBe(169);
@@ -68,9 +68,9 @@ test("no payWhatYouCan", () => {
   // click a bundle
   wrapper.find("Choice").first().find("button").first().simulate("click");
 
-  expect(wrapper.find("Payment").length).toBe(1);
-  expect(wrapper.find("PayWhatYouCan").length).toBe(0);
-  expect(wrapper.find("Card").length).toBe(1);
+  expect(wrapper.find("Payment")).toHaveLength(1);
+  expect(wrapper.find("PayWhatYouCan")).toHaveLength(0);
+  expect(wrapper.find("Card")).toHaveLength(1);
 });
 
 test("humanizeBreadsPerWeek", () => {
