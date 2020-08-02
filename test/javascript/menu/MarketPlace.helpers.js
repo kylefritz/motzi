@@ -68,7 +68,7 @@ class MarketplaceWrapper {
   submittedOrder() {
     return this.onCreateOrder.mock.calls[0][0];
   }
-  fillUser(firstName, lastName, email) {
+  fillUser(firstName, lastName, email, phone) {
     const inputs = this.find("input");
     const setInput = (index, value) =>
       inputs.at(index).simulate("change", { target: { value } });
@@ -76,5 +76,6 @@ class MarketplaceWrapper {
     setInput(0, firstName);
     setInput(1, lastName);
     setInput(2, email);
+    setInput(3, phone);
   }
 }

@@ -21,6 +21,9 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
 
     new_user = User.unscoped.order("created_at desc").last
     assert_equal order_attrs[:email], new_user.email
+    assert_equal order_attrs[:first_name], new_user.first_name
+    assert_equal order_attrs[:last_name], new_user.last_name
+    assert_equal order_attrs[:phone], new_user.phone
     refute new_user.subscriber?, "created user isn't a subscriber"
 
     new_order = Order.last
@@ -79,13 +82,14 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
   def build_order_attrs
     return {
       cart: [
-          {itemId: items(:classic).id, price: 5, quantity: 1, day: "Thursday"},
-          {itemId: items(:rye).id, price: 5, quantity: 1, day: "Thursday"}
+          {item_id: items(:classic).id, price: 5, quantity: 1, day: "Thursday"},
+          {item_id: items(:rye).id, price: 5, quantity: 1, day: "Thursday"}
       ],
       comments: nil,
       email: "jeff@jeff.com",
-      firstName: "Jef",
-      lastName: "Fritz",
+      first_name: "Jef",
+      last_name: "Fritz",
+      phone: "555-123-4567",
       price: 10.00,
       opt_in: false,
       token: @stripe_helper.generate_card_token

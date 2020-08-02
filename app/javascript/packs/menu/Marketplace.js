@@ -4,7 +4,7 @@ import _ from "lodash";
 import BakersNote from "./BakersNote";
 import Cart, { cartTotal } from "./Cart";
 import Title from "./Title";
-import EmailName from "./EmailName";
+import Account from "./Account";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
 import Payment from "../buy/Payment";
@@ -17,15 +17,15 @@ export default function Marketplace({ menu, onCreateOrder }) {
 
   const [submitting, setSubmitting] = useState(false);
   const [comments, setComments] = useState();
-  const [emailName, setEmailName] = useState({});
+  const [account, setAccount] = useState({});
 
   const [price, setPrice] = useState(cartTotal({ cart, menu }).price);
 
   const handleCardToken = ({ token }) => {
-    if (_.isEmpty(emailName.email)) {
+    if (_.isEmpty(account.email)) {
       return alert("Enter email!");
     }
-    if (!/\S+@\S+\.\S+/.test(emailName.email)) {
+    if (!/\S+@\S+\.\S+/.test(account.email)) {
       return alert("Invalid email");
     }
 
@@ -34,7 +34,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
 
     // send stripe token to rails to complete purchase
     onCreateOrder({
-      ...emailName,
+      ...account,
       comments,
       cart,
       price,
@@ -94,7 +94,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
       <Cart {...{ cart, menu, rmCartItem: handleRemoveFromCart }} />
 
       <div className="mt-3">
-        <EmailName onChange={setEmailName} disabled={menuClosed} />
+        <Account onChange={setAccount} disabled={menuClosed} />
       </div>
       <PayWhatYouCan
         price={price}

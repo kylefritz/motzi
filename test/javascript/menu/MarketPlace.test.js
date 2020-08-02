@@ -24,7 +24,7 @@ test("marketplace, add item to cart", () => {
   expect(menu.cartTotal()).toContain("$3.00");
 
   // fill out customer info
-  menu.fillUser("kyle", "fritz", "kf@woo.com");
+  menu.fillUser("kyle", "fritz", "kf@woo.com", "555-123-4567");
 
   // set payWhatYouCan to $0
   const payWhatYouCan = menu.wrapper.find("PayWhatYouCan").find("input");
@@ -40,7 +40,7 @@ test("marketplace, add item to cart", () => {
   // order is the 0th arg of the 0th call
   const order = menu.submittedOrder();
   expect(order).toBeTruthy();
-  const { email, firstName, lastName, cart } = order;
+  const { email, firstName, lastName, phone, cart } = order;
   console.log("submitted order", order);
 
   // uid is assigned and skip is true
@@ -54,4 +54,5 @@ test("marketplace, add item to cart", () => {
   expect(email).toBe("kf@woo.com");
   expect(lastName).toBe("fritz");
   expect(firstName).toBe("kyle");
+  expect(phone).toBe("555-123-4567");
 });

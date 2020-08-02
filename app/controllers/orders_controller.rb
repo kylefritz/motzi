@@ -15,7 +15,7 @@ class OrdersController < ApplicationController
       return existing_user
     end
 
-    User.create!(params.permit(:first_name, :last_name, :email, :opt_in))
+    User.create!(params.permit(:first_name, :last_name, :email, :phone, :opt_in))
   end
 
   def create

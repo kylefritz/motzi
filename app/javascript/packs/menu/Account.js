@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 
-export default function EmailName({ onChange, disabled }) {
+export default function Account({ onChange, disabled }) {
   const [account, setAccount] = useState({
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
     optIn: false,
   });
 
@@ -16,7 +17,7 @@ export default function EmailName({ onChange, disabled }) {
       onChange(nextAccount);
     };
   };
-  const { firstName, lastName, email, optIn } = account;
+  const { firstName, lastName, email, phone, optIn } = account;
   return (
     <>
       <h5>Your info</h5>
@@ -55,6 +56,20 @@ export default function EmailName({ onChange, disabled }) {
             name="email"
             value={email}
             onChange={handle("email")}
+            className="form-control"
+            disabled={disabled}
+          />
+        </label>
+      </div>
+      <div className="form-group">
+        <label>
+          Phone
+          <input
+            required
+            type="tel"
+            name="phone"
+            value={phone}
+            onChange={handle("phone")}
             className="form-control"
             disabled={disabled}
           />
