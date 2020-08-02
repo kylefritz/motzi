@@ -16,3 +16,8 @@ unless Rails.env.test?
     CreditBundle.create!(description: "3-Month", credits: 12, price: 72)
   end
 end
+
+unless Menu.any?
+  menu = Menu.create!(week_id: Time.zone.now.week_id)
+  menu.make_current!
+end
