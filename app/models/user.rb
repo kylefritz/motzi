@@ -38,7 +38,7 @@ class User < ApplicationRecord
   end
 
   def credits
-    SqlQuery.new(:user_credits, user_ids: [self.id]).execute.first.values.last.to_i
+    SqlQuery.new(:user_credits, user_ids: [self.id]).execute.first["credit_balance"]
   end
 
   def authenticate(password)

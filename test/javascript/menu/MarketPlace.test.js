@@ -9,6 +9,14 @@ test("marketplace render menu", () => {
   expect(menu.submitOrderBtn().text()).toBe("Select an item");
 });
 
+test("payWhatYouCan false", () => {
+  const menuWith = renderMenu({ enablePayWhatYouCan: true });
+  expect(menuWith.find("PayWhatYouCan")).toHaveLength(1);
+
+  const withOut = renderMenu({ enablePayWhatYouCan: false });
+  expect(withOut.find("PayWhatYouCan")).toHaveLength(0);
+});
+
 test("marketplace, add item to cart", () => {
   const menu = renderMenu({ order: false, user: false });
   expect(menu.cart().text()).toContain("No items");

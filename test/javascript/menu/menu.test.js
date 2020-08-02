@@ -10,7 +10,7 @@ test("menu for uid-user, before order", () => {
   expect(menu.payItForward()).toHaveLength(1);
 });
 
-test("payItForward false", () => {
+test("payItForward", () => {
   const menu = renderMenu({ enablePayItForward: false });
   expect(menu.payItForward()).toHaveLength(0);
 });
@@ -78,11 +78,11 @@ test("nag buy more credits", () => {
 test("must buy more credits", () => {
   const must = renderMenu({ user: { credits: 0 }, order: false });
   expect(must.find("Buy")).toHaveLength(1);
-  expect(must.find("Items")).toHaveLength(0);
+  expect(must.find("SubmitButton")).toHaveLength(0);
 
   const regular = renderMenu({ user: { credits: 5 }, order: false });
   expect(regular.find("Buy")).toHaveLength(0);
-  expect(regular.find("Items")).toHaveLength(1);
+  expect(regular.find("SubmitButton")).toHaveLength(1);
 });
 
 test("Menu pick skip", () => {

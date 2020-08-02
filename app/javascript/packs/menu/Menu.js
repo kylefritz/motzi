@@ -44,10 +44,13 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
     return (
       <>
         <Subscription user={user} showBuyMoreButton={false} />
-        <p className="my-2">
-          We love making yummy things but you more credits.
+        <p className="my-2 text-center">
+          Buy credits then trade them for yummy things!
         </p>
         <BuyCredits user={user} />
+
+        <h5 className="mt-5">Preview of current menu</h5>
+        <Items marketplace items={menu.items} disabled={true} />
       </>
     );
   }

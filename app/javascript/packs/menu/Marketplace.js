@@ -55,8 +55,9 @@ export default function Marketplace({ menu, onCreateOrder }) {
     resetPrice(nextCart);
   };
 
-  const { menuNote, items, enablePayItForward } = menu;
+  const { menuNote, items, enablePayItForward, enablePayWhatYouCan } = menu;
   const { pastDay2Deadline: menuClosed } = getDayContext();
+  const disabled = menuClosed || !onCreateOrder;
   return (
     <>
       <Title menu={menu} />
@@ -68,13 +69,13 @@ export default function Marketplace({ menu, onCreateOrder }) {
         marketplace
         items={items}
         onAddToCart={handleAddToCart}
-        disabled={menuClosed}
+        disabled={disabled}
       />
       {enablePayItForward && (
         <PayItForward
           {...menu.payItForward}
           onAddToCart={handleAddToCart}
-          disabled={menuClosed}
+          disabled={disabled}
         />
       )}
 
@@ -86,7 +87,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
             defaultValue={comments}
             onChange={(e) => setComments(e.target.value)}
             className="form-control"
-            disabled={menuClosed}
+            disabled={disabled}
           />
         </div>
       </div>
@@ -94,19 +95,23 @@ export default function Marketplace({ menu, onCreateOrder }) {
       <Cart {...{ cart, menu, rmCartItem: handleRemoveFromCart }} />
 
       <div className="mt-3">
-        <Account onChange={setAccount} disabled={menuClosed} />
+        <Account onChange={setAccount} disabled={disabled} />
       </div>
-      <PayWhatYouCan
-        price={price}
-        onPricedChanged={setPrice}
-        disabled={menuClosed}
-      />
+      {enablePayWhatYouCan ? (
+        <PayWhatYouCan
+          price={price}
+          onPricedChanged={setPrice}
+          disabled={disabled}
+        />
+      ) : (
+        <br />
+      )}
       <Payment
         price={_.isEmpty(cart) ? null : price}
         stripeApiKey={gon.stripeApiKey}
         onCardToken={handleCardToken}
         submitting={submitting}
-        disabled={menuClosed}
+        disabled={disabled}
       />
     </>
   );

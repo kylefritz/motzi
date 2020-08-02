@@ -43,6 +43,7 @@ ActiveAdmin.register User do
       para auto_link user, user.email
       small user.additional_email
     end
+    column :subscriber
     column :breads_per_week
     column :phone do |user|
       number_to_phone(user.phone)
