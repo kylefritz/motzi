@@ -150,7 +150,7 @@ export default function App() {
         enablePayItForward,
         bundles,
         onRefresh: fetchMenu,
-        showCredits: !_.isNil(user), // TODO: could push this setting into marketplace vs menu!
+        showCredits: !_.isNil(user), // could push this setting into marketplace vs menu?
       }}
     >
       <DayContext.Provider

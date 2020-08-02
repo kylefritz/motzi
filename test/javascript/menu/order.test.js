@@ -6,8 +6,7 @@ import Order from "menu/Order";
 import mockMenuJson from "./mockMenuJson";
 
 test("Order snapshot", () => {
-  const data = mockMenuJson();
-  const wrapper = mount(<Order {...data} />);
+  const wrapper = mount(<Order {...mockMenuJson()} />);
 
   expect(wrapper.find("DaysCart").length).toBe(1);
   expect(wrapper.find("DaysCart").text()).toContain("Classic");
