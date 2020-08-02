@@ -9,6 +9,7 @@ json.menu do
 
   json.items menu_items.map do |menu_item, item|
     json.extract! menu_item, :subscriber, :marketplace, :day1, :day2
+    json.menu_item_id menu_item.id # use by the menu_builder app
     json.extract! item, :id, :name, :description, :price
     json.image item.image_path
   end

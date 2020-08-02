@@ -24,6 +24,7 @@ export default function ({
     items: [
       {
         id: 3,
+        menuItemId: 13,
         name: "Baguette",
         description: "",
         image: "bread-baguette.jpg",
@@ -35,6 +36,7 @@ export default function ({
       },
       {
         id: 1,
+        menuItemId: 11,
         name: "Classic",
         description:
           "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
@@ -47,6 +49,7 @@ export default function ({
       },
       {
         id: 2,
+        menuItemId: 12,
         name: "Cookies",
         description: "ony subscribers can get cookies",
         price: 4.0,
@@ -57,6 +60,7 @@ export default function ({
       },
       {
         id: 4,
+        menuItemId: 14,
         name: "Marketplace only item",
         description: "too small for subscribers",
         price: 2.0,
@@ -67,6 +71,7 @@ export default function ({
       },
       {
         id: 5,
+        menuItemId: null,
         name: "Another small item",
         description: "too small for subscribers",
         price: 1.5,
@@ -77,6 +82,7 @@ export default function ({
       },
       {
         id: 0,
+        menuItemId: 10,
         name: "Skip",
         description: "Skip this week.",
         day1: true,

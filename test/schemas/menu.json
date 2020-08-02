@@ -45,6 +45,7 @@
             "type": "object",
             "required": [
               "id",
+              "menuItemId",
               "name",
               "description",
               "price",
@@ -55,6 +56,7 @@
             ],
             "properties": {
               "id": { "type": "integer" },
+              "menuItemId": { "type": ["integer", "null"] },
               "name": { "type": "string" },
               "description": { "type": "string" },
               "price": { "type": "number" },
