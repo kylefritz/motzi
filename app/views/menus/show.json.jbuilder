@@ -2,16 +2,25 @@ json.menu do
   json.extract! @menu, :id, :name, :menu_note, :subscriber_note, :created_at, :day1_deadline, :day2_deadline
   json.is_current @menu.current?
 
-  menu_items = @menu.menu_items.map {|mi| [mi, mi.item]}
+  menu_items = @menu.menu_items.includes(item: {image_attachment: :blob}).map {|mi| [mi, mi.item]}
   if Setting.shop.pay_it_forward && Item.pay_it_forward.present?
     menu_items.push([MenuItem.new, Item.pay_it_forward])
   end
+
+  day1_counts, day2_counts = @menu.item_counts
 
   json.items menu_items.map do |menu_item, item|
     json.extract! menu_item, :subscriber, :marketplace, :day1, :day2
     json.menu_item_id menu_item.id # use by the menu_builder app
     json.extract! item, :id, :name, :description, :price, :credits
     json.image item.image_path
+
+    json.extract! menu_item, :day1_limit, :day2_limit
+    json.ordered_day1_count day1_counts[menu_item.item_id]
+    json.ordered_day2_count day2_counts[menu_item.item_id]
+
+    json.remaining_day1 menu_item.day1_limit.present? ? (menu_item.day1_limit - day1_counts[menu_item.item_id]) : (menu_item.day1 ? 120 : 0)
+    json.remaining_day2 menu_item.day2_limit.present? ? (menu_item.day2_limit - day2_counts[menu_item.item_id]) : (menu_item.day2 ? 120 : 0)
   end
 
   json.day1 Setting.pickup_day1

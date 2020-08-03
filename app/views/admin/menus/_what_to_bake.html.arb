@@ -1,11 +1,10 @@
-counts = Hash.new(0).tap do |counts|
-  order_items.each { |order_item| counts[order_item.item.name] += order_item.quantity }
-end
-sorted_keys_without_total = counts.keys.sort_by(&:to_s)
 total_tag = "<strong>TOTAL</strong>".html_safe
-counts[total_tag] = "<strong>#{order_items.map(&:quantity).sum}</strong>".html_safe
+counts[total_tag] = "<strong>#{counts.values.sum}</strong>".html_safe
 
-table_for [sorted_keys_without_total, total_tag].flatten, class: 'mt-0 breads' do
-  column ("Item") { |item| item }
-  column ("Quantity") { |item| counts[item] }
+sorted_keys_without_total = Item.find(counts.keys).pluck(:name, :id).sort_by(&:first)
+sorted_keys_without_total.push([total_tag, total_tag])
+
+table_for sorted_keys_without_total, class: 'mt-0 breads' do
+  column ("Item") { |name, id| name }
+  column ("Quantity") { |name, id| counts[id] }
 end

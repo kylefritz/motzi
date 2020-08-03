@@ -19,6 +19,12 @@ class Menu < ApplicationRecord
     self.id == Setting.menu_id
   end
 
+  def item_counts
+    day1, day2 = SqlQuery.new(:ordered_items_counts, menu_id: self.id).execute.partition {|count| count["day1_pickup"]}
+    s = ->(list){ Hash[list.map { |c| [c["item_id"], c["sum"]] }] }
+    [s.call(day1), s.call(day2)]
+  end
+
   def subscriber_note_html
     @subscriber_note_html ||= MARKDOWN.render(self.subscriber_note || '').html_safe
   end

@@ -6,15 +6,25 @@ export default class Item extends React.Component {
     this.props.onRemove(this.props.id);
   }
   render() {
-    const { menuItemId, name, subscriber, marketplace, day1, day2 } =
-      this.props || {};
+    const {
+      menuItemId,
+      name,
+      subscriber,
+      marketplace,
+      day1,
+      day2,
+      day1Limit,
+      day2Limit,
+    } = this.props || {};
     return (
       <tr>
         <td>{name}</td>
         <td>{marketplace ? "" : "no"}</td>
         <td>{subscriber ? "" : "no"}</td>
         <td>{day1 ? "" : "no"}</td>
+        <td>{day1Limit}</td>
         <td>{day2 ? "" : "no"}</td>
+        <td>{day2Limit}</td>
         <td>
           <a href={`/admin/menu_items/${menuItemId}`} target="_blank">
             Edit
