@@ -1,5 +1,4 @@
 require("../configure_enzyme");
-import { act } from "react-dom/test-utils";
 
 import renderMenu from "./MarketPlace.helpers";
 
@@ -25,11 +24,11 @@ test("checkout", () => {
   menu.addItemToCart();
   expect(menu.cartTotal()).toContain("$3.00");
 
-  // "fill" card
-  menu.find("CardElement").props().onChange({ complete: true });
-
   // fill out customer info
   menu.fillUser("kyle", "fritz", "kf@woo.com", "555-123-4567");
+
+  // "fill" card by invoking onChange: https://enzymejs.github.io/enzyme/#reacttestutilsact-wrap
+  menu.find("CardElement").invoke("onChange")({ complete: true });
 
   // click submit
   menu.submitOrder();
