@@ -4,6 +4,7 @@ import { mount } from "enzyme";
 import Marketplace from "menu/Marketplace";
 import mockMenuJson from "./mockMenuJson";
 import stripeMock from "./stripeMock";
+import { SettingsContext } from "../../../app/javascript/packs/menu/Contexts";
 
 export default function renderMenu(menuJsonOptions) {
   window.gon = { stripeApiKey: "no-such-key" };
@@ -28,10 +29,12 @@ export default function renderMenu(menuJsonOptions) {
   const onCreateOrder = jest.fn(() => Promise.resolve());
 
   const wrapper = mount(
-    <Marketplace
-      {...mockMenuJson(menuJsonOptions)}
-      onCreateOrder={onCreateOrder}
-    />
+    <SettingsContext.Provider value={{}}>
+      <Marketplace
+        {...mockMenuJson(menuJsonOptions)}
+        onCreateOrder={onCreateOrder}
+      />
+    </SettingsContext.Provider>
   );
 
   return new MarketplaceWrapper(wrapper, onCreateOrder);
@@ -56,6 +59,15 @@ class MarketplaceWrapper {
   }
   items() {
     return this.find("Item");
+  }
+  addItemToCart() {
+    // click "thurs"
+    const thurs = this.items().at(0).find("button").at(0);
+    thurs.simulate("click");
+
+    // click "add to cart"
+    const addToCart = this.items().at(0).find("button").at(2);
+    addToCart.simulate("click");
   }
   skipBtn() {
     return this.find("SkipThisWeek").find("button");

@@ -2,7 +2,7 @@ require("../configure_enzyme");
 
 import renderMenu from "./MarketPlace.helpers";
 
-test("marketplace render menu", () => {
+test("menu", () => {
   const menu = renderMenu({ order: false, user: false });
 
   expect(menu.items()).toHaveLength(4);
@@ -17,18 +17,61 @@ test("payWhatYouCan false", () => {
   expect(withOut.find("PayWhatYouCan")).toHaveLength(0);
 });
 
-test("marketplace, add item to cart", () => {
+test("checkout", () => {
   const menu = renderMenu({ order: false, user: false });
   expect(menu.cart().text()).toContain("No items");
 
-  // click "thurs"
-  const thurs = menu.items().at(0).find("button").at(0);
-  thurs.simulate("click");
+  menu.addItemToCart();
+  expect(menu.cartTotal()).toContain("$3.00");
 
-  // click "add to cart"
-  const addToCart = menu.items().at(0).find("button").at(2);
-  addToCart.simulate("click");
+  // fill out customer info
+  menu.fillUser("kyle", "fritz", "kf@woo.com", "555-123-4567");
 
+  // "fill" card by invoking onChange: https://enzymejs.github.io/enzyme/#reacttestutilsact-wrap
+  menu.find("CardElement").invoke("onChange")({ complete: true });
+
+  // click submit
+  menu.submitOrder();
+
+  // simulate getting response back from stripe
+  menu
+    .find("Payment")
+    .props()
+    .onCardToken({
+      token: {
+        id: "test_id",
+      },
+    });
+
+  // create order gets called
+  expect(menu.onCreateOrder).toHaveBeenCalledTimes(1);
+
+  // order is the 0th arg of the 0th call
+  const order = menu.submittedOrder();
+  expect(order).toBeTruthy();
+  const { email, firstName, lastName, phone, cart, price } = order;
+  console.log("submitted order", order);
+
+  // uid is assigned and skip is true
+  expect(cart).toHaveLength(1);
+  expect(cart[0]).toStrictEqual({
+    itemId: 3,
+    price: 3,
+    quantity: 1,
+    day: "Thursday",
+  });
+  expect(email).toBe("kf@woo.com");
+  expect(lastName).toBe("fritz");
+  expect(firstName).toBe("kyle");
+  expect(phone).toBe("555-123-4567");
+  expect(price).toBe(3);
+});
+
+test("0-price", () => {
+  const menu = renderMenu({ order: false, user: false });
+  expect(menu.cart().text()).toContain("No items");
+
+  menu.addItemToCart();
   expect(menu.cartTotal()).toContain("$3.00");
 
   // fill out customer info
@@ -47,20 +90,6 @@ test("marketplace, add item to cart", () => {
 
   // order is the 0th arg of the 0th call
   const order = menu.submittedOrder();
-  expect(order).toBeTruthy();
-  const { email, firstName, lastName, phone, cart } = order;
-  console.log("submitted order", order);
-
-  // uid is assigned and skip is true
-  expect(cart).toHaveLength(1);
-  expect(cart[0]).toStrictEqual({
-    itemId: 3,
-    price: 3,
-    quantity: 1,
-    day: "Thursday",
-  });
-  expect(email).toBe("kf@woo.com");
-  expect(lastName).toBe("fritz");
-  expect(firstName).toBe("kyle");
-  expect(phone).toBe("555-123-4567");
+  const { price } = order;
+  expect(price).toBe(0);
 });
