@@ -18,24 +18,35 @@ const WrappedPaymentRequest = injectStripe(PaymentRequest);
 </StripeProvider>;
 */
 
-export default function Payment({
-  credits,
-  price,
-  stripeApiKey,
-  onCardToken,
-  onPaymentResult,
-  submitting,
-  disabled,
-}) {
-  return (
-    <>
-      <StripeProvider apiKey={stripeApiKey}>
-        <Elements>
-          <WrappedCard
-            {...{ price, credits, submitting, onToken: onCardToken, disabled }}
-          />
-        </Elements>
-      </StripeProvider>
-    </>
-  );
+// we need to use a class style component here so we can
+// call the onCardToken prop from a test
+export default class Payment extends React.Component {
+  render() {
+    const {
+      credits,
+      price,
+      stripeApiKey,
+      onCardToken,
+      onPaymentResult,
+      submitting,
+      disabled,
+    } = this.props;
+    return (
+      <>
+        <StripeProvider apiKey={stripeApiKey}>
+          <Elements>
+            <WrappedCard
+              {...{
+                price,
+                credits,
+                submitting,
+                onToken: onCardToken,
+                disabled,
+              }}
+            />
+          </Elements>
+        </StripeProvider>
+      </>
+    );
+  }
 }
