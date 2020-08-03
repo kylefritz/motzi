@@ -43,7 +43,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
   };
 
   const resetPrice = (nextCart) =>
-    setPrice(cartTotal({ cart: nextCart, menu }));
+    setPrice(cartTotal({ cart: nextCart, menu }).price);
 
   const handleAddToCart = (item) => {
     const nextCart = addToCart(item);
