@@ -147,17 +147,15 @@ export default function Buy({ user: passedUser }) {
       </h2>
       {grouped.map(([name, choices]) => {
         return (
-          <div key={name}>
+          <div key={name} className="text-center">
             {name && name !== "null" && <h6>{name}</h6>}
-            <div className="text-center">
-              {choices.map((choice) => (
-                <Choice
-                  key={choice.credits}
-                  {...choice}
-                  onChoose={handleChoose}
-                />
-              ))}
-            </div>
+            {choices.map((choice) => (
+              <Choice
+                key={choice.credits}
+                {...choice}
+                onChoose={handleChoose}
+              />
+            ))}
           </div>
         );
       })}
