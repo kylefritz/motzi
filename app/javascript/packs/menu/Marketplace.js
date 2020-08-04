@@ -2,24 +2,23 @@ import React, { useState } from "react";
 import _ from "lodash";
 
 import BakersNote from "./BakersNote";
-import Cart, { cartTotal } from "./Cart";
+import Cart, { useCart } from "./Cart";
 import Title from "./Title";
 import Account from "./Account";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
 import Payment from "../buy/Payment";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
-import useCart from "./useCart";
 import { getDayContext } from "./Contexts";
 
 export default function Marketplace({ menu, onCreateOrder }) {
-  const { cart, addToCart, rmCartItem } = useCart();
-
+  const { cart, addToCart, rmCartItem, total, items } = useCart({
+    items: menu.items,
+  });
   const [submitting, setSubmitting] = useState(false);
   const [comments, setComments] = useState();
   const [account, setAccount] = useState({});
-
-  const [price, setPrice] = useState(cartTotal({ cart, menu }).price);
+  const [price, setPrice] = useState(total.price);
 
   const handleCardToken = ({ token }) => {
     if (_.isEmpty(account.email)) {
@@ -42,20 +41,17 @@ export default function Marketplace({ menu, onCreateOrder }) {
     }).then(() => setSubmitting(false));
   };
 
-  const resetPrice = (nextCart) =>
-    setPrice(cartTotal({ cart: nextCart, menu }).price);
-
   const handleAddToCart = (item) => {
-    const nextCart = addToCart(item);
-    resetPrice(nextCart);
+    const newCartPrice = addToCart(item);
+    setPrice(newCartPrice);
   };
 
   const handleRemoveFromCart = (item) => {
-    const nextCart = rmCartItem(item);
-    resetPrice(nextCart);
+    const newCartPrice = rmCartItem(item);
+    setPrice(newCartPrice);
   };
 
-  const { menuNote, items, enablePayItForward, enablePayWhatYouCan } = menu;
+  const { menuNote, enablePayWhatYouCan, payItForward } = menu;
   const { pastDay2Deadline: menuClosed } = getDayContext();
   const disabled = menuClosed || !onCreateOrder;
   return (
@@ -71,9 +67,9 @@ export default function Marketplace({ menu, onCreateOrder }) {
         onAddToCart={handleAddToCart}
         disabled={disabled}
       />
-      {enablePayItForward && (
+      {payItForward && (
         <PayItForward
-          {...menu.payItForward}
+          {...payItForward}
           onAddToCart={handleAddToCart}
           disabled={disabled}
         />

@@ -21,7 +21,6 @@
         "createdAt",
         "items",
         "isCurrent",
-        "enablePayItForward",
         "enablePayWhatYouCan"
       ],
       "properties": {
@@ -53,7 +52,11 @@
               "subscriber",
               "marketplace",
               "day1",
-              "day2"
+              "day2",
+              "day1Limit",
+              "day2Limit",
+              "remainingDay1",
+              "remainingDay2"
             ],
             "properties": {
               "id": { "type": "integer" },
@@ -66,6 +69,10 @@
               "marketplace": { "type": "boolean" },
               "day1": { "type": "boolean" },
               "day2": { "type": "boolean" },
+              "day1Limit": { "type": ["integer", "null"] },
+              "day2Limit": { "type": ["integer", "null"] },
+              "remainingDay1": { "type": ["integer", "null"] },
+              "remainingDay2": { "type": ["integer", "null"] },
               "image": {
                 "type": ["null", "string"],
                 "title": "image",
@@ -77,7 +84,6 @@
           }
         },
         "isCurrent": { "type": "boolean" },
-        "enablePayItForward": { "type": "boolean" },
         "enablePayWhatYouCan": { "type": "boolean" }
       }
     },

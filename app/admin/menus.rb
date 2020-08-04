@@ -119,17 +119,17 @@ ActiveAdmin.register Menu do
 
     panel "Orders" do
       columns do
-        day1, day2 = menu.orders.includes(order_items: :item).flat_map(&:order_items).partition(&:day1_pickup?)
+        day1, day2 = menu.item_counts
 
         column id: 'what-to-bake-day1' do
           panel "#{Setting.pickup_day1}" do
-            render 'admin/menus/what_to_bake', { order_items: day1 }
+            render 'admin/menus/what_to_bake', { counts: day1, menu: menu }
           end
         end
 
         column id: 'what-to-bake-day2' do
           panel "#{Setting.pickup_day2}" do
-            render 'admin/menus/what_to_bake', { order_items: day2}
+            render 'admin/menus/what_to_bake', { counts: day2, menu: menu}
           end
         end
       end

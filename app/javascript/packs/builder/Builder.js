@@ -81,7 +81,9 @@ export default class App extends React.Component {
               <th>Marketplace?</th>
               <th>Subscriber?</th>
               <th>Day 1?</th>
+              <th>Day 1 Limit</th>
               <th>Day 2?</th>
+              <th>Day 2 Limit</th>
               <th></th>
             </tr>
           </thead>

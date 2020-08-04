@@ -1,22 +1,82 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
+import { get, isNumber } from "lodash";
 
 import Price from "./Price";
 import Quantity from "./Quantity";
 import { getDayContext } from "./Contexts";
 
 function shortDay(day) {
-  if (day == "Thursday") {
-    return "Thurs";
+  switch (day) {
+    case "Monday":
+    case "Tuesday":
+    case "Thursday":
+    case "Friday":
+    case "Sunday":
+      return day.replace("day", "");
+    case "Wednesday":
+      return "Wed";
+    case "Saturday":
+      return "Sat";
   }
-  return "Sat";
+  return day;
+}
+
+export function DayButton({
+  day,
+  btn,
+  isPastDeadline,
+  deadlineDay,
+  remaining,
+  onSetDay,
+}) {
+  if (remaining < 1 || isPastDeadline) {
+    const [short, long, title] = isPastDeadline
+      ? [
+          `Closed`,
+          `Ordering closed for ${shortDay(day)}`,
+          `Order by midnight ${deadlineDay} for ${day}.`,
+        ]
+      : ["Sold Out", `${shortDay(day)} Sold Out`, undefined];
+
+    return (
+      <button
+        type="button"
+        className={`btn btn-outline-${btn} btn-sm mr-2`}
+        disabled={true}
+        title={title}
+      >
+        <span className="d-block d-md-none">{short}</span>
+        <span className="d-none d-md-block">{long}</span>
+      </button>
+    );
+  }
+
+  return (
+    <div key={day}>
+      <button
+        type="button"
+        className={`btn btn-${btn} btn-sm mr-2`}
+        onClick={() => onSetDay(day)}
+      >
+        <span className="d-block d-md-none">{shortDay(day)}</span>
+        <span className="d-none d-md-block">{day}</span>
+      </button>
+      {isNumber(remaining) && remaining < 5 && (
+        <div className="text-info text-center mt-1">
+          <small>{remaining} left!</small>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function DayButtons({
   description,
   onSetDay,
-  showButtons,
-  day1: availableDay1,
-  day2: availableDay2,
+  day1: enableDay1,
+  day2: enableDay2,
+  remainingDay1,
+  remainingDay2,
 }) {
   const {
     day1,
@@ -27,32 +87,30 @@ function DayButtons({
     day2DeadlineDay,
   } = getDayContext();
   const days = [];
-  if (availableDay1) {
-    days.push([day1, "secondary", day1Closed, day1DeadlineDay]);
+  if (enableDay1) {
+    days.push({
+      day: day1,
+      btn: "secondary",
+      isPastDeadline: day1Closed,
+      deadlineDay: day1DeadlineDay,
+      remaining: remainingDay1,
+    });
   }
-  if (availableDay2) {
-    days.push([day2, "primary", day2Closed, day2DeadlineDay]);
+  if (enableDay2) {
+    days.push({
+      day: day2,
+      btn: "primary",
+      isPastDeadline: day2Closed,
+      deadlineDay: day2DeadlineDay,
+      remaining: remainingDay2,
+    });
   }
   return (
     <>
-      {showButtons && (
-        <div className="my-2">
-          {days.map(([day, btn, isPastDeadline, deadlineDay]) => (
-            <button
-              key={day}
-              type="button"
-              className={`btn btn-${btn} btn-sm mr-2`}
-              onClick={() => onSetDay(day)}
-              disabled={isPastDeadline}
-              title={
-                isPastDeadline
-                  ? `Order by midnight ${deadlineDay} for ${day}.`
-                  : undefined
-              }
-            >
-              <span className="d-block d-md-none">{shortDay(day)}</span>
-              <span className="d-none d-md-block">{day}</span>
-            </button>
+      {onSetDay && (
+        <div className="my-2" style={{ display: "flex" }}>
+          {days.map((props) => (
+            <DayButton key={props.day} onSetDay={onSetDay} {...props} />
           ))}
         </div>
       )}
@@ -63,7 +121,7 @@ function DayButtons({
   );
 }
 
-function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day }) {
+function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day, max }) {
   return (
     <>
       <div>
@@ -72,7 +130,7 @@ function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day }) {
       <div>
         Qty: <strong className="pr-3">{quantity}</strong>
       </div>
-      <Quantity defaultQuantity={quantity} onChange={onQuantity} />
+      <Quantity defaultQuantity={quantity} onChange={onQuantity} max={max} />
       <div className="mt-2">
         <button onClick={onAdd} className="btn btn-primary btn-sm mr-2">
           <span className="d-block d-md-none">Add</span>
@@ -86,10 +144,13 @@ function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day }) {
   );
 }
 
-function Ordering({ description, onChange, day1, day2 }) {
+function Ordering(props) {
   const [day, setDay] = useState(null);
   const [wasAdded, setWasAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const { day1 } = getDayContext();
+
+  const { onChange } = props;
 
   const handleAdd = () => {
     onChange({ day, quantity });
@@ -108,27 +169,28 @@ function Ordering({ description, onChange, day1, day2 }) {
   }
 
   if (day) {
+    const remaining = get(
+      props,
+      day === day1 ? "remainingDay1" : "remainingDay2"
+    );
+    const maxQuantity = isNumber(remaining) && remaining < 4 ? remaining : 4;
+
     return (
       <QuantityAdd
         quantity={quantity}
         onQuantity={setQuantity}
         onAdd={handleAdd}
         day={day}
+        max={maxQuantity}
         onCancel={() => setDay(null)}
       />
     );
   }
 
-  return (
-    <DayButtons
-      onSetDay={setDay}
-      showButtons={!!onChange}
-      {...{ description, day1, day2 }}
-    />
-  );
+  return <DayButtons onSetDay={onChange && setDay} {...props} />;
 }
 
-function Item(props) {
+export function Item(props) {
   const { price, credits, image, name } = props;
   return (
     <div className="col-6 mb-4">

@@ -56,7 +56,6 @@ test("checkout", () => {
   expect(cart).toHaveLength(1);
   expect(cart[0]).toStrictEqual({
     itemId: 3,
-    price: 3,
     quantity: 1,
     day: "Thursday",
   });

@@ -3,18 +3,19 @@ import _ from "lodash";
 
 import BakersNote from "./BakersNote";
 import BuyCredits from "../buy/App";
-import Cart, { cartTotal } from "./Cart";
+import Cart, { useCart } from "./Cart";
 import Title from "./Title";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
 import SkipThisWeek from "./SkipThisWeek";
 import Subscription from "./Subscription";
-import useCart from "./useCart";
 import { getDayContext } from "./Contexts";
 
 export default function Menu({ menu, order, user, onCreateOrder }) {
-  const { cart, addToCart, rmCartItem, setCart } = useCart(order);
-
+  const { cart, addToCart, rmCartItem, setCart, total, items } = useCart({
+    order,
+    items: menu.items,
+  });
   const [skip, setSkip] = useState(_.get(order, "skip", false));
   const [comments, setComments] = useState(_.get(order, "comments", null));
 
@@ -37,7 +38,7 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
     });
   };
 
-  const { subscriberNote, items, isCurrent, enablePayItForward } = menu;
+  const { subscriberNote, isCurrent } = menu;
   const { day2Closed: menuClosed } = getDayContext();
   if (user.credits < 1) {
     // Must buy credits!
@@ -55,7 +56,7 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
     );
   }
 
-  const insufficientCredits = cartTotal({ cart, menu }).credits > user.credits;
+  const insufficientCredits = total.credits > user.credits;
   return (
     <>
       <Subscription user={user} />
@@ -88,12 +89,8 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
         <>
           <Items items={items} onAddToCart={addToCart} />
 
-          <SkipThisWeek
-            {...menu.skip}
-            onSkip={handleSkip}
-            disabled={menuClosed}
-          />
-          {enablePayItForward && (
+          <SkipThisWeek onSkip={handleSkip} disabled={menuClosed} />
+          {menu.payItForward && (
             <PayItForward
               {...menu.payItForward}
               onAddToCart={addToCart}

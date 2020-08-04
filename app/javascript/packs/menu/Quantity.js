@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function Quantity({ defaultQuantity = 1, onChange }) {
+export default function Quantity({ defaultQuantity = 1, onChange, max = 4 }) {
   const [quantity, setQuantity] = useState(defaultQuantity);
 
   const handlePlus = () => {
@@ -32,7 +32,7 @@ export default function Quantity({ defaultQuantity = 1, onChange }) {
         <button
           type="button"
           className="btn btn-primary"
-          disabled={quantity >= 4}
+          disabled={quantity >= max}
           onClick={handlePlus}
         >
           +

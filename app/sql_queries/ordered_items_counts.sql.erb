@@ -1,0 +1,7 @@
+select order_items.day1_pickup, order_items.item_id, sum(quantity)
+from orders
+  join order_items on order_items.order_id = orders.id
+
+where orders.menu_id = <%= @menu_id %>
+
+group by day1_pickup, order_items.item_id

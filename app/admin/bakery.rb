@@ -57,23 +57,22 @@ ActiveAdmin.register_page "Dashboard" do
         end
 
         panel "Pay what you can stats for menu" do
-          render 'admin/menus/pay_what_you_can_stats', {menu: Menu.current}
+          render 'admin/menus/pay_what_you_can_stats', {menu: menu}
         end
       end
 
-      day1, day2 = Order.for_current_menu.includes(order_items: :item).flat_map(&:order_items).partition(&:day1_pickup?)
-
+      day1, day2 = menu.item_counts
       column id: 'what-to-bake-day1' do
         panel "#{Setting.pickup_day1} - What to bake" do
           a("#{Setting.pickup_day1} Pickup List", href: pickup_day1_admin_menus_path())
-          render 'admin/menus/what_to_bake', { order_items: day1 }
+          render 'admin/menus/what_to_bake', { counts: day1, menu: menu }
         end
       end
 
       column id: 'what-to-bake-day2' do
         panel "#{Setting.pickup_day2} - What to bake" do
           a("#{Setting.pickup_day2} Pickup List", href: pickup_day2_admin_menus_path())
-          render 'admin/menus/what_to_bake', { order_items: day2}
+          render 'admin/menus/what_to_bake', { counts: day2, menu: menu}
         end
       end
     end

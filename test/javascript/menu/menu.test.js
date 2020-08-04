@@ -11,7 +11,7 @@ test("menu for uid-user, before order", () => {
 });
 
 test("payItForward", () => {
-  const menu = renderMenu({ enablePayItForward: false });
+  const menu = renderMenu({ payItForward: false });
   expect(menu.payItForward()).toHaveLength(0);
 });
 
@@ -47,7 +47,6 @@ test("menu for uid-user, add item to cart", () => {
   expect(cart).toHaveLength(1);
   expect(cart[0]).toStrictEqual({
     itemId: 3,
-    price: 3,
     quantity: 1,
     day: "Thursday",
   });

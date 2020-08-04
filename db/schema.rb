@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_02_034941) do
+ActiveRecord::Schema.define(version: 2020_08_02_083629) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -206,6 +206,8 @@ ActiveRecord::Schema.define(version: 2020_08_02_034941) do
     t.boolean "day2", default: true
     t.boolean "subscriber", default: true
     t.boolean "marketplace", default: true
+    t.integer "day1_limit"
+    t.integer "day2_limit"
     t.index ["item_id"], name: "index_menu_items_on_item_id"
     t.index ["menu_id"], name: "index_menu_items_on_menu_id"
   end
