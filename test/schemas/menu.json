@@ -55,8 +55,6 @@
               "day2",
               "day1Limit",
               "day2Limit",
-              "orderedDay1Count",
-              "orderedDay2Count",
               "remainingDay1",
               "remainingDay2"
             ],
@@ -73,8 +71,6 @@
               "day2": { "type": "boolean" },
               "day1Limit": { "type": ["integer", "null"] },
               "day2Limit": { "type": ["integer", "null"] },
-              "orderedDay1Count": { "type": "integer" },
-              "orderedDay2Count": { "type": "integer" },
               "remainingDay1": { "type": "integer" },
               "remainingDay2": { "type": "integer" },
               "image": {
