@@ -21,7 +21,7 @@ function shortDay(day) {
   return day;
 }
 
-function DayButton({
+export function DayButton({
   day,
   btn,
   isPastDeadline,
@@ -57,12 +57,6 @@ function DayButton({
         type="button"
         className={`btn btn-${btn} btn-sm mr-2`}
         onClick={() => onSetDay(day)}
-        disabled={isPastDeadline}
-        title={
-          isPastDeadline
-            ? `Order by midnight ${deadlineDay} for ${day}.`
-            : undefined
-        }
       >
         <span className="d-block d-md-none">{shortDay(day)}</span>
         <span className="d-none d-md-block">{day}</span>

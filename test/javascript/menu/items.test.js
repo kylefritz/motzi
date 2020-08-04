@@ -3,7 +3,7 @@ import React from "react";
 import { mount } from "enzyme";
 
 import mockMenuJson from "./mockMenuJson";
-import Items, { Item } from "menu/Items";
+import Items, { DayButton, Item } from "menu/Items";
 import { SettingsContext } from "menu/Contexts";
 
 test("items", () => {
@@ -46,14 +46,17 @@ test("day1day2", () => {
   expectButtons({ day1: false, day2: false }).toHaveLength(0);
 });
 
-// test("day1day2", () => {
-//   const render = (props) =>
-//     mount(<Item onChange={true} day1={true} day2={true} {...props} />);
-//   const expectButtons = (props) => expect(render(props).find("button"));
+test("remaining deadline", () => {
+  const render = (props) =>
+    mount(<DayButton day="Thursday" btn="primary" {...props} />);
 
-//   expectButtons({ remainingDay1: true, remainingDay2: true }).toHaveLength(2);
-//   console.log(render({ remainingDay1: true, remainingDay2: false }).debug());
-//   expectButtons({ remainingDay1: true, remainingDay2: false }).toHaveLength(1);
-//   expectButtons({ remainingDay1: false, remainingDay2: true }).toHaveLength(1);
-//   expectButtons({ remainingDay1: false, remainingDay2: false }).toHaveLength(0);
-// });
+  expect(render({ remaining: 4 }).text()).toMatch("4 left");
+  expect(render({ remaining: 4 }).find("button").prop("disabled")).toBe(
+    undefined
+  );
+  expect(render({ remaining: 0 }).find("button").prop("disabled")).toBe(true);
+
+  expect(render({ isPastDeadline: true }).find("button").prop("disabled")).toBe(
+    true
+  );
+});
