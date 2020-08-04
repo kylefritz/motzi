@@ -169,11 +169,8 @@ function Ordering(props) {
   }
 
   if (day) {
-    const remaining = get(
-      props,
-      day === day1 ? "remainingDay1" : "remainingDay2"
-    );
-    const maxQuantity = isNumber(remaining) && remaining < 4 ? remaining : 4;
+    const remainingAttr = day === day1 ? "remainingDay1" : "remainingDay2";
+    const remainingQuantity = get(props, remainingAttr);
 
     return (
       <QuantityAdd
@@ -181,7 +178,7 @@ function Ordering(props) {
         onQuantity={setQuantity}
         onAdd={handleAdd}
         day={day}
-        max={maxQuantity}
+        max={remainingQuantity}
         onCancel={() => setDay(null)}
       />
     );
