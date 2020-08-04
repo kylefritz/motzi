@@ -1,12 +1,12 @@
-import { separatePayItForwardAndSkip } from "menu/App";
+import { separatePayItForward } from "menu/App";
 
 export default function ({
   order: withOrder = true,
   user: withUser = true,
-  enablePayItForward = true,
+  payItForward = true,
   enablePayWhatYouCan = true,
 } = {}) {
-  const menu = separatePayItForwardAndSkip({
+  const menu = separatePayItForward({
     id: 921507399,
     name: "week 5",
     subscriberNote: "subscribers note copy",
@@ -19,7 +19,6 @@ export default function ({
     day2: "Thursday",
     day1DeadlineDay: "Sunday",
     day2DeadlineDay: "Tuesday",
-    enablePayItForward,
     enablePayWhatYouCan,
     items: [
       {
@@ -87,6 +86,14 @@ export default function ({
       },
     ],
   });
+  if (payItForward) {
+    menu.payItForward = {
+      id: -1,
+      name: "Pay it forward",
+      price: 5,
+      credits: 1,
+    };
+  }
 
   const user = {
     id: 584273342,

@@ -28,7 +28,6 @@ json.menu do
   json.day1_deadline_day Setting.pickup_day1_deadline_day
   json.day2_deadline_day Setting.pickup_day2_deadline_day
 
-  json.enable_pay_it_forward Setting.shop.pay_it_forward
   json.enable_pay_what_you_can Setting.shop.pay_what_you_can
 end
 

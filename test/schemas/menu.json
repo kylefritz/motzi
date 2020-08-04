@@ -21,7 +21,6 @@
         "createdAt",
         "items",
         "isCurrent",
-        "enablePayItForward",
         "enablePayWhatYouCan"
       ],
       "properties": {
@@ -89,7 +88,6 @@
           }
         },
         "isCurrent": { "type": "boolean" },
-        "enablePayItForward": { "type": "boolean" },
         "enablePayWhatYouCan": { "type": "boolean" }
       }
     },

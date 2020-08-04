@@ -1,18 +1,12 @@
 import React from "react";
 import _ from "lodash";
+import { useState } from "react";
 
 import Price from "./Price";
 import { getDayContext } from "./Contexts";
 
-function buildMenuItemLookup(menu) {
-  const { items } = menu;
-  const menuItems = _.keyBy(items, (i) => i.id);
-  menuItems[menu.payItForward.id] = menu.payItForward;
-  return menuItems;
-}
-
-function DaysCart({ menu, cart, rmCartItem }) {
-  const menuItemsById = buildMenuItemLookup(menu);
+function DaysCart({ menu: { items }, cart, rmCartItem }) {
+  const menuItemsById = _.keyBy(items, ({ id }) => id);
 
   return (
     <>
@@ -47,7 +41,7 @@ function Days({ menu, cart, rmCartItem, skip }) {
   const thurs = cart.filter(({ day }) => day === day1);
   const sat = cart.filter(({ day }) => day === day2);
   const payItForward = cart.filter(
-    ({ itemId }) => itemId === menu.payItForward.id
+    ({ itemId }) => itemId === _.get(menu, "payItForward.id", "wont-match")
   );
 
   if (skip) {
@@ -107,25 +101,8 @@ function Days({ menu, cart, rmCartItem, skip }) {
   return sections;
 }
 
-export function cartTotal({ cart, menu }) {
-  if (cart.length === 0) {
-    return { price: null, credits: 0 };
-  }
-
-  const menuItemsById = buildMenuItemLookup(menu);
-  const addBy = (attribute) =>
-    _.sum(
-      cart.map(
-        ({ itemId, quantity }) =>
-          _.get(menuItemsById[itemId], attribute, 0) * quantity
-      )
-    );
-
-  return { price: addBy("price"), credits: addBy("credits") };
-}
-
-function Total({ cart, menu, stripeChargeAmount }) {
-  const { price, credits } = cartTotal({ cart, menu });
+function Total({ cart, menu: { items }, stripeChargeAmount }) {
+  const { price, credits } = cartTotal({ cart, items });
   return (
     <div>
       <h6>Total</h6>
@@ -161,4 +138,47 @@ export default function CartWrapper(props) {
       </div>
     </>
   );
+}
+
+function cartTotal({ cart, items }) {
+  if (cart.length === 0) {
+    return { price: null, credits: 0 };
+  }
+  const menuItemsById = _.keyBy(items, ({ id }) => id);
+  const addBy = (attribute) =>
+    _.sum(
+      cart.map(
+        ({ itemId, quantity }) =>
+          _.get(menuItemsById[itemId], attribute, 0) * quantity
+      )
+    );
+
+  return { price: addBy("price"), credits: addBy("credits") };
+}
+
+export function useCart({ order = null, items }) {
+  const [cart, setCart] = useState(_.get(order, "items", []));
+
+  const calcTotal = (cart) => cartTotal({ cart, items });
+
+  const addToCart = ({ id: itemId, quantity, day }) => {
+    console.log("addToCart", itemId, quantity, day);
+    const nextCart = [...cart, { itemId, quantity, day }];
+    setCart(nextCart);
+    return calcTotal(nextCart).price;
+  };
+
+  const rmCartItem = (itemId, quantity, day) => {
+    const index = _.findIndex(
+      cart,
+      (ci) => ci.itemId === itemId && ci.quantity === quantity && ci.day === day
+    );
+    console.log("rmCartItem", index);
+    const nextCart = [...cart];
+    nextCart.splice(index, 1);
+    setCart(nextCart);
+    return calcTotal(nextCart).price;
+  };
+
+  return { cart, addToCart, rmCartItem, setCart, total: calcTotal(cart) };
 }

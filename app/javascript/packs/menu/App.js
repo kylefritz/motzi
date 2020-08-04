@@ -9,15 +9,13 @@ import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
 
-export function separatePayItForwardAndSkip(menu) {
+export function separatePayItForward(menu) {
   const { items } = menu;
   const menuItems = _.keyBy(items, ({ id }) => id);
-  // identify *skip* & *payItForward*
-  // & filter them out of *regular* items
+  // filter *payItForward* out of *regular* items
   return {
     ...menu,
-    skip: menuItems[0] || {},
-    payItForward: menuItems[-1] || {},
+    payItForward: menuItems[-1],
     items: items.filter(({ id }) => id !== 0 && id !== -1),
   };
 }
@@ -25,7 +23,6 @@ export function separatePayItForwardAndSkip(menu) {
 function Layout({
   bundles,
   error,
-  fetchMenu,
   handleCreateOrder,
   isEditingOrder,
   menu,
@@ -46,7 +43,7 @@ function Layout({
     return <h2 className="mt-5">loading...</h2>;
   }
 
-  menu = separatePayItForwardAndSkip(menu);
+  menu = separatePayItForward(menu);
   const { day2Closed } = getDayContext();
 
   if (order && !isEditingOrder) {
@@ -140,14 +137,12 @@ export default function App() {
     day2Deadline,
     day2DeadlineDay,
     enablePayWhatYouCan,
-    enablePayItForward,
   } = menu || {};
 
   return (
     <SettingsContext.Provider
       value={{
         enablePayWhatYouCan,
-        enablePayItForward,
         bundles,
         onRefresh: fetchMenu,
         showCredits: !_.isNil(user), // could push this setting into marketplace vs menu?
