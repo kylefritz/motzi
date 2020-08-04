@@ -12,7 +12,7 @@ import Subscription from "./Subscription";
 import { getDayContext } from "./Contexts";
 
 export default function Menu({ menu, order, user, onCreateOrder }) {
-  const { cart, addToCart, rmCartItem, setCart, total } = useCart({
+  const { cart, addToCart, rmCartItem, setCart, total, items } = useCart({
     order,
     items: menu.items,
   });
@@ -38,7 +38,7 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
     });
   };
 
-  const { subscriberNote, items, isCurrent } = menu;
+  const { subscriberNote, isCurrent } = menu;
   const { day2Closed: menuClosed } = getDayContext();
   if (user.credits < 1) {
     // Must buy credits!

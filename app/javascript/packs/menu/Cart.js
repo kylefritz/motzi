@@ -158,6 +158,7 @@ function cartTotal({ cart, items }) {
 
 export function useCart({ order = null, items }) {
   const [cart, setCart] = useState(_.get(order, "items", []));
+  const { day1 } = getDayContext();
 
   const calcTotal = (cart) => cartTotal({ cart, items });
 
@@ -180,5 +181,21 @@ export function useCart({ order = null, items }) {
     return calcTotal(nextCart).price;
   };
 
-  return { cart, addToCart, rmCartItem, setCart, total: calcTotal(cart) };
+  // update remaining items
+  const itemLookup = _.keyBy(_.cloneDeep(items), ({ id }) => id);
+  cart.forEach(({ itemId, quantity, day }) => {
+    const prop = day === day1 ? "remainingDay1" : "remainingDay2";
+    itemLookup[itemId][prop] -= quantity;
+  });
+  // maintain original order
+  const nextItems = items.map(({ id }) => itemLookup[id]);
+
+  return {
+    cart,
+    addToCart,
+    rmCartItem,
+    setCart,
+    total: calcTotal(cart),
+    items: nextItems,
+  };
 }

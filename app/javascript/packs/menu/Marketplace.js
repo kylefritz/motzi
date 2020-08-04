@@ -12,7 +12,9 @@ import PayWhatYouCan from "../buy/PayWhatYouCan";
 import { getDayContext } from "./Contexts";
 
 export default function Marketplace({ menu, onCreateOrder }) {
-  const { cart, addToCart, rmCartItem, total } = useCart({ items: menu.items });
+  const { cart, addToCart, rmCartItem, total, items } = useCart({
+    items: menu.items,
+  });
   const [submitting, setSubmitting] = useState(false);
   const [comments, setComments] = useState();
   const [account, setAccount] = useState({});
@@ -49,7 +51,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
     setPrice(newCartPrice);
   };
 
-  const { menuNote, items, enablePayWhatYouCan, payItForward } = menu;
+  const { menuNote, enablePayWhatYouCan, payItForward } = menu;
   const { pastDay2Deadline: menuClosed } = getDayContext();
   const disabled = menuClosed || !onCreateOrder;
   return (

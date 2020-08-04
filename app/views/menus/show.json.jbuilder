@@ -9,6 +9,16 @@ json.menu do
 
   day1_counts, day2_counts = @menu.item_counts
 
+  def remaining(limit, ordered, is_for_day)
+    unless is_for_day
+      return nil
+    end
+    unless limit.present?
+      return 120
+    end
+    (limit - ordered).clamp(0, 120)
+  end
+
   json.items menu_items.map do |menu_item, item|
     json.extract! menu_item, :subscriber, :marketplace, :day1, :day2
     json.menu_item_id menu_item.id # use by the menu_builder app
@@ -19,8 +29,8 @@ json.menu do
     json.ordered_day1_count day1_counts[menu_item.item_id].presence || 0
     json.ordered_day2_count day2_counts[menu_item.item_id].presence || 0
 
-    json.remaining_day1 menu_item.day1_limit.present? ? (menu_item.day1_limit - day1_counts[menu_item.item_id]) : (menu_item.day1 ? 120 : 0)
-    json.remaining_day2 menu_item.day2_limit.present? ? (menu_item.day2_limit - day2_counts[menu_item.item_id]) : (menu_item.day2 ? 120 : 0)
+    json.remaining_day1 remaining(menu_item.day1_limit, day1_counts[menu_item.item_id], menu_item.day1)
+    json.remaining_day2 remaining(menu_item.day2_limit, day2_counts[menu_item.item_id], menu_item.day2)
   end
 
   json.day1 Setting.pickup_day1

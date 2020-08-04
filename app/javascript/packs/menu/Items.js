@@ -20,21 +20,24 @@ function DayButton({
   remaining,
   onSetDay,
 }) {
-  if (remaining === 0) {
+  if (remaining < 1 || isPastDeadline) {
+    const [short, long, title] = isPastDeadline
+      ? [
+          `Closed`,
+          `Ordering closed for ${shortDay(day)}`,
+          `Order by midnight ${deadlineDay} for ${day}.`,
+        ]
+      : ["Sold Out", `${shortDay(day)} Sold Out`, undefined];
+
     return (
       <button
         type="button"
-        className={`btn btn-${btn} btn-sm mr-2 btn-outline`}
-        onClick={() => onSetDay(day)}
+        className={`btn btn-outline-${btn} btn-sm mr-2`}
         disabled={true}
-        title={
-          isPastDeadline
-            ? `Order by midnight ${deadlineDay} for ${day}.`
-            : undefined
-        }
+        title={title}
       >
-        <span className="d-block d-md-none">Sold Out</span>
-        <span className="d-none d-md-block">{shortDay(day)} Sold Out</span>
+        <span className="d-block d-md-none">{short}</span>
+        <span className="d-none d-md-block">{long}</span>
       </button>
     );
   }
@@ -67,8 +70,8 @@ function DayButton({
 function DayButtons({
   description,
   onSetDay,
-  day1: availableDay1,
-  day2: availableDay2,
+  day1: enableDay1,
+  day2: enableDay2,
   remainingDay1,
   remainingDay2,
 }) {
@@ -81,7 +84,7 @@ function DayButtons({
     day2DeadlineDay,
   } = getDayContext();
   const days = [];
-  if (availableDay1) {
+  if (enableDay1) {
     days.push({
       day: day1,
       btn: "secondary",
@@ -90,7 +93,7 @@ function DayButtons({
       remaining: remainingDay1,
     });
   }
-  if (availableDay2) {
+  if (enableDay2) {
     days.push({
       day: day2,
       btn: "primary",
@@ -142,7 +145,7 @@ function Ordering(props) {
   const [day, setDay] = useState(null);
   const [wasAdded, setWasAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const { day1, day2 } = getDayContext();
+  const { day1 } = getDayContext();
 
   const { onChange } = props;
 
@@ -165,10 +168,9 @@ function Ordering(props) {
   if (day) {
     const remaining = get(
       props,
-      day === day ? "remainingDay1" : "remainingDay2"
+      day === day1 ? "remainingDay1" : "remainingDay2"
     );
-    const maxQuantity =
-      isNumber(remaining) && remaining < fallback ? remaining : 4;
+    const maxQuantity = isNumber(remaining) && remaining < 4 ? remaining : 4;
 
     return (
       <QuantityAdd
