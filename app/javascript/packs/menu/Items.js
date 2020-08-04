@@ -6,10 +6,19 @@ import Quantity from "./Quantity";
 import { getDayContext } from "./Contexts";
 
 function shortDay(day) {
-  if (day == "Thursday") {
-    return "Thurs";
+  switch (day) {
+    case "Monday":
+    case "Tuesday":
+    case "Thursday":
+    case "Friday":
+    case "Sunday":
+      return day.replace("day", "");
+    case "Wednesday":
+      return "Wed";
+    case "Saturday":
+      return "Sat";
   }
-  return "Sat";
+  return day;
 }
 
 function DayButton({
