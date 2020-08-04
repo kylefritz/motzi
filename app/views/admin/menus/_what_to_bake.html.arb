@@ -1,7 +1,6 @@
+sorted_keys_without_total = Item.find(counts.keys).pluck(:name, :id).sort_by(&:first)
 total_tag = "<strong>TOTAL</strong>".html_safe
 counts[total_tag] = "<strong>#{counts.values.sum}</strong>".html_safe
-
-sorted_keys_without_total = Item.find(counts.keys).pluck(:name, :id).sort_by(&:first)
 sorted_keys_without_total.push([total_tag, total_tag])
 
 table_for sorted_keys_without_total, class: 'mt-0 breads' do

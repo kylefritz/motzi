@@ -16,8 +16,8 @@ json.menu do
     json.image item.image_path
 
     json.extract! menu_item, :day1_limit, :day2_limit
-    json.ordered_day1_count day1_counts[menu_item.item_id]
-    json.ordered_day2_count day2_counts[menu_item.item_id]
+    json.ordered_day1_count day1_counts[menu_item.item_id].presence || 0
+    json.ordered_day2_count day2_counts[menu_item.item_id].presence || 0
 
     json.remaining_day1 menu_item.day1_limit.present? ? (menu_item.day1_limit - day1_counts[menu_item.item_id]) : (menu_item.day1 ? 120 : 0)
     json.remaining_day2 menu_item.day2_limit.present? ? (menu_item.day2_limit - day2_counts[menu_item.item_id]) : (menu_item.day2 ? 120 : 0)
