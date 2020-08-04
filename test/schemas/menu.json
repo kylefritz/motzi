@@ -71,8 +71,8 @@
               "day2": { "type": "boolean" },
               "day1Limit": { "type": ["integer", "null"] },
               "day2Limit": { "type": ["integer", "null"] },
-              "remainingDay1": { "type": "integer" },
-              "remainingDay2": { "type": "integer" },
+              "remainingDay1": { "type": ["integer", "null"] },
+              "remainingDay2": { "type": ["integer", "null"] },
               "image": {
                 "type": ["null", "string"],
                 "title": "image",
