@@ -211,6 +211,8 @@ ActiveAdmin.register Menu do
     gon.jbuilder template: 'app/views/admin/users/index.json.jbuilder', as: :havent_ordered
 
     @menu = Menu.current
+    # TODO: could use this technique in the menu_builder app
+    # TODO: write a test for this action (it broke)
     gon.jbuilder template: 'app/views/admin/menus/bakers_choice_menu.json.jbuilder', as: :menu
 
     render :bakers_choice
