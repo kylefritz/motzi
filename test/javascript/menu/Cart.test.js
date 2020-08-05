@@ -61,6 +61,7 @@ test("remaining", () => {
     { id: 3, remainingDay1: 10, remainingDay2: NaN },
     { id: 1, remainingDay1: 10, remainingDay2: 0 },
     { id: 2, remainingDay1: 10, remainingDay2: null },
+    { id: -1, name: "PayItForward" },
   ];
 
   const { result } = renderHook(() => useCart({ items }));
@@ -96,4 +97,21 @@ test("remaining", () => {
     items.map(({ id }) => id)
   );
   expect(result.current.items[0].remainingDay2).toBe(NaN);
+});
+
+test("no payItForward", () => {
+  const items = [
+    { id: 3, remainingDay1: 10, remainingDay2: NaN },
+    { id: 1, remainingDay1: 10, remainingDay2: 0 },
+    { id: 2, remainingDay1: 10, remainingDay2: null },
+  ];
+
+  const { result: no } = renderHook(() => useCart({ items }));
+  expect(no.current.payItForward).toBeUndefined();
+
+  const { result: yes } = renderHook(() =>
+    useCart({ items: [...items, { id: -1, name: "PayItForward" }] })
+  );
+  expect(yes.current.payItForward).toBeDefined();
+  expect(yes.current.payItForward.name).toMatch("PayItForward");
 });

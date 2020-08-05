@@ -1,12 +1,10 @@
-import { separatePayItForward } from "menu/App";
-
 export default function ({
   order: withOrder = true,
   user: withUser = true,
   payItForward = true,
   enablePayWhatYouCan = true,
 } = {}) {
-  const menu = separatePayItForward({
+  const menu = {
     id: 921507399,
     name: "week 5",
     subscriberNote: "subscribers note copy",
@@ -85,14 +83,14 @@ export default function ({
         marketplace: true,
       },
     ],
-  });
+  };
   if (payItForward) {
-    menu.payItForward = {
+    menu.items.push({
       id: -1,
       name: "Pay it forward",
       price: 5,
       credits: 1,
-    };
+    });
   }
 
   const user = {

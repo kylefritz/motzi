@@ -9,17 +9,6 @@ import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
 
-export function separatePayItForward(menu) {
-  const { items } = menu;
-  const menuItems = _.keyBy(items, ({ id }) => id);
-  // filter *payItForward* out of *regular* items
-  return {
-    ...menu,
-    payItForward: menuItems[-1],
-    items: items.filter(({ id }) => id !== 0 && id !== -1),
-  };
-}
-
 function Layout({
   bundles,
   error,
@@ -43,7 +32,6 @@ function Layout({
     return <h2 className="mt-5">loading...</h2>;
   }
 
-  menu = separatePayItForward(menu);
   const { day2Closed } = getDayContext();
 
   if (order && !isEditingOrder) {

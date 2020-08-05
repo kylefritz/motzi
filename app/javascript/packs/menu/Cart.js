@@ -40,9 +40,7 @@ function Days({ menu, cart, rmCartItem, skip }) {
 
   const thurs = cart.filter(({ day }) => day === day1);
   const sat = cart.filter(({ day }) => day === day2);
-  const payItForward = cart.filter(
-    ({ itemId }) => itemId === _.get(menu, "payItForward.id", "wont-match")
-  );
+  const payItForward = cart.filter(({ itemId }) => itemId === -1);
 
   if (skip) {
     return (
@@ -183,6 +181,7 @@ export function useCart({ order = null, items }) {
 
   // update remaining items
   const itemLookup = _.keyBy(_.cloneDeep(items), ({ id }) => id);
+  const payItForward = itemLookup[-1];
   cart.forEach(({ itemId, quantity, day }) => {
     if (itemId === -1) {
       return;
@@ -200,5 +199,6 @@ export function useCart({ order = null, items }) {
     setCart,
     total: calcTotal(cart),
     items: nextItems,
+    payItForward,
   };
 }
