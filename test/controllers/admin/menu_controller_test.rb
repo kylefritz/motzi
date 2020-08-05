@@ -46,6 +46,13 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_select '#orders tbody tr', 1, "num_day2=#{menus(:week1).order_items.day2_pickup.map(&:order_id).uniq.count}"
   end
 
+  test "get bakers choice" do
+    menus(:week1).make_current!
+    get "/admin/menus/bakers_choice"
+    # TODO: improve test
+    assert_response :success
+  end
+
   test "get edit" do
     obj = menus(:week2)
     get "/admin/menus/#{obj.id}/edit"

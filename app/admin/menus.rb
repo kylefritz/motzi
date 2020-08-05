@@ -212,7 +212,6 @@ ActiveAdmin.register Menu do
 
     @menu = Menu.current
     # TODO: could use this technique in the menu_builder app
-    # TODO: write a test for this action (it broke)
     gon.jbuilder template: 'app/views/admin/menus/bakers_choice_menu.json.jbuilder', as: :menu
 
     render :bakers_choice
