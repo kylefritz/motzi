@@ -69,10 +69,8 @@ test("remaining", () => {
   act(() => {
     result.current.addToCart({ id: 1, quantity: 1, day: "Thursday" });
   });
-  expect(result.current.items).toHaveLength(items.length);
-  expect(result.current.items.map(({ id }) => id)).toStrictEqual(
-    items.map(({ id }) => id)
-  );
+  expect(result.current.items).toHaveLength(items.length - 1); // not pay it forward
+  expect(result.current.items.map(({ id }) => id)).toStrictEqual([3, 1, 2]);
   expect(result.current.items[1].remainingDay1).toBe(9);
 
   act(() => {
@@ -93,9 +91,7 @@ test("remaining", () => {
   act(() => {
     result.current.addToCart({ id: 3, quantity: 3, day: "Saturday" });
   });
-  expect(result.current.items.map(({ id }) => id)).toStrictEqual(
-    items.map(({ id }) => id)
-  );
+  expect(result.current.items.map(({ id }) => id)).toStrictEqual([3, 1, 2]);
   expect(result.current.items[0].remainingDay2).toBe(NaN);
 });
 
@@ -114,4 +110,5 @@ test("no payItForward", () => {
   );
   expect(yes.current.payItForward).toBeDefined();
   expect(yes.current.payItForward.name).toMatch("PayItForward");
+  expect(yes.current.items.map(({ id }) => id)).toStrictEqual([3, 1, 2]);
 });

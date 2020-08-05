@@ -178,19 +178,26 @@ export function useCart({ order = null, items }) {
     setCart(nextCart);
     return calcTotal(nextCart).price;
   };
-
+  const PAY_IT_FORWARD_ID = -1;
   // update remaining items
   const itemLookup = _.keyBy(_.cloneDeep(items), ({ id }) => id);
-  const payItForward = itemLookup[-1];
+  const payItForward = itemLookup[PAY_IT_FORWARD_ID];
   cart.forEach(({ itemId, quantity, day }) => {
-    if (itemId === -1) {
+    if (itemId === PAY_IT_FORWARD_ID) {
+      return;
+    }
+    if (!itemLookup[itemId]) {
+      console.warn(`item in cart ${itemId} but not on menu`);
       return;
     }
     const prop = day === day1 ? "remainingDay1" : "remainingDay2";
     itemLookup[itemId][prop] -= quantity;
   });
+
   // maintain original order
-  const nextItems = items.map(({ id }) => itemLookup[id]);
+  const nextItems = items
+    .filter(({ id }) => id !== PAY_IT_FORWARD_ID)
+    .map(({ id }) => itemLookup[id]);
 
   return {
     cart,
