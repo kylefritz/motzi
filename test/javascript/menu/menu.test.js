@@ -7,7 +7,11 @@ test("menu for uid-user, before order", () => {
 
   expect(menu.items()).toHaveLength(3);
   expect(menu.submitOrderBtn().text()).toBe("Submit Order");
+
+  // click pay it forward
   expect(menu.payItForward()).toHaveLength(1);
+  menu.payItForward().find("button").at(0).simulate("click");
+  expect(menu.cartTotal()).toContain("1 credit");
 });
 
 test("payItForward", () => {

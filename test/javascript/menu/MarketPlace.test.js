@@ -7,6 +7,10 @@ test("menu", () => {
 
   expect(menu.items()).toHaveLength(4);
   expect(menu.submitOrderBtn().text()).toBe("Select an item");
+
+  expect(menu.payItForward()).toHaveLength(1);
+  menu.payItForward().find("button").at(0).simulate("click");
+  expect(menu.cartTotal()).toContain("$5.00");
 });
 
 test("payWhatYouCan false", () => {

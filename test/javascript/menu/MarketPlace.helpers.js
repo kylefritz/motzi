@@ -48,6 +48,9 @@ class MarketplaceWrapper {
   find(selector) {
     return this.wrapper.find(selector);
   }
+  payItForward() {
+    return this.find("PayItForward");
+  }
   cart() {
     return this.find("Cart");
   }
