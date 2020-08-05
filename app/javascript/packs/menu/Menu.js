@@ -38,7 +38,7 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
     });
   };
 
-  const { subscriberNote, isCurrent } = menu;
+  const { subscriberNote, isCurrent, payItForward } = menu;
   const { day2Closed: menuClosed } = getDayContext();
   if (user.credits < 1) {
     // Must buy credits!
@@ -90,9 +90,9 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
           <Items items={items} onAddToCart={addToCart} />
 
           <SkipThisWeek onSkip={handleSkip} disabled={menuClosed} />
-          {menu.payItForward && (
+          {payItForward && (
             <PayItForward
-              {...menu.payItForward}
+              {...payItForward}
               onAddToCart={addToCart}
               disabled={menuClosed}
             />

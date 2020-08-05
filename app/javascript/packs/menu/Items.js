@@ -34,7 +34,7 @@ export function DayButton({
       ? [
           `Closed`,
           `Ordering closed for ${shortDay(day)}`,
-          `Order by midnight ${deadlineDay} for ${day}.`,
+          `Order by midnight ${deadlineDay} for ${day} pickup.`,
         ]
       : ["Sold Out", `${shortDay(day)} Sold Out`, undefined];
 

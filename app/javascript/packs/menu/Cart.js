@@ -184,6 +184,9 @@ export function useCart({ order = null, items }) {
   // update remaining items
   const itemLookup = _.keyBy(_.cloneDeep(items), ({ id }) => id);
   cart.forEach(({ itemId, quantity, day }) => {
+    if (itemId === -1) {
+      return;
+    }
     const prop = day === day1 ? "remainingDay1" : "remainingDay2";
     itemLookup[itemId][prop] -= quantity;
   });
