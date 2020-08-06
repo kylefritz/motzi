@@ -20,12 +20,10 @@ json.menu do
   end
 
   json.items menu_items.map do |menu_item, item|
-    json.extract! menu_item, :subscriber, :marketplace, :day1, :day2
-    json.menu_item_id menu_item.id # used by admin/menu_builder
     json.extract! item, :id, :name, :description, :price, :credits
     json.image item.image_path
 
-    json.extract! menu_item, :day1_limit, :day2_limit # used by admin/menu_builder
+    json.extract! menu_item, :subscriber, :marketplace, :day1, :day2
     json.remaining_day1 remaining(menu_item.day1_limit, day1_counts[menu_item.item_id], menu_item.day1)
     json.remaining_day2 remaining(menu_item.day2_limit, day2_counts[menu_item.item_id], menu_item.day2)
   end

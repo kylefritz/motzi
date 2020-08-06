@@ -24,6 +24,7 @@ export default function Adder({ items, not, onAdd }) {
     setDay2(true);
   };
 
+  not = new Set(not);
   const choices = _.sortBy(items, ({ name }) => name).filter(
     (i) => !not.has(i.name)
   );

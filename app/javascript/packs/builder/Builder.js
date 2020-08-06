@@ -3,10 +3,10 @@ import axios from "axios";
 import * as Sentry from "@sentry/browser";
 import _ from "lodash";
 
-import Item from "./Item";
+import MenuItem from "./Item";
 import Adder from "./Adder";
 
-export default class App extends React.Component {
+export default class MenuBuilder extends React.Component {
   constructor(props) {
     super(props);
     const menuId = _.get(location.pathname.match(/menus\/(.*)/), 1);
@@ -16,10 +16,9 @@ export default class App extends React.Component {
   loadMenu() {
     const { menuId } = this.state;
     axios
-      .get(`/menus/${menuId}.json`)
-      .then(({ data: { menu, user } }) => {
-        this.setState({ menu });
-        Sentry.configureScope((scope) => scope.setUser(user));
+      .get(`/admin/menus/${menuId}/menu_items.json`)
+      .then(({ data: { items } }) => {
+        this.setState({ menuItems: items });
       })
       .catch((error) => {
         console.error("cant load menu", error);
@@ -61,15 +60,13 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { error, items: allItems, menu } = this.state || {};
+    const { error, menuItems, items: allItems } = this.state || {};
     if (error) {
       return <h2>{error} :(</h2>;
     }
-    if (!(allItems && menu)) {
+    if (!allItems || !menuItems) {
       return <h2>Loading</h2>;
     }
-    const { items } = menu;
-    const makeSet = (menuItems) => new Set(menuItems.map(({ name }) => name));
 
     return (
       <div className="menu-builder">
@@ -88,8 +85,8 @@ export default class App extends React.Component {
             </tr>
           </thead>
           <tbody>
-            {items.map((i) => (
-              <Item
+            {menuItems.map((i) => (
+              <MenuItem
                 key={i.id}
                 {...i}
                 onRemove={this.handleRemoveItem.bind(this)}
@@ -104,7 +101,7 @@ export default class App extends React.Component {
         )}
         <Adder
           items={allItems}
-          not={makeSet(items)}
+          not={menuItems.map(({ name }) => name)}
           onAdd={(item) => this.handleAddItem(item)}
         />
       </div>

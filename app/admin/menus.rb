@@ -191,6 +191,11 @@ ActiveAdmin.register Menu do
     render json: {message: "deleted!"}
   end
 
+  member_action :menu_items do
+    @menu = Menu.find(params[:id])
+    render 'admin/menus/bakers_choice_menu.json.jbuilder'
+  end
+
   collection_action :bakers_choice, method: [:get, :post] do
     if request.post?
       menu = Menu.current
@@ -211,7 +216,6 @@ ActiveAdmin.register Menu do
     gon.jbuilder template: 'app/views/admin/users/index.json.jbuilder', as: :havent_ordered
 
     @menu = Menu.current
-    # TODO: could use this technique in the menu_builder app
     gon.jbuilder template: 'app/views/admin/menus/bakers_choice_menu.json.jbuilder', as: :menu
 
     render :bakers_choice

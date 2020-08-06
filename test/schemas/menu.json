@@ -44,7 +44,6 @@
             "type": "object",
             "required": [
               "id",
-              "menuItemId",
               "name",
               "description",
               "price",
@@ -53,14 +52,11 @@
               "marketplace",
               "day1",
               "day2",
-              "day1Limit",
-              "day2Limit",
               "remainingDay1",
               "remainingDay2"
             ],
             "properties": {
               "id": { "type": "integer" },
-              "menuItemId": { "type": ["integer", "null"] },
               "name": { "type": "string" },
               "description": { "type": "string" },
               "price": { "type": "number" },
@@ -69,8 +65,6 @@
               "marketplace": { "type": "boolean" },
               "day1": { "type": "boolean" },
               "day2": { "type": "boolean" },
-              "day1Limit": { "type": ["integer", "null"] },
-              "day2Limit": { "type": ["integer", "null"] },
               "remainingDay1": { "type": ["integer", "null"] },
               "remainingDay2": { "type": ["integer", "null"] },
               "image": {
