@@ -1,26 +1,19 @@
+// override boostrap colors/variables
+// https://github.com/twbs/bootstrap-rubygem/blob/master/assets/stylesheets/bootstrap/_variables.scss
 $container-max-widths: (
   sm: 420px,
   md: 640px,
   lg: 680px,
 );
-
-$motzi-purple: rgb(53, 44, 99);
-$motzi-red: rgb(213, 72, 44);
-
-// override boostrap colors/variables
-// https://github.com/twbs/bootstrap-rubygem/blob/master/assets/stylesheets/bootstrap/_variables.scss
-$secondary: $motzi-red; // day1
-$primary: $motzi-purple; // day2
 $btn-padding-x-sm: 0.75rem;
+@import "shop";
 
 // Custom bootstrap variables must be set or imported *before* bootstrap.
 @import "bootstrap";
 
-@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@300;500&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@400&display=swap");
 body {
-  background-color: rgb(255, 238, 214);
-  font-family: "Raleway", sans-serif;
+  background-color: $background-color;
+  font-family: $font-family;
   font-weight: 300;
   color: #2e2927;
 }
@@ -35,10 +28,22 @@ strong {
   background-repeat: no-repeat;
   padding-top: 200px;
 }
-
 .dutch_courage {
   #background {
-    background-position-y: 0 !important;
+    background-position-y: 0;
+  }
+  #logo {
+    height: 250px;
+    margin-bottom: 0;
+  }
+}
+.jinji {
+  #background {
+    background-position-y: -120px;
+  }
+  #logo {
+    height: 200px;
+    margin-bottom: 0;
   }
 }
 
@@ -48,10 +53,11 @@ strong {
 }
 #logo {
   height: 100px;
+  margin-bottom: 3rem;
 }
 .subscriber-info {
-  color: $motzi-red;
-  font-family: "Oswald", sans-serif;
+  color: $secondary;
+  font-family: $accent-font-family;
   font-weight: 400;
   font-size: 20px;
 }
@@ -65,7 +71,7 @@ $container-margin-padding: 34px + $container-margin;
   padding-right: $container-margin-padding;
   margin-bottom: 0;
   color: white;
-  background: $motzi-purple;
+  background: $primary;
   text-transform: none;
   padding-top: 45px;
   padding-bottom: 25px;
@@ -74,7 +80,7 @@ $container-margin-padding: 34px + $container-margin;
 }
 #deadline {
   color: white;
-  background: $motzi-purple;
+  background: $primary;
   margin-left: -$container-margin-padding;
   margin-right: -$container-margin-padding;
   padding-left: $container-margin-padding;
@@ -115,7 +121,7 @@ h4,
 h5,
 h6 {
   font-family: "Raleway", sans-serif;
-  color: $motzi-purple;
+  color: $primary;
   text-transform: uppercase;
 }
 h5 {
@@ -130,13 +136,13 @@ h2 {
 .btn-dark,
 .price {
   text-transform: uppercase;
-  font-family: "Oswald", sans-serif;
+  font-family: $accent-font-family;
   font-weight: 400;
   letter-spacing: 0.05rem;
 }
 .alert-secondary {
   border: none;
-  background: $motzi-red;
+  background: $secondary;
   color: white;
 }
 .price {

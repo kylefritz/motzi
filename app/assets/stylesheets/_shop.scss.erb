@@ -1,0 +1,24 @@
+$dc-gold: rgb(183, 139, 32);
+
+$motzi-purple: rgb(53, 44, 99);
+$motzi-red: rgb(213, 72, 44);
+$motzi-background: rgb(255, 238, 214);
+
+
+<% if Setting.shop_id == "dutch_courage"  %>
+  $primary: $dc-gold;
+  $secondary: black;
+<% elsif Setting.shop_id == "jinji"  %>
+  $secondary: $motzi-red;
+  $primary: $motzi-purple;
+<% else %>
+  $secondary: $motzi-red;
+  $primary: $motzi-purple;
+<% end %>
+
+$background-color: rgb(255, 238, 214);
+
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@300;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@400&display=swap");
+$font-family: "Raleway", sans-serif;
+$accent-font-family: "Oswald", sans-serif;
