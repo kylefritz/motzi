@@ -154,6 +154,11 @@ function cartTotal({ cart, items }) {
   return { price: addBy("price"), credits: addBy("credits") };
 }
 
+export function orderCredits({ order, items }) {
+  const orderItems = _.get(order, "items", []);
+  return cartTotal({ cart: orderItems, items }).credits;
+}
+
 export function useCart({ order = null, items }) {
   const [cart, setCart] = useState(_.get(order, "items", []));
   const { day1 } = getDayContext();

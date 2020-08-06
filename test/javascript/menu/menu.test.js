@@ -63,10 +63,33 @@ test("menu for uid-user, after order", () => {
   expect(menu.submitOrderBtn().text()).toBe("Update Order");
 });
 
-test("insufficientCredits", () => {
-  const menu = renderMenu({ user: { credits: 2 } });
+test("orderCredits", () => {
+  const menu = renderMenu({ user: { credits: 1 } }); // 3 credits in order
+
   expect(menu.cartTotal()).toContain("3 credits");
+  menu.payItForward().find("button").at(0).simulate("click");
+  expect(menu.cartTotal()).toContain("4 credits"); // ok
+  expect(menu.submitOrderBtn().prop("disabled")).toBe(false);
+
+  // add item to cart
+  menu.items().at(0).find("button").at(0).simulate("click");
+  menu.items().at(0).find("button").at(2).simulate("click");
+
+  expect(menu.cartTotal()).toContain("5 credits"); // too many
   expect(menu.submitOrderBtn().text()).toBe("Buy more credits :)");
+  expect(menu.submitOrderBtn().prop("disabled")).toBe(true);
+});
+
+test("insufficientCredits, no order", () => {
+  const menu = renderMenu({ user: { credits: 1 }, order: false });
+
+  menu.payItForward().find("button").at(0).simulate("click");
+
+  // add item to cart
+  menu.items().at(0).find("button").at(0).simulate("click");
+  menu.items().at(0).find("button").at(2).simulate("click");
+
+  expect(menu.cartTotal()).toContain("2 credits");
   expect(menu.submitOrderBtn().prop("disabled")).toBe(true);
 });
 

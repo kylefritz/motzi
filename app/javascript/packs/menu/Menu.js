@@ -3,7 +3,7 @@ import _ from "lodash";
 
 import BakersNote from "./BakersNote";
 import BuyCredits from "../buy/App";
-import Cart, { useCart } from "./Cart";
+import Cart, { useCart, orderCredits } from "./Cart";
 import Title from "./Title";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
@@ -64,7 +64,8 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
     );
   }
 
-  const insufficientCredits = total.credits > user.credits;
+  const insufficientCredits =
+    total.credits - orderCredits({ order, items: menu.items }) > user.credits;
   return (
     <>
       <Subscription user={user} />
