@@ -103,6 +103,9 @@ ActiveAdmin.register Menu do
       row :menu_items do
         render 'builder'
       end
+      row :send_test_email do
+        button_to("Send yourself a test menu email", test_email_admin_menu_path(menu), method: :post)
+      end
       row :created_at
       row :updated_at
       row :emailed_at do
@@ -192,7 +195,7 @@ ActiveAdmin.register Menu do
   end
 
   member_action :menu_items do
-    @menu = Menu.find(params[:id])
+    @menu = resource
     render 'admin/menus/bakers_choice_menu.json.jbuilder'
   end
 
@@ -219,5 +222,18 @@ ActiveAdmin.register Menu do
     gon.jbuilder template: 'app/views/admin/menus/bakers_choice_menu.json.jbuilder', as: :menu
 
     render :bakers_choice
+  end
+
+  member_action :test_email, method: :post do
+    menu = resource
+    MenuMailer.with(menu: menu, user: current_user).weekly_menu_email.deliver_now
+
+    notice = "Menu '#{menu.name}' was emailed to #{current_user.email}"
+    ActiveAdmin::Comment.create(body: notice,
+                                namespace: "admin",
+                                resource: menu,
+                                author: current_admin_user)
+
+    redirect_to resource_path, notice: notice
   end
 end
