@@ -80,7 +80,7 @@ class OrdersController < ApplicationController
     end
 
     # send confirmation email
-    OrderMailer.with(order: order).confirmation_email.deliver_later
+    ConfirmationMailer.with(order: order).order_email.deliver_later
 
     render_current_order(menu.id, current_user)
 
@@ -116,7 +116,7 @@ class OrdersController < ApplicationController
       end
 
       # send confirmation email
-      OrderMailer.with(order: order).confirmation_email.deliver_later
+      ConfirmationMailer.with(order: order).order_email.deliver_later
 
       ahoy.track "order_updated"
     end

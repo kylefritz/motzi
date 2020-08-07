@@ -1,5 +1,11 @@
 <h2>Sign up</h2>
 
+<% if Setting.signup_form_text_html.present? %>
+<div class="mb-4">
+  <%= Setting.signup_form_text_html %>
+</div>
+<% end%>
+
 <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
   <%= render "devise/shared/error_messages", resource: resource %>
 

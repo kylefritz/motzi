@@ -37,6 +37,8 @@ class CreditItemsController < ApplicationController
       # update user bread_per_week
       current_user.update(breads_per_week: breads_per_week)
 
+      ConfirmationMailer.with(credit_item: @credit_item).credit_email.deliver_later
+
       # return a reasonable response object
       render "show", format: :json
     rescue Stripe::CardError => e

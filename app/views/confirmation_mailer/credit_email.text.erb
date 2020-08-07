@@ -1,0 +1,5 @@
+Thanks for buying credits from <%= Setting.shop.name %>.
+
+You were charged: <%= number_to_currency(@credit_item.stripe_charge_amount) %> for <%= number_to_currency(@credit_item.quantity) %> credits.
+
+<%= Setting.signup_email_text %>
