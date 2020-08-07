@@ -21,7 +21,7 @@ class ConfirmationMailerTest < ActionMailer::TestCase
 
   test "credit_item" do
     credit_item = credit_items(:kyle)
-    Setting.signup_email_text = "youre great"
+    Setting.credit_purchase_note = "youre great"
 
     email = ConfirmationMailer.with(credit_item: credit_item).credit_email
     assert_emails 1 do

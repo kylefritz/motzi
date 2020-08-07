@@ -9,8 +9,8 @@ class Setting < RailsSettings::Base
   field :pickup_day2, default: "Thursday", type: :string
   field :pickup_instructions, type: :string
   field :shop_id, default: ENV.fetch("SHOP_ID", "motzi"), readonly: true
-  field :signup_email_text, type: :string
-  field :signup_form_text, type: :string
+  field :credit_purchase_note, type: :string
+  field :signup_form_note, type: :string
 
   def self.pickup_day1_abbr
     abbr_day(Setting.pickup_day1)
@@ -47,12 +47,12 @@ class Setting < RailsSettings::Base
     Menu::MARKDOWN.render(Setting.pickup_instructions || '').html_safe
   end
 
-  def self.signup_email_html
-    Menu::MARKDOWN.render(Setting.signup_email_text || '').html_safe
+  def self.credit_purchase_note_html
+    Menu::MARKDOWN.render(Setting.credit_purchase_note || '').html_safe
   end
 
-  def self.signup_form_text_html
-    Menu::MARKDOWN.render(Setting.signup_form_text || '').html_safe
+  def self.signup_form_note_html
+    Menu::MARKDOWN.render(Setting.signup_form_note || '').html_safe
   end
 
   def self.shop
