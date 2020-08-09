@@ -16,7 +16,7 @@ json.menu do
     unless limit.present?
       return 120
     end
-    (limit - ordered).clamp(0, 120)
+    (limit - (ordered || 0)).clamp(0, 120)
   end
 
   json.items menu_items.map do |menu_item, item|
