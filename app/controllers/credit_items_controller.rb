@@ -5,7 +5,7 @@ class CreditItemsController < ApplicationController
   def create
     price = params[:price].to_f.clamp(1, 250)
     price_cents = (price * 100).to_i
-    credits = params[:credits].to_i.clamp(1, 50)
+    credits = params[:credits].to_i.clamp(1, 200)
 
     breads_per_week = params[:breads_per_week].to_f
     frequency = breads_per_week == 1.0 ? "Weekly" : "Bi-Weekly";
