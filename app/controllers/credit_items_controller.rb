@@ -3,9 +3,9 @@ class CreditItemsController < ApplicationController
   before_action :require_hashid_user_or_devise_user!
 
   def create
-    price = params[:price].to_f.clamp(1, 250)
+    price = params[:price].to_f.clamp(1, CreditBundle::MAX_PRICE)
     price_cents = (price * 100).to_i
-    credits = params[:credits].to_i.clamp(1, 200)
+    credits = params[:credits].to_i.clamp(1, CreditBundle::MAX_CREDITS)
 
     breads_per_week = params[:breads_per_week].to_f
     frequency = breads_per_week == 1.0 ? "Weekly" : "Bi-Weekly";

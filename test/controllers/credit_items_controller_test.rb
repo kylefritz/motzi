@@ -30,8 +30,10 @@ class CreditItemsControllerTest < ActionDispatch::IntegrationTest
     end
 
     new_credit_item = CreditItem.last
+    assert_equal order_attrs[:credits], new_credit_item.quantity
     refute_nil new_credit_item.stripe_charge_id
     refute_nil new_credit_item.stripe_charge_amount
+    assert_equal order_attrs[:price], new_credit_item.stripe_charge_amount
   end
 
 end
