@@ -114,7 +114,7 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
         <div className="col">
           <textarea
             style={{ minHeight: 120 }}
-            placeholder="We'd love to hear your feedback on previous loaves or any comments/special requests you may have"
+            placeholder="We'd love to hear your feedback on previous order or any comments/special requests you may have"
             defaultValue={comments}
             onChange={(e) => setComments(e.target.value)}
             className="form-control"

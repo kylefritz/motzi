@@ -4,8 +4,8 @@ import Price from "./Price";
 
 export default function PayItForward({
   id = -1,
-  name = "Pay it forward loaf",
-  description = "Wild times out there. Support some else in need.",
+  name = "Pay it forward",
+  description = "This purchase supports someone else in need.",
   price = 5,
   onAddToCart: addToCart,
   disabled,

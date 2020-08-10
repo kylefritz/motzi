@@ -6,7 +6,7 @@ unless Item.pay_it_forward
   Item.create!(
     id: Item::PAY_IT_FORWARD_ID,
     name: 'Pay it forward',
-    description: 'Support some else in need. Make a 1.5 loaf donation.',
+    description: 'Support someone else in need.',
   )
 end
 
