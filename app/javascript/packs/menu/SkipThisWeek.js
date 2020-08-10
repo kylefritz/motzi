@@ -2,7 +2,7 @@ import React from "react";
 
 export default function SkipThisWeek({
   onSkip,
-  description = "I'd like to skip this week, please credit me for a future week (limit 3 per 6 month period).",
+  description = "I'd like to skip this week, please credit me for a future week.",
   disabled,
 }) {
   return (
