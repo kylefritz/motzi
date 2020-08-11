@@ -9,14 +9,6 @@ class CreditItem < ApplicationRecord
   }
 
   def retail_price
-    if quantity == 26
-      169
-    elsif quantity == 13
-      91
-    elsif quantity == 6
-      46
-    else
-      7 * quantity
-    end
+    CreditBundle.find_by(credits: quantity)&.price || 0
   end
 end
