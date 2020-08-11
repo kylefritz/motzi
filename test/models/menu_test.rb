@@ -43,7 +43,7 @@ class MenuTest < ActiveSupport::TestCase
   end
 
   test "deadline" do
-    assert_equal Time.zone.parse("Sun, 13 Jan 2019 23:59:59 -0500"),  menus(:week3).day1_deadline
-    assert_equal Time.zone.parse("Tue, 15 Jan 2019 23:59:59 -0500"),  menus(:week3).day2_deadline
+    assert_equal Time.zone.parse("Sun, 13 Jan 2019 20:59:59 -0500"),  menus(:week3).day1_deadline
+    assert_equal Time.zone.parse("Tue, 15 Jan 2019 20:59:59 -0500"),  menus(:week3).day2_deadline
   end
 end

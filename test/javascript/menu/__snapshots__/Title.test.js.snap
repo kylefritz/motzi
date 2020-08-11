@@ -30,13 +30,13 @@ exports[`After deadline: ordering close 1`] = `
         }
       }
     >
-      Order by midnight 
+      Order by 9pm 
       Sunday
        for 
       Tuesday
        pickup 
       <br />
-      or midnight 
+      or 9pm 
       Monday
        for 
       Wednesday
@@ -71,12 +71,12 @@ exports[`Before deadline: small warning 1`] = `
           }
         }
       >
-        Order by midnight 
+        Order by 9pm 
         Sunday
          for 
         Tuesday
          pickup 
-        or midnight 
+        or 9pm 
         Monday
          for 
         Wednesday

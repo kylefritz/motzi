@@ -8,8 +8,8 @@ function When({ br }) {
 
   return (
     <>
-      Order by midnight {day1DeadlineDay} for {day1} pickup {br && <br />}or
-      midnight {day2DeadlineDay} for {day2} pickup.
+      Order by 9pm {day1DeadlineDay} for {day1} pickup {br && <br />}or 9pm{" "}
+      {day2DeadlineDay} for {day2} pickup.
     </>
   );
 }

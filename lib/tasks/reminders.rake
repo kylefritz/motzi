@@ -1,5 +1,5 @@
 namespace :reminders do
-  desc "Reminder to order before sunday midnight deadline"
+  desc "Reminder to order before menu deadline"
   task :havent_ordered => :environment do
     if Setting.automated_reminder_emails?
       SendHaventOrderedReminderJob.perform_now
