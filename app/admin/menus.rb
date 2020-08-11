@@ -48,7 +48,7 @@ ActiveAdmin.register Menu do
       small "#{t.strftime('%a %m/%d')}"
     end
     column :stats do |menu|
-      render 'admin/menus/pay_what_you_can_stats', {menu: menu}
+      render 'admin/menus/sales', {menu: menu}
     end
     column :emailed_at
     actions defaults: false do |menu|
@@ -115,7 +115,7 @@ ActiveAdmin.register Menu do
 
     panel "Pay what you can" do
       # NB: this is an N+1 query but let's leave it for now because it's valuable
-      render 'admin/menus/pay_what_you_can_stats', {menu: menu}
+      render 'admin/menus/sales', {menu: menu}
     end
 
     active_admin_comments

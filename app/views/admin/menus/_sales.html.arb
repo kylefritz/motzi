@@ -14,10 +14,14 @@ ci = {
   paid: credit_items.map(&:stripe_charge_amount).sum,
 }
 
-table_for [mp, ci], class: 'subscribers' do
+table_for [mp, ci], class: 'sales' do
   column :type
   column :qty
-  column :retail do |r|number_to_currency r[:retail] end
+  if Setting.shop.pay_what_you_can
+    column :retail do |r|number_to_currency r[:retail] end
+  end
   column :paid do |r|number_to_currency r[:paid] end
-  column :diff do |r|price_diff(r[:retail], r[:paid]) end
+  if Setting.shop.pay_what_you_can
+    column :diff do |r|price_diff(r[:retail], r[:paid]) end
+  end
 end

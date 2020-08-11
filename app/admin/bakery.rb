@@ -56,8 +56,8 @@ ActiveAdmin.register_page "Dashboard" do
           end
         end
 
-        panel "Pay what you can stats for menu" do
-          render 'admin/menus/pay_what_you_can_stats', {menu: menu}
+        panel "Sales" do
+          render 'admin/menus/sales', {menu: menu}
         end
       end
 
