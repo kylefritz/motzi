@@ -36,7 +36,8 @@ exports[`After deadline: ordering close 1`] = `
       Tuesday
        pickup 
       <br />
-      or 9pm 
+      or 9pm
+       
       Monday
        for 
       Wednesday
@@ -76,7 +77,8 @@ exports[`Before deadline: small warning 1`] = `
          for 
         Tuesday
          pickup 
-        or 9pm 
+        or 9pm
+         
         Monday
          for 
         Wednesday
