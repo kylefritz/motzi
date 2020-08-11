@@ -31,7 +31,7 @@ ActiveAdmin.register User do
   end
 
   index do
-    selectable_column
+    id_column
     column :first_name do |user|
       span user.first_name
       if user.is_admin?

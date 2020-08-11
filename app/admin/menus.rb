@@ -27,7 +27,7 @@ ActiveAdmin.register Menu do
   end
 
   index do
-    selectable_column
+    id_column
     column :name do |menu|
       div auto_link menu
       if menu.current?

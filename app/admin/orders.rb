@@ -15,6 +15,7 @@ ActiveAdmin.register Order do
 
   index do
     selectable_column
+    id_column
     column :menu
     column :user
     column :items do |order|

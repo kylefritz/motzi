@@ -1,5 +1,5 @@
 ActiveAdmin.register Ahoy::Message, as: "Email" do
-  actions :index, :show
+  actions :all, except: [:edit, :update] # updating doesn't make sense
   includes :menu, :user
 
   scope :all, default: true
@@ -10,6 +10,7 @@ ActiveAdmin.register Ahoy::Message, as: "Email" do
 
   index do
     selectable_column
+    id_column
     column :to do |email|
       div auto_link email.user, email.to
     end
@@ -23,6 +24,6 @@ ActiveAdmin.register Ahoy::Message, as: "Email" do
     column :opened_at
     column :clicked_at
     column :subject
-    # column :mailer
+    actions
   end
 end

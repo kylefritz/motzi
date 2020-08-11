@@ -4,11 +4,13 @@ ActiveAdmin.register Item do
   config.sort_order = 'LOWER(name)'
   config.create_another = true
 
+  actions :all, except: [:destroy] # deleting items can orphan orders, etc
+
   preserve_default_filters!
   remove_filter :versions, :image_attachment, :image_blob, :menu_items
 
   index do
-    selectable_column
+    id_column
     column :name do |item|
       auto_link item
     end

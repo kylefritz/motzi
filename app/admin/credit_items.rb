@@ -8,6 +8,7 @@ ActiveAdmin.register CreditItem do
 
   index do
     selectable_column
+    id_column
     column :memo
     column :quantity
     column :user
