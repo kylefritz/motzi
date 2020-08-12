@@ -1,6 +1,10 @@
 week1:
   name: week1
   week_id: 19w01
+  day1_deadline: 2018-12-30 21:00:00 -0500
+  day1_pickup_at: 2019-01-01
+  day2_deadline: 2019-01-01 21:00:00 -0500
+  day2_pickup_at: 2019-01-03
   subscriber_note: |
     Hello, all!
 
@@ -17,6 +21,10 @@ week1:
 week2:
   name: week2
   week_id: 19w02
+  day1_deadline: 2019-01-06 21:00:00 -0500
+  day1_pickup_at: 2019-01-08
+  day2_deadline: 2019-01-08 21:00:00 -0500
+  day2_pickup_at: 2019-01-10
   subscriber_note: |
     Hello, all!
 
@@ -33,6 +41,10 @@ week2:
 week3:
   name: week3
   week_id: 19w03
+  day1_deadline: 2019-01-13 21:00:00 -0500
+  day1_pickup_at: 2019-01-15
+  day2_deadline: 2019-01-15 21:00:00 -0500
+  day2_pickup_at: 2019-01-17
   subscriber_note: |
     Hi friends!
 

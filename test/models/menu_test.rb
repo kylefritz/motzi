@@ -43,7 +43,18 @@ class MenuTest < ActiveSupport::TestCase
   end
 
   test "deadline" do
-    assert_equal Time.zone.parse("Sun, 13 Jan 2019 20:59:59 -0500"),  menus(:week3).day1_deadline
-    assert_equal Time.zone.parse("Tue, 15 Jan 2019 20:59:59 -0500"),  menus(:week3).day2_deadline
+    assert_equal Time.zone.parse("Sun, 13 Jan 2019 21:00:00 -0500"),  menus(:week3).day1_deadline
+    assert_equal Time.zone.parse("Tue, 15 Jan 2019 21:00:00 -0500"),  menus(:week3).day2_deadline
+  end
+
+  test "Menu.deadline_and_pickup" do
+    week_id = "19w01"
+    day1_deadline = Time.zone.parse("2018-12-30 21:00:00 -0500")
+    day1_pickup_at = Time.zone.parse("2019-01-01").to_date
+    day2_deadline = Time.zone.parse("2019-01-01 21:00:00 -0500")
+    day2_pickup_at = Time.zone.parse("2019-01-03").to_date
+
+    assert_equal [day1_deadline, day1_pickup_at], Menu.deadline_and_pickup(week_id, Date::DAYS_INTO_WEEK[:tuesday])
+    assert_equal [day2_deadline, day2_pickup_at], Menu.deadline_and_pickup(week_id, Date::DAYS_INTO_WEEK[:thursday])
   end
 end

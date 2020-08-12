@@ -1,5 +1,7 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note
+  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note,
+                :day1_pickup_at, :day1_deadline, :day2_pickup_at, :day2_deadline
+
   includes menu_items: [:item]
   config.sort_order = 'LOWER(week_id) desc'
 
@@ -78,6 +80,10 @@ ActiveAdmin.register Menu do
       end
       input :subscriber_note
       input :menu_note
+      input :day1_pickup_at, as: :date_picker
+      input :day1_deadline, as: :datetime_picker
+      input :day2_pickup_at, as: :date_picker
+      input :day2_deadline, as: :datetime_picker
       input :day_of_note, placeholder: 'Included in reminder emails sent out on pickup day'
     end
     actions
@@ -91,6 +97,10 @@ ActiveAdmin.register Menu do
           status_tag true, style: 'margin-left: 3px', label: 'Current'
         end
       end
+      row :day1_pickup_at
+      row :day1_deadline
+      row :day2_pickup_at
+      row :day2_deadline
       row :subscriber_note do
         menu.subscriber_note_html
       end

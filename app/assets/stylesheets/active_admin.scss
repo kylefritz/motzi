@@ -234,3 +234,10 @@ form fieldset.actions li.cancel a {
   // give lists a little more room to breath
   line-height: 1.5;
 }
+
+// override stuff active_admin seems to want
+
+// date_picker in menu form
+.edit form input[type="date"] {
+  width: inherit;
+}
