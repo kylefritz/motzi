@@ -11,6 +11,7 @@ class Setting < RailsSettings::Base
   field :shop_id, default: ENV.fetch("SHOP_ID", "motzi"), readonly: true
   field :credit_purchase_note, type: :string
   field :signup_form_note, type: :string
+  field :accepting_subscribers, default: true, type: :boolean
 
   def self.pickup_day1_abbr
     abbr_day(Setting.pickup_day1)

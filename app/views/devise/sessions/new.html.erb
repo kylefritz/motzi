@@ -1,0 +1,42 @@
+<div class="alert alert-info" role="alert">
+  <h6>
+    Previously buy credits but don't know what your password is?
+  </h6>
+  <p>
+    <%= link_to "Set a new password now!", new_password_path(resource_name) %>
+  </p>
+  <p>
+   You may have been assigned you a random password when we made your account.
+  </p>
+  <p>
+   Each menu email also includes a <strong>special, encoded order link</strong>.
+  </p>
+</div>
+
+<h2>Subscriber log in</h2>
+<%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+  <div class="form-group">
+    <%= f.label :email %><br />
+    <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control" %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :password %><br />
+    <%= f.password_field :password, autocomplete: "current-password", class: "form-control" %>
+  </div>
+
+  <% if devise_mapping.rememberable? %>
+    <div class="form-group">
+      <%= f.check_box :remember_me %>
+      <%= f.label :remember_me %>
+    </div>
+  <% end %>
+
+  <div class="actions">
+    <%= f.submit "Log in to access credits", class: "btn btn-primary btn-lg btn-block" %>
+  </div>
+<% end %>
+
+<div class="text-center mt-4">
+  <%= render "devise/shared/links" %>
+</div>

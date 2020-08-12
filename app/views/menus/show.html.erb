@@ -1,3 +1,8 @@
+<%- if current_user.nil?  %>
+  <div class="text-center mb-4">
+    Do you have subscriber credits? <%= link_to "Sign in to use them", new_session_path("user") %>
+  </div>
+<%end  %>
 <!-- load the  "menu" bundle & run the "menu" react app -->
 <div id="react-menu"></div>
 <%= javascript_pack_tag 'menu' %>
