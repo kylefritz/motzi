@@ -1,6 +1,7 @@
 class SendHaventOrderedReminderJob < ApplicationJob
 
   def perform(*args)
+    # TODO: compute deadline & subtract 3 hours for reminder email
     return unless (19..23).include?(Time.zone.now.hour) # 7p-midnight
     return unless Time.zone.now.reminder_day?
 

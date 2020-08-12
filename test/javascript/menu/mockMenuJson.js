@@ -19,6 +19,8 @@ export default function ({
     day1DeadlineDay: "Sunday",
     day2DeadlineDay: "Tuesday",
     enablePayWhatYouCan,
+    orderingDeadlineText:
+      "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
   };
   const items = [
     {

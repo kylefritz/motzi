@@ -20,7 +20,8 @@
         "createdAt",
         "items",
         "isCurrent",
-        "enablePayWhatYouCan"
+        "enablePayWhatYouCan",
+        "showDay2"
       ],
       "properties": {
         "id": { "type": "integer" },
@@ -76,7 +77,8 @@
           }
         },
         "isCurrent": { "type": "boolean" },
-        "enablePayWhatYouCan": { "type": "boolean" }
+        "enablePayWhatYouCan": { "type": "boolean" },
+        "showDay2": { "type": "boolean" }
       }
     },
     "user": {

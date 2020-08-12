@@ -73,6 +73,7 @@ function DayButtons({
   day2: enableDay2,
   remainingDay1,
   remainingDay2,
+  showDay2 = true,
 }) {
   const { day1, day1Closed, day2, day2Closed } = getDayContext();
   const days = [];
@@ -84,7 +85,7 @@ function DayButtons({
       remaining: remainingDay1,
     });
   }
-  if (enableDay2) {
+  if (showDay2 && enableDay2) {
     days.push({
       day: day2,
       btn: "primary",
@@ -186,13 +187,18 @@ export function Item(props) {
   );
 }
 
-export default function Items({ items, onAddToCart: handleAddToCart }) {
+export default function Items({
+  items,
+  onAddToCart: handleAddToCart,
+  showDay2 = true,
+}) {
   return (
     <div className="row mt-2">
       {items.map((i) => (
         <Item
           key={i.id}
           {...i}
+          showDay2={showDay2}
           onChange={
             handleAddToCart &&
             (({ quantity, day }) => handleAddToCart({ ...i, quantity, day }))

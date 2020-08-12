@@ -10,7 +10,7 @@ function When({ menu, br }) {
     return null;
   }
 
-  const [day1, day2] = orderingDeadlineText.split("or");
+  const [day1, day2] = orderingDeadlineText.split(" or ");
   return (
     <>
       Order by {day1} {day2 && br && <br />}
