@@ -58,10 +58,10 @@ test("remove", () => {
 
 test("remaining", () => {
   const items = [
-    { id: 3, remainingDay1: 10, remainingDay2: NaN },
-    { id: 1, remainingDay1: 10, remainingDay2: 0 },
-    { id: 2, remainingDay1: 10, remainingDay2: null },
-    { id: -1, name: "PayItForward" },
+    { id: 3, subscriber: true, remainingDay1: 10, remainingDay2: NaN },
+    { id: 1, subscriber: true, remainingDay1: 10, remainingDay2: 0 },
+    { id: 2, subscriber: true, remainingDay1: 10, remainingDay2: null },
+    { id: -1, subscriber: true, name: "PayItForward" },
   ];
 
   const { result } = renderHook(() => useCart({ items }));
@@ -69,37 +69,45 @@ test("remaining", () => {
   act(() => {
     result.current.addToCart({ id: 1, quantity: 1, day: "Thursday" });
   });
-  expect(result.current.items).toHaveLength(items.length - 1); // not pay it forward
-  expect(result.current.items.map(({ id }) => id)).toStrictEqual([3, 1, 2]);
-  expect(result.current.items[1].remainingDay1).toBe(9);
+  expect(result.current.subscriberItems).toHaveLength(items.length - 1); // not pay it forward
+  expect(result.current.subscriberItems.map(({ id }) => id)).toStrictEqual([
+    3,
+    1,
+    2,
+  ]);
+  expect(result.current.subscriberItems[1].remainingDay1).toBe(9);
 
   act(() => {
     result.current.addToCart({ id: 1, quantity: 1, day: "Thursday" });
   });
-  expect(result.current.items[1].remainingDay1).toBe(8);
+  expect(result.current.subscriberItems[1].remainingDay1).toBe(8);
 
   act(() => {
     result.current.addToCart({ id: 1, quantity: 3, day: "Saturday" });
   });
-  expect(result.current.items[1].remainingDay2).toBe(-3);
+  expect(result.current.subscriberItems[1].remainingDay2).toBe(-3);
 
   act(() => {
     result.current.addToCart({ id: 2, quantity: 3, day: "Saturday" });
   });
-  expect(result.current.items[2].remainingDay2).toBe(-3);
+  expect(result.current.subscriberItems[2].remainingDay2).toBe(-3);
 
   act(() => {
     result.current.addToCart({ id: 3, quantity: 3, day: "Saturday" });
   });
-  expect(result.current.items.map(({ id }) => id)).toStrictEqual([3, 1, 2]);
-  expect(result.current.items[0].remainingDay2).toBe(NaN);
+  expect(result.current.subscriberItems.map(({ id }) => id)).toStrictEqual([
+    3,
+    1,
+    2,
+  ]);
+  expect(result.current.subscriberItems[0].remainingDay2).toBe(NaN);
 });
 
 test("no payItForward", () => {
   const items = [
-    { id: 3, remainingDay1: 10, remainingDay2: NaN },
-    { id: 1, remainingDay1: 10, remainingDay2: 0 },
-    { id: 2, remainingDay1: 10, remainingDay2: null },
+    { id: 3, marketplace: true, remainingDay1: 10, remainingDay2: NaN },
+    { id: 1, marketplace: true, remainingDay1: 10, remainingDay2: 0 },
+    { id: 2, marketplace: true, remainingDay1: 10, remainingDay2: null },
   ];
 
   const { result: no } = renderHook(() => useCart({ items }));
@@ -110,5 +118,28 @@ test("no payItForward", () => {
   );
   expect(yes.current.payItForward).toBeDefined();
   expect(yes.current.payItForward.name).toMatch("PayItForward");
-  expect(yes.current.items.map(({ id }) => id)).toStrictEqual([3, 1, 2]);
+  expect(yes.current.marketplaceItems.map(({ id }) => id)).toStrictEqual([
+    3,
+    1,
+    2,
+  ]);
+});
+
+test("marketplaceItems vs subscriberItems", () => {
+  const items = [
+    { id: 1, marketplace: true },
+    { id: 2, marketplace: true },
+    { id: 3, marketplace: true },
+    { id: 4, subscriber: true },
+    { id: 5, subscriber: true },
+  ];
+
+  const {
+    result: {
+      current: { marketplaceItems, subscriberItems },
+    },
+  } = renderHook(() => useCart({ items }));
+
+  expect(marketplaceItems.map(({ id }) => id)).toStrictEqual([1, 2, 3]);
+  expect(subscriberItems.map(({ id }) => id)).toStrictEqual([4, 5]);
 });

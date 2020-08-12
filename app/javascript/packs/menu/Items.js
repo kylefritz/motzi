@@ -191,7 +191,6 @@ export function Item(props) {
   const { price, credits, image, name } = props;
   return (
     <div className="col-6 mb-4">
-      {/* TODO: make image square */}
       <img src={image} className="img-fluid" style={{ objectFit: "contain" }} />
       <div>{name}</div>
       <Price {...{ price, credits }} />
@@ -200,17 +199,7 @@ export function Item(props) {
   );
 }
 
-export default function Items({
-  items,
-  onAddToCart: handleAddToCart,
-  marketplace = false,
-}) {
-  if (marketplace) {
-    items = items.filter(({ marketplace }) => marketplace);
-  } else {
-    // subscriber view
-    items = items.filter(({ subscriber }) => subscriber);
-  }
+export default function Items({ items, onAddToCart: handleAddToCart }) {
   return (
     <div className="row mt-2">
       {items.map((i) => (

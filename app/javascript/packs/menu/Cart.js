@@ -204,13 +204,17 @@ export function useCart({ order = null, items }) {
     .filter(({ id }) => id !== PAY_IT_FORWARD_ID)
     .map(({ id }) => itemLookup[id]);
 
+  const marketplaceItems = nextItems.filter(({ marketplace }) => marketplace);
+  const subscriberItems = nextItems.filter(({ subscriber }) => subscriber);
+
   return {
     cart,
     addToCart,
     rmCartItem,
     setCart,
     total: calcTotal(cart),
-    items: nextItems,
+    marketplaceItems,
+    subscriberItems,
     payItForward,
   };
 }

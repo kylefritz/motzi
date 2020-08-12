@@ -1,6 +1,7 @@
 export default function ({
   order: withOrder = true,
   user: withUser = true,
+  items: withItems = true,
   payItForward = true,
   enablePayWhatYouCan = true,
 } = {}) {
@@ -18,74 +19,78 @@ export default function ({
     day1DeadlineDay: "Sunday",
     day2DeadlineDay: "Tuesday",
     enablePayWhatYouCan,
-    items: [
-      {
-        id: 3,
-        name: "Baguette",
-        description: "",
-        image: "bread-baguette.jpg",
-        price: 3.0,
-        credits: 1,
-        day1: true,
-        day2: true,
-        subscriber: true,
-        marketplace: true,
-      },
-      {
-        id: 1,
-        name: "Classic",
-        description:
-          "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
-        image: "bread2-002.webp",
-        price: 4.0,
-        credits: 2,
-        day1: true,
-        day2: true,
-        subscriber: true,
-        marketplace: true,
-      },
-      {
-        id: 2,
-        name: "Cookies",
-        description: "ony subscribers can get cookies",
-        price: 4.0,
-        credits: 1,
-        day1: true,
-        day2: true,
-        subscriber: true,
-        marketplace: false,
-      },
-      {
-        id: 4,
-        name: "Marketplace only item",
-        description: "too small for subscribers",
-        price: 2.0,
-        credits: 1,
-        day1: true,
-        day2: true,
-        subscriber: false,
-        marketplace: true,
-      },
-      {
-        id: 5,
-        name: "Another small item",
-        description: "too small for subscribers",
-        price: 1.5,
-        credits: 1,
-        day1: true,
-        day2: true,
-        subscriber: false,
-        marketplace: true,
-      },
-    ],
   };
+  const items = [
+    {
+      id: 3,
+      name: "Baguette",
+      description: "",
+      image: "bread-baguette.jpg",
+      price: 3.0,
+      credits: 1,
+      day1: true,
+      day2: true,
+      subscriber: true,
+      marketplace: true,
+    },
+    {
+      id: 1,
+      name: "Classic",
+      description:
+        "Mix of modern wheats and ancient Einkorn for the best of both worlds.",
+      image: "bread2-002.webp",
+      price: 4.0,
+      credits: 2,
+      day1: true,
+      day2: true,
+      subscriber: true,
+      marketplace: true,
+    },
+    {
+      id: 2,
+      name: "Cookies",
+      description: "ony subscribers can get cookies",
+      price: 4.0,
+      credits: 1,
+      day1: true,
+      day2: true,
+      subscriber: true,
+      marketplace: false,
+    },
+    {
+      id: 4,
+      name: "Marketplace only item",
+      description: "too small for subscribers",
+      price: 2.0,
+      credits: 1,
+      day1: true,
+      day2: true,
+      subscriber: false,
+      marketplace: true,
+    },
+    {
+      id: 5,
+      name: "Another small item",
+      description: "too small for subscribers",
+      price: 1.5,
+      credits: 1,
+      day1: true,
+      day2: true,
+      subscriber: false,
+      marketplace: true,
+    },
+  ];
+
   if (payItForward) {
-    menu.items.push({
+    items.push({
       id: -1,
       name: "Pay it forward",
       price: 5,
       credits: 1,
     });
+  }
+  if (withItems) {
+    menu.items = withItems === true ? items : withItems;
   }
 
   const user = {

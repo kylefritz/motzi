@@ -6,11 +6,17 @@ test("menu", () => {
   const menu = renderMenu({ order: false, user: false });
 
   expect(menu.items()).toHaveLength(4);
+  expect(menu.submitOrderBtn()).toHaveLength(1);
   expect(menu.submitOrderBtn().text()).toBe("Select an item");
 
   expect(menu.payItForward()).toHaveLength(1);
   menu.payItForward().find("button").at(0).simulate("click");
   expect(menu.cartTotal()).toContain("$5.00");
+});
+
+test("noItems", () => {
+  const menu = renderMenu({ order: false, user: false, items: [] });
+  expect(menu.submitOrderBtn()).toHaveLength(0);
 });
 
 test("payWhatYouCan false", () => {

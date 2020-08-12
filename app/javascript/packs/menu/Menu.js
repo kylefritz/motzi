@@ -18,7 +18,7 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
     rmCartItem,
     setCart,
     total,
-    items,
+    subscriberItems,
     payItForward,
   } = useCart({
     order,
@@ -59,7 +59,7 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
         <BuyCredits user={user} />
 
         <h5 className="mt-5">Preview of current menu</h5>
-        <Items marketplace items={menu.items} disabled={true} />
+        <Items items={subscriberItems} disabled={true} />
       </>
     );
   }
@@ -96,7 +96,7 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
         </>
       ) : (
         <>
-          <Items items={items} onAddToCart={addToCart} />
+          <Items items={subscriberItems} onAddToCart={addToCart} />
 
           <SkipThisWeek onSkip={handleSkip} disabled={menuClosed} />
           {payItForward && (

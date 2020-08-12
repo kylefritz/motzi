@@ -12,7 +12,14 @@ import PayWhatYouCan from "../buy/PayWhatYouCan";
 import { getDayContext } from "./Contexts";
 
 export default function Marketplace({ menu, onCreateOrder }) {
-  const { cart, addToCart, rmCartItem, total, items, payItForward } = useCart({
+  const {
+    cart,
+    addToCart,
+    rmCartItem,
+    total,
+    marketplaceItems,
+    payItForward,
+  } = useCart({
     items: menu.items,
   });
   const [submitting, setSubmitting] = useState(false);
@@ -51,6 +58,11 @@ export default function Marketplace({ menu, onCreateOrder }) {
     setPrice(newCartPrice);
   };
 
+  if (!marketplaceItems.length) {
+    console.warn("marketplace has no items", marketplaceItems);
+    return null;
+  }
+
   const { menuNote, enablePayWhatYouCan } = menu;
   const { pastDay2Deadline: menuClosed } = getDayContext();
   const disabled = menuClosed || !onCreateOrder;
@@ -62,8 +74,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
 
       <h5>Menu</h5>
       <Items
-        marketplace
-        items={items}
+        items={marketplaceItems}
         onAddToCart={handleAddToCart}
         disabled={disabled}
       />
