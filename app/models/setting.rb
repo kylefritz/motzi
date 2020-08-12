@@ -31,12 +31,6 @@ class Setting < RailsSettings::Base
   def self.pickup_day2_wday
     Date::DAYS_INTO_WEEK[Setting.pickup_day2.downcase.to_sym]
   end
-  def self.pickup_day1_deadline_wday
-    self.pickup_day1_wday - Setting.leadtime_days.ceil
-  end
-  def self.pickup_day2_deadline_wday
-    self.pickup_day2_wday - Setting.leadtime_days.ceil
-  end
 
   def self.pickup_instructions_html
     Menu::MARKDOWN.render(Setting.pickup_instructions || '').html_safe
