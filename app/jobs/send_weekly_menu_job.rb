@@ -9,7 +9,7 @@ class SendWeeklyMenuJob < ApplicationJob
     menu = Menu.current
 
     # email each individual user
-    self.class.users_to_email(menu).map do |user|
+    self.class.users_to_email(menu).find_each do |user|
       MenuMailer.with(menu: menu, user: user).weekly_menu_email.deliver_now
     end
   end

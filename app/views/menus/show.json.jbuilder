@@ -33,7 +33,7 @@ json.menu do
   json.ordering_deadline_text ordering_deadline_text()
 
   json.enable_pay_what_you_can Setting.shop.pay_what_you_can
-  json.show_day2 Setting.shop.show_day2
+  json.show_day2 Setting.show_day2
 end
 
 json.user do

@@ -69,7 +69,7 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
 
-      if Setting.shop.show_day2
+      if Setting.show_day2
         column id: 'what-to-bake-day2' do
           panel "#{Setting.pickup_day2} - What to make" do
             a("#{Setting.pickup_day2} Pickup List", href: pickup_day2_admin_menus_path())

@@ -9,7 +9,7 @@ module DeadlineHelper
   end
 
   def ordering_deadline_text
-    return order_by_for_day_num(1) unless Setting.shop.show_day2
+    return order_by_for_day_num(1) unless Setting.show_day2
 
     "#{order_by_for_day_num(1)} or #{order_by_for_day_num(2)}"
   end
