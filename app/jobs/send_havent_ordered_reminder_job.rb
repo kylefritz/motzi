@@ -3,7 +3,7 @@ class SendHaventOrderedReminderJob < ApplicationJob
   def perform(*args)
     menu = Menu.current
 
-    return unless inside_reminder_window?(menu.day1_deadline) || inside_reminder_window?(menu.day2_deadline)
+    return unless SendHaventOrderedReminderJob.time_for_reminder_email?(menu)
 
     already_reminded = Set[*menu.messages.where(mailer: 'ReminderMailer#havent_ordered_email').pluck(:user_id)]
     already_ordered = Set[*menu.orders.pluck(:user_id)]
@@ -16,8 +16,12 @@ class SendHaventOrderedReminderJob < ApplicationJob
     end
   end
 
-  def inside_reminder_window?(deadline)
-    reminder_start = deadline - Setting.reminder_hours.to_f.hours
+  def self.inside_reminder_window?(deadline)
+    reminder_start = deadline - Setting.reminder_hours.to_f.hours - 1.minute
     Time.zone.now.between?(reminder_start, deadline)
+  end
+
+  def self.time_for_reminder_email?(menu)
+    inside_reminder_window?(menu.day1_deadline) || inside_reminder_window?(menu.day2_deadline)
   end
 end
