@@ -3,13 +3,18 @@ import _ from "lodash";
 
 import { getDayContext } from "./Contexts";
 
-function When({ br }) {
-  const { day1, day1DeadlineDay, day2, day2DeadlineDay } = getDayContext();
+function When({ menu, br }) {
+  const { orderingDeadlineText } = menu;
+  if (!orderingDeadlineText) {
+    console.warn("menu.orderingDeadlineText is null");
+    return null;
+  }
 
+  const [day1, day2] = orderingDeadlineText.split("or");
   return (
     <>
-      Order by 9pm {day1DeadlineDay} for {day1} pickup {br && <br />}or 9pm{" "}
-      {day2DeadlineDay} for {day2} pickup.
+      Order by {day1} {day2 && br && <br />}
+      {day2 && <>or {day2}</>}
     </>
   );
 }

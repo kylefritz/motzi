@@ -15,6 +15,7 @@ motzi:
   pay_it_forward: true
   pay_what_you_can: true
   js_tracking: true
+  single_pickup_day: false
 
 jinji:
   name: Jinji Chocolate Collective
@@ -25,6 +26,7 @@ jinji:
   pay_it_forward: false
   pay_what_you_can: false
   js_tracking: false
+  single_pickup_day: false
 
 dutch_courage:
   name: Dutch Courage
@@ -35,3 +37,4 @@ dutch_courage:
   pay_it_forward: false
   pay_what_you_can: false
   js_tracking: false
+  single_pickup_day: true

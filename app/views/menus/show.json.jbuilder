@@ -30,8 +30,7 @@ json.menu do
 
   json.day1 Setting.pickup_day1
   json.day2 Setting.pickup_day2
-  json.day1_deadline_day Setting.pickup_day1_deadline_day
-  json.day2_deadline_day Setting.pickup_day2_deadline_day
+  json.ordering_deadline_text ordering_deadline_text()
 
   json.enable_pay_what_you_can Setting.shop.pay_what_you_can
 end

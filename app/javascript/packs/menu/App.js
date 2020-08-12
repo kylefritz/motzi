@@ -120,10 +120,9 @@ export default function App() {
   const {
     day1,
     day1Deadline,
-    day1DeadlineDay,
     day2,
     day2Deadline,
-    day2DeadlineDay,
+    orderingDeadlineText,
     enablePayWhatYouCan,
   } = menu || {};
 
@@ -140,10 +139,9 @@ export default function App() {
         value={{
           day1,
           day1Deadline,
-          day1DeadlineDay,
           day2,
           day2Deadline,
-          day2DeadlineDay,
+          orderingDeadlineText,
           ignoreDeadline,
         }}
       >

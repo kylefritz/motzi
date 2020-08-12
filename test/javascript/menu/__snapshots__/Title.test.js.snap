@@ -29,20 +29,7 @@ exports[`After deadline: ordering close 1`] = `
           "name": "Week 6: toast",
         }
       }
-    >
-      Order by 9pm 
-      Sunday
-       for 
-      Tuesday
-       pickup 
-      <br />
-      or 9pm
-       
-      Monday
-       for 
-      Wednesday
-       pickup.
-    </When>
+    />
   </div>
 </Title>
 `;
@@ -71,19 +58,7 @@ exports[`Before deadline: small warning 1`] = `
             "name": "Week 6: toast",
           }
         }
-      >
-        Order by 9pm 
-        Sunday
-         for 
-        Tuesday
-         pickup 
-        or 9pm
-         
-        Monday
-         for 
-        Wednesday
-         pickup.
-      </When>
+      />
     </small>
   </div>
 </Title>

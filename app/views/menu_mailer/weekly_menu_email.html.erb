@@ -6,6 +6,6 @@
 
 <p><%= link_to "This week's menu", current_menu_url(uid: @user.hashid) %></p>
 
-<p>Order by <%= day_to_order_by_text %>.</p>
+<p>Order by <%= ordering_deadline_text %>.</p>
 
 <%= render partial: 'menu_mailer/credits_remaining' %>

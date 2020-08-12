@@ -25,17 +25,13 @@ export function DayButton({
   day,
   btn,
   isPastDeadline,
-  deadlineDay,
   remaining,
   onSetDay,
+  orderingDeadlineText,
 }) {
   if (remaining < 1 || isPastDeadline) {
     const [short, long, title] = isPastDeadline
-      ? [
-          `Closed`,
-          `Ordering closed for ${shortDay(day)}`,
-          `Order by 9pm ${deadlineDay} for ${day} pickup.`,
-        ]
+      ? [`Closed`, `Ordering closed for ${shortDay(day)}`, orderingDeadlineText]
       : ["Sold Out", `${shortDay(day)} Sold Out`, undefined];
 
     return (
@@ -78,21 +74,13 @@ function DayButtons({
   remainingDay1,
   remainingDay2,
 }) {
-  const {
-    day1,
-    day1Closed,
-    day1DeadlineDay,
-    day2,
-    day2Closed,
-    day2DeadlineDay,
-  } = getDayContext();
+  const { day1, day1Closed, day2, day2Closed } = getDayContext();
   const days = [];
   if (enableDay1) {
     days.push({
       day: day1,
       btn: "secondary",
       isPastDeadline: day1Closed,
-      deadlineDay: day1DeadlineDay,
       remaining: remainingDay1,
     });
   }
@@ -101,7 +89,6 @@ function DayButtons({
       day: day2,
       btn: "primary",
       isPastDeadline: day2Closed,
-      deadlineDay: day2DeadlineDay,
       remaining: remainingDay2,
     });
   }

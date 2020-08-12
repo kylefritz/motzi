@@ -1,14 +1,16 @@
 module DeadlineHelper
-  def pickup_day1_deadline_day
-    Date::DAYS_INTO_WEEK.invert[Setting.pickup_day1_deadline_wday].to_s.titlecase
+  def order_by_for_day_num(day_num)
+    pickup_day = Setting.send("pickup_day#{day_num}".to_sym)
+    pickup_wday = Setting.send("pickup_day#{day_num}_wday".to_sym)
+
+    deadline = Time.zone.now.beginning_of_week + pickup_wday - Setting.leadtime_days.days
+
+    "#{deadline.strftime("%I:%M %P %A")} for #{pickup_day} pickup"
   end
-  def pickup_day2_deadline_day
-    Date::DAYS_INTO_WEEK.invert[Setting.pickup_day2_deadline_wday].to_s.titlecase
-  end
-  def deadline_time
-    "9pm" #"midnight"
-  end
-  def day_to_order_by_text
-    "#{deadline_time} #{pickup_day1_deadline_day} for #{Setting.pickup_day1} pickup or #{deadline_time} #{pickup_day2_deadline_day} for #{Setting.pickup_day2} pickup"
+
+  def ordering_deadline_text
+    return order_by_for_day_num(1) if Setting.shop.single_pickup_day
+
+    "#{order_by_for_day_num(1)} or #{order_by_for_day_num(2)}"
   end
 end
