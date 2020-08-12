@@ -63,15 +63,15 @@ ActiveAdmin.register_page "Dashboard" do
 
       day1, day2 = menu.item_counts
       column id: 'what-to-bake-day1' do
-        panel "#{Setting.pickup_day1} - What to bake" do
-          a("#{Setting.pickup_day1} Pickup List", href: pickup_day1_admin_menus_path())
+        panel "#{menu.day1_pickup_at.strftime("%A")} - Ordered Items" do
+          a("#{menu.day1_pickup_at.strftime("%A")} Pickup List", href: pickup_day1_admin_menus_path())
           render 'admin/menus/what_to_bake', { counts: day1, menu: menu }
         end
       end
 
       column id: 'what-to-bake-day2' do
-        panel "#{Setting.pickup_day2} - What to bake" do
-          a("#{Setting.pickup_day2} Pickup List", href: pickup_day2_admin_menus_path())
+        panel "#{menu.day2_pickup_at.strftime("%A")} - Ordered Items" do
+          a("#{menu.day2_pickup_at.strftime("%A")} Pickup List", href: pickup_day2_admin_menus_path())
           render 'admin/menus/what_to_bake', { counts: day2, menu: menu}
         end
       end

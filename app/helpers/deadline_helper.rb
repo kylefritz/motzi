@@ -1,14 +1,16 @@
 module DeadlineHelper
-  def pickup_day1_deadline_day
-    Date::DAYS_INTO_WEEK.invert[Setting.pickup_day1_deadline_wday].to_s.titlecase
-  end
-  def pickup_day2_deadline_day
-    Date::DAYS_INTO_WEEK.invert[Setting.pickup_day2_deadline_wday].to_s.titlecase
-  end
-  def deadline_time
-    "9pm" #"midnight"
-  end
-  def day_to_order_by_text
-    "#{deadline_time} #{pickup_day1_deadline_day} for #{Setting.pickup_day1} pickup or #{deadline_time} #{pickup_day2_deadline_day} for #{Setting.pickup_day2} pickup"
+  def day_to_order_by_text(menu)
+    pickup_day1 = menu.day1_pickup_at.strftime("%A")
+    pickup_day1_deadline = menu.day1_deadline.strftime("%A")
+
+
+    pickup_day2 = menu.day2_pickup_at.strftime("%A")
+    pickup_day2_deadline = menu.day2_deadline.strftime("%A")
+
+    day1 = "#{pickup_day1_deadline} for #{pickup_day1} pickup"
+
+    return day1 if Setting.single_pickup_day?
+
+    "#{day1} or #{pickup_day2_deadline} for #{pickup_day2} pickup"
   end
 end

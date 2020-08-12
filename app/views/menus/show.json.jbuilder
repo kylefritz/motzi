@@ -1,5 +1,5 @@
 json.menu do
-  json.extract! @menu, :id, :name, :menu_note, :subscriber_note, :created_at, :day1_deadline, :day2_deadline
+  json.extract! @menu, :id, :name, :menu_note, :subscriber_note, :created_at, :day1_deadline, :day2_deadline, :day1_pickup_at, :day2_pickup_at
   json.is_current @menu.current?
 
   menu_items = @menu.menu_items.includes(item: {image_attachment: :blob}).map {|mi| [mi, mi.item]}
@@ -27,11 +27,6 @@ json.menu do
     json.remaining_day1 remaining(menu_item.day1_limit, day1_counts[menu_item.item_id], menu_item.day1)
     json.remaining_day2 remaining(menu_item.day2_limit, day2_counts[menu_item.item_id], menu_item.day2)
   end
-
-  json.day1 Setting.pickup_day1
-  json.day2 Setting.pickup_day2
-  json.day1_deadline_day Setting.pickup_day1_deadline_day
-  json.day2_deadline_day Setting.pickup_day2_deadline_day
 
   json.enable_pay_what_you_can Setting.shop.pay_what_you_can
 end

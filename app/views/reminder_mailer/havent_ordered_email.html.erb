@@ -1,4 +1,4 @@
-<h2>For <%= @menu.name %>, please order by <%= day_to_order_by_text %>!!</h2>
+<h2>For <%= @menu.name %>, please order by <%= day_to_order_by_text(@menu) %>!!</h2>
 
 <p><%= link_to @menu.name, current_menu_url(uid: @user.hashid) %></p>
 
