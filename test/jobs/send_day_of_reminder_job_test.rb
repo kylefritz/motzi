@@ -17,6 +17,8 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
     refute_reminders_emailed(:thurs, '5:00 AM', 'dont send too early')
     assert_reminders_emailed(Menu.current.order_items.day1_pickup.map(&:order_id).uniq.count, :tues, '7:00 AM', 'send on day1/tues')
     assert_reminders_emailed(Menu.current.order_items.day2_pickup.map(&:order_id).uniq.count, :thurs, '7:00 AM', 'send on day2/thurs; not to jess')
+    refute_reminders_emailed(:tues, '1:00 PM', 'dont send too early')
+    refute_reminders_emailed(:thurs, '1:00 PM', 'dont send too late')
   end
 
   test "Sends according to pickup day settings" do

@@ -23,10 +23,6 @@ class ActiveSupport::TimeWithZone
     self.wday == Setting.pickup_day1_deadline_wday
   end
 
-  def too_early?
-    self.hour < 7 # before 7am
-  end
-
   def cweek
     self.to_datetime.cweek
   end

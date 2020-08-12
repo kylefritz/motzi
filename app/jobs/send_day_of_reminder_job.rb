@@ -2,7 +2,8 @@ class SendDayOfReminderJob < ApplicationJob
   queue_as :default
 
   def perform(*args)
-    return if Time.zone.now.too_early?
+    return unless (7..11).include?(Time.zone.now.hour) # 7a-11a
+
     if Time.zone.now.day1_pickup?
       send_reminders_for_day(true)
     end
