@@ -15,6 +15,13 @@ export function getSettingsContext() {
   return ctx || {};
 }
 
+// like getSettingsContext but just for prices & doesn't warn
+export function getPriceContext() {
+  const ctx = useContext(SettingsContext);
+  const { showCredits = false } = ctx || {};
+  return { showCredits };
+}
+
 export function getDayContext() {
   const ctx = useContext(DayContext);
   if (ctx !== undefined) {

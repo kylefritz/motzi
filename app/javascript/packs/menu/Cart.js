@@ -3,7 +3,7 @@ import _ from "lodash";
 import { useState } from "react";
 
 import Price from "./Price";
-import { getDayContext } from "./Contexts";
+import { getDayContext, getPriceContext } from "./Contexts";
 
 function DaysCart({ menu: { items }, cart, rmCartItem }) {
   const menuItemsById = _.keyBy(items, ({ id }) => id);
@@ -101,9 +101,14 @@ function Days({ menu, cart, rmCartItem, skip }) {
 
 function Total({ cart, menu: { items }, stripeChargeAmount }) {
   const { price, credits } = cartTotal({ cart, items });
+  const { showCredits } = getPriceContext();
+  const showPrices = !showCredits;
   return (
     <div>
-      <h6>Total</h6>
+      <h6>
+        Total
+        {showPrices && <small className="ml-3">includes taxes & fees</small>}
+      </h6>
       <div className="row">
         <div className="col-1" />
         <div className="col">
