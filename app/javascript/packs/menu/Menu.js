@@ -46,9 +46,9 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
     });
   };
 
-  const { subscriberNote, isCurrent } = menu;
-  const { day2Closed: menuClosed } = getDayContext();
-  if (user.credits < 1) {
+  // if editing an order, "give back" credits from the order
+  const userCredits = user.credits + orderCredits({ order, items: menu.items });
+  if (userCredits < 1) {
     // Must buy credits!
     return (
       <>
@@ -68,14 +68,15 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
     );
   }
 
-  const insufficientCredits =
-    total.credits - orderCredits({ order, items: menu.items }) > user.credits;
+  const { subscriberNote, isCurrent } = menu;
+  const { day2Closed: menuClosed } = getDayContext();
+  const insufficientCredits = total.credits > userCredits;
   return (
     <>
       <Subscription user={user} />
 
       {/* if low, show nag to buy credits*/}
-      {(user.credits < 4 || insufficientCredits) && <BuyCredits user={user} />}
+      {(userCredits < 4 || insufficientCredits) && <BuyCredits user={user} />}
 
       <Title menu={menu} />
 
