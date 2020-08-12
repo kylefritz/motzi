@@ -37,9 +37,10 @@ function DaysCart({ menu: { items }, cart, rmCartItem }) {
 
 function Days({ menu, cart, rmCartItem, skip }) {
   const { day1, day1Closed, day2, day2Closed } = getDayContext();
+  const { showDay2 } = menu;
 
-  const thurs = cart.filter(({ day }) => day === day1);
-  const sat = cart.filter(({ day }) => day === day2);
+  const day1Items = cart.filter(({ day }) => day === day1);
+  const day2Items = cart.filter(({ day }) => day === day2);
   const payItForward = cart.filter(({ itemId }) => itemId === -1);
 
   if (skip) {
@@ -51,7 +52,7 @@ function Days({ menu, cart, rmCartItem, skip }) {
   }
 
   const sections = [];
-  if (thurs.length) {
+  if (day1Items.length) {
     sections.push(
       <div key="day1">
         <h6>{day1}</h6>
@@ -59,14 +60,14 @@ function Days({ menu, cart, rmCartItem, skip }) {
           {...{
             menu,
             rmCartItem: !day1Closed && rmCartItem,
-            cart: thurs,
+            cart: day1Items,
           }}
         />
       </div>
     );
   }
 
-  if (sat.length) {
+  if (showDay2 && day2Items.length) {
     sections.push(
       <div key="day2">
         <h6>{day2}</h6>
@@ -74,7 +75,7 @@ function Days({ menu, cart, rmCartItem, skip }) {
           {...{
             menu,
             rmCartItem: !day2Closed && rmCartItem,
-            cart: sat,
+            cart: day2Items,
           }}
         />
       </div>

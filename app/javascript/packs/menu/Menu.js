@@ -59,7 +59,11 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
         <BuyCredits user={user} />
 
         <h5 className="mt-5">Preview of current menu</h5>
-        <Items items={subscriberItems} disabled={true} />
+        <Items
+          items={subscriberItems}
+          showDay2={menu.showDay2}
+          disabled={true}
+        />
       </>
     );
   }
@@ -96,7 +100,11 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
         </>
       ) : (
         <>
-          <Items items={subscriberItems} onAddToCart={addToCart} />
+          <Items
+            items={subscriberItems}
+            onAddToCart={addToCart}
+            showDay2={menu.showDay2}
+          />
 
           <SkipThisWeek onSkip={handleSkip} disabled={menuClosed} />
           {payItForward && (

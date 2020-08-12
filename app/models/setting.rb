@@ -7,6 +7,9 @@ class Setting < RailsSettings::Base
   field :automated_reminder_emails, default: true, type: :boolean
   field :pickup_day1, default: "Tuesday", type: :string
   field :pickup_day2, default: "Thursday", type: :string
+  field :show_day2, default: true, type: :boolean
+  field :leadtime_days, default: 1.125, type: :float
+  field :reminder_hours, default: 3, type: :float
   field :pickup_instructions, type: :string
   field :shop_id, default: ENV.fetch("SHOP_ID", "motzi"), readonly: true
   field :credit_purchase_note, type: :string
@@ -27,21 +30,6 @@ class Setting < RailsSettings::Base
   end
   def self.pickup_day2_wday
     Date::DAYS_INTO_WEEK[Setting.pickup_day2.downcase.to_sym]
-  end
-  def self.pickup_day1_deadline_wday
-    self.pickup_day1_wday - 2
-  end
-  def self.pickup_day2_deadline_wday
-    self.pickup_day2_wday - 2
-  end
-  def self.pickup_day1_deadline_day
-    day_from_wday(self.pickup_day1_deadline_wday)
-  end
-  def self.pickup_day2_deadline_day
-    day_from_wday(self.pickup_day2_deadline_wday)
-  end
-  private_class_method def self.day_from_wday(wday)
-    Date::DAYS_INTO_WEEK.invert[wday].to_s.capitalize
   end
 
   def self.pickup_instructions_html

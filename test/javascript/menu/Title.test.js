@@ -37,7 +37,13 @@ function makeTitle() {
         day2DeadlineDay: "Monday",
       }}
     >
-      <Title menu={{ name: "Week 6: toast" }} />
+      <Title
+        menu={{
+          name: "Week 6: toast",
+          orderingDeadlineText:
+            "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
+        }}
+      />
     </DayContext.Provider>
   );
 }

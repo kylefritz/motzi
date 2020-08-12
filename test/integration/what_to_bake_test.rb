@@ -24,6 +24,14 @@ class WhatToBakeTest < ActionDispatch::IntegrationTest
     assert_el_count 2, '#what-to-bake-day2 .breads tbody tr', 'bread for ljf'
   end
 
+  test "dashboard show_day2=false" do
+    Setting.show_day2 = false
+    get '/admin/dashboard'
+    assert_response :success
+    assert_el_count 1, '#what-to-bake-day1'
+    assert_el_count 0, '#what-to-bake-day2'
+  end
+
   test "day1 pickup list" do
     get "/admin/menus/pickup_day1"
     assert_response :success

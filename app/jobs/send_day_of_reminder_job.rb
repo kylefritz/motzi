@@ -19,7 +19,7 @@ class SendDayOfReminderJob < ApplicationJob
 
     already_reminded = Set[*menu.messages.where(mailer: "ReminderMailer##{mailer}").pluck(:user_id)]
 
-    Menu.current.orders.map do |order|
+    menu.orders.find_each do |order|
       next if already_reminded.include?(order.user_id)
 
       order_items_for_day = order.order_items.send(day1_pickup ? :day1_pickup : :day2_pickup)

@@ -42,7 +42,7 @@ class ReminderMailerTest < ActionMailer::TestCase
     assert_equal [@user.email], @email.to
     assert_includes @email.subject, 'Make your selection soon'
     assert_in_email @menu.name
-    assert_in_email day_to_order_by_text
+    assert_in_email ordering_deadline_text
   end
   private
 

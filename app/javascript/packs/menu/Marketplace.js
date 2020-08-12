@@ -77,6 +77,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
         items={marketplaceItems}
         onAddToCart={handleAddToCart}
         disabled={disabled}
+        showDay2={menu.showDay2}
       />
       {payItForward && (
         <PayItForward

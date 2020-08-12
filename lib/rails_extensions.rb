@@ -19,10 +19,6 @@ class ActiveSupport::TimeWithZone
     self.wday == Setting.pickup_day2_wday
   end
 
-  def reminder_day?
-    self.wday == Setting.pickup_day1_deadline_wday
-  end
-
   def cweek
     self.to_datetime.cweek
   end

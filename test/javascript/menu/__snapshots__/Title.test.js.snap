@@ -5,6 +5,7 @@ exports[`After deadline: ordering close 1`] = `
   menu={
     Object {
       "name": "Week 6: toast",
+      "orderingDeadlineText": "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
     }
   }
 >
@@ -27,21 +28,16 @@ exports[`After deadline: ordering close 1`] = `
       menu={
         Object {
           "name": "Week 6: toast",
+          "orderingDeadlineText": "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
         }
       }
     >
-      Order by 9pm 
-      Sunday
-       for 
-      Tuesday
-       pickup 
-      <br />
-      or 9pm
+      Order by 
+      9:00 pm Tuesday for Thursday pickup
        
-      Monday
-       for 
-      Wednesday
-       pickup.
+      <br />
+      or 
+      9:00 pm Thurs for Sat pickup
     </When>
   </div>
 </Title>
@@ -52,6 +48,7 @@ exports[`Before deadline: small warning 1`] = `
   menu={
     Object {
       "name": "Week 6: toast",
+      "orderingDeadlineText": "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
     }
   }
 >
@@ -69,20 +66,15 @@ exports[`Before deadline: small warning 1`] = `
         menu={
           Object {
             "name": "Week 6: toast",
+            "orderingDeadlineText": "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
           }
         }
       >
-        Order by 9pm 
-        Sunday
-         for 
-        Tuesday
-         pickup 
-        or 9pm
+        Order by 
+        9:00 pm Tuesday for Thursday pickup
          
-        Monday
-         for 
-        Wednesday
-         pickup.
+        or 
+        9:00 pm Thurs for Sat pickup
       </When>
     </small>
   </div>

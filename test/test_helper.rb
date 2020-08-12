@@ -24,9 +24,9 @@ class ActiveSupport::TestCase
   end
 
   EMAIL_MODEL_COUNTS = ['ApplicationMailer.deliveries.count', 'Ahoy::Message.count']
-  def assert_email_sent(num_emails=1, &block)
+  def assert_email_sent(num_emails=1, msg="emails delivered & audited in ahoy", &block)
     perform_enqueued_jobs do
-      assert_difference(EMAIL_MODEL_COUNTS, num_emails, 'emails delivered & audited in ahoy') do
+      assert_difference(EMAIL_MODEL_COUNTS, num_emails, msg) do
         block.call
       end
     end

@@ -60,6 +60,6 @@ class Menu < ApplicationRecord
 
   private
   def compute_deadline(wday)
-    Time.zone.from_week_id(week_id).beginning_of_day + ((wday - 2) % 7).days + 12.hours + 9.hours - 1.second
+    Time.zone.from_week_id(week_id).beginning_of_day + ((wday - Setting.leadtime_days.to_f) % 7).days
   end
 end

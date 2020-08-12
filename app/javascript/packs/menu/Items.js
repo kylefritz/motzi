@@ -25,17 +25,13 @@ export function DayButton({
   day,
   btn,
   isPastDeadline,
-  deadlineDay,
   remaining,
   onSetDay,
+  orderingDeadlineText,
 }) {
   if (remaining < 1 || isPastDeadline) {
     const [short, long, title] = isPastDeadline
-      ? [
-          `Closed`,
-          `Ordering closed for ${shortDay(day)}`,
-          `Order by 9pm ${deadlineDay} for ${day} pickup.`,
-        ]
+      ? [`Closed`, `Ordering closed for ${shortDay(day)}`, orderingDeadlineText]
       : ["Sold Out", `${shortDay(day)} Sold Out`, undefined];
 
     return (
@@ -77,31 +73,23 @@ function DayButtons({
   day2: enableDay2,
   remainingDay1,
   remainingDay2,
+  showDay2 = true,
 }) {
-  const {
-    day1,
-    day1Closed,
-    day1DeadlineDay,
-    day2,
-    day2Closed,
-    day2DeadlineDay,
-  } = getDayContext();
+  const { day1, day1Closed, day2, day2Closed } = getDayContext();
   const days = [];
   if (enableDay1) {
     days.push({
       day: day1,
       btn: "secondary",
       isPastDeadline: day1Closed,
-      deadlineDay: day1DeadlineDay,
       remaining: remainingDay1,
     });
   }
-  if (enableDay2) {
+  if (showDay2 && enableDay2) {
     days.push({
       day: day2,
       btn: "primary",
       isPastDeadline: day2Closed,
-      deadlineDay: day2DeadlineDay,
       remaining: remainingDay2,
     });
   }
@@ -199,13 +187,18 @@ export function Item(props) {
   );
 }
 
-export default function Items({ items, onAddToCart: handleAddToCart }) {
+export default function Items({
+  items,
+  onAddToCart: handleAddToCart,
+  showDay2 = true,
+}) {
   return (
     <div className="row mt-2">
       {items.map((i) => (
         <Item
           key={i.id}
           {...i}
+          showDay2={showDay2}
           onChange={
             handleAddToCart &&
             (({ quantity, day }) => handleAddToCart({ ...i, quantity, day }))
