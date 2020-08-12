@@ -14,7 +14,7 @@ namespace :s3 do
     bar = ProgressBar.new(objects.count)
     objects.each do |object|
       storage_path = Rails.root.join("storage/#{object.key[0..1]}/#{object.key[2..3]}")
-      storage_path.mkpathw
+      storage_path.mkpath
       s3.get_object(response_target: storage_path.join(object.key),
                     bucket: bucket,
                     key: object.key)
