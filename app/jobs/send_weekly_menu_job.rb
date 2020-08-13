@@ -1,8 +1,8 @@
 class SendWeeklyMenuJob < ApplicationJob
   queue_as :default
 
-  def self.users_to_email_count(menu=nil)
-    users_to_email(menu || Menu.current).count
+  def self.users_to_email_count(menu)
+    users_to_email(menu).count
   end
 
   def perform(*args)

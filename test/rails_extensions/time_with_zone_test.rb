@@ -11,6 +11,7 @@ class TimeWithZoneTest < ActiveSupport::TestCase
     time = Time.zone.from_week_id("19w46")
     assert_equal time, Time.zone.parse("2019-11-10 9:00 AM EST")
     assert_equal time.week_id, "19w46"
+    assert_equal time.prev_week_id, "19w45"
 
     assert_equal Time.zone.parse("2019-11-10 8:59 AM EST").week_id, "19w45"
     assert_equal Time.zone.parse("2019-11-17 9:01 AM EST").week_id, "19w47"

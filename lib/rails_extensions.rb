@@ -32,6 +32,10 @@ class ActiveSupport::TimeWithZone
     wk = date_time.cweek.to_s.rjust(2, "0")
     [yr, wk].join("w")
   end
+
+  def prev_week_id
+    (self - 1.week).week_id
+  end
 end
 
 class ActiveSupport::TimeZone
