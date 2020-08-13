@@ -10,8 +10,11 @@ ActiveAdmin.register Order do
   scope :skip
   scope :not_skip
 
-  preserve_default_filters!
-  remove_filter :ahoy_visit, :versions, :order_items
+  filter :user_id_equals
+  filter :comments
+  filter :menu
+  filter :items
+  filter :stripe_charge_amount
 
   index do
     selectable_column

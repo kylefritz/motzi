@@ -280,7 +280,7 @@ ActiveAdmin.setup do |config|
   # Pagination is enabled by default for all resources.
   # You can control the default per page count for all resources here.
   #
-  config.default_per_page = 500
+  config.default_per_page = 250
   #
   # You can control the max per page count too.
   #
@@ -302,17 +302,15 @@ ActiveAdmin.setup do |config|
   #
   # config.include_default_association_filters = true
 
-  # config.maximum_association_filter_arity = 256 # default value of :unlimited will change to 256 in a future version
-  # config.filter_columns_for_large_association, [
-  #    :display_name,
-  #    :full_name,
-  #    :name,
-  #    :username,
-  #    :login,
-  #    :title,
-  #    :email,
-  #  ]
-  # config.filter_method_for_large_association, '_starts_with'
+  config.maximum_association_filter_arity = 256 # default value of :unlimited will change to 256 in a future version
+  config.filter_columns_for_large_association = [
+     :first_name,
+     :last_name,
+     :name,
+     :email,
+     :id,
+  ]
+  config.filter_method_for_large_association = '_starts_with'
 
   # == Head
   #

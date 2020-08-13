@@ -5,8 +5,11 @@ ActiveAdmin.register Ahoy::Message, as: "Email" do
   scope :all, default: true
   scope("current menu") { |scope| scope.where(menu_id: Setting.menu_id) }
 
-  preserve_default_filters!
-  remove_filter :token
+  filter :menu
+  filter :to
+  filter :user_id_equals
+  filter :subject
+  filter :sent_at
 
   index do
     selectable_column

@@ -6,8 +6,11 @@ ActiveAdmin.register Item do
 
   actions :all, except: [:destroy] # deleting items can orphan orders, etc
 
-  preserve_default_filters!
-  remove_filter :versions, :image_attachment, :image_blob, :menu_items
+  filter :menus
+  filter :name
+  filter :description
+  filter :price
+  filter :credits
 
   index do
     id_column
@@ -49,6 +52,8 @@ ActiveAdmin.register Item do
         end
       end
     end
+
+    active_admin_comments
   end
 
   form partial: 'form'

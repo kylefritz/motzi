@@ -2,9 +2,10 @@ ActiveAdmin.register CreditItem do
   permit_params :memo, :good_for_weeks, :quantity, :user, :user_id
   includes :user
 
-  preserve_default_filters!
-  remove_filter :versions
-
+  filter :user_id_equals
+  filter :memo
+  filter :quantity
+  filter :stripe_charge_amount
 
   index do
     selectable_column

@@ -3,12 +3,13 @@ ActiveAdmin.register User do
     :subscriber, :opt_in, :breads_per_week, :phone
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'
 
-  # search filters on index page
-  preserve_default_filters!
-  remove_filter :credit_items, :messages, :orders, :order_items, :versions, :visits, \
-    :created_at, :current_sign_in_at, :current_sign_in_ip, :encrypted_password, \
-    :last_sign_in_at, :last_sign_in_ip, :remember_created_at, :reset_password_sent_at, \
-    :reset_password_token, :sign_in_count, :updated_at
+  filter :first_name
+  filter :last_name
+  filter :email
+  filter :additional_email
+  filter :breads_per_week
+  filter :phone
+  filter :opt_in
 
   scope :all, default: true
   scope "Weekly", :must_order_weekly

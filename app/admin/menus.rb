@@ -5,8 +5,12 @@ ActiveAdmin.register Menu do
 
   actions :all, except: [:destroy] # deleting menus can orphan orders, etc
 
-  preserve_default_filters!
-  remove_filter :menu_items, :orders, :messages, :versions
+  filter :items
+  filter :name
+  filter :subscriber_note
+  filter :week_id
+  filter :menu_note
+  filter :day_of_note
 
   scope :all, default: true
   scope("current menu") { |scope| scope.where(id: Setting.menu_id) }
