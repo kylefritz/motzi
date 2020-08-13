@@ -49,4 +49,10 @@ class ActiveSupport::TestCase
       block.call
     end
   end
+
+  def travel_to_week_id(week_id, &block)
+    travel_to(Time.zone.from_week_id(week_id)) do
+      block.call
+    end
+  end
 end
