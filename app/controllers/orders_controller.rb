@@ -40,7 +40,7 @@ class OrdersController < ApplicationController
         end
       end
       params.fetch(:cart).each do |cart_item_params|
-        day1_pickup = Setting.pickup_day1.casecmp?(cart_item_params[:day]).presence || true # default to day1
+        day1_pickup = !(Setting.pickup_day2.casecmp?(cart_item_params[:day])) # default to day 1
         order.order_items.create!(cart_item_params.permit(:item_id, :quantity).merge(day1_pickup: day1_pickup))
       end
 
