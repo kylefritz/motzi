@@ -10,6 +10,26 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     before_deadline do
       assert_order_placed users(:ljf).hashid
     end
+    order = Order.last
+    order_items = order.order_items
+    assert_equal 1, order_items.size
+
+    assert order_items.first.day1_pickup, "defaults to day1"
+  end
+
+  test "order day1 vs day2" do
+    before_deadline do
+      post "/orders.json", params: different_order_attrs(users(:ljf).hashid), as: :json
+    end
+    assert_response :success
+
+    order = Order.last
+    order_items = order.order_items
+    assert_equal 2, order_items.size
+
+    day1, day2 = order_items
+    assert day1.day1_pickup, "day1 item"
+    refute day2.day1_pickup, "day2 item"
   end
 
   test "hashid_user cant place empty order" do
@@ -114,7 +134,10 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
   def different_order_attrs(hashid=nil)
     item_id = items(:rye).id
-    {comment: 'different', cart: [{item_id: item_id, quantity: 3}]}.tap do |attrs|
+    {comment: 'different', cart: [
+      { item_id: item_id, quantity: 3, day: Setting.pickup_day1 },
+      { item_id: item_id, quantity: 3, day: Setting.pickup_day2 }
+    ]}.tap do |attrs|
       attrs[:uid] = hashid if hashid
     end
   end
