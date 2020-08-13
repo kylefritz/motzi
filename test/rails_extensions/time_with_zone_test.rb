@@ -3,7 +3,7 @@ require 'test_helper'
 class TimeWithZoneTest < ActiveSupport::TestCase
   test "week_id" do
     with_time do
-      assert_equal Time.zone.now.week_id, "19w46"
+      assert_equal Time.zone.now.week_id, '19w46'
     end
   end
 
@@ -54,7 +54,7 @@ class TimeWithZoneTest < ActiveSupport::TestCase
   def assert_week_id(date, week_id)
     datetime = DateTime.parse("#{date} 9:00 AM EST")
     assert datetime.sunday?
-    assert_equal Time.zone.from_week_id(week_id), datetime
+    assert_equal datetime, Time.zone.from_week_id(week_id)
   end
 
   def with_time(&block)

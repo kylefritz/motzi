@@ -50,7 +50,7 @@ class Menu < ApplicationRecord
 
   def publish_to_subscribers!
     unless can_publish?
-      throw "can only publish_to_subscribers for current week's menu or next week's menu"
+      throw "can only publish_to_subscribers for current week's menu or future week's menu"
     end
     self.make_current!
     self.touch :emailed_at # audit email was sent

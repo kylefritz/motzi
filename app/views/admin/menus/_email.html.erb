@@ -1,11 +1,14 @@
+<!-- has the menu been emailed yet -->
+<p>
+  <%- if menu.emailed_at.present? %>
+    Emailed to subscribers <strong title="<%=menu.emailed_at.to_s(:long) %>"><%= time_ago_in_words(menu.emailed_at) %></strong> ago
+  <% else %>
+    Has not been emailed to subscribers.
+  <% end %>
+</p>
+
+<!-- can we email the menu now? -->
 <%- if menu.can_publish? %>
-  <p>
-    <% if menu.emailed_at.present? %>
-      Emailed to subscribers <strong title="<%=menu.emailed_at.to_s(:long) %>"><%= time_ago_in_words(menu.emailed_at) %></strong> ago
-    <% else %>
-      Has not been emailed to subscribers.
-    <% end %>
-  </p>
   <%- if (num_to_email = SendWeeklyMenuJob.users_to_email_count(menu)) > 0 %>
     <% button_text = menu.current? ? "Email to #{num_to_email} subscribers, who have not recieved it" : "Make menu \"current\" & email to #{num_to_email} subscribers" %>
     <%= button_to(button_text, email_menu_admin_menu_path(menu), { method: :post, data: {confirm: "Email menu to #{num_to_email} subscribers?"} })%>

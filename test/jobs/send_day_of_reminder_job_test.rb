@@ -110,7 +110,7 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
       end
     end
     if num_emails > 0
-      assert_match /ReminderMailer#day_of_email/, Ahoy::Message.last.mailer, "sent by right mailer action"
+      assert_match /ReminderMailer#day_of_email/, Ahoy::Message.last.mailer, 'sent by right mailer action'
     end
   end
 end
