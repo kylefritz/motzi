@@ -1,7 +1,8 @@
 class SendHaventOrderedReminderJob < ApplicationJob
 
   def perform(*args)
-    menu = Menu.current
+    menu = Menu.for_current_week_id
+    return if menu.nil?
 
     return unless SendHaventOrderedReminderJob.time_for_reminder_email?(menu)
 

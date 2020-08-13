@@ -13,19 +13,7 @@ class SendWeeklyMenuJobTest < ActiveJob::TestCase
   end
 
   def assert_menu_emailed(num_emails, day, time, msg=nil)
-    days = {
-      sun: '11-10',
-      mon: '11-11',
-      tues: '11-12',
-      wed: '11-13',
-      thur: '11-14'
-    }
-    assert days.include?(day), 'pick a known day'
-
-    datetime_str = "2019-#{days[day]} #{time} EST"
-    date_time = DateTime.parse(datetime_str)
-
-    travel_to(date_time) do
+    travel_to_day_time(day, time) do
       assert_email_sent(num_emails) do
         SendWeeklyMenuJob.perform_now
       end

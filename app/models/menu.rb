@@ -10,6 +10,9 @@ class Menu < ApplicationRecord
   def self.current
     Menu.find(Setting.menu_id)
   end
+  def self.for_current_week_id
+    Menu.find_by(week_id: Time.zone.now.week_id)
+  end
 
   def make_current!
     Setting.menu_id = self.id
@@ -17,6 +20,14 @@ class Menu < ApplicationRecord
 
   def current?
     self.id == Setting.menu_id
+  end
+
+  def for_current_week_id?
+    self.week_id == Time.zone.now.week_id
+  end
+
+  def can_publish?
+    self.week_id >= Time.zone.now.week_id
   end
 
   def item_counts
@@ -38,9 +49,12 @@ class Menu < ApplicationRecord
   end
 
   def publish_to_subscribers!
+    unless can_publish?
+      throw "can only publish_to_subscribers for current week's menu or future week's menu"
+    end
     self.make_current!
     self.touch :emailed_at # audit email was sent
-    SendWeeklyMenuJob.users_to_email_count.tap do
+    SendWeeklyMenuJob.users_to_email_count(self).tap do
       SendWeeklyMenuJob.perform_later
     end
   end

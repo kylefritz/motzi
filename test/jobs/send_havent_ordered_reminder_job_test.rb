@@ -69,6 +69,17 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
     refute_reminders_emailed(:sun, '7:01 PM', 'dont send the second time')
   end
 
+  test "wrong week_id" do
+    Menu.current.update!(week_id: "19w44")
+    refute_reminders_emailed(:sun, "7:00 PM", "send on sunday night")
+
+    Menu.current.update!(week_id: "19w47")
+    refute_reminders_emailed(:sun, "7:00 PM", "send on sunday night")
+
+    Menu.current.update!(week_id: "19w46")
+    assert_reminders_emailed(@num_to_remind, :sun, "7:00 PM", "send on sunday night")
+  end
+
   private
   def refute_reminders_emailed(day, time, msg)
     assert_reminders_emailed(0, day, time, msg)
@@ -76,31 +87,12 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
 
   def assert_reminders_emailed(num_emails, day, time, msg)
     travel_to_day_time(day, time) do
-
       assert_email_sent(num_emails, msg) do
         SendHaventOrderedReminderJob.perform_now
       end
     end
     if num_emails > 0
       assert_equal 'ReminderMailer#havent_ordered_email', Ahoy::Message.last.mailer, 'sent by right mailer action'
-    end
-  end
-
-  def travel_to_day_time(day, time, &block)
-    days = {sun: "11-10",
-            mon: "11-11",
-            tues: "11-12",
-            wed: "11-13",
-            thurs: "11-14",
-            fri: "11-15",
-            sat: "11-16"}
-    assert days.include?(day), "pick a known day"
-
-    datetime_str = "2019-#{days[day]} #{time} EST"
-    date_time = DateTime.parse(datetime_str)
-
-    travel_to(date_time) do
-      block.call
     end
   end
 end

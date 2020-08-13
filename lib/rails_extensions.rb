@@ -24,7 +24,17 @@ class ActiveSupport::TimeWithZone
   end
 
   def week_id
-    "#{self.year.to_s[2..]}w#{self.cweek.to_s.rjust(2, "0")}"
+    # nudge forward into next week if past 9a on sunday
+    wk_nudge = self.wday == 0 && self.hour >= 9 ? 1 :0
+
+    date_time = self + wk_nudge.days
+    yr = date_time.end_of_week.year.to_s[2..]
+    wk = date_time.cweek.to_s.rjust(2, "0")
+    [yr, wk].join("w")
+  end
+
+  def prev_week_id
+    (self - 1.week).week_id
   end
 end
 

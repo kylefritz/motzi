@@ -14,9 +14,10 @@ class SendDayOfReminderJob < ApplicationJob
   end
 
   def send_reminders_for_day(day1_pickup)
-    mailer = "day_of_email_day#{day1_pickup ? 1 : 2}"
-    menu = Menu.current
+    menu = Menu.for_current_week_id
+    return if menu.nil?
 
+    mailer = "day_of_email_day#{day1_pickup ? 1 : 2}"
     already_reminded = Set[*menu.messages.where(mailer: "ReminderMailer##{mailer}").pluck(:user_id)]
 
     menu.orders.find_each do |order|

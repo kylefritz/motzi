@@ -49,4 +49,28 @@ class ActiveSupport::TestCase
       block.call
     end
   end
+
+  def travel_to_week_id(week_id, &block)
+    travel_to(Time.zone.from_week_id(week_id)) do
+      block.call
+    end
+  end
+
+  def travel_to_day_time(day, time, &block)
+    days = { sun: "11-10",
+            mon: "11-11",
+            tues: "11-12",
+            wed: "11-13",
+            thurs: "11-14",
+            fri: "11-15",
+            sat: "11-16" }
+    assert days.include?(day), "pick a known day"
+
+    datetime_str = "2019-#{days[day]} #{time} EST"
+    date_time = DateTime.parse(datetime_str)
+
+    travel_to(date_time) do
+      block.call
+    end
+  end
 end
