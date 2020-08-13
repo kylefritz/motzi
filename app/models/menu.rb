@@ -74,6 +74,7 @@ class Menu < ApplicationRecord
 
   private
   def compute_deadline(wday)
-    Time.zone.from_week_id(week_id).beginning_of_day + ((wday - Setting.leadtime_days.to_f) % 7).days
+    # from_week_id(week_id).beginning_of_day is always sunday
+    Time.zone.from_week_id(week_id).beginning_of_day + wday.days - Setting.leadtime_hours.hours
   end
 end

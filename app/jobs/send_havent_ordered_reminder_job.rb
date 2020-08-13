@@ -18,7 +18,7 @@ class SendHaventOrderedReminderJob < ApplicationJob
   end
 
   def self.inside_reminder_window?(deadline)
-    reminder_start = deadline - Setting.reminder_hours.to_f.hours - 1.minute
+    reminder_start = deadline - Setting.reminder_hours.hours - 1.minute
     Time.zone.now.between?(reminder_start, deadline)
   end
 

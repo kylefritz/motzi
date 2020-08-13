@@ -8,8 +8,8 @@ class Setting < RailsSettings::Base
   field :pickup_day1, default: "Tuesday", type: :string
   field :pickup_day2, default: "Thursday", type: :string
   field :show_day2, default: true, type: :boolean
-  field :leadtime_days, default: 1.125, type: :float
-  field :reminder_hours, default: 3, type: :float
+  field :leadtime_hours, default: 27, type: :integer
+  field :reminder_hours, default: 3, type: :integer
   field :pickup_instructions, type: :string
   field :shop_id, default: ENV.fetch("SHOP_ID", "motzi"), readonly: true
   field :credit_purchase_note, type: :string
