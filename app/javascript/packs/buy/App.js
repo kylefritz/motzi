@@ -77,7 +77,7 @@ export default function Buy({ user: passedUser }) {
     }
   };
   const totalPrice = applyTip(price, tip);
-  const handleCardToken = ({ token }) => {
+  const handleStripeToken = ({ token }) => {
     const data = {
       uid: user.hashid,
       token: token.id,
@@ -107,13 +107,6 @@ export default function Buy({ user: passedUser }) {
         Sentry.captureException(error);
       })
       .then(() => setSubmitting(false));
-  };
-
-  const handlePaymentResult = ({ token }) => {
-    // with payment request, the price sent to stripe
-    console.error("paymentResult token=", token);
-
-    // TODO: send completed payment request to rails
   };
 
   if (receipt) {
@@ -181,8 +174,7 @@ export default function Buy({ user: passedUser }) {
             credits={credits}
             price={totalPrice}
             stripeApiKey={gon.stripeApiKey}
-            onCardToken={handleCardToken}
-            onPaymentResult={handlePaymentResult}
+            onToken={handleStripeToken}
             submitting={submitting}
           />
         </>

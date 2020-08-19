@@ -47,7 +47,7 @@ test("checkout", () => {
   menu
     .find("Payment")
     .props()
-    .onCardToken({
+    .onToken({
       token: {
         id: "test_id",
       },

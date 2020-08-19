@@ -30,7 +30,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
   const [tip, setTip] = useState();
 
   const totalPrice = applyTip(price, tip);
-  const handleCardToken = ({ token }) => {
+  const handleStripeToken = ({ token }) => {
     if (_.isEmpty(account.email)) {
       return alert("Enter email!");
     }
@@ -38,7 +38,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
       return alert("Invalid email");
     }
 
-    console.log("handleCardToken", { token, price: totalPrice });
+    console.log("handleStripeToken", { token, price: totalPrice });
     setSubmitting(true);
 
     // send stripe token to rails to complete purchase
@@ -122,7 +122,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
       <Payment
         price={_.isEmpty(cart) ? null : totalPrice}
         stripeApiKey={gon.stripeApiKey}
-        onCardToken={handleCardToken}
+        onToken={handleStripeToken}
         submitting={submitting}
         disabled={disabled}
       />
