@@ -34,7 +34,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     refute_user_created { assert_ordered_emailed(build_order_attrs) }
   end
 
-  test "existing user can pay for order" do
+  test "existing user (with an order) can place marketplace order" do
     order_attrs = build_order_attrs
     order_attrs[:email] = users(:kyle).email
     refute_user_created { assert_ordered_emailed(order_attrs) }
@@ -42,6 +42,21 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     new_order = Order.last
     refute_nil new_order.stripe_charge_id
     refute_nil new_order.stripe_charge_amount
+  end
+
+
+  test "marketplace order does not block existing user from placing subscription order" do
+    kyle = users(:kyle)
+    kyle.orders.delete_all
+    assert_equal 0, kyle.orders.size
+
+    order_attrs = build_order_attrs
+    order_attrs[:email] = users(:kyle).email
+    assert_ordered_emailed(order_attrs)
+
+    get "/menu.json?uid=#{users(:kyle).hashid}"
+    data = JSON.load(@response.body)
+    assert_nil data["order"], "an order in menu json would block you from ordering again"
   end
 
   test "set opt_in" do

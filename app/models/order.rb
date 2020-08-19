@@ -9,6 +9,7 @@ class Order < ApplicationRecord
   scope :not_skip, -> { where("skip is FALSE") }
   scope :skip, -> { where("skip is TRUE") }
   scope :marketplace, -> { where("stripe_charge_amount is not NULL")}
+  scope :subscriber, -> { where("stripe_charge_amount is NULL")}
 
   def self.for_current_menu
     self.for_menu_id(Menu.current.id)
