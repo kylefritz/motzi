@@ -32,7 +32,7 @@ export default class Payment extends React.Component {
       disabled,
     } = this.props;
     return (
-      <>
+      <div className="checkout">
         <StripeProvider apiKey={stripeApiKey}>
           <Elements>
             <WrappedCard
@@ -46,7 +46,7 @@ export default class Payment extends React.Component {
             />
           </Elements>
         </StripeProvider>
-      </>
+      </div>
     );
   }
 }

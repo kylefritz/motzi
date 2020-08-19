@@ -1,8 +1,12 @@
 import React, { useState } from "react";
+import { isFinite } from "lodash";
+import Tip from "./Tip";
 
 export default function PayWhatYouCan({
   price,
   onPricedChanged: handlePriceChanged,
+  tip,
+  onTip,
   disabled,
 }) {
   const [tempPrice, setTempPrice] = useState(null);
@@ -54,6 +58,7 @@ export default function PayWhatYouCan({
           disabled={disabled}
         />
       </div>
+      <Tip {...{ price, tip, onTip }} />
     </>
   );
 }

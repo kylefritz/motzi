@@ -7,6 +7,7 @@ import queryString from "query-string";
 import Choice from "./Choice";
 import Payment from "./Payment";
 import PayWhatYouCan from "./PayWhatYouCan";
+import { applyTip } from "./Tip";
 import { getSettingsContext } from "../menu/Contexts";
 
 export default function Buy({ user: passedUser }) {
@@ -18,6 +19,7 @@ export default function Buy({ user: passedUser }) {
 
   const [credits, setCredits] = useState();
   const [price, setPrice] = useState();
+  const [tip, setTip] = useState();
   const [breadsPerWeek, setBreadsPerWeek] = useState();
   const [user, setUser] = useState(passedUser);
   const [bundles, setBundles] = useState(passedBundles);
@@ -74,20 +76,21 @@ export default function Buy({ user: passedUser }) {
       setPrice(newPrice);
     }
   };
-
+  const totalPrice = applyTip(price, tip);
   const handleCardToken = ({ token }) => {
-    console.log("card token=", token, { credits, price });
+    const data = {
+      uid: user.hashid,
+      token: token.id,
+      price: totalPrice,
+      credits,
+      breadsPerWeek,
+    };
+    console.log("got card token", data);
     setSubmitting(true);
 
     // send stripe token to rails to complete purchase
     axios
-      .post("/credit_items.json", {
-        uid: user.hashid,
-        token: token.id,
-        price,
-        credits,
-        breadsPerWeek,
-      })
+      .post("/credit_items.json", data)
       .then(({ data }) => {
         const { creditItem } = data;
         console.log("bought credits", data);
@@ -167,6 +170,8 @@ export default function Buy({ user: passedUser }) {
               <PayWhatYouCan
                 price={price}
                 onPricedChanged={handlePriceChanged}
+                tip={tip}
+                onTip={setTip}
               />
             </>
           ) : (
@@ -174,7 +179,7 @@ export default function Buy({ user: passedUser }) {
           )}
           <Payment
             credits={credits}
-            price={price}
+            price={totalPrice}
             stripeApiKey={gon.stripeApiKey}
             onCardToken={handleCardToken}
             onPaymentResult={handlePaymentResult}
