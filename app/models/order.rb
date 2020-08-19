@@ -36,7 +36,7 @@ class Order < ApplicationRecord
       ].each do |day_name, day_items|
         next if day_items.empty?
 
-        s << "#{prior_day_had_items ? "; " : ""}#{day_name}: "
+        s << "#{prior_day_had_items ? ". " : ""}#{day_name}: "
 
         prior_day_had_items = true
 
@@ -57,13 +57,13 @@ class Order < ApplicationRecord
 
           is_last = i+1 == day_item_names.size
 
-          s << "#{name}#{is_last ? "" : ", "}"
+          s << "#{name}#{is_last ? "" : "; "}"
         end
 
       end
       unless pay_it_forwards.empty?
         num = pay_it_forwards.map(&:quantity).sum
-        s << "; "
+        s << ". "
         if num > 1
           s << "#{num}x "
         end
