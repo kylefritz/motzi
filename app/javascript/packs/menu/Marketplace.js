@@ -8,6 +8,7 @@ import Account from "./Account";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
 import Payment from "../buy/Payment";
+import { applyTip } from "../buy/Tip";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
 import { getDayContext } from "./Contexts";
 
@@ -26,7 +27,9 @@ export default function Marketplace({ menu, onCreateOrder }) {
   const [comments, setComments] = useState();
   const [account, setAccount] = useState({});
   const [price, setPrice] = useState(total.price);
+  const [tip, setTip] = useState();
 
+  const totalPrice = applyTip(price, tip);
   const handleCardToken = ({ token }) => {
     if (_.isEmpty(account.email)) {
       return alert("Enter email!");
@@ -35,7 +38,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
       return alert("Invalid email");
     }
 
-    console.log("handleCardToken", { token, price });
+    console.log("handleCardToken", { token, price: totalPrice });
     setSubmitting(true);
 
     // send stripe token to rails to complete purchase
@@ -43,7 +46,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
       ...account,
       comments,
       cart,
-      price,
+      price: totalPrice,
       token: token.id,
     }).then(() => setSubmitting(false));
   };
@@ -110,12 +113,14 @@ export default function Marketplace({ menu, onCreateOrder }) {
           price={price}
           onPricedChanged={setPrice}
           disabled={disabled}
+          tip={tip}
+          onTip={setTip}
         />
       ) : (
         <br />
       )}
       <Payment
-        price={_.isEmpty(cart) ? null : price}
+        price={_.isEmpty(cart) ? null : totalPrice}
         stripeApiKey={gon.stripeApiKey}
         onCardToken={handleCardToken}
         submitting={submitting}

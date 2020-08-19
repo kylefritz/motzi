@@ -5,11 +5,8 @@ class CreditItemsController < ApplicationController
   def create
     price = params[:price].to_f.clamp(1, CreditBundle::MAX_PRICE)
     price_cents = (price * 100).to_i
-    credits = params[:credits].to_i.clamp(1, CreditBundle::MAX_CREDITS)
-
-    breads_per_week = params[:breads_per_week].to_f
-    frequency = breads_per_week == 1.0 ? "Weekly" : "Bi-Weekly";
-
+    quantity = params[:credits].to_i.clamp(1, CreditBundle::MAX_CREDITS)
+    bundle = CreditBundle.find_by(credits: quantity)
     begin
       # make stripe change
       charge = Stripe::Charge.create({
@@ -19,10 +16,11 @@ class CreditItemsController < ApplicationController
         metadata: {
           user_id: current_user.id,
           user_name: current_user.name,
-          credits: credits,
-          frequency: frequency,
+          credits: quantity,
+          bundle_name: bundle.try(:name),
+          bundle_description: bundle.try(:description),
         },
-        description: "#{credits}x Subscription Credits, #{frequency}",
+        description: ["#{quantity}x credits", bundle.try(:name_description)].compact.join(" - "),
         receipt_email: current_user.email
       })
 
@@ -30,12 +28,12 @@ class CreditItemsController < ApplicationController
       @credit_item = current_user.credit_items.create!(stripe_charge_id: charge.id,
                                                        stripe_receipt_url: charge.try(:receipt_url),
                                                        stripe_charge_amount: price,
-                                                       memo: "paid $#{price} via Stripe. #{frequency}",
-                                                       quantity: credits,
+                                                       memo: "paid via Stripe $#{price}",
+                                                       quantity: quantity,
                                                        good_for_weeks: 42)
 
       # update user bread_per_week
-      current_user.update(breads_per_week: breads_per_week)
+      current_user.update(breads_per_week: params[:breads_per_week].to_f)
 
       ConfirmationMailer.with(credit_item: @credit_item).credit_email.deliver_later
 

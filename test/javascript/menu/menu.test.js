@@ -47,7 +47,7 @@ test("menu for uid-user, add item to cart", () => {
 
   // uid is assigned and skip is true
   expect(uid).toBe("Dot9gKn9w");
-  expect(skip).toBe(false);
+  expect(skip).toBeFalsy();
   expect(cart).toHaveLength(1);
   expect(cart[0]).toStrictEqual({
     itemId: 3,
@@ -69,7 +69,7 @@ test("orderCredits", () => {
   expect(menu.cartTotal()).toContain("3 credits");
   menu.payItForward().find("button").at(0).simulate("click");
   expect(menu.cartTotal()).toContain("4 credits"); // ok
-  expect(menu.submitOrderBtn().prop("disabled")).toBe(false);
+  expect(menu.submitOrderBtn().prop("disabled")).toBeFalsy();
 
   // add item to cart
   menu.items().at(0).find("button").at(0).simulate("click");
@@ -77,7 +77,7 @@ test("orderCredits", () => {
 
   expect(menu.cartTotal()).toContain("5 credits"); // too many
   expect(menu.submitOrderBtn().text()).toBe("Buy more credits :)");
-  expect(menu.submitOrderBtn().prop("disabled")).toBe(true);
+  expect(menu.submitOrderBtn().prop("disabled")).toBeTruthy();
 });
 
 test("insufficientCredits, no order", () => {
@@ -90,7 +90,7 @@ test("insufficientCredits, no order", () => {
   menu.items().at(0).find("button").at(2).simulate("click");
 
   expect(menu.cartTotal()).toContain("2 credits");
-  expect(menu.submitOrderBtn().prop("disabled")).toBe(true);
+  expect(menu.submitOrderBtn().prop("disabled")).toBeTruthy();
 });
 
 test("nag buy more credits", () => {
@@ -135,5 +135,5 @@ test("Menu pick skip", () => {
 
   // uid is assigned and skip is true
   expect(uid).toBe("Dot9gKn9w");
-  expect(skip).toBe(true);
+  expect(skip).toBeTruthy();
 });

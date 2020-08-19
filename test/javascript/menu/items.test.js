@@ -31,7 +31,7 @@ test("remaining deadline", () => {
   expect(render({ remaining: 4 }).find("button").prop("disabled")).toBe(
     undefined
   );
-  expect(render({ remaining: 0 }).find("button").prop("disabled")).toBe(true);
+  expect(render({ remaining: 0 }).find("button").prop("disabled")).toBeTruthy();
 
   expect(render({ isPastDeadline: true }).find("button").prop("disabled")).toBe(
     true
