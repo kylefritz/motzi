@@ -77,7 +77,7 @@ class MarketplaceWrapper {
   }
   submitOrder() {
     const btn = this.submitOrderBtn();
-    expect(btn.prop("disabled")).toBe(false);
+    expect(btn.prop("disabled")).toBeFalsy();
     btn.simulate("click");
   }
   submittedOrder() {

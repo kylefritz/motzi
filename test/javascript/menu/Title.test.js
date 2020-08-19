@@ -21,10 +21,10 @@ import { __setPastDeadline } from "menu/pastDeadline";
 
 test("__setPastDeadline back and forth in same test", () => {
   __setPastDeadline(false);
-  expect(pastDeadline()).toBe(false);
+  expect(pastDeadline()).toBeFalsy();
 
   __setPastDeadline(true);
-  expect(pastDeadline()).toBe(true);
+  expect(pastDeadline()).toBeTruthy();
 });
 
 function makeTitle() {
