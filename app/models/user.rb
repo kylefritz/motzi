@@ -66,6 +66,10 @@ class User < ApplicationRecord
     menu_orders.last
   end
 
+  def email_list
+    [email, additional_email].filter(&:present?).join(', ')
+  end
+
   #
   # vanity users
   #

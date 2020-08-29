@@ -98,4 +98,10 @@ class UserTest < ActiveSupport::TestCase
     user = User.create!(email: "   #{email.upcase}   ", password: "sadfsfsdf")
     assert_equal email, user.email
   end
+
+  test "email_list" do
+    assert_equal "laura.flamm@gmail.com", users(:ljf).email_list
+    assert_equal "kyle.p.fritz@gmail.com, meghan.l.ames@gmail.com", users(:kyle).email_list
+    assert_equal "jess@gmail.com", users(:jess).email_list
+  end
 end

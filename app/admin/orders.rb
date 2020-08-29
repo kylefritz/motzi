@@ -17,6 +17,17 @@ ActiveAdmin.register Order do
   filter :items
   filter :stripe_charge_amount
 
+  csv do
+    column(:order_id) { |order| order.id }
+    column :menu_id
+    column :user_id
+    column(:user_email) { |order| order.user.email_list }
+    column(:items) { |order| order.item_list }
+    column :stripe_charge_amount
+    column :retail_price
+    column :created_at
+  end
+
   index do
     selectable_column
     id_column
