@@ -8,6 +8,7 @@ class CreditItemsController < ApplicationController
     quantity = params[:credits].to_i.clamp(1, CreditBundle::MAX_CREDITS)
     bundle = CreditBundle.find_by(credits: quantity)
     begin
+      description = ["#{quantity}x credits", bundle.try(:name_description)].compact.join(" - ")
       # make stripe change
       charge = Stripe::Charge.create({
         amount: price_cents,
@@ -20,7 +21,7 @@ class CreditItemsController < ApplicationController
           bundle_name: bundle.try(:name),
           bundle_description: bundle.try(:description),
         },
-        description: ["#{quantity}x credits", bundle.try(:name_description)].compact.join(" - "),
+        description: description,
         receipt_email: current_user.email
       })
 
@@ -28,7 +29,7 @@ class CreditItemsController < ApplicationController
       @credit_item = current_user.credit_items.create!(stripe_charge_id: charge.id,
                                                        stripe_receipt_url: charge.try(:receipt_url),
                                                        stripe_charge_amount: price,
-                                                       memo: "paid via Stripe $#{price}",
+                                                       memo: "#{description}. Paid via Stripe $#{price}.",
                                                        quantity: quantity,
                                                        good_for_weeks: 42)
 
