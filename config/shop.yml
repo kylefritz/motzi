@@ -35,3 +35,13 @@ dutch_courage:
   pay_it_forward: false
   pay_what_you_can: false
   js_tracking: false
+
+pilgrim:
+  name: Pilgrim Bread
+  short_name: Pilgrim Bread
+  marketing_domain: pilgrimbread.com
+  app_domain: pilgrimbread.herokuapp.com
+  email_reply_to: pilgrimbread@gmail.com
+  pay_it_forward: true
+  pay_what_you_can: true
+  js_tracking: false

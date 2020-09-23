@@ -166,18 +166,6 @@ a {
   }
 }
 
-//
-// JINJI overrides
-//
-.jinji {
-  .banner {
-    background-image: image-url("background-chocolate.jpg");
-  }
-  .container {
-    border-top-color: purple;
-  }
-}
-
 // for ErrorBoundary
 .stack-trace {
   white-space: pre;
