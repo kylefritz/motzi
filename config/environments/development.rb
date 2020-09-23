@@ -56,6 +56,11 @@ Rails.application.configure do
   # number of complex assets.
   config.assets.debug = true
 
+  # https://github.com/sass/sassc-rails/issues/102
+  # config.sass.inline_source_maps = true
+  # config.assets.cache_store = :null_store  # Disables the Asset cache
+  config.sass.cache = false  # Disable the SASS compiler cache, _shop.scss.erb stale in cache
+
   # Suppress logger output for asset requests.
   config.assets.quiet = true
 
