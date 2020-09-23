@@ -24,26 +24,32 @@ strong {
   // set the background-image inline
   background-size: auto;
   background-position-x: center;
-  background-position-y: -720px;
+  background-position-y: 0; // frequently overridden
   background-repeat: no-repeat;
   padding-top: 200px;
 }
-.dutch_courage {
+.motzi {
   #background {
-    background-position-y: 0;
+    background-position-y: -720px;
   }
   #logo {
+    height: 100px;
+    margin-bottom: 3rem;
+  }
+}
+.dutch_courage {
+  #logo {
     height: 250px;
-    margin-bottom: 0;
   }
 }
 .jinji {
   #background {
     background-position-y: -120px;
   }
+}
+.pilgrim {
   #logo {
-    height: 200px;
-    margin-bottom: 0;
+    filter: invert(100%);
   }
 }
 
@@ -52,8 +58,7 @@ strong {
   padding-top: 20px;
 }
 #logo {
-  height: 100px;
-  margin-bottom: 3rem;
+  height: 200px;
 }
 .subscriber-info {
   color: $secondary;
