@@ -1,0 +1,20 @@
+with users_without_orders as (
+    select
+        users.id,
+        count(*) as order_count
+    from users
+    join orders on users.id = orders.user_id
+    group by users.id
+)
+
+select
+    users.id
+
+from users
+left join users_without_orders on users.id = users_without_orders.id
+
+where
+    users_without_orders.order_count is null
+    and sign_in_count = 1
+    and (first_name ~ '.*[A-Z][A-Z].*' || last_name ~ '.*[A-Z][A-Z].*')
+order by created_at

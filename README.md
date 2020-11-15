@@ -64,3 +64,9 @@ $ node --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/
 ### Checking emails
 
 visit `/letter_opener` to see emails sent by rails
+
+### spam users
+
+```
+User.find(SqlQuery.new(:spam_user_ids).execute.pluck("id")).each {|u| u.destroy!}
+```
