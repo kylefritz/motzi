@@ -30,6 +30,11 @@ ActiveAdmin.register User do
       link_to("Resend menu email", resend_menu_admin_user_path(params[:id]), { method: :post, data: {confirm: "Resend menu email?"}})
     end
   end
+  action_item :order, only: :show, if: proc{ resource.orders.empty? } do
+    if params[:id].present?
+      link_to("Delete", resend_menu_admin_user_path(params[:id]), { method: :post, data: {confirm: "Delete user #{resource.name}?"}})
+    end
+  end
 
   index do
     id_column
@@ -150,5 +155,14 @@ ActiveAdmin.register User do
                                 author: current_admin_user)
 
     redirect_to collection_path, notice: notice
+  end
+
+  member_action :resend_menu, method: :post do
+    unless resource.orders.empty?
+      redirect_to collection_path, notice: "Can only delete users without orders"
+    end
+
+    resource.destroy!
+    redirect_to collection_path, notice: "User '#{resource.name}' deleted"
   end
 end
