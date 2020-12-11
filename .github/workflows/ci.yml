@@ -12,58 +12,23 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - name: git checkout
-        uses: actions/checkout@v1
-
-      # ruby 2.7.1 w/ cache
-      - name: Ruby cache
-        uses: actions/cache@preview
-        id: cache-ruby
-        with:
-          path: ~/local/rubies
-          key: ruby-2.7.1
-
-      - name: ruby-build 2.7.1
-        uses: clupprich/ruby-build-action@master
-        id: ruby
-        env:
-          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-        with:
-          ruby-version: 2.7.1
-          cache-available: ${{ steps.cache-ruby.outputs.cache-hit == 'true' }}
-
-      - name: yarn install
-        uses: borales/actions-yarn@v2.0.0
-        with:
-          cmd: install
+      - uses: actions/checkout@v2
 
       - name: Install PostgreSQL 11 client
         run: sudo apt-get -yqq install libpq-dev
 
-      - name: Cache Gems
-        uses: actions/cache@v1.1.2
-        with:
-          path: vendor
-          key: ${{ env.RUBY_VERSION }}-kpf-bundler-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ env.RUBY_VERSION }}-kpf-bundler-${{ hashFiles('**/Gemfile.lock') }}
-
-      - name: Increasing the amount of inotify watchers
+      - name: Increase the amount of inotify watchers
         # started getting this error around 20-03-01
         # https://github.com/guard/listen/wiki/Increasing-the-amount-of-inotify-watchers
-        run: |
-          echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+        run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
-      - name: Install & Configure Bundler
-        run: |
-          gem install bundler -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
-          bundle config specific_platform x86_64-linux
-          bundle config --local build.sassc --disable-march-tune-native
-          bundle config path vendor/bundle
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
 
-      - name: Install Gems if Uncached
-        run: |
-          bundle update --jobs 4 --retry 3
+      - uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: install
 
       - name: rails db:setup test test:system
         env:
