@@ -33,11 +33,6 @@ ActiveAdmin.register User do
       link_to("Resend menu email", resend_menu_admin_user_path(params[:id]), { method: :post, data: {confirm: "Resend menu email?"}})
     end
   end
-  action_item :delete, only: :show, if: proc{ resource.orders.empty? } do
-    if params[:id].present?
-      link_to("Delete", admin_user_path(params[:id]), { method: :post, data: {confirm: "Delete user #{resource.name}?"}})
-    end
-  end
 
   index do
     selectable_column
@@ -145,8 +140,6 @@ ActiveAdmin.register User do
     active_admin_comments
   end
 
-  actions :all, except: [:destroy] # deleting users can orphan orders, etc
-
   member_action :resend_menu, method: :post do
     user = resource
     menu = Menu.current
@@ -161,6 +154,7 @@ ActiveAdmin.register User do
     redirect_to collection_path, notice: notice
   end
 
+  # modify the destroy action to disallow deleting users who have orders
   member_action :destroy, method: :post do
     if params[:id] == "batch_action"
       users = User.includes(:orders).where(id: params[:collection_selection])
@@ -176,7 +170,7 @@ ActiveAdmin.register User do
     end
 
     unless resource.orders.empty?
-      return redirect_to collection_path, alert: "Can only users without orders can be deleted"
+      return redirect_to collection_path, alert: "Only users without orders can be deleted"
     end
 
     resource.destroy!
