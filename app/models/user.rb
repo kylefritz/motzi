@@ -16,6 +16,7 @@ class User < ApplicationRecord
   scope :owners, -> {where(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   scope :not_owners, -> {where.not(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   scope :admin, -> {where(is_admin: true)}
+  scope :spam, -> {where(id: SqlQuery.new(:spam_user_ids).execute.pluck("id"))}
   before_validation(on: :create) do
     # if no password, set random passwords on user
     self.password = SecureRandom.base64(16) if self.password.blank?

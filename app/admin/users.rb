@@ -16,8 +16,11 @@ ActiveAdmin.register User do
   scope "Semi-weekly", :every_other_week
   scope :subscribers
   scope :nonsubscribers
+  scope :spam
   scope :owners
   scope :admin
+
+  batch_action :destroy
 
   action_item :order, except: [:index, :new] do
     if params[:id].present?
@@ -25,13 +28,19 @@ ActiveAdmin.register User do
       link_to "Order for", current_menu_url(uid: user.hashid, ignoredeadline: true), target: "_blank"
     end
   end
-  action_item :order, except: [:index, :new] do
+  action_item :resend_menu, except: [:index, :new] do
     if params[:id].present?
       link_to("Resend menu email", resend_menu_admin_user_path(params[:id]), { method: :post, data: {confirm: "Resend menu email?"}})
     end
   end
+  action_item :delete, only: :show, if: proc{ resource.orders.empty? } do
+    if params[:id].present?
+      link_to("Delete", admin_user_path(params[:id]), { method: :post, data: {confirm: "Delete user #{resource.name}?"}})
+    end
+  end
 
   index do
+    selectable_column
     id_column
     column :first_name do |user|
       span user.first_name
@@ -150,5 +159,27 @@ ActiveAdmin.register User do
                                 author: current_admin_user)
 
     redirect_to collection_path, notice: notice
+  end
+
+  member_action :destroy, method: :post do
+    if params[:id] == "batch_action"
+      users = User.includes(:orders).where(id: params[:collection_selection])
+      num_deleted = 0
+
+      users.find_each do |user|
+        if user.orders.empty?
+          user.destroy!
+          num_deleted += 1
+        end
+      end
+      return redirect_to collection_path, notice: "Deleted #{num_deleted} users"
+    end
+
+    unless resource.orders.empty?
+      return redirect_to collection_path, alert: "Can only users without orders can be deleted"
+    end
+
+    resource.destroy!
+    redirect_to collection_path, notice: "User '#{resource.name}' deleted"
   end
 end
