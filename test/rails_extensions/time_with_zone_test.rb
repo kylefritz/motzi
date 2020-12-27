@@ -26,8 +26,29 @@ class TimeWithZoneTest < ActiveSupport::TestCase
     end
   end
 
+  test "late 2020 from_week_id" do
+    assert_equal Time.zone.from_week_id("20w53"), Time.zone.parse("2020-12-27 9:00 AM EST")
+    assert_equal Time.zone.from_week_id("20w53").week_id, "20w53"
+  end
+
+  test "early 2020 from_week_id" do
+    assert_equal Time.zone.from_week_id("20w01"), Time.zone.parse("2019-12-29 9:00 AM EST")
+    assert_equal Time.zone.from_week_id("20w01").week_id, "20w01"
+  end
+
+  test "2019 from_week_id" do
+    assert_equal Time.zone.from_week_id("19w52"), Time.zone.parse("2019-12-22 9:00 AM EST")
+    assert_equal Time.zone.from_week_id("19w52").week_id, "19w52"
+  end
+
+  test "current week_id at end of 2020" do
+    travel_to(DateTime.parse("2020-12-27 10:00 AM EST")) do
+      assert_equal Time.zone.now.week_id, "20w53"
+    end
+  end
+
   test "from_week_id" do
-    week_ids = date_times = [
+    week_ids = [
       "19w51",
       "19w52",
       "20w01",
