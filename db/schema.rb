@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_01_10_235104) do
+ActiveRecord::Schema.define(version: 2021_01_11_010703) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -73,6 +73,7 @@ ActiveRecord::Schema.define(version: 2021_01_10_235104) do
     t.string "token"
     t.datetime "opened_at"
     t.datetime "clicked_at"
+    t.bigint "pickup_day_id"
     t.index ["menu_id"], name: "index_ahoy_messages_on_menu_id"
     t.index ["token"], name: "index_ahoy_messages_on_token"
     t.index ["user_type", "user_id"], name: "index_ahoy_messages_on_user_type_and_user_id"
@@ -230,8 +231,7 @@ ActiveRecord::Schema.define(version: 2021_01_10_235104) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "quantity", default: 1, null: false
-    t.boolean "day1_pickup", default: true, null: false
-    t.bigint "pickup_day_id"
+    t.bigint "pickup_day_id", null: false
     t.index ["item_id"], name: "index_order_items_on_item_id"
     t.index ["order_id"], name: "index_order_items_on_order_id"
   end

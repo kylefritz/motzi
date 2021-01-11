@@ -36,25 +36,28 @@ class OrderTest < ActiveSupport::TestCase
   end
 
   test "item_list" do
-    assert_equal "Tue: Donuts; Rye Five Ways", orders(:kyle_week2).item_list
+    assert_equal "Thu: Donuts; Rye Five Ways", orders(:kyle_week2).item_list
     assert_equal 11, orders(:kyle_week2).retail_price
+    
+    thu, sat = menus(:week1).pickup_days
 
     orders(:ljf_week1).tap do |o|
-      o.order_items.create!(item: items(:pumpkin), quantity: 5, day1_pickup: true)
-      o.order_items.create!(item: items(:pumpkin), quantity: 1, day1_pickup: true)
-      o.order_items.create!(item: items(:classic), quantity: 1, day1_pickup: true)
-      assert_equal "Tue: Classic; 6x Pumpkin. Thu: Classic", o.item_list
+      o.order_items.create!(item: items(:classic), quantity: 1, pickup_day: thu)
+      o.order_items.create!(item: items(:pumpkin), quantity: 5, pickup_day: thu)
+      o.order_items.create!(item: items(:pumpkin), quantity: 1, pickup_day: thu)
+
+      assert_equal "Thu: Classic; 6x Pumpkin. Sat: Classic", o.item_list
 
       assert_equal 40, o.retail_price
     end
 
     Order.create!(menu: menus(:week1), user: users(:kyle)).tap do |o|
-      o.order_items.create!(item: items(:pumpkin), quantity: 1, day1_pickup: true)
-      o.order_items.create!(item: items(:pay_it_forward), quantity: 1, day1_pickup: true)
-      assert_equal "Tue: Pumpkin. Pay it forward", o.item_list
+      o.order_items.create!(item: items(:pumpkin), quantity: 1, pickup_day: thu)
+      o.order_items.create!(item: items(:pay_it_forward), quantity: 1, pickup_day: thu)
+      assert_equal "Thu: Pumpkin. Pay it forward", o.item_list
 
-      o.order_items.create!(item: items(:pay_it_forward), quantity: 2, day1_pickup: true)
-      assert_equal "Tue: Pumpkin. 3x Pay it forward", o.item_list
+      o.order_items.create!(item: items(:pay_it_forward), quantity: 2, pickup_day: thu)
+      assert_equal "Thu: Pumpkin. 3x Pay it forward", o.item_list
     end
   end
 
@@ -62,6 +65,20 @@ class OrderTest < ActiveSupport::TestCase
     assert_equal 0, Order.marketplace.count
     Order.update_all(stripe_charge_amount: 6.0)
     assert_equal Order.count, Order.marketplace.count
+  end
+
+  test "items_for_pickup" do
+    o = orders(:kyle_week1)
+    day1, day2 = o.menu.pickup_days
+    assert_equal 1, o.items_for_pickup(day1).count
+    assert_equal 0, o.items_for_pickup(day2).count
+    
+    o.order_items.create!(item: items(:classic), quantity: 1, pickup_day: day2)
+    o.order_items.create!(item: items(:classic), quantity: 1, pickup_day: day2)
+    assert_equal 2, o.items_for_pickup(day2).count
+
+    o.order_items.create!(item_id: Item::PAY_IT_FORWARD_ID, quantity: 1, pickup_day: day2)
+    assert_equal 2, o.items_for_pickup(day2).count
   end
 
   private

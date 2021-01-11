@@ -3,4 +3,5 @@ class Ahoy::Message < ApplicationRecord
 
   belongs_to :user, polymorphic: true, optional: true
   belongs_to :menu, optional: true
+  belongs_to :pickup_day, optional: true
 end
