@@ -57,13 +57,13 @@ class ActiveSupport::TestCase
   end
 
   def travel_to_day_time(day, time, &block)
-    days = { sun: "11-10",
-            mon: "11-11",
-            tues: "11-12",
-            wed: "11-13",
+    days = {sun:   "11-10",
+            mon:   "11-11",
+            tues:  "11-12",
+            wed:   "11-13",
             thurs: "11-14",
-            fri: "11-15",
-            sat: "11-16" }
+            fri:   "11-15",
+            sat:   "11-16" }
     assert days.include?(day), "pick a known day"
 
     datetime_str = "2019-#{days[day]} #{time} EST"

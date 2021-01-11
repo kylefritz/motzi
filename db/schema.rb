@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_01_11_010703) do
+ActiveRecord::Schema.define(version: 2021_01_11_200254) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -253,8 +253,8 @@ ActiveRecord::Schema.define(version: 2021_01_11_010703) do
 
   create_table "pickup_days", force: :cascade do |t|
     t.bigint "menu_id", null: false
-    t.datetime "pickup_at"
-    t.datetime "order_deadline_at"
+    t.datetime "pickup_at", null: false
+    t.datetime "order_deadline_at", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["menu_id"], name: "index_pickup_days_on_menu_id"

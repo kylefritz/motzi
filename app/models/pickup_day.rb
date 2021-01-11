@@ -2,8 +2,11 @@ class PickupDay < ApplicationRecord
   belongs_to :menu
   has_many :order_items
 
-  def self.for_pickup_at(pickup_at)
-    PickupDay.find_by("date_trunc('day', pickup_at) = ?", pickup_at.to_date)
+  def self.for_pickup_at(dt) self.for_date_trunc('pickup_at', dt) end
+  def self.for_order_deadline_at(dt) self.for_date_trunc('order_deadline_at', dt) end
+
+  def self.for_date_trunc(field, dt)
+    PickupDay.find_by("date_trunc('day', #{field}) = ?", dt.utc.to_date)
   end
 
   def pickup_day

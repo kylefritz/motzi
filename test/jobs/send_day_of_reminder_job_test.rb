@@ -4,11 +4,11 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
   include ActiveJob::TestHelper
 
   def setup
-    menu = menus(:week1)
-    menu.make_current!
+    @menu = menus(:week1)
+    @menu.make_current!
 
     # match the time travel for this test
-    @tues, @thurs = menu.pickup_days.all
+    @tues, @thurs = @menu.pickup_days.all
     @tues.update!(pickup_at: "2019-11-12 3:00 PM")
     @thurs.update!(pickup_at: "2019-11-14 3:00 PM")
   end
@@ -50,34 +50,6 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
 
     refute_reminders_emailed(:tues, '7:00 AM', 'no emails should be sent since all items are now pay it forward')
   end
-
-#   test "reminders sent when orders placed on current menu during pickup_day2" do
-#     Setting.pickup_day1 = "Thursday"
-#     Setting.pickup_day2 = "Saturday"
-
-#     menu = Menu.current
-#     menu.update!(week_id: "19w47") # match the time travel for this test
-#     sat_9a = travel_to_day_time(:sat, "9:00 AM") do
-#       order = menu.orders.create!(user: users(:kyle))
-#       order.order_items.create!(item: items(:rye), day1_pickup: false)
-#     end
-#     refute_reminders_emailed(:sat, "9:00 AM", "no emails since orders are for this coming saturday")
-
-#     # go forward to end of week
-#     travel_to(DateTime.parse("2019-11-23 9:30 AM EST")) do
-#       assert_email_sent(1, "emails sent the next saturday") do
-#         SendDayOfReminderJob.perform_now
-#       end
-#     end
-
-#     # go forward to next next of week
-#     menu.messages.delete_all # delete messages so would resend
-#     travel_to(DateTime.parse("2019-11-30 9:30 AM EST")) do
-#       assert_email_sent(0, "emails not sent on the following saturday") do
-#         SendDayOfReminderJob.perform_now
-#       end
-#     end
-#   end
 
   private
 
