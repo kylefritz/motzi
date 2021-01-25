@@ -27,10 +27,8 @@ class ActiveSupport::TimeWithZone
     # nudge forward into next week if past 9a on sunday
     wk_nudge = self.wday == 0 && self.hour >= 9 ? 1 :0
 
-    # cweek counts mondays so move datetime to middle of week
-    date_time = (self + wk_nudge.days).beginning_of_week + 2.day
-
-    yr = date_time.year.to_s[2..]
+    date_time = self + wk_nudge.days
+    yr = date_time.end_of_week.year.to_s[2..]
     wk = date_time.cweek.to_s.rjust(2, "0")
     [yr, wk].join("w")
   end
@@ -44,9 +42,7 @@ class ActiveSupport::TimeZone
   def from_week_id(week_id)
     yr, num_weeks = week_id.split('w')
     num_weeks = num_weeks.to_i - 1
-
-    jan1 = ActiveSupport::TimeZone['America/New_York'].parse("20#{yr}-01-01")
-    week_time = jan1 + num_weeks.weeks
-    week_time.beginning_of_week - 1.day + 9.hours
+    jan1 = ActiveSupport::TimeZone['America/New_York'].parse("20#{yr}-01-01 9:00 AM")
+    jan1.beginning_of_week + num_weeks.weeks - 1.day + 9.hours
   end
 end
