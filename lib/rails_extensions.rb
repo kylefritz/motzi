@@ -20,17 +20,23 @@ class ActiveSupport::TimeWithZone
   end
 
   def cweek
-    self.to_datetime.cweek
+    # cweek starts on monday, we start our weeks on sunday
+    # https://stackoverflow.com/questions/6720736/week-number-of-the-year-kinda
+    (to_datetime + 1.day).cweek
   end
 
   def week_id
-    # nudge forward into next week if past 9a on sunday
-    wk_nudge = self.wday == 0 && self.hour >= 9 ? 1 :0
+    effective_yr = (if cweek == 1
+      (self + 1.day).end_of_week.year
+    elsif cweek > 51
+      self.beginning_of_week.year
+    else
+      self.year
+    end)
 
-    date_time = self + wk_nudge.days
-    yr = date_time.end_of_week.year.to_s[2..]
-    wk = date_time.cweek.to_s.rjust(2, "0")
-    [yr, wk].join("w")
+    yr = effective_yr.to_s[2..]
+    wk = cweek.to_s.rjust(2, '0')
+    [yr, wk].join('w')
   end
 
   def prev_week_id
@@ -41,8 +47,13 @@ end
 class ActiveSupport::TimeZone
   def from_week_id(week_id)
     yr, num_weeks = week_id.split('w')
-    num_weeks = num_weeks.to_i - 1
-    jan1 = ActiveSupport::TimeZone['America/New_York'].parse("20#{yr}-01-01 9:00 AM")
-    jan1.beginning_of_week + num_weeks.weeks - 1.day + 9.hours
+
+    week1 = ActiveSupport::TimeZone['America/New_York'].parse("20#{yr}-01-01")
+    if week1.cweek == 53
+      week1 = week1.beginning_of_week + 7.days
+    end
+
+    week_time = week1 + (num_weeks.to_i - 1).weeks
+    week_time.beginning_of_week - 1.day + 9.hours
   end
 end
