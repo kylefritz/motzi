@@ -13,7 +13,6 @@ class TimeWithZoneTest < ActiveSupport::TestCase
     assert_equal time.week_id, "19w46"
     assert_equal time.prev_week_id, "19w45"
 
-    assert_equal Time.zone.parse("2019-11-10 8:59 AM EST").week_id, "19w45"
     assert_equal Time.zone.parse("2019-11-17 9:01 AM EST").week_id, "19w47"
 
     assert_equal Time.zone.parse("2019-12-22 9:00 AM EST").week_id, "19w52"
@@ -47,7 +46,73 @@ class TimeWithZoneTest < ActiveSupport::TestCase
   end
 
   test 'way back in time' do
-    assert_week_id '2010-01-03', '10w02'
+    assert_week_id '2010-01-03', '10w01'
+  end
+
+  test 'late 2020 from_week_id' do
+    assert_roundtrip '2020-12-27 9:00 AM EST', '20w53'
+  end
+
+  test 'early 2020 from_week_id' do
+    assert_roundtrip '2019-12-29 9:00 AM EST', '20w01'
+  end
+
+  test '2019 from_week_id' do
+    assert_roundtrip '2019-12-22 9:00 AM EST', '19w52'
+  end
+
+  test 'current week_id at end of 2020' do
+    travel_to(DateTime.parse('2020-12-27 10:00 AM EST')) do
+      assert_equal Time.zone.now.week_id, '20w53'
+    end
+  end
+
+  test '2010-01-03' do
+    assert_cweek'2010-01-03', 1
+  end
+
+  test '2020-12-26' do
+    assert_cweek'2020-12-26', 52
+  end
+
+  test '2020-12-27' do
+    assert_cweek'2020-12-27', 53
+  end
+
+  test '2020-12-28' do
+    assert_cweek'2020-12-28', 53
+  end
+
+  test '2020-12-31' do
+    assert_cweek'2020-12-31', 53
+  end
+
+  test '2021-01-01' do
+    assert_cweek'2021-01-01', 53
+  end
+
+  test '2021-01-02' do
+    assert_cweek'2021-01-02', 53
+  end
+
+  test '2021-01-03' do
+    assert_cweek'2021-01-03', 1
+  end
+
+  test '2021-01-31' do
+    assert_cweek'2021-01-31', 5
+  end
+
+  test '2021-02-01' do
+    assert_cweek'2021-02-01', 5
+  end
+
+  test '2021 from_week_id new' do
+    assert_equal Time.zone.from_week_id('21w05'), Time.zone.parse('2021-01-31 9:00 AM EST')
+  end
+
+  test '2021 week_id_new' do
+    assert_equal Time.zone.parse('2021-01-31 9:00 AM EST').week_id, '21w05'
   end
 
   private
@@ -61,5 +126,14 @@ class TimeWithZoneTest < ActiveSupport::TestCase
     travel_to(DateTime.parse("2019-11-11 9:00 AM EST")) do
       block.call
     end
+  end
+
+  def assert_cweek(date_str, cweek)
+    assert_equal Time.zone.parse("#{date_str} 9:00 AM EST").cweek, cweek
+  end
+
+  def assert_roundtrip(datetime_str, week_id)
+    assert_equal Time.zone.from_week_id(week_id), Time.zone.parse(datetime_str)
+    assert_equal Time.zone.parse(datetime_str).week_id, week_id
   end
 end
