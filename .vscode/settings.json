@@ -1,3 +1,16 @@
 {
-  "cSpell.ignoreWords": ["ignoredeadline"]
+  "cSpell.ignoreWords": ["ignoredeadline"],
+  "files.associations": {
+    "*.html.erb": "html"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.formatOnSave": true,
+  "solargraph.autoformat": true,
+  "solargraph.diagnostics": true,
+  "solargraph.formatting": true
 }
