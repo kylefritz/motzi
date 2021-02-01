@@ -45,22 +45,25 @@ jobs:
         run: npx jest test/javascript
 
       - name: heroku deploy motzi
-        env:
-          HEROKU_API_TOKEN: ${{ secrets.HEROKU_API_TOKEN }}
-          HEROKU_APP_NAME: motzibread
         if: github.ref == 'refs/heads/master' && job.status == 'success'
-        run: git push -f https://heroku:$HEROKU_API_TOKEN@git.heroku.com/$HEROKU_APP_NAME.git origin/master:master
+        uses: akhileshns/heroku-deploy@v3.9.9
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: motzibread
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
 
       - name: heroku deploy jinji
-        env:
-          HEROKU_API_TOKEN: ${{ secrets.HEROKU_API_TOKEN }}
-          HEROKU_APP_NAME: jinjichocolate
         if: github.ref == 'refs/heads/master' && job.status == 'success'
-        run: git push -f https://heroku:$HEROKU_API_TOKEN@git.heroku.com/$HEROKU_APP_NAME.git origin/master:master
+        uses: akhileshns/heroku-deploy@v3.9.9
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: jinjichocolate
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
 
       - name: heroku deploy dutch courage
-        env:
-          HEROKU_API_TOKEN: ${{ secrets.HEROKU_API_TOKEN }}
-          HEROKU_APP_NAME: dutchcourage
         if: github.ref == 'refs/heads/master' && job.status == 'success'
-        run: git push -f https://heroku:$HEROKU_API_TOKEN@git.heroku.com/$HEROKU_APP_NAME.git origin/master:master
+        uses: akhileshns/heroku-deploy@v3.9.9
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: dutchcourage
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
