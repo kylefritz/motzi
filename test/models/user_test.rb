@@ -14,9 +14,11 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 23, users(:kyle).credits
 
     # buy a multi-credit item
-    order = users(:kyle).orders.create!(menu: menus(:week1))
+    menu = menus(:week1)
+    order = users(:kyle).orders.create!(menu: menu)
     item = Item.create!(name: 'multi-credit item', credits: 6)
-    order.order_items.create!(item: item)
+    pickup_day =  menu.pickup_days.first
+    order.order_items.create!(item: item, pickup_day: pickup_day)
     assert_equal 23 - item.credits, users(:kyle).credits
   end
 
@@ -26,19 +28,23 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "credit go down with items" do
-    menus(:week2).make_current!
+    menu = menus(:week2)
+    menu.make_current!
+    pickup_day = menu.pickup_days.first
     kyle = users(:kyle)
     assert_difference 'kyle.credits', -1, 'added an item' do
-      kyle.current_order.order_items.create!(item: items(:classic))
+      kyle.current_order.order_items.create!(item: items(:classic), pickup_day: pickup_day)
     end
   end
 
   test "credits dont change if we pay for order seperately" do
-    menus(:week2).make_current!
+    menu = menus(:week2)
+    menu.make_current!
+    pickup_day = menu.pickup_days.first
     kyle = users(:kyle)
     kyle.current_order.update(stripe_charge_id: "fake-value")
     assert_difference 'kyle.credits', 0, 'added an item' do
-      kyle.current_order.order_items.create!(item: items(:classic))
+      kyle.current_order.order_items.create!(item: items(:classic), pickup_day: pickup_day)
     end
   end
 

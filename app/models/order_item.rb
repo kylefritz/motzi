@@ -14,6 +14,6 @@ class OrderItem < ApplicationRecord
       return nil
     end
 
-    self.pickup_day.pickup_day
+    self.pickup_day.day_str
   end
 end

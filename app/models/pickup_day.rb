@@ -9,11 +9,11 @@ class PickupDay < ApplicationRecord
     PickupDay.find_by("date_trunc('day', #{field}) = ?", dt.utc.to_date)
   end
 
-  def pickup_day
+  def day_str
     Date::DAYS_INTO_WEEK.invert[pickup_at.wday].to_s.titleize
   end
 
-  def pickup_day_abbr
+  def day_abbr
     I18n.t('date.abbr_day_names')[pickup_at.wday]
   end
 end

@@ -32,9 +32,22 @@ class Menu < ApplicationRecord
   end
 
   def item_counts
-    day1, day2 = SqlQuery.new(:ordered_items_counts, menu_id: self.id).execute.partition {|count| count["day1_pickup"]}
-    s = ->(list){ Hash[list.map { |c| [c["item_id"], c["sum"]] }] }
-    [s.call(day1), s.call(day2)]
+    #TODO: how should we represent this?
+    day_item_counts = SqlQuery.new(:ordered_items_counts, menu_id: self.id).execute
+    # pickup_days = self.pickup_days.all
+
+    {}.tap do |counts|
+      day_item_counts.each do |r|
+        pickup_day_id = r["pickup_day_id"]
+        item_id = r["item_id"]
+        num_items = r["sum"]
+
+        if counts[item_id].nil?
+          counts[item_id] = {}
+        end
+        counts[item_id][pickup_day_id] = num_items
+      end
+    end
   end
 
   def subscriber_note_html

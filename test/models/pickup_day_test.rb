@@ -7,12 +7,12 @@ class PickupDayTest < ActiveSupport::TestCase
     assert pickup_day
   end
 
-  test "pickup_day.pickup_day" do
-    assert_equal "Thursday", pickup_days(:w1_d1_thurs).pickup_day
+  test "pickup_day.day_str" do
+    assert_equal "Thursday", pickup_days(:w1_d1_thurs).day_str
   end
 
-  test "pickup_day.pickup_day_abbr" do
-    assert_equal "Thu", pickup_days(:w1_d1_thurs).pickup_day_abbr
+  test "pickup_day.day_abbr" do
+    assert_equal "Thu", pickup_days(:w1_d1_thurs).day_abbr
   end
 
   test "for_pickup_at & for_order_deadline_at" do
