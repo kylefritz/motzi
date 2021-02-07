@@ -216,7 +216,7 @@ ActiveAdmin.register Menu do
       end
 
       @users = User.for_bakers_choice
-      return render 'admin/users/index', format: :json
+      return render template: 'admin/users/index.json.jbuilder'
     end
 
     @users = User.for_bakers_choice
