@@ -39,7 +39,7 @@ class Order < ApplicationRecord
         day_items = items_for_pickup(pickup_day)
         next if day_items.empty?
 
-        s << "#{prior_day_had_items ? ". " : ""}#{pickup_day.pickup_day_abbr}: "
+        s << "#{prior_day_had_items ? ". " : ""}#{pickup_day.day_abbr}: "
 
         prior_day_had_items = true
 

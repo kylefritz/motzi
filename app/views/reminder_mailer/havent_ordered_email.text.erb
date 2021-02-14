@@ -1,4 +1,4 @@
-For <%= @menu.name %>, please order by <%= ordering_deadline_text %>!!
+For <%= @menu.name %>, please order by <%= ordering_deadline_text(@menu) %>!!
 
 Follow this link to this week's menu: <%= current_menu_url(uid: @user.hashid) %>
 

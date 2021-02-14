@@ -1,5 +1,7 @@
-<h2>For <%= @menu.name %>, please order by <%= ordering_deadline_text %>!!</h2>
+<h2>For <%= @menu.name %>, please order by <%= ordering_deadline_text(@menu) %>!!</h2>
 
-<p><%= link_to @menu.name, current_menu_url(uid: @user.hashid) %></p>
+<p>
+  <%= link_to @menu.name, current_menu_url(uid: @user.hashid) %>
+</p>
 
 <%= render partial: 'menu_mailer/credits_remaining' %>
