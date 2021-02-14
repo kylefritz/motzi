@@ -13,6 +13,8 @@ class MigrateMenusToPickupDay < ActiveRecord::Migration[6.0]
       PickupDay.create(menu_id: menu.id, pickup_at: pickup_at, order_deadline_at: order_deadline_at)
     end
     
+    PaperTrail.enabled false
+
     bar = ProgressBar.new(Menu.count)
     Menu.find_each do |m|
       day1 = make_pickup_day(m, true)
@@ -26,6 +28,8 @@ class MigrateMenusToPickupDay < ActiveRecord::Migration[6.0]
       
       bar.increment!
     end
+  ensure
+    PaperTrail.enabled true
   end
   
   def down

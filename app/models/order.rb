@@ -5,7 +5,7 @@ class Order < ApplicationRecord
   has_many :items, through: :order_items
   has_paper_trail
   visitable :ahoy_visit
-  scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> '' AND comments <> ?", BAKERS_CHOICE) }
+  scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> ''",) }
   scope :not_skip, -> { where("skip is FALSE") }
   scope :skip, -> { where("skip is TRUE") }
   scope :marketplace, -> { where("stripe_charge_amount is not NULL")}
@@ -74,7 +74,6 @@ class Order < ApplicationRecord
   def name
     "Order ##{id}"
   end
-  BAKERS_CHOICE = "Baker's Choice"
 
   def comments_html
     if self.comments.present?

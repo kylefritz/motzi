@@ -29,10 +29,6 @@ class OrderTest < ActiveSupport::TestCase
     assert_difference 'Order.with_comments.size', 0, 'empty string' do
       Order.create!(comments: '', menu: menus(:week2), user: users(:ljf))
     end
-
-    assert_difference 'Order.with_comments.size', 0, 'Baker\'s choice isnt a comment' do
-      Order.create!(comments: Order::BAKERS_CHOICE, menu: menus(:week2), user: users(:ljf))
-    end
   end
 
   test "item_list" do

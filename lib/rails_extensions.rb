@@ -11,14 +11,6 @@ class BigDecimal
 end
 
 class ActiveSupport::TimeWithZone
-  def day1_pickup?
-    self.wday == Setting.pickup_day1_wday
-  end
-
-  def day2_pickup?
-    self.wday == Setting.pickup_day2_wday
-  end
-
   def cweek
     # cweek starts on monday, we start our weeks on sunday
     # https://stackoverflow.com/questions/6720736/week-number-of-the-year-kinda

@@ -16,4 +16,12 @@ class PickupDay < ApplicationRecord
   def day_abbr
     I18n.t('date.abbr_day_names')[pickup_at.wday]
   end
+
+  def name
+    pickup_at.strftime('%A %m/%d/%y')
+  end
+
+  def name_abbr
+    pickup_at.strftime('%a %m/%d')
+  end
 end

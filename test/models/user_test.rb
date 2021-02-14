@@ -64,22 +64,6 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 2, User.owners.count
   end
 
-  test "for_bakers_choice" do
-    menus(:week2).make_current!
-    assert_equal 2, User.for_bakers_choice.count
-  end
-
-  test "must_order_weekly" do
-    assert_equal 3, User.must_order_weekly.count
-    assert User.must_order_weekly.first.must_order_weekly?
-  end
-
-  test "every_other_week" do
-    assert_equal 1, User.every_other_week.count
-    assert_equal users(:jess).id, User.every_other_week.first.id
-    assert User.every_other_week.first.every_other_week?
-  end
-
   test "subscribers" do
     assert_equal 4, User.subscribers.count, 'kf, adrian, ljf, jess'
     User.all.update_all(subscriber: false)

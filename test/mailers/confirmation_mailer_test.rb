@@ -15,7 +15,7 @@ class ConfirmationMailerTest < ActionMailer::TestCase
     assert_includes email.subject, order.menu.name
 
     assert_in_both email, 'Pumpkin', 'items'
-    assert_in_both email, Setting.pickup_day1_abbr, 'pickup_day1_abbr'
+    assert_in_both email, order.menu.pickup_days.first.day_abbr, 'pickup day_abbr'
     assert_in_both email, "call when you get here", 'Setting.pickup_instructions'
   end
 

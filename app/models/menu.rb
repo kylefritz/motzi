@@ -32,7 +32,7 @@ class Menu < ApplicationRecord
   end
 
   def item_counts
-    #TODO: how should we represent this?
+    # TODO: how should we represent this?
     day_item_counts = SqlQuery.new(:ordered_items_counts, menu_id: self.id).execute
     # pickup_days = self.pickup_days.all
 
@@ -46,6 +46,22 @@ class Menu < ApplicationRecord
           counts[item_id] = {}
         end
         counts[item_id][pickup_day_id] = num_items
+      end
+    end
+  end
+
+  def item_counts_by_pickup_day
+    day_item_counts = SqlQuery.new(:ordered_items_counts, menu_id: self.id).execute
+    {}.tap do |counts|
+      day_item_counts.each do |r|
+        pickup_day_id = r["pickup_day_id"]
+        item_id = r["item_id"]
+        num_items = r["sum"]
+
+        if counts[pickup_day_id].nil?
+          counts[pickup_day_id] = {}
+        end
+        counts[pickup_day_id][item_id] = num_items
       end
     end
   end
@@ -73,22 +89,9 @@ class Menu < ApplicationRecord
     end
   end
 
-  def day1_deadline
-    compute_deadline(Setting.pickup_day1_wday)
-  end
-  def day2_deadline
-    compute_deadline(Setting.pickup_day2_wday)
-  end
-
   def ordering_closed?
     Time.zone.now > day2_deadline
   end
 
   MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
-
-  private
-  def compute_deadline(wday)
-    # from_week_id(week_id).beginning_of_day is always sunday
-    Time.zone.from_week_id(week_id).beginning_of_day + wday.days - Setting.leadtime_hours.hours
-  end
 end

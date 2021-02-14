@@ -34,25 +34,19 @@ ActiveAdmin.register_page "Dashboard" do
             }
           end
 
-          customers = User.subscribers
-          weekly = compute("Weekly", customers.must_order_weekly)
-          biweekly = compute("Every Other Week", customers.every_other_week)
+          subscribers = compute("Subscribers", User.subscribers)
           num_marketplace = Order.for_current_menu.marketplace.count
           marketplace = {
             type: "Marketplace",
             ordered: num_marketplace,
             total: num_marketplace,
           }
-          table_for [weekly, biweekly, marketplace], class: 'subscribers' do
+          table_for [subscribers, marketplace], class: 'subscribers' do
             column :type
             column :not_ordered
             column :ordered
             column :skipped
             column(:total) { |h| strong(h[:total]) }
-          end
-
-          if (num_bakers_choice = weekly[:not_ordered]) > 0
-            para(a("Make selections for #{num_bakers_choice} subscribers", {href: bakers_choice_admin_menus_path()}))
           end
         end
 
@@ -61,22 +55,7 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
 
-      day1, day2 = menu.item_counts
-      column id: 'what-to-bake-day1' do
-        panel "#{Setting.pickup_day1} - What to make" do
-          a("#{Setting.pickup_day1} Pickup List", href: pickup_day1_admin_menus_path())
-          render 'admin/menus/what_to_bake', { counts: day1, menu: menu }
-        end
-      end
-
-      if Setting.show_day2
-        column id: 'what-to-bake-day2' do
-          panel "#{Setting.pickup_day2} - What to make" do
-            a("#{Setting.pickup_day2} Pickup List", href: pickup_day2_admin_menus_path())
-            render 'admin/menus/what_to_bake', { counts: day2, menu: menu}
-          end
-        end
-      end
+      render 'admin/menus/what_to_bake', {menu: menu}
     end
 
 

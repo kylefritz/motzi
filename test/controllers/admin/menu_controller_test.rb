@@ -46,31 +46,9 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_select '#orders tbody tr', 1, "num_day2=#{menus(:week1).order_items.day2_pickup.map(&:order_id).uniq.count}"
   end
 
-  test "get bakers choice" do
-    menus(:week1).make_current!
-    get "/admin/menus/bakers_choice"
-    # TODO: improve test
-    assert_response :success
-  end
-
   test "get edit" do
     obj = menus(:week2)
     get "/admin/menus/#{obj.id}/edit"
     assert_response :success
-  end
-
-  test "assign a bakers choice for a user" do
-    user = users(:adrian)
-
-    assert_nil user.current_order, 'user hasnt ordered yet'
-    order_params = {user_id: user.id, item_id: items(:classic).id}
-
-    assert_ordered do
-      post '/admin/menus/bakers_choice.json', params: order_params, as: :json
-      assert_response :success
-    end
-
-    refute_nil user.current_order, 'now user has ordered'
-    refute user.current_order.skip?, 'not skip'
   end
 end

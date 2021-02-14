@@ -11,8 +11,6 @@ class User < ApplicationRecord
   scope :subscribers, -> { not_owners.where(subscriber: true) }
   scope :nonsubscribers, -> { where(subscriber: false) }
   scope :opt_in, -> { where(opt_in: true) }
-  scope :must_order_weekly, -> { subscribers.where("breads_per_week >= 1") }
-  scope :every_other_week, -> { subscribers.where("breads_per_week = 0.5") }
   scope :owners, -> {where(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   scope :not_owners, -> {where.not(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   scope :admin, -> {where(is_admin: true)}
@@ -23,19 +21,6 @@ class User < ApplicationRecord
   end
   before_validation do
     self.email = self.email.strip.downcase
-  end
-  def self.for_bakers_choice
-    # users who havent ordered but must
-    must_order = User.must_order_weekly.pluck(:id)
-    have_ordered = Order.for_current_menu.where(user_id: must_order).pluck(:user_id)
-    User.where(id: must_order - have_ordered)
-  end
-
-  def must_order_weekly?
-    self.breads_per_week >= 1
-  end
-  def every_other_week?
-    !must_order_weekly?
   end
 
   def credits

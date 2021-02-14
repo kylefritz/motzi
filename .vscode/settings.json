@@ -10,6 +10,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "editor.formatOnSave": true,
+  "editor.tabSize": 2,
   "solargraph.autoformat": true,
   "solargraph.diagnostics": true,
   "solargraph.formatting": true
