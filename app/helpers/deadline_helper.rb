@@ -8,9 +8,7 @@ module DeadlineHelper
     "#{deadline.strftime("%l%P %A").strip} for #{pickup_day} pickup"
   end
 
-  def ordering_deadline_text
-    return order_by_for_day_num(1) unless Setting.show_day2
-
-    "#{order_by_for_day_num(1)} or #{order_by_for_day_num(2)}"
+  def ordering_deadline_text(menu)
+    menu.pickup_days.map(&:deadline_text).join(" or\n")
   end
 end

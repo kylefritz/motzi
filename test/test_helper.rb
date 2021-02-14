@@ -23,6 +23,15 @@ class ActiveSupport::TestCase
     JSON::Validator.validate!(schema_path, json, strict: true)
   end
 
+  def assert_el_count(expect_count, css, msg=nil)
+    @html = document_root_element.css(css)
+    if expect_count != @html.count
+      puts document_root_element.css('#main_content')
+      puts "looking for $(#{css})"
+    end
+    assert_equal expect_count, @html.count, msg
+  end
+
   EMAIL_MODEL_COUNTS = ['ApplicationMailer.deliveries.count', 'Ahoy::Message.count']
   def assert_email_sent(num_emails=1, msg="emails delivered & audited in ahoy", &block)
     perform_enqueued_jobs do

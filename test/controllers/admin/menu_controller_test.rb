@@ -19,33 +19,6 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "get pickup list day1" do
-    menus(:week1).make_current!
-    get "/admin/menus/pickup_day1"
-    assert_response :success
-    assert_select '#orders tbody tr', 2, "num_day1=#{menus(:week1).order_items.day1_pickup.map(&:order_id).uniq.count}"
-  end
-
-  test "no skips in pickup list" do
-    menus(:week1).make_current!
-
-    # make this order into a skip
-    order = menus(:week1).orders.first
-    order.update!(skip: true)
-    order.order_items.destroy_all
-
-    get "/admin/menus/pickup_day1"
-    assert_response :success
-    assert_select '#orders tbody tr', 1, "num_day1=#{menus(:week1).order_items.day1_pickup.map(&:order_id).uniq.count}"
-  end
-
-  test "get pickup list thursday" do
-    menus(:week1).make_current!
-    get "/admin/menus/pickup_day2"
-    assert_response :success
-    assert_select '#orders tbody tr', 1, "num_day2=#{menus(:week1).order_items.day2_pickup.map(&:order_id).uniq.count}"
-  end
-
   test "get edit" do
     obj = menus(:week2)
     get "/admin/menus/#{obj.id}/edit"

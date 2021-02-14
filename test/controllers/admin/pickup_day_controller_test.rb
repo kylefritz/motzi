@@ -27,13 +27,16 @@ class Admin::PickupDayControllerTest < ActionDispatch::IntegrationTest
     assert_el_count 1, '#pickup-list tbody tr', 'ljf'
   end
 
-  private
-  def assert_el_count(expect_count, css, msg=nil)
-    @html = document_root_element.css(css)
-    if expect_count != @html.count
-      puts document_root_element.css('#main_content')
-      puts "looking for $(#{css})"
-    end
-    assert_equal expect_count, @html.count, msg
+  test "no skips in pickup list" do
+    menus(:week1).make_current!
+
+    # make this order into a skip
+    order = menus(:week1).orders.first
+    order.update!(skip: true)
+    order.order_items.destroy_all
+
+    get "/admin/pickup_days/#{@day1.id}"
+    assert_response :success
+    assert_select '#orders tbody tr', 1
   end
 end

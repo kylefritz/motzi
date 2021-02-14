@@ -23,14 +23,4 @@ class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_el_count 1, '#what-to-bake-Sat'
     assert_el_count 2, '#what-to-bake-Sat .breads tbody tr', 'bread for ljf'
   end
-
-  private
-  def assert_el_count(expect_count, css, msg=nil)
-    @html = document_root_element.css(css)
-    if expect_count != @html.count
-      puts document_root_element.css('#main_content')
-      puts "looking for $(#{css})"
-    end
-    assert_equal expect_count, @html.count, msg
-  end
 end
