@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { get, isNumber } from "lodash";
+import moment from "moment";
 
 import Price from "./Price";
 import Quantity from "./Quantity";
@@ -22,13 +23,16 @@ function shortDay(day) {
 }
 
 export function DayButton({
-  day,
-  btn,
-  isPastDeadline,
+  btn = "primary",
+  pickupAt,
+  orderDeadlineAt,
   remaining,
   onSetDay,
   orderingDeadlineText,
 }) {
+  const day = moment(pickupAt).format("dddd");
+  const isPastDeadline = false; // TODO: use orderDeadlineAt
+
   if (remaining < 1 || isPastDeadline) {
     const [short, long, title] = isPastDeadline
       ? [`Closed`, `Ordering closed for ${shortDay(day)}`, orderingDeadlineText]
@@ -66,39 +70,35 @@ export function DayButton({
   );
 }
 
-function DayButtons({
-  description,
-  onSetDay,
-  day1: enableDay1,
-  day2: enableDay2,
-  remainingDay1,
-  remainingDay2,
-  showDay2 = true,
-}) {
-  const { day1, day1Closed, day2, day2Closed } = getDayContext();
-  const days = [];
-  if (enableDay1) {
-    days.push({
-      day: day1,
-      btn: "secondary",
-      isPastDeadline: day1Closed,
-      remaining: remainingDay1,
-    });
-  }
-  if (showDay2 && enableDay2) {
-    days.push({
-      day: day2,
-      btn: "primary",
-      isPastDeadline: day2Closed,
-      remaining: remainingDay2,
-    });
-  }
+function DayButtons({ description, onSetDay, pickupDays }) {
+  // const { day1, day1Closed, day2, day2Closed } = getDayContext();
+  // const days = [];
+  // if (enableDay1) {
+  //   days.push({
+  //     day: day1,
+  //     btn: "secondary",
+  //     isPastDeadline: day1Closed,
+  //     remaining: remainingDay1,
+  //   });
+  // }
+  // if (showDay2 && enableDay2) {
+  //   days.push({
+  //     day: day2,
+  //     btn: "primary",
+  //     isPastDeadline: day2Closed,
+  //     remaining: remainingDay2,
+  //   });
+  // }
+
+  // "secondary",
+  // "primary",
+
   return (
     <>
       {onSetDay && (
         <div className="my-2" style={{ display: "flex" }}>
-          {days.map((props) => (
-            <DayButton key={props.day} onSetDay={onSetDay} {...props} />
+          {pickupDays.map((props) => (
+            <DayButton key={props.id} onSetDay={onSetDay} {...props} />
           ))}
         </div>
       )}
@@ -187,18 +187,13 @@ export function Item(props) {
   );
 }
 
-export default function Items({
-  items,
-  onAddToCart: handleAddToCart,
-  showDay2 = true,
-}) {
+export default function Items({ items, onAddToCart: handleAddToCart }) {
   return (
     <div className="row mt-2">
       {items.map((i) => (
         <Item
           key={i.id}
           {...i}
-          showDay2={showDay2}
           onChange={
             handleAddToCart &&
             (({ quantity, day }) => handleAddToCart({ ...i, quantity, day }))

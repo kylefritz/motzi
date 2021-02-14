@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_01_11_200254) do
+ActiveRecord::Schema.define(version: 2021_02_14_204321) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -198,17 +198,23 @@ ActiveRecord::Schema.define(version: 2021_01_11_200254) do
     t.index "lower((name)::text)", name: "index_items_on_LOWER_name"
   end
 
+  create_table "menu_item_pickup_days", force: :cascade do |t|
+    t.bigint "menu_item_id", null: false
+    t.bigint "pickup_day_id", null: false
+    t.integer "limit"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["menu_item_id"], name: "index_menu_item_pickup_days_on_menu_item_id"
+    t.index ["pickup_day_id"], name: "index_menu_item_pickup_days_on_pickup_day_id"
+  end
+
   create_table "menu_items", force: :cascade do |t|
     t.bigint "menu_id"
     t.bigint "item_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.boolean "day1", default: true
-    t.boolean "day2", default: true
     t.boolean "subscriber", default: true
     t.boolean "marketplace", default: true
-    t.integer "day1_limit"
-    t.integer "day2_limit"
     t.index ["item_id"], name: "index_menu_items_on_item_id"
     t.index ["menu_id"], name: "index_menu_items_on_menu_id"
   end

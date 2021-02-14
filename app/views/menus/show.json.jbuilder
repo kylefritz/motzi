@@ -1,5 +1,5 @@
 json.menu do
-  json.extract! @menu, :id, :name, :menu_note, :subscriber_note, :created_at, :day1_deadline, :day2_deadline
+  json.extract! @menu, :id, :name, :menu_note, :subscriber_note, :created_at
   json.is_current @menu.current?
 
   menu_items = @menu.menu_items.includes(item: {image_attachment: :blob}).map {|mi| [mi, mi.item]}
@@ -7,33 +7,32 @@ json.menu do
     menu_items.push([MenuItem.new, Item.pay_it_forward])
   end
 
-  day1_counts, day2_counts = @menu.item_counts
-
-  def remaining(limit, ordered, is_for_day)
-    unless is_for_day
-      return nil
-    end
+  def remaining(limit, ordered)
     unless limit.present?
       return 120
     end
     (limit - (ordered || 0)).clamp(0, 120)
   end
 
+  json.pickup_days @menu.pickup_days do |pickup_day|
+    json.extract! pickup_day, :id, :pickup_at, :order_deadline_at
+  end
+
+  ordered_item_counts = @menu.item_counts
   json.items menu_items.map do |menu_item, item|
     json.extract! item, :id, :name, :description, :price, :credits
     json.image item.image_path
 
-    json.extract! menu_item, :subscriber, :marketplace, :day1, :day2
-    json.remaining_day1 remaining(menu_item.day1_limit, day1_counts[menu_item.item_id], menu_item.day1)
-    json.remaining_day2 remaining(menu_item.day2_limit, day2_counts[menu_item.item_id], menu_item.day2)
+    json.extract! menu_item, :subscriber, :marketplace
+    json.pickup_days menu_item.menu_item_pickup_days do |mi_pd|
+
+      json.extract! mi_pd.pickup_day, :id, :pickup_at, :order_deadline_at
+      json.remaining remaining(mi_pd.limit, ordered_item_counts[item.id])
+    end
   end
 
-  json.day1 Setting.pickup_day1
-  json.day2 Setting.pickup_day2
-  json.ordering_deadline_text ordering_deadline_text()
-
+  json.ordering_deadline_text ordering_deadline_text(@menu)
   json.enable_pay_what_you_can Setting.shop.pay_what_you_can
-  json.show_day2 Setting.show_day2
 end
 
 json.user do

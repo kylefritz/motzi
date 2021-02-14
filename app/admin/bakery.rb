@@ -54,8 +54,9 @@ ActiveAdmin.register_page "Dashboard" do
           render 'admin/menus/sales', {menu: menu}
         end
       end
-
-      render 'admin/menus/what_to_bake', {menu: menu}
+      column do
+        render 'admin/menus/what_to_bake', {menu: menu}
+      end
     end
 
 

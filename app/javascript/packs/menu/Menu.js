@@ -101,11 +101,7 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
         </>
       ) : (
         <>
-          <Items
-            items={subscriberItems}
-            onAddToCart={addToCart}
-            showDay2={menu.showDay2}
-          />
+          <Items items={subscriberItems} onAddToCart={addToCart} />
 
           <SkipThisWeek onSkip={handleSkip} disabled={menuClosed} />
           {payItForward && (

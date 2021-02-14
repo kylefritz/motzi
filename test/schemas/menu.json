@@ -10,18 +10,13 @@
       "required": [
         "id",
         "name",
-        "day1Deadline",
-        "day2Deadline",
-        "day1",
-        "day2",
         "orderingDeadlineText",
         "menuNote",
         "subscriberNote",
         "createdAt",
         "items",
         "isCurrent",
-        "enablePayWhatYouCan",
-        "showDay2"
+        "enablePayWhatYouCan"
       ],
       "properties": {
         "id": { "type": "integer" },

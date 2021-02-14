@@ -22,6 +22,13 @@ export default function ({
     orderingDeadlineText:
       "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
   };
+  const pickupDays = [
+    {
+      id: 1,
+      pickupAt: "2019-11-05T16:00:00.000-04:00",
+      orderDeadlineAt: "2019-11-03T23:59:59.000-04:00",
+    },
+  ];
   const items = [
     {
       id: 3,
@@ -30,10 +37,9 @@ export default function ({
       image: "bread-baguette.jpg",
       price: 3.0,
       credits: 1,
-      day1: true,
-      day2: true,
       subscriber: true,
       marketplace: true,
+      pickupDays,
     },
     {
       id: 1,
@@ -43,8 +49,7 @@ export default function ({
       image: "bread2-002.webp",
       price: 4.0,
       credits: 2,
-      day1: true,
-      day2: true,
+      pickupDays,
       subscriber: true,
       marketplace: true,
     },
@@ -54,8 +59,7 @@ export default function ({
       description: "ony subscribers can get cookies",
       price: 4.0,
       credits: 1,
-      day1: true,
-      day2: true,
+      pickupDays,
       subscriber: true,
       marketplace: false,
     },
@@ -65,8 +69,7 @@ export default function ({
       description: "too small for subscribers",
       price: 2.0,
       credits: 1,
-      day1: true,
-      day2: true,
+      pickupDays,
       subscriber: false,
       marketplace: true,
     },
@@ -76,8 +79,7 @@ export default function ({
       description: "too small for subscribers",
       price: 1.5,
       credits: 1,
-      day1: true,
-      day2: true,
+      pickupDays,
       subscriber: false,
       marketplace: true,
     },
