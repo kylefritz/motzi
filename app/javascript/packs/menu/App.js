@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
 import _ from "lodash";
 
-import { getDayContext, DayContext, SettingsContext } from "./Contexts";
+import { getDeadlineContext, DayContext, SettingsContext } from "./Contexts";
 import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
@@ -32,11 +32,11 @@ function Layout({
     return <h2 className="mt-5">loading...</h2>;
   }
 
-  const { day2Closed } = getDayContext();
+  const orderingClosed = getDeadlineContext().allClosed(menu);
 
   if (order && !isEditingOrder) {
     const handleEditOrder =
-      menu.isCurrent && !day2Closed ? () => setIsEditingOrder(true) : null;
+      menu.isCurrent && !orderingClosed ? () => setIsEditingOrder(true) : null;
     return (
       <Order
         {...{
@@ -117,14 +117,7 @@ export default function App() {
       });
   };
   const { menu, bundles, user } = data;
-  const {
-    day1,
-    day1Deadline,
-    day2,
-    day2Deadline,
-    orderingDeadlineText,
-    enablePayWhatYouCan,
-  } = menu || {};
+  const { orderingDeadlineText, enablePayWhatYouCan } = menu || {};
 
   return (
     <SettingsContext.Provider
@@ -137,11 +130,7 @@ export default function App() {
     >
       <DayContext.Provider
         value={{
-          day1,
-          day1Deadline,
-          day2,
-          day2Deadline,
-          orderingDeadlineText,
+          orderingDeadlineText, // TODO: this needs fixed
           ignoreDeadline,
         }}
       >

@@ -9,7 +9,7 @@ import Items from "./Items";
 import PayItForward from "./PayItForward";
 import SkipThisWeek from "./SkipThisWeek";
 import Subscription from "./Subscription";
-import { getDayContext } from "./Contexts";
+import { getDeadlineContext } from "./Contexts";
 
 export default function Menu({ menu, order, user, onCreateOrder }) {
   const {
@@ -69,7 +69,7 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
   }
 
   const { subscriberNote, isCurrent } = menu;
-  const { day2Closed: menuClosed } = getDayContext();
+  const menuClosed = getDeadlineContext().allClosed(menu);
   const insufficientCredits = total.credits > userCredits;
   return (
     <>

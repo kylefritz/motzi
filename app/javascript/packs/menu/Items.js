@@ -4,7 +4,7 @@ import moment from "moment";
 
 import Price from "./Price";
 import Quantity from "./Quantity";
-import { getDayContext } from "./Contexts";
+import { getDeadlineContext } from "./Contexts";
 
 function shortDay(day) {
   switch (day) {
@@ -27,11 +27,12 @@ export function DayButton({
   pickupAt,
   orderDeadlineAt,
   remaining,
-  onSetDay,
+  id: dayId,
+  onSetDayId,
   orderingDeadlineText,
 }) {
   const day = moment(pickupAt).format("dddd");
-  const isPastDeadline = false; // TODO: use orderDeadlineAt
+  const isPastDeadline = getDeadlineContext().isClosed(orderDeadlineAt);
 
   if (remaining < 1 || isPastDeadline) {
     const [short, long, title] = isPastDeadline
@@ -56,7 +57,7 @@ export function DayButton({
       <button
         type="button"
         className={`btn btn-${btn} btn-sm mr-2`}
-        onClick={() => onSetDay(day)}
+        onClick={() => onSetDayId(dayId)}
       >
         <span className="d-block d-md-none">{shortDay(day)}</span>
         <span className="d-none d-md-block">{day}</span>
@@ -70,35 +71,20 @@ export function DayButton({
   );
 }
 
-function DayButtons({ description, onSetDay, pickupDays }) {
-  // const { day1, day1Closed, day2, day2Closed } = getDayContext();
-  // const days = [];
-  // if (enableDay1) {
-  //   days.push({
-  //     day: day1,
-  //     btn: "secondary",
-  //     isPastDeadline: day1Closed,
-  //     remaining: remainingDay1,
-  //   });
-  // }
-  // if (showDay2 && enableDay2) {
-  //   days.push({
-  //     day: day2,
-  //     btn: "primary",
-  //     isPastDeadline: day2Closed,
-  //     remaining: remainingDay2,
-  //   });
-  // }
-
-  // "secondary",
-  // "primary",
-
+function DayButtons({ description, onSetDayId, pickupDays }) {
+  const highlights = ["secondary", "primary"];
+  const alternate = (i) => highlights[i % highlights.length];
   return (
     <>
-      {onSetDay && (
+      {onSetDayId && (
         <div className="my-2" style={{ display: "flex" }}>
-          {pickupDays.map((props) => (
-            <DayButton key={props.id} onSetDay={onSetDay} {...props} />
+          {pickupDays.map((props, index) => (
+            <DayButton
+              key={props.id}
+              onSetDayId={onSetDayId}
+              btn={alternate(index)}
+              {...props}
+            />
           ))}
         </div>
       )}
@@ -133,19 +119,18 @@ function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day, max }) {
 }
 
 function Ordering(props) {
-  const [day, setDay] = useState(null);
+  const [pickupDayId, setPickupDayId] = useState(null);
   const [wasAdded, setWasAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const { day1 } = getDayContext();
 
-  const { onChange } = props;
+  const { onChange, pickupDays } = props;
 
   const handleAdd = () => {
-    onChange({ day, quantity });
+    onChange({ pickupDayId, quantity });
     setWasAdded(true);
     const reset = () => {
       setWasAdded(false);
-      setDay(null);
+      setPickupDayId(null);
       setQuantity(1);
     };
 
@@ -156,9 +141,11 @@ function Ordering(props) {
     return <p className="text-success my-3">Added to cart!</p>;
   }
 
-  if (day) {
-    const remainingAttr = day === day1 ? "remainingDay1" : "remainingDay2";
-    const remainingQuantity = get(props, remainingAttr);
+  if (pickupDayId) {
+    const { remaining, pickupAt } = pickupDays.find(
+      ({ id }) => pickupDayId === id
+    );
+    const day = moment(pickupAt).format("dddd");
 
     return (
       <QuantityAdd
@@ -166,13 +153,13 @@ function Ordering(props) {
         onQuantity={setQuantity}
         onAdd={handleAdd}
         day={day}
-        max={remainingQuantity}
-        onCancel={() => setDay(null)}
+        max={remaining}
+        onCancel={() => setPickupDayId(null)}
       />
     );
   }
 
-  return <DayButtons onSetDay={onChange && setDay} {...props} />;
+  return <DayButtons onSetDayId={onChange && setPickupDayId} {...props} />;
 }
 
 export function Item(props) {
@@ -196,7 +183,8 @@ export default function Items({ items, onAddToCart: handleAddToCart }) {
           {...i}
           onChange={
             handleAddToCart &&
-            (({ quantity, day }) => handleAddToCart({ ...i, quantity, day }))
+            (({ quantity, pickupDayId }) =>
+              handleAddToCart({ ...i, quantity, pickupDayId }))
           }
         />
       ))}

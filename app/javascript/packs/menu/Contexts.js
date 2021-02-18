@@ -22,6 +22,7 @@ export function getPriceContext() {
   return { showCredits };
 }
 
+// TODO: remove!
 export function getDayContext() {
   const ctx = useContext(DayContext);
   if (ctx !== undefined) {
@@ -52,4 +53,27 @@ export function getDayContext() {
     pastDay2Deadline: false,
     day2Closed: false,
   };
+}
+
+export function getDeadlineContext() {
+  const ctx = useContext(DayContext) || {};
+
+  const isClosed = (orderDeadlineAt) => {
+    if (ctx.ignoreDeadline) {
+      return false;
+    }
+
+    return pastDeadline(orderDeadlineAt);
+  };
+
+  const allClosed = ({ pickupDays }) => {
+    if (ctx.ignoreDeadline) {
+      return false;
+    }
+
+    const lastPickupDay = pickupDays[pickupDays.length - 1];
+    return isClosed(lastPickupDay.orderDeadlineAt);
+  };
+
+  return { ...ctx, isClosed, allClosed };
 }

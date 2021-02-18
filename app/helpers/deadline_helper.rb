@@ -5,7 +5,7 @@ module DeadlineHelper
 
     deadline = Time.zone.now.beginning_of_week - 1.day + pickup_wday.days - Setting.leadtime_hours.hours
 
-    "#{deadline.strftime("%l%P %A").strip} for #{pickup_day} pickup"
+    "#{deadline.strftime("%l%P %A").strip} for #{pickup_day} pickup" # TODO: .gsub(/:00 /, '')
   end
 
   def ordering_deadline_text(menu)

@@ -10,7 +10,7 @@ import PayItForward from "./PayItForward";
 import Payment from "../buy/Payment";
 import { applyTip } from "../buy/Tip";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
-import { getDayContext } from "./Contexts";
+import { getDeadlineContext } from "./Contexts";
 
 export default function Marketplace({ menu, onCreateOrder }) {
   const {
@@ -67,7 +67,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
   }
 
   const { menuNote, enablePayWhatYouCan } = menu;
-  const { pastDay2Deadline: menuClosed } = getDayContext();
+  const menuClosed = getDeadlineContext().allClosed(menu);
   const disabled = menuClosed || !onCreateOrder;
   return (
     <>
