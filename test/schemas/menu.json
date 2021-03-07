@@ -10,28 +10,35 @@
       "required": [
         "id",
         "name",
-        "orderingDeadlineText",
         "menuNote",
         "subscriberNote",
-        "createdAt",
-        "items",
         "isCurrent",
-        "enablePayWhatYouCan"
+        "orderingDeadlineText",
+        "enablePayWhatYouCan",
+        "pickupDays",
+        "items"
       ],
       "properties": {
         "id": { "type": "integer" },
         "name": { "type": "string" },
-        "subscriberNote": { "type": "string" },
         "menuNote": { "type": ["null", "string"] },
-        "createdAt": {
-          "type": "string",
-          "title": "created at"
-        },
-        "day1Deadline": { "type": "string" },
-        "day2Deadline": { "type": "string" },
-        "day1": { "type": "string" },
-        "day2": { "type": "string" },
+        "subscriberNote": { "type": "string" },
+        "isCurrent": { "type": "boolean" },
         "orderingDeadlineText": { "type": "string" },
+        "enablePayWhatYouCan": { "type": "boolean" },
+        "pickupDays": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "pickupAt", "orderDeadlineAt"],
+            "properties": {
+              "id": { "type": "integer" },
+              "pickupAt": { "type": "string" },
+              "orderDeadlineAt": { "type": "string" },
+              "debug": { "type": "string" }
+            }
+          }
+        },
         "items": {
           "type": "array",
           "items": {
@@ -44,10 +51,7 @@
               "credits",
               "subscriber",
               "marketplace",
-              "day1",
-              "day2",
-              "remainingDay1",
-              "remainingDay2"
+              "pickupDays"
             ],
             "properties": {
               "id": { "type": "integer" },
@@ -55,25 +59,37 @@
               "description": { "type": "string" },
               "price": { "type": "number" },
               "credits": { "type": "integer" },
-              "subscriber": { "type": "boolean" },
-              "marketplace": { "type": "boolean" },
-              "day1": { "type": "boolean" },
-              "day2": { "type": "boolean" },
-              "remainingDay1": { "type": ["integer", "null"] },
-              "remainingDay2": { "type": ["integer", "null"] },
               "image": {
                 "type": ["null", "string"],
                 "title": "image",
                 "examples": [
                   "/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBCZz09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--f5152334760abf53540d2df5ba6caa61b3d4635a/RussellBread2-002.webp"
                 ]
+              },
+              "subscriber": { "type": "boolean" },
+              "marketplace": { "type": "boolean" },
+              "pickupDays": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "pickupAt",
+                    "orderDeadlineAt",
+                    "remaining"
+                  ],
+                  "properties": {
+                    "id": { "type": "integer" },
+                    "pickupAt": { "type": "string" },
+                    "orderDeadlineAt": { "type": "string" },
+                    "debug": { "type": "string" },
+                    "remaining": { "type": "integer" }
+                  }
+                }
               }
             }
           }
-        },
-        "isCurrent": { "type": "boolean" },
-        "enablePayWhatYouCan": { "type": "boolean" },
-        "showDay2": { "type": "boolean" }
+        }
       }
     },
     "user": {
@@ -115,15 +131,19 @@
           "items": {
             "type": "object",
             "title": "item",
-            "required": ["itemId", "quantity", "day", "day1Pickup"],
+            "required": [
+              "itemId",
+              "quantity",
+              "day",
+              "pickupDayId",
+              "pickupAt"
+            ],
             "properties": {
               "itemId": { "type": "integer" },
-              "quantity": {
-                "type": "integer",
-                "default": 1
-              },
+              "quantity": { "type": "integer" },
               "day": { "type": "string" },
-              "day1Pickup": { "type": "boolean" }
+              "pickupDayId": { "type": "integer" },
+              "pickupAt": { "type": "string" }
             }
           }
         },

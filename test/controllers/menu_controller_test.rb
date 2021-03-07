@@ -17,7 +17,6 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:ljf)
     order = orders(:ljf_week1)
     order.update(menu: Menu.current)
-
     get '/menu.json'
     assert_menu_json
   end
