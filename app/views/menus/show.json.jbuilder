@@ -16,6 +16,7 @@ json.menu do
 
   json.pickup_days @menu.pickup_days do |pickup_day|
     json.extract! pickup_day, :id, :pickup_at, :order_deadline_at
+    json.debug_title pickup_day.day_abbr # TODO: remove
   end
 
   ordered_item_counts = @menu.item_counts
@@ -27,6 +28,7 @@ json.menu do
     json.pickup_days menu_item.menu_item_pickup_days do |mi_pd|
 
       json.extract! mi_pd.pickup_day, :id, :pickup_at, :order_deadline_at
+      json.debug_title mi_pd.pickup_day.day_abbr # TODO: remove
       json.remaining remaining(mi_pd.limit, ordered_item_counts[item.id])
     end
   end
@@ -47,7 +49,8 @@ json.order do
   if @order
     json.extract! @order, :id, :comments, :skip, :stripe_receipt_url, :stripe_charge_amount
     json.items @order.order_items.map do |order_item|
-      json.extract! order_item, :item_id, :quantity, :day1_pickup, :day
+      json.extract! order_item, :item_id, :quantity, :day, :pickup_day_id
+      json.extract! order_item.pickup_day, :pickup_at
     end
   else
     json.null!

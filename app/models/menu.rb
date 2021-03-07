@@ -83,14 +83,14 @@ class Menu < ApplicationRecord
       throw "can only publish_to_subscribers for current week's menu or future week's menu"
     end
     self.make_current!
-    self.touch :emailed_at # audit email was sent
+    self.touch :emailed_at # create audit that email was sent
     SendWeeklyMenuJob.users_to_email_count(self).tap do
       SendWeeklyMenuJob.perform_later
     end
   end
 
   def ordering_closed?
-    Time.zone.now > day2_deadline
+    Time.zone.now > self.pickup_days.maximum(:order_deadline_at)
   end
 
   MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)

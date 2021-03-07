@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { get, isNumber } from "lodash";
+import { sortBy, isNumber } from "lodash";
 import moment from "moment";
 
 import Price from "./Price";
@@ -23,7 +23,6 @@ function shortDay(day) {
 }
 
 export function DayButton({
-  btn = "primary",
   pickupAt,
   orderDeadlineAt,
   remaining,
@@ -42,7 +41,7 @@ export function DayButton({
     return (
       <button
         type="button"
-        className={`btn btn-outline-${btn} btn-sm mr-2`}
+        className="btn btn-outline-primary btn-sm mr-2"
         disabled={true}
         title={title}
       >
@@ -56,7 +55,7 @@ export function DayButton({
     <div key={day}>
       <button
         type="button"
-        className={`btn btn-${btn} btn-sm mr-2`}
+        className="btn btn-primary btn-sm mr-2"
         onClick={() => onSetDayId(dayId)}
       >
         <span className="d-block d-md-none">{shortDay(day)}</span>
@@ -72,19 +71,12 @@ export function DayButton({
 }
 
 function DayButtons({ description, onSetDayId, pickupDays }) {
-  const highlights = ["secondary", "primary"];
-  const alternate = (i) => highlights[i % highlights.length];
   return (
     <>
       {onSetDayId && (
         <div className="my-2" style={{ display: "flex" }}>
-          {pickupDays.map((props, index) => (
-            <DayButton
-              key={props.id}
-              onSetDayId={onSetDayId}
-              btn={alternate(index)}
-              {...props}
-            />
+          {sortBy(pickupDays, (p) => p.pickupAt).map((props) => (
+            <DayButton key={props.id} onSetDayId={onSetDayId} {...props} />
           ))}
         </div>
       )}

@@ -1,9 +1,41 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# week 1
+w1_classic_thurs:
+  menu_item: w1_classic
+  pickup_day: w1_d1_thurs
 
-one:
-  menu_item_id: MyString
-  pickup_day_id: MyString
+w1_classic_sat:
+  menu_item: w1_classic
+  pickup_day: w1_d2_sat
 
-two:
-  menu_item_id: MyString
-  pickup_day_id: MyString
+w1_pumpkin_thurs:
+  menu_item: w1_pumpkin
+  pickup_day: w1_d1_thurs
+
+w1_pumpkin_sat:
+  menu_item: w1_pumpkin
+  pickup_day: w1_d2_sat
+
+# week 2
+w2_classic_thurs:
+  menu_item: w2_classic
+  pickup_day: w2_d1_thurs
+
+w2_classic_sat:
+  menu_item: w2_classic
+  pickup_day: w2_d2_sat
+
+w2_rye_thurs:
+  menu_item: w2_rye
+  pickup_day: w2_d1_thurs
+
+w2_rye_sat:
+  menu_item: w2_rye
+  pickup_day: w2_d2_sat
+
+w2_donut_thurs:
+  menu_item: w2_donut
+  pickup_day: w2_d1_thurs
+
+w2_donut_sat:
+  menu_item: w2_donut
+  pickup_day: w2_d2_sat

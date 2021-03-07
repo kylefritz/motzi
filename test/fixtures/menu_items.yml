@@ -6,8 +6,6 @@ w1_classic: &default
   item: classic
   subscriber: true
   marketplace: true
-  day1: true
-  day2: true
 
 w1_pumpkin:
   <<: *default
