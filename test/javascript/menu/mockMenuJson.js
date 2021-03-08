@@ -1,3 +1,5 @@
+import { DateTime, Duration } from "luxon";
+
 export default function ({
   order: withOrder = true,
   user: withUser = true,
@@ -5,30 +7,28 @@ export default function ({
   payItForward = true,
   enablePayWhatYouCan = true,
 } = {}) {
-  const menu = {
-    id: 921507399,
-    name: "week 5",
-    subscriberNote: "subscribers note copy",
-    menuNote: "menu note copy",
-    createdAt: "2019-11-02T14:01:23.820-04:00",
-    day1Deadline: "2019-11-03T23:59:59.000-04:00",
-    day2Deadline: "2019-11-05T23:59:59.000-04:00",
-    isCurrent: true,
-    day1: "Tuesday",
-    day2: "Thursday",
-    day1DeadlineDay: "Sunday",
-    day2DeadlineDay: "Tuesday",
-    enablePayWhatYouCan,
-    orderingDeadlineText:
-      "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
-  };
+  const pickupAt = DateTime.now().plus(Duration.fromISO("PT24H")).toISO();
+  const orderDeadlineAt = DateTime.now()
+    .plus(Duration.fromISO("PT12H"))
+    .toISO();
   const pickupDays = [
     {
       id: 1,
-      pickupAt: "2019-11-05T16:00:00.000-04:00",
-      orderDeadlineAt: "2019-11-03T23:59:59.000-04:00",
+      pickupAt,
+      orderDeadlineAt,
     },
   ];
+  const menu = {
+    id: 921507399,
+    name: "week 5",
+    menuNote: "menu note copy",
+    subscriberNote: "subscribers note copy",
+    isCurrent: true,
+    orderingDeadlineText:
+      "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
+    enablePayWhatYouCan,
+    pickupDays,
+  };
   const items = [
     {
       id: 3,
@@ -113,14 +113,12 @@ export default function ({
       {
         itemId: 3,
         quantity: 1,
-        day1Pickup: true,
-        day: "Tuesday",
+        pickupDayId: pickupDays[0].id,
       },
       {
         itemId: 1,
         quantity: 1,
-        day1Pickup: true,
-        day: "Thursday",
+        pickupDayId: pickupDays[0].id,
       },
     ],
   };

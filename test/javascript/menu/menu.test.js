@@ -52,7 +52,7 @@ test("menu for uid-user, add item to cart", () => {
   expect(cart[0]).toStrictEqual({
     itemId: 3,
     quantity: 1,
-    day: "Thursday",
+    pickupDayId: 1,
   });
 });
 

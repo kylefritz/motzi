@@ -91,7 +91,7 @@ function Days({ menu, cart, rmCartItem, skip }) {
 
   if (payItForward.length) {
     const lastPickupDay = menu.pickupDays[menu.pickupDays.length - 1];
-    const canOrder = !isClosed(lastPickupDay.orderDeadlineAt);
+    const canEdit = !isClosed(lastPickupDay.orderDeadlineAt);
     sections.push(
       <div key="pay-it-forward">
         <h6>Pay It Forward</h6>
@@ -213,6 +213,9 @@ export function useCart({ order = null, items }) {
       return;
     }
     const pickupDay = item.pickupDays.find(({ id }) => id === pickupDayId);
+    if (pickupDay === undefined) {
+      throw "cant find pickupDay";
+    }
     pickupDay.remaining -= quantity;
   });
 
