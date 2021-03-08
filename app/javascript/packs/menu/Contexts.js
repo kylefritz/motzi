@@ -1,6 +1,11 @@
 import React, { useContext } from "react";
-import { pastDeadline } from "./pastDeadline";
+import moment from "moment";
 import _ from "lodash";
+
+function pastDeadline(deadline) {
+  const now = moment();
+  return now > moment(deadline);
+}
 
 const DayContext = React.createContext();
 const SettingsContext = React.createContext();

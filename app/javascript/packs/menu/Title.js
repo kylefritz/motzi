@@ -3,24 +3,8 @@ import _ from "lodash";
 
 import { getDeadlineContext } from "./Contexts";
 
-function When({ menu, br }) {
-  const { orderingDeadlineText } = menu;
-  if (!orderingDeadlineText) {
-    console.warn("menu.orderingDeadlineText is null");
-    return null;
-  }
-
-  const [day1, day2] = orderingDeadlineText.split(" or ");
-  return (
-    <>
-      Order by {day1} {day2 && br && <br />}
-      {day2 && <>or {day2}</>}
-    </>
-  );
-}
-
 export default function Title({ menu }) {
-  const { name } = menu;
+  const { name, orderingDeadlineText } = menu;
   const isClosed = getDeadlineContext().allClosed(menu);
 
   return (
@@ -28,17 +12,16 @@ export default function Title({ menu }) {
       <h2 id="menu-name">{name}</h2>
       {isClosed ? (
         <div
+          id="past-deadline"
           className="alert alert-secondary text-center py-3 my-4"
           role="alert"
         >
           <h6 className="alert-heading">Ordering is closed for this menu</h6>
-          <When menu={menu} br={true} />
+          {orderingDeadlineText}
         </div>
       ) : (
         <div id="deadline">
-          <small>
-            <When menu={menu} br={false} />
-          </small>
+          <small>{orderingDeadlineText}</small>
         </div>
       )}
     </>
