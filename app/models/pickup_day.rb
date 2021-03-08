@@ -26,8 +26,9 @@ class PickupDay < ApplicationRecord
   end
 
   def deadline_text
-    pickup_str = pickup_at.strftime('%a (%m/%d)')
-    deadline_str = order_deadline_at.strftime('%-l:%M %p %a (%m/%d)')
-    "for #{pickup_str} pickup, order by #{deadline_str}"
+    pickup_str = pickup_at.strftime('%a %m/%d')
+    deadline_str = order_deadline_at.strftime('%-l:%M %p on %a %m/%d')
+    deadline_str = deadline_str.gsub(/:00/i, '').gsub(/ AM/i, 'a').gsub(/ PM/i, 'p')
+    "for #{pickup_str} pickup: order by #{deadline_str}"
   end
 end

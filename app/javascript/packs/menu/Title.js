@@ -3,6 +3,25 @@ import _ from "lodash";
 
 import { getDeadlineContext } from "./Contexts";
 
+function When({ orderingDeadlineText }) {
+  if (!orderingDeadlineText) {
+    console.warn("menu.orderingDeadlineText is null");
+    return null;
+  }
+
+  const days = orderingDeadlineText.split(" or\n");
+  if (days.length > 0) {
+    days[0] = _.upperFirst(days[0]);
+  }
+
+  return days.map((words, index) => (
+    <React.Fragment key={index}>
+      {words}
+      {index != days.length - 1 && <br />}
+    </React.Fragment>
+  ));
+}
+
 export default function Title({ menu }) {
   const { name, orderingDeadlineText } = menu;
   const isClosed = getDeadlineContext().allClosed(menu);
@@ -17,11 +36,13 @@ export default function Title({ menu }) {
           role="alert"
         >
           <h6 className="alert-heading">Ordering is closed for this menu</h6>
-          {orderingDeadlineText}
+          <When {...{ orderingDeadlineText }} />
         </div>
       ) : (
         <div id="deadline">
-          <small>{orderingDeadlineText}</small>
+          <small>
+            <When {...{ orderingDeadlineText }} />
+          </small>
         </div>
       )}
     </>
