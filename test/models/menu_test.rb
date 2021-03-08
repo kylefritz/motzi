@@ -51,21 +51,20 @@ class MenuTest < ActiveSupport::TestCase
   test "ordering closed" do
     week3 = menus(:week3)
 
-    w3_final_deadline = Time.zone.parse("2019-01-17 10:00 PM")
-
-    travel_to(w3_final_deadline + 5.minutes) do
+    travel_to(week3.latest_deadline + 5.minutes) do
       assert week3.ordering_closed?
     end
 
-    assert_equal week3.pickup_days.maximum(:order_deadline_at), w3_final_deadline
-
-    travel_to(w3_final_deadline - 1.hour) do
+    travel_to(week3.latest_deadline - 1.hour) do
       refute week3.ordering_closed?
     end
   end
 
-  test "deadline" do
-    assert_equal Time.zone.parse("Sun, 13 Jan 2019 21:00:00 -0500"),  menus(:week3).day1_deadline
-    assert_equal Time.zone.parse("Tue, 15 Jan 2019 21:00:00 -0500"),  menus(:week3).day2_deadline
+  test "w3_last_deadline" do
+    week3 = menus(:week3)
+
+    w3_last_deadline = Time.zone.parse("2019-01-17 10:00 PM")
+    assert_equal week3.latest_deadline, w3_last_deadline
+    assert_equal week3.pickup_days.maximum(:order_deadline_at), w3_last_deadline
   end
 end

@@ -13,8 +13,6 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     order = Order.last
     order_items = order.order_items
     assert_equal 1, order_items.size
-
-    assert order_items.first.day1_pickup, "defaults to day1"
   end
 
   test "order day1 vs day2" do
@@ -28,8 +26,8 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_equal 2, order_items.size
 
     day1, day2 = order_items
-    assert day1.day1_pickup, "day1 item"
-    refute day2.day1_pickup, "day2 item"
+    refute_equal day1.pickup_day_id, day2.pickup_day_id
+    refute_nil day1.pickup_day_id
   end
 
   test "hashid_user cant place empty order" do
@@ -127,16 +125,19 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
   def order_attrs(hashid)
     item_id = Menu.current.items.first.id
-    {comment: 'test order', cart: [{item_id: item_id}]}.tap do |attrs|
+    pickup_day_id = Menu.current.pickup_days.first.id
+    {comment: 'test order', cart: [{item_id: item_id, pickup_day_id: pickup_day_id}]}.tap do |attrs|
       attrs[:uid] = hashid if hashid
     end
   end
 
   def different_order_attrs(hashid=nil)
     item_id = items(:rye).id
+    pickup_day1_id = Menu.current.pickup_days.first.id
+    pickup_day2_id = Menu.current.pickup_days.second.id
     {comment: 'different', cart: [
-      { item_id: item_id, quantity: 3, day: Setting.pickup_day1 },
-      { item_id: item_id, quantity: 3, day: Setting.pickup_day2 }
+      { item_id: item_id, quantity: 3, pickup_day_id: pickup_day1_id },
+      { item_id: item_id, quantity: 3, pickup_day_id: pickup_day2_id }
     ]}.tap do |attrs|
       attrs[:uid] = hashid if hashid
     end
@@ -162,13 +163,13 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   end
 
   def before_deadline(&block)
-    travel_to(Menu.current.day1_deadline - 2.hours) do
+    travel_to(Menu.current.earliest_deadline - 2.hours) do
       block.call
     end
   end
 
   def after_deadline(&block)
-    travel_to(Menu.current.day2_deadline + 2.hours) do
+    travel_to(Menu.current.latest_deadline + 2.hours) do
       block.call
     end
   end

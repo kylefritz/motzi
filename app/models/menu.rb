@@ -90,7 +90,15 @@ class Menu < ApplicationRecord
   end
 
   def ordering_closed?
-    Time.zone.now > self.pickup_days.maximum(:order_deadline_at)
+    Time.zone.now > self.latest_deadline
+  end
+
+  def earliest_deadline
+    self.pickup_days.minimum(:order_deadline_at)
+  end
+
+  def latest_deadline
+    self.pickup_days.maximum(:order_deadline_at)
   end
 
   MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
