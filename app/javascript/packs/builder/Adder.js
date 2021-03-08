@@ -25,9 +25,9 @@ export default function Adder({ items, not, onAdd }) {
   };
 
   not = new Set(not);
-  const choices = _.sortBy(items, ({ name }) => name).filter(
-    (i) => !not.has(i.name)
-  );
+  const choices = _.sortBy(items, ({ name }) => name)
+    .filter((i) => !not.has(i.name))
+    .filter((i) => i.name.length > 0);
   return (
     <form onSubmit={handleAdd} style={{ marginTop: 30, marginBottom: 20 }}>
       <div>

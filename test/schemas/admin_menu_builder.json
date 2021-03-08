@@ -1,0 +1,69 @@
+{
+  "definitions": {},
+  "$id": "/admin/menu/id/menu_builder.json",
+  "type": "object",
+  "title": "menu",
+  "required": ["id", "orderingDeadlineText", "pickupDays", "items"],
+  "properties": {
+    "id": { "type": "integer" },
+    "orderingDeadlineText": { "type": "string" },
+    "pickupDays": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "pickupAt", "orderDeadlineAt"],
+        "properties": {
+          "id": { "type": "integer" },
+          "pickupAt": { "type": "string" },
+          "orderDeadlineAt": { "type": "string" },
+          "debug": { "type": "string" }
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "price",
+          "credits",
+          "subscriber",
+          "marketplace",
+          "pickupDays"
+        ],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "price": { "type": "number" },
+          "credits": { "type": "integer" },
+          "image": {
+            "type": ["null", "string"],
+            "title": "image",
+            "examples": [
+              "/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBCZz09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--f5152334760abf53540d2df5ba6caa61b3d4635a/RussellBread2-002.webp"
+            ]
+          },
+          "subscriber": { "type": "boolean" },
+          "marketplace": { "type": "boolean" },
+          "pickupDays": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "pickupAt", "orderDeadlineAt"],
+              "properties": {
+                "id": { "type": "integer" },
+                "pickupAt": { "type": "string" },
+                "orderDeadlineAt": { "type": "string" },
+                "debug": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

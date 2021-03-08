@@ -166,9 +166,9 @@ ActiveAdmin.register Menu do
     render json: {message: "deleted!"}
   end
 
-  member_action :menu_items do
+  member_action :menu_builder do
     @menu = resource
-    render 'admin/menus/show.json.jbuilder'
+    render 'admin/menus/menu_builder.json.jbuilder'
   end
 
   member_action :test_email, method: :post do

@@ -1,110 +1,68 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import * as Sentry from "@sentry/browser";
 import _ from "lodash";
 
-import MenuItem from "./Item";
-import Adder from "./Adder";
+import Layout from "./Layout";
 
-export default class MenuBuilder extends React.Component {
-  constructor(props) {
-    super(props);
-    const menuId = _.get(location.pathname.match(/menus\/(.*)/), 1);
-    this.state = { menuId };
-  }
+const menuId = _.get(location.pathname.match(/menus\/(.*)/), 1);
 
-  loadMenu() {
-    const { menuId } = this.state;
+export default function MenuBuilder() {
+  const [menuItems, setMenuItems] = useState();
+  const [allItems, setAllItems] = useState();
+  const [error, setError] = useState();
+
+  function loadMenu() {
     axios
-      .get(`/admin/menus/${menuId}/menu_items.json`)
+      .get(`/admin/menus/${menuId}/menu_builder.json`)
       .then(({ data: { items } }) => {
-        this.setState({ menuItems: items });
+        setMenuItems(items);
+        setError(undefined);
       })
       .catch((error) => {
         console.error("cant load menu", error);
         Sentry.captureException(error);
-        this.setState({ error: "We can't load the menu" });
+        setError("We can't load the menu");
       });
   }
+  function handleAddItem(item) {
+    const json = { ...item, menuId };
+    console.log("add item", json);
+    return axios.post("/admin/menu_items.json", json).then(loadMenu);
+  }
 
-  componentDidMount() {
-    this.loadMenu();
+  function handleRemoveItem(itemId) {
+    console.log("remove item", itemId);
+    return axios({
+      method: "delete",
+      data: { itemId },
+      url: `/admin/menus/${menuId}/item.json`,
+    }).then(loadMenu);
+  }
+  useEffect(() => {
+    loadMenu();
 
+    // load items
     axios
       .get(`/admin/items.json`)
       .then(({ data: { items } }) => {
-        this.setState({ items });
+        setAllItems(items);
       })
       .catch((error) => {
         console.error("cant load items", error);
         Sentry.captureException(error);
-        this.setState({ error: "We can't load the items" });
+        setError("We can't load the  items");
       });
+  }, []);
+
+  if (error) {
+    return <h2>{error} :(</h2>;
+  }
+  if (!allItems || !menuItems) {
+    return <h2>Loading</h2>;
   }
 
-  handleAddItem(props) {
-    const { menuId } = this.state;
-    const json = { ...props, menuId };
-    console.log("add item", json);
-    axios.post("/admin/menu_items.json", json).then(() => this.loadMenu());
-  }
-
-  handleRemoveItem(itemId) {
-    const { menuId } = this.state;
-    console.log("remove item", itemId);
-    axios({
-      method: "delete",
-      data: { itemId },
-      url: `/admin/menus/${menuId}/item.json`,
-    }).then(() => this.loadMenu());
-  }
-
-  render() {
-    const { error, menuItems, items: allItems } = this.state || {};
-    if (error) {
-      return <h2>{error} :(</h2>;
-    }
-    if (!allItems || !menuItems) {
-      return <h2>Loading</h2>;
-    }
-
-    return (
-      <div className="menu-builder">
-        <h4>Items</h4>
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Marketplace?</th>
-              <th>Subscriber?</th>
-              <th>Day 1?</th>
-              <th>Day 1 Limit</th>
-              <th>Day 2?</th>
-              <th>Day 2 Limit</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {menuItems.map((i) => (
-              <MenuItem
-                key={i.id}
-                {...i}
-                onRemove={this.handleRemoveItem.bind(this)}
-              />
-            ))}
-          </tbody>
-        </table>
-        {items.length == 0 && (
-          <p>
-            <em>no items</em>
-          </p>
-        )}
-        <Adder
-          items={allItems}
-          not={menuItems.map(({ name }) => name)}
-          onAdd={(item) => this.handleAddItem(item)}
-        />
-      </div>
-    );
-  }
+  return (
+    <Layout {...{ menuItems, allItems, handleRemoveItem, handleAddItem }} />
+  );
 }

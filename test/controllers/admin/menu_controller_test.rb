@@ -24,4 +24,12 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     get "/admin/menus/#{obj.id}/edit"
     assert_response :success
   end
+
+  test "get menu_items" do
+    obj = menus(:week2)
+    get "/admin/menus/#{obj.id}/menu_builder.json"
+    assert_response :success
+
+    validate_json_schema :admin_menu_builder, @response.body
+  end
 end

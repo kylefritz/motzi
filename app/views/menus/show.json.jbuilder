@@ -9,7 +9,6 @@ json.menu do
     json.debug pickup_day.day_abbr
   end
 
-
   menu_items = @menu.menu_items.includes(item: {image_attachment: :blob}).map {|mi| [mi, mi.item]}
   if Setting.shop.pay_it_forward && Item.pay_it_forward.present?
     menu_items.push([MenuItem.new, Item.pay_it_forward])
