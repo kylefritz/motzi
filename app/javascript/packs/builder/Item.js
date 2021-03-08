@@ -3,14 +3,7 @@ import { Card, CardActions, Link, IconButton } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Delete } from "@material-ui/icons";
 import styled from "styled-components";
-
-const useStyles = makeStyles({
-  root: {
-    width: 225,
-    marginBottom: 20,
-    marginRight: 20,
-  },
-});
+import { shortDay } from "./PickupDay";
 
 export default function Item({
   onRemove: handleRemove,
@@ -18,6 +11,7 @@ export default function Item({
   name,
   subscriber,
   marketplace,
+  pickupDays,
 }) {
   const classes = useStyles();
 
@@ -26,7 +20,9 @@ export default function Item({
       <Content>
         <Name>{name}</Name>
 
-        <Smaller>pickup days info</Smaller>
+        <Smaller>
+          {pickupDays.map(({ pickupAt }) => shortDay(pickupAt)).join(", ")}
+        </Smaller>
       </Content>
 
       <CardActions>
@@ -47,6 +43,14 @@ export default function Item({
     </Card>
   );
 }
+
+const useStyles = makeStyles({
+  root: {
+    width: 225,
+    marginBottom: 20,
+    marginRight: 20,
+  },
+});
 
 const Name = styled.div`
   font-size: 1rem;

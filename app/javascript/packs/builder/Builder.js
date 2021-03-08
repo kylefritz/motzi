@@ -8,15 +8,15 @@ import Layout from "./Layout";
 const menuId = _.get(location.pathname.match(/menus\/(.*)/), 1);
 
 export default function MenuBuilder() {
-  const [menuItems, setMenuItems] = useState();
+  const [menu, setMenu] = useState();
   const [allItems, setAllItems] = useState();
   const [error, setError] = useState();
 
   function loadMenu() {
     axios
       .get(`/admin/menus/${menuId}/menu_builder.json`)
-      .then(({ data: { items } }) => {
-        setMenuItems(items);
+      .then(({ data: menu }) => {
+        setMenu(menu);
         setError(undefined);
       })
       .catch((error) => {
@@ -58,11 +58,9 @@ export default function MenuBuilder() {
   if (error) {
     return <h2>{error} :(</h2>;
   }
-  if (!allItems || !menuItems) {
+  if (!allItems || !menu) {
     return <h2>Loading</h2>;
   }
 
-  return (
-    <Layout {...{ menuItems, allItems, handleRemoveItem, handleAddItem }} />
-  );
+  return <Layout {...{ menu, allItems, handleRemoveItem, handleAddItem }} />;
 }

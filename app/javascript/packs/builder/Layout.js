@@ -1,48 +1,14 @@
 import React from "react";
 import styled from "styled-components";
-import { AppBar, Tabs, Tab, Box, Typography } from "@material-ui/core";
+import { AppBar, Tabs, Tab, Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 import MenuItem from "./Item";
 import Adder from "./Adder";
 
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box p={3}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
-
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-}
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-    backgroundColor: theme.palette.background.paper,
-  },
-}));
-
 export default function SimpleTabs({
   allItems,
-  menuItems,
+  menu,
   handleAddItem,
   handleRemoveItem,
 }) {
@@ -53,8 +19,8 @@ export default function SimpleTabs({
     setValue(newValue);
   };
 
-  const subscriber = menuItems.filter((i) => i.subscriber);
-  const marketplace = menuItems.filter((i) => i.marketplace);
+  const subscriber = menu.items.filter((i) => i.subscriber);
+  const marketplace = menu.items.filter((i) => i.marketplace);
 
   return (
     <div className={classes.root}>
@@ -78,8 +44,25 @@ export default function SimpleTabs({
       <Adder
         items={allItems}
         not={(isSubscriber ? subscriber : marketplace).map(({ name }) => name)}
+        pickupDays={menu.pickupDays}
         onAdd={(item) => handleAddItem(item)}
       />
+    </div>
+  );
+}
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box p={3}>{children}</Box>}
     </div>
   );
 }
@@ -101,17 +84,21 @@ function ItemGrid({ menuItems }) {
   );
 }
 
-const App = styled.div`
-  all: unset;
-`;
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
+  };
+}
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+    backgroundColor: theme.palette.background.paper,
+  },
+}));
 
 const Grid = styled.div`
-  // display: grid;
-  // grid-template-columns: auto auto auto auto auto;
-  // column-gap: 10px;
-  // row-gap: 15px;
-  // columns: auto;
-  // columns: 275px auto;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
