@@ -6,6 +6,10 @@ export default function Adder({ items, not: rawNot, onAdd, pickupDays }) {
   const [marketplace, setMarketplace] = useState(true);
   const [pickupDayIds, setPickupDayIds] = useState(pickupDays.map((d) => d.id));
 
+  if (pickupDays.length === 0) {
+    return <h3>Add a pickup day before adding items</h3>;
+  }
+
   const togglePickupDay = (pickupDayId, shouldAdd) => {
     console.log("pickupDay", pickupDayId, shouldAdd);
     const set = new Set(pickupDayIds);

@@ -25,6 +25,7 @@ export default function MenuBuilder() {
         setError("We can't load the menu");
       });
   }
+
   function handleAddItem(item) {
     const json = { ...item, menuId };
     console.log("add item", json);
@@ -33,12 +34,24 @@ export default function MenuBuilder() {
 
   function handleRemoveItem(itemId) {
     console.log("remove item", itemId);
-    return axios({
-      method: "delete",
-      data: { itemId },
-      url: `/admin/menus/${menuId}/item.json`,
-    }).then(loadMenu);
+    return axios
+      .delete(`/admin/menus/${menuId}/item.json`, { itemId })
+      .then(loadMenu);
   }
+
+  function handleAddPickupDay(pickupDay) {
+    const json = { ...pickupDay, menuId };
+    console.log("add pickupDay", json);
+    return axios.post("/admin/pickup_days.json", json).then(loadMenu);
+  }
+
+  function handleRemovePickupDay(pickupDayId) {
+    console.log("rm pickupDay", pickupDayId);
+    return axios
+      .delete(`/admin/pickup_days/${pickupDayId}.json`)
+      .then(loadMenu);
+  }
+
   useEffect(() => {
     loadMenu();
 
@@ -62,5 +75,16 @@ export default function MenuBuilder() {
     return <h2>Loading</h2>;
   }
 
-  return <Layout {...{ menu, allItems, handleRemoveItem, handleAddItem }} />;
+  return (
+    <Layout
+      {...{
+        menu,
+        allItems,
+        handleRemoveItem,
+        handleAddItem,
+        handleAddPickupDay,
+        handleRemovePickupDay,
+      }}
+    />
+  );
 }

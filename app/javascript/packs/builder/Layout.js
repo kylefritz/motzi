@@ -5,12 +5,15 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import MenuItem from "./Item";
 import Adder from "./Adder";
+import { PickupDays } from "./PickupDay";
 
 export default function SimpleTabs({
   allItems,
   menu,
   handleAddItem,
   handleRemoveItem,
+  handleAddPickupDay,
+  handleRemovePickupDay,
 }) {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
@@ -47,6 +50,7 @@ export default function SimpleTabs({
         pickupDays={menu.pickupDays}
         onAdd={(item) => handleAddItem(item)}
       />
+      <PickupDays {...{ ...menu, handleAddPickupDay, handleRemovePickupDay }} />
     </div>
   );
 }
