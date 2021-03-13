@@ -85,7 +85,12 @@ function TabPanel(props) {
   );
 }
 
-function ItemGrid({ menuItems, pickupDays, handleChangeMenuItemPickupDay }) {
+function ItemGrid({
+  menuItems,
+  pickupDays,
+  handleRemoveItem,
+  handleChangeMenuItemPickupDay,
+}) {
   if (items.length == 0) {
     return (
       <p>
@@ -97,13 +102,13 @@ function ItemGrid({ menuItems, pickupDays, handleChangeMenuItemPickupDay }) {
     <Grid>
       {menuItems.map((i) => (
         <MenuItem
-          key={i.id}
+          key={i.menuItemId}
           {...{
             ...i,
             handleChangeMenuItemPickupDay,
           }}
           menuPickupDays={pickupDays}
-          onRemove={() => handleRemoveItem(i.id)}
+          onRemove={() => handleRemoveItem(i.itemId)}
         />
       ))}
     </Grid>

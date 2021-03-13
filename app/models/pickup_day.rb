@@ -1,6 +1,7 @@
 class PickupDay < ApplicationRecord
   belongs_to :menu
   has_many :order_items, dependent: :destroy
+  has_many :menu_item_pickup_days, dependent: :destroy
 
   def self.for_pickup_at(dt) self.for_date_trunc('pickup_at', dt) end
   def self.for_order_deadline_at(dt) self.for_date_trunc('order_deadline_at', dt) end

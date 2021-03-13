@@ -28,15 +28,13 @@ export default function Item({
       <Content>
         <Name>{name}</Name>
 
-        <Days>
-          <PickupDays
-            {...{
-              pickupDays,
-              menuPickupDays,
-              handleCheck,
-            }}
-          />
-        </Days>
+        <PickupDays
+          {...{
+            pickupDays,
+            menuPickupDays,
+            handleCheck,
+          }}
+        />
       </Content>
 
       <CardActions>
@@ -56,16 +54,22 @@ export default function Item({
 
 function PickupDays({ pickupDays, menuPickupDays, handleCheck }) {
   const selected = new Set(pickupDays.map((d) => d.pickupAt));
-  return menuPickupDays.map(({ pickupAt, id }) => (
-    <Label key={id}>
-      <input
-        type="checkbox"
-        onChange={() => handleCheck(id, !selected.has(pickupAt))}
-        checked={selected.has(pickupAt)}
-      />
-      {shortDay(pickupAt)}
-    </Label>
-  ));
+  return (
+    <Days>
+      {menuPickupDays.map(({ pickupAt, id }) => (
+        <div key={id}>
+          <label>
+            <input
+              type="checkbox"
+              onChange={() => handleCheck(id, !selected.has(pickupAt))}
+              checked={selected.has(pickupAt)}
+            />
+            <LabelText>{shortDay(pickupAt)}</LabelText>
+          </label>
+        </div>
+      ))}
+    </Days>
+  );
 }
 
 const useStyles = makeStyles({
@@ -76,8 +80,8 @@ const useStyles = makeStyles({
   },
 });
 
-const Label = styled.label`
-  margin-right: 0.5rem;
+const LabelText = styled.span`
+  padding-left: 0.5rem;
 `;
 
 const Days = styled.div`

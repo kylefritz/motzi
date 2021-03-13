@@ -29,14 +29,14 @@ export default function MenuBuilder() {
   function handleAddItem(item) {
     const json = { ...item, menuId };
     console.log("add item", json);
-    return axios.post("/admin/menu_items.json", json).then(loadMenu);
+    return axios.post(`/admin/menus/${menuId}/item.json`, json).then(loadMenu);
   }
 
   function handleRemoveItem(itemId) {
     console.log("remove item", itemId);
     return axios
-      .delete(`/admin/menus/${menuId}/item.json`, { itemId })
-      .then(loadMenu);
+      .post(`/admin/menus/${menuId}/remove_item.json`, { itemId })
+      .then(({ data: menu }) => setMenu(menu));
   }
 
   function handleAddPickupDay(pickupDay) {
@@ -53,23 +53,32 @@ export default function MenuBuilder() {
   }
 
   function handleChangeMenuItemPickupDay({ menuItemId, pickupDayId }, add) {
+    const method = add
+      ? handleAddMenuItemPickupDay
+      : handleRemoveMenuItemPickupDay;
+    return method({ menuItemId, pickupDayId });
+  }
+
+  function handleAddMenuItemPickupDay({ menuItemId, pickupDayId }) {
     const json = { menuItemId, pickupDayId };
+
     console.log("add MenuItem PickupDay", json);
-    if (add) {
-      return axios
-        .post("/admin/menu_item_pickup_days.json", json)
-        .then(loadMenu);
-    } else {
-      return axios
-        .post("/admin/menu_item_pickup_days/find.json", json)
-        .then(loadMenu);
-    }
+    return axios.post("/admin/menu_item_pickup_days.json", json).then(loadMenu);
+  }
+
+  function handleRemoveMenuItemPickupDay({ menuItemId, pickupDayId }) {
+    const json = { menuItemId, pickupDayId };
+    console.log("remove MenuItem PickupDay", json);
+    return axios
+      .post(`/admin/menus/${menuId}/remove_menu_item_pickup_day.json`, json)
+      .then(({ data: menu }) => setMenu(menu));
   }
 
   useEffect(() => {
     loadMenu();
 
     // load items
+    // TODO: why side load? add to menu request?
     axios
       .get(`/admin/items.json`)
       .then(({ data: { items } }) => {

@@ -11,14 +11,14 @@ export default function Adder({ items, not: rawNot, onAdd, pickupDays }) {
   }
 
   const togglePickupDay = (pickupDayId, shouldAdd) => {
-    console.log("pickupDay", pickupDayId, shouldAdd);
+    console.log("pickupDay", pickupDayId, "add", shouldAdd);
     const set = new Set(pickupDayIds);
     if (shouldAdd) {
       set.add(pickupDayId);
     } else {
       set.delete(pickupDayId);
     }
-    setPickupDayIds(set.entries());
+    setPickupDayIds([...set.keys()]);
   };
 
   const selectRef = React.createRef();
@@ -29,13 +29,7 @@ export default function Adder({ items, not: rawNot, onAdd, pickupDays }) {
       alert("Select an item");
       return;
     }
-    onAdd({ itemId, subscriber, marketplace, day1, day2 });
-
-    // reset form
-    setSubscriber(true);
-    setMarketplace(true);
-    setDay1(true);
-    setDay2(true);
+    onAdd({ itemId, subscriber, marketplace, pickupDayIds });
   };
 
   const not = new Set(rawNot);
@@ -69,15 +63,17 @@ export default function Adder({ items, not: rawNot, onAdd, pickupDays }) {
             onChange={(e) => setSubscriber(e.target.checked)}
           />
         </label>
-        {pickupDays.map(({ id, pickupAt }) => (
-          <label key={id} style={{ marginLeft: 20 }}>
-            {shortDay(pickupAt)}
-            <Checkbox
-              checked={new Set(pickupDayIds).has(id)}
-              onChange={(e) => togglePickupDay(id, e.target.checked)}
-            />
-          </label>
-        ))}
+        {pickupDays.map(({ id, pickupAt }) => {
+          return (
+            <label key={id} style={{ marginLeft: 20 }}>
+              {shortDay(pickupAt)}
+              <Checkbox
+                checked={new Set(pickupDayIds).has(id)}
+                onChange={(e) => togglePickupDay(id, e.target.checked)}
+              />
+            </label>
+          );
+        })}
         <br />
         <br />
         <button type="submit">Add Item</button>

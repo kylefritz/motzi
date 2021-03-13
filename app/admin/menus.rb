@@ -160,17 +160,6 @@ ActiveAdmin.register Menu do
     redirect_to collection_path, notice: notice
   end
 
-  member_action :item, method: :delete do
-    menu = Menu.find(params[:id])
-    MenuItem.where(menu: menu, item_id: params[:item_id]).destroy_all
-    render json: {message: "deleted!"}
-  end
-
-  member_action :menu_builder do
-    @menu = resource
-    render 'admin/menus/menu_builder.json.jbuilder'
-  end
-
   member_action :test_email, method: :post do
     menu = resource
     MenuMailer.with(menu: menu, user: current_user).weekly_menu_email.deliver_now
@@ -182,5 +171,48 @@ ActiveAdmin.register Menu do
                                 author: current_admin_user)
 
     redirect_to resource_path, notice: notice
+  end
+
+
+  #
+  # menu builder actions, could be own controller...
+  #
+  member_action :menu_builder do
+    @menu = resource
+    render 'admin/menus/menu_builder.json.jbuilder'
+  end
+
+  member_action :item, method: :post do
+    @menu = Menu.find(params[:id])
+    Menu.transaction do 
+      mi = @menu.menu_items.create!(
+        item_id: params[:item_id],
+        subscriber: params[:subscriber],
+        marketplace: params[:marketplace]
+      )
+
+      params[:pickup_day_ids].each do |pickup_day_id|
+        mi.menu_item_pickup_days.create!(pickup_day_id: pickup_day_id)
+      end
+    end
+
+    render 'admin/menus/menu_builder.json.jbuilder'
+  end
+
+  # TODO: should use DELETE instead of POST but axios doesn't send body
+  # https://blog.liplex.de/send-body-with-axios-delete-request/
+  member_action :remove_menu_item_pickup_day, method: :post do
+    mipd = MenuItemPickupDay.find_by(menu_item_id: params[:menu_item_id], pickup_day_id: params[:pickup_day_id])
+    mipd.destroy!
+
+    @menu = MenuItem.find(params[:menu_item_id]).menu
+    render 'admin/menus/menu_builder.json.jbuilder'
+  end
+
+  member_action :remove_item, method: :post do
+    @menu = Menu.find(params[:id])
+    MenuItem.where(menu: @menu, item_id: params[:item_id]).destroy_all
+    
+    render 'admin/menus/menu_builder.json.jbuilder'
   end
 end
