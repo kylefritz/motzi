@@ -16,7 +16,7 @@ class MigrateMenusToPickupDay < ActiveRecord::Migration[6.0]
     bar = ProgressBar.new(Menu.count)
     Menu.find_each do |m|
       day1 = make_pickup_day(m, true)
-      day2 = Setting.show_day2 ? make_pickup_day(m, false) : nil
+      day2 = Setting.show_day2 ? make_pickup_day(m, false) : day1 # move any accidental order items to day1
       
       m.orders.each do |o|
         o.order_items.each do |oi|
