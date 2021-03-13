@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_02_083629) do
+ActiveRecord::Schema.define(version: 2021_01_10_235104) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -231,6 +231,7 @@ ActiveRecord::Schema.define(version: 2020_08_02_083629) do
     t.datetime "updated_at", precision: 6, null: false
     t.integer "quantity", default: 1, null: false
     t.boolean "day1_pickup", default: true, null: false
+    t.bigint "pickup_day_id"
     t.index ["item_id"], name: "index_order_items_on_item_id"
     t.index ["order_id"], name: "index_order_items_on_order_id"
   end
@@ -248,6 +249,15 @@ ActiveRecord::Schema.define(version: 2020_08_02_083629) do
     t.decimal "stripe_charge_amount", precision: 8, scale: 2
     t.index ["menu_id"], name: "index_orders_on_menu_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
+  end
+
+  create_table "pickup_days", force: :cascade do |t|
+    t.bigint "menu_id", null: false
+    t.datetime "pickup_at"
+    t.datetime "order_deadline_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["menu_id"], name: "index_pickup_days_on_menu_id"
   end
 
   create_table "settings", force: :cascade do |t|

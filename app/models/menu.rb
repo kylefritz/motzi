@@ -1,5 +1,6 @@
 class Menu < ApplicationRecord
   has_many :menu_items, dependent: :destroy
+  has_many :pickup_days, dependent: :destroy
   has_many :items, through: :menu_items
   has_many :orders
   has_many :order_items, through: :orders
