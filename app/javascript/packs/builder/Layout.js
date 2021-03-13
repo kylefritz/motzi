@@ -15,6 +15,7 @@ export default function SimpleTabs({
   handleAddPickupDay,
   handleRemovePickupDay,
   handleChangeMenuItemPickupDay,
+  handleUpdateMenuItemPickupDay,
 }) {
   const classes = useStyles();
   const [tab, setTab] = React.useState(0);
@@ -34,6 +35,7 @@ export default function SimpleTabs({
           handleRemoveItem,
           pickupDays: menu.pickupDays,
           handleChangeMenuItemPickupDay,
+          handleUpdateMenuItemPickupDay,
         }}
       />
     );
@@ -96,6 +98,7 @@ function ItemGrid({
   pickupDays,
   handleRemoveItem,
   handleChangeMenuItemPickupDay,
+  handleUpdateMenuItemPickupDay,
 }) {
   if (items.length == 0) {
     return (
@@ -112,6 +115,7 @@ function ItemGrid({
           {...{
             ...i,
             handleChangeMenuItemPickupDay,
+            handleUpdateMenuItemPickupDay,
           }}
           menuPickupDays={pickupDays}
           onRemove={() => handleRemoveItem(i.itemId)}

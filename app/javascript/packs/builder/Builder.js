@@ -74,6 +74,15 @@ export default function MenuBuilder() {
       .then(({ data: menu }) => setMenu(menu));
   }
 
+  function handleUpdateMenuItemPickupDay({ id, limit }) {
+    const json = { menu_item_pickup_day_id: id, limit };
+
+    console.log("update MenuItem PickupDay", json);
+    return axios
+      .post(`/admin/menus/${menuId}/menu_item_pickup_day_limit.json`, json)
+      .then(({ data: menu }) => setMenu(menu));
+  }
+
   useEffect(() => {
     loadMenu();
 
@@ -108,6 +117,7 @@ export default function MenuBuilder() {
         handleAddPickupDay,
         handleRemovePickupDay,
         handleChangeMenuItemPickupDay,
+        handleUpdateMenuItemPickupDay,
       }}
     />
   );

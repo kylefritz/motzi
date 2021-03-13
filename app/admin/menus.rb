@@ -199,6 +199,14 @@ ActiveAdmin.register Menu do
     render 'admin/menus/menu_builder.json.jbuilder'
   end
 
+  member_action :menu_item_pickup_day_limit, method: :post do
+    mipd = MenuItemPickupDay.find(params[:menu_item_pickup_day_id])
+    mipd.update!(limit: params[:limit])
+
+    @menu = Menu.find(params[:id])
+    render 'admin/menus/menu_builder.json.jbuilder'
+  end
+
   # TODO: should use DELETE instead of POST but axios doesn't send body
   # https://blog.liplex.de/send-body-with-axios-delete-request/
   member_action :remove_menu_item_pickup_day, method: :post do

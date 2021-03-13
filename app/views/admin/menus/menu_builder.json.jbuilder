@@ -21,7 +21,7 @@ json.items @menu.menu_items.map do |menu_item|
   json.extract! menu_item, :subscriber, :marketplace
   json.pickup_days menu_item.menu_item_pickup_days do |mi_pd|
 
-    json.extract! mi_pd, :id
+    json.extract! mi_pd, :id, :limit
     json.extract! mi_pd.pickup_day, :pickup_at, :order_deadline_at, :deadline_text
     json.debug mi_pd.pickup_day.day_abbr
   end

@@ -63,11 +63,12 @@
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["id", "pickupAt", "orderDeadlineAt"],
+              "required": ["id", "pickupAt", "orderDeadlineAt", "limit"],
               "properties": {
                 "id": { "type": "integer" },
                 "pickupAt": { "type": "string" },
                 "orderDeadlineAt": { "type": "string" },
+                "limit": { "type": ["integer", "null"] },
                 "debug": { "type": "string" },
                 "deadlineText": { "type": "string" }
               }
