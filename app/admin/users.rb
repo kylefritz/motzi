@@ -12,8 +12,6 @@ ActiveAdmin.register User do
   filter :opt_in
 
   scope :all, default: true
-  scope "Weekly", :must_order_weekly
-  scope "Semi-weekly", :every_other_week
   scope :subscribers
   scope :nonsubscribers
   scope :spam

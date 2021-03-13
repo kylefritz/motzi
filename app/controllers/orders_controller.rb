@@ -40,11 +40,7 @@ class OrdersController < ApplicationController
         end
       end
       params.fetch(:cart).each do |cart_item_params|
-        # default to day1
-        day1_pickup = Setting.pickup_day1.casecmp?(cart_item_params[:day])
-        day1_pickup = day1_pickup.nil? ? true : day1_pickup
-
-        order.order_items.create!(cart_item_params.permit(:item_id, :quantity).merge(day1_pickup: day1_pickup))
+        order.order_items.create!(cart_item_params.permit(:item_id, :quantity, :pickup_day_id))
       end
 
       # figure out if we need to charge this person or if we're using credits
@@ -114,8 +110,7 @@ class OrdersController < ApplicationController
       order.update!(params.permit(:comments, :skip))
       order.order_items.destroy_all
       params[:cart].each do |cart_item_params|
-        day1_pickup = !(Setting.pickup_day2.casecmp?(cart_item_params[:day])) # default to day 1
-        order.order_items.create!(cart_item_params.permit(:item_id, :quantity).merge(day1_pickup: day1_pickup))
+        order.order_items.create!(cart_item_params.permit(:item_id, :quantity, :pickup_day_id))
       end
 
       # send confirmation email

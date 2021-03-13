@@ -32,9 +32,38 @@ class Menu < ApplicationRecord
   end
 
   def item_counts
-    day1, day2 = SqlQuery.new(:ordered_items_counts, menu_id: self.id).execute.partition {|count| count["day1_pickup"]}
-    s = ->(list){ Hash[list.map { |c| [c["item_id"], c["sum"]] }] }
-    [s.call(day1), s.call(day2)]
+    # TODO: how should we represent this?
+    day_item_counts = SqlQuery.new(:ordered_items_counts, menu_id: self.id).execute
+    # pickup_days = self.pickup_days.all
+
+    {}.tap do |counts|
+      day_item_counts.each do |r|
+        pickup_day_id = r["pickup_day_id"]
+        item_id = r["item_id"]
+        num_items = r["sum"]
+
+        if counts[item_id].nil?
+          counts[item_id] = {}
+        end
+        counts[item_id][pickup_day_id] = num_items
+      end
+    end
+  end
+
+  def item_counts_by_pickup_day
+    day_item_counts = SqlQuery.new(:ordered_items_counts, menu_id: self.id).execute
+    {}.tap do |counts|
+      day_item_counts.each do |r|
+        pickup_day_id = r["pickup_day_id"]
+        item_id = r["item_id"]
+        num_items = r["sum"]
+
+        if counts[pickup_day_id].nil?
+          counts[pickup_day_id] = {}
+        end
+        counts[pickup_day_id][item_id] = num_items
+      end
+    end
   end
 
   def subscriber_note_html
@@ -54,28 +83,23 @@ class Menu < ApplicationRecord
       throw "can only publish_to_subscribers for current week's menu or future week's menu"
     end
     self.make_current!
-    self.touch :emailed_at # audit email was sent
+    self.touch :emailed_at # create audit that email was sent
     SendWeeklyMenuJob.users_to_email_count(self).tap do
       SendWeeklyMenuJob.perform_later
     end
   end
 
-  def day1_deadline
-    compute_deadline(Setting.pickup_day1_wday)
-  end
-  def day2_deadline
-    compute_deadline(Setting.pickup_day2_wday)
+  def ordering_closed?
+    Time.zone.now > self.latest_deadline
   end
 
-  def ordering_closed?
-    Time.zone.now > day2_deadline
+  def earliest_deadline
+    self.pickup_days.minimum(:order_deadline_at)
+  end
+
+  def latest_deadline
+    self.pickup_days.maximum(:order_deadline_at)
   end
 
   MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
-
-  private
-  def compute_deadline(wday)
-    # from_week_id(week_id).beginning_of_day is always sunday
-    Time.zone.from_week_id(week_id).beginning_of_day + wday.days - Setting.leadtime_hours.hours
-  end
 end

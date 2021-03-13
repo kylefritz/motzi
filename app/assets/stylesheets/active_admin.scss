@@ -32,19 +32,6 @@
   max-width: 200px;
 }
 
-// building menus
-.menu-builder {
-  table {
-    margin-bottom: 0; // make Adder table adjacent to previous table
-    select {
-      height: 27px; // make <select> same height as button
-    }
-    td:last-child {
-      text-align: right;
-    }
-  }
-}
-
 //
 // try to flatten everything out
 //

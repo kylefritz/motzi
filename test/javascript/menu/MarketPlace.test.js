@@ -67,7 +67,7 @@ test("checkout", () => {
   expect(cart[0]).toStrictEqual({
     itemId: 3,
     quantity: 1,
-    day: "Thursday",
+    pickupDayId: 1,
   });
   expect(email).toBe("kf@woo.com");
   expect(lastName).toBe("fritz");

@@ -1,6 +1,6 @@
 ActiveAdmin.register Ahoy::Message, as: "Email" do
   actions :all, except: [:edit, :update] # updating doesn't make sense
-  includes :menu, :user
+  includes :menu, :user, :pickup_day
 
   scope :all, default: true
   scope("current menu") { |scope| scope.where(menu_id: Setting.menu_id) }
@@ -22,6 +22,9 @@ ActiveAdmin.register Ahoy::Message, as: "Email" do
     end
     column "menu" do |email|
       auto_link email.menu
+    end
+    column "pickup_day" do |email|
+      auto_link email.pickup_day.day_str
     end
     column :sent_at
     column :opened_at

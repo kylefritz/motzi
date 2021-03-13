@@ -14,9 +14,11 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 23, users(:kyle).credits
 
     # buy a multi-credit item
-    order = users(:kyle).orders.create!(menu: menus(:week1))
+    menu = menus(:week1)
+    order = users(:kyle).orders.create!(menu: menu)
     item = Item.create!(name: 'multi-credit item', credits: 6)
-    order.order_items.create!(item: item)
+    pickup_day =  menu.pickup_days.first
+    order.order_items.create!(item: item, pickup_day: pickup_day)
     assert_equal 23 - item.credits, users(:kyle).credits
   end
 
@@ -26,19 +28,23 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "credit go down with items" do
-    menus(:week2).make_current!
+    menu = menus(:week2)
+    menu.make_current!
+    pickup_day = menu.pickup_days.first
     kyle = users(:kyle)
     assert_difference 'kyle.credits', -1, 'added an item' do
-      kyle.current_order.order_items.create!(item: items(:classic))
+      kyle.current_order.order_items.create!(item: items(:classic), pickup_day: pickup_day)
     end
   end
 
   test "credits dont change if we pay for order seperately" do
-    menus(:week2).make_current!
+    menu = menus(:week2)
+    menu.make_current!
+    pickup_day = menu.pickup_days.first
     kyle = users(:kyle)
     kyle.current_order.update(stripe_charge_id: "fake-value")
     assert_difference 'kyle.credits', 0, 'added an item' do
-      kyle.current_order.order_items.create!(item: items(:classic))
+      kyle.current_order.order_items.create!(item: items(:classic), pickup_day: pickup_day)
     end
   end
 
@@ -56,22 +62,6 @@ class UserTest < ActiveSupport::TestCase
 
   test "owners" do
     assert_equal 2, User.owners.count
-  end
-
-  test "for_bakers_choice" do
-    menus(:week2).make_current!
-    assert_equal 2, User.for_bakers_choice.count
-  end
-
-  test "must_order_weekly" do
-    assert_equal 3, User.must_order_weekly.count
-    assert User.must_order_weekly.first.must_order_weekly?
-  end
-
-  test "every_other_week" do
-    assert_equal 1, User.every_other_week.count
-    assert_equal users(:jess).id, User.every_other_week.first.id
-    assert User.every_other_week.first.every_other_week?
   end
 
   test "subscribers" do

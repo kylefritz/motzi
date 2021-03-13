@@ -1,9 +1,21 @@
-sorted_keys_without_total = Item.where(id: counts.keys).pluck(:name, :id).sort_by(&:first)
-total_tag = "<strong>TOTAL</strong>".html_safe
-counts[total_tag] = "<strong>#{counts.values.sum}</strong>".html_safe
-sorted_keys_without_total.push([total_tag, total_tag])
+item_counts_by_pickup_day = menu.item_counts_by_pickup_day
+columns do
+  menu.pickup_days.each do |pickup_day|
+    column id: "what-to-bake-#{pickup_day.day_abbr}" do
+      panel "#{pickup_day.day_str} - What to make" do
+        a("Pickup List", href: admin_pickup_day_path(pickup_day))
+        counts = item_counts_by_pickup_day[pickup_day.id] || {}
 
-table_for sorted_keys_without_total, class: 'mt-0 breads' do
-  column ("Item") { |name, id| name }
-  column ("Quantity") { |name, id| counts[id] }
+        sorted_keys_without_total = Item.where(id: counts.keys).pluck(:name, :id).sort_by(&:first)
+        total_tag = "<strong>TOTAL</strong>".html_safe
+        counts[total_tag] = "<strong>#{counts.values.sum}</strong>".html_safe
+        sorted_keys_without_total.push([total_tag, total_tag])
+
+        table_for sorted_keys_without_total, class: 'mt-0 breads' do
+          column ("Item") { |name, id| name }
+          column ("Quantity") { |name, id| counts[id] }
+        end
+      end
+    end
+  end
 end

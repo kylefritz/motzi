@@ -1,11 +1,16 @@
 class SendHaventOrderedReminderJob < ApplicationJob
 
   def perform(*args)
-    menu = Menu.for_current_week_id
-    return if menu.nil?
+    PickupDay.for_order_deadline_at(Time.zone.now).each do |pickup_day|
+      send_reminders_for_day(pickup_day)
+    end
+  end
 
-    return unless SendHaventOrderedReminderJob.time_for_reminder_email?(menu)
-
+  private
+  def send_reminders_for_day(pickup_day)
+    menu = pickup_day.menu
+    return unless menu.current?
+    
     already_reminded = Set[*menu.messages.where(mailer: 'ReminderMailer#havent_ordered_email').pluck(:user_id)]
     already_ordered = Set[*menu.orders.pluck(:user_id)]
 
@@ -15,14 +20,5 @@ class SendHaventOrderedReminderJob < ApplicationJob
 
       ReminderMailer.with(user: user, menu: menu).havent_ordered_email.deliver_now
     end
-  end
-
-  def self.inside_reminder_window?(deadline)
-    reminder_start = deadline - Setting.reminder_hours.hours - 1.minute
-    Time.zone.now.between?(reminder_start, deadline)
-  end
-
-  def self.time_for_reminder_email?(menu)
-    inside_reminder_window?(menu.day1_deadline) || inside_reminder_window?(menu.day2_deadline)
   end
 end

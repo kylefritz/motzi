@@ -23,6 +23,15 @@ class ActiveSupport::TestCase
     JSON::Validator.validate!(schema_path, json, strict: true)
   end
 
+  def assert_el_count(expect_count, css, msg=nil)
+    @html = document_root_element.css(css)
+    if expect_count != @html.count
+      puts document_root_element.css('#main_content')
+      puts "looking for $(#{css})"
+    end
+    assert_equal expect_count, @html.count, msg
+  end
+
   EMAIL_MODEL_COUNTS = ['ApplicationMailer.deliveries.count', 'Ahoy::Message.count']
   def assert_email_sent(num_emails=1, msg="emails delivered & audited in ahoy", &block)
     perform_enqueued_jobs do
@@ -57,13 +66,13 @@ class ActiveSupport::TestCase
   end
 
   def travel_to_day_time(day, time, &block)
-    days = { sun: "11-10",
-            mon: "11-11",
-            tues: "11-12",
-            wed: "11-13",
+    days = {sun:   "11-10",
+            mon:   "11-11",
+            tues:  "11-12",
+            wed:   "11-13",
             thurs: "11-14",
-            fri: "11-15",
-            sat: "11-16" }
+            fri:   "11-15",
+            sat:   "11-16" }
     assert days.include?(day), "pick a known day"
 
     datetime_str = "2019-#{days[day]} #{time} EST"

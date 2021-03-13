@@ -15,12 +15,13 @@ class LowCreditUsersTest < ActiveSupport::TestCase
   test "doesnt charge for skip" do
     kyle = users(:kyle)
     menu = menus(:week2)
+    pickup_day = menu.pickup_days.first
 
     # synthesize enough orders that kyle will be in the "low-credit" list
     items = menu.menu_items
     new_kyle_orders = kyle.credits.times.map do
       kyle.orders.create!(menu: menu).tap do |order|
-        order.order_items.create!(item: items.sample.item)
+        order.order_items.create!(item: items.sample.item, pickup_day: pickup_day)
       end
     end
     assert_equal 0, kyle.credits, 'now kyle has no credits'

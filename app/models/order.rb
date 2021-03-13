@@ -5,7 +5,7 @@ class Order < ApplicationRecord
   has_many :items, through: :order_items
   has_paper_trail
   visitable :ahoy_visit
-  scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> '' AND comments <> ?", BAKERS_CHOICE) }
+  scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> ''",) }
   scope :not_skip, -> { where("skip is FALSE") }
   scope :skip, -> { where("skip is TRUE") }
   scope :marketplace, -> { where("stripe_charge_amount is not NULL")}
@@ -23,30 +23,29 @@ class Order < ApplicationRecord
     order_items.map {|oi| oi.item.price * oi.quantity}.sum
   end
 
+  def items_for_pickup(pickup_day)
+    order_items.filter {|oi| oi.pickup_day == pickup_day && oi.item_id != Item::PAY_IT_FORWARD_ID}
+  end
+
   def item_list
     StringIO.new.tap do |s|
 
       prior_day_had_items = false
 
-      pay_it_forwards = []
-      day1, day2 = order_items.partition(&:day1_pickup)
-      [
-        [Setting.pickup_day1_abbr, day1],
-        [Setting.pickup_day2_abbr, day2],
-      ].each do |day_name, day_items|
+      pay_it_forwards = order_items.filter {|oi| oi.item_id == Item::PAY_IT_FORWARD_ID}
+      pickup_days = PickupDay.where(id: order_items.map(&:pickup_day_id).uniq).sort_by(&:pickup_at)
+      
+      pickup_days.each do |pickup_day|
+        day_items = items_for_pickup(pickup_day)
         next if day_items.empty?
 
-        s << "#{prior_day_had_items ? ". " : ""}#{day_name}: "
+        s << "#{prior_day_had_items ? ". " : ""}#{pickup_day.day_abbr}: "
 
         prior_day_had_items = true
 
         counts = Hash.new(0).tap do |counts|
           day_items.each do |oi|
-            if oi.item.pay_it_forward?
-              pay_it_forwards.push(oi)
-            else
-              counts[oi.item.name] += oi.quantity
-            end
+            counts[oi.item.name] += oi.quantity
           end
         end
         day_item_names = counts.keys.natural_sort
@@ -75,7 +74,6 @@ class Order < ApplicationRecord
   def name
     "Order ##{id}"
   end
-  BAKERS_CHOICE = "Baker's Choice"
 
   def comments_html
     if self.comments.present?

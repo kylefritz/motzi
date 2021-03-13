@@ -5,7 +5,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
   def setup
     menus(:week2).make_current!
-    travel_to(Menu.current.day1_deadline - 2.hours)
+    travel_to(Menu.current.earliest_deadline - 2.hours)
     StripeMock.start
     @stripe_helper = StripeMock.create_test_helper
   end
@@ -97,8 +97,8 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
   def build_order_attrs
     return {
       cart: [
-          {item_id: items(:classic).id, price: 5, quantity: 1, day: "Thursday"},
-          {item_id: items(:rye).id, price: 5, quantity: 1, day: "Thursday"}
+          {item_id: items(:classic).id, price: 5, quantity: 1, pickup_day_id: pickup_days(:w2_d1_thurs).id},
+          {item_id: items(:rye).id, price: 5, quantity: 1, pickup_day_id: pickup_days(:w2_d1_thurs).id}
       ],
       comments: nil,
       email: "jeff@jeff.com",

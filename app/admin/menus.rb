@@ -1,6 +1,6 @@
 ActiveAdmin.register Menu do
   permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note
-  includes menu_items: [:item]
+  includes :pickup_days, menu_items: [:item]
   config.sort_order = 'LOWER(week_id) desc'
 
   actions :all, except: [:destroy] # deleting menus can orphan orders, etc
@@ -18,12 +18,6 @@ ActiveAdmin.register Menu do
   scope("not emailed") { |scope| scope.where("emailed_at is null") }
 
   # create big buttons on every menu page
-  action_item :pickup_day1, except: [:index, :new] do
-    link_to "#{Setting.pickup_day1} Pickup List", pickup_day1_admin_menus_path()
-  end
-  action_item :pickup_day2, except: [:index, :new] do
-    link_to "#{Setting.pickup_day2} Pickup List", pickup_day2_admin_menus_path()
-  end
   action_item :preview, except: [:index, :new] do
     if params[:id].present?
       link_to 'Preview Menu', menu_path(params[:id]), target: "_blank"
@@ -42,7 +36,7 @@ ActiveAdmin.register Menu do
     column :items do |menu|
       ul style: 'list-style: 	disc outside none !important; white-space: nowrap' do
         menu.menu_items.map do |menu_item|
-          li "#{menu_item.item.name}"
+          li menu_item.item.name
         end
       end
     end
@@ -55,6 +49,13 @@ ActiveAdmin.register Menu do
       render 'admin/menus/sales', {menu: menu}
     end
     column :emailed_at
+    column :pickup_days do |menu|
+      ul style: 'list-style: 	disc outside none !important; white-space: nowrap' do
+        menu.pickup_days.map do |pickup_day|
+          li a(pickup_day.name_abbr, href: admin_pickup_day_path(pickup_day))
+        end
+      end
+    end
     actions defaults: false do |menu|
       item "View", admin_menu_path(menu), class: "member_link"
       item "Edit", edit_admin_menu_path(menu), class: "member_link"
@@ -125,21 +126,7 @@ ActiveAdmin.register Menu do
     active_admin_comments
 
     panel "Orders" do
-      columns do
-        day1, day2 = menu.item_counts
-
-        column id: 'what-to-bake-day1' do
-          panel "#{Setting.pickup_day1}" do
-            render 'admin/menus/what_to_bake', { counts: day1, menu: menu }
-          end
-        end
-
-        column id: 'what-to-bake-day2' do
-          panel "#{Setting.pickup_day2}" do
-            render 'admin/menus/what_to_bake', { counts: day2, menu: menu}
-          end
-        end
-      end
+      render 'admin/menus/what_to_bake', {menu: menu}
     end
 
     panel "Emails" do
@@ -173,61 +160,6 @@ ActiveAdmin.register Menu do
     redirect_to collection_path, notice: notice
   end
 
-  # metaprogramming for day1_pickup, day2_pickup
-  [1, 2].each do |day|
-    day1_pickup = day == 1
-    pickup_day = "day#{day}_pickup"
-
-    collection_action "pickup_day#{day}" do
-      orders = Menu.current.orders.not_skip.includes(:user).includes({order_items: :item})
-      @rows = orders.map do |order|
-        order_items = order.order_items.filter {|oi| oi.day1_pickup == day1_pickup}
-        unless order_items.empty?
-          [order.user, order_items]
-        end
-      end.compact
-
-      @page_title = Setting.send("pickup_day#{day}")
-      render :pickup_list
-    end
-  end
-
-  member_action :item, method: :delete do
-    menu = Menu.find(params[:id])
-    MenuItem.where(menu: menu, item_id: params[:item_id]).destroy_all
-    render json: {message: "deleted!"}
-  end
-
-  member_action :menu_items do
-    @menu = resource
-    render 'admin/menus/bakers_choice_menu.json.jbuilder'
-  end
-
-  collection_action :bakers_choice, method: [:get, :post] do
-    if request.post?
-      menu = Menu.current
-      user = User.find(params[:user_id])
-      item = Item.find(params[:item_id])
-      day1_pickup = !(Setting.pickup_day2.casecmp?(params[:day])) # default to day 1
-      order = Order.transaction do
-        user.orders.create!(menu: menu, comments: Order::BAKERS_CHOICE).tap do |order|
-          order.order_items.create!(item: item, day1_pickup: day1_pickup)
-        end
-      end
-
-      @users = User.for_bakers_choice
-      return render template: 'admin/users/index.json.jbuilder'
-    end
-
-    @users = User.for_bakers_choice
-    gon.jbuilder template: 'app/views/admin/users/index.json.jbuilder', as: :havent_ordered
-
-    @menu = Menu.current
-    gon.jbuilder template: 'app/views/admin/menus/bakers_choice_menu.json.jbuilder', as: :menu
-
-    render :bakers_choice
-  end
-
   member_action :test_email, method: :post do
     menu = resource
     MenuMailer.with(menu: menu, user: current_user).weekly_menu_email.deliver_now
@@ -239,5 +171,48 @@ ActiveAdmin.register Menu do
                                 author: current_admin_user)
 
     redirect_to resource_path, notice: notice
+  end
+
+
+  #
+  # menu builder actions, could be own controller...
+  #
+  member_action :menu_builder do
+    @menu = resource
+    render 'admin/menus/menu_builder.json.jbuilder'
+  end
+
+  member_action :item, method: :post do
+    @menu = Menu.find(params[:id])
+    Menu.transaction do 
+      mi = @menu.menu_items.create!(
+        item_id: params[:item_id],
+        subscriber: params[:subscriber],
+        marketplace: params[:marketplace]
+      )
+
+      params[:pickup_day_ids].each do |pickup_day_id|
+        mi.menu_item_pickup_days.create!(pickup_day_id: pickup_day_id)
+      end
+    end
+
+    render 'admin/menus/menu_builder.json.jbuilder'
+  end
+
+  # TODO: should use DELETE instead of POST but axios doesn't send body
+  # https://blog.liplex.de/send-body-with-axios-delete-request/
+  member_action :remove_menu_item_pickup_day, method: :post do
+    mipd = MenuItemPickupDay.find_by(menu_item_id: params[:menu_item_id], pickup_day_id: params[:pickup_day_id])
+    mipd.destroy!
+
+    @menu = MenuItem.find(params[:menu_item_id]).menu
+    render 'admin/menus/menu_builder.json.jbuilder'
+  end
+
+  member_action :remove_item, method: :post do
+    @menu = Menu.find(params[:id])
+    MenuItem.where(menu: @menu, item_id: params[:item_id]).destroy_all
+    
+    render 'admin/menus/menu_builder.json.jbuilder'
   end
 end

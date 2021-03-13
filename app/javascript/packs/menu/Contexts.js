@@ -1,6 +1,11 @@
 import React, { useContext } from "react";
-import { pastDeadline } from "./pastDeadline";
+import moment from "moment";
 import _ from "lodash";
+
+function pastDeadline(deadline) {
+  const now = moment();
+  return now > moment(deadline);
+}
 
 const DayContext = React.createContext();
 const SettingsContext = React.createContext();
@@ -22,34 +27,25 @@ export function getPriceContext() {
   return { showCredits };
 }
 
-export function getDayContext() {
-  const ctx = useContext(DayContext);
-  if (ctx !== undefined) {
-    const { day1Deadline, day2Deadline, ignoreDeadline } = ctx;
+export function getDeadlineContext() {
+  const ctx = useContext(DayContext) || {};
 
-    const pastDay1Deadline = pastDeadline(day1Deadline);
-    const day1Closed = pastDay1Deadline && !ignoreDeadline;
-    const pastDay2Deadline = pastDeadline(day2Deadline);
-    const day2Closed = pastDay2Deadline && !ignoreDeadline;
+  const isClosed = (orderDeadlineAt) => {
+    if (ctx.ignoreDeadline) {
+      return false;
+    }
 
-    return {
-      ...ctx,
-      pastDay1Deadline,
-      pastDay2Deadline,
-      day1Closed,
-      day2Closed,
-    };
-  }
-
-  return {
-    day1: "Thursday",
-    day1DeadlineDay: "Tuesday",
-    pastDay1Deadline: false,
-    day1Closed: false,
-    //
-    day2: "Saturday",
-    day2DeadlineDay: "Thursday",
-    pastDay2Deadline: false,
-    day2Closed: false,
+    return pastDeadline(orderDeadlineAt);
   };
+
+  const allClosed = ({ pickupDays }) => {
+    if (ctx.ignoreDeadline) {
+      return false;
+    }
+
+    const lastPickupDay = pickupDays[pickupDays.length - 1];
+    return isClosed(lastPickupDay.orderDeadlineAt);
+  };
+
+  return { ...ctx, isClosed, allClosed };
 }

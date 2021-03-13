@@ -6,31 +6,23 @@ class OrderItemTest < ActiveSupport::TestCase
   end
 
   test "day" do
-    assert_equal Setting.pickup_day1, order_items(:k_w1_pumpkin_day1).day
-    assert_equal Setting.pickup_day2, order_items(:ljf_w1_classic_day2).day
+    assert_equal "Thursday", order_items(:k_w1_pumpkin_day1).day
+    assert_equal "Saturday", order_items(:ljf_w1_classic_day2).day
 
     assert_nil make_order_item(item: Item.pay_it_forward).day
   end
 
   test "scopes" do
-    assert_difference('OrderItem.day1_pickup.count', 1, 'day1_pickup') do
-      make_order_item(pickup: :day1)
-    end
-    assert_difference('OrderItem.day2_pickup.count', 1, 'day2_pickup') do
-      make_order_item(pickup: :day2)
-    end
     assert_difference('OrderItem.requires_pickup.count', 2, 'requires_pickup') do
-      make_order_item(pickup: :day1)
-      make_order_item(pickup: :day2)
+      make_order_item(pickup: pickup_days(:w1_d1_thurs))
+      make_order_item(pickup: pickup_days(:w1_d2_sat))
     end
     assert_difference('OrderItem.requires_pickup.count', 0, 'requires_pickup') do
       make_order_item(item: Item.pay_it_forward)
     end
   end
 
-  def make_order_item(item: items(:classic), pickup: :day1)
-
-    orders(:kyle_week1).order_items.create!(item: item,
-                                            day1_pickup: (pickup == :day1))
+  def make_order_item(item: items(:classic), pickup: pickup_days(:w1_d1_thurs))
+    orders(:kyle_week1).order_items.create!(item: item, pickup_day: pickup)
   end
 end

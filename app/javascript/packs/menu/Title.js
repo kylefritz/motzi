@@ -1,43 +1,47 @@
 import React from "react";
 import _ from "lodash";
 
-import { getDayContext } from "./Contexts";
+import { getDeadlineContext } from "./Contexts";
 
-function When({ menu, br }) {
-  const { orderingDeadlineText } = menu;
+function When({ orderingDeadlineText }) {
   if (!orderingDeadlineText) {
     console.warn("menu.orderingDeadlineText is null");
     return null;
   }
 
-  const [day1, day2] = orderingDeadlineText.split(" or ");
-  return (
-    <>
-      Order by {day1} {day2 && br && <br />}
-      {day2 && <>or {day2}</>}
-    </>
-  );
+  const days = orderingDeadlineText.split(" or\n");
+  if (days.length > 0) {
+    days[0] = _.upperFirst(days[0]);
+  }
+
+  return days.map((words, index) => (
+    <React.Fragment key={index}>
+      {words}
+      {index != days.length - 1 && <br />}
+    </React.Fragment>
+  ));
 }
 
 export default function Title({ menu }) {
-  const { name } = menu;
-  const { pastDay2Deadline: isClosed } = getDayContext();
+  const { name, orderingDeadlineText } = menu;
+  const isClosed = getDeadlineContext().allClosed(menu);
 
   return (
     <>
       <h2 id="menu-name">{name}</h2>
       {isClosed ? (
         <div
+          id="past-deadline"
           className="alert alert-secondary text-center py-3 my-4"
           role="alert"
         >
           <h6 className="alert-heading">Ordering is closed for this menu</h6>
-          <When menu={menu} br={true} />
+          <When {...{ orderingDeadlineText }} />
         </div>
       ) : (
         <div id="deadline">
           <small>
-            <When menu={menu} br={false} />
+            <When {...{ orderingDeadlineText }} />
           </small>
         </div>
       )}

@@ -4,6 +4,7 @@ import { mount } from "enzyme";
 
 import mockMenuJson from "./mockMenuJson";
 import Items, { DayButton, Item } from "menu/Items";
+import { DateTime, Duration } from "luxon";
 
 test("items", () => {
   const { menu } = mockMenuJson();
@@ -17,10 +18,9 @@ test("day1day2", () => {
   const render = (props) => mount(<Item onChange={true} {...props} />);
   const expectButtons = (props) => expect(render(props).find("button"));
 
-  expectButtons({ day1: true, day2: true }).toHaveLength(2);
-  expectButtons({ day1: true, day2: false }).toHaveLength(1);
-  expectButtons({ day1: false, day2: true }).toHaveLength(1);
-  expectButtons({ day1: false, day2: false }).toHaveLength(0);
+  expectButtons({ pickupDays: [{ id: 1 }, { id: 2 }] }).toHaveLength(2);
+  expectButtons({ pickupDays: [{ id: 1 }] }).toHaveLength(1);
+  expectButtons({ pickupDays: [] }).toHaveLength(0);
 });
 
 test("remaining deadline", () => {
@@ -33,7 +33,10 @@ test("remaining deadline", () => {
   );
   expect(render({ remaining: 0 }).find("button").prop("disabled")).toBeTruthy();
 
-  expect(render({ isPastDeadline: true }).find("button").prop("disabled")).toBe(
+  const orderDeadlineAt = DateTime.now()
+    .minus(Duration.fromISO("PT1H"))
+    .toISO();
+  expect(render({ orderDeadlineAt }).find("button").prop("disabled")).toBe(
     true
   );
 });

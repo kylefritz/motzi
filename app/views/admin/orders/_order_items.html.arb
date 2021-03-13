@@ -1,4 +1,4 @@
-def for_day(day_name, order_items)
+def for_day(pickup_day, order_items)
   if order_items.empty?
     return
   end
@@ -7,7 +7,7 @@ def for_day(day_name, order_items)
   order_items.each { |oi| counts[oi.item.name] += oi.quantity }
 
   div do
-    em("#{day_name}: ")
+    em("#{pickup_day.day_str}: ")
 
     item_names = counts.keys.natural_sort
     item_names.each_with_index do |name, i|
@@ -24,9 +24,12 @@ def for_day(day_name, order_items)
 end
 
 pay_it_forward, rest = order_items.partition { |oi| oi.item.pay_it_forward? }
-day1, day2 = rest.partition(&:day1_pickup)
-for_day(Setting.pickup_day1_abbr, day1)
-for_day(Setting.pickup_day2_abbr, day2)
+
+pickup_days.each do |pickup_day|
+  rest.filter {|oi| oi.pickup_day == pickup_day}
+  for_day(pickup_day, order_items)  
+end
+
 if pay_it_forward.any?
   num = pay_it_forward.map(&:quantity).sum
   div do
