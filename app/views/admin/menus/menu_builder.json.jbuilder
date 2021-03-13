@@ -12,7 +12,10 @@ end
 json.items @menu.menu_items.map do |menu_item|
   item = menu_item.item
 
-  json.extract! item, :id, :name, :description, :price, :credits
+  json.menu_item_id menu_item.id
+  json.item_id menu_item.item_id
+
+  json.extract! item, :name, :description, :price, :credits
   json.image item.image_path
 
   json.extract! menu_item, :subscriber, :marketplace

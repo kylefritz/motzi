@@ -33,7 +33,8 @@
       "items": {
         "type": "object",
         "required": [
-          "id",
+          "itemId",
+          "menuItemId",
           "name",
           "description",
           "price",
@@ -43,7 +44,8 @@
           "pickupDays"
         ],
         "properties": {
-          "id": { "type": "integer" },
+          "menuItemId": { "type": "integer" },
+          "itemId": { "type": "integer" },
           "name": { "type": "string" },
           "description": { "type": "string" },
           "price": { "type": "number" },

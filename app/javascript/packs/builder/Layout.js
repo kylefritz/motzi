@@ -14,22 +14,36 @@ export default function SimpleTabs({
   handleRemoveItem,
   handleAddPickupDay,
   handleRemovePickupDay,
+  handleChangeMenuItemPickupDay,
 }) {
   const classes = useStyles();
-  const [value, setValue] = React.useState(0);
-  const isSubscriber = value === 0;
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
+  const [tab, setTab] = React.useState(0);
+  const isSubscriber = tab === 0;
+  const handleChange = (event, newTab) => {
+    setTab(newTab);
   };
 
   const subscriber = menu.items.filter((i) => i.subscriber);
   const marketplace = menu.items.filter((i) => i.marketplace);
 
+  function makeItemsGrid(menuItems) {
+    return (
+      <ItemGrid
+        {...{
+          menuItems,
+          handleRemoveItem,
+          pickupDays: menu.pickupDays,
+          handleChangeMenuItemPickupDay,
+        }}
+      />
+    );
+  }
+
   return (
     <div className={classes.root}>
       <AppBar position="static">
         <Tabs
-          value={value}
+          value={tab}
           onChange={handleChange}
           aria-label="simple tabs example"
         >
@@ -37,11 +51,11 @@ export default function SimpleTabs({
           <Tab label="Marketplace" {...a11yProps(1)} />
         </Tabs>
       </AppBar>
-      <TabPanel value={value} index={0}>
-        <ItemGrid menuItems={subscriber} {...{ handleRemoveItem }} />
+      <TabPanel value={tab} index={0}>
+        {makeItemsGrid(subscriber)}
       </TabPanel>
-      <TabPanel value={value} index={1}>
-        <ItemGrid menuItems={marketplace} {...{ handleRemoveItem }} />
+      <TabPanel value={tab} index={1}>
+        {makeItemsGrid(marketplace)}
       </TabPanel>
 
       <Adder
@@ -71,7 +85,7 @@ function TabPanel(props) {
   );
 }
 
-function ItemGrid({ menuItems }) {
+function ItemGrid({ menuItems, pickupDays, handleChangeMenuItemPickupDay }) {
   if (items.length == 0) {
     return (
       <p>
@@ -82,7 +96,15 @@ function ItemGrid({ menuItems }) {
   return (
     <Grid>
       {menuItems.map((i) => (
-        <MenuItem key={i.id} {...i} onRemove={() => handleRemoveItem(i.id)} />
+        <MenuItem
+          key={i.id}
+          {...{
+            ...i,
+            handleChangeMenuItemPickupDay,
+          }}
+          menuPickupDays={pickupDays}
+          onRemove={() => handleRemoveItem(i.id)}
+        />
       ))}
     </Grid>
   );

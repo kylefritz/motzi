@@ -7,33 +7,43 @@ import { shortDay } from "./PickupDay";
 
 export default function Item({
   onRemove: handleRemove,
+  itemId,
   menuItemId,
   name,
   subscriber,
   marketplace,
   pickupDays,
+  menuPickupDays,
+  handleChangeMenuItemPickupDay,
 }) {
   const classes = useStyles();
+
+  function handleCheck(pickupDayId, isAdd) {
+    console.log("menuItemId", menuItemId, "pickupDayId", pickupDayId, "isAdd", isAdd); // prettier-ignore
+    handleChangeMenuItemPickupDay({ menuItemId, pickupDayId }, isAdd);
+  }
 
   return (
     <Card className={classes.root}>
       <Content>
         <Name>{name}</Name>
 
-        <Smaller>
-          {pickupDays.map(({ pickupAt }) => shortDay(pickupAt)).join(", ")}
-        </Smaller>
+        <Days>
+          <PickupDays
+            {...{
+              pickupDays,
+              menuPickupDays,
+              handleCheck,
+            }}
+          />
+        </Days>
       </Content>
 
       <CardActions>
         <IconButton aria-label="delete" color="primary" onClick={handleRemove}>
           <Delete />
         </IconButton>
-        <Link
-          href={`/admin/menu_items/${menuItemId}`}
-          target="_blank"
-          variant="body2"
-        >
+        <Link href={`/admin/items/${itemId}`} target="_blank" variant="body2">
           edit
         </Link>
 
@@ -44,6 +54,20 @@ export default function Item({
   );
 }
 
+function PickupDays({ pickupDays, menuPickupDays, handleCheck }) {
+  const selected = new Set(pickupDays.map((d) => d.pickupAt));
+  return menuPickupDays.map(({ pickupAt, id }) => (
+    <Label key={id}>
+      <input
+        type="checkbox"
+        onChange={() => handleCheck(id, !selected.has(pickupAt))}
+        checked={selected.has(pickupAt)}
+      />
+      {shortDay(pickupAt)}
+    </Label>
+  ));
+}
+
 const useStyles = makeStyles({
   root: {
     width: 225,
@@ -52,13 +76,17 @@ const useStyles = makeStyles({
   },
 });
 
+const Label = styled.label`
+  margin-right: 0.5rem;
+`;
+
+const Days = styled.div`
+  margin-top: 0.5rem;
+`;
+
 const Name = styled.div`
   font-size: 1rem;
   margin-bottom: 0.1rem;
-`;
-
-const Smaller = styled.div`
-  font-size: 0.75rem;
 `;
 
 const Content = styled.div`
