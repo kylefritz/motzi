@@ -52,22 +52,40 @@ export default function Item({
   );
 }
 
-function PickupDays({ pickupDays, menuPickupDays, handleCheck }) {
-  const selected = new Set(pickupDays.map((d) => d.pickupAt));
+function PickupDays({
+  pickupDays: itemPickupDays,
+  menuPickupDays,
+  handleCheck,
+}) {
   return (
     <Days>
-      {menuPickupDays.map(({ pickupAt, id }) => (
-        <div key={id}>
-          <label>
-            <input
-              type="checkbox"
-              onChange={() => handleCheck(id, !selected.has(pickupAt))}
-              checked={selected.has(pickupAt)}
-            />
-            <LabelText>{shortDay(pickupAt)}</LabelText>
-          </label>
-        </div>
-      ))}
+      {menuPickupDays.map((menuPickupDay) => {
+        const itemPickupDay = itemPickupDays.find(
+          ({ pickupAt }) => pickupAt === menuPickupDay.pickupAt
+        );
+        const pickupEnabled = !!itemPickupDay;
+
+        return (
+          <div key={menuPickupDay.id}>
+            <label>
+              <input
+                type="checkbox"
+                onChange={() => handleCheck(menuPickupDay.id, !pickupEnabled)}
+                checked={pickupEnabled}
+              />
+              <LabelText>{shortDay(menuPickupDay.pickupAt)}</LabelText>
+            </label>
+
+            {pickupEnabled && (
+              <a href={`/admin/menu_item_pickup_days/${itemPickupDay.id}/edit`}>
+                {itemPickupDay.limit === undefined
+                  ? "no limit"
+                  : `limit: ${itemPickupDay.limit}`}
+              </a>
+            )}
+          </div>
+        );
+      })}
     </Days>
   );
 }
@@ -82,6 +100,7 @@ const useStyles = makeStyles({
 
 const LabelText = styled.span`
   padding-left: 0.5rem;
+  padding-right: 0.5rem;
 `;
 
 const Days = styled.div`

@@ -41,20 +41,27 @@ export default function SimpleTabs({
 
   return (
     <div className={classes.root}>
+      <PickupDays {...{ ...menu, handleAddPickupDay, handleRemovePickupDay }} />
+      <hr />
+      <h2>Menu Items</h2>
       <AppBar position="static">
         <Tabs
           value={tab}
           onChange={handleChange}
           aria-label="simple tabs example"
         >
-          <Tab label="Subscribers" {...a11yProps(0)} />
-          <Tab label="Marketplace" {...a11yProps(1)} />
+          <Tab label="All" {...a11yProps(0)} />
+          <Tab label="Subscribers" {...a11yProps(1)} />
+          <Tab label="Marketplace" {...a11yProps(2)} />
         </Tabs>
       </AppBar>
       <TabPanel value={tab} index={0}>
-        {makeItemsGrid(subscriber)}
+        {makeItemsGrid(menu.items)}
       </TabPanel>
       <TabPanel value={tab} index={1}>
+        {makeItemsGrid(subscriber)}
+      </TabPanel>
+      <TabPanel value={tab} index={2}>
         {makeItemsGrid(marketplace)}
       </TabPanel>
 
@@ -64,7 +71,6 @@ export default function SimpleTabs({
         pickupDays={menu.pickupDays}
         onAdd={(item) => handleAddItem(item)}
       />
-      <PickupDays {...{ ...menu, handleAddPickupDay, handleRemovePickupDay }} />
     </div>
   );
 }

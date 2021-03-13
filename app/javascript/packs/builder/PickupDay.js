@@ -57,8 +57,7 @@ export function PickupDays({
   }
   return (
     <>
-      <hr />
-      <h3>Pickup days</h3>
+      <h2>Pickup days</h2>
       <ol>
         {pickupDays.map(({ id, deadlineText }) => (
           <li key={id}>
