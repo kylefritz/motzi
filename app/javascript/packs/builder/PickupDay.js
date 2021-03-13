@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import styled from "styled-components";
 import moment from "moment";
+import { useApi } from "./Context";
 
 export function shortDay(pickupAt) {
   const day = moment(pickupAt).format("dddd");
@@ -19,14 +20,10 @@ export function shortDay(pickupAt) {
   return day;
 }
 
-export function PickupDays({
-  pickupDays,
-  leadtimeHours,
-  handleAddPickupDay,
-  handleRemovePickupDay,
-}) {
+export function PickupDays({ pickupDays, leadtimeHours }) {
   const inputDeadline = useRef(null);
   const inputPickup = useRef(null);
+  const api = useApi();
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -38,7 +35,7 @@ export function PickupDays({
       return;
     }
     console.log("pickup", shortDay(pickupAt), pickupAt, "deadline", orderDeadlineAt); // prettier-ignore
-    handleAddPickupDay({ pickupAt, orderDeadlineAt }).then(() => {
+    api.pickupDay.add({ pickupAt, orderDeadlineAt }).then(() => {
       // reset form
       inputPickup.current.value = "";
       inputDeadline.current.value = "";
@@ -62,7 +59,7 @@ export function PickupDays({
         {pickupDays.map(({ id, deadlineText }) => (
           <li key={id}>
             {deadlineText}{" "}
-            <button onClick={() => handleRemovePickupDay(id)}>x</button>
+            <button onClick={() => api.pickupDay.remove(id)}>x</button>
           </li>
         ))}
       </ol>

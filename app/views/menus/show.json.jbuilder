@@ -31,7 +31,7 @@ json.menu do
 
       json.extract! mi_pd.pickup_day, :id, :pickup_at, :order_deadline_at
       json.debug mi_pd.pickup_day.day_abbr
-      json.remaining remaining(mi_pd.limit, ordered_item_counts[item.id])
+      json.remaining remaining(mi_pd.limit, (ordered_item_counts[item.id] || {})[mi_pd.pickup_day_id])
     end
   end
 end

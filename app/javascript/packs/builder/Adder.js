@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { shortDay } from "./PickupDay";
+import { useApi } from "./Context";
 
-export default function Adder({ items, not: rawNot, onAdd, pickupDays }) {
+export default function Adder({ items, not: rawNot, pickupDays }) {
+  const api = useApi();
   const [subscriber, setSubscriber] = useState(true);
   const [marketplace, setMarketplace] = useState(true);
   const [pickupDayIds, setPickupDayIds] = useState(pickupDays.map((d) => d.id));
@@ -29,7 +31,7 @@ export default function Adder({ items, not: rawNot, onAdd, pickupDays }) {
       alert("Select an item");
       return;
     }
-    onAdd({ itemId, subscriber, marketplace, pickupDayIds });
+    api.item.add({ itemId, subscriber, marketplace, pickupDayIds });
   };
 
   const not = new Set(rawNot);

@@ -7,43 +7,17 @@ import MenuItem from "./Item";
 import Adder from "./Adder";
 import { PickupDays } from "./PickupDay";
 
-export default function SimpleTabs({
-  allItems,
-  menu,
-  handleAddItem,
-  handleRemoveItem,
-  handleAddPickupDay,
-  handleRemovePickupDay,
-  handleChangeMenuItemPickupDay,
-  handleUpdateMenuItemPickupDay,
-}) {
+export default function SimpleTabs({ allItems, menu }) {
   const classes = useStyles();
   const [tab, setTab] = React.useState(0);
   const isSubscriber = tab === 0;
   const handleChange = (event, newTab) => {
     setTab(newTab);
   };
-
-  const subscriber = menu.items.filter((i) => i.subscriber);
-  const marketplace = menu.items.filter((i) => i.marketplace);
-
-  function makeItemsGrid(menuItems) {
-    return (
-      <ItemGrid
-        {...{
-          menuItems,
-          handleRemoveItem,
-          pickupDays: menu.pickupDays,
-          handleChangeMenuItemPickupDay,
-          handleUpdateMenuItemPickupDay,
-        }}
-      />
-    );
-  }
-
+  const { pickupDays } = menu;
   return (
     <div className={classes.root}>
-      <PickupDays {...{ ...menu, handleAddPickupDay, handleRemovePickupDay }} />
+      <PickupDays {...menu} />
       <hr />
       <h2>Menu Items</h2>
       <AppBar position="static">
@@ -58,20 +32,29 @@ export default function SimpleTabs({
         </Tabs>
       </AppBar>
       <TabPanel value={tab} index={0}>
-        {makeItemsGrid(menu.items)}
+        <ItemGrid {...{ menuItems: menu.items, pickupDays }} />
       </TabPanel>
       <TabPanel value={tab} index={1}>
-        {makeItemsGrid(subscriber)}
+        <ItemGrid
+          {...{
+            menuItems: menu.items.filter((i) => i.subscriber),
+            pickupDays,
+          }}
+        />
       </TabPanel>
       <TabPanel value={tab} index={2}>
-        {makeItemsGrid(marketplace)}
+        <ItemGrid
+          {...{
+            menuItems: menu.items.filter((i) => i.marketplace),
+            pickupDays,
+          }}
+        />
       </TabPanel>
 
       <Adder
         items={allItems}
-        not={(isSubscriber ? subscriber : marketplace).map(({ name }) => name)}
+        not={menu.items.map(({ name }) => name)}
         pickupDays={menu.pickupDays}
-        onAdd={(item) => handleAddItem(item)}
       />
     </div>
   );
@@ -93,14 +76,8 @@ function TabPanel(props) {
   );
 }
 
-function ItemGrid({
-  menuItems,
-  pickupDays,
-  handleRemoveItem,
-  handleChangeMenuItemPickupDay,
-  handleUpdateMenuItemPickupDay,
-}) {
-  if (items.length == 0) {
+function ItemGrid({ menuItems, pickupDays }) {
+  if (items.length === 0) {
     return (
       <p>
         <em>no items</em>
@@ -110,16 +87,7 @@ function ItemGrid({
   return (
     <Grid>
       {menuItems.map((i) => (
-        <MenuItem
-          key={i.menuItemId}
-          {...{
-            ...i,
-            handleChangeMenuItemPickupDay,
-            handleUpdateMenuItemPickupDay,
-          }}
-          menuPickupDays={pickupDays}
-          onRemove={() => handleRemoveItem(i.itemId)}
-        />
+        <MenuItem key={i.menuItemId} {...i} menuPickupDays={pickupDays} />
       ))}
     </Grid>
   );

@@ -1,18 +1,11 @@
 import React, { useState } from "react";
-import {
-  Card,
-  CardActions,
-  Link,
-  IconButton,
-  Checkbox,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Card, Icon, IconButton } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import styled from "styled-components";
 import { shortDay } from "./PickupDay";
+import { useApi } from "./Context";
 
 export default function Item({
-  onRemove: handleRemove,
   itemId,
   menuItemId,
   name,
@@ -20,57 +13,84 @@ export default function Item({
   marketplace,
   pickupDays,
   menuPickupDays,
-  handleChangeMenuItemPickupDay,
-  handleUpdateMenuItemPickupDay,
 }) {
-  const classes = useStyles();
-
-  function handleCheck(pickupDayId, isAdd) {
-    console.log("menuItemId", menuItemId, "pickupDayId", pickupDayId, "isAdd", isAdd); // prettier-ignore
-    handleChangeMenuItemPickupDay({ menuItemId, pickupDayId }, isAdd);
+  const api = useApi();
+  function handleChangeMenuType(menuType, enabled) {
+    api.menuItem.update(menuItemId, { [menuType]: enabled });
   }
 
   return (
-    <Card className={classes.root}>
-      <Content>
-        <Name>{name}</Name>
-
-        <PickupDays
-          {...{
-            pickupDays,
-            menuPickupDays,
-            handleCheck,
-            handleUpdateMenuItemPickupDay,
-          }}
-        />
-      </Content>
-
-      <CardActions>
-        <IconButton
+    <CardContent>
+      <Header>
+        <Name>
+          <a href={`/admin/items/${itemId}`} target="_blank">
+            {name}
+          </a>
+        </Name>
+        <RightButton
           aria-label="delete"
           color="primary"
           title="remove from menu"
-          onClick={handleRemove}
+          onClick={() => api.item.remove(itemId)}
         >
           <Delete />
-        </IconButton>
-        {subscriber && <Subscriber title="Subscriber">S</Subscriber>}
-        {marketplace && <Marketplace title="Marketplace">M</Marketplace>}
+        </RightButton>
+      </Header>
 
-        <Link href={`/admin/items/${itemId}`} target="_blank" variant="body2">
-          edit item
-        </Link>
-      </CardActions>
-    </Card>
+      <Sub>Pickup Days</Sub>
+      <PickupDays
+        {...{
+          menuItemId,
+          pickupDays,
+          menuPickupDays,
+        }}
+      />
+
+      <Sub>Menu Type</Sub>
+      <MenuType
+        name="Subscriber"
+        enabled={subscriber}
+        onChange={(enable) => handleChangeMenuType("subscriber", enable)}
+      />
+      <MenuType
+        name="Marketplace"
+        enabled={marketplace}
+        onChange={(enable) => handleChangeMenuType("marketplace", enable)}
+      />
+    </CardContent>
+  );
+}
+
+function MenuType({ name, enabled, onChange: handleChange }) {
+  return (
+    <Row>
+      <label>
+        <input
+          type="checkbox"
+          onChange={() => handleChange(!enabled)}
+          checked={enabled}
+        />
+        <LabelText>{name}</LabelText>
+      </label>
+    </Row>
   );
 }
 
 function PickupDays({
+  menuItemId,
   pickupDays: itemPickupDays,
   menuPickupDays,
-  handleCheck,
-  handleUpdateMenuItemPickupDay,
 }) {
+  const api = useApi();
+
+  function handleCheck(pickupDayId, isAdd) {
+    console.log("menuItemId", menuItemId, "pickupDayId", pickupDayId, "isAdd", isAdd); // prettier-ignore
+    const action = isAdd
+      ? api.menuItemPickupDay.add
+      : api.menuItemPickupDay.remove;
+    action({ menuItemId, pickupDayId });
+  }
+
   return (
     <Days>
       {menuPickupDays.map((menuPickupDay) => {
@@ -89,9 +109,7 @@ function PickupDays({
               />
               <LabelText>{shortDay(menuPickupDay.pickupAt)}</LabelText>
             </CheckboxLabel>
-            {itemPickupDay && (
-              <Limit {...{ ...itemPickupDay, handleUpdateMenuItemPickupDay }} />
-            )}
+            {itemPickupDay && <Limit {...{ ...itemPickupDay }} />}
           </Row>
         );
       })}
@@ -99,8 +117,10 @@ function PickupDays({
   );
 }
 
-function Limit({ id, limit, handleUpdateMenuItemPickupDay }) {
-  const [newLimit, setNewLimit] = useState(limit || ""); // TODO: set to "" instead of undefined to get rid of react uncontrolled component warning!
+function Limit({ id, limit }) {
+  const api = useApi();
+
+  const [newLimit, setNewLimit] = useState(limit || "");
   const hasChanged = newLimit !== (limit || "");
 
   function handleChange(event) {
@@ -111,7 +131,7 @@ function Limit({ id, limit, handleUpdateMenuItemPickupDay }) {
 
   function handleSave(event) {
     event.preventDefault();
-    handleUpdateMenuItemPickupDay({ id, limit: newLimit });
+    api.menuItemPickupDay.updateLimit({ id, limit: newLimit });
   }
 
   return (
@@ -123,13 +143,15 @@ function Limit({ id, limit, handleUpdateMenuItemPickupDay }) {
   );
 }
 
-const useStyles = makeStyles({
-  root: {
-    width: 225,
-    marginBottom: 20,
-    marginRight: 20,
-  },
-});
+const RightButton = styled(IconButton)`
+  margin-top: -10px;
+  margin-right: -10px;
+`;
+
+const Sub = styled.h6`
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+`;
 
 const MiniBtn = styled.button`
   margin-left: 3px;
@@ -145,6 +167,11 @@ const CheckboxLabel = styled.label`
 const Row = styled.div`
   display: flex;
   margin-bottom: 12px;
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;
 
 const SmallInput = styled.input`
@@ -167,23 +194,9 @@ const Name = styled.div`
   margin-bottom: 0.1rem;
 `;
 
-const Content = styled.div`
-  margin: 0.8rem;
-  margin-bottom: 0;
-`;
-
-const SmallChip = styled.span`
-  background: tomato;
-  margin-right: 4px;
-  padding: 3px;
-  font-size: 11px;
-  border-radius: 0.3rem;
-`;
-
-const Subscriber = styled(SmallChip)`
-  background: greenyellow;
-`;
-
-const Marketplace = styled(SmallChip)`
-  background: tomato;
+const CardContent = styled(Card)`
+  padding: 0.8rem;
+  width: 225px;
+  margin-bottom: 20px;
+  margin-right: 20px;
 `;
