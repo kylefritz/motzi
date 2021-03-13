@@ -2,14 +2,15 @@ class PickupDay < ApplicationRecord
   belongs_to :menu
   has_many :order_items, dependent: :destroy
   has_many :menu_item_pickup_days, dependent: :destroy
+  default_scope { order("pickup_at") }
 
-  def self.for_pickup_at(dt) self.for_date_trunc('pickup_at', dt) end
-  def self.for_order_deadline_at(dt) self.for_date_trunc('order_deadline_at', dt) end
-
-  def self.for_date_trunc(field, dt)
-    PickupDay.find_by("date_trunc('day', #{field}) = ?", dt.utc.to_date)
+  def self.for_pickup_at(dt)
+     PickupDay.where("? between pickup_at - interval '8 hours' AND pickup_at + interval '2 hours' ", dt)
   end
-  
+  def self.for_order_deadline_at(dt)
+    PickupDay.where("? between order_deadline_at - interval '#{Setting.reminder_hours} hours' AND order_deadline_at", dt)
+  end
+
   def day_str
     Date::DAYS_INTO_WEEK.invert[pickup_at.wday].to_s.titleize
   end

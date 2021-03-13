@@ -8,18 +8,18 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
     @menu.make_current!
 
     # this test thinks it's 19w46
-    @sun = @menu.pickup_days.first
-    @sun.update!(
+    assert_equal 2, @menu.pickup_days.size, 'two pickup days'
+    sun, tues = @menu.pickup_days
+    sun.update!(
       order_deadline_at: Time.zone.parse("2019-11-10 9:00 PM EST"), # sunday 9p
       pickup_at: Time.zone.parse("2019-11-11 3:00 PM EST"), # monday 3p
     )
-
-    @tues = @menu.pickup_days.last
-    @tues.update!(
+    tues.update!(
       order_deadline_at: Time.zone.parse("2019-11-12 9:00 PM EST"), # tues 9p
       pickup_at: Time.zone.parse("2019-11-13 3:00 PM EST"), # wed 3p
     )
-    assert 3, Setting.reminder_hours # reminders should go out between 6-9pm
+
+    assert_equal 3, Setting.reminder_hours, 'reminders should go out between 6-9pm'
 
     @user_ids = Set[*User.subscribers.pluck(:id)]
     @user_ids_ordered = Set[*Menu.current.orders.pluck(:user_id)]
@@ -30,21 +30,6 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
   test "dont send on wrong day of week" do
     refute_reminders_emailed(:mon, '8:00 PM', 'dont send on mon')
     refute_reminders_emailed(:wed, '8:00 PM', 'dont send on wed')
-  end
-
-  test "inside_reminder_window" do
-    assert_equal 3.0, Setting.reminder_hours.to_f, "deadline is 9pm start reminders 3 hrs earlier"
-    menu = Menu.current
-
-    travel_to_day_time(:sun, "5:00 PM") do
-      refute SendHaventOrderedReminderJob.time_for_reminder_email?(@sun.order_deadline_at), "too early"
-    end
-    travel_to_day_time(:sun, "7:00 PM") do
-      assert SendHaventOrderedReminderJob.time_for_reminder_email?(@sun.order_deadline_at), "inside window"
-    end
-    travel_to_day_time(:sun, "9:05 PM") do
-      refute SendHaventOrderedReminderJob.time_for_reminder_email?(@sun.order_deadline_at), "too late"
-    end
   end
 
   test "Sends to users who havent ordered, at right time" do

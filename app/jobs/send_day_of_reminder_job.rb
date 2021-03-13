@@ -4,13 +4,15 @@ class SendDayOfReminderJob < ApplicationJob
   def perform(*args)
     return unless (7..11).include?(Time.zone.now.hour) # 7a-11a
 
-    pickup_day = PickupDay.for_pickup_at(Time.zone.now)
+    PickupDay.for_pickup_at(Time.zone.now).each do |pickup_day|
 
-    return unless pickup_day && pickup_day.menu.current?
-    
-    send_reminders_for_day(pickup_day)
+      next unless pickup_day.menu.current?
+
+      send_reminders_for_day(pickup_day)
+    end
   end
 
+  private
   def send_reminders_for_day(pickup_day)
     menu = pickup_day.menu
 

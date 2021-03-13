@@ -15,14 +15,21 @@ class PickupDayTest < ActiveSupport::TestCase
     assert_equal "Thu", pickup_days(:w1_d1_thurs).day_abbr
   end
 
-  test "for_pickup_at & for_order_deadline_at" do
+  test "for_pickup_at" do
     deadline_at = Time.zone.parse("2021-01-03 9:00 PM") # 2am next day UTC
     pickup_at = deadline_at + 1.day
     pickup_day = PickupDay.create!(order_deadline_at: deadline_at, pickup_at: pickup_at, menu: menus(:week1))
 
-    assert_equal pickup_day, PickupDay.for_pickup_at(pickup_at)
-    assert_equal pickup_day, PickupDay.for_order_deadline_at(deadline_at)
-    assert_nil PickupDay.for_order_deadline_at(pickup_at)
+    assert_equal pickup_day, PickupDay.for_pickup_at(pickup_at).first
+  end
+
+  test "for_order_deadline_at" do
+    deadline_at = Time.zone.parse("2021-01-03 9:00 PM") # 2am next day UTC
+    pickup_at = deadline_at + 1.day
+    pickup_day = PickupDay.create!(order_deadline_at: deadline_at, pickup_at: pickup_at, menu: menus(:week1))
+
+    assert_equal pickup_day, PickupDay.for_order_deadline_at(deadline_at).first
+    assert_nil PickupDay.for_order_deadline_at(pickup_at).first
   end
 
   test "deadline text" do
