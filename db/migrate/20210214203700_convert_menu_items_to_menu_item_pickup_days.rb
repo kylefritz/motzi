@@ -10,7 +10,7 @@ class ConvertMenuItemsToMenuItemPickupDays < ActiveRecord::Migration[6.0]
           limit: mi.day1_limit
         )
       end
-      if mi.day2?
+      if mi.day2? && day2.present?
         mi.menu_item_pickup_days.create!(
           pickup_day: day2,
           limit: mi.day2_limit,
