@@ -46,15 +46,20 @@ export default function Item({
       </Content>
 
       <CardActions>
-        <IconButton aria-label="delete" color="primary" onClick={handleRemove}>
+        <IconButton
+          aria-label="delete"
+          color="primary"
+          title="remove from menu"
+          onClick={handleRemove}
+        >
           <Delete />
         </IconButton>
-        <Link href={`/admin/items/${itemId}`} target="_blank" variant="body2">
-          edit
-        </Link>
-
         {subscriber && <Subscriber title="Subscriber">S</Subscriber>}
         {marketplace && <Marketplace title="Marketplace">M</Marketplace>}
+
+        <Link href={`/admin/items/${itemId}`} target="_blank" variant="body2">
+          edit item
+        </Link>
       </CardActions>
     </Card>
   );
@@ -101,10 +106,7 @@ function Limit({ id, limit, handleUpdateMenuItemPickupDay }) {
   function handleChange(event) {
     const newValue = event.target.value;
     console.log("newValue", newValue);
-    if (newValue === "") {
-      setNewLimit(undefined);
-    }
-    setNewLimit(parseInt(newValue));
+    setNewLimit(newValue === "" ? "" : parseInt(newValue));
   }
 
   function handleSave(event) {
