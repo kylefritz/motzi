@@ -12,7 +12,7 @@ motzi:
   marketing_domain: motzibread.com
   app_domain: motzibread.herokuapp.com
   email_reply_to: motzi.bread@gmail.com
-  pay_it_forward: true
+  pay_it_forward: false
   pay_what_you_can: true
   js_tracking: true
 
@@ -34,14 +34,4 @@ dutch_courage:
   email_reply_to: bjdorr@gmail.com
   pay_it_forward: false
   pay_what_you_can: false
-  js_tracking: false
-
-pilgrim:
-  name: Pilgrim Bread
-  short_name: Pilgrim Bread
-  marketing_domain: pilgrimbread.com
-  app_domain: pilgrimbread.herokuapp.com
-  email_reply_to: pilgrimbread@gmail.com
-  pay_it_forward: true
-  pay_what_you_can: true
   js_tracking: false
