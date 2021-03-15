@@ -28,6 +28,12 @@ class Order < ApplicationRecord
   end
 
   def item_list
+    if skip && order_items.empty?
+      return "Skip this week"
+    end
+    if order_items.empty?
+      return "No items"
+    end
     StringIO.new.tap do |s|
 
       prior_day_had_items = false
@@ -62,7 +68,9 @@ class Order < ApplicationRecord
       end
       unless pay_it_forwards.empty?
         num = pay_it_forwards.map(&:quantity).sum
-        s << ". "
+        unless s.size == 0
+          s << ". "
+        end
         if num > 1
           s << "#{num}x "
         end

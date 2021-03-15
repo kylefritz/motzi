@@ -55,6 +55,16 @@ class OrderTest < ActiveSupport::TestCase
       o.order_items.create!(item: items(:pay_it_forward), quantity: 2, pickup_day: thu)
       assert_equal "Thu: Pumpkin. 3x Pay it forward", o.item_list
     end
+
+    Order.create!(menu: menus(:week1), user: users(:kyle), skip: true).tap do |o|
+      assert_equal "Skip this week", o.item_list
+
+      o.order_items.create!(item: items(:pay_it_forward), quantity: 2, pickup_day: thu)
+      assert_equal "2x Pay it forward", o.item_list
+    end
+    Order.create!(menu: menus(:week1), user: users(:kyle)).tap do |o|
+      assert_equal "No items", o.item_list
+    end
   end
 
   test "marketplace" do
