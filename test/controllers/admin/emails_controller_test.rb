@@ -9,6 +9,8 @@ class Admin::EmailsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get index" do
+    MenuMailer.with(user: users(:kyle), menu: menus(:week2)).weekly_menu_email.deliver_now
+
     get '/admin/emails'
     assert_response :success
   end

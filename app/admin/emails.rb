@@ -24,7 +24,7 @@ ActiveAdmin.register Ahoy::Message, as: "Email" do
       auto_link email.menu
     end
     column "pickup_day" do |email|
-      auto_link email.pickup_day.day_str
+      auto_link email.pickup_day&.day_str
     end
     column :sent_at
     column :opened_at
