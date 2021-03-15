@@ -1,7 +1,7 @@
 include PriceHelper
 ActiveAdmin.register Order do
   permit_params :comments, :menu, :user
-  includes :menu, :user, order_items: :item
+  includes :menu, :user, order_items: [:item, :pickup_day]
 
   scope :all, default: true
   scope("current menu") { |scope| scope.where(menu_id: Setting.menu_id) }

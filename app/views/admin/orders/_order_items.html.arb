@@ -23,22 +23,28 @@ def for_day(pickup_day, order_items)
   end
 end
 
-pay_it_forward, rest = order_items.partition { |oi| oi.item.pay_it_forward? }
+pay_it_forward, pickupable_items = order_items.partition { |oi| oi.item.pay_it_forward? }
+pickup_days = order_items.map(&:pickup_day).uniq.sort_by(&:pickup_at)
 
 pickup_days.each do |pickup_day|
-  rest.filter {|oi| oi.pickup_day == pickup_day}
-  for_day(pickup_day, order_items)  
+  day_items = pickupable_items.filter {|oi| oi.pickup_day == pickup_day }
+  next if day_items.empty?
+
+  for_day(pickup_day, day_items)  
 end
 
 if pay_it_forward.any?
-  num = pay_it_forward.map(&:quantity).sum
   div do
     em do
-      if num > 1
-        strong "#{num}x "
+      if (count = pay_it_forward.map(&:quantity).sum) > 1
+        strong "#{count}x "
       end
 
       span pay_it_forward.first.item.name
     end
   end
+end
+
+if order_items.empty?
+  em "No items"
 end

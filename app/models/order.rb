@@ -24,7 +24,7 @@ class Order < ApplicationRecord
   end
 
   def items_for_pickup(pickup_day)
-    order_items.filter {|oi| oi.pickup_day == pickup_day && oi.item_id != Item::PAY_IT_FORWARD_ID}
+    order_items.filter {|oi| oi.pickup_day == pickup_day && !oi.pay_it_forward? }
   end
 
   def item_list
@@ -38,7 +38,7 @@ class Order < ApplicationRecord
 
       prior_day_had_items = false
 
-      pay_it_forwards = order_items.filter {|oi| oi.item_id == Item::PAY_IT_FORWARD_ID}
+      pay_it_forwards = order_items.filter {|oi| oi.pay_it_forward? }
       pickup_days = PickupDay.where(id: order_items.map(&:pickup_day_id).uniq).sort_by(&:pickup_at)
       
       pickup_days.each do |pickup_day|
