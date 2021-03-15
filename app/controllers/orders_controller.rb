@@ -40,7 +40,8 @@ class OrdersController < ApplicationController
         end
       end
       params.fetch(:cart).each do |cart_item_params|
-        order.order_items.create!(cart_item_params.permit(:item_id, :quantity, :pickup_day_id))
+        order.order_items.create!(cart_item_params.permit(:item_id, :quantity, :pickup_day_id)
+                                                  .with_defaults(pickup_day_id: menu.pickup_days.first.id))
       end
 
       # figure out if we need to charge this person or if we're using credits

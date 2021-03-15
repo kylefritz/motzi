@@ -54,6 +54,20 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert Order.last.skip
   end
 
+  test "hashid_user can pay_it_forward" do
+    order = order_attrs(users(:ljf).hashid)
+    order[:cart] = [
+      { item_id: Item::PAY_IT_FORWARD_ID, quantity: 1 }
+    ]
+    before_deadline do
+      assert_ordered do
+        post '/orders.json', params: order, as: :json
+      end
+    end
+    assert_response :success
+    assert Order.last.present?
+  end
+
   test "hashid_user cant order past deadline" do
     after_deadline do
       refute_order_placed users(:ljf).hashid
