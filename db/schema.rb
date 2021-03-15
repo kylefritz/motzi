@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_02_14_204321) do
+ActiveRecord::Schema.define(version: 2021_03_15_214347) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -204,6 +204,7 @@ ActiveRecord::Schema.define(version: 2021_02_14_204321) do
     t.integer "limit"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["menu_item_id", "pickup_day_id"], name: "index_menu_item_pickup_days_on_menu_item_id_and_pickup_day_id", unique: true
     t.index ["menu_item_id"], name: "index_menu_item_pickup_days_on_menu_item_id"
     t.index ["pickup_day_id"], name: "index_menu_item_pickup_days_on_pickup_day_id"
   end
