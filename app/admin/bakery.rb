@@ -7,17 +7,9 @@ ActiveAdmin.register_page "Dashboard" do
 
     columns do
       column do
-        panel "Current Menu" do
+        panel "Menu" do
           h4 a(menu.name, href: admin_menu_path(menu.id), class: 'bigger')
-          ul do
-            menu.menu_items.includes(:item).map do |menu_item|
-              li "#{menu_item.item.name}"
-            end
-          end
         end
-      end
-
-      column do
         panel "Orders" do
           def compute(name, subs)
             total = subs.count
@@ -54,7 +46,7 @@ ActiveAdmin.register_page "Dashboard" do
           render 'admin/menus/sales', {menu: menu}
         end
       end
-      column do
+      column span: 3 do
         render 'admin/menus/what_to_bake', {menu: menu}
       end
     end
@@ -72,11 +64,12 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       column do
-        panel "New Opt-In - last 2 weeks" do
-          users = User.opt_in.where("created_at > ?", 2.weeks.ago).order('created_at desc').limit(20)
-          table_for users do
-            column ("user") { |u| u }
-            column ("Created At") { |u| u.created_at }
+        panel "New Credits - last 2 weeks" do
+          credit_items = CreditItem.order('id desc').where("created_at > ?", 2.weeks.ago).includes(:user).limit(20)
+          table_for credit_items do
+            column ("user") { |ci| ci.user }
+            column ("Amount") { |ci| ci.quantity }
+            column ("Credit Added At") { |ci| ci.created_at }
           end
         end
       end
@@ -117,15 +110,15 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       column do
-        panel "New Credits - last 2 weeks" do
-          credit_items = CreditItem.order('id desc').where("created_at > ?", 2.weeks.ago).includes(:user).limit(20)
-          table_for credit_items do
-            column ("user") { |ci| ci.user }
-            column ("Amount") { |ci| ci.quantity }
-            column ("Credit Added At") { |ci| ci.created_at }
+        panel "New Opt-In - last 2 weeks" do
+          users = User.opt_in.where("created_at > ?", 2.weeks.ago).order('created_at desc').limit(20)
+          table_for users do
+            column ("user") { |u| u }
+            column ("Created At") { |u| u.created_at }
           end
         end
       end
+
     end
 
 
