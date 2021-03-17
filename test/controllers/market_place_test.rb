@@ -116,6 +116,9 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
       assert_email_sent do
         post '/orders.json', params: order_attrs, as: :json
         assert_response :success
+        json = JSON.load(response.body)
+        validate_json_schema :menu, json
+        refute_nil json["order"]
       end
     end
   end

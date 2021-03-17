@@ -19,7 +19,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     before_deadline do
       post "/orders.json", params: different_order_attrs(users(:ljf).hashid), as: :json
     end
-    assert_response :success
+    assert_success_and_validate
 
     order = Order.last
     order_items = order.order_items
@@ -50,7 +50,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
         post '/orders.json', params: order, as: :json
       end
     end
-    assert_response :success
+    assert_success_and_validate
     assert Order.last.skip
   end
 
@@ -65,6 +65,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
       end
     end
     assert_response :success
+    # TODO: pay it forward doesnt match json schema because `day` is nil
     assert Order.last.present?
   end
 
@@ -81,7 +82,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
       put_order users(:ljf).current_order.id, different_order_attrs(users(:ljf).hashid)
     end
-    assert_response :success
+    assert_success_and_validate
   end
 
   test "hashid_user cannot update someone else's order" do
@@ -161,7 +162,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_email_sent do
       assert_ordered do
         post '/orders.json', params: order_attrs(hashid), as: :json
-        assert_response :success
+        assert_success_and_validate
       end
     end
   end
@@ -186,5 +187,16 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     travel_to(Menu.current.latest_deadline + 2.hours) do
       block.call
     end
+  end
+
+  def assert_success_and_validate
+    assert_response :success
+    validate_response_json_schema
+  end
+
+  def validate_response_json_schema
+    json = JSON.load(response.body)
+    validate_json_schema :menu, json
+    refute_nil json["order"]
   end
 end

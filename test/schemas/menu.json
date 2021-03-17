@@ -148,7 +148,7 @@
           }
         },
         "id": { "type": "integer" },
-        "comments": { "type": "string" },
+        "comments": { "type": ["string", "null"] },
         "skip": { "type": "boolean" },
         "stripeReceiptUrl": { "type": ["string", "null"] },
         "stripeChargeAmount": { "type": ["number", "null"] }

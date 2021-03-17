@@ -23,15 +23,15 @@ class OrdersController < ApplicationController
       logger.warn "user=#{current_user.email} already placed an order. returning that order"
       return render_current_order
     end
-    menu = Menu.current
+    @menu = Menu.current
 
-    if menu.ordering_closed? && current_admin_user.blank?
+    if @menu.ordering_closed? && current_admin_user.blank?
       return render_ordering_closed
     end
 
-    current_user, order = Order.transaction do
-      current_user = current_user_or_create_user
-      order_params = params.permit(:comments, :skip).merge(menu: menu, user: current_user)
+    @user, @order = Order.transaction do
+      user = current_user_or_create_user
+      order_params = params.permit(:comments, :skip).merge(menu: @menu, user: user)
 
       order = Order.create!(order_params)
       unless order.skip?
@@ -41,7 +41,7 @@ class OrdersController < ApplicationController
       end
       params.fetch(:cart).each do |cart_item_params|
         order.order_items.create!(cart_item_params.permit(:item_id, :quantity, :pickup_day_id)
-                                                  .with_defaults(pickup_day_id: menu.pickup_days.first.id))
+                                                  .with_defaults(pickup_day_id: @menu.pickup_days.first.id))
       end
 
       # figure out if we need to charge this person or if we're using credits
@@ -61,11 +61,11 @@ class OrdersController < ApplicationController
             currency: 'usd',
             source: params[:token],
             metadata: {
-              user_id: current_user.id,
+              user_id: user.id,
               order_id: order.id,
             },
             description: "Order ##{order.id} - #{order.item_list}",
-            receipt_email: current_user.email
+            receipt_email: user.email
           })
         end
         order.update!(
@@ -76,13 +76,13 @@ class OrdersController < ApplicationController
       end
 
       ahoy.track "order_created"
-      [current_user, order]
+      [user, order]
     end
 
     # send confirmation email
-    ConfirmationMailer.with(order: order).order_email.deliver_later
+    ConfirmationMailer.with(order: @order).order_email.deliver_later
 
-    render_current_order(menu.id, current_user)
+    render 'menus/show', format: :json # requires @menu, @user, @order
 
     rescue OrderError => e
       render_validation_failed(e.message)
