@@ -42,8 +42,12 @@ export function getDeadlineContext() {
     if (ctx.ignoreDeadline) {
       return false;
     }
+    if (pickupDays === undefined) {
+      console.warn("called with pickupDays = undefined");
+      return false;
+    }
 
-    const lastPickupDay = pickupDays[pickupDays.length - 1];
+    const lastPickupDay = _.last(pickupDays);
     return isClosed(lastPickupDay.orderDeadlineAt);
   };
 
