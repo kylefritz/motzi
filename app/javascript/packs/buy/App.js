@@ -102,8 +102,9 @@ export default function Buy({ user: passedUser }) {
         }
       })
       .catch((error) => {
-        console.error("cant buy credits order", error);
-        window.alert("There was a problem buying credits.");
+        const { message } = error.response.data || {};
+        console.error("Can't buy credits", error, message);
+        window.alert(`Couldn't buy credits: ${message || error}`);
         Sentry.captureException(error);
       })
       .then(() => setSubmitting(false));
