@@ -23,7 +23,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
     order = Order.last
     order_items = order.order_items
-    assert_equal 2, order_items.size
+    assert_equal 3, order_items.size
 
     day1, day2 = order_items
     refute_equal day1.pickup_day_id, day2.pickup_day_id
@@ -64,8 +64,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
         post '/orders.json', params: order, as: :json
       end
     end
-    assert_response :success
-    # TODO: pay it forward doesnt match json schema because `day` is nil
+    assert_success_and_validate
     assert Order.last.present?
   end
 
@@ -152,7 +151,8 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     pickup_day2_id = Menu.current.pickup_days.second.id
     {comment: 'different', cart: [
       { item_id: item_id, quantity: 3, pickup_day_id: pickup_day1_id },
-      { item_id: item_id, quantity: 3, pickup_day_id: pickup_day2_id }
+      { item_id: item_id, quantity: 3, pickup_day_id: pickup_day2_id },
+      { item_id: Item::PAY_IT_FORWARD_ID, quantity: 1 },
     ]}.tap do |attrs|
       attrs[:uid] = hashid if hashid
     end

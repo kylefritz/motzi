@@ -111,7 +111,8 @@ class OrdersController < ApplicationController
       order.update!(params.permit(:comments, :skip))
       order.order_items.destroy_all
       params[:cart].each do |cart_item_params|
-        order.order_items.create!(cart_item_params.permit(:item_id, :quantity, :pickup_day_id))
+        order.order_items.create!(cart_item_params.permit(:item_id, :quantity, :pickup_day_id)
+                                                  .with_defaults(pickup_day_id: order.menu.pickup_days.first.id))
       end
 
       # send confirmation email

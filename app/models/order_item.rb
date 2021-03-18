@@ -10,10 +10,6 @@ class OrderItem < ApplicationRecord
   end
 
   def day
-    if self.pay_it_forward?
-      return nil
-    end
-
     self.pickup_day.day_str
   end
 
