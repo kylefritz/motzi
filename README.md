@@ -1,5 +1,7 @@
 # Motzi ![](https://github.com/kylefritz/motzi/workflows/ci/badge.svg)
 
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/kylefritz/motzi)
+
 Neighborhood bakery's CSA site
 
 ## Development
