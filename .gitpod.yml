@@ -1,5 +1,18 @@
 image:
   file: .gitpod.Dockerfile
 
+ports:
+  # Rails server
+  - port: 3000
+    onOpen: open-preview
+  # PostgreSQL server
+  - port: 5432
+    onOpen: ignore
+
 tasks:
-  - init: yarn install && bundle install
+  - init: >
+      yarn install &&
+      bundle install &&
+      rake db:create
+    command: >
+      rails server
