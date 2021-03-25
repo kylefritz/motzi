@@ -16,3 +16,4 @@ tasks:
       rake db:create
     command: >
       rails server
+  - command: ./bin/webpack-dev-server
