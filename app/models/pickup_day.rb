@@ -3,6 +3,7 @@ class PickupDay < ApplicationRecord
   has_many :order_items, dependent: :destroy
   has_many :menu_item_pickup_days, dependent: :destroy
   default_scope { order("pickup_at") }
+  has_paper_trail
 
   def self.for_pickup_at(dt)
      PickupDay.where("? between pickup_at - interval '8 hours' AND pickup_at + interval '2 hours' ", dt)
