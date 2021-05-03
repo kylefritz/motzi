@@ -46,7 +46,12 @@ ActiveAdmin.register Menu do
       small "#{t.strftime('%a %m/%d')}"
     end
     column :stats do |menu|
-      render 'admin/menus/sales', {menu: menu}
+      if menu.emailed_at.blank? || menu.emailed_at > 4.weeks.ago
+        render 'admin/menus/sales', {menu: menu}
+      else
+        span "Sales stats "
+        a("in menu details", href: admin_menu_path(menu))
+      end
     end
     column :emailed_at
     column :pickup_days do |menu|
