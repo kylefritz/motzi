@@ -23,6 +23,10 @@ class Order < ApplicationRecord
     order_items.map {|oi| oi.item.price * oi.quantity}.sum
   end
 
+  def credits
+    order_items.map {|oi| oi.item.credits * oi.quantity}.sum
+  end
+
   def items_for_pickup(pickup_day)
     order_items.filter {|oi| oi.pickup_day == pickup_day && !oi.pay_it_forward? }
   end

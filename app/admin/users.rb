@@ -89,6 +89,22 @@ ActiveAdmin.register User do
         column :items do |order|
           render partial: 'admin/orders/order', locals: {order: order}
         end
+        column :paid do |order|
+          if order.stripe_charge_amount.present?
+            a number_to_currency(order.stripe_charge_amount), href: "https://dashboard.stripe.com/payments/#{order.stripe_charge_id}", target: '_blank', title: "via Stripe"
+          else
+            span "#{order.credits} cr"
+          end
+          if order.stripe_receipt_url.present?
+            a "Receipt", href: order.stripe_receipt_url, target: '_blank', title: "Stripe Receipt"
+          end
+        end
+        column :retail_price do |order|
+          if order.stripe_charge_amount.present?
+            div number_to_currency(order.retail_price), class: "text-right"
+            price_diff(order.retail_price, order.stripe_charge_amount)
+          end
+        end
         column :comments
       end
     end
