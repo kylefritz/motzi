@@ -33,8 +33,8 @@ class CreditItemsController < ApplicationController
                                                        quantity: quantity,
                                                        good_for_weeks: 42)
 
-      # update user bread_per_week
-      current_user.update(breads_per_week: params[:breads_per_week].to_f)
+      # make user subscriber & update bread_per_week
+      current_user.update(breads_per_week: params[:breads_per_week].to_f, subscriber: true)
 
       ConfirmationMailer.with(credit_item: @credit_item).credit_email.deliver_later
 
