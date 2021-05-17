@@ -4,17 +4,12 @@ $motzi-purple: rgb(53, 44, 99);
 $motzi-red: rgb(213, 72, 44);
 $motzi-background: rgb(255, 238, 214);
 
-$pilgrim-gold: rgb(188, 154, 93);
-
 <% if ENV["SHOP_ID"] == "dutch_courage"  %>
   $primary: $dc-gold;
   $secondary: black;
 <% elsif ENV["SHOP_ID"] == "jinji"  %>
   $secondary: $motzi-red;
   $primary: $motzi-purple;
-<% elsif ENV["SHOP_ID"] == "pilgrim"  %>
-  $secondary: black;
-  $primary: $pilgrim-gold;
 <% else %>
   $secondary: $motzi-red;
   $primary: $motzi-purple;
