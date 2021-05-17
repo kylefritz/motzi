@@ -4,6 +4,9 @@ Neighborhood bakery's CSA site
 
 ## Development
 
+- postgres.app
+- redis
+
 ### Getting started
 
 ```

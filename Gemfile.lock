@@ -127,7 +127,8 @@ GEM
       xpath (~> 3.2)
     chartkick (3.4.0)
     childprocess (3.0.0)
-    concurrent-ruby (1.1.8)
+    concurrent-ruby (1.1.6)
+    connection_pool (2.2.5)
     crass (1.0.6)
     dante (0.2.0)
     device_detector (1.0.3)
@@ -312,6 +313,7 @@ GEM
       ffi (~> 1.0)
     rcodetools (0.8.5.0)
     redcarpet (3.5.1)
+    redis (4.2.5)
     regexp_parser (1.7.0)
     request_store (1.5.0)
       rack (>= 1.4)
@@ -362,6 +364,10 @@ GEM
       rubyzip (>= 1.2.2)
     sentry-raven (3.0.0)
       faraday (>= 1.0)
+    sidekiq (6.2.1)
+      connection_pool (>= 2.2.2)
+      rack (~> 2.0)
+      redis (>= 4.2.0)
     solargraph (0.40.2)
       backport (~> 1.1)
       benchmark
@@ -465,6 +471,7 @@ DEPENDENCIES
   sass-rails (~> 5)
   selenium-webdriver
   sentry-raven
+  sidekiq
   solargraph
   spring
   spring-watcher-listen (~> 2.0.0)

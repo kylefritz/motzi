@@ -1,4 +1,5 @@
 class SendHaventOrderedReminderJob < ApplicationJob
+  queue_as :default
 
   def perform(*args)
     PickupDay.for_order_deadline_at(Time.zone.now).each do |pickup_day|
