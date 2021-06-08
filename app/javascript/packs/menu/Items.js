@@ -55,7 +55,7 @@ export function DayButton({
     <div key={day}>
       <button
         type="button"
-        className="btn btn-primary btn-sm mr-2"
+        className="btn btn-primary btn-sm mr-2 mb-2"
         onClick={() => onSetDayId(dayId)}
       >
         <span className="d-block d-md-none">{shortDay(day)}</span>
@@ -74,7 +74,7 @@ function DayButtons({ description, onSetDayId, pickupDays }) {
   return (
     <>
       {onSetDayId && (
-        <div className="my-2" style={{ display: "flex" }}>
+        <div className="my-2" style={{ display: "flex", flexWrap: "wrap" }}>
           {sortBy(pickupDays, (p) => p.pickupAt).map((props) => (
             <DayButton key={props.id} onSetDayId={onSetDayId} {...props} />
           ))}
