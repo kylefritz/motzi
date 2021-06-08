@@ -7,7 +7,6 @@ ActiveAdmin.register User do
   filter :last_name
   filter :email
   filter :additional_email
-  filter :breads_per_week
   filter :phone
   filter :opt_in
 
@@ -47,7 +46,6 @@ ActiveAdmin.register User do
       small user.additional_email
     end
     column :subscriber
-    column :breads_per_week
     column :phone do |user|
       number_to_phone(user.phone)
     end
