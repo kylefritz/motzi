@@ -41,7 +41,7 @@ export function DayButton({
     return (
       <button
         type="button"
-        className="btn btn-outline-primary btn-sm mr-2"
+        className="btn btn-outline-primary btn-sm mr-2 mb-2"
         disabled={true}
         title={title}
       >
@@ -74,7 +74,7 @@ function DayButtons({ description, onSetDayId, pickupDays }) {
   return (
     <>
       {onSetDayId && (
-        <div className="my-2" style={{ display: "flex", flexWrap: "wrap" }}>
+        <div className="mt-2" style={{ display: "flex", flexWrap: "wrap" }}>
           {sortBy(pickupDays, (p) => p.pickupAt).map((props) => (
             <DayButton key={props.id} onSetDayId={onSetDayId} {...props} />
           ))}
