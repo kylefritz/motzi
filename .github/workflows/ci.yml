@@ -59,10 +59,3 @@ jobs:
           HEROKU_APP_NAME: jinjichocolate
         if: github.ref == 'refs/heads/master' && job.status == 'success'
         run: git push --force --no-verify https://heroku:$HEROKU_API_TOKEN@git.heroku.com/$HEROKU_APP_NAME.git HEAD:master
-
-      - name: heroku deploy dutch courage
-        env:
-          HEROKU_API_TOKEN: ${{ secrets.HEROKU_API_TOKEN }}
-          HEROKU_APP_NAME: dutchcourage
-        if: github.ref == 'refs/heads/master' && job.status == 'success'
-        run: git push --force --no-verify https://heroku:$HEROKU_API_TOKEN@git.heroku.com/$HEROKU_APP_NAME.git HEAD:master
