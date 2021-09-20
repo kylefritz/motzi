@@ -1,6 +1,6 @@
 ActiveAdmin.register User do
   permit_params :first_name, :last_name, :email, :additional_email, :is_admin, \
-    :subscriber, :opt_in, :breads_per_week, :phone
+    :subscriber, :opt_in, :breads_per_week, :phone, :password
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'
 
   filter :first_name
@@ -18,6 +18,15 @@ ActiveAdmin.register User do
   scope :admin
 
   batch_action :destroy
+
+  controller do
+    def update
+      if params[:user][:password].blank?
+        params[:user].delete("password")
+      end
+      super
+    end
+  end
 
   action_item :order, except: [:index, :new] do
     if params[:id].present?
@@ -68,6 +77,7 @@ ActiveAdmin.register User do
       input :opt_in
     end
     inputs 'Danger Zone' do
+      input :password
       input :subscriber
       input :is_admin
     end
