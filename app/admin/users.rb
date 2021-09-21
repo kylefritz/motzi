@@ -19,15 +19,6 @@ ActiveAdmin.register User do
 
   batch_action :destroy
 
-  controller do
-    def update
-      if params[:user][:password].blank?
-        params[:user].delete("password")
-      end
-      super
-    end
-  end
-
   action_item :order, except: [:index, :new] do
     if params[:id].present?
       user = User.find(params[:id])
@@ -176,26 +167,37 @@ ActiveAdmin.register User do
     redirect_to collection_path, notice: notice
   end
 
-  # modify the destroy action to disallow deleting users who have orders
-  member_action :destroy, method: :post do
-    if params[:id] == "batch_action"
-      users = User.includes(:orders).where(id: params[:collection_selection])
-      num_deleted = 0
 
-      users.find_each do |user|
-        if user.orders.empty?
-          user.destroy!
-          num_deleted += 1
-        end
+  controller do
+    # only update a user's password if a new password is specified
+    def update
+      if params[:user][:password].blank?
+        params[:user].delete("password")
       end
-      return redirect_to collection_path, notice: "Deleted #{num_deleted} users"
+      super
     end
-
-    unless resource.orders.empty?
-      return redirect_to collection_path, alert: "Only users without orders can be deleted"
+  
+    # modify the destroy action to disallow deleting users who have orders
+    def destroy
+      if params[:id] == "batch_action"
+        users = User.includes(:orders).where(id: params[:collection_selection])
+        num_deleted = 0
+  
+        users.find_each do |user|
+          if user.orders.empty?
+            user.destroy!
+            num_deleted += 1
+          end
+        end
+        return redirect_to collection_path, notice: "Deleted #{num_deleted} users"
+      end
+  
+      unless resource.orders.empty?
+        return redirect_to collection_path, alert: "Only users without orders can be deleted"
+      end
+  
+      resource.destroy!
+      redirect_to collection_path, notice: "User '#{resource.name}' deleted"
     end
-
-    resource.destroy!
-    redirect_to collection_path, notice: "User '#{resource.name}' deleted"
   end
 end

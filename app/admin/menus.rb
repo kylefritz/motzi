@@ -46,7 +46,7 @@ ActiveAdmin.register Menu do
       small "#{t.strftime('%a %m/%d')}"
     end
     column :stats do |menu|
-      if menu.emailed_at.blank? || menu.emailed_at > 4.weeks.ago
+      if menu.emailed_at.blank? || menu.emailed_at > 6.weeks.ago
         render 'admin/menus/sales', {menu: menu}
       else
         span "Sales stats "
@@ -100,6 +100,9 @@ ActiveAdmin.register Menu do
         if menu.current?
           status_tag true, style: 'margin-left: 3px', label: 'Current'
         end
+      end
+      row :sales do
+        render 'admin/menus/sales', {menu: menu}
       end
       row :subscriber_note do
         menu.subscriber_note_html
