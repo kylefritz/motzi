@@ -181,6 +181,14 @@ ActiveAdmin.register Menu do
     redirect_to resource_path, notice: notice
   end
 
+  member_action :copy_from, method: :post do
+    @menu = resource
+    original_menu = Menu.find(params[:original_menu_id])
+
+    @menu.copy_from(original_menu)
+
+    redirect_to resource_path, notice: "Copied from menu #{params[:original_menu_id]}"
+  end
 
   #
   # menu builder actions, could be own controller...

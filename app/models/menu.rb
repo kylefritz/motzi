@@ -101,5 +101,27 @@ class Menu < ApplicationRecord
     self.pickup_days.maximum(:order_deadline_at)
   end
 
+  def copy_from(original_menu)
+    if original_menu.pickup_days.count > self.pickup_days.count
+      raise "Can't map onto fewer pickup days"
+    end
+
+    # make a lookup between old pick_up days & new pick_up days
+    new_to_old = Hash[original_menu.pickup_days.zip(self.pickup_days).map do |pud, new_pud|
+      [pud.id, new_pud.id]
+    end]
+
+    original_menu.menu_items.each do |original_mi|
+      new_mi = self.menu_items.create!(item_id: original_mi.item_id)
+
+      original_mi.menu_item_pickup_days.each do |mipud|
+        new_mi.menu_item_pickup_days.create!(
+          pickup_day_id: new_to_old[mipud.pickup_day_id],
+          limit: mipud.limit,
+        )
+      end
+    end
+  end
+
   MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
 end

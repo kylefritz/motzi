@@ -17,6 +17,7 @@ export default function SimpleTabs({ allItems, menu }) {
   const { pickupDays } = menu;
   return (
     <div className={classes.root}>
+      <CopyFrom menuId={menu.id} />
       <PickupDays {...menu} />
       <hr />
       <h2>Menu Items</h2>
@@ -75,6 +76,30 @@ function TabPanel(props) {
     </div>
   );
 }
+
+function CopyFrom({ menuId }) {
+  return (
+    <>
+      <h2>Copy from menu</h2>
+      <form method="POST" action={`/admin/menus/${menuId}/copy_from`}>
+        <Row>
+          <label htmlFor="original_menu_id">Original Menu ID:</label>
+          <input id="original_menu_id" name="original_menu_id" />
+        </Row>
+        <Row>
+          <input type="submit" value="Copy from" />
+        </Row>
+      </form>
+    </>
+  );
+}
+
+const Row = styled.div`
+  margin: 1rem 0;
+  label {
+    margin-right: 1rem;
+  }
+`;
 
 function ItemGrid({ menuItems, pickupDays }) {
   if (items.length === 0) {

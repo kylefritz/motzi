@@ -67,4 +67,16 @@ class MenuTest < ActiveSupport::TestCase
     assert_equal week3.latest_deadline, w3_last_deadline
     assert_equal week3.pickup_days.maximum(:order_deadline_at), w3_last_deadline
   end
+
+  test "copy_from" do
+    week1 = menus(:week1)
+    week3 = menus(:week3)
+
+    week3.copy_from(week1)
+
+    assert_equal week1.items.count, week3.items.count, "same number of items"
+    assert_equal week1.pickup_days.count, week3.pickup_days.count, "same number of pickup_days"
+    assert_equal week1.menu_items.map {|i| i.menu_item_pickup_days.count}.sum,
+                 week3.menu_items.map {|i| i.menu_item_pickup_days.count}.sum, "same sum of menu_item_pickup_days"
+  end
 end
