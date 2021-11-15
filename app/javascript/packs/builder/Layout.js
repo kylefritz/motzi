@@ -17,8 +17,9 @@ export default function SimpleTabs({ allItems, menu }) {
   const { pickupDays } = menu;
   return (
     <div className={classes.root}>
-      <CopyFrom menuId={menu.id} />
       <PickupDays {...menu} />
+      <hr />
+      <CopyFrom menuId={menu.id} />
       <hr />
       <h2>Menu Items</h2>
       <AppBar position="static">
