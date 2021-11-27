@@ -187,7 +187,13 @@ ActiveAdmin.register Menu do
 
     @menu.copy_from(original_menu)
 
-    redirect_to resource_path, notice: "Copied from menu #{params[:original_menu_id]}"
+    notice = "Copied from menu #{params[:original_menu_id]}"
+    ActiveAdmin::Comment.create(body: notice,
+                                namespace: "admin",
+                                resource: @menu,
+                                author: current_admin_user)
+
+    redirect_to resource_path, notice: notice
   end
 
   #
