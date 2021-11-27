@@ -9,7 +9,7 @@ json.pickup_days @menu.pickup_days do |pickup_day|
   json.debug pickup_day.day_abbr
 end
 
-json.items @menu.menu_items.map do |menu_item|
+json.items @menu.sorted_menu_items.map do |menu_item|
   item = menu_item.item
 
   json.menu_item_id menu_item.id
@@ -18,7 +18,7 @@ json.items @menu.menu_items.map do |menu_item|
   json.extract! item, :name, :description, :price, :credits
   json.image item.image_path
 
-  json.extract! menu_item, :subscriber, :marketplace
+  json.extract! menu_item, :subscriber, :marketplace, :sort_order
   json.pickup_days menu_item.menu_item_pickup_days do |mi_pd|
 
     json.extract! mi_pd, :id, :limit

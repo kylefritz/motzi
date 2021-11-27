@@ -41,6 +41,7 @@
           "credits",
           "subscriber",
           "marketplace",
+          "sortOrder",
           "pickupDays"
         ],
         "properties": {
@@ -59,6 +60,7 @@
           },
           "subscriber": { "type": "boolean" },
           "marketplace": { "type": "boolean" },
+          "sortOrder": { "type": ["integer", "null"] },
           "pickupDays": {
             "type": "array",
             "items": {

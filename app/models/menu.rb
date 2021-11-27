@@ -101,6 +101,15 @@ class Menu < ApplicationRecord
     self.pickup_days.maximum(:order_deadline_at)
   end
 
+  def sorted_menu_items(includes: nil)
+    my_menu_items = self.menu_items
+    if includes.present?
+      my_menu_items = my_menu_items.includes(includes)
+    end
+
+    my_menu_items.sort_by {|mi| mi.sort_order.nil? ? 1_000 : mi.sort_order}
+  end
+
   def copy_from(original_menu)
     if original_menu.pickup_days.count > self.pickup_days.count
       raise "Can't map onto fewer pickup days"
@@ -111,8 +120,16 @@ class Menu < ApplicationRecord
       [pud.id, new_pud.id]
     end]
 
-    original_menu.menu_items.each do |original_mi|
-      new_mi = self.menu_items.create!(item_id: original_mi.item_id)
+    # if there are already items in this menu, append these new ones to the end by offsetting the sort order index
+    sort_offset = self.menu_items.pluck(:sort_order).compact.max || 0
+
+    original_menu.sorted_menu_items.each_with_index do |original_mi, index|
+      new_mi = self.menu_items.create!(
+        item_id: original_mi.item_id,
+        subscriber: original_mi.subscriber,
+        marketplace: original_mi.marketplace,
+        sort_order: sort_offset + index,
+      )
 
       original_mi.menu_item_pickup_days.each do |mipud|
         new_mi.menu_item_pickup_days.create!(

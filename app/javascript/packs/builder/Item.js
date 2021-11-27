@@ -4,6 +4,7 @@ import { Delete } from "@material-ui/icons";
 import styled from "styled-components";
 import { shortDay } from "./PickupDay";
 import { useApi } from "./Context";
+import { isNil } from "lodash";
 
 export default function Item({
   itemId,
@@ -11,12 +12,16 @@ export default function Item({
   name,
   subscriber,
   marketplace,
+  sortOrder,
   pickupDays,
   menuPickupDays,
 }) {
   const api = useApi();
   function handleChangeMenuType(menuType, enabled) {
     api.menuItem.update(menuItemId, { [menuType]: enabled });
+  }
+  function handleSortOrderChanged(sortOrder) {
+    api.menuItem.update(menuItemId, { sortOrder });
   }
 
   return (
@@ -36,6 +41,8 @@ export default function Item({
           <Delete />
         </RightButton>
       </Header>
+
+      <SortOrder sortOrder={sortOrder} onChange={handleSortOrderChanged} />
 
       <Sub>Pickup Days</Sub>
       <PickupDays
@@ -71,6 +78,31 @@ function MenuType({ name, enabled, onChange: handleChange }) {
           checked={enabled}
         />
         <LabelText>{name}</LabelText>
+      </label>
+    </Row>
+  );
+}
+
+function SortOrder({ sortOrder, onChange: handleChange }) {
+  function handleClear(event) {
+    event.preventDefault();
+    handleChange(null);
+  }
+  return (
+    <Row>
+      <label>
+        <LeftLabelText>Sort Order</LeftLabelText>
+        <SmallInput
+          type="number"
+          value={sortOrder}
+          onChange={(event) => handleChange(event.target.valueAsNumber)}
+          placeholder="none"
+        />
+        {!isNil(sortOrder) && (
+          <XBtn href="#" onClick={handleClear}>
+            x
+          </XBtn>
+        )}
       </label>
     </Row>
   );
@@ -180,9 +212,18 @@ const SmallInput = styled.input`
   border: 1px dashed rgba(1, 1, 1, 0.2);
 `;
 
+const LeftLabelText = styled.span`
+  padding-right: 0.5rem;
+`;
+
 const LabelText = styled.span`
   padding-left: 0.5rem;
   padding-right: 0.5rem;
+`;
+
+const XBtn = styled.a`
+  padding-left: 0.5rem;
+  font-weight: bold;
 `;
 
 const Days = styled.div`
