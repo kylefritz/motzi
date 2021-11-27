@@ -33,9 +33,9 @@ class PickupDay < ApplicationRecord
       time.strftime(format).gsub(/:00/i, '').gsub(/ AM/i, 'a').gsub(/ PM/i, 'p')
     end
     pickup = clean_strftime(pickup_at, '%a %m/%d %-l:%M %p')
-    deadline = clean_strftime(order_deadline_at, '%-l:%M %p on %a %m/%d')
+    deadline = clean_strftime(order_deadline_at, '%a %m/%d %-l:%M %p')
 
-    "#{pickup} pickup: order by #{deadline}"
+    "#{pickup} pickup (order by #{deadline})"
   end
 end
  

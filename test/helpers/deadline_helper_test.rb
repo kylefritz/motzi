@@ -9,6 +9,6 @@ class DeadlineHelperTest < ActiveSupport::TestCase
   end
 
   test "ordering_deadline_text" do
-    assert_equal "for Thu 01/03 3p pickup: order by 10p on Tue 01/01 or for Sat 01/05 8a pickup: order by 10p on Thu 01/03", ordering_deadline_text(@menu).gsub(/\n/,' ')
+    assert_equal "Thu 01/03 3p pickup (order by Tue 01/01 10p);\nSat 01/05 8a pickup (order by Thu 01/03 10p)", ordering_deadline_text(@menu)
   end
 end
