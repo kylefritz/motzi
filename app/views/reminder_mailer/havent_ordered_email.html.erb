@@ -1,4 +1,9 @@
-<h2>For <%= @menu.name %>, please order by <%= ordering_deadline_text(@menu) %>!!</h2>
+<h2>
+  <%= @menu.name %>
+</h2>
+<p>Please order soon:
+<pre style="font-family:Arial, Helvetica, sans-serif"><%= ordering_deadline_text(@menu) %></pre>
+</p>
 
 <p>
   <%= link_to @menu.name, current_menu_url(uid: @user.hashid) %>

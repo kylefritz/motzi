@@ -10,6 +10,8 @@
   <%= link_to "This week's menu" , current_menu_url(uid: @user.hashid) %>
 </p>
 
-<p>Order by <%= ordering_deadline_text(@menu) %>.</p>
+<p>
+<pre style="font-family:Arial, Helvetica, sans-serif"><%= ordering_deadline_text(@menu) %></pre>
+</p>
 
 <%= render partial: 'menu_mailer/credits_remaining' %>
