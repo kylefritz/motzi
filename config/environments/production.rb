@@ -57,8 +57,17 @@ Rails.application.configure do
   # config.cache_store = :mem_cache_store
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
-  # config.active_job.queue_adapter     = :resque
+  config.active_job.queue_adapter = Setting.shop.queue_adapter.to_sym
   # config.active_job.queue_name_prefix = "motzi_production"
+  
+  # change queue for our work back to the "default" queue
+  #
+  # nil will use the "default" queue (some of these options will not work with your Rails version; add/remove as necessary)
+  config.action_mailer.deliver_later_queue_name = "mailers"        # defaults to "mailers"
+  config.active_storage.queues.analysis         = "active_storage" # defaults to "active_storage_analysis"
+  config.active_storage.queues.purge            = "active_storage" # defaults to "active_storage_purge"
+  config.active_storage.queues.mirror           = "active_storage" # defaults to "active_storage_mirror"
+  config.active_storage.queues.purge            = "active_storage" # alternatively, put purge jobs in the `low` queue
 
   # Setup the mailer config
   config.action_mailer.default_url_options = { host: Setting.shop.app_domain }

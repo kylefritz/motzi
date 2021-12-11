@@ -1,0 +1,8 @@
+---
+:concurrency: 2
+:queues:
+  - critical
+  - default
+  - low
+  - mailers
+  - active_storage

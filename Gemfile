@@ -31,6 +31,7 @@ gem 'rails', '~> 6.0.3.2'
 gem 'redcarpet' # markdown the baker's note in admin
 gem 'sass-rails', '~> 5' # css
 gem 'sentry-raven' # debugging to sentry.io
+gem 'sidekiq' # background work
 gem 'sql_query' # load SQL queries from erb templates
 gem 'stripe' # accept credit cards
 gem 'webpacker', '~> 4.0' # compiles javascript

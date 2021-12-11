@@ -1,3 +1,5 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
   devise_for :users
   ActiveAdmin.routes(self)
@@ -25,9 +27,11 @@ Rails.application.routes.draw do
   get '/logout' => redirect('/signout')
   get '/signout' => 'home#signout'
 
-  # blazer for admins
+  # mounted admin-only apps
   authenticate :user, ->(user) { user.is_admin? } do
-    mount Blazer::Engine, at: "blazer"
+    mount Blazer::Engine, at: "/blazer"
+
+    mount Sidekiq::Web, at: "/sidekiq"
   end
 
   # review emails in development
