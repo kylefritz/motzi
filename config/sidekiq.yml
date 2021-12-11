@@ -5,4 +5,5 @@
   - default
   - low
   - mailers
+  - ahoy
   - active_storage
