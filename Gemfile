@@ -29,7 +29,7 @@ gem 'puma', '>= 3.12.2' # web/app server
 gem 'rails-settings-cached' # site-wide settings
 gem 'rails', '~> 6.0.3.2'
 gem 'redcarpet' # markdown the baker's note in admin
-gem 'sass-rails', '~> 5' # css
+gem 'sass-rails', '~> 6' # css
 gem 'sentry-raven' # debugging to sentry.io
 gem 'sidekiq' # background work
 gem 'sql_query' # load SQL queries from erb templates
