@@ -170,7 +170,7 @@ ActiveAdmin.register Menu do
 
   member_action :test_email, method: :post do
     menu = resource
-    MenuMailer.with(menu: menu, user: current_user).weekly_menu_email.deliver_now
+    MenuMailer.with(menu: menu, user: current_user).weekly_menu_email.deliver_later
 
     notice = "Menu '#{menu.name}' was emailed to #{current_user.email}"
     ActiveAdmin::Comment.create(body: notice,
