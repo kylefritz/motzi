@@ -4,3 +4,5 @@
   - critical
   - default
   - low
+  - mailers
+  - active_storage

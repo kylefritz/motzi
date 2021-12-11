@@ -63,11 +63,11 @@ Rails.application.configure do
   # change queue for our work back to the "default" queue
   #
   # nil will use the "default" queue (some of these options will not work with your Rails version; add/remove as necessary)
-  config.action_mailer.deliver_later_queue_name = nil # defaults to "mailers"
-  config.active_storage.queues.analysis   = nil       # defaults to "active_storage_analysis"
-  config.active_storage.queues.purge      = nil       # defaults to "active_storage_purge"
-  config.active_storage.queues.mirror     = nil       # defaults to "active_storage_mirror"
-  config.active_storage.queues.purge      = nil       # alternatively, put purge jobs in the `low` queue
+  config.action_mailer.deliver_later_queue_name = "mailers"        # defaults to "mailers"
+  config.active_storage.queues.analysis         = "active_storage" # defaults to "active_storage_analysis"
+  config.active_storage.queues.purge            = "active_storage" # defaults to "active_storage_purge"
+  config.active_storage.queues.mirror           = "active_storage" # defaults to "active_storage_mirror"
+  config.active_storage.queues.purge            = "active_storage" # alternatively, put purge jobs in the `low` queue
 
   # Setup the mailer config
   config.action_mailer.default_url_options = { host: Setting.shop.app_domain }

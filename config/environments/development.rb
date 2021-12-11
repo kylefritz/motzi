@@ -28,6 +28,15 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
+  # uncomment to test production queue settings
+  #
+  # config.active_job.queue_adapter = Setting.shop.queue_adapter.to_sym
+  # config.action_mailer.deliver_later_queue_name = "mailers"        # defaults to "mailers"
+  # config.active_storage.queues.analysis         = "active_storage" # defaults to "active_storage_analysis"
+  # config.active_storage.queues.purge            = "active_storage" # defaults to "active_storage_purge"
+  # config.active_storage.queues.mirror           = "active_storage" # defaults to "active_storage_mirror"
+  # config.active_storage.queues.purge            = "active_storage" # alternatively, put purge jobs in the `low` queue
+
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
