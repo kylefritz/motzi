@@ -17,7 +17,7 @@ gem 'bootstrap', '~> 4.3.1' # nice style
 gem 'devise' # for authentication
 gem 'gon' # rails variables in javascript
 gem 'hashid-rails' # lookup models by hashid
-gem 'image_processing', '~> 1.2' # Use Active Storage variant
+gem 'image_processing', '~> 1.12' # Use Active Storage variant
 gem 'jbuilder', '~> 2.7' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'naturalsort', :require => 'natural_sort_kernel' # implements a natural, human-friendly alphanumeric sort
 gem 'newrelic_rpm' # debugging to new relic
