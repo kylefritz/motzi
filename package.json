@@ -16,7 +16,7 @@
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "lodash": "^4.17.19",
     "luxon": "^1.26.0",
-    "moment": "^2.25.1",
+    "moment": "^2.29.4",
     "pluralize": "^8.0.0",
     "prop-types": "^15.7.2",
     "query-string": "^6.12.1",
