@@ -1,6 +1,6 @@
 # RailsSettings Model
 class Setting < RailsSettings::Base
-  has_paper_trail
+  # has_paper_trail
 
   field :menu_id, type: :integer, default: nil
   field :google_analytics_tracker, default: nil, type: :string
