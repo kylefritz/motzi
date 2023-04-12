@@ -1,6 +1,6 @@
 # RailsSettings Model
 class Setting < RailsSettings::Base
-  # has_paper_trail
+  has_paper_trail
 
   field :menu_id, type: :integer, default: nil
   field :google_analytics_tracker, default: nil, type: :string
@@ -10,7 +10,6 @@ class Setting < RailsSettings::Base
   field :leadtime_hours, default: 27, type: :integer
   field :reminder_hours, default: 3, type: :integer
   field :pickup_instructions, type: :string
-  field :shop_id, default: ENV.fetch("SHOP_ID", "motzi"), readonly: true
   field :credit_purchase_note, type: :string
   field :signup_form_note, type: :string
   field :accepting_subscribers, default: true, type: :boolean
@@ -28,14 +27,6 @@ class Setting < RailsSettings::Base
   end
 
   def self.shop
-    find_shop_by_shop_id!(Setting.shop_id) # perf: reading from disk kind multiple times per request
-  end
-  def self.find_shop_by_shop_id!(shop_id)
-    Rails.application.config_for(:shop, env: shop_id).tap do |shop_hash|
-      if shop_hash.empty?
-        throw "No shop settings for #{Setting.shop_id}"
-      end
-      shop_hash[:id] = shop_id
-    end
+    ShopConfig.shop
   end
 end
