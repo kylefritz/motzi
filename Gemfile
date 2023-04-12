@@ -61,7 +61,7 @@ end
 
 group :test do
   gem 'capybara', '>= 2.15' # Adds support for Capybara system testing and selenium driver
-  gem 'stripe-ruby-mock', '~> 3.0.1', :require => 'stripe_mock' # test Stripe code without hitting Stripe's servers
+  gem 'stripe-ruby-mock', '3.1.0.rc3', :require => 'stripe_mock' # test Stripe code without hitting Stripe's servers
   gem 'selenium-webdriver'
   gem 'webdrivers' # Easy installation and use of web drivers to run system tests with browsers
 end
