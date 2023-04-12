@@ -1,3 +1,5 @@
+require_relative "../../app/models/shop_config"
+
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -30,7 +32,7 @@ Rails.application.configure do
 
   # uncomment to test production queue settings
   #
-  # config.active_job.queue_adapter = Setting.shop.queue_adapter.to_sym
+  # config.active_job.queue_adapter = ShopConfig.shop.queue_adapter.to_sym
   # config.action_mailer.deliver_later_queue_name = "mailers"        # defaults to "mailers"
   # config.active_storage.queues.analysis         = "active_storage" # defaults to "active_storage_analysis"
   # config.active_storage.queues.purge            = "active_storage" # defaults to "active_storage_purge"

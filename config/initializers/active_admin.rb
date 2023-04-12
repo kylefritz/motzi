@@ -1,3 +1,5 @@
+require_relative "../../app/models/shop_config"
+
 class GonFooter < ActiveAdmin::Component
   builder_method :footer
 
@@ -13,7 +15,7 @@ ActiveAdmin.setup do |config|
   # Set the title that is displayed on the main layout
   # for each of the active admin pages.
   #
-  config.site_title = Setting.shop.short_name
+  config.site_title = ShopConfig.shop.short_name
 
   # Set the link url for the title. For example, to take
   # users to your main site. Defaults to no link.
