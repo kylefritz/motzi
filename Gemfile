@@ -1,13 +1,13 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.7.8'
+ruby '3.1.4'
 
 #
 # please keep gems sorted; include comment for why a gem is needed
 #
 gem 'activeadmin' # admin ui
-gem 'ahoy_email' # email analytics
+gem 'ahoy_email', '~> 1.1.1' # email analytics
 gem 'ahoy_matey' # analytics
 gem 'aws-sdk-s3', require: false # for s3/active storage
 gem 'bcrypt', '~> 3.1.7' # for devise
@@ -27,14 +27,14 @@ gem 'pg', '>= 0.18', '< 2.0'
 gem 'progress_bar'
 gem 'puma', '>= 3.12.2' # web/app server
 gem 'rails-settings-cached' # site-wide settings
-gem 'rails', '~> 6.0.3.2'
+gem 'rails', '~> 6.1.7.3'
 gem 'redcarpet' # markdown the baker's note in admin
 gem 'sass-rails', '~> 6' # css
 gem 'sentry-raven' # debugging to sentry.io
 gem 'sidekiq' # background work
 gem 'sql_query' # load SQL queries from erb templates
 gem 'stripe' # accept credit cards
-gem 'webpacker', '~> 4.0' # compiles javascript
+gem 'webpacker', '~> 5' # compiles javascript
 
 
 # gem 'redis', '~> 4.0' # Use Redis adapter to run Action Cable in production
