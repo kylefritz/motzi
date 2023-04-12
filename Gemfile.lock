@@ -224,9 +224,9 @@ GEM
       letter_opener (~> 1.7)
       railties (>= 5.2)
       rexml
-    listen (3.0.8)
-      rb-fsevent (~> 0.9, >= 0.9.4)
-      rb-inotify (~> 0.9, >= 0.9.7)
+    listen (3.8.0)
+      rb-fsevent (~> 0.10, >= 0.10.3)
+      rb-inotify (~> 0.9, >= 0.9.10)
     loofah (2.20.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -276,10 +276,12 @@ GEM
       highline (>= 1.6, < 3)
       options (~> 2.3.0)
     public_suffix (5.0.1)
-    puma (6.2.1)
+    puma (5.6.5)
       nio4r (~> 2.0)
     racc (1.6.2)
     rack (2.2.6.4)
+    rack-mini-profiler (2.3.4)
+      rack (>= 1.2.0)
     rack-proxy (0.7.6)
       rack
     rack-test (2.1.0)
@@ -397,9 +399,6 @@ GEM
       tilt (~> 2.0)
       yard (~> 0.9, >= 0.9.24)
     spring (2.1.1)
-    spring-watcher-listen (2.0.1)
-      listen (>= 2.7, < 4.0)
-      spring (>= 1.2, < 3.0)
     sprockets (4.2.0)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
@@ -459,10 +458,10 @@ DEPENDENCIES
   aws-sdk-s3
   bcrypt (~> 3.1.7)
   blazer
-  bootsnap (>= 1.4.2)
+  bootsnap (>= 1.4.4)
   bootstrap (~> 4.3.1)
   byebug
-  capybara (>= 2.15)
+  capybara (>= 3.26)
   devise
   dotenv-rails
   faker
@@ -473,32 +472,32 @@ DEPENDENCIES
   jbuilder (~> 2.7)
   json-schema
   letter_opener_web
-  listen (>= 3.0.5, < 3.2)
+  listen (~> 3.3)
   naturalsort
   newrelic_rpm
   olive_branch
   paper_trail
   pg (>= 0.18, < 2.0)
   progress_bar
-  puma (>= 3.12.2)
+  puma (~> 5.0)
+  rack-mini-profiler (~> 2.0)
   rails (~> 6.1.7.3)
   rails-settings-cached
   rcodetools
   redcarpet
   sass-rails (~> 6)
-  selenium-webdriver
+  selenium-webdriver (>= 4.0.0.rc1)
   sentry-raven
   sidekiq
   solargraph
   spring
-  spring-watcher-listen (~> 2.0.0)
   sql_query
   standard
   stripe
   stripe-ruby-mock (= 3.1.0.rc3)
-  web-console (>= 3.3.0)
+  web-console (>= 4.1.0)
   webdrivers
-  webpacker (~> 5)
+  webpacker (~> 5.0)
 
 RUBY VERSION
    ruby 3.1.4p223
