@@ -7,7 +7,7 @@ ruby '3.1.4'
 # please keep gems sorted; include comment for why a gem is needed
 #
 gem 'activeadmin' # admin ui
-gem 'ahoy_email', '~> 1.1.1' # email analytics
+gem 'ahoy_email', '~> 1.1.1' # email analytics (v2 sadly removes open tracking)
 gem 'ahoy_matey' # analytics
 gem 'aws-sdk-s3', require: false # for s3/active storage
 gem 'bcrypt', '~> 3.1.7' # for devise
