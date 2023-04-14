@@ -1,3 +1,6 @@
+require "active_support/core_ext/integer/time"
+require_relative "../../app/models/shop_config"
+
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -29,7 +32,7 @@ Rails.application.configure do
   config.assets.compile = false
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
-  # config.action_controller.asset_host = 'http://assets.example.com'
+  # config.asset_host = 'http://assets.example.com'
 
   # Specifies the header that your server uses for sending files.
   # config.action_dispatch.x_sendfile_header = 'X-Sendfile' # for Apache
@@ -57,7 +60,7 @@ Rails.application.configure do
   # config.cache_store = :mem_cache_store
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
-  config.active_job.queue_adapter = Setting.shop.queue_adapter.to_sym
+  config.active_job.queue_adapter = ShopConfig.shop.queue_adapter.to_sym
   # config.active_job.queue_name_prefix = "motzi_production"
   
   # change queue for our work back to the "default" queue
@@ -70,7 +73,7 @@ Rails.application.configure do
   config.active_storage.queues.purge            = "active_storage" # alternatively, put purge jobs in the `low` queue
 
   # Setup the mailer config
-  config.action_mailer.default_url_options = { host: Setting.shop.app_domain }
+  config.action_mailer.default_url_options = { host: ShopConfig.shop.app_domain }
   config.action_mailer.perform_caching = false
   config.action_mailer.perform_deliveries = true
   # from send grid
@@ -78,7 +81,7 @@ Rails.application.configure do
   config.action_mailer.smtp_settings = {
     :user_name => ENV['SENDGRID_USERNAME'],
     :password => ENV['SENDGRID_PASSWORD'],
-    :domain => Setting.shop.marketing_domain,
+    :domain => ShopConfig.shop.marketing_domain,
     :address => 'smtp.sendgrid.net',
     :port => 587,
     :authentication => :plain,
@@ -95,6 +98,12 @@ Rails.application.configure do
 
   # Send deprecation notices to registered listeners.
   config.active_support.deprecation = :notify
+
+  # Log disallowed deprecations.
+  config.active_support.disallowed_deprecation = :log
+
+  # Tell Active Support which deprecation messages to disallow.
+  config.active_support.disallowed_deprecation_warnings = []
 
   # Use default logging formatter so that PID and timestamp are not suppressed.
   config.log_formatter = ::Logger::Formatter.new

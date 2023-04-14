@@ -1,3 +1,5 @@
+require_relative "../../app/models/shop_config"
+
 # frozen_string_literal: true
 
 # Use this hook to configure devise mailer, warden hooks and so forth.
@@ -18,7 +20,7 @@ Devise.setup do |config|
   # Configure the e-mail address which will be shown in Devise::Mailer,
   # note that it will be overwritten if you use your own mailer class
   # with default "from" parameter.
-  config.mailer_sender = "no-reply@#{Setting.shop.marketing_domain}"
+  config.mailer_sender = "no-reply@#{ShopConfig.shop.marketing_domain}"
 
   # Configure the class responsible to send e-mails.
   # config.mailer = 'Devise::Mailer'
