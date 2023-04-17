@@ -110,13 +110,6 @@ export default function Buy({ user: passedUser }) {
       .then(() => setSubmitting(false));
   };
 
-  const handlePaymentResult = ({ token }) => {
-    // with payment request, the price sent to stripe
-    console.error("paymentResult token=", token);
-
-    // TODO: send completed payment request to rails
-  };
-
   if (receipt) {
     return (
       <div className="alert alert-success" role="alert">
@@ -179,11 +172,9 @@ export default function Buy({ user: passedUser }) {
             <br />
           )}
           <Payment
-            credits={credits}
+            description={`${credits} credits`}
             price={totalPrice}
-            stripeApiKey={gon.stripeApiKey}
             onCardToken={handleCardToken}
-            onPaymentResult={handlePaymentResult}
             submitting={submitting}
           />
         </>

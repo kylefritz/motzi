@@ -30,7 +30,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
   const [tip, setTip] = useState();
 
   const totalPrice = applyTip(price, tip);
-  const handleCardToken = ({ token }) => {
+  const handleCheckout = ({ token }) => {
     if (_.isEmpty(account.email)) {
       return alert("Enter email!");
     }
@@ -41,14 +41,25 @@ export default function Marketplace({ menu, onCreateOrder }) {
     console.log("handleCardToken", { token, price: totalPrice });
     setSubmitting(true);
 
-    // send stripe token to rails to complete purchase
-    onCreateOrder({
-      ...account,
-      comments,
-      cart,
-      price: totalPrice,
-      token: token.id,
-    }).then(() => setSubmitting(false));
+    axios
+      .post("/payment_intents", {
+        ...account,
+        price: totalPrice,
+        comments,
+        cart,
+      })
+      .then(({ data }) => {
+        console.log("got from server data.checkoutUrl=", data.checkoutUrl);
+        // setClientSecret(data.clientSecret);
+
+        // TODO: redirect to checkoutUrl
+      })
+      .catch((error) => {
+        console.error("Couldn't create payment intent", error.response);
+        window.alert(`Couldn't create payment: ${error.message}`);
+        Sentry.captureException(err);
+      })
+      .always(() => setSubmitting(false));
   };
 
   const handleAddToCart = (item) => {
@@ -105,27 +116,64 @@ export default function Marketplace({ menu, onCreateOrder }) {
 
       <Cart {...{ cart, menu, rmCartItem: handleRemoveFromCart }} />
 
-      <div className="mt-3">
-        <Account onChange={setAccount} disabled={disabled} />
-      </div>
-      {enablePayWhatYouCan ? (
-        <PayWhatYouCan
-          price={price}
-          onPricedChanged={setPrice}
-          disabled={disabled}
-          tip={tip}
-          onTip={setTip}
-        />
-      ) : (
-        <br />
+      {cart.length > 0 && (
+        <>
+          <div className="mt-3">
+            <Account onChange={setAccount} disabled={disabled} />
+          </div>
+
+          {enablePayWhatYouCan ? (
+            <PayWhatYouCan
+              price={price}
+              onPricedChanged={setPrice}
+              disabled={disabled}
+              tip={tip}
+              onTip={setTip}
+            />
+          ) : (
+            <br />
+          )}
+
+          <CheckoutButton
+            disabled={disabled}
+            submitting={submitting}
+            onClick={handleCheckout}
+          />
+        </>
       )}
-      <Payment
-        price={_.isEmpty(cart) ? null : totalPrice}
-        stripeApiKey={gon.stripeApiKey}
-        onCardToken={handleCardToken}
-        submitting={submitting}
-        disabled={disabled}
+    </>
+  );
+}
+
+function CheckoutButton({ disabled, submitting, onClick }) {
+  const text = "Proceed to Checkout";
+  return (
+    <button
+      disabled={disabled || submitting}
+      className="btn btn-primary btn-lg btn-block"
+      style={buttonStyle}
+      onClick={onClick}
+      type="submit"
+    >
+      {submitting ? <Spinner /> : text}
+    </button>
+  );
+}
+const buttonStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+function Spinner() {
+  return (
+    <>
+      <span
+        className="spinner-border spinner-border-sm mr-2"
+        role="status"
+        aria-hidden="true"
       />
+      Loading...
     </>
   );
 }

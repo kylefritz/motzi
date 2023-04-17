@@ -5,19 +5,6 @@ class OrdersController < ApplicationController
   include RenderCurrentOrder
   before_action :require_not_skip_and_cart_items
 
-  def current_user_or_create_user
-    if !params.include?(:email)
-      require_hashid_user_or_devise_user!
-      return current_user
-    end
-
-    if (existing_user = User.find_by(email: params.fetch(:email).strip.downcase)).present?
-      return existing_user
-    end
-
-    User.create!(params.permit(:first_name, :last_name, :email, :phone, :opt_in))
-  end
-
   def create
     if current_user&.current_order
       logger.warn "user=#{current_user.email} already placed an order. returning that order"
@@ -30,7 +17,8 @@ class OrdersController < ApplicationController
     end
 
     @user, @order = Order.transaction do
-      user = current_user_or_create_user
+      # TODO: replaced current_user_or_create_user with current_user_or_create_user
+      user = current_user
       order_params = params.permit(:comments, :skip).merge(menu: @menu, user: user)
 
       order = Order.create!(order_params)

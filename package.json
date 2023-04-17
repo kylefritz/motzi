@@ -10,6 +10,8 @@
     "@rails/ujs": "^6.0.0-alpha",
     "@rails/webpacker": "5.4.3",
     "@sentry/browser": "^5.7.1",
+    "@stripe/react-stripe-js": "^2.1.0",
+    "@stripe/stripe-js": "^1.52.1",
     "accounting": "^0.4.1",
     "ahoy.js": "^0.3.4",
     "axios": "^0.21.1",
@@ -23,7 +25,6 @@
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
     "react-is": "^17.0.1",
-    "react-stripe-elements": "^6.0.1",
     "showdown": "^1.9.1",
     "styled-components": "^5.2.1"
   },
