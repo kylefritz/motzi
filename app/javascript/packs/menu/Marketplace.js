@@ -3,11 +3,12 @@ import _ from "lodash";
 
 import BakersNote from "./BakersNote";
 import Cart, { useCart } from "./Cart";
+import Button from "./Button";
 import Title from "./Title";
 import Account from "./Account";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
-import Payment from "../buy/Payment";
+import Checkout from "./Checkout";
 import { applyTip } from "../buy/Tip";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
 import { getDeadlineContext } from "./Contexts";
@@ -23,44 +24,13 @@ export default function Marketplace({ menu, onCreateOrder }) {
   } = useCart({
     items: menu.items,
   });
-  const [submitting, setSubmitting] = useState(false);
   const [comments, setComments] = useState();
   const [account, setAccount] = useState({});
   const [price, setPrice] = useState(total.price);
   const [tip, setTip] = useState();
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const totalPrice = applyTip(price, tip);
-  const handleCheckout = ({ token }) => {
-    if (_.isEmpty(account.email)) {
-      return alert("Enter email!");
-    }
-    if (!/\S+@\S+\.\S+/.test(account.email)) {
-      return alert("Invalid email");
-    }
-
-    console.log("handleCardToken", { token, price: totalPrice });
-    setSubmitting(true);
-
-    axios
-      .post("/payment_intents", {
-        ...account,
-        price: totalPrice,
-        comments,
-        cart,
-      })
-      .then(({ data }) => {
-        console.log("got from server data.checkoutUrl=", data.checkoutUrl);
-        // setClientSecret(data.clientSecret);
-
-        // TODO: redirect to checkoutUrl
-      })
-      .catch((error) => {
-        console.error("Couldn't create payment intent", error.response);
-        window.alert(`Couldn't create payment: ${error.message}`);
-        Sentry.captureException(err);
-      })
-      .always(() => setSubmitting(false));
-  };
 
   const handleAddToCart = (item) => {
     const newCartPrice = addToCart(item);
@@ -72,20 +42,44 @@ export default function Marketplace({ menu, onCreateOrder }) {
     setPrice(newCartPrice);
   };
 
+  const handleProceedToCheckout = () => {
+    if (_.isEmpty(account.email)) {
+      return alert("Enter email!");
+    }
+    if (!/\S+@\S+\.\S+/.test(account.email)) {
+      return alert("Invalid email");
+    }
+
+    setShowCheckout(true);
+  };
+
   if (!marketplaceItems.length) {
     console.warn("marketplace has no items", marketplaceItems);
     return null;
   }
 
-  const { menuNote, enablePayWhatYouCan } = menu;
+  if (showCheckout) {
+    return (
+      <Layout menu={menu}>
+        <Checkout
+          {...{
+            cart,
+            menu,
+            account,
+            comments,
+            price: totalPrice,
+            onCreateOrder,
+          }}
+        />
+      </Layout>
+    );
+  }
+
+  const { enablePayWhatYouCan } = menu;
   const menuClosed = getDeadlineContext().allClosed(menu);
   const disabled = menuClosed || !onCreateOrder;
   return (
-    <>
-      <Title menu={menu} />
-
-      <BakersNote note={menuNote} />
-
+    <Layout menu={menu}>
       <h5>Menu</h5>
       <Items
         items={marketplaceItems}
@@ -116,64 +110,40 @@ export default function Marketplace({ menu, onCreateOrder }) {
 
       <Cart {...{ cart, menu, rmCartItem: handleRemoveFromCart }} />
 
-      {cart.length > 0 && (
-        <>
-          <div className="mt-3">
-            <Account onChange={setAccount} disabled={disabled} />
-          </div>
+      <div className="mt-3">
+        <Account onChange={setAccount} disabled={disabled} />
+      </div>
 
-          {enablePayWhatYouCan ? (
-            <PayWhatYouCan
-              price={price}
-              onPricedChanged={setPrice}
-              disabled={disabled}
-              tip={tip}
-              onTip={setTip}
-            />
-          ) : (
-            <br />
-          )}
-
-          <CheckoutButton
-            disabled={disabled}
-            submitting={submitting}
-            onClick={handleCheckout}
-          />
-        </>
+      {enablePayWhatYouCan ? (
+        <PayWhatYouCan
+          price={price}
+          onPricedChanged={setPrice}
+          disabled={disabled}
+          tip={tip}
+          onTip={setTip}
+        />
+      ) : (
+        <br />
       )}
-    </>
+
+      <Button
+        disabled={_.isEmpty(cart) || disabled}
+        text="Proceed to Checkout"
+        onClick={handleProceedToCheckout}
+      />
+    </Layout>
   );
 }
 
-function CheckoutButton({ disabled, submitting, onClick }) {
-  const text = "Proceed to Checkout";
-  return (
-    <button
-      disabled={disabled || submitting}
-      className="btn btn-primary btn-lg btn-block"
-      style={buttonStyle}
-      onClick={onClick}
-      type="submit"
-    >
-      {submitting ? <Spinner /> : text}
-    </button>
-  );
-}
-const buttonStyle = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
-function Spinner() {
+function Layout({ menu, children }) {
+  const { menuNote } = menu;
   return (
     <>
-      <span
-        className="spinner-border spinner-border-sm mr-2"
-        role="status"
-        aria-hidden="true"
-      />
-      Loading...
+      <Title menu={menu} />
+
+      <BakersNote note={menuNote} />
+
+      {children}
     </>
   );
 }

@@ -24,27 +24,6 @@ export default function Payment({
 }) {
   const [clientSecret, setClientSecret] = useState("");
 
-  // TODO: lock in price
-  //
-  // create PaymentIntent as soon as the page loads
-  const handleStartCheckout = () => {
-    axios
-      .post("/payment_intents", {
-        ...account,
-        price,
-        description,
-      })
-      .then(({ data }) => {
-        console.log("got from server data.clientSecret=", data.clientSecret);
-        setClientSecret(data.clientSecret);
-      })
-      .catch((error) => {
-        console.error("Couldn't create payment intent", error.response);
-        window.alert(`Couldn't create payment: ${error.message}`);
-        Sentry.captureException(err);
-      });
-  };
-
   const appearance = {
     theme: "stripe",
   };
@@ -52,18 +31,6 @@ export default function Payment({
     clientSecret,
     appearance,
   };
-
-  if (clientSecret === "") {
-    const text =
-      price === null
-        ? "Choose an item"
-        : `Checkout for ${accounting.formatMoney(price || 0)}`;
-    return (
-      <div className="checkout">
-        <Button text={text} disabled={disabled} onClick={handleStartCheckout} />
-      </div>
-    );
-  }
 
   return (
     <div className="checkout">
