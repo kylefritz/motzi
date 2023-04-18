@@ -3,11 +3,12 @@ import _ from "lodash";
 
 import BakersNote from "./BakersNote";
 import Cart, { useCart } from "./Cart";
+import Button from "./Button";
 import Title from "./Title";
 import Account from "./Account";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
-import Payment from "../buy/Payment";
+import Checkout from "./Checkout";
 import { applyTip } from "../buy/Tip";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
 import { getDeadlineContext } from "./Contexts";
@@ -15,6 +16,7 @@ import { getDeadlineContext } from "./Contexts";
 export default function Marketplace({ menu, onCreateOrder }) {
   const {
     cart,
+    cartDescription,
     addToCart,
     rmCartItem,
     total,
@@ -23,33 +25,13 @@ export default function Marketplace({ menu, onCreateOrder }) {
   } = useCart({
     items: menu.items,
   });
-  const [submitting, setSubmitting] = useState(false);
   const [comments, setComments] = useState();
   const [account, setAccount] = useState({});
   const [price, setPrice] = useState(total.price);
   const [tip, setTip] = useState();
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const totalPrice = applyTip(price, tip);
-  const handleCardToken = ({ token }) => {
-    if (_.isEmpty(account.email)) {
-      return alert("Enter email!");
-    }
-    if (!/\S+@\S+\.\S+/.test(account.email)) {
-      return alert("Invalid email");
-    }
-
-    console.log("handleCardToken", { token, price: totalPrice });
-    setSubmitting(true);
-
-    // send stripe token to rails to complete purchase
-    onCreateOrder({
-      ...account,
-      comments,
-      cart,
-      price: totalPrice,
-      token: token.id,
-    }).then(() => setSubmitting(false));
-  };
 
   const handleAddToCart = (item) => {
     const newCartPrice = addToCart(item);
@@ -61,20 +43,49 @@ export default function Marketplace({ menu, onCreateOrder }) {
     setPrice(newCartPrice);
   };
 
+  const handleProceedToCheckout = () => {
+    if (_.isEmpty(account.email)) {
+      return alert("Enter email!");
+    }
+    if (!/\S+@\S+\.\S+/.test(account.email)) {
+      return alert("Invalid email");
+    }
+
+    setShowCheckout(true);
+  };
+  const handleReturnToMarketplace = () => {
+    setShowCheckout(false);
+  };
+
   if (!marketplaceItems.length) {
     console.warn("marketplace has no items", marketplaceItems);
     return null;
   }
 
-  const { menuNote, enablePayWhatYouCan } = menu;
+  if (showCheckout) {
+    return (
+      <Layout menu={menu}>
+        <Checkout
+          {...{
+            cart,
+            cartDescription,
+            menu,
+            account,
+            comments,
+            price: totalPrice,
+            onCreateOrder,
+            onReturn: handleReturnToMarketplace,
+          }}
+        />
+      </Layout>
+    );
+  }
+
+  const { enablePayWhatYouCan } = menu;
   const menuClosed = getDeadlineContext().allClosed(menu);
   const disabled = menuClosed || !onCreateOrder;
   return (
-    <>
-      <Title menu={menu} />
-
-      <BakersNote note={menuNote} />
-
+    <Layout menu={menu}>
       <h5>Menu</h5>
       <Items
         items={marketplaceItems}
@@ -108,6 +119,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
       <div className="mt-3">
         <Account onChange={setAccount} disabled={disabled} />
       </div>
+
       {enablePayWhatYouCan ? (
         <PayWhatYouCan
           price={price}
@@ -119,13 +131,25 @@ export default function Marketplace({ menu, onCreateOrder }) {
       ) : (
         <br />
       )}
-      <Payment
-        price={_.isEmpty(cart) ? null : totalPrice}
-        stripeApiKey={gon.stripeApiKey}
-        onCardToken={handleCardToken}
-        submitting={submitting}
-        disabled={disabled}
+
+      <Button
+        disabled={_.isEmpty(cart) || disabled}
+        text="Proceed to Checkout"
+        onClick={handleProceedToCheckout}
       />
+    </Layout>
+  );
+}
+
+function Layout({ menu, children }) {
+  const { menuNote } = menu;
+  return (
+    <>
+      <Title menu={menu} />
+
+      <BakersNote note={menuNote} />
+
+      {children}
     </>
   );
 }

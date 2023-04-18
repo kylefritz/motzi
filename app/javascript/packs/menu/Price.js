@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import accounting from "accounting";
 import pluralize from "pluralize";
 import _ from "lodash";

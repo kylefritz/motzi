@@ -18,6 +18,9 @@ Rails.application.routes.draw do
   # create/update order for a menu
   resources :orders, only: [:create, :update]
 
+  # create stripe payment intent
+  resources :payment_intents, only: [:create]
+
   # sign in
   get '/auth' => redirect('/users/sign_in')
   get '/login' => redirect('/users/sign_in')

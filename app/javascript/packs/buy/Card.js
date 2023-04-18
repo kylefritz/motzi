@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { CardElement } from "react-stripe-elements";
 import { formatMoney } from "accounting";
 
 export default function Card({
@@ -45,7 +44,8 @@ export default function Card({
     <form onSubmit={handleSubmit}>
       <h5>Pay by credit card</h5>
       {!disabled && (
-        <CardElement onChange={handleCardChange} {...createOptions()} />
+        <h1>TODO: Card Element</h1>
+        /*<CardElement onChange={handleCardChange} {...createOptions()} />*/
       )}
       {errorMessage && (
         <div className="error" role="alert">
