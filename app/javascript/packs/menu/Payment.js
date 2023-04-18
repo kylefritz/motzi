@@ -5,12 +5,13 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+import Button from "./Button";
 
-export default function CheckoutForm({ clientSecret, price }) {
+export default function Payment({ clientSecret, price, email: initialEmail }) {
   const stripe = useStripe();
   const elements = useElements();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [message, setMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -80,12 +81,16 @@ export default function CheckoutForm({ clientSecret, price }) {
         id="link-authentication-element"
         onChange={(e) => setEmail(e.target.value)}
       />
+
       <PaymentElement id="payment-element" options={paymentElementOptions} />
-      <button disabled={isLoading || !stripe || !elements} id="submit">
-        <span id="button-text">
-          {isLoading ? <div className="spinner" id="spinner"></div> : "Pay now"}
-        </span>
-      </button>
+
+      {/* No onClick handler because button should automatically trigger a form submission */}
+      <Button
+        disabled={isLoading || !stripe || !elements}
+        text="Pay now"
+        spinner={isLoading}
+      />
+
       {/* Show any error or success messages */}
       {message && <div id="payment-message">{message}</div>}
     </form>

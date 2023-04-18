@@ -16,6 +16,7 @@ import { getDeadlineContext } from "./Contexts";
 export default function Marketplace({ menu, onCreateOrder }) {
   const {
     cart,
+    cartDescription,
     addToCart,
     rmCartItem,
     total,
@@ -52,6 +53,9 @@ export default function Marketplace({ menu, onCreateOrder }) {
 
     setShowCheckout(true);
   };
+  const handleReturnToMarketplace = () => {
+    setShowCheckout(false);
+  };
 
   if (!marketplaceItems.length) {
     console.warn("marketplace has no items", marketplaceItems);
@@ -64,11 +68,13 @@ export default function Marketplace({ menu, onCreateOrder }) {
         <Checkout
           {...{
             cart,
+            cartDescription,
             menu,
             account,
             comments,
             price: totalPrice,
             onCreateOrder,
+            onReturn: handleReturnToMarketplace,
           }}
         />
       </Layout>

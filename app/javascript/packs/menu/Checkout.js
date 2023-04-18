@@ -3,19 +3,22 @@ import _ from "lodash";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import axios from "axios";
+import * as Sentry from "@sentry/browser";
 
 import Cart from "./Cart";
-import CheckoutForm from "./CheckoutForm";
+import Payment from "./Payment";
 
 const stripePromise = loadStripe(gon.stripeApiKey);
 
 export default function Checkout({
   cart,
+  cartDescription,
   menu,
   account,
   comments,
   price,
   onCreateOrder,
+  onReturn,
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [clientSecret, setClientSecret] = useState("");
@@ -23,19 +26,26 @@ export default function Checkout({
   // TODO: could re-run useEffect if price changes
   useEffect(() => {
     axios
-      .post("/payment_intents", {})
+      .post("/payment_intents", {
+        ...account,
+        price,
+        description: cartDescription,
+      })
       .then(({ data }) => {
         console.log("got from server data.clientSecret=", data.clientSecret);
         setClientSecret(data.clientSecret);
       })
       .catch((error) => {
         console.error("Couldn't create payment intent", error.response);
-        window.alert(`Couldn't create payment: ${error.message}`);
-        Sentry.captureException(err);
+        window.alert(
+          `Couldn't create payment intent on server: ${error.message}`
+        );
+        Sentry.captureException(error);
+        onReturn();
       });
   }, []);
 
-  const handleCardToken = ({ token }) => {
+  const handleStripeSuccessful = ({ token }) => {
     console.log("handleCardToken", { token, price: totalPrice });
     setSubmitting(true);
 
@@ -49,12 +59,13 @@ export default function Checkout({
     }).then(() => setSubmitting(false));
   };
 
-  const appearance = {
-    theme: "stripe",
-  };
-  const options = {
+  if (clientSecret === "") {
+    return null;
+  }
+
+  const stripeOptions = {
     clientSecret,
-    appearance,
+    appearance: { theme: "stripe" },
   };
 
   return (
@@ -64,19 +75,18 @@ export default function Checkout({
       <div className="row mt-2 mb-3">
         <div className="col">{comments}</div>
       </div>
-      (clientSecret !== "" && (
       <div className="checkout">
-        <Elements stripe={stripePromise} options={options}>
-          <CheckoutForm
+        <Elements stripe={stripePromise} options={stripeOptions}>
+          <Payment
             {...{
+              email: account.email,
               price,
               clientSecret,
-              onToken: handleCardToken,
+              // onToken: handleStripeSuccessful,
             }}
           />
         </Elements>
       </div>
-      ))
     </>
   );
 }

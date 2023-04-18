@@ -169,6 +169,20 @@ function cartTotal({ cart, items }) {
   return { price: addBy("price"), credits: addBy("credits") };
 }
 
+function cartDescription({ cart, items }) {
+  if (cart.length === 0) {
+    return null;
+  }
+  const menuItemsById = _.keyBy(items, ({ id }) => id);
+  return cart
+    .map(({ itemId, quantity }) => {
+      const prefix = quantity > 1 ? `${quantity}x ` : "";
+      const item = menuItemsById[itemId];
+      return [prefix, item].join("");
+    })
+    .join(", ");
+}
+
 export function orderCredits({ order, items }) {
   const orderItems = _.get(order, "items", []);
   return cartTotal({ cart: orderItems, items }).credits;
@@ -178,6 +192,7 @@ export function useCart({ order = null, items }) {
   const [cart, setCart] = useState(_.get(order, "items", []));
 
   const calcTotal = (cart) => cartTotal({ cart, items });
+  const description = cartDescription({ cart, items });
 
   const addToCart = ({ id: itemId, quantity, pickupDayId }) => {
     console.log("addToCart", itemId, "x", quantity, "on", pickupDayId);
@@ -229,6 +244,7 @@ export function useCart({ order = null, items }) {
 
   return {
     cart,
+    cartDescription: description,
     addToCart,
     rmCartItem,
     setCart,
