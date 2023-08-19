@@ -25,7 +25,7 @@ gem 'olive_branch' # convert snake_case to camelCase for json
 gem 'paper_trail' # audits
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'progress_bar'
-gem 'puma', '~> 5.0' # web/app server
+gem 'puma', '~> 5.6' # web/app server
 gem 'rails-settings-cached' # site-wide settings
 gem 'rails', '~> 6.1.7.3'
 gem 'redcarpet' # markdown the baker's note in admin
