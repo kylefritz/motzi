@@ -37,7 +37,7 @@ gem 'stripe' # accept credit cards
 gem 'webpacker', '~> 5.0' # compiles javascript
 
 
-# gem 'redis', '~> 4.0' # Use Redis adapter to run Action Cable in production
+gem 'redis', '~> 4.0' # Use Redis adapter to run Action Cable in production
 
 
 group :development, :test do

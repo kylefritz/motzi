@@ -327,6 +327,7 @@ GEM
     rbs (2.8.4)
     rcodetools (0.8.5.0)
     redcarpet (3.6.0)
+    redis (4.8.1)
     redis-client (0.22.2)
       connection_pool
     regexp_parser (2.7.0)
@@ -485,6 +486,7 @@ DEPENDENCIES
   rails-settings-cached
   rcodetools
   redcarpet
+  redis (~> 4.0)
   sass-rails (~> 6)
   selenium-webdriver (>= 4.0.0.rc1)
   sentry-raven
