@@ -41,6 +41,9 @@
     "regenerator-runtime": "^0.13.3",
     "webpack-dev-server": "^3.8.2"
   },
+  "engines": {
+    "node": "16.x"
+  },
   "scripts": {
     "test": "jest",
     "test-watch": "jest --watch"
