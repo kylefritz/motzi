@@ -6,7 +6,7 @@ ruby '3.1.4'
 #
 # please keep gems sorted; include comment for why a gem is needed
 #
-gem 'activeadmin' # admin ui
+gem 'activeadmin', '~> 2.13.1' # admin ui
 gem 'ahoy_email', '~> 1.1.1' # email analytics (v2 sadly removes open tracking)
 gem 'ahoy_matey' # analytics
 gem 'aws-sdk-s3', require: false # for s3/active storage
@@ -14,10 +14,12 @@ gem 'bcrypt', '~> 3.1.7' # for devise
 gem 'blazer' # analytics
 gem 'bootsnap', '>= 1.4.4', require: false # Reduces boot times through caching; required in config/boot.rb
 gem 'bootstrap', '~> 4.3.1' # nice style
+gem 'concurrent-ruby', '1.3.4' # pinned for compatibility
 gem 'devise' # for authentication
 gem 'gon' # rails variables in javascript
 gem 'hashid-rails' # lookup models by hashid
 gem 'image_processing', '~> 1.2' # Use Active Storage variant
+gem 'jaro_winkler', '~> 1.5.5' # pinned for compatibility
 gem 'jbuilder', '~> 2.7' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'naturalsort', :require => 'natural_sort_kernel' # implements a natural, human-friendly alphanumeric sort
 gem 'newrelic_rpm' # debugging to new relic

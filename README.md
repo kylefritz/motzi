@@ -46,9 +46,15 @@ $ rake s3:download
 $ rails server
 ```
 
+You need a few variables in a .env file
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+STRIPE_PUBLISHABLE_KEY
+
 Working on the react apps
 
 ```
+npm install -g yarn
 $ ./bin/webpack-dev-server
 ```
 
