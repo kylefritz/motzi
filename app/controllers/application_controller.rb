@@ -3,16 +3,16 @@ class ApplicationController < ActionController::Base
 
   before_action :set_paper_trail_whodunnit
   before_action :authenticate_user!
-  before_action :set_raven_context
+  before_action :set_sentry_context
   before_action :push_gon
   before_action :configure_permitted_parameters, if: :devise_controller?
 
   protected
 
-  def set_raven_context
+  def set_sentry_context
     unless Rails.env.test?
-      Raven.user_context(id: current_user&.id, email: current_user&.email, is_admin: current_user&.is_admin)
-      Raven.extra_context(params: params.to_unsafe_h, url: request.url)
+      Sentry.set_user(id: current_user&.id, email: current_user&.email, is_admin: current_user&.is_admin)
+      Sentry.set_extras(params: params.to_unsafe_h, url: request.url)
     end
   end
 
