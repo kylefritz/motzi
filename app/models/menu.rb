@@ -85,7 +85,8 @@ class Menu < ApplicationRecord
     self.make_current!
     self.touch :emailed_at # create audit that email was sent
     SendWeeklyMenuJob.users_to_email_count(self).tap do
-      SendWeeklyMenuJob.perform_later
+      # Pass the specific menu ID to the job
+      SendWeeklyMenuJob.perform_later(id)
     end
   end
 

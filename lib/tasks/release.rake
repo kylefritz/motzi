@@ -11,6 +11,15 @@ task release: :environment do
     raise e  # Re-raise the error because we want the release to fail
   end
 
+  # Run rails db:seed
+  puts "Running db:seed"
+  begin
+    ActiveRecord::Tasks::DatabaseTasks.load_seed
+  rescue => e
+    puts "Error during db:seed: #{e.message}. Rethrowing exception to cancel release."
+    raise e  # Re-raise the error because we want the release to fail
+  end
+
   if ShopConfig.uses_sidekiq?
     gitdesc = ENV['HEROKU_RELEASE_VERSION'] || `git log -1 --format="%h %s"`.strip
     puts "Running Sidekiq::Deploy.mark! #{gitdesc}"

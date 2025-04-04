@@ -16,7 +16,9 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
   test "Sends at right time" do
     refute_reminders_emailed(:tues, '5:00 AM', 'dont send too early')
     refute_reminders_emailed(:thurs, '5:00 AM', 'dont send too early')
-    assert_reminders_emailed(2, :tues, '7:00 AM', 'send on day1/tues')
+    assert_commented do
+      assert_reminders_emailed(2, :tues, '7:00 AM', 'send on day1/tues')
+    end
     assert_reminders_emailed(1, :thurs, '7:00 AM', 'send on day2/thurs; not to jess')
     refute_reminders_emailed(:tues, '1:00 PM', 'dont send too early')
     refute_reminders_emailed(:thurs, '1:00 PM', 'dont send too late')
@@ -39,7 +41,7 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
   end
 
   test "Doesnt send to users multiple times on same menu" do
-    assert_reminders_emailed(2, :tues, '7:00 AM', 'send on day1')
+      assert_reminders_emailed(2, :tues, '7:00 AM', 'send on day1')
     refute_reminders_emailed(:tues, '7:01 AM', 'dont send the second time')
   end
 

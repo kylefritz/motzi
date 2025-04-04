@@ -15,7 +15,9 @@ class SendWeeklyMenuJobTest < ActiveJob::TestCase
   def assert_menu_emailed(num_emails, day, time, msg=nil)
     travel_to_day_time(day, time) do
       assert_email_sent(num_emails) do
-        SendWeeklyMenuJob.perform_now
+        assert_commented 2 do
+          SendWeeklyMenuJob.perform_now
+        end
       end
     end
     if num_emails > 0

@@ -1,3 +1,9 @@
+system:
+  id: <%= User::SYSTEM_ID %>
+  email: motzi-system@localhost
+  first_name: Motzi
+  last_name: System
+
 kyle:
   first_name: Kyle
   last_name: Fritz

@@ -21,3 +21,12 @@ unless Menu.any?
   menu = Menu.create!(week_id: Time.zone.now.week_id)
   menu.make_current!
 end
+
+unless User.system
+  User.create!(
+    id: User::SYSTEM_ID,
+    email: 'motzi-system@localhost',
+    first_name: 'Motzi',
+    last_name: 'System',
+  )
+end

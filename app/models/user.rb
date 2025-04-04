@@ -70,4 +70,8 @@ class User < ApplicationRecord
   def self.russell
     User.find_by(email: RUSSELL_EMAIL)
   end
+  SYSTEM_ID = 0
+  def self.system
+    User.find_by(id: SYSTEM_ID)
+  end
 end

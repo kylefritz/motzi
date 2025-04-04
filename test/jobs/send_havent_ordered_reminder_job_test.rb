@@ -34,7 +34,9 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
 
   test "Sends to users who havent ordered, at right time" do
     refute_reminders_emailed(:sun, '5:00 PM', 'dont send too early')
-    assert_reminders_emailed(@num_to_remind, :sun, '7:00 PM', 'send on sunday night')
+    assert_commented do
+      assert_reminders_emailed(@num_to_remind, :sun, '7:00 PM', 'send on sunday night')
+    end
     just_messaged = Set[*Menu.current.messages.where(mailer: 'ReminderMailer#havent_ordered_email').pluck(:user_id)]
     assert_equal @user_ids_to_remind, just_messaged, 'we sent messages to who we wanted to'
   end

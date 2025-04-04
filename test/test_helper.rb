@@ -48,6 +48,12 @@ class ActiveSupport::TestCase
     end
   end
 
+  def assert_commented(num=1, &block)
+    assert_difference 'ActiveAdmin::Comment.count', num, "Assert comments created" do
+        block.call
+    end
+  end
+
   def assert_ordered(&block)
     assert_difference 'Order.count', 1, 'order created' do
       block.call
