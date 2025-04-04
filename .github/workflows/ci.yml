@@ -59,11 +59,3 @@ jobs:
           heroku_app_name: motzibread
           heroku_email: ${{secrets.HEROKU_EMAIL}}
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-
-      - name: heroku deploy jinji
-        if: github.ref == 'refs/heads/master' && job.status == 'success'
-        uses: akhileshns/heroku-deploy@v3.12.13 # This is the action
-        with:
-          heroku_app_name: jinjichocolate
-          heroku_email: ${{secrets.HEROKU_EMAIL}}
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
