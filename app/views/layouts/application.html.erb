@@ -31,7 +31,9 @@
   <div id="background" style="background-image: url(<%= image_url("#{Setting.shop.id}-background.jpg") %>)">
     <div class="container">
       <div id="logo-wrapper">
-        <img id="logo" src="<%= image_url("#{Setting.shop.id}-logo.png") %>" alt="<%= Setting.shop.name %>">
+        <a href="/">
+          <img id="logo" src="<%= image_url("#{Setting.shop.id}-logo.png") %>" alt="<%= Setting.shop.name %>">
+        </a>
       </div>
       <% if notice%>
       <div class="alert alert-warning text-center" role="alert"><%= notice %></div>
