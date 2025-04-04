@@ -8,10 +8,6 @@ class ShopConfig
     load_config_for_shop_id!(self.shop_id) # perf: reading from disk multiple times per request
   end
 
-  def self.uses_sidekiq?
-    self.shop.queue_adapter == "sidekiq"
-  end
-  
   def self.load_config_for_shop_id!(shop_id)
     Rails.application.config_for(:shop, env: shop_id).tap do |shop_hash|
       if shop_hash.empty?
