@@ -26,9 +26,7 @@ task release: :environment do
   if defined?(Sentry)
     puts "Notifying Sentry of release and deploy: #{gitdesc}"
     
-    begin
-      Sentry.configuration.release = sentry_release
-      
+    begin      
       Sentry.sdk_create_deploy(
         release: gitdesc,
         environment: Rails.env,
