@@ -40,8 +40,14 @@ class OrdersController < ApplicationController
         end
       end
       params.fetch(:cart).each do |cart_item_params|
-        order.order_items.create!(cart_item_params.permit(:item_id, :quantity, :pickup_day_id)
-                                                  .with_defaults(pickup_day_id: @menu.pickup_days.first.id))
+        # Create a clean hash with only permitted attributes and ensure quantity is not null
+        filtered_params = {
+          item_id: cart_item_params[:item_id],
+          quantity: cart_item_params[:quantity].presence || 1,
+          pickup_day_id: cart_item_params[:pickup_day_id] || @menu.pickup_days.first.id
+        }
+        
+        order.order_items.create!(filtered_params)
       end
 
       # figure out if we need to charge this person or if we're using credits
@@ -111,8 +117,14 @@ class OrdersController < ApplicationController
       order.update!(params.permit(:comments, :skip))
       order.order_items.destroy_all
       params[:cart].each do |cart_item_params|
-        order.order_items.create!(cart_item_params.permit(:item_id, :quantity, :pickup_day_id)
-                                                  .with_defaults(pickup_day_id: order.menu.pickup_days.first.id))
+        # Create a clean hash with only permitted attributes and ensure quantity is not null
+        filtered_params = {
+          item_id: cart_item_params[:item_id],
+          quantity: cart_item_params[:quantity].presence || 1,
+          pickup_day_id: cart_item_params[:pickup_day_id] || order.menu.pickup_days.first.id
+        }
+        
+        order.order_items.create!(filtered_params)
       end
 
       # send confirmation email
