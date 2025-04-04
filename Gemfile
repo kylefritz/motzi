@@ -32,7 +32,8 @@ gem 'rails-settings-cached' # site-wide settings
 gem 'rails', '~> 6.1.7.3'
 gem 'redcarpet' # markdown the baker's note in admin
 gem 'sass-rails', '~> 6' # css
-gem 'sentry-raven' # debugging to sentry.io
+gem 'sentry-ruby' # New Sentry SDK
+gem 'sentry-rails' # Rails integration for Sentry
 gem 'sidekiq' # background work
 gem 'sql_query' # load SQL queries from erb templates
 gem 'stripe' # accept credit cards
