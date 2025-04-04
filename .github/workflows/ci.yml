@@ -52,10 +52,12 @@ jobs:
       - name: jest
         run: npx jest test/javascript
 
-      - name: heroku deploy motzi
-        if: github.ref == 'refs/heads/master' && job.status == 'success'
-        uses: akhileshns/heroku-deploy@v3.12.13 # This is the action
-        with:
-          heroku_app_name: motzibread
-          heroku_email: ${{secrets.HEROKU_EMAIL}}
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+      - name: Deploy to Heroku
+        if: github.ref == 'refs/heads/master' && success()
+        env:
+          HEROKU_API_KEY: ${{secrets.HEROKU_API_KEY}}
+          HEROKU_APP_NAME: motzibread
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+          heroku git:remote -a $HEROKU_APP_NAME
+          git push heroku master
