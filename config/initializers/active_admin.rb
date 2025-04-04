@@ -183,7 +183,7 @@ ActiveAdmin.setup do |config|
 
   # == Setting a Favicon
   #
-  # config.favicon = 'favicon.ico'
+  config.favicon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90' transform='rotate(15 50 50)'%3E🍞%3C/text%3E%3C/svg%3E"
 
   # == Meta Tags
   #
