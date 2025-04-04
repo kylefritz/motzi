@@ -1,7 +1,6 @@
 {
   "recommendations": [
     "kaiwood.endwise",
-    "ninoseki.vscode-gem-lens",
     // "castwide.solargraph",
     "streetsidesoftware.code-spell-checker",
     "esbenp.prettier-vscode",
