@@ -15,8 +15,7 @@ class SendHaventOrderedReminderJob < ApplicationJob
     already_reminded = Set[*menu.messages.where(mailer: 'ReminderMailer#havent_ordered_email').pluck(:user_id)]
     already_ordered = Set[*menu.orders.pluck(:user_id)]
 
-    num_to_remind = User.subscribers.count - already_reminded.count - already_ordered.count
-    add_comment! menu, "SendHaventOrderedReminderJob: Starting to queue #{num_to_remind} reminder emails for menu #{menu.id}"
+    num_reminded = 0
 
     User.subscribers.find_each do |user|
       next if already_reminded.include?(user.id)
@@ -24,9 +23,14 @@ class SendHaventOrderedReminderJob < ApplicationJob
 
       begin
         ReminderMailer.with(user: user, menu: menu).havent_ordered_email.deliver_now
+        num_reminded += 1
       rescue => e
-        Rails.logger.error "Failed to send havent ordered email to user #{user.id}: #{e.message}"
+        Rails.logger.error "Failed to send haven't ordered email to user #{user.id}: #{e.message}"
       end
+    end
+
+    if num_reminded > 0
+      add_comment! menu, "Haven't Ordered reminder job: num_reminded=#{num_reminded}"
     end
   end
 end
