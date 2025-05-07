@@ -51,15 +51,3 @@ jobs:
 
       - name: jest
         run: npx jest test/javascript
-
-      # Make sure the cli is installed before using akhileshns/heroku-deploy
-      - name: Install Heroku CLI
-        run: curl https://cli-assets.heroku.com/install.sh | sh
-      - name: Deploy to Heroku
-        if: github.ref == 'refs/heads/master' && success()
-        timeout-minutes: 15
-        uses: akhileshns/heroku-deploy@v3.14.15
-        with:
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: motzibread
-          heroku_email: ${{secrets.HEROKU_EMAIL}}
