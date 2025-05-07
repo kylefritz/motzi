@@ -340,6 +340,7 @@ GEM
       ffi (~> 1.0)
     rbs (2.8.4)
     rcodetools (0.8.5.0)
+    recaptcha (5.19.0)
     redcarpet (3.6.1)
     redis (4.8.1)
     redis-client (0.23.2)
@@ -521,6 +522,7 @@ DEPENDENCIES
   rails (~> 6.1.7.3)
   rails-settings-cached
   rcodetools
+  recaptcha
   redcarpet
   redis (~> 4.0)
   sass-rails (~> 6)
