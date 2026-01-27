@@ -36,6 +36,7 @@ bun --inspect-brk test test/javascript/menu/items.test.tsx
 ```
 
 Logging preference:
+
 - Keep existing `console.log` statements in tests and app code. Do not delete or globally silence logs unless explicitly asked.
 
 ## JavaScript build (esbuild)
@@ -59,7 +60,7 @@ bun run build:watch
 
 ## Rails tests
 
-Run all Rails tests:
+Run all Rails tests (agents need elevated permissions):
 
 ```
 bundle exec rails test
@@ -72,8 +73,3 @@ DISABLE_SPRING=1 bundle exec rails test
 ```
 
 Rails tests require a running local Postgres on `127.0.0.1:5432` / `::1:5432`.
-
-Known warnings (as of Jan 27, 2026):
-  - DidYouMean: `SPELL_CHECKERS.merge!` deprecation
-  - PG: `PG::Coder.new(hash)` deprecation
-  - Rails: rendering action with `.` in name (admin/menus/menu_builder.json.jbuilder)

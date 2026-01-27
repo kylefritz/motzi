@@ -62,13 +62,19 @@ $ bun run build:watch
 ### Running js tests
 
 ```
+$ bun run test
+```
+
+Update snapshots (if any)
+
+```
 $ bun run test -- -u
 ```
 
-Debug js jest tests
+Debug js tests
 
 ```
-$ bun --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.tsx
+$ bun --inspect-brk test test/javascript/menu/items.test.tsx
 ```
 
 ### Checking emails
