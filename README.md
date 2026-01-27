@@ -6,10 +6,12 @@ Neighborhood bakery's CSA site
 
 - postgres.app
 - redis
+- mise (manages Ruby/Node)
 
 ### Getting started
 
 ```
+$ mise install
 $ bundle
 $ yarn install --check-files
 $ rails db:setup
