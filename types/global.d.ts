@@ -14,6 +14,8 @@ interface RequireContext {
   keys(): string[];
 }
 
-interface NodeRequire {
+interface WebpackRequire {
   context: (path: string, deep?: boolean, filter?: RegExp) => RequireContext;
 }
+
+declare const require: WebpackRequire;

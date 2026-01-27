@@ -6,7 +6,7 @@ Neighborhood bakery's CSA site
 
 - postgres.app
 - redis
-- mise (manages Ruby/Node/Bun)
+- mise (manages Ruby/Bun)
 
 ### Getting started
 
@@ -68,7 +68,7 @@ $ bun run test -- -u
 Debug js jest tests
 
 ```
-$ node --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.tsx
+$ bun --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.tsx
 ```
 
 ### Checking emails

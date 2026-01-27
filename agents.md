@@ -4,7 +4,6 @@ Concise project-specific helpers for CI and local dev.
 
 ## Tooling
 
-- Node version: 20 (see `mise.toml`)
 - Ruby version: 3.3.10 (see `Gemfile` / `mise.toml`)
 - Package manager: Bun (keep `yarn.lock` for Heroku compatibility)
 - Deployment: Heroku. When suggesting changes, consider the deployment impact (builds, assets, env vars, and CI).
@@ -24,10 +23,10 @@ Run a single test file (no snapshot update):
 bun run test -- test/javascript/menu/items.test.tsx
 ```
 
-Debug a single Jest test in Node inspector:
+Debug a single Jest test in Bun inspector:
 
 ```
-node --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.tsx
+bun --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.tsx
 ```
 
 Logging preference:
