@@ -9,24 +9,30 @@ Concise project-specific helpers for CI and local dev.
 - Deployment: Heroku. When suggesting changes, consider the deployment impact (builds, assets, env vars, and CI).
 - CI: GitHub Actions runs the test/build pipeline; keep changes compatible with GH CI.
 
-## JavaScript tests (Jest)
+## JavaScript tests (Bun)
 
-Run all tests and update snapshots:
+Run all JS tests:
+
+```
+bun run test
+```
+
+Update snapshots (if any):
 
 ```
 bun run test -- -u
 ```
 
-Run a single test file (no snapshot update):
+Run a single test file:
 
 ```
 bun run test -- test/javascript/menu/items.test.tsx
 ```
 
-Debug a single Jest test in Bun inspector:
+Debug a single test in Bun inspector:
 
 ```
-bun --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.tsx
+bun --inspect-brk test test/javascript/menu/items.test.tsx
 ```
 
 Logging preference:
