@@ -1,3 +1,4 @@
+import { expect, test } from "bun:test";
 import { renderHook, act } from "@testing-library/react-hooks";
 
 import { useCart } from "menu/Cart";

@@ -1,11 +1,12 @@
 import React from "react";
+import { expect, mock, test } from "bun:test";
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import Quantity from "menu/Quantity";
 
 test("increments and decrements within bounds", async () => {
-  const onChange = jest.fn();
+  const onChange = mock(() => {});
   render(<Quantity defaultQuantity={1} onChange={onChange} max={3} />);
 
   const buttons = document.querySelectorAll("button");
@@ -25,7 +26,7 @@ test("increments and decrements within bounds", async () => {
 });
 
 test("disables increment at max", () => {
-  const onChange = jest.fn();
+  const onChange = mock(() => {});
   render(<Quantity defaultQuantity={2} onChange={onChange} max={2} />);
 
   const buttons = document.querySelectorAll("button");

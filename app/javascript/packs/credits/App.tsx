@@ -7,7 +7,7 @@ export default function App() {
   const memoRef = React.createRef();
   const quantityRef = React.createRef();
   const weeksRef = React.createRef();
-  const userId = _.get(location.pathname.match(/users\/(.*)/), 1);
+  const userId = _.get(window.location?.pathname.match(/users\/(.*)/), 1);
 
   const handleSubmit = (event) => {
     event.preventDefault();

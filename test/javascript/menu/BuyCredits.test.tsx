@@ -1,4 +1,5 @@
 import React from "react";
+import { expect, mock, test } from "bun:test";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -7,9 +8,13 @@ import { SettingsContext } from "menu/Contexts";
 import mockMenuJson from "./mockMenuJson";
 import stripeMock from "./stripeMock";
 
-test("buy credits", async () => {
+const setStripeKey = () => {
   window.gon = { stripeApiKey: "no-such-key" };
-  window.Stripe = jest.fn().mockReturnValue(stripeMock);
+};
+
+test("buy credits", async () => {
+  setStripeKey();
+  window.Stripe = mock(() => stripeMock);
 
   const { user: subscriber, bundles } = mockMenuJson();
 
@@ -49,8 +54,8 @@ test("buy credits", async () => {
 });
 
 test("no payWhatYouCan", async () => {
-  window.gon = { stripeApiKey: "no-such-key" };
-  window.Stripe = jest.fn().mockReturnValue(stripeMock);
+  setStripeKey();
+  window.Stripe = mock(() => stripeMock);
 
   const { user: subscriber, bundles } = mockMenuJson();
   render(

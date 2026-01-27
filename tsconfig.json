@@ -20,7 +20,7 @@
       "buy/*": ["app/javascript/packs/buy/*"],
       "builder/*": ["app/javascript/packs/builder/*"]
     },
-    "types": ["jest"]
+    "types": ["bun-types"]
   },
   "include": ["app/javascript/**/*", "test/javascript/**/*", "types/**/*"]
 }

@@ -19,3 +19,11 @@ interface WebpackRequire {
 }
 
 declare const require: WebpackRequire;
+
+declare var window: Window;
+declare var document: Document;
+declare var navigator: Navigator;
+declare var location: Location;
+declare var HTMLElement: typeof HTMLElement;
+declare var requestAnimationFrame: (callback: FrameRequestCallback) => number;
+declare var cancelAnimationFrame: (handle: number) => void;

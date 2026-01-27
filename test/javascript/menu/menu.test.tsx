@@ -1,4 +1,5 @@
 import React from "react";
+import { expect, mock, test } from "bun:test";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -151,8 +152,10 @@ test("old menu disables submit", () => {
   data.menu.isCurrent = false;
 
   render(
-    <SettingsContext.Provider value={{ showCredits: true, bundles: data.bundles }}>
-      <Menu {...data} onCreateOrder={jest.fn()} />
+    <SettingsContext.Provider
+      value={{ showCredits: true, bundles: data.bundles }}
+    >
+      <Menu {...data} onCreateOrder={mock(() => {})} />
     </SettingsContext.Provider>
   );
 

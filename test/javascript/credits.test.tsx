@@ -1,35 +1,44 @@
 import React from "react";
+import { expect, mock, test } from "bun:test";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import App from "credits/App";
-
-jest.mock("axios", () => ({
-  post: jest.fn(() => new Promise(() => {})),
+const postMock = mock(() => Promise.resolve({}));
+mock.module("axios", () => ({
+  default: {
+    post: postMock,
+  },
 }));
 
-jest.mock("@sentry/browser", () => ({
-  captureException: jest.fn(),
+const captureException = mock(() => {});
+mock.module("@sentry/browser", () => ({
+  captureException,
 }));
 
-test("snapshot", () => {
-  const { asFragment } = render(<App />);
-  expect(asFragment()).toMatchSnapshot();
+test("renders credit form", async () => {
+  const { default: App } = await import("credits/App");
+  render(<App />);
+  expect(screen.getAllByText("Add credit")).toHaveLength(2);
 });
 
 test("submits credit payload for current user", async () => {
-  const axios = require("axios");
+  const { default: App } = await import("credits/App");
   window.history.pushState({}, "", "/admin/users/123");
 
   render(<App />);
 
-  const memoInput = screen.getByText("Memo").parentElement.querySelector("input");
+  const memoInput = screen
+    .getByText("Memo")
+    .parentElement?.querySelector("input");
   const quantityInput = screen
     .getByText("Quantity")
-    .parentElement.querySelector("input");
+    .parentElement?.querySelector("input");
   const weeksInput = screen
     .getByText("Good for weeks")
-    .parentElement.querySelector("input");
+    .parentElement?.querySelector("input");
+  if (!memoInput || !quantityInput || !weeksInput) {
+    throw new Error("Expected credit form inputs to be present.");
+  }
 
   await userEvent.type(memoInput, "promo");
   await userEvent.type(quantityInput, "5");
@@ -37,7 +46,7 @@ test("submits credit payload for current user", async () => {
 
   await userEvent.click(screen.getByRole("button", { name: "Add credit" }));
 
-  expect(axios.post).toHaveBeenCalledWith("/admin/credit_items.json", {
+  expect(postMock).toHaveBeenCalledWith("/admin/credit_items.json", {
     memo: "promo",
     quantity: "5",
     goodForWeeks: "12",

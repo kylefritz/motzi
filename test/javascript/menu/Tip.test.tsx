@@ -1,11 +1,12 @@
 import React from "react";
+import { expect, mock, test } from "bun:test";
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import Tip, { applyTip } from "buy/Tip";
 
 test("Tip interactions", async () => {
-  const onTip = jest.fn();
+  const onTip = mock(() => {});
 
   const { container } = render(
     <Tip onTip={onTip} tip={undefined} price={5} />

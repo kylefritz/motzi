@@ -1,4 +1,5 @@
 import React from "react";
+import { mock } from "bun:test";
 import { render } from "@testing-library/react";
 
 import Marketplace from "menu/Marketplace";
@@ -8,15 +9,17 @@ import { SettingsContext } from "menu/Contexts";
 
 export default function renderMenu(menuJsonOptions) {
   window.gon = { stripeApiKey: "no-such-key" };
-  window.Stripe = jest.fn().mockReturnValue(stripeMock);
+  window.Stripe = mock(() => stripeMock);
 
-  stripeMock.createToken.mockResolvedValue({
-    token: {
-      id: "test_id",
-    },
-  });
+  stripeMock.createToken = mock(() =>
+    Promise.resolve({
+      token: {
+        id: "test_id",
+      },
+    })
+  );
 
-  const onCreateOrder = jest.fn(() => Promise.resolve());
+  const onCreateOrder = mock(() => Promise.resolve());
 
   const utils = render(
     <SettingsContext.Provider value={{}}>

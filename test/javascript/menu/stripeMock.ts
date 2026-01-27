@@ -1,19 +1,20 @@
-// Mocking Stripe object
+import { mock } from "bun:test";
+
 const elementMock = {
-  mount: jest.fn(),
-  destroy: jest.fn(),
-  on: jest.fn(),
-  update: jest.fn(),
+  mount: mock(() => {}),
+  destroy: mock(() => {}),
+  on: mock(() => {}),
+  update: mock(() => {}),
 };
 
 const elementsMock = {
-  create: jest.fn().mockReturnValue(elementMock),
+  create: mock(() => elementMock),
 };
 
 const stripeMock = {
-  elements: jest.fn().mockReturnValue(elementsMock),
-  createToken: jest.fn(() => Promise.resolve()),
-  createSource: jest.fn(() => Promise.resolve()),
+  elements: mock(() => elementsMock),
+  createToken: mock(() => Promise.resolve()),
+  createSource: mock(() => Promise.resolve()),
 };
 
 export default stripeMock;
