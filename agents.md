@@ -28,6 +28,20 @@ Debug a single Jest test in Node inspector:
 node --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.js
 ```
 
+## JavaScript build (esbuild)
+
+Build JS bundles once:
+
+```
+yarn build
+```
+
+Watch and rebuild in development:
+
+```
+yarn build:watch
+```
+
 ## Rails tests
 
 Run all Rails tests:

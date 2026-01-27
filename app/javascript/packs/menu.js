@@ -1,4 +1,4 @@
-// Run by adding <%= javascript_pack_tag 'menu' %> to an erb page
+// Run by adding <%= javascript_include_tag 'menu' %> to an erb page
 
 import ErrorBoundary from "./ErrorBoundary";
 import App from "./menu/App";
