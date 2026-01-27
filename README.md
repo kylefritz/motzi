@@ -6,14 +6,14 @@ Neighborhood bakery's CSA site
 
 - postgres.app
 - redis
-- mise (manages Ruby/Node)
+- mise (manages Ruby/Node/Bun)
 
 ### Getting started
 
 ```
 $ mise install
 $ bundle
-$ yarn install --check-files
+$ bun install
 $ rails db:setup
 ```
 
@@ -56,19 +56,19 @@ STRIPE_PUBLISHABLE_KEY
 Working on the react apps
 
 ```
-$ yarn build:watch
+$ bun run build:watch
 ```
 
 ### Running js tests
 
 ```
-$ npx jest -u
+$ bun run test -- -u
 ```
 
 Debug js jest tests
 
 ```
-$ node --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.js
+$ node --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.tsx
 ```
 
 ### Checking emails

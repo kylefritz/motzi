@@ -6,7 +6,7 @@ Concise project-specific helpers for CI and local dev.
 
 - Node version: 20 (see `mise.toml`)
 - Ruby version: 3.3.10 (see `Gemfile` / `mise.toml`)
-- Package manager: Yarn v1 (lockfile is `yarn.lock`)
+- Package manager: Bun (keep `yarn.lock` for Heroku compatibility)
 - Deployment: Heroku. When suggesting changes, consider the deployment impact (builds, assets, env vars, and CI).
 - CI: GitHub Actions runs the test/build pipeline; keep changes compatible with GH CI.
 
@@ -15,19 +15,19 @@ Concise project-specific helpers for CI and local dev.
 Run all tests and update snapshots:
 
 ```
-npx jest -u
+bun run test -- -u
 ```
 
 Run a single test file (no snapshot update):
 
 ```
-npx jest test/javascript/menu/items.test.js
+bun run test -- test/javascript/menu/items.test.tsx
 ```
 
 Debug a single Jest test in Node inspector:
 
 ```
-node --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.js
+node --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.tsx
 ```
 
 Logging preference:
@@ -38,19 +38,19 @@ Logging preference:
 Build JS bundles once:
 
 ```
-yarn build
+bun run build
 ```
 
 Watch and rebuild in development:
 
 ```
-yarn build:watch
+bun run build:watch
 ```
 
 ## CI / deployment build steps
 
-- GitHub Actions runs `yarn install`, `yarn build`, Rails tests, and Jest before deploying to Heroku.
-- Heroku deploys from GH CI on successful `master` builds; make sure asset build changes are compatible with `yarn build`.
+- GitHub Actions runs `bun install`, `bun run build`, Rails tests, and Jest before deploying to Heroku.
+- Heroku deploys from GH CI on successful `master` builds; make sure asset build changes are compatible with `bun run build` and the Heroku buildpack setup.
 
 ## Rails tests
 
