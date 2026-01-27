@@ -4,10 +4,10 @@ exports[`Menu snapshot 1`] = `
 <div
   className="bakers-note"
   dangerouslySetInnerHTML={
-    Object {
-      "__html": "<h3 id=\\"shouldbeh3\\">should be h3</h3>
-<p>visit <a href=\\"http://www.motzibakery.com\\">www.motzibakery.com</a>.<br />
-  email <a href=\\"mailto:motzi@gmail.com\\">motzi@gmail.com</a></p>",
+    {
+      "__html": "<h3 id="shouldbeh3">should be h3</h3>
+<p>visit <a href="http://www.motzibakery.com">www.motzibakery.com</a>.<br />
+  email <a href="mailto:motzi@gmail.com">motzi@gmail.com</a></p>",
     }
   }
 />
