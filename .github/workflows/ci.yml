@@ -27,7 +27,7 @@ jobs:
         # https://github.com/guard/listen/wiki/Increasing-the-amount-of-inotify-watchers
         run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
-      - uses: ruby/setup-ruby@v1.229.0
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.3.10
           bundler-cache: true
