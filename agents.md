@@ -7,6 +7,8 @@ Concise project-specific helpers for CI and local dev.
 - Node version: 20 (see `mise.toml`)
 - Ruby version: 3.1.4 (see `Gemfile` / `mise.toml`)
 - Package manager: Yarn v1 (lockfile is `yarn.lock`)
+- Deployment: Heroku. When suggesting changes, consider the deployment impact (builds, assets, env vars, and CI).
+- CI: GitHub Actions runs the test/build pipeline; keep changes compatible with GH CI.
 
 ## JavaScript tests (Jest)
 
@@ -44,6 +46,11 @@ Watch and rebuild in development:
 ```
 yarn build:watch
 ```
+
+## CI / deployment build steps
+
+- GitHub Actions runs `yarn install`, `yarn build`, Rails tests, and Jest before deploying to Heroku.
+- Heroku deploys from GH CI on successful `master` builds; make sure asset build changes are compatible with `yarn build`.
 
 ## Rails tests
 

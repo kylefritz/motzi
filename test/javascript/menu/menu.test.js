@@ -1,7 +1,11 @@
-import { screen, waitFor } from "@testing-library/react";
+import React from "react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import Menu from "menu/Menu";
+import { SettingsContext } from "menu/Contexts";
 import renderMenu from "./Menu.helpers";
+import mockMenuJson from "./mockMenuJson";
 
 const getCartTotalText = () => {
   const orderHeading = screen.getByText("Your order");
@@ -140,4 +144,18 @@ test("Menu pick skip", async () => {
 
   expect(uid).toBe("Dot9gKn9w");
   expect(skip).toBeTruthy();
+});
+
+test("old menu disables submit", () => {
+  const data = mockMenuJson({ order: false });
+  data.menu.isCurrent = false;
+
+  render(
+    <SettingsContext.Provider value={{ showCredits: true, bundles: data.bundles }}>
+      <Menu {...data} onCreateOrder={jest.fn()} />
+    </SettingsContext.Provider>
+  );
+
+  const submitButton = screen.getByRole("button", { name: "Old menu" });
+  expect(submitButton.disabled).toBe(true);
 });
