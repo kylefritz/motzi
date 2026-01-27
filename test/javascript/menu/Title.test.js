@@ -1,6 +1,5 @@
 import React from "react";
-require("../configure_enzyme");
-import { mount } from "enzyme";
+import { render } from "@testing-library/react";
 import { DateTime, Duration } from "luxon";
 
 import Title from "menu/Title";
@@ -8,7 +7,7 @@ import Title from "menu/Title";
 function makeTitle(orderDeadlineAt) {
   const pickupAt = DateTime.now().plus(Duration.fromISO("PT24H")).toISO();
 
-  return mount(
+  return render(
     <Title
       menu={{
         name: "Week 6: toast",
@@ -24,14 +23,16 @@ test("After deadline: ordering close", () => {
   const orderDeadlineAt = DateTime.now()
     .plus(Duration.fromISO("PT12H"))
     .toISO();
-  const wrapper = makeTitle(orderDeadlineAt);
-  expect(wrapper.getDOMNode()[1].id).toBe("deadline");
+  const { container } = makeTitle(orderDeadlineAt);
+  const deadlineEl = container.querySelector("#deadline");
+  expect(deadlineEl).toBeTruthy();
 });
 
 test("Before deadline: small warning", () => {
   const orderDeadlineAt = DateTime.now()
     .minus(Duration.fromISO("PT12H"))
     .toISO();
-  const wrapper = makeTitle(orderDeadlineAt);
-  expect(wrapper.getDOMNode()[1].id).toBe("past-deadline");
+  const { container } = makeTitle(orderDeadlineAt);
+  const warningEl = container.querySelector("#past-deadline");
+  expect(warningEl).toBeTruthy();
 });

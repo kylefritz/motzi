@@ -56,8 +56,7 @@ STRIPE_PUBLISHABLE_KEY
 Working on the react apps
 
 ```
-npm install -g yarn
-$ ./bin/webpack-dev-server
+$ yarn build:watch
 ```
 
 ### Running js tests

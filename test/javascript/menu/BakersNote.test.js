@@ -1,6 +1,5 @@
 import React from "react";
-require("../configure_enzyme");
-import { shallow } from "enzyme";
+import { render } from "@testing-library/react";
 
 import BakersNote from "menu/BakersNote";
 
@@ -9,6 +8,6 @@ test("Menu snapshot", () => {
   visit www.motzibakery.com.
   email motzi@gmail.com
   `;
-  const wrapper = shallow(<BakersNote note={markdown} />);
-  expect(wrapper).toMatchSnapshot();
+  const { asFragment } = render(<BakersNote note={markdown} />);
+  expect(asFragment()).toMatchSnapshot();
 });

@@ -25,8 +25,15 @@ not a committed roadmap.
 
 - Review PostgreSQL version in CI (currently 11.5) and align with production.
 - Audit JS stack for upgrade path:
-  - React 16 + Webpacker 5 + Jest 29 + Enzyme.
-  - Decide whether to modernize test stack (e.g., React Testing Library only).
+  - Current stack: React 16 + Webpacker 5 + Jest 29 + Enzyme.
+  - Decision point: keep Enzyme (pin cheerio) vs move to React Testing Library only.
+  - If modernizing, outline migration steps:
+    - Replace Enzyme mount/shallow with RTL render and queries.
+    - Remove Enzyme adapters and jest-enzyme setup.
+    - Update snapshots to RTL where needed.
+    - Consider moving from Webpacker to jsbundling-rails (esbuild) or Vite:
+      - jsbundling-rails is closer to Rails defaults and simpler for older apps.
+      - Vite offers faster dev feedback and modern DX but is a larger change.
 - Review pinned gems for compatibility reasons:
   - `concurrent-ruby`, `jaro_winkler`, `stripe-ruby-mock` are pinned.
 

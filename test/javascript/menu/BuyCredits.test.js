@@ -1,76 +1,72 @@
 import React from "react";
-require("../configure_enzyme");
-import { mount } from "enzyme";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import Subscription, { humanizeBreadsPerWeek } from "menu/Subscription";
 import { SettingsContext } from "menu/Contexts";
 import mockMenuJson from "./mockMenuJson";
 import stripeMock from "./stripeMock";
 
-test("buy credits", () => {
+test("buy credits", async () => {
   window.gon = { stripeApiKey: "no-such-key" };
   window.Stripe = jest.fn().mockReturnValue(stripeMock);
 
-  const { user, bundles } = mockMenuJson();
+  const { user: subscriber, bundles } = mockMenuJson();
 
-  const wrapper = mount(
+  const { container } = render(
     <SettingsContext.Provider value={{ bundles, enablePayWhatYouCan: true }}>
-      <Subscription user={user} />
+      <Subscription user={subscriber} />
     </SettingsContext.Provider>
   );
 
-  // user name
-  expect(wrapper.find(".subscriber-info").first().text()).toEqual(user.name);
+  const subscriberInfo = container.querySelectorAll(".subscriber-info");
+  expect(subscriberInfo[0].textContent).toEqual(subscriber.name);
+  expect(parseInt(subscriberInfo[1].textContent)).toEqual(subscriber.credits);
 
-  // credits
-  expect(parseInt(wrapper.find(".subscriber-info").at(1).text())).toEqual(
-    user.credits
-  );
+  await userEvent.click(screen.getByRole("button", { name: "Buy more" }));
 
-  // click buy credits button
-  wrapper.find("button").simulate("click");
-
-  // for each choice in the bundle
-  expect(wrapper.find("Choice")).toHaveLength(bundles.length);
-  expect(wrapper.find("Choice").first().text()).toEqual(
+  const choiceButtons = screen.getAllByRole("button", { name: /credits/ });
+  expect(choiceButtons).toHaveLength(bundles.length);
+  expect(choiceButtons[0].textContent).toEqual(
     "Weekly26 credits at $6.50 ea$169.00"
   );
 
-  // 6-month, 3-month headers
-  expect(wrapper.find("h6")).toHaveLength(2);
-  expect(wrapper.find("h6").first().text()).toEqual("6-Month");
+  const headings = screen.getAllByRole("heading", { level: 6 });
+  expect(headings).toHaveLength(2);
+  expect(headings[0].textContent).toEqual("6-Month");
 
-  // click a bundle
-  wrapper.find("Choice").first().find("button").first().simulate("click");
+  await userEvent.click(choiceButtons[0]);
 
-  expect(wrapper.find("Payment")).toHaveLength(1);
-  expect(wrapper.find("PayWhatYouCan")).toHaveLength(1);
-  expect(wrapper.find("Card")).toHaveLength(1);
+  expect(screen.getByText("Pay by credit card")).toBeTruthy();
+  expect(screen.getByLabelText("Price")).toBeTruthy();
+  expect(screen.getByTestId("card-element")).toBeTruthy();
 
-  expect(wrapper.find("Payment").props().credits).toBe(26);
-  expect(wrapper.find("Payment").props().price).toBe(169);
+  expect(
+    screen.getByRole("button", {
+      name: "Charge credit card $169.00 for 26 credits",
+    })
+  ).toBeTruthy();
 });
 
-test("no payWhatYouCan", () => {
+test("no payWhatYouCan", async () => {
   window.gon = { stripeApiKey: "no-such-key" };
   window.Stripe = jest.fn().mockReturnValue(stripeMock);
 
-  const { user, bundles } = mockMenuJson();
-  const wrapper = mount(
+  const { user: subscriber, bundles } = mockMenuJson();
+  render(
     <SettingsContext.Provider value={{ bundles, enablePayWhatYouCan: false }}>
-      <Subscription user={user} />
+      <Subscription user={subscriber} />
     </SettingsContext.Provider>
   );
 
-  // click buy credits button
-  wrapper.find("button").simulate("click");
+  await userEvent.click(screen.getByRole("button", { name: "Buy more" }));
 
-  // click a bundle
-  wrapper.find("Choice").first().find("button").first().simulate("click");
+  const choiceButtons = screen.getAllByRole("button", { name: /credits/ });
+  await userEvent.click(choiceButtons[0]);
 
-  expect(wrapper.find("Payment")).toHaveLength(1);
-  expect(wrapper.find("PayWhatYouCan")).toHaveLength(0);
-  expect(wrapper.find("Card")).toHaveLength(1);
+  expect(screen.getByText("Pay by credit card")).toBeTruthy();
+  expect(screen.queryByLabelText("Price")).toBeNull();
+  expect(screen.getByTestId("card-element")).toBeTruthy();
 });
 
 test("humanizeBreadsPerWeek", () => {
