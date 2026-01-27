@@ -62,6 +62,9 @@ jobs:
         if: github.ref == 'refs/heads/master' && success()
         timeout-minutes: 15
         uses: akhileshns/heroku-deploy@v3.14.15
+        env:
+          # Prevent Husky hooks from running during deploy (can trigger `npm test`/`yarn test`).
+          HUSKY: "0"
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: motzibread
