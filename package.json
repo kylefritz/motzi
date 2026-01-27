@@ -64,8 +64,8 @@
     "node": "20"
   },
   "scripts": {
-    "build": "esbuild app/javascript/packs/*.{ts,tsx} --bundle --sourcemap --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx --outdir=app/assets/builds --public-path=/assets",
-    "build:watch": "esbuild app/javascript/packs/*.{ts,tsx} --bundle --sourcemap --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx --outdir=app/assets/builds --public-path=/assets --watch",
+    "build": "esbuild app/javascript/packs/*.ts app/javascript/packs/*.tsx --bundle --sourcemap --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx --outdir=app/assets/builds --public-path=/assets",
+    "build:watch": "esbuild app/javascript/packs/*.ts app/javascript/packs/*.tsx --bundle --sourcemap --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx --outdir=app/assets/builds --public-path=/assets --watch",
     "test": "jest",
     "test-watch": "jest --watch",
     "typecheck": "tsc --noEmit",
