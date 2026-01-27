@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ES2019"],
+    "jsx": "react",
+    "strict": false,
+    "noImplicitAny": false,
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "menu/*": ["app/javascript/packs/menu/*"],
+      "credits/*": ["app/javascript/packs/credits/*"],
+      "buy/*": ["app/javascript/packs/buy/*"],
+      "builder/*": ["app/javascript/packs/builder/*"]
+    },
+    "types": ["jest", "node"]
+  },
+  "include": ["app/javascript/**/*", "test/javascript/**/*", "types/**/*"]
+}

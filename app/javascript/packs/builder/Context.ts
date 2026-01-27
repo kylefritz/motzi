@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 
-const ApiContext = React.createContext();
+const ApiContext = React.createContext<any>(null);
 
 export { ApiContext };
 

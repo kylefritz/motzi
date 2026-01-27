@@ -69,6 +69,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
   const { menuNote, enablePayWhatYouCan } = menu;
   const menuClosed = getDeadlineContext().allClosed(menu);
   const disabled = menuClosed || !onCreateOrder;
+  const stripeApiKey = window.gon?.stripeApiKey;
   return (
     <>
       <Title menu={menu} />
@@ -121,7 +122,7 @@ export default function Marketplace({ menu, onCreateOrder }) {
       )}
       <Payment
         price={_.isEmpty(cart) ? null : totalPrice}
-        stripeApiKey={gon.stripeApiKey}
+        stripeApiKey={stripeApiKey}
         onCardToken={handleCardToken}
         submitting={submitting}
         disabled={disabled}

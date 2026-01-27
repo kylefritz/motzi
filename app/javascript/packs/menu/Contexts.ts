@@ -7,8 +7,8 @@ function pastDeadline(deadline) {
   return now > moment(deadline);
 }
 
-const DayContext = React.createContext();
-const SettingsContext = React.createContext();
+const DayContext = React.createContext<any>(null);
+const SettingsContext = React.createContext<any>(null);
 
 export { DayContext, SettingsContext };
 

@@ -142,6 +142,7 @@ export default function Buy({ user: passedUser }) {
     );
   }
 
+  const stripeApiKey = window.gon?.stripeApiKey;
   const grouped = Object.entries(_.groupBy(bundles, ({ name }) => name));
 
   return (
@@ -181,7 +182,7 @@ export default function Buy({ user: passedUser }) {
           <Payment
             credits={credits}
             price={totalPrice}
-            stripeApiKey={gon.stripeApiKey}
+            stripeApiKey={stripeApiKey}
             onCardToken={handleCardToken}
             onPaymentResult={handlePaymentResult}
             submitting={submitting}

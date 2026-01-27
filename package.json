@@ -37,10 +37,16 @@
     "@babel/plugin-transform-regenerator": "^7.24.7",
     "@babel/plugin-transform-runtime": "^7.24.7",
     "@babel/preset-env": "^7.24.7",
+    "@babel/preset-typescript": "^7.24.7",
     "@testing-library/dom": "^8.19.1",
     "@testing-library/react": "^12.1.5",
     "@testing-library/react-hooks": "^3.2.1",
     "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^29.5.12",
+    "@types/lodash": "^4.17.7",
+    "@types/node": "^20.14.10",
+    "@types/react": "^16.14.62",
+    "@types/react-dom": "^16.9.25",
     "babel-jest": "^29.7.0",
     "babel-plugin-dynamic-import-node": "^2.3.3",
     "babel-plugin-macros": "^3.1.0",
@@ -51,16 +57,18 @@
     "prettier": "2.0.4",
     "pretty-quick": "^2.0.1",
     "react-test-renderer": "^16.10.2",
-    "regenerator-runtime": "^0.13.3"
+    "regenerator-runtime": "^0.13.3",
+    "typescript": "^5.5.4"
   },
   "engines": {
     "node": "20"
   },
   "scripts": {
-    "build": "esbuild app/javascript/packs/*.js --bundle --sourcemap --loader:.js=jsx --outdir=app/assets/builds --public-path=/assets",
-    "build:watch": "yarn build --watch",
+    "build": "esbuild app/javascript/packs/*.{ts,tsx} --bundle --sourcemap --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx --outdir=app/assets/builds --public-path=/assets",
+    "build:watch": "esbuild app/javascript/packs/*.{ts,tsx} --bundle --sourcemap --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx --outdir=app/assets/builds --public-path=/assets --watch",
     "test": "jest",
     "test-watch": "jest --watch",
+    "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
   "jest": {
@@ -72,7 +80,7 @@
       "app/javascript/packs"
     ],
     "setupFilesAfterEnv": [
-      "<rootDir>/test/javascript/setupTests.js"
+      "<rootDir>/test/javascript/setupTests.tsx"
     ],
     "transform": {
       "^.+\\.[jt]sx?$": "babel-jest"

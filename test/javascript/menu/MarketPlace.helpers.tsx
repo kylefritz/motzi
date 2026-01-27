@@ -4,7 +4,7 @@ import { render } from "@testing-library/react";
 import Marketplace from "menu/Marketplace";
 import mockMenuJson from "./mockMenuJson";
 import stripeMock from "./stripeMock";
-import { SettingsContext } from "../../../app/javascript/packs/menu/Contexts";
+import { SettingsContext } from "menu/Contexts";
 
 export default function renderMenu(menuJsonOptions) {
   window.gon = { stripeApiKey: "no-such-key" };
