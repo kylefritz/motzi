@@ -1,8 +1,11 @@
 name: ci
 # Run Rails tests & Jest. If pass & on master, deploy to Heroku.
 on: push
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  ci:
+  test:
     runs-on: ubuntu-latest
 
     services:
@@ -10,11 +13,11 @@ jobs:
         image: postgres:11.5
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      HUSKY: "0"
 
     steps:
       - uses: actions/checkout@v4.2.2
-        with:
-          fetch-depth: 0 # heroku needs an unshallow clone
 
       - name: Install PostgreSQL 11 client
         run: sudo apt-get -yqq install libpq-dev
@@ -32,6 +35,8 @@ jobs:
         uses: actions/setup-node@v4.3.0
         with:
           node-version: 20.x
+          cache: yarn
+          cache-dependency-path: yarn.lock
 
       - name: Run install
         uses: borales/actions-yarn@v5.0.0
@@ -55,13 +60,21 @@ jobs:
       - name: jest
         run: npx jest test/javascript
 
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Prevent Husky hooks from running during deploy (can trigger `npm test`/`yarn test`).
+      HUSKY: "0"
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0 # heroku needs an unshallow clone
+
       - name: Deploy to Heroku
-        if: github.ref == 'refs/heads/master' && success()
-        timeout-minutes: 15
         uses: akhileshns/heroku-deploy@v3.14.15
-        env:
-          # Prevent Husky hooks from running during deploy (can trigger `npm test`/`yarn test`).
-          HUSKY: "0"
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: motzibread
