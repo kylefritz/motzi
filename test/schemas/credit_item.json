@@ -1,0 +1,26 @@
+{
+  "$id": "/credit_item.json",
+  "type": "object",
+  "required": ["creditItem"],
+  "properties": {
+    "creditItem": {
+      "type": "object",
+      "required": [
+        "id",
+        "stripeChargeId",
+        "stripeReceiptUrl",
+        "memo",
+        "quantity",
+        "userId"
+      ],
+      "properties": {
+        "id": { "type": "integer" },
+        "stripeChargeId": { "type": "string" },
+        "stripeReceiptUrl": { "type": ["null", "string"] },
+        "memo": { "type": ["null", "string"] },
+        "quantity": { "type": "integer" },
+        "userId": { "type": "integer" }
+      }
+    }
+  }
+}

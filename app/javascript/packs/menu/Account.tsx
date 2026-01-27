@@ -1,7 +1,18 @@
 import React, { useState } from "react";
+import type { MarketplaceOrderRequest } from "../../types/api";
 
-export default function Account({ onChange, disabled }) {
-  const [account, setAccount] = useState({
+type AccountInfo = Pick<
+  MarketplaceOrderRequest,
+  "firstName" | "lastName" | "email" | "phone" | "optIn"
+>;
+
+type AccountProps = {
+  onChange: (next: AccountInfo) => void;
+  disabled?: boolean;
+};
+
+export default function Account({ onChange, disabled }: AccountProps) {
+  const [account, setAccount] = useState<AccountInfo>({
     firstName: "",
     lastName: "",
     email: "",
@@ -9,9 +20,10 @@ export default function Account({ onChange, disabled }) {
     optIn: false,
   });
 
-  const handle = (fieldName) => {
-    return (event) => {
-      const fieldValue = event.target.value;
+  const handle = (fieldName: keyof AccountInfo) => {
+    return (event: React.ChangeEvent<HTMLInputElement>) => {
+      const fieldValue =
+        fieldName === "optIn" ? event.target.checked : event.target.value;
       const nextAccount = { ...account, [fieldName]: fieldValue };
       setAccount(nextAccount);
       onChange(nextAccount);
@@ -83,6 +95,7 @@ export default function Account({ onChange, disabled }) {
           name="optIn"
           checked={optIn}
           onChange={handle("optIn")}
+          disabled={disabled}
         />
         <label className="form-check-label" htmlFor="optIn">
           Receive newsletter?

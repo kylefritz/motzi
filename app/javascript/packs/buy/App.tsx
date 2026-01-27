@@ -9,25 +9,38 @@ import Payment from "./Payment";
 import PayWhatYouCan from "./PayWhatYouCan";
 import { applyTip } from "./Tip";
 import { getSettingsContext } from "../menu/Contexts";
+import type {
+  CreditItemResponse,
+  CreditBundle,
+  CreditPurchaseRequest,
+  MenuResponse,
+  MenuUser,
+} from "../../types/api";
 
-export default function Buy({ user: passedUser }) {
+type BuyProps = {
+  user?: MenuUser;
+};
+
+type StripeTokenPayload = { token: { id: string } };
+
+export default function Buy({ user: passedUser }: BuyProps) {
   const {
     bundles: passedBundles,
     enablePayWhatYouCan: passedEnablePayWhatYouCan,
     onRefresh: onComplete,
   } = getSettingsContext();
 
-  const [credits, setCredits] = useState();
-  const [price, setPrice] = useState();
-  const [tip, setTip] = useState();
-  const [breadsPerWeek, setBreadsPerWeek] = useState();
-  const [user, setUser] = useState(passedUser);
-  const [bundles, setBundles] = useState(passedBundles);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [price, setPrice] = useState<number | null>(null);
+  const [tip, setTip] = useState<string | null>(null);
+  const [breadsPerWeek, setBreadsPerWeek] = useState<number | null>(null);
+  const [user, setUser] = useState<MenuUser | undefined>(passedUser);
+  const [bundles, setBundles] = useState<CreditBundle[]>(passedBundles || []);
   const [enablePayWhatYouCan, setEnablePayWhatYouCan] = useState(
-    passedEnablePayWhatYouCan
+    !!passedEnablePayWhatYouCan
   );
-  const [error, setError] = useState();
-  const [receipt, setReceipt] = useState();
+  const [error, setError] = useState<string | undefined>();
+  const [receipt, setReceipt] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   // what is the current user?
@@ -38,7 +51,7 @@ export default function Buy({ user: passedUser }) {
     const { uid } = queryString.parse(location.search);
     const params = { uid };
     axios
-      .get("/menu.json", { params })
+      .get<MenuResponse>("/menu.json", { params })
       .then(
         ({
           data: {
@@ -64,7 +77,11 @@ export default function Buy({ user: passedUser }) {
       });
   }, []);
 
-  const handleChoose = ({ credits, price, breadsPerWeek }) => {
+  const handleChoose = ({
+    credits,
+    price,
+    breadsPerWeek,
+  }: Pick<CreditBundle, "credits" | "price" | "breadsPerWeek">) => {
     setCredits(credits);
     setPrice(price);
     setBreadsPerWeek(breadsPerWeek);
@@ -77,20 +94,20 @@ export default function Buy({ user: passedUser }) {
     }
   };
   const totalPrice = applyTip(price, tip);
-  const handleCardToken = ({ token }) => {
-    const data = {
-      uid: user.hashid,
+  const handleCardToken = ({ token }: StripeTokenPayload) => {
+    const data: CreditPurchaseRequest = {
+      uid: user?.hashid || null,
       token: token.id,
-      price: totalPrice,
-      credits,
-      breadsPerWeek,
+      price: typeof totalPrice === "number" ? totalPrice : 0,
+      credits: credits || 0,
+      breadsPerWeek: breadsPerWeek || 0,
     };
     console.log("got card token", data);
     setSubmitting(true);
 
     // send stripe token to rails to complete purchase
     axios
-      .post("/credit_items.json", data)
+      .post<CreditItemResponse>("/credit_items.json", data)
       .then(({ data }) => {
         const { creditItem } = data;
         console.log("bought credits", data);

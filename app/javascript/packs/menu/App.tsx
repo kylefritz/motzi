@@ -8,6 +8,28 @@ import { getDeadlineContext, DayContext, SettingsContext } from "./Contexts";
 import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
+import type {
+  CreditBundle,
+  Menu as MenuType,
+  MenuOrder,
+  MenuOrderRequest,
+  MenuResponse,
+  MenuUser,
+  MarketplaceOrderRequest,
+} from "../../types/api";
+
+type LayoutProps = {
+  bundles: CreditBundle[];
+  error?: string;
+  handleCreateOrder: (
+    order: MenuOrderRequest | MarketplaceOrderRequest
+  ) => Promise<unknown>;
+  isEditingOrder: boolean;
+  menu: MenuType | null;
+  order: MenuOrder | null;
+  setIsEditingOrder: React.Dispatch<React.SetStateAction<boolean>>;
+  user: MenuUser | null;
+};
 
 function Layout({
   bundles,
@@ -18,7 +40,7 @@ function Layout({
   order,
   setIsEditingOrder,
   user,
-}) {
+}: LayoutProps) {
   if (error) {
     return (
       <>
@@ -68,23 +90,25 @@ function Layout({
 }
 
 export default function App() {
-  const [data, setData] = useState({}); // expect: menu, user, order
-  const [error, setError] = useState();
+  const [data, setData] = useState<MenuResponse | null>(null); // expect: menu, user, order
+  const [error, setError] = useState<string | undefined>();
   const [isEditingOrder, setIsEditingOrder] = useState(false);
   const { uid, ignoredeadline: ignoreDeadline } = queryString.parse(
     location.search
-  );
+  ) as { uid?: string; ignoredeadline?: string };
 
   const fetchMenu = () => {
     let params = { uid };
     const id = _.get(location.pathname.match(/menus\/(.*)/), 1);
     const menuPath = id ? `/menus/${id}.json` : "/menu.json";
     axios
-      .get(menuPath, { params })
+      .get<MenuResponse>(menuPath, { params })
       .then(({ data: newData }) => {
         setData(newData); // expect: menu, user, order
         const { user } = newData;
-        Sentry.configureScope((scope) => scope.setUser(user));
+        Sentry.configureScope((scope) =>
+          scope.setUser(user ? { id: user.id, email: user.email } : null)
+        );
       })
       .catch((err) => {
         console.error("cant load menu", err);
@@ -95,14 +119,16 @@ export default function App() {
 
   useEffect(fetchMenu, []);
 
-  const handleCreateOrder = (order) => {
+  const handleCreateOrder = (
+    order: MenuOrderRequest | MarketplaceOrderRequest
+  ) => {
     const orderId = _.get(data, "order.id");
 
-    const method = orderId ? "put" : "post";
+    const method: "put" | "post" = orderId ? "put" : "post";
     const url = orderId ? `/orders/${orderId}.json` : "/orders.json";
     console.debug("saving order", method, url, order);
 
-    return axios({ method, url, data: order })
+    return axios<MenuResponse>({ method, url, data: order })
       .then(({ data: newData }) => {
         setData(newData); // expect: menu, user, order
         setIsEditingOrder(false);
@@ -116,7 +142,10 @@ export default function App() {
         Sentry.captureException(err);
       });
   };
-  const { menu, bundles, user } = data;
+  const menu = data?.menu || null;
+  const bundles = data?.bundles || [];
+  const user = data?.user || null;
+  const order = data?.order || null;
   const { orderingDeadlineText, enablePayWhatYouCan } = menu || {};
 
   return (
@@ -136,12 +165,14 @@ export default function App() {
       >
         <Layout
           {...{
-            ...data,
+            bundles,
             error,
-            fetchMenu,
             handleCreateOrder,
             isEditingOrder,
+            menu,
+            order,
             setIsEditingOrder,
+            user,
           }}
         />
       </DayContext.Provider>

@@ -1,8 +1,16 @@
 import React, { useState } from "react";
+import _ from "lodash";
 import { shortDay } from "./PickupDay";
 import { useApi } from "./Context";
+import type { AdminItem, AdminPickupDay } from "../../types/api";
 
-export default function Adder({ items, not: rawNot, pickupDays }) {
+type AdderProps = {
+  items: AdminItem[];
+  not: string[];
+  pickupDays: AdminPickupDay[];
+};
+
+export default function Adder({ items, not: rawNot, pickupDays }: AdderProps) {
   const api = useApi();
   const [subscriber, setSubscriber] = useState(true);
   const [marketplace, setMarketplace] = useState(true);
@@ -12,7 +20,7 @@ export default function Adder({ items, not: rawNot, pickupDays }) {
     return <h3>Add a pickup day before adding items</h3>;
   }
 
-  const togglePickupDay = (pickupDayId, shouldAdd) => {
+  const togglePickupDay = (pickupDayId: number, shouldAdd: boolean) => {
     console.log("pickupDay", pickupDayId, "add", shouldAdd);
     const set = new Set(pickupDayIds);
     if (shouldAdd) {
@@ -23,10 +31,10 @@ export default function Adder({ items, not: rawNot, pickupDays }) {
     setPickupDayIds([...set.keys()]);
   };
 
-  const selectRef = React.createRef();
-  const handleAdd = (e) => {
+  const selectRef = React.createRef<HTMLSelectElement>();
+  const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    const itemId = parseInt(selectRef.current.value);
+    const itemId = parseInt(selectRef.current?.value || "", 10);
     if (!itemId) {
       alert("Select an item");
       return;

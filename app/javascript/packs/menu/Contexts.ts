@@ -1,23 +1,36 @@
 import React, { useContext } from "react";
 import moment from "moment";
 import _ from "lodash";
+import type { MenuPickupDay, CreditBundle } from "../../types/api";
 
-function pastDeadline(deadline) {
+function pastDeadline(deadline: string) {
   const now = moment();
   return now > moment(deadline);
 }
 
-const DayContext = React.createContext<any>(null);
-const SettingsContext = React.createContext<any>(null);
+type DayContextValue = {
+  orderingDeadlineText?: string;
+  ignoreDeadline?: boolean | string | null;
+};
+
+type SettingsContextValue = {
+  enablePayWhatYouCan?: boolean;
+  bundles?: CreditBundle[];
+  onRefresh?: () => void;
+  showCredits?: boolean;
+};
+
+const DayContext = React.createContext<DayContextValue | null>(null);
+const SettingsContext = React.createContext<SettingsContextValue | null>(null);
 
 export { DayContext, SettingsContext };
 
-export function getSettingsContext() {
+export function getSettingsContext(): SettingsContextValue {
   const ctx = useContext(SettingsContext);
   if (_.isNil(ctx)) {
     console.warn("SettingsContext is nil", ctx);
   }
-  return ctx || {};
+  return ctx || ({} as SettingsContextValue);
 }
 
 // like getSettingsContext but just for prices & doesn't warn
@@ -28,9 +41,9 @@ export function getPriceContext() {
 }
 
 export function getDeadlineContext() {
-  const ctx = useContext(DayContext) || {};
+  const ctx = useContext(DayContext) || ({} as DayContextValue);
 
-  const isClosed = (orderDeadlineAt) => {
+  const isClosed = (orderDeadlineAt: string) => {
     if (ctx.ignoreDeadline) {
       return false;
     }
@@ -38,7 +51,11 @@ export function getDeadlineContext() {
     return pastDeadline(orderDeadlineAt);
   };
 
-  const allClosed = ({ pickupDays }) => {
+  const allClosed = ({
+    pickupDays,
+  }: {
+    pickupDays?: MenuPickupDay[];
+  }) => {
     if (ctx.ignoreDeadline) {
       return false;
     }

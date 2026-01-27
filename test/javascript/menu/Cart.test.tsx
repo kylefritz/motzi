@@ -6,15 +6,34 @@ import { useCart } from "menu/Cart";
 const thur = 1;
 const sat = 2;
 
-const makePickupDays = (satRemaining) => [
-  { id: thur, remaining: 10 },
-  { id: sat, remaining: satRemaining },
+const basePickupAt = "2025-01-01T00:00:00Z";
+const makePickupDays = (satRemaining: number | null) => [
+  { id: thur, remaining: 10, pickupAt: basePickupAt, orderDeadlineAt: basePickupAt },
+  {
+    id: sat,
+    remaining: satRemaining ?? 0,
+    pickupAt: basePickupAt,
+    orderDeadlineAt: basePickupAt,
+  },
 ];
 
+const buildItem = (overrides = {}) => ({
+  id: 0,
+  name: "Item",
+  description: "",
+  price: 0,
+  credits: 0,
+  image: null,
+  subscriber: false,
+  marketplace: false,
+  pickupDays: makePickupDays(0),
+  ...overrides,
+});
+
 const items = [
-  { id: 1, price: 1, credits: 100, pickupDays: makePickupDays(0) },
-  { id: 2, price: 10, credits: 10, pickupDays: makePickupDays(null) },
-  { id: 3, price: 100, credits: 1, pickupDays: makePickupDays(NaN) },
+  buildItem({ id: 1, price: 1, credits: 100, pickupDays: makePickupDays(0) }),
+  buildItem({ id: 2, price: 10, credits: 10, pickupDays: makePickupDays(null) }),
+  buildItem({ id: 3, price: 100, credits: 1, pickupDays: makePickupDays(NaN) }),
 ];
 
 test("Order snapshot", () => {
@@ -67,10 +86,16 @@ test("remove", () => {
 
 test("remaining", () => {
   const items = [
-    { id: 3, subscriber: true, pickupDays: makePickupDays(NaN) },
-    { id: 1, subscriber: true, pickupDays: makePickupDays(0) },
-    { id: 2, subscriber: true, pickupDays: makePickupDays(null) },
-    { id: -1, subscriber: true, name: "PayItForward" },
+    buildItem({ id: 3, subscriber: true, pickupDays: makePickupDays(NaN) }),
+    buildItem({ id: 1, subscriber: true, pickupDays: makePickupDays(0) }),
+    buildItem({ id: 2, subscriber: true, pickupDays: makePickupDays(null) }),
+    buildItem({
+      id: -1,
+      name: "PayItForward",
+      pickupDays: [],
+      subscriber: false,
+      marketplace: false,
+    }),
   ];
 
   const { result } = renderHook(() => useCart({ items }));
@@ -114,16 +139,27 @@ test("remaining", () => {
 
 test("no payItForward", () => {
   const items = [
-    { id: 3, marketplace: true, pickupDays: makePickupDays(0) },
-    { id: 1, marketplace: true, pickupDays: makePickupDays(null) },
-    { id: 2, marketplace: true, pickupDays: makePickupDays(NaN) },
+    buildItem({ id: 3, marketplace: true, pickupDays: makePickupDays(0) }),
+    buildItem({ id: 1, marketplace: true, pickupDays: makePickupDays(null) }),
+    buildItem({ id: 2, marketplace: true, pickupDays: makePickupDays(NaN) }),
   ];
 
   const { result: no } = renderHook(() => useCart({ items }));
   expect(no.current.payItForward).toBeUndefined();
 
   const { result: yes } = renderHook(() =>
-    useCart({ items: [...items, { id: -1, name: "PayItForward" }] })
+    useCart({
+      items: [
+        ...items,
+        buildItem({
+          id: -1,
+          name: "PayItForward",
+          pickupDays: [],
+          subscriber: false,
+          marketplace: false,
+        }),
+      ],
+    })
   );
   expect(yes.current.payItForward).toBeDefined();
   expect(yes.current.payItForward.name).toMatch("PayItForward");
@@ -136,11 +172,11 @@ test("no payItForward", () => {
 
 test("marketplaceItems vs subscriberItems", () => {
   const items = [
-    { id: 1, marketplace: true, pickupDays: makePickupDays(10) },
-    { id: 2, marketplace: true, pickupDays: makePickupDays(10) },
-    { id: 3, marketplace: true, pickupDays: makePickupDays(10) },
-    { id: 4, subscriber: true, pickupDays: makePickupDays(10) },
-    { id: 5, subscriber: true, pickupDays: makePickupDays(10) },
+    buildItem({ id: 1, marketplace: true, pickupDays: makePickupDays(10) }),
+    buildItem({ id: 2, marketplace: true, pickupDays: makePickupDays(10) }),
+    buildItem({ id: 3, marketplace: true, pickupDays: makePickupDays(10) }),
+    buildItem({ id: 4, subscriber: true, pickupDays: makePickupDays(10) }),
+    buildItem({ id: 5, subscriber: true, pickupDays: makePickupDays(10) }),
   ];
 
   const {

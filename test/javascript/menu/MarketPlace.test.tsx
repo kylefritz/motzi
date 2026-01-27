@@ -18,7 +18,9 @@ test("menu", async () => {
   expect(screen.getByRole("button", { name: "Select an item" })).toBeTruthy();
 
   const donateBtn = screen.getByRole("button", { name: "Donate Now" });
-  await userEvent.click(donateBtn);
+  await act(async () => {
+    await userEvent.click(donateBtn);
+  });
   await waitFor(() => expect(getCartTotalText()).toContain("$5.00"));
 });
 

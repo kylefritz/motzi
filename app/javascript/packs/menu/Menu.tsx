@@ -10,8 +10,21 @@ import PayItForward from "./PayItForward";
 import SkipThisWeek from "./SkipThisWeek";
 import Subscription from "./Subscription";
 import { getDeadlineContext } from "./Contexts";
+import type {
+  Menu as MenuType,
+  MenuOrder,
+  MenuOrderRequest,
+  MenuUser,
+} from "../../types/api";
 
-export default function Menu({ menu, order, user, onCreateOrder }) {
+type MenuProps = {
+  menu: MenuType;
+  order: MenuOrder | null;
+  user: MenuUser;
+  onCreateOrder: (order: MenuOrderRequest) => Promise<unknown>;
+};
+
+export default function Menu({ menu, order, user, onCreateOrder }: MenuProps) {
   const {
     cart,
     addToCart,
@@ -24,8 +37,10 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
     order,
     items: menu.items,
   });
-  const [skip, setSkip] = useState(_.get(order, "skip", false));
-  const [comments, setComments] = useState(_.get(order, "comments", null));
+  const [skip, setSkip] = useState<boolean>(_.get(order, "skip", false));
+  const [comments, setComments] = useState<string | null>(
+    _.get(order, "comments", null)
+  );
 
   const handleSkip = () => {
     setSkip(true);
@@ -58,12 +73,11 @@ export default function Menu({ menu, order, user, onCreateOrder }) {
         </p>
         <BuyCredits user={user} />
 
-        <h5 className="mt-5">Preview of current menu</h5>
-        <Items
-          items={subscriberItems}
-          showDay2={menu.showDay2}
-          disabled={true}
-        />
+      <h5 className="mt-5">Preview of current menu</h5>
+      <Items
+        items={subscriberItems}
+        disabled={true}
+      />
       </>
     );
   }

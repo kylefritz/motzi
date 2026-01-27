@@ -4,18 +4,25 @@ import * as Sentry from "@sentry/browser";
 import _ from "lodash";
 
 import Layout from "./Layout";
-import { ApiContext } from "./Context";
+import { ApiContext, BuilderApi } from "./Context";
+import type {
+  AdminItem,
+  AdminItemsResponse,
+  AdminMenuBuilderResponse,
+} from "../../types/api";
 
-const menuId = _.get(location.pathname.match(/menus\/(.*)/), 1);
+const menuId = _.get(location.pathname.match(/menus\/(.*)/), 1) as
+  | string
+  | undefined;
 
 export default function MenuBuilder() {
-  const [menu, setMenu] = useState();
-  const [allItems, setAllItems] = useState();
-  const [error, setError] = useState();
+  const [menu, setMenu] = useState<AdminMenuBuilderResponse | null>(null);
+  const [allItems, setAllItems] = useState<AdminItem[] | null>(null);
+  const [error, setError] = useState<string | undefined>();
 
   function loadMenu() {
     axios
-      .get(`/admin/menus/${menuId}/menu_builder.json`)
+      .get<AdminMenuBuilderResponse>(`/admin/menus/${menuId}/menu_builder.json`)
       .then(({ data: menu }) => {
         setMenu(menu);
         setError(undefined);
@@ -27,7 +34,7 @@ export default function MenuBuilder() {
       });
   }
 
-  const api = {
+  const api: BuilderApi = {
     item: {
       add: (item) => {
         const json = { ...item, menuId };
@@ -101,7 +108,7 @@ export default function MenuBuilder() {
     // load items
     // TODO: why side load? add to menu request?
     axios
-      .get(`/admin/items.json`)
+      .get<AdminItemsResponse>(`/admin/items.json`)
       .then(({ data: { items } }) => {
         setAllItems(items);
       })

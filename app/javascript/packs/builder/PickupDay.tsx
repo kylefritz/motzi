@@ -2,8 +2,9 @@ import React, { useRef } from "react";
 import styled from "styled-components";
 import moment from "moment";
 import { useApi } from "./Context";
+import type { AdminPickupDay } from "../../types/api";
 
-export function shortDay(pickupAt) {
+export function shortDay(pickupAt: string) {
   const day = moment(pickupAt).format("dddd");
   switch (day) {
     case "Monday":
@@ -20,15 +21,20 @@ export function shortDay(pickupAt) {
   return day;
 }
 
-export function PickupDays({ pickupDays, leadtimeHours }) {
-  const inputDeadline = useRef(null);
-  const inputPickup = useRef(null);
+type PickupDaysProps = {
+  pickupDays: AdminPickupDay[];
+  leadtimeHours: number | null;
+};
+
+export function PickupDays({ pickupDays, leadtimeHours }: PickupDaysProps) {
+  const inputDeadline = useRef<HTMLInputElement | null>(null);
+  const inputPickup = useRef<HTMLInputElement | null>(null);
   const api = useApi();
 
-  function handleSubmit(event) {
+  function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    const pickupAt = inputPickup.current.value;
-    const orderDeadlineAt = inputDeadline.current.value;
+    const pickupAt = inputPickup.current?.value || "";
+    const orderDeadlineAt = inputDeadline.current?.value || "";
 
     if (pickupAt === "" || orderDeadlineAt === "") {
       alert("Set pickup at & deadline at");
@@ -37,20 +43,26 @@ export function PickupDays({ pickupDays, leadtimeHours }) {
     console.log("pickup", shortDay(pickupAt), pickupAt, "deadline", orderDeadlineAt); // prettier-ignore
     api.pickupDay.add({ pickupAt, orderDeadlineAt }).then(() => {
       // reset form
-      inputPickup.current.value = "";
-      inputDeadline.current.value = "";
+      if (inputPickup.current) {
+        inputPickup.current.value = "";
+      }
+      if (inputDeadline.current) {
+        inputDeadline.current.value = "";
+      }
     });
   }
-  function handleSetDeadline(event) {
+  function handleSetDeadline(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
-    const pickup = inputPickup.current.value;
+    const pickup = inputPickup.current?.value || "";
     const deadline = moment(pickup).subtract(
       moment.duration(leadtimeHours || 27, "hours")
     );
 
-    inputDeadline.current.value = deadline
-      .toISOString()
-      .replace(/:00.000Z/, "");
+    if (inputDeadline.current) {
+      inputDeadline.current.value = deadline
+        .toISOString()
+        .replace(/:00.000Z/, "");
+    }
   }
   return (
     <>

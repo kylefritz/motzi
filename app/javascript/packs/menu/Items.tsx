@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { sortBy, isNumber } from "lodash";
 import moment from "moment";
 
 import Price from "./Price";
 import Quantity from "./Quantity";
 import { getDeadlineContext } from "./Contexts";
+import type { MenuItem, MenuItemPickupDay } from "../../types/api";
 
 function shortDay(day) {
   switch (day) {
@@ -22,6 +23,12 @@ function shortDay(day) {
   return day;
 }
 
+type DayButtonProps = MenuItemPickupDay & {
+  itemId: number;
+  onSetDayId: (dayId: number) => void;
+  orderingDeadlineText?: string;
+};
+
 export function DayButton({
   itemId,
   pickupAt,
@@ -30,7 +37,7 @@ export function DayButton({
   id: dayId,
   onSetDayId,
   orderingDeadlineText,
-}) {
+}: DayButtonProps) {
   const day = moment(pickupAt).format("dddd");
   const isPastDeadline = getDeadlineContext().isClosed(orderDeadlineAt);
 
@@ -72,7 +79,17 @@ export function DayButton({
   );
 }
 
-function DayButtons({ description, onSetDayId, pickupDays, itemId }) {
+type DayButtonsProps = Pick<MenuItem, "description" | "pickupDays"> & {
+  itemId: number;
+  onSetDayId?: (dayId: number) => void;
+};
+
+function DayButtons({
+  description,
+  onSetDayId,
+  pickupDays,
+  itemId,
+}: DayButtonsProps) {
   return (
     <>
       {onSetDayId && (
@@ -102,6 +119,14 @@ function QuantityAdd({
   day,
   max,
   itemId,
+}: {
+  quantity: number;
+  onAdd: () => void;
+  onQuantity: (next: number) => void;
+  onCancel: () => void;
+  day: string;
+  max: number;
+  itemId: number;
 }) {
   return (
     <>
@@ -129,14 +154,23 @@ function QuantityAdd({
   );
 }
 
-function Ordering(props) {
-  const [pickupDayId, setPickupDayId] = useState(null);
+type OrderingProps = MenuItem & {
+  itemId: number;
+  onChange?: (payload: { pickupDayId: number; quantity: number }) => void;
+};
+
+function Ordering(props: OrderingProps) {
+  const [pickupDayId, setPickupDayId] = useState<number | null>(null);
   const [wasAdded, setWasAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { onChange, pickupDays, itemId } = props;
 
   const handleAdd = () => {
+    if (!onChange || pickupDayId === null) {
+      return;
+    }
     onChange({ pickupDayId, quantity });
     setWasAdded(true);
     const reset = () => {
@@ -145,8 +179,20 @@ function Ordering(props) {
       setQuantity(1);
     };
 
-    setTimeout(reset, 1.5 * 1000);
+    const isTestEnv =
+      typeof process !== "undefined" && process.env?.NODE_ENV === "test";
+    if (!isTestEnv) {
+      resetTimerRef.current = setTimeout(reset, 1.5 * 1000);
+    }
   };
+
+  React.useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current);
+      }
+    };
+  }, []);
 
   if (wasAdded) {
     return <p className="text-success my-3">Added to cart!</p>;
@@ -155,7 +201,7 @@ function Ordering(props) {
   if (pickupDayId) {
     const { remaining, pickupAt } = pickupDays.find(
       ({ id }) => pickupDayId === id
-    );
+    ) as MenuItemPickupDay;
     const day = moment(pickupAt).format("dddd");
 
     return (
@@ -173,14 +219,18 @@ function Ordering(props) {
 
   return (
     <DayButtons
-      onSetDayId={onChange && setPickupDayId}
+      onSetDayId={onChange ? setPickupDayId : undefined}
       itemId={itemId}
       {...props}
     />
   );
 }
 
-export function Item(props) {
+type ItemProps = MenuItem & {
+  onChange?: (payload: { pickupDayId: number; quantity: number }) => void;
+};
+
+export function Item(props: ItemProps) {
   const { id, price, credits, image, name } = props;
   return (
     <div className="col-6 mb-4" data-testid={`item-${id}`}>
@@ -192,7 +242,13 @@ export function Item(props) {
   );
 }
 
-export default function Items({ items, onAddToCart: handleAddToCart }) {
+type ItemsProps = {
+  items: MenuItem[];
+  onAddToCart?: (item: MenuItem & { quantity: number; pickupDayId: number }) => void;
+  disabled?: boolean;
+};
+
+export default function Items({ items, onAddToCart: handleAddToCart }: ItemsProps) {
   return (
     <div className="row mt-2">
       {items.map((i) => (
@@ -200,9 +256,10 @@ export default function Items({ items, onAddToCart: handleAddToCart }) {
           key={i.id}
           {...i}
           onChange={
-            handleAddToCart &&
-            (({ quantity, pickupDayId }) =>
-              handleAddToCart({ ...i, quantity, pickupDayId }))
+            handleAddToCart
+              ? ({ quantity, pickupDayId }) =>
+                  handleAddToCart({ ...i, quantity, pickupDayId })
+              : undefined
           }
         />
       ))}

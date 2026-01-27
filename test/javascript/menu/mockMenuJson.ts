@@ -1,4 +1,22 @@
 import { DateTime, Duration } from "luxon";
+import type {
+  CreditBundle,
+  Menu,
+  MenuItem,
+  MenuOrder,
+  MenuOrderItem,
+  MenuPickupDay,
+  MenuResponse,
+  MenuUser,
+} from "../../../app/javascript/types/api";
+
+type MockMenuOptions = {
+  order?: boolean | MenuOrder;
+  user?: boolean | MenuUser;
+  items?: boolean | MenuItem[];
+  payItForward?: boolean;
+  enablePayWhatYouCan?: boolean;
+};
 
 export default function ({
   order: withOrder = true,
@@ -6,19 +24,19 @@ export default function ({
   items: withItems = true,
   payItForward = true,
   enablePayWhatYouCan = true,
-} = {}) {
+}: MockMenuOptions = {}): MenuResponse {
   const pickupAt = DateTime.now().plus(Duration.fromISO("PT24H")).toISO();
   const orderDeadlineAt = DateTime.now()
     .plus(Duration.fromISO("PT12H"))
     .toISO();
-  const pickupDays = [
+  const pickupDays: MenuPickupDay[] = [
     {
       id: 1,
       pickupAt,
       orderDeadlineAt,
     },
   ];
-  const menu = {
+  const menu: Menu = {
     id: 921507399,
     name: "week 5",
     menuNote: "menu note copy",
@@ -28,8 +46,9 @@ export default function ({
       "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
     enablePayWhatYouCan,
     pickupDays,
+    items: [],
   };
-  const items = [
+  const items: MenuItem[] = [
     {
       id: 3,
       name: "Baguette",
@@ -59,6 +78,7 @@ export default function ({
       description: "ony subscribers can get cookies",
       price: 4.0,
       credits: 1,
+      image: null,
       pickupDays,
       subscriber: true,
       marketplace: false,
@@ -69,6 +89,7 @@ export default function ({
       description: "too small for subscribers",
       price: 2.0,
       credits: 1,
+      image: null,
       pickupDays,
       subscriber: false,
       marketplace: true,
@@ -79,6 +100,7 @@ export default function ({
       description: "too small for subscribers",
       price: 1.5,
       credits: 1,
+      image: null,
       pickupDays,
       subscriber: false,
       marketplace: true,
@@ -89,15 +111,20 @@ export default function ({
     items.push({
       id: -1,
       name: "Pay it forward",
+      description: "This purchase supports someone else in need.",
       price: 5,
       credits: 1,
+      image: null,
+      subscriber: false,
+      marketplace: false,
+      pickupDays: [],
     });
   }
-  if (withItems) {
-    menu.items = withItems === true ? items : withItems;
-  }
+  const resolvedItems =
+    withItems === true ? items : withItems === false ? [] : withItems;
+  menu.items = resolvedItems;
 
-  const user = {
+  const user: MenuUser = {
     id: 584273342,
     name: "Kyle Fritz",
     email: "kyle.p.fritz@gmail.com",
@@ -107,23 +134,33 @@ export default function ({
     subscriber: true,
   };
 
-  const order = {
+  const orderItems: MenuOrderItem[] = [
+    {
+      itemId: 3,
+      quantity: 1,
+      pickupDayId: pickupDays[0].id,
+      pickupAt,
+      day: DateTime.fromISO(pickupAt).toFormat("cccc"),
+    },
+    {
+      itemId: 1,
+      quantity: 1,
+      pickupDayId: pickupDays[0].id,
+      pickupAt,
+      day: DateTime.fromISO(pickupAt).toFormat("cccc"),
+    },
+  ];
+
+  const order: MenuOrder = {
+    id: 12345,
     skip: false,
-    items: [
-      {
-        itemId: 3,
-        quantity: 1,
-        pickupDayId: pickupDays[0].id,
-      },
-      {
-        itemId: 1,
-        quantity: 1,
-        pickupDayId: pickupDays[0].id,
-      },
-    ],
+    comments: null,
+    items: orderItems,
+    stripeReceiptUrl: null,
+    stripeChargeAmount: null,
   };
 
-  const bundles = [
+  const bundles: CreditBundle[] = [
     {
       name: "6-Month",
       description: "Weekly",
@@ -154,12 +191,12 @@ export default function ({
     },
   ];
 
-  let data = { menu, bundles };
-  if (withUser) {
-    data = { ...data, user: withUser === true ? user : withUser };
-  }
-  if (withOrder) {
-    data = { ...data, order: withOrder === true ? order : withOrder };
-  }
+  const data: MenuResponse = {
+    menu,
+    bundles,
+    user: withUser === true ? user : withUser || null,
+    order: withOrder === true ? order : withOrder || null,
+  };
+
   return data;
 }

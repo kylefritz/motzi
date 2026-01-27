@@ -2,6 +2,7 @@ import React from "react";
 import _ from "lodash";
 
 import { getDeadlineContext } from "./Contexts";
+import type { MenuPickupDay } from "../../types/api";
 
 function When({ orderingDeadlineText }) {
   if (!orderingDeadlineText) {
@@ -22,7 +23,15 @@ function When({ orderingDeadlineText }) {
   ));
 }
 
-export default function Title({ menu }) {
+type TitleProps = {
+  menu: {
+    name: string;
+    orderingDeadlineText: string;
+    pickupDays: MenuPickupDay[];
+  };
+};
+
+export default function Title({ menu }: TitleProps) {
   const { name, orderingDeadlineText } = menu;
   const isClosed = getDeadlineContext().allClosed(menu);
 

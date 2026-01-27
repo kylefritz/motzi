@@ -3,8 +3,16 @@ import _ from "lodash";
 
 import Subscription from "./Subscription";
 import Cart from "./Cart";
+import type { Menu as MenuType, MenuOrder, MenuUser } from "../../types/api";
 
-export default function Order({ menu, user, order, onEditOrder }) {
+type OrderProps = {
+  menu: MenuType;
+  user: MenuUser;
+  order: MenuOrder;
+  onEditOrder?: (() => void) | null;
+};
+
+export default function Order({ menu, user, order, onEditOrder }: OrderProps) {
   const { name } = menu;
   const {
     items: cart,

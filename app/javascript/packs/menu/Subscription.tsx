@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import BuyCredits from "../buy/App";
+import type { MenuUser } from "../../types/api";
 
-export const humanizeBreadsPerWeek = (perWeek) => {
+export const humanizeBreadsPerWeek = (perWeek: number) => {
   if (perWeek === 0.5) {
     return "Every other week";
   }
@@ -17,7 +18,15 @@ export const humanizeBreadsPerWeek = (perWeek) => {
   return `${perWeek} breads per week`;
 };
 
-export default function Subscription({ user, showBuyMoreButton = true }) {
+type SubscriptionProps = {
+  user: MenuUser;
+  showBuyMoreButton?: boolean;
+};
+
+export default function Subscription({
+  user,
+  showBuyMoreButton = true,
+}: SubscriptionProps) {
   const [showForm, setShowForm] = useState(false);
   return (
     <>

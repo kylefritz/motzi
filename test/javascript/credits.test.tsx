@@ -48,8 +48,8 @@ test("submits credit payload for current user", async () => {
 
   expect(postMock).toHaveBeenCalledWith("/admin/credit_items.json", {
     memo: "promo",
-    quantity: "5",
-    goodForWeeks: "12",
-    userId: "123",
+    quantity: 5,
+    goodForWeeks: 12,
+    userId: 123,
   });
 });

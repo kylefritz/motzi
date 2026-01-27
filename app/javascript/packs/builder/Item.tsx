@@ -5,6 +5,11 @@ import styled from "styled-components";
 import { shortDay } from "./PickupDay";
 import { useApi } from "./Context";
 import { isNil } from "lodash";
+import type { AdminMenuItem, AdminMenuItemPickupDay, AdminPickupDay } from "../../types/api";
+
+type ItemProps = AdminMenuItem & {
+  menuPickupDays: AdminPickupDay[];
+};
 
 export default function Item({
   itemId,
@@ -15,12 +20,15 @@ export default function Item({
   sortOrder,
   pickupDays,
   menuPickupDays,
-}) {
+}: ItemProps) {
   const api = useApi();
-  function handleChangeMenuType(menuType, enabled) {
+  function handleChangeMenuType(
+    menuType: "subscriber" | "marketplace",
+    enabled: boolean
+  ) {
     api.menuItem.update(menuItemId, { [menuType]: enabled });
   }
-  function handleSortOrderChanged(sortOrder) {
+  function handleSortOrderChanged(sortOrder: number | null) {
     api.menuItem.update(menuItemId, { sortOrder });
   }
 
@@ -68,7 +76,15 @@ export default function Item({
   );
 }
 
-function MenuType({ name, enabled, onChange: handleChange }) {
+function MenuType({
+  name,
+  enabled,
+  onChange: handleChange,
+}: {
+  name: string;
+  enabled: boolean;
+  onChange: (next: boolean) => void;
+}) {
   return (
     <Row>
       <label>
@@ -83,8 +99,14 @@ function MenuType({ name, enabled, onChange: handleChange }) {
   );
 }
 
-function SortOrder({ sortOrder, onChange: handleChange }) {
-  function handleClear(event) {
+function SortOrder({
+  sortOrder,
+  onChange: handleChange,
+}: {
+  sortOrder: number | null;
+  onChange: (next: number | null) => void;
+}) {
+  function handleClear(event: React.MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
     handleChange(null);
   }
@@ -112,10 +134,14 @@ function PickupDays({
   menuItemId,
   pickupDays: itemPickupDays,
   menuPickupDays,
+}: {
+  menuItemId: number;
+  pickupDays: AdminMenuItemPickupDay[];
+  menuPickupDays: AdminPickupDay[];
 }) {
   const api = useApi();
 
-  function handleCheck(pickupDayId, isAdd) {
+  function handleCheck(pickupDayId: number, isAdd: boolean) {
     console.log("menuItemId", menuItemId, "pickupDayId", pickupDayId, "isAdd", isAdd); // prettier-ignore
     const action = isAdd
       ? api.menuItemPickupDay.add
@@ -149,19 +175,19 @@ function PickupDays({
   );
 }
 
-function Limit({ id, limit }) {
+function Limit({ id, limit }: { id: number; limit: number | null }) {
   const api = useApi();
 
-  const [newLimit, setNewLimit] = useState(limit || "");
+  const [newLimit, setNewLimit] = useState<number | "">(limit || "");
   const hasChanged = newLimit !== (limit || "");
 
-  function handleChange(event) {
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const newValue = event.target.value;
     console.log("newValue", newValue);
     setNewLimit(newValue === "" ? "" : parseInt(newValue));
   }
 
-  function handleSave(event) {
+  function handleSave(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     api.menuItemPickupDay.updateLimit({ id, limit: newLimit });
   }

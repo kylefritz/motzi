@@ -6,12 +6,23 @@ import { makeStyles } from "@material-ui/core/styles";
 import MenuItem from "./Item";
 import Adder from "./Adder";
 import { PickupDays } from "./PickupDay";
+import type {
+  AdminItem,
+  AdminMenuBuilderResponse,
+  AdminMenuItem,
+  AdminPickupDay,
+} from "../../types/api";
 
-export default function SimpleTabs({ allItems, menu }) {
+type LayoutProps = {
+  allItems: AdminItem[];
+  menu: AdminMenuBuilderResponse;
+};
+
+export default function SimpleTabs({ allItems, menu }: LayoutProps) {
   const classes = useStyles();
   const [tab, setTab] = React.useState(0);
   const isSubscriber = tab === 0;
-  const handleChange = (event, newTab) => {
+  const handleChange = (_event: React.ChangeEvent<{}>, newTab: number) => {
     setTab(newTab);
   };
   const { pickupDays } = menu;
@@ -62,7 +73,13 @@ export default function SimpleTabs({ allItems, menu }) {
   );
 }
 
-function TabPanel(props) {
+type TabPanelProps = React.HTMLAttributes<HTMLDivElement> & {
+  children: React.ReactNode;
+  value: number;
+  index: number;
+};
+
+function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
@@ -78,7 +95,7 @@ function TabPanel(props) {
   );
 }
 
-function CopyFrom({ menuId }) {
+function CopyFrom({ menuId }: { menuId: number }) {
   return (
     <>
       <h2>Copy from menu</h2>
@@ -102,8 +119,13 @@ const Row = styled.div`
   }
 `;
 
-function ItemGrid({ menuItems, pickupDays }) {
-  if (items.length === 0) {
+type ItemGridProps = {
+  menuItems: AdminMenuItem[];
+  pickupDays: AdminPickupDay[];
+};
+
+function ItemGrid({ menuItems, pickupDays }: ItemGridProps) {
+  if (menuItems.length === 0) {
     return (
       <p>
         <em>no items</em>
@@ -119,7 +141,7 @@ function ItemGrid({ menuItems, pickupDays }) {
   );
 }
 
-function a11yProps(index) {
+function a11yProps(index: number) {
   return {
     id: `simple-tab-${index}`,
     "aria-controls": `simple-tabpanel-${index}`,

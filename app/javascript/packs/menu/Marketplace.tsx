@@ -11,8 +11,26 @@ import Payment from "../buy/Payment";
 import { applyTip } from "../buy/Tip";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
 import { getDeadlineContext } from "./Contexts";
+import type {
+  CartItem,
+  MarketplaceOrderRequest,
+  Menu as MenuType,
+  MenuItem,
+} from "../../types/api";
 
-export default function Marketplace({ menu, onCreateOrder }) {
+type AccountInfo = Pick<
+  MarketplaceOrderRequest,
+  "email" | "firstName" | "lastName" | "phone" | "optIn"
+>;
+
+type MarketplaceProps = {
+  menu: MenuType;
+  onCreateOrder: (order: MarketplaceOrderRequest) => Promise<unknown>;
+};
+
+type StripeTokenPayload = { token: { id: string } };
+
+export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
   const {
     cart,
     addToCart,
@@ -24,13 +42,19 @@ export default function Marketplace({ menu, onCreateOrder }) {
     items: menu.items,
   });
   const [submitting, setSubmitting] = useState(false);
-  const [comments, setComments] = useState();
-  const [account, setAccount] = useState({});
-  const [price, setPrice] = useState(total.price);
-  const [tip, setTip] = useState();
+  const [comments, setComments] = useState<string | null>(null);
+  const [account, setAccount] = useState<AccountInfo>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    optIn: false,
+  });
+  const [price, setPrice] = useState<number | null>(total.price);
+  const [tip, setTip] = useState<string | null>(null);
 
   const totalPrice = applyTip(price, tip);
-  const handleCardToken = ({ token }) => {
+  const handleCardToken = ({ token }: StripeTokenPayload) => {
     if (_.isEmpty(account.email)) {
       return alert("Enter email!");
     }
@@ -42,22 +66,29 @@ export default function Marketplace({ menu, onCreateOrder }) {
     setSubmitting(true);
 
     // send stripe token to rails to complete purchase
+    const finalPrice = typeof totalPrice === "number" ? totalPrice : 0;
     onCreateOrder({
       ...account,
       comments,
       cart,
-      price: totalPrice,
+      price: finalPrice,
       token: token.id,
     }).then(() => setSubmitting(false));
   };
 
-  const handleAddToCart = (item) => {
+  const handleAddToCart = (
+    item: MenuItem & { quantity: number; pickupDayId: number }
+  ) => {
     const newCartPrice = addToCart(item);
     setPrice(newCartPrice);
   };
 
-  const handleRemoveFromCart = (item) => {
-    const newCartPrice = rmCartItem(item);
+  const handleRemoveFromCart = (
+    itemId: CartItem["itemId"],
+    quantity: CartItem["quantity"],
+    pickupDayId: CartItem["pickupDayId"]
+  ) => {
+    const newCartPrice = rmCartItem(itemId, quantity, pickupDayId);
     setPrice(newCartPrice);
   };
 
@@ -81,7 +112,6 @@ export default function Marketplace({ menu, onCreateOrder }) {
         items={marketplaceItems}
         onAddToCart={handleAddToCart}
         disabled={disabled}
-        showDay2={menu.showDay2}
       />
       {payItForward && (
         <PayItForward

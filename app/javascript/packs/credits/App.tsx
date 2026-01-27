@@ -2,19 +2,23 @@ import React from "react";
 import axios from "axios";
 import * as Sentry from "@sentry/browser";
 import _ from "lodash";
+import type { AdminCreditItemRequest } from "../../types/api";
 
 export default function App() {
-  const memoRef = React.createRef();
-  const quantityRef = React.createRef();
-  const weeksRef = React.createRef();
-  const userId = _.get(window.location?.pathname.match(/users\/(.*)/), 1);
+  const memoRef = React.createRef<HTMLInputElement>();
+  const quantityRef = React.createRef<HTMLInputElement>();
+  const weeksRef = React.createRef<HTMLInputElement>();
+  const userId = parseInt(
+    _.get(window.location?.pathname.match(/users\/(.*)/), 1),
+    10
+  );
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const credit = {
-      memo: memoRef.current.value,
-      quantity: quantityRef.current.value,
-      goodForWeeks: weeksRef.current.value,
+    const credit: AdminCreditItemRequest = {
+      memo: memoRef.current?.value || "",
+      quantity: Number(quantityRef.current?.value || 0),
+      goodForWeeks: Number(weeksRef.current?.value || 0),
       userId,
     };
     console.info(credit);

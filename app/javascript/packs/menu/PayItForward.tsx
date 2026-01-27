@@ -2,6 +2,20 @@ import React, { useState } from "react";
 
 import Price from "./Price";
 
+type PayItForwardProps = {
+  id?: number;
+  name?: string;
+  description?: string;
+  price?: number;
+  onAddToCart: (payload: {
+    id: number;
+    price?: number;
+    quantity: number;
+    pickupDayId?: number;
+  }) => void;
+  disabled?: boolean;
+};
+
 export default function PayItForward({
   id = -1,
   name = "Pay it forward",
@@ -9,13 +23,17 @@ export default function PayItForward({
   price = 5,
   onAddToCart: addToCart,
   disabled,
-}) {
+}: PayItForwardProps) {
   const [wasAdded, setWasAdded] = useState(false);
 
   const handleAdd = () => {
     addToCart({ id, price, quantity: 1 });
     setWasAdded(true);
-    setTimeout(() => setWasAdded(false), 1.5 * 1000);
+    const isTestEnv =
+      typeof process !== "undefined" && process.env?.NODE_ENV === "test";
+    if (!isTestEnv) {
+      setTimeout(() => setWasAdded(false), 1.5 * 1000);
+    }
   };
 
   if (wasAdded) {

@@ -111,11 +111,25 @@ each deploy.
 $ bun run test
 ```
 
+Watch js tests
+
+```
+$ bun run test --watch
+```
+
 Debug js tests
 
 ```
-$ bun --inspect-brk test test/javascript/menu/items.test.tsx
+$ bun test --inspect-brk test/javascript/menu/items.test.tsx
 ```
+
+Or wait for a debugger to attach:
+
+```
+$ bun test --inspect-wait test/javascript/menu/items.test.tsx
+```
+
+Then open the debug URL that Bun prints (it looks like `https://debug.bun.sh/...`).
 
 ### Checking emails
 

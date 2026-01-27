@@ -5,10 +5,31 @@ import moment from "moment";
 
 import Price from "./Price";
 import { getDeadlineContext, getPriceContext } from "./Contexts";
+import type {
+  CartItem as CartItemType,
+  Menu as MenuType,
+  MenuItem,
+  MenuOrder,
+  MenuOrderItem,
+} from "../../types/api";
 
 const PAY_IT_FORWARD_ID = -1;
 
-function CartItem({ itemId, quantity, pickupDayId, name, rmCartItem }) {
+type CartItemProps = {
+  itemId: number;
+  quantity: number;
+  pickupDayId?: number;
+  name: string;
+  rmCartItem?: (itemId: number, quantity: number, pickupDayId?: number) => void;
+};
+
+function CartItem({
+  itemId,
+  quantity,
+  pickupDayId,
+  name,
+  rmCartItem,
+}: CartItemProps) {
   return (
     <div className="row mb-3">
       <div className="col-1" />
@@ -32,7 +53,15 @@ function CartItem({ itemId, quantity, pickupDayId, name, rmCartItem }) {
   );
 }
 
-function DaysCart({ menu: { items }, cart, rmCartItem }) {
+function DaysCart({
+  menu: { items },
+  cart,
+  rmCartItem,
+}: {
+  menu: Pick<MenuType, "items">;
+  cart: CartItemType[];
+  rmCartItem?: (itemId: number, quantity: number, pickupDayId?: number) => void;
+}) {
   const menuItemsById = _.keyBy(items, ({ id }) => id);
 
   return (
@@ -51,7 +80,14 @@ function DaysCart({ menu: { items }, cart, rmCartItem }) {
   );
 }
 
-function Days({ menu, cart, rmCartItem, skip }) {
+type DaysProps = {
+  menu: MenuType;
+  cart: CartItemType[];
+  rmCartItem?: (itemId: number, quantity: number, pickupDayId?: number) => void;
+  skip?: boolean;
+};
+
+function Days({ menu, cart, rmCartItem, skip }: DaysProps) {
   const { isClosed } = getDeadlineContext();
 
   if (skip) {
@@ -109,7 +145,15 @@ function Days({ menu, cart, rmCartItem, skip }) {
   return sections;
 }
 
-function Total({ cart, menu: { items }, stripeChargeAmount }) {
+function Total({
+  cart,
+  menu: { items },
+  stripeChargeAmount,
+}: {
+  cart: CartItemType[];
+  menu: Pick<MenuType, "items">;
+  stripeChargeAmount?: number | null;
+}) {
   const { price, credits } = cartTotal({ cart, items });
   const { showCredits } = getPriceContext();
   const showPrices = !showCredits;
@@ -129,7 +173,7 @@ function Total({ cart, menu: { items }, stripeChargeAmount }) {
   );
 }
 
-function Cart(props) {
+function Cart(props: DaysProps & { cart: CartItemType[] }) {
   const { cart, skip } = props;
   if (!cart.length && !skip) {
     return <p>No items</p>;
@@ -142,7 +186,7 @@ function Cart(props) {
   );
 }
 
-export default function CartWrapper(props) {
+export default function CartWrapper(props: DaysProps & { cart: CartItemType[] }) {
   return (
     <>
       <h5>Your order</h5>
@@ -153,7 +197,15 @@ export default function CartWrapper(props) {
   );
 }
 
-function cartTotal({ cart, items }) {
+type CartTotal = { price: number | null; credits: number };
+
+function cartTotal({
+  cart,
+  items,
+}: {
+  cart: CartItemType[];
+  items: MenuItem[];
+}): CartTotal {
   if (cart.length === 0) {
     return { price: null, credits: 0 };
   }
@@ -169,24 +221,48 @@ function cartTotal({ cart, items }) {
   return { price: addBy("price"), credits: addBy("credits") };
 }
 
-export function orderCredits({ order, items }) {
-  const orderItems = _.get(order, "items", []);
+export function orderCredits({
+  order,
+  items,
+}: {
+  order: MenuOrder | null;
+  items: MenuItem[];
+}) {
+  const orderItems = _.get(order, "items", []) as MenuOrderItem[];
   return cartTotal({ cart: orderItems, items }).credits;
 }
 
-export function useCart({ order = null, items }) {
-  const [cart, setCart] = useState(_.get(order, "items", []));
+type UseCartInput = {
+  order?: MenuOrder | null;
+  items: MenuItem[];
+};
 
-  const calcTotal = (cart) => cartTotal({ cart, items });
+type AddToCartPayload = {
+  id: number;
+  quantity: number;
+  pickupDayId?: number;
+  price?: number;
+};
 
-  const addToCart = ({ id: itemId, quantity, pickupDayId }) => {
+export function useCart({ order = null, items }: UseCartInput) {
+  const [cart, setCart] = useState<CartItemType[]>(
+    (_.get(order, "items", []) as MenuOrderItem[]) || []
+  );
+
+  const calcTotal = (cart: CartItemType[]) => cartTotal({ cart, items });
+
+  const addToCart = ({ id: itemId, quantity, pickupDayId }: AddToCartPayload) => {
     console.log("addToCart", itemId, "x", quantity, "on", pickupDayId);
     const nextCart = [...cart, { itemId, quantity, pickupDayId }];
     setCart(nextCart);
     return calcTotal(nextCart).price;
   };
 
-  const rmCartItem = (itemId, quantity, pickupDayId) => {
+  const rmCartItem = (
+    itemId: number,
+    quantity: number,
+    pickupDayId?: number
+  ) => {
     const index = _.findIndex(
       cart,
       (ci) =>
