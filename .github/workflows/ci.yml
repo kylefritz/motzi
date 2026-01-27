@@ -59,29 +59,3 @@ jobs:
 
       - name: jest
         run: npx jest test/javascript
-
-  deploy:
-    needs: test
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      # Prevent Husky hooks from running during deploy (can trigger `npm test`/`yarn test`).
-      HUSKY: "0"
-    steps:
-      - uses: actions/checkout@v4.2.2
-        with:
-          fetch-depth: 0 # heroku needs an unshallow clone
-
-      - name: Install Heroku CLI (quiet)
-        # The deploy action shells out to `heroku`; keep output low to avoid ENOBUFS.
-        run: |
-          set -euo pipefail
-          curl -s https://cli-assets.heroku.com/install.sh | sudo sh > /tmp/heroku-install.log
-
-      - name: Deploy to Heroku
-        uses: akhileshns/heroku-deploy@v3.14.15
-        with:
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: motzibread
-          heroku_email: ${{secrets.HEROKU_EMAIL}}
