@@ -1,68 +1,86 @@
-require("../configure_enzyme");
+import { act, fireEvent, screen, within, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import renderMenu from "./MarketPlace.helpers";
 
-test("menu", () => {
-  const menu = renderMenu({ order: false, user: false });
+const getCartTotalText = () => {
+  const orderHeading = screen.getByText("Your order");
+  const orderContainer = orderHeading.nextElementSibling;
+  const priceEl = orderContainer.querySelector(".price");
+  return priceEl ? priceEl.textContent : "";
+};
 
-  expect(menu.items()).toHaveLength(4);
-  expect(menu.submitOrderBtn()).toHaveLength(1);
-  expect(menu.submitOrderBtn().text()).toBe("Select an item");
+test("menu", async () => {
+  const { container } = renderMenu({ order: false, user: false });
 
-  expect(menu.payItForward()).toHaveLength(1);
-  menu.payItForward().find("button").at(0).simulate("click");
-  expect(menu.cartTotal()).toContain("$5.00");
+  expect(container.querySelectorAll(".col-6.mb-4")).toHaveLength(4);
+  expect(screen.getByRole("button", { name: "Select an item" })).toBeTruthy();
+
+  const donateBtn = screen.getByRole("button", { name: "Donate Now" });
+  await userEvent.click(donateBtn);
+  await waitFor(() => expect(getCartTotalText()).toContain("$5.00"));
 });
 
 test("noItems", () => {
-  const menu = renderMenu({ order: false, user: false, items: [] });
-  expect(menu.submitOrderBtn()).toHaveLength(0);
+  const { container } = renderMenu({ order: false, user: false, items: [] });
+  expect(container.firstChild).toBeNull();
 });
 
 test("payWhatYouCan false", () => {
-  const menuWith = renderMenu({ enablePayWhatYouCan: true });
-  expect(menuWith.find("PayWhatYouCan")).toHaveLength(1);
+  const { unmount } = renderMenu({ enablePayWhatYouCan: true });
+  expect(screen.getByLabelText("Price")).toBeTruthy();
+  unmount();
 
-  const withOut = renderMenu({ enablePayWhatYouCan: false });
-  expect(withOut.find("PayWhatYouCan")).toHaveLength(0);
+  renderMenu({ enablePayWhatYouCan: false });
+  expect(screen.queryByLabelText("Price")).toBeNull();
 });
 
-test("checkout", () => {
-  const menu = renderMenu({ order: false, user: false });
-  expect(menu.cart().text()).toContain("No items");
+test("checkout", async () => {
+  const { container, onCreateOrder } = renderMenu({
+    order: false,
+    user: false,
+  });
+  expect(screen.getByText("No items")).toBeTruthy();
 
-  menu.addItemToCart();
-  expect(menu.cartTotal()).toContain("$3.00");
+  const itemCards = container.querySelectorAll(".col-6.mb-4");
+  const firstItem = itemCards[0];
+  const dayButton = within(firstItem).getByRole("button", {
+    name: /(mon|tues|wed|thu|fri|sat|sun)/i,
+  });
+  await userEvent.click(dayButton);
+  const addToCartButton = within(firstItem).getByRole("button", {
+    name: /add to cart/i,
+  });
+  await userEvent.click(addToCartButton);
+  await waitFor(() => expect(getCartTotalText()).toContain("$3.00"));
 
-  // fill out customer info
-  menu.fillUser("kyle", "fritz", "kf@woo.com", "555-123-4567");
+  await userEvent.type(screen.getByLabelText("First Name"), "kyle");
+  await userEvent.type(screen.getByLabelText("Last Name"), "fritz");
+  await userEvent.type(screen.getByLabelText("Email"), "kf@woo.com");
+  await userEvent.type(screen.getByLabelText("Phone"), "555-123-4567");
 
-  // "fill" card by invoking onChange: https://enzymejs.github.io/enzyme/#reacttestutilsact-wrap
-  menu.find("CardElement").invoke("onChange")({ complete: true });
+  const cardElement = screen.getByTestId("card-element");
+  await userEvent.type(cardElement, "4242");
 
-  // click submit
-  menu.submitOrder();
+  const submitButton = screen.getByRole("button", {
+    name: "Charge credit card $3.00",
+  });
+  await waitFor(() => expect(submitButton.disabled).toBe(false));
+  await userEvent.click(submitButton);
 
-  // simulate getting response back from stripe
-  menu
-    .find("Payment")
-    .props()
-    .onCardToken({
-      token: {
-        id: "test_id",
-      },
-    });
+  await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));
+  await act(async () => {
+    await onCreateOrder.mock.results[0].value;
+  });
+  await act(async () => {
+    await onCreateOrder.mock.results[0].value;
+  });
 
-  // create order gets called
-  expect(menu.onCreateOrder).toHaveBeenCalledTimes(1);
-
-  // order is the 0th arg of the 0th call
-  const order = menu.submittedOrder();
+  const order = onCreateOrder.mock.calls[0][0];
   expect(order).toBeTruthy();
   const { email, firstName, lastName, phone, cart, price } = order;
   console.log("submitted order", order);
 
-  // uid is assigned and skip is true
   expect(cart).toHaveLength(1);
   expect(cart[0]).toStrictEqual({
     itemId: 3,
@@ -76,29 +94,41 @@ test("checkout", () => {
   expect(price).toBe(3);
 });
 
-test("0-price", () => {
-  const menu = renderMenu({ order: false, user: false });
-  expect(menu.cart().text()).toContain("No items");
+test("0-price", async () => {
+  const { container, onCreateOrder } = renderMenu({
+    order: false,
+    user: false,
+  });
+  expect(screen.getByText("No items")).toBeTruthy();
 
-  menu.addItemToCart();
-  expect(menu.cartTotal()).toContain("$3.00");
+  const itemCards = container.querySelectorAll(".col-6.mb-4");
+  const firstItem = itemCards[0];
+  const dayButton = within(firstItem).getByRole("button", {
+    name: /(mon|tues|wed|thu|fri|sat|sun)/i,
+  });
+  await userEvent.click(dayButton);
+  const addToCartButton = within(firstItem).getByRole("button", {
+    name: /add to cart/i,
+  });
+  await userEvent.click(addToCartButton);
+  await waitFor(() => expect(getCartTotalText()).toContain("$3.00"));
 
-  // fill out customer info
-  menu.fillUser("kyle", "fritz", "kf@woo.com", "555-123-4567");
+  await userEvent.type(screen.getByLabelText("First Name"), "kyle");
+  await userEvent.type(screen.getByLabelText("Last Name"), "fritz");
+  await userEvent.type(screen.getByLabelText("Email"), "kf@woo.com");
+  await userEvent.type(screen.getByLabelText("Phone"), "555-123-4567");
 
-  // set payWhatYouCan to $0
-  const payWhatYouCan = menu.wrapper.find("PayWhatYouCan").find("input");
-  payWhatYouCan.simulate("change", { target: { value: "0" } });
-  payWhatYouCan.simulate("blur", { target: { value: "0" } });
+  const payWhatYouCan = screen.getByLabelText("Price");
+  fireEvent.change(payWhatYouCan, { target: { value: "0" } });
+  fireEvent.blur(payWhatYouCan, { target: { value: "0" } });
 
-  // click submit
-  menu.submitOrder();
+  await userEvent.click(screen.getByRole("button", { name: "Submit Order" }));
 
-  // create order gets called
-  expect(menu.onCreateOrder).toHaveBeenCalledTimes(1);
+  await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));
+  await act(async () => {
+    await onCreateOrder.mock.results[0].value;
+  });
 
-  // order is the 0th arg of the 0th call
-  const order = menu.submittedOrder();
-  const { price } = order;
-  expect(price).toBe(0);
+  const order = onCreateOrder.mock.calls[0][0];
+  expect(order.price).toBe(0);
 });

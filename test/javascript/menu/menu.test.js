@@ -1,51 +1,62 @@
-require("../configure_enzyme");
+import { screen, within, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import renderMenu from "./Menu.helpers";
 
-test("menu for uid-user, before order", () => {
-  const menu = renderMenu({ order: false });
+const getCartTotalText = () => {
+  const orderHeading = screen.getByText("Your order");
+  const orderContainer = orderHeading.nextElementSibling;
+  const priceEl = orderContainer.querySelector(".price");
+  return priceEl ? priceEl.textContent : "";
+};
 
-  expect(menu.items()).toHaveLength(3);
-  expect(menu.submitOrderBtn().text()).toBe("Submit Order");
+test("menu for uid-user, before order", async () => {
+  const { container } = renderMenu({ order: false });
+
+  const itemCards = container.querySelectorAll(".col-6.mb-4");
+  expect(itemCards).toHaveLength(3);
+  expect(
+    screen.getByRole("button", { name: "Submit Order" })
+  ).toBeTruthy();
 
   // click pay it forward
-  expect(menu.payItForward()).toHaveLength(1);
-  menu.payItForward().find("button").at(0).simulate("click");
-  expect(menu.cartTotal()).toContain("1 credit");
+  const donateBtn = screen.getByRole("button", { name: "Donate Now" });
+  await userEvent.click(donateBtn);
+  await waitFor(() => expect(getCartTotalText()).toContain("1 credit"));
 });
 
 test("payItForward", () => {
-  const menu = renderMenu({ payItForward: false });
-  expect(menu.payItForward()).toHaveLength(0);
+  renderMenu({ payItForward: false });
+  expect(screen.queryByText("Pay it forward")).toBeNull();
 });
 
-test("menu for uid-user, add item to cart", () => {
-  const menu = renderMenu({ order: false });
-  expect(menu.cart().text()).toContain("No items");
+test("menu for uid-user, add item to cart", async () => {
+  const { container, onCreateOrder } = renderMenu({ order: false });
+  expect(screen.getByText("No items")).toBeTruthy();
 
-  // click "thurs"
-  const thurs = menu.items().at(0).find("button").at(0);
-  thurs.simulate("click");
+  const itemCards = container.querySelectorAll(".col-6.mb-4");
+  const firstItem = itemCards[0];
+  const dayButton = within(firstItem).getByRole("button", {
+    name: /(mon|tues|wed|thu|fri|sat|sun)/i,
+  });
+  await userEvent.click(dayButton);
 
-  // click "add to cart"
-  const addToCart = menu.items().at(0).find("button").at(2);
-  addToCart.simulate("click");
+  const addToCartButton = within(firstItem).getByRole("button", {
+    name: /add to cart/i,
+  });
+  await userEvent.click(addToCartButton);
 
-  expect(menu.cartTotal()).toContain("1 credit");
+  await waitFor(() => expect(getCartTotalText()).toContain("1 credit"));
 
-  // click submit
-  menu.submitOrder();
+  await userEvent.click(screen.getByRole("button", { name: "Submit Order" }));
 
-  // create order gets called
-  expect(menu.onCreateOrder).toHaveBeenCalledTimes(1);
+  await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));
 
-  // order is the 0th arg of the 0th call
-  const order = menu.submittedOrder();
+  const order = onCreateOrder.mock.calls[0][0];
   expect(order).toBeTruthy();
   const { uid, skip, cart } = order;
   console.log("submitted card", cart);
 
-  // uid is assigned and skip is true
   expect(uid).toBe("Dot9gKn9w");
   expect(skip).toBeFalsy();
   expect(cart).toHaveLength(1);
@@ -57,83 +68,98 @@ test("menu for uid-user, add item to cart", () => {
 });
 
 test("menu for uid-user, after order", () => {
-  const menu = renderMenu();
-  expect(menu.cartTotal()).toContain("3 credits");
-  expect(menu.items()).toHaveLength(3);
-  expect(menu.submitOrderBtn().text()).toBe("Update Order");
+  const { container } = renderMenu();
+  expect(getCartTotalText()).toContain("3 credits");
+  expect(container.querySelectorAll(".col-6.mb-4")).toHaveLength(3);
+  expect(
+    screen.getByRole("button", { name: "Update Order" })
+  ).toBeTruthy();
 });
 
-test("orderCredits", () => {
-  const menu = renderMenu({ user: { credits: 1 } }); // 3 credits in order
+test("orderCredits", async () => {
+  const { container } = renderMenu({ user: { credits: 1 } }); // 3 credits in order
 
-  expect(menu.cartTotal()).toContain("3 credits");
-  menu.payItForward().find("button").at(0).simulate("click");
-  expect(menu.cartTotal()).toContain("4 credits"); // ok
-  expect(menu.submitOrderBtn().prop("disabled")).toBeFalsy();
+  expect(getCartTotalText()).toContain("3 credits");
+  await userEvent.click(screen.getByRole("button", { name: "Donate Now" }));
+  await waitFor(() => expect(getCartTotalText()).toContain("4 credits")); // ok
+  expect(
+    screen.getByRole("button", { name: "Update Order" }).disabled
+  ).toBe(false);
 
-  // add item to cart
-  menu.items().at(0).find("button").at(0).simulate("click");
-  menu.items().at(0).find("button").at(2).simulate("click");
+  const itemCards = container.querySelectorAll(".col-6.mb-4");
+  const firstItem = itemCards[0];
+  const dayButton = within(firstItem).getByRole("button", {
+    name: /(mon|tues|wed|thu|fri|sat|sun)/i,
+  });
+  await userEvent.click(dayButton);
+  const addToCartButton = within(firstItem).getByRole("button", {
+    name: /add to cart/i,
+  });
+  await userEvent.click(addToCartButton);
 
-  expect(menu.cartTotal()).toContain("5 credits"); // too many
-  expect(menu.submitOrderBtn().text()).toBe("Buy more credits :)");
-  expect(menu.submitOrderBtn().prop("disabled")).toBeTruthy();
+  await waitFor(() => expect(getCartTotalText()).toContain("5 credits")); // too many
+  const buyMore = screen.getByRole("button", { name: "Buy more credits :)" });
+  expect(buyMore.disabled).toBe(true);
 });
 
-test("insufficientCredits, no order", () => {
-  const menu = renderMenu({ user: { credits: 1 }, order: false });
+test("insufficientCredits, no order", async () => {
+  const { container } = renderMenu({ user: { credits: 1 }, order: false });
 
-  menu.payItForward().find("button").at(0).simulate("click");
+  await userEvent.click(screen.getByRole("button", { name: "Donate Now" }));
 
-  // add item to cart
-  menu.items().at(0).find("button").at(0).simulate("click");
-  menu.items().at(0).find("button").at(2).simulate("click");
+  const itemCards = container.querySelectorAll(".col-6.mb-4");
+  const firstItem = itemCards[0];
+  const dayButton = within(firstItem).getByRole("button", {
+    name: /(mon|tues|wed|thu|fri|sat|sun)/i,
+  });
+  await userEvent.click(dayButton);
+  const addToCartButton = within(firstItem).getByRole("button", {
+    name: /add to cart/i,
+  });
+  await userEvent.click(addToCartButton);
 
-  expect(menu.cartTotal()).toContain("2 credits");
-  expect(menu.submitOrderBtn().prop("disabled")).toBeTruthy();
+  await waitFor(() => expect(getCartTotalText()).toContain("2 credits"));
+  const buyMore = screen.getByRole("button", { name: "Buy more credits :)" });
+  expect(buyMore.disabled).toBe(true);
 });
 
 test("nag buy more credits", () => {
-  const noNag = renderMenu({ user: { credits: 5 }, order: false });
-  expect(noNag.find("Buy")).toHaveLength(0);
+  const { unmount } = renderMenu({ user: { credits: 5 }, order: false });
+  expect(screen.queryByText("Buy credits")).toBeNull();
+  unmount();
 
-  const menu = renderMenu({ user: { credits: 1 }, order: false });
-  expect(menu.find("Buy")).toHaveLength(1);
+  renderMenu({ user: { credits: 1 }, order: false });
+  expect(screen.getByText("Buy credits")).toBeTruthy();
 });
 
 test("must buy more credits", () => {
-  const must = renderMenu({ user: { credits: 0 }, order: false });
-  expect(must.find("Buy")).toHaveLength(1);
-  expect(must.find("SubmitButton")).toHaveLength(0);
+  const { unmount } = renderMenu({ user: { credits: 0 }, order: false });
+  expect(screen.getByText("Buy credits")).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Submit Order" })).toBeNull();
+  unmount();
 
-  const regular = renderMenu({ user: { credits: 5 }, order: false });
-  expect(regular.find("Buy")).toHaveLength(0);
-  expect(regular.find("SubmitButton")).toHaveLength(1);
+  renderMenu({ user: { credits: 5 }, order: false });
+  expect(screen.queryByText("Buy credits")).toBeNull();
+  expect(screen.getByRole("button", { name: "Submit Order" })).toBeTruthy();
 });
 
-test("Menu pick skip", () => {
-  const menu = renderMenu();
+test("Menu pick skip", async () => {
+  const { onCreateOrder } = renderMenu();
 
-  expect(menu.cartTotal()).toContain("3 credits");
+  expect(getCartTotalText()).toContain("3 credits");
 
-  // click skip
-  menu.skipBtn().simulate("click");
+  await userEvent.click(screen.getByRole("button", { name: "Skip Now" }));
 
-  // cart should go to $0
-  expect(menu.cartTotal()).toContain("0 credits");
+  expect(screen.getByText("Skip this week")).toBeTruthy();
 
-  // click submit
-  menu.submitOrder();
+  await userEvent.click(screen.getByRole("button", { name: "Update Order" }));
 
-  // create order gets called
-  expect(menu.onCreateOrder).toHaveBeenCalledTimes(1);
+  await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));
 
-  // order is the 0th arg of the 0th call
-  const order = menu.submittedOrder();
+  const order = onCreateOrder.mock.calls[0][0];
   expect(order).toBeTruthy();
   const { uid, skip } = order;
 
-  // uid is assigned and skip is true
   expect(uid).toBe("Dot9gKn9w");
   expect(skip).toBeTruthy();
 });

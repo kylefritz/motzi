@@ -1,25 +1,28 @@
 import React from "react";
-require("../configure_enzyme");
-import { mount } from "enzyme";
+import { render } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import Tip, { applyTip } from "buy/Tip";
 
-test("Order snapshot", () => {
+test("Tip interactions", async () => {
   const onTip = jest.fn();
-  const tip = (price) => mount(<Tip {...{ onTip, tip: undefined, price }} />);
 
-  const tip5 = tip(5).find("TipBtn");
-  expect(tip5).toHaveLength(3);
-  const tip1dollar = tip5.at(0);
-  expect(tip1dollar.text()).toContain("$1");
-  tip1dollar.simulate("click");
+  const { container } = render(
+    <Tip onTip={onTip} tip={undefined} price={5} />
+  );
+  const tipButtons = container.querySelectorAll("button");
+  expect(tipButtons).toHaveLength(3);
+  expect(tipButtons[0].textContent).toContain("$1");
+  await userEvent.click(tipButtons[0]);
   expect(onTip).toHaveBeenCalledTimes(1);
 
-  const tip15 = tip(15).find("TipBtn");
-  expect(tip15).toHaveLength(3);
-  const tip5p = tip15.at(0);
-  expect(tip5p.text()).toContain("5%");
-  tip5p.simulate("click");
+  const { container: container2 } = render(
+    <Tip onTip={onTip} tip={undefined} price={15} />
+  );
+  const tipButtons2 = container2.querySelectorAll("button");
+  expect(tipButtons2).toHaveLength(3);
+  expect(tipButtons2[0].textContent).toContain("5%");
+  await userEvent.click(tipButtons2[0]);
   expect(onTip).toHaveBeenCalledTimes(2);
 });
 

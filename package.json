@@ -37,26 +37,27 @@
     "@babel/plugin-transform-regenerator": "^7.24.7",
     "@babel/plugin-transform-runtime": "^7.24.7",
     "@babel/preset-env": "^7.24.7",
+    "@testing-library/react": "^12.1.5",
     "@testing-library/react-hooks": "^3.2.1",
+    "@testing-library/user-event": "^13.5.0",
+    "@testing-library/dom": "^8.19.1",
     "babel-jest": "^29.7.0",
     "babel-plugin-dynamic-import-node": "^2.3.3",
     "babel-plugin-macros": "^3.1.0",
-    "enzyme": "^3.11.0",
-    "enzyme-adapter-react-16": "^1.15.2",
     "esbuild": "^0.20.2",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
-    "jest-enzyme": "^7.1.2",
     "jest-environment-jsdom": "^29.7.0",
     "prettier": "2.0.4",
     "pretty-quick": "^2.0.1",
+    "react-test-renderer": "^16.10.2",
     "regenerator-runtime": "^0.13.3"
   },
   "engines": {
     "node": "20"
   },
   "scripts": {
-    "build": "esbuild app/javascript/packs/*.js --bundle --sourcemap --outdir=app/assets/builds --public-path=/assets",
+    "build": "esbuild app/javascript/packs/*.js --bundle --sourcemap --loader:.js=jsx --outdir=app/assets/builds --public-path=/assets",
     "build:watch": "yarn build --watch",
     "test": "jest",
     "test-watch": "jest --watch",
@@ -71,18 +72,12 @@
       "app/javascript/packs"
     ],
     "setupFilesAfterEnv": [
-      "./node_modules/jest-enzyme/lib/index.js"
+      "<rootDir>/test/javascript/setupTests.js"
     ],
     "transform": {
       "^.+\\.[jt]sx?$": "babel-jest"
     },
-    "transformIgnorePatterns": [
-      "node_modules/(?!(cheerio|enzyme/node_modules/cheerio)/)"
-    ],
     "testEnvironment": "jsdom"
-  },
-  "resolutions": {
-    "cheerio": "1.0.0-rc.10"
   },
   "husky": {
     "hooks": {

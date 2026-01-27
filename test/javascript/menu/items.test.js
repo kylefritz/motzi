@@ -1,6 +1,5 @@
-require("../configure_enzyme");
 import React from "react";
-import { mount } from "enzyme";
+import { render } from "@testing-library/react";
 
 import mockMenuJson from "./mockMenuJson";
 import Items, { DayButton, Item } from "menu/Items";
@@ -10,13 +9,15 @@ test("items", () => {
   const { menu } = mockMenuJson();
   const { items } = menu;
 
-  const wrapper = mount(<Items items={items} />);
-  expect(wrapper.find("Item")).toHaveLength(6);
+  const { container } = render(<Items items={items} />);
+  expect(container.querySelectorAll(".col-6.mb-4")).toHaveLength(6);
 });
 
 test("day1day2", () => {
-  const render = (props) => mount(<Item onChange={true} {...props} />);
-  const expectButtons = (props) => expect(render(props).find("button"));
+  const renderItem = (props) =>
+    render(<Item onChange={true} {...props} />);
+  const expectButtons = (props) =>
+    expect(renderItem(props).container.querySelectorAll("button"));
 
   expectButtons({ pickupDays: [{ id: 1 }, { id: 2 }] }).toHaveLength(2);
   expectButtons({ pickupDays: [{ id: 1 }] }).toHaveLength(1);
@@ -24,19 +25,15 @@ test("day1day2", () => {
 });
 
 test("remaining deadline", () => {
-  const render = (props) =>
-    mount(<DayButton day="Thursday" btn="primary" {...props} />);
+  const renderDay = (props) =>
+    render(<DayButton day="Thursday" btn="primary" {...props} />);
 
-  expect(render({ remaining: 4 }).text()).toMatch("4 left");
-  expect(render({ remaining: 4 }).find("button").prop("disabled")).toBe(
-    undefined
-  );
-  expect(render({ remaining: 0 }).find("button").prop("disabled")).toBeTruthy();
+  expect(renderDay({ remaining: 4 }).container.textContent).toMatch("4 left");
+  expect(renderDay({ remaining: 4 }).container.querySelector("button").disabled).toBe(false);
+  expect(renderDay({ remaining: 0 }).container.querySelector("button").disabled).toBe(true);
 
   const orderDeadlineAt = DateTime.now()
     .minus(Duration.fromISO("PT1H"))
     .toISO();
-  expect(render({ orderDeadlineAt }).find("button").prop("disabled")).toBe(
-    true
-  );
+  expect(renderDay({ orderDeadlineAt }).container.querySelector("button").disabled).toBe(true);
 });
