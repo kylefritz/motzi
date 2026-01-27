@@ -1,4 +1,4 @@
-import { screen, within, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import renderMenu from "./Menu.helpers";
@@ -34,17 +34,9 @@ test("menu for uid-user, add item to cart", async () => {
   const { container, onCreateOrder } = renderMenu({ order: false });
   expect(screen.getByText("No items")).toBeTruthy();
 
-  const itemCards = container.querySelectorAll(".col-6.mb-4");
-  const firstItem = itemCards[0];
-  const dayButton = within(firstItem).getByRole("button", {
-    name: /(mon|tues|wed|thu|fri|sat|sun)/i,
-  });
-  await userEvent.click(dayButton);
-
-  const addToCartButton = within(firstItem).getByRole("button", {
-    name: /add to cart/i,
-  });
-  await userEvent.click(addToCartButton);
+  const firstItem = screen.getByTestId("item-3");
+  await userEvent.click(screen.getByTestId("pickup-day-3-1"));
+  await userEvent.click(screen.getByTestId("add-to-cart-3"));
 
   await waitFor(() => expect(getCartTotalText()).toContain("1 credit"));
 
@@ -86,16 +78,9 @@ test("orderCredits", async () => {
     screen.getByRole("button", { name: "Update Order" }).disabled
   ).toBe(false);
 
-  const itemCards = container.querySelectorAll(".col-6.mb-4");
-  const firstItem = itemCards[0];
-  const dayButton = within(firstItem).getByRole("button", {
-    name: /(mon|tues|wed|thu|fri|sat|sun)/i,
-  });
-  await userEvent.click(dayButton);
-  const addToCartButton = within(firstItem).getByRole("button", {
-    name: /add to cart/i,
-  });
-  await userEvent.click(addToCartButton);
+  const firstItem = screen.getByTestId("item-3");
+  await userEvent.click(screen.getByTestId("pickup-day-3-1"));
+  await userEvent.click(screen.getByTestId("add-to-cart-3"));
 
   await waitFor(() => expect(getCartTotalText()).toContain("5 credits")); // too many
   const buyMore = screen.getByRole("button", { name: "Buy more credits :)" });
@@ -107,16 +92,9 @@ test("insufficientCredits, no order", async () => {
 
   await userEvent.click(screen.getByRole("button", { name: "Donate Now" }));
 
-  const itemCards = container.querySelectorAll(".col-6.mb-4");
-  const firstItem = itemCards[0];
-  const dayButton = within(firstItem).getByRole("button", {
-    name: /(mon|tues|wed|thu|fri|sat|sun)/i,
-  });
-  await userEvent.click(dayButton);
-  const addToCartButton = within(firstItem).getByRole("button", {
-    name: /add to cart/i,
-  });
-  await userEvent.click(addToCartButton);
+  const firstItem = screen.getByTestId("item-3");
+  await userEvent.click(screen.getByTestId("pickup-day-3-1"));
+  await userEvent.click(screen.getByTestId("add-to-cart-3"));
 
   await waitFor(() => expect(getCartTotalText()).toContain("2 credits"));
   const buyMore = screen.getByRole("button", { name: "Buy more credits :)" });

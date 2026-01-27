@@ -23,6 +23,7 @@ function shortDay(day) {
 }
 
 export function DayButton({
+  itemId,
   pickupAt,
   orderDeadlineAt,
   remaining,
@@ -56,6 +57,7 @@ export function DayButton({
       <button
         type="button"
         className="btn btn-primary btn-sm mr-2 mb-2"
+        data-testid={`pickup-day-${itemId}-${dayId}`}
         onClick={() => onSetDayId(dayId)}
       >
         <span className="d-block d-md-none">{shortDay(day)}</span>
@@ -70,13 +72,18 @@ export function DayButton({
   );
 }
 
-function DayButtons({ description, onSetDayId, pickupDays }) {
+function DayButtons({ description, onSetDayId, pickupDays, itemId }) {
   return (
     <>
       {onSetDayId && (
         <div className="mt-2" style={{ display: "flex", flexWrap: "wrap" }}>
           {sortBy(pickupDays, (p) => p.pickupAt).map((props) => (
-            <DayButton key={props.id} onSetDayId={onSetDayId} {...props} />
+            <DayButton
+              key={props.id}
+              onSetDayId={onSetDayId}
+              itemId={itemId}
+              {...props}
+            />
           ))}
         </div>
       )}
@@ -87,7 +94,15 @@ function DayButtons({ description, onSetDayId, pickupDays }) {
   );
 }
 
-function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day, max }) {
+function QuantityAdd({
+  quantity,
+  onAdd,
+  onQuantity,
+  onCancel,
+  day,
+  max,
+  itemId,
+}) {
   return (
     <>
       <div>
@@ -98,7 +113,11 @@ function QuantityAdd({ quantity, onAdd, onQuantity, onCancel, day, max }) {
       </div>
       <Quantity defaultQuantity={quantity} onChange={onQuantity} max={max} />
       <div className="mt-2">
-        <button onClick={onAdd} className="btn btn-primary btn-sm mr-2">
+        <button
+          onClick={onAdd}
+          className="btn btn-primary btn-sm mr-2"
+          data-testid={`add-to-cart-${itemId}`}
+        >
           <span className="d-block d-md-none">Add</span>
           <span className="d-none d-md-block">Add to cart</span>
         </button>
@@ -115,7 +134,7 @@ function Ordering(props) {
   const [wasAdded, setWasAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  const { onChange, pickupDays } = props;
+  const { onChange, pickupDays, itemId } = props;
 
   const handleAdd = () => {
     onChange({ pickupDayId, quantity });
@@ -146,22 +165,29 @@ function Ordering(props) {
         onAdd={handleAdd}
         day={day}
         max={remaining}
+        itemId={itemId}
         onCancel={() => setPickupDayId(null)}
       />
     );
   }
 
-  return <DayButtons onSetDayId={onChange && setPickupDayId} {...props} />;
+  return (
+    <DayButtons
+      onSetDayId={onChange && setPickupDayId}
+      itemId={itemId}
+      {...props}
+    />
+  );
 }
 
 export function Item(props) {
-  const { price, credits, image, name } = props;
+  const { id, price, credits, image, name } = props;
   return (
-    <div className="col-6 mb-4">
+    <div className="col-6 mb-4" data-testid={`item-${id}`}>
       <img src={image} className="img-fluid" style={{ objectFit: "contain" }} />
       <div>{name}</div>
       <Price {...{ price, credits }} />
-      <Ordering {...props} />
+      <Ordering {...props} itemId={id} />
     </div>
   );
 }

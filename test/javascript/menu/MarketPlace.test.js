@@ -1,4 +1,4 @@
-import { act, fireEvent, screen, within, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import renderMenu from "./MarketPlace.helpers";
@@ -36,22 +36,14 @@ test("payWhatYouCan false", () => {
 });
 
 test("checkout", async () => {
-  const { container, onCreateOrder } = renderMenu({
+  const { onCreateOrder } = renderMenu({
     order: false,
     user: false,
   });
   expect(screen.getByText("No items")).toBeTruthy();
 
-  const itemCards = container.querySelectorAll(".col-6.mb-4");
-  const firstItem = itemCards[0];
-  const dayButton = within(firstItem).getByRole("button", {
-    name: /(mon|tues|wed|thu|fri|sat|sun)/i,
-  });
-  await userEvent.click(dayButton);
-  const addToCartButton = within(firstItem).getByRole("button", {
-    name: /add to cart/i,
-  });
-  await userEvent.click(addToCartButton);
+  await userEvent.click(screen.getByTestId("pickup-day-3-1"));
+  await userEvent.click(screen.getByTestId("add-to-cart-3"));
   await waitFor(() => expect(getCartTotalText()).toContain("$3.00"));
 
   await userEvent.type(screen.getByLabelText("First Name"), "kyle");
@@ -66,12 +58,11 @@ test("checkout", async () => {
     name: "Charge credit card $3.00",
   });
   await waitFor(() => expect(submitButton.disabled).toBe(false));
-  await userEvent.click(submitButton);
+  await act(async () => {
+    await userEvent.click(submitButton);
+  });
 
   await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));
-  await act(async () => {
-    await onCreateOrder.mock.results[0].value;
-  });
   await act(async () => {
     await onCreateOrder.mock.results[0].value;
   });
@@ -95,22 +86,14 @@ test("checkout", async () => {
 });
 
 test("0-price", async () => {
-  const { container, onCreateOrder } = renderMenu({
+  const { onCreateOrder } = renderMenu({
     order: false,
     user: false,
   });
   expect(screen.getByText("No items")).toBeTruthy();
 
-  const itemCards = container.querySelectorAll(".col-6.mb-4");
-  const firstItem = itemCards[0];
-  const dayButton = within(firstItem).getByRole("button", {
-    name: /(mon|tues|wed|thu|fri|sat|sun)/i,
-  });
-  await userEvent.click(dayButton);
-  const addToCartButton = within(firstItem).getByRole("button", {
-    name: /add to cart/i,
-  });
-  await userEvent.click(addToCartButton);
+  await userEvent.click(screen.getByTestId("pickup-day-3-1"));
+  await userEvent.click(screen.getByTestId("add-to-cart-3"));
   await waitFor(() => expect(getCartTotalText()).toContain("$3.00"));
 
   await userEvent.type(screen.getByLabelText("First Name"), "kyle");
@@ -122,7 +105,9 @@ test("0-price", async () => {
   fireEvent.change(payWhatYouCan, { target: { value: "0" } });
   fireEvent.blur(payWhatYouCan, { target: { value: "0" } });
 
-  await userEvent.click(screen.getByRole("button", { name: "Submit Order" }));
+  await act(async () => {
+    await userEvent.click(screen.getByRole("button", { name: "Submit Order" }));
+  });
 
   await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));
   await act(async () => {
