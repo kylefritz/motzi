@@ -8,7 +8,6 @@ not a committed roadmap.
 ## Short-Term (low-risk / maintenance)
 
 - Update README setup steps to match current tooling:
-  - Mention Node 20 and Ruby 3.1.4 (mise).
   - Use `bundle exec` for Rails commands.
   - Note required services: Postgres + Redis.
 - Reduce test noise:
@@ -24,16 +23,6 @@ not a committed roadmap.
 ## Medium-Term (compat / upgrades)
 
 - Review PostgreSQL version in CI (currently 11.5) and align with production.
-- Audit JS stack for upgrade path:
-  - Current stack: React 16 + Webpacker 5 + Jest 29 + Enzyme.
-  - Decision point: keep Enzyme (pin cheerio) vs move to React Testing Library only.
-  - If modernizing, outline migration steps:
-    - Replace Enzyme mount/shallow with RTL render and queries.
-    - Remove Enzyme adapters and jest-enzyme setup.
-    - Update snapshots to RTL where needed.
-    - Consider moving from Webpacker to jsbundling-rails (esbuild) or Vite:
-      - jsbundling-rails is closer to Rails defaults and simpler for older apps.
-      - Vite offers faster dev feedback and modern DX but is a larger change.
 - Review pinned gems for compatibility reasons:
   - `concurrent-ruby`, `jaro_winkler`, `stripe-ruby-mock` are pinned.
 

@@ -201,7 +201,7 @@ ActiveAdmin.register Menu do
   #
   member_action :menu_builder do
     @menu = resource
-    render 'admin/menus/menu_builder.json.jbuilder'
+    render 'admin/menus/menu_builder', formats: [:json]
   end
 
   member_action :item, method: :post do
@@ -218,7 +218,7 @@ ActiveAdmin.register Menu do
       end
     end
 
-    render 'admin/menus/menu_builder.json.jbuilder'
+    render 'admin/menus/menu_builder', formats: [:json]
   end
 
   # TODO: should use DELETE instead of POST but axios doesn't send body
@@ -228,13 +228,13 @@ ActiveAdmin.register Menu do
     mipd.destroy!
 
     @menu = MenuItem.find(params[:menu_item_id]).menu
-    render 'admin/menus/menu_builder.json.jbuilder'
+    render 'admin/menus/menu_builder', formats: [:json]
   end
 
   member_action :remove_item, method: :post do
     @menu = Menu.find(params[:id])
     MenuItem.where(menu: @menu, item_id: params[:item_id]).destroy_all
     
-    render 'admin/menus/menu_builder.json.jbuilder'
+    render 'admin/menus/menu_builder', formats: [:json]
   end
 end

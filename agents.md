@@ -5,7 +5,7 @@ Concise project-specific helpers for CI and local dev.
 ## Tooling
 
 - Node version: 20 (see `mise.toml`)
-- Ruby version: 3.1.4 (see `Gemfile` / `mise.toml`)
+- Ruby version: 3.3.10 (see `Gemfile` / `mise.toml`)
 - Package manager: Yarn v1 (lockfile is `yarn.lock`)
 - Deployment: Heroku. When suggesting changes, consider the deployment impact (builds, assets, env vars, and CI).
 - CI: GitHub Actions runs the test/build pipeline; keep changes compatible with GH CI.

@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '3.1.4'
+ruby '3.3.10'
 
 #
 # please keep gems sorted; include comment for why a gem is needed
@@ -16,19 +16,21 @@ gem 'bootsnap', '>= 1.4.4', require: false # Reduces boot times through caching;
 gem 'bootstrap', '~> 4.3.1' # nice style
 gem 'concurrent-ruby', '1.3.4' # pinned for compatibility
 gem 'devise' # for authentication
+gem 'drb' # stdlib gem (Ruby 3.4 deprecation warning)
 gem 'gon' # rails variables in javascript
 gem 'hashid-rails' # lookup models by hashid
 gem 'image_processing', '~> 1.2' # Use Active Storage variant
 gem 'jaro_winkler', '~> 1.5.5' # pinned for compatibility
 gem 'jbuilder', '~> 2.7' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jsbundling-rails' # js bundling (esbuild)
+gem 'mutex_m' # stdlib gem (Ruby 3.4 deprecation warning)
 gem 'naturalsort', :require => 'natural_sort_kernel' # implements a natural, human-friendly alphanumeric sort
 gem 'newrelic_rpm' # debugging to new relic
 gem 'olive_branch' # convert snake_case to camelCase for json
 gem 'paper_trail' # audits
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'progress_bar'
-gem 'puma', '~> 5.0' # web/app server
+gem 'puma', '~> 7.0' # web/app server
 gem 'rails-settings-cached' # site-wide settings
 gem 'rails', '~> 6.1.7.3'
 gem 'redcarpet' # markdown the baker's note in admin
