@@ -8,6 +8,3 @@ yarn.lock linguist-generated
 
 # Mark any vendored files as having been vendored.
 vendor/* linguist-vendored
-
-# Use bd merge for beads JSONL files
-.beads/issues.jsonl merge=beads
