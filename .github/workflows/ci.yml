@@ -38,6 +38,9 @@ jobs:
         with:
           cmd: install # will run `yarn install` command
 
+      - name: Compile webpacker assets (test)
+        run: NODE_ENV=test RAILS_ENV=test bin/webpack
+
       - name: rails db:setup test test:system
         env:
           PGHOST: localhost
