@@ -8,14 +8,49 @@ Neighborhood bakery's CSA site
 - redis
 - mise (manages Ruby/Bun)
 
-### Getting started
+### Setup
 
 ```
-$ mise install
-$ bundle
-$ bun install
-$ rails db:setup
+$ bin/setup
 ```
+
+`bin/setup` runs:
+- `mise install`
+- `bundle`
+- `bun install`
+- `rails db:prepare` (use `DB_SETUP=1 bin/setup` for `db:setup`)
+
+You need Postgres and Redis running locally, plus a few variables in a `.env` file:
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+STRIPE_PUBLISHABLE_KEY
+
+### Running the app
+
+Run Rails + Bun watch together:
+
+```
+$ bin/dev
+```
+
+`bin/dev` uses `Procfile.dev` and runs `bin/setup` by default. Set
+`SKIP_SETUP=1` to skip the setup step.
+
+### Local JS dev (Bun)
+
+If you only want the JS watcher (no Rails):
+
+```
+$ bun run build:watch
+```
+
+If `bun` is not on your PATH:
+
+```
+$ mise exec -- bun run build:watch
+```
+
+### Data
 
 #### Test data
 
@@ -42,33 +77,38 @@ Download the menu images from s3
 $ rake s3:download
 ```
 
-### Running the app
+### Heroku JS build (Bun)
+
+To build JS assets during deploy, use the `heroku-buildpack-run` buildpack to
+run a script at build time.
+
+1. Add the buildpack (ensure it runs before the Ruby buildpack):
 
 ```
-$ rails server
+$ heroku buildpacks:add https://github.com/weibeld/heroku-buildpack-run
 ```
 
-You need a few variables in a .env file
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-STRIPE_PUBLISHABLE_KEY
+2. Add `buildpack-run.sh` at the repo root:
 
-Working on the react apps
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
 
+curl -fsSL https://bun.com/install | bash
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+bun install
+bun run build
 ```
-$ bun run build:watch
-```
+
+Make it executable (`chmod +x buildpack-run.sh`) and commit it so it runs on
+each deploy.
 
 ### Running js tests
 
 ```
 $ bun run test
-```
-
-Update snapshots (if any)
-
-```
-$ bun run test -- -u
 ```
 
 Debug js tests

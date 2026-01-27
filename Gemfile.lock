@@ -161,6 +161,8 @@ GEM
       i18n (>= 1.8.11, < 2)
     fastri (0.3.1.1)
     ffi (1.17.1)
+    foreman (0.90.0)
+      thor (~> 1.4)
     formtastic (4.0.0)
       actionpack (>= 5.2.0)
     formtastic_i18n (0.7.0)
@@ -446,7 +448,7 @@ GEM
       dante (>= 0.2.0)
       multi_json (~> 1.0)
       stripe (> 5, < 6)
-    thor (1.3.2)
+    thor (1.5.0)
     tilt (2.6.0)
     timeout (0.4.3)
     tzinfo (2.0.6)
@@ -495,6 +497,7 @@ DEPENDENCIES
   drb
   faker
   fastri
+  foreman
   gon
   hashid-rails
   image_processing (~> 1.2)
