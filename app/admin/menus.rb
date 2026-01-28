@@ -242,4 +242,11 @@ ActiveAdmin.register Menu do
     
     render 'admin/menus/menu_builder', formats: [:json]
   end
+
+  member_action :remove_items, method: :post do
+    @menu = Menu.find(params[:id])
+    MenuItem.where(menu: @menu).destroy_all
+
+    render 'admin/menus/menu_builder', formats: [:json]
+  end
 end

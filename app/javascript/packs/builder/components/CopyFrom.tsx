@@ -12,11 +12,10 @@ type CopyFromProps = {
 
 export default function CopyFrom({ menuId, recentMenus }: CopyFromProps) {
   return (
-    <>
+    <Section>
       <h2>Copy from menu</h2>
-      <p>Most recent 100 menus</p>
       <form method="POST" action={`/admin/menus/${menuId}/copy_from`}>
-        <Row>
+        <FieldRow>
           <label htmlFor="original_menu_id">Menu:</label>
           <select
             id="original_menu_id"
@@ -28,14 +27,16 @@ export default function CopyFrom({ menuId, recentMenus }: CopyFromProps) {
             <option value="" disabled>
               Select a menu
             </option>
-            {recentMenus.map((menu) => (
-              <option key={menu.id} value={menu.id}>
-                {menu.name} ({menu.weekId})
-              </option>
-            ))}
+            <optgroup label="Most recent 100 menus">
+              {recentMenus.map((menu) => (
+                <option key={menu.id} value={menu.id}>
+                  {menu.name} ({menu.weekId})
+                </option>
+              ))}
+            </optgroup>
           </select>
-        </Row>
-        <Row>
+        </FieldRow>
+        <CheckboxRow>
           <label>
             <input
               type="checkbox"
@@ -63,18 +64,55 @@ export default function CopyFrom({ menuId, recentMenus }: CopyFromProps) {
             />
             Day of note
           </label>
-        </Row>
+        </CheckboxRow>
         <Row>
-          <input type="submit" value="Copy from" />
+          <PrimaryBtn type="submit">Copy from</PrimaryBtn>
         </Row>
       </form>
-    </>
+    </Section>
   );
 }
+
+const Section = styled.section`
+  margin-bottom: 1.25rem;
+`;
 
 const Row = styled.div`
   margin: 1rem 0;
   label {
     margin-right: 1rem;
   }
+`;
+
+const FieldRow = styled(Row)`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  label {
+    min-width: 70px;
+  }
+  select {
+    min-width: 320px;
+  }
+`;
+
+const CheckboxRow = styled(Row)`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-right: 0;
+  }
+`;
+
+const PrimaryBtn = styled.button`
+  padding: 0.4rem 1rem;
+  font-size: 95%;
+  border: 1px solid #3f3a80;
+  background: #3f3a80;
+  color: #fff;
+  border-radius: 6px;
 `;

@@ -120,6 +120,13 @@ test("edits menu items", async () => {
   // Wait for the builder to load.
   await waitFor(() => expect(screen.getByText("Menu Items")).toBeTruthy());
 
+  // Clear all menu items.
+  const confirmSpy = mock(() => true);
+  window.confirm = confirmSpy;
+  await userEvent.click(screen.getByRole("button", { name: /Clear all/i }));
+  expect(confirmSpy).toHaveBeenCalled();
+  expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_items.json");
+
   // Toggle marketplace on an item card.
   const sourdoughCard = screen
     .getByText("Sourdough")

@@ -37,6 +37,7 @@ export type BuilderApi = {
   item: {
     add: (item: MenuItemAddPayload) => Promise<unknown>;
     remove: (itemId: number) => Promise<unknown>;
+    clearAll: () => Promise<unknown>;
   };
   menuItem: {
     update: (menuItemId: number, json: MenuItemUpdatePayload) => Promise<unknown>;

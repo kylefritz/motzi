@@ -7,8 +7,6 @@ This document tracks potential improvements and follow-ups. It is a draft list, 
 ## p0 customer requested features
 
 - First and most important is the ability to have ordering open for two weeks at once so that we can use the heroku for holiday ordering. Having two separate platforms continues to confuse people and complicate our systems for filling orders.
-- Second, is the potential for mistakes inherent in putting in our hours fresh each time we make a new weekly menu. Would be huge to be able to set standard hours that auto populate for each new menu.
-  - Add support to clear all menu items
 
 ## Medium-Term (compat / upgrades)
 

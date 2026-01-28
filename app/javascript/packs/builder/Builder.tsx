@@ -50,6 +50,13 @@ export default function MenuBuilder() {
           .post(`/admin/menus/${menuId}/remove_item.json`, { itemId })
           .then(({ data: menu }) => setMenu(menu));
       },
+
+      clearAll: () => {
+        console.log("remove all items");
+        return axios
+          .post(`/admin/menus/${menuId}/remove_items.json`)
+          .then(({ data: menu }) => setMenu(menu));
+      },
     },
     menuItem: {
       update: (menuItemId, json) => {
