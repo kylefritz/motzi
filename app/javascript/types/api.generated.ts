@@ -14,6 +14,11 @@ export type AdminMenuBuilderResponse = {
   id: number;
   orderingDeadlineText: string;
   leadtimeHours: number | null;
+  recentMenus: Array<{
+    id: number;
+    name: string;
+    weekId: string;
+  }>;
   pickupDays: Array<{
     id: number;
     pickupAt: string;

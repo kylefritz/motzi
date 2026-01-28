@@ -7,6 +7,10 @@ const menuResponse = {
   id: 42,
   orderingDeadlineText: "Order by Tuesday",
   leadtimeHours: 27,
+  recentMenus: [
+    { id: 41, name: "week1", weekId: "24w01" },
+    { id: 40, name: "week0", weekId: "23w52" },
+  ],
   pickupDays: [
     {
       id: 1,
@@ -185,7 +189,13 @@ test("adds pickup days and items", async () => {
   await userEvent.click(pickupRemoveButtons[0]);
   expect(deleteMock).toHaveBeenCalledWith("/admin/pickup_days/1.json");
 
-  const select = screen.getByRole("combobox");
+  const addItemForm = screen
+    .getByRole("button", { name: "Add Item" })
+    .closest("form");
+  if (!addItemForm) {
+    throw new Error("Expected Add Item form to be present");
+  }
+  const select = within(addItemForm).getByRole("combobox");
   fireEvent.change(select, { target: { value: "102" } });
 
   await userEvent.click(screen.getByRole("button", { name: "Add Item" }));

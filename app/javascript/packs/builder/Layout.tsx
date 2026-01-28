@@ -21,16 +21,15 @@ type LayoutProps = {
 export default function SimpleTabs({ allItems, menu }: LayoutProps) {
   const classes = useStyles();
   const [tab, setTab] = React.useState(0);
-  const isSubscriber = tab === 0;
   const handleChange = (_event: React.ChangeEvent<{}>, newTab: number) => {
     setTab(newTab);
   };
-  const { pickupDays } = menu;
+  const { pickupDays, leadtimeHours, recentMenus } = menu;
   return (
     <div className={classes.root}>
-      <PickupDays {...menu} />
+      <CopyFrom menuId={menu.id} recentMenus={recentMenus} />
       <hr />
-      <CopyFrom menuId={menu.id} />
+      <PickupDays pickupDays={pickupDays} leadtimeHours={leadtimeHours} />
       <hr />
       <h2>Menu Items</h2>
       <AppBar position="static">
@@ -95,14 +94,38 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-function CopyFrom({ menuId }: { menuId: number }) {
+type RecentMenu = AdminMenuBuilderResponse["recentMenus"][number];
+
+function CopyFrom({
+  menuId,
+  recentMenus,
+}: {
+  menuId: number;
+  recentMenus: RecentMenu[];
+}) {
   return (
     <>
       <h2>Copy from menu</h2>
+      <p>Most recent 100 menus</p>
       <form method="POST" action={`/admin/menus/${menuId}/copy_from`}>
         <Row>
-          <label htmlFor="original_menu_id">Original Menu ID:</label>
-          <input id="original_menu_id" name="original_menu_id" />
+          <label htmlFor="original_menu_id">Menu:</label>
+          <select
+            id="original_menu_id"
+            name="original_menu_id"
+            defaultValue=""
+            required
+            disabled={recentMenus.length === 0}
+          >
+            <option value="" disabled>
+              Select a menu
+            </option>
+            {recentMenus.map((menu) => (
+              <option key={menu.id} value={menu.id}>
+                {menu.name} ({menu.weekId})
+              </option>
+            ))}
+          </select>
         </Row>
         <Row>
           <input type="submit" value="Copy from" />

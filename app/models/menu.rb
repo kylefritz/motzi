@@ -112,6 +112,10 @@ class Menu < ApplicationRecord
   end
 
   def copy_from(original_menu)
+    if self.pickup_days.empty?
+      copy_pickup_days_from(original_menu)
+    end
+
     if original_menu.pickup_days.count > self.pickup_days.count
       raise "Can't map onto fewer pickup days"
     end
@@ -138,6 +142,18 @@ class Menu < ApplicationRecord
           limit: mipud.limit,
         )
       end
+    end
+  end
+
+  def copy_pickup_days_from(original_menu)
+    original_week_start = Time.zone.from_week_id(original_menu.week_id)
+    target_week_start = Time.zone.from_week_id(self.week_id)
+
+    original_menu.pickup_days.each do |pickup_day|
+      pickup_days.create!(
+        pickup_at: target_week_start + (pickup_day.pickup_at - original_week_start),
+        order_deadline_at: target_week_start + (pickup_day.order_deadline_at - original_week_start),
+      )
     end
   end
 

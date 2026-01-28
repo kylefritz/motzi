@@ -4,6 +4,10 @@ json.ordering_deadline_text ordering_deadline_text(@menu)
 
 json.leadtime_hours Setting.leadtime_hours
 
+json.recent_menus Menu.unscoped.order("LOWER(week_id) desc").limit(100) do |menu|
+  json.extract! menu, :id, :name, :week_id
+end
+
 json.pickup_days @menu.pickup_days do |pickup_day|
   json.extract! pickup_day, :id, :pickup_at, :order_deadline_at, :deadline_text
   json.debug pickup_day.day_abbr
