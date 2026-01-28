@@ -11,7 +11,7 @@
     "accounting": "^0.4.1",
     "ahoy.js": "^0.3.4",
     "axios": "^0.21.1",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.23",
     "luxon": "^1.26.0",
     "moment": "^2.25.1",
     "pluralize": "^8.0.0",
