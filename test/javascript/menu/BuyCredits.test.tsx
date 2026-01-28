@@ -1,6 +1,6 @@
 import React from "react";
 import { expect, mock, test } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import Subscription, { humanizeBreadsPerWeek } from "menu/Subscription";
@@ -28,7 +28,9 @@ test("buy credits", async () => {
   expect(subscriberInfo[0].textContent).toEqual(subscriber.name);
   expect(parseInt(subscriberInfo[1].textContent)).toEqual(subscriber.credits);
 
-  await userEvent.click(screen.getByRole("button", { name: "Buy more" }));
+  await act(async () => {
+    await userEvent.click(screen.getByRole("button", { name: "Buy more" }));
+  });
 
   const choiceButtons = screen.getAllByRole("button", { name: /credits/ });
   expect(choiceButtons).toHaveLength(bundles.length);
@@ -40,7 +42,9 @@ test("buy credits", async () => {
   expect(headings).toHaveLength(2);
   expect(headings[0].textContent).toEqual("6-Month");
 
-  await userEvent.click(choiceButtons[0]);
+  await act(async () => {
+    await userEvent.click(choiceButtons[0]);
+  });
 
   expect(screen.getByText("Pay by credit card")).toBeTruthy();
   expect(screen.getByLabelText("Price")).toBeTruthy();
@@ -64,10 +68,14 @@ test("no payWhatYouCan", async () => {
     </SettingsContext.Provider>
   );
 
-  await userEvent.click(screen.getByRole("button", { name: "Buy more" }));
+  await act(async () => {
+    await userEvent.click(screen.getByRole("button", { name: "Buy more" }));
+  });
 
   const choiceButtons = screen.getAllByRole("button", { name: /credits/ });
-  await userEvent.click(choiceButtons[0]);
+  await act(async () => {
+    await userEvent.click(choiceButtons[0]);
+  });
 
   expect(screen.getByText("Pay by credit card")).toBeTruthy();
   expect(screen.queryByLabelText("Price")).toBeNull();

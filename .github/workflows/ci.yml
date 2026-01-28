@@ -43,7 +43,7 @@ jobs:
       - name: Build JS assets
         run: bun run build
 
-      - name: rails db:setup test test:system
+      - name: Rails tests
         env:
           PGHOST: localhost
           PGUSER: postgres
@@ -54,5 +54,5 @@ jobs:
           bin/rails test
           bin/rails test:system
 
-      - name: jest
+      - name: JS tests
         run: bun run test

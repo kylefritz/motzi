@@ -11,8 +11,10 @@ mock.module("axios", () => ({
 }));
 
 const captureException = mock(() => {});
+const configureScope = mock((cb) => cb({ setUser: () => {} }));
 mock.module("@sentry/browser", () => ({
   captureException,
+  configureScope,
 }));
 
 test("renders credit form", async () => {

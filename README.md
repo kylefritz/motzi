@@ -77,6 +77,14 @@ $ bun test --inspect-wait test/javascript/menu/items.test.tsx
 
 Then open the debug URL that Bun prints (it looks like `https://debug.bun.sh/...`).
 
+### Git hooks (Husky)
+
+Skip Husky hooks for a single commit:
+
+```
+HUSKY=0 git commit -m "no hooks run"
+```
+
 ### Checking emails
 
 visit `/letter_opener` to see emails sent by rails

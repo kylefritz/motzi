@@ -39,6 +39,14 @@ Logging preference:
 
 - Keep existing `console.log` statements in tests and app code. Do not delete or globally silence logs unless explicitly asked.
 
+## Git hooks (Husky)
+
+Skip Husky hooks for a single commit:
+
+```
+HUSKY=0 git commit -m "no hooks run"
+```
+
 ## JavaScript build (esbuild)
 
 Build JS bundles once:

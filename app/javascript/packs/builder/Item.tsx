@@ -116,8 +116,11 @@ function SortOrder({
         <LeftLabelText>Sort Order</LeftLabelText>
         <SmallInput
           type="number"
-          value={sortOrder}
-          onChange={(event) => handleChange(event.target.valueAsNumber)}
+          value={sortOrder ?? ""}
+          onChange={(event) => {
+            const { value, valueAsNumber } = event.target;
+            handleChange(value === "" || Number.isNaN(valueAsNumber) ? null : valueAsNumber);
+          }}
           placeholder="none"
         />
         {!isNil(sortOrder) && (
