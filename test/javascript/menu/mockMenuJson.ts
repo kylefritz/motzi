@@ -196,6 +196,14 @@ export default function ({
     bundles,
     user: withUser === true ? user : withUser || null,
     order: withOrder === true ? order : withOrder || null,
+    openMenus: [
+      {
+        id: menu.id,
+        name: menu.name,
+        weekId: "24w05",
+        isCurrent: menu.isCurrent,
+      },
+    ],
   };
 
   return data;

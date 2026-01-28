@@ -159,4 +159,24 @@ class MenuTest < ActiveSupport::TestCase
     assert_equal "Menu note copy", target.menu_note
     assert_equal "Day of note copy", target.day_of_note
   end
+
+  test "menus can overlap when allow_overlap is enabled" do
+    holiday = Menu.create!(name: "Holiday", week_id: "19w04", allow_overlap: true)
+    assert_difference -> { holiday.pickup_days.count }, 1 do
+      holiday.pickup_days.create!(
+        order_deadline_at: Time.zone.parse("2019-01-09 9:00 PM"),
+        pickup_at: Time.zone.parse("2019-01-11 3:00 PM")
+      )
+    end
+  end
+
+  test "menus cannot overlap when allow_overlap is disabled" do
+    other = Menu.create!(name: "Week 4", week_id: "19w05")
+    assert_raises(ActiveRecord::RecordInvalid) do
+      other.pickup_days.create!(
+        order_deadline_at: Time.zone.parse("2019-01-09 9:00 PM"),
+        pickup_at: Time.zone.parse("2019-01-11 3:00 PM")
+      )
+    end
+  end
 end

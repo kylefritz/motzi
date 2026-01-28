@@ -37,6 +37,11 @@ json.menu do
   end
 end
 
+json.open_menus @open_menus do |menu|
+  json.extract! menu, :id, :name, :week_id
+  json.is_current menu.current?
+end
+
 json.user do
   if @user
     json.extract! @user, :id, :name, :email, :hashid, :credits, :breads_per_week, :subscriber

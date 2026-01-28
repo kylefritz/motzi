@@ -7,6 +7,9 @@ class Menu < ApplicationRecord
   has_many :messages, class_name: "Ahoy::Message"
   has_paper_trail
   default_scope { order("LOWER(week_id) desc") }
+  scope :open_for_ordering, -> {
+    joins(:pickup_days).where("pickup_days.order_deadline_at >= ?", Time.zone.now).distinct
+  }
 
   def self.current
     Menu.find(Setting.menu_id)
@@ -92,6 +95,24 @@ class Menu < ApplicationRecord
 
   def ordering_closed?
     Time.zone.now > self.latest_deadline
+  end
+
+  def ordering_window(deadlines: nil)
+    values = deadlines || pickup_days.pluck(:order_deadline_at)
+    return nil if values.blank?
+
+    values.min..values.max
+  end
+
+  def ordering_window_overlaps?(other, deadlines: nil)
+    range = ordering_window(deadlines: deadlines)
+    other_range = other.ordering_window
+    return false if range.nil? || other_range.nil?
+
+    range.cover?(other_range.begin) ||
+      range.cover?(other_range.end) ||
+      other_range.cover?(range.begin) ||
+      other_range.cover?(range.end)
   end
 
   def earliest_deadline

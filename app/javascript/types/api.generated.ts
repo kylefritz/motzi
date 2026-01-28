@@ -123,5 +123,10 @@ export type MenuResponse = {
     credits: number;
     breadsPerWeek: number;
   }>;
+  openMenus: Array<{
+    id: number;
+    name: string;
+    weekId: string;
+    isCurrent: boolean;
+  }>;
 };
-

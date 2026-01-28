@@ -19,11 +19,12 @@ class OrdersController < ApplicationController
   end
 
   def create
-    if current_user&.current_order
+    menu_id = params[:menu_id] || params[:menuId]
+    @menu = menu_id.present? ? Menu.find(menu_id) : Menu.current
+    if current_user&.order_for_menu(@menu)
       logger.warn "user=#{current_user.email} already placed an order. returning that order"
-      return render_current_order
+      return render_current_order(@menu.id, current_user)
     end
-    @menu = Menu.current
 
     if @menu.ordering_closed? && current_admin_user.blank?
       return render_ordering_closed
@@ -88,7 +89,7 @@ class OrdersController < ApplicationController
     # send confirmation email
     ConfirmationMailer.with(order: @order).order_email.deliver_later
 
-    render 'menus/show', format: :json # requires @menu, @user, @order
+    render_current_order(@menu.id, @user)
 
     rescue OrderError => e
       render_validation_failed(e.message)
@@ -133,7 +134,7 @@ class OrdersController < ApplicationController
       ahoy.track "order_updated"
     end
 
-    render_current_order
+    render_current_order(order.menu_id)
   end
 
   private

@@ -2,7 +2,7 @@
   "definitions": {},
   "$id": "/menu.json",
   "type": "object",
-  "required": ["menu", "user", "order", "bundles"],
+  "required": ["menu", "user", "order", "bundles", "openMenus"],
   "properties": {
     "menu": {
       "type": "object",
@@ -176,6 +176,20 @@
             "type": "number",
             "default": 1.0
           }
+        }
+      }
+    },
+    "openMenus": {
+      "type": "array",
+      "title": "openMenus",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "weekId", "isCurrent"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "weekId": { "type": "string" },
+          "isCurrent": { "type": "boolean" }
         }
       }
     }

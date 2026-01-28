@@ -15,6 +15,7 @@ import type {
   MenuOrderRequest,
   MenuResponse,
   MenuUser,
+  OpenMenu,
   MarketplaceOrderRequest,
 } from "../../types/api";
 
@@ -30,6 +31,39 @@ type LayoutProps = {
   setIsEditingOrder: React.Dispatch<React.SetStateAction<boolean>>;
   user: MenuUser | null;
 };
+
+type MenuTabsProps = {
+  menus: OpenMenu[];
+  selectedMenuId?: number;
+  onSelect: (menuId: number) => void;
+};
+
+function MenuTabs({ menus, selectedMenuId, onSelect }: MenuTabsProps) {
+  if (menus.length < 2) {
+    return null;
+  }
+
+  return (
+    <ul className="nav nav-tabs mb-4" role="tablist">
+      {menus.map((menu) => {
+        const isActive = menu.id === selectedMenuId;
+        return (
+          <li className="nav-item" role="presentation" key={menu.id}>
+            <button
+              type="button"
+              className={`nav-link${isActive ? " active" : ""}`}
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => onSelect(menu.id)}
+            >
+              {menu.name}
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 function Layout({
   bundles,
@@ -58,7 +92,7 @@ function Layout({
 
   if (order && !isEditingOrder) {
     const handleEditOrder =
-      menu.isCurrent && !orderingClosed ? () => setIsEditingOrder(true) : null;
+      !orderingClosed ? () => setIsEditingOrder(true) : null;
     return (
       <Order
         {...{
@@ -97,9 +131,12 @@ export default function App() {
     location.search
   ) as { uid?: string; ignoredeadline?: string };
 
-  const fetchMenu = () => {
+  const fetchMenu = (menuId?: number) => {
     let params = { uid };
-    const id = _.get(location.pathname.match(/menus\/(.*)/), 1);
+    const id =
+      menuId ||
+      _.get(location.pathname.match(/menus\/(.*)/), 1) ||
+      undefined;
     const menuPath = id ? `/menus/${id}.json` : "/menu.json";
     axios
       .get<MenuResponse>(menuPath, { params })
@@ -123,12 +160,14 @@ export default function App() {
     order: MenuOrderRequest | MarketplaceOrderRequest
   ) => {
     const orderId = _.get(data, "order.id");
+    const menuId = _.get(data, "menu.id");
 
     const method: "put" | "post" = orderId ? "put" : "post";
     const url = orderId ? `/orders/${orderId}.json` : "/orders.json";
-    console.debug("saving order", method, url, order);
+    const orderPayload = menuId ? { ...order, menuId } : order;
+    console.debug("saving order", method, url, orderPayload);
 
-    return axios<MenuResponse>({ method, url, data: order })
+    return axios<MenuResponse>({ method, url, data: orderPayload })
       .then(({ data: newData }) => {
         setData(newData); // expect: menu, user, order
         setIsEditingOrder(false);
@@ -146,6 +185,7 @@ export default function App() {
   const bundles = data?.bundles || [];
   const user = data?.user || null;
   const order = data?.order || null;
+  const openMenus = data?.openMenus || [];
   const { orderingDeadlineText, enablePayWhatYouCan } = menu || {};
 
   return (
@@ -163,6 +203,16 @@ export default function App() {
           ignoreDeadline,
         }}
       >
+        <MenuTabs
+          menus={openMenus}
+          selectedMenuId={menu?.id}
+          onSelect={(menuId) => {
+            if (menuId !== menu?.id) {
+              setIsEditingOrder(false);
+              fetchMenu(menuId);
+            }
+          }}
+        />
         <Layout
           {...{
             bundles,

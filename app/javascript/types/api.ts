@@ -23,6 +23,7 @@ export type CreditBundle = MenuResponse["bundles"][number];
 export type MenuUser = NonNullable<MenuResponse["user"]>;
 export type MenuOrder = NonNullable<MenuResponse["order"]>;
 export type MenuOrderItem = MenuOrder["items"][number];
+export type OpenMenu = MenuResponse["openMenus"][number];
 
 export type CartItem = Pick<MenuOrderItem, "itemId" | "quantity" | "pickupDayId"> &
   Partial<Pick<MenuOrderItem, "day" | "pickupAt">>;
@@ -37,6 +38,7 @@ export type CreditItem = CreditItemResponse["creditItem"];
 
 export type MenuOrderRequest = {
   uid?: string | null;
+  menuId?: number;
   comments?: string | null;
   skip?: boolean;
   cart: CartItem[];

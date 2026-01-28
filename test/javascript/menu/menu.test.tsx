@@ -147,7 +147,7 @@ test("Menu pick skip", async () => {
   expect(skip).toBeTruthy();
 });
 
-test("old menu disables submit", () => {
+test("non-current menu can submit when open", () => {
   const data = mockMenuJson({ order: false });
   data.menu.isCurrent = false;
 
@@ -159,6 +159,6 @@ test("old menu disables submit", () => {
     </SettingsContext.Provider>
   );
 
-  const submitButton = screen.getByRole("button", { name: "Old menu" });
-  expect(submitButton.disabled).toBe(true);
+  const submitButton = screen.getByRole("button", { name: "Submit Order" });
+  expect(submitButton.disabled).toBe(false);
 });

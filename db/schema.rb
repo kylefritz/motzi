@@ -238,6 +238,7 @@ ActiveRecord::Schema.define(version: 2023_04_12_045510) do
     t.string "week_id", null: false
     t.text "day_of_note"
     t.text "menu_note"
+    t.boolean "allow_overlap", default: false, null: false
     t.index ["week_id"], name: "index_menus_on_week_id", unique: true
   end
 

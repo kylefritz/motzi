@@ -82,7 +82,7 @@ export default function Menu({ menu, order, user, onCreateOrder }: MenuProps) {
     );
   }
 
-  const { subscriberNote, isCurrent } = menu;
+  const { subscriberNote } = menu;
   const menuClosed = getDeadlineContext().allClosed(menu);
   const insufficientCredits = total.credits > userCredits;
   return (
@@ -147,7 +147,6 @@ export default function Menu({ menu, order, user, onCreateOrder }: MenuProps) {
           <SubmitButton
             onClick={handleCreateOrder}
             status={{
-              isCurrent,
               menuClosed,
               insufficientCredits,
               isEditing: !!order,
@@ -159,14 +158,8 @@ export default function Menu({ menu, order, user, onCreateOrder }: MenuProps) {
   );
 }
 
-function buttonText({ isCurrent, menuClosed, insufficientCredits, isEditing }) {
+function buttonText({ menuClosed, insufficientCredits, isEditing }) {
   const no = (text, title) => ({ disabled: true, title, text });
-  if (!isCurrent) {
-    return no(
-      "Old menu",
-      "This is not the current menu; you cannot submit an order."
-    );
-  }
   if (menuClosed) {
     return no("Ordering closed", "Ordering for this menu is closed");
   }

@@ -1,5 +1,5 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note
+  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note, :allow_overlap
   includes :pickup_days, menu_items: [:item]
   config.sort_order = 'LOWER(week_id) desc'
 
@@ -11,11 +11,13 @@ ActiveAdmin.register Menu do
   filter :week_id
   filter :menu_note
   filter :day_of_note
+  filter :allow_overlap
 
   scope :all, default: true
   scope("current menu") { |scope| scope.where(id: Setting.menu_id) }
   scope("emailed") { |scope| scope.where("emailed_at is not null") }
   scope("not emailed") { |scope| scope.where("emailed_at is null") }
+  scope("open for ordering") { |scope| scope.open_for_ordering }
 
   # create big buttons on every menu page
   action_item :preview, except: [:index, :new] do
@@ -45,6 +47,7 @@ ActiveAdmin.register Menu do
       t = Time.zone.from_week_id(menu.week_id)
       small "#{t.strftime('%a %m/%d')}"
     end
+    column :allow_overlap
     column :stats do |menu|
       if menu.emailed_at.blank? || menu.emailed_at > 6.weeks.ago
         render 'admin/menus/sales', {menu: menu}
@@ -89,6 +92,7 @@ ActiveAdmin.register Menu do
       input :subscriber_note
       input :menu_note
       input :day_of_note, placeholder: 'Included in reminder emails sent out on pickup day'
+      input :allow_overlap, label: "Allow overlap with other menus"
     end
     actions
   end
@@ -113,6 +117,7 @@ ActiveAdmin.register Menu do
       row :day_of_note do
         menu.day_of_note_html
       end
+      row :allow_overlap
       row :menu_items do
         render 'builder'
       end
