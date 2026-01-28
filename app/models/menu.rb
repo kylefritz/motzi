@@ -137,6 +137,8 @@ class Menu < ApplicationRecord
   end
 
   def map_pickup_days_from(original_menu)
+    # we intentionally don't support multiple pickup days on the same weekday
+
     original_week_start = Time.zone.from_week_id(original_menu.week_id)
     target_week_start = Time.zone.from_week_id(self.week_id)
 

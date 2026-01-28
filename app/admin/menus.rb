@@ -245,7 +245,7 @@ ActiveAdmin.register Menu do
 
   member_action :remove_items, method: :post do
     @menu = Menu.find(params[:id])
-    MenuItem.where(menu: @menu).delete_all
+    MenuItem.where(menu: @menu).destroy_all
 
     render 'admin/menus/menu_builder', formats: [:json]
   end
