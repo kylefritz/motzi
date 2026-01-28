@@ -18,6 +18,7 @@ export type AdminMenuBuilderResponse = {
     id: number;
     name: string;
     weekId: string;
+    pickupDaysLabel: string;
   }>;
   pickupDays: Array<{
     id: number;

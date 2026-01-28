@@ -25,15 +25,16 @@ export default function CopyFrom({ menuId, recentMenus }: CopyFromProps) {
             disabled={recentMenus.length === 0}
           >
             <option value="" disabled>
-              Select a menu
+              Select from 100 most recent menus
             </option>
-            <optgroup label="Most recent 100 menus">
-              {recentMenus.map((menu) => (
+            {recentMenus.map((menu) => {
+              const pickupDaysLabel = menu.pickupDaysLabel || "No pickup days";
+              return (
                 <option key={menu.id} value={menu.id}>
-                  {menu.name} ({menu.weekId})
+                  {menu.weekId} - {menu.name} - {pickupDaysLabel}
                 </option>
-              ))}
-            </optgroup>
+              );
+            })}
           </select>
         </FieldRow>
         <CheckboxRow>
@@ -67,6 +68,9 @@ export default function CopyFrom({ menuId, recentMenus }: CopyFromProps) {
         </CheckboxRow>
         <Row>
           <PrimaryBtn type="submit">Copy from</PrimaryBtn>
+          <Hint>
+            Copies pickup days and shifts them into this menu’s week.
+          </Hint>
         </Row>
       </form>
     </Section>
@@ -115,4 +119,10 @@ const PrimaryBtn = styled.button`
   background: #3f3a80;
   color: #fff;
   border-radius: 6px;
+`;
+
+const Hint = styled.span`
+  margin-left: 0.75rem;
+  color: #6b6b6b;
+  font-size: 90%;
 `;

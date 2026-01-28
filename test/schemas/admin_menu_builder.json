@@ -19,11 +19,12 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "name", "weekId"],
+        "required": ["id", "name", "weekId", "pickupDaysLabel"],
         "properties": {
           "id": { "type": "integer" },
           "name": { "type": "string" },
-          "weekId": { "type": "string" }
+          "weekId": { "type": "string" },
+          "pickupDaysLabel": { "type": "string" }
         }
       }
     },

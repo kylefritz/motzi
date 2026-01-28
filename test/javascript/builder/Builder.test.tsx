@@ -8,8 +8,8 @@ const menuResponse = {
   orderingDeadlineText: "Order by Tuesday",
   leadtimeHours: 27,
   recentMenus: [
-    { id: 41, name: "week1", weekId: "24w01" },
-    { id: 40, name: "week0", weekId: "23w52" },
+    { id: 41, name: "week1", weekId: "24w01", pickupDaysLabel: "Wed, Fri" },
+    { id: 40, name: "week0", weekId: "23w52", pickupDaysLabel: "Thu" },
   ],
   pickupDays: [
     {
