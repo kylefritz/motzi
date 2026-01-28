@@ -8,7 +8,7 @@ import { DateTime, Duration } from "luxon";
 
 const basePickupAt = DateTime.now().plus(Duration.fromISO("PT24H")).toISO();
 
-const basePickupDay = (id, remaining = 10) => ({
+const basePickupDay = (id: number, remaining: number = 10) => ({
   id,
   pickupAt: basePickupAt,
   orderDeadlineAt: basePickupAt,
