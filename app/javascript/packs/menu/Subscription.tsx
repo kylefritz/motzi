@@ -1,0 +1,71 @@
+import React, { useState } from "react";
+import BuyCredits from "../buy/App";
+import type { MenuUser } from "../../types/api";
+
+export const humanizeBreadsPerWeek = (perWeek: number) => {
+  if (perWeek === 0.5) {
+    return "Every other week";
+  }
+  if (perWeek === 1.0) {
+    return "Every week";
+  }
+  if (perWeek === 2.0) {
+    return "Two breads per week";
+  }
+  if (perWeek === 3.0) {
+    return "Three breads per week";
+  }
+  return `${perWeek} breads per week`;
+};
+
+type SubscriptionProps = {
+  user: MenuUser;
+  showBuyMoreButton?: boolean;
+};
+
+export default function Subscription({
+  user,
+  showBuyMoreButton = true,
+}: SubscriptionProps) {
+  const [showForm, setShowForm] = useState(false);
+  return (
+    <>
+      <div className="row">
+        <div className="col">
+          <h5 className="text-center">Subscriber</h5>
+          <div className="text-center mb-2">
+            <div className="subscriber-info">{user.name}</div>
+            <div>
+              <small className="ml-2">
+                <a href="/signout" className="text-nowrap">
+                  Not you?
+                </a>
+              </small>
+            </div>
+          </div>
+        </div>
+        {user.subscriber && (
+          <>
+            <div className="col">
+              <h5 className="text-center">Credits</h5>
+              <div className="text-center">
+                <div className="subscriber-info">{user.credits}</div>
+                {showBuyMoreButton && (
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-link text-nowrap"
+                    style={{ fontSize: "80%" }}
+                    onClick={() => setShowForm(!showForm)}
+                  >
+                    Buy more
+                  </button>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+      {showForm && <BuyCredits user={user} />}
+    </>
+  );
+}

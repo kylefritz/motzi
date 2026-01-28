@@ -1,0 +1,67 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "json"
+
+root = File.expand_path("..", __dir__)
+schema_dir = File.join(root, "test", "schemas")
+output_dir = File.join(root, "app", "javascript", "types")
+output_file = File.join(output_dir, "api.generated.ts")
+
+INDENT = "  "
+
+def type_name_for(file_name)
+  base = File.basename(file_name, ".json")
+  base.split("_").map(&:capitalize).join + "Response"
+end
+
+def render_type(schema, indent = 0)
+  types = schema["type"]
+  if types.is_a?(Array)
+    return types.map { |t| render_type(schema.merge("type" => t), indent) }.uniq.join(" | ")
+  end
+
+  case types
+  when "object"
+    props = schema["properties"] || {}
+    return "Record<string, unknown>" if props.empty?
+
+    required = schema["required"] || []
+    lines = props.map do |name, prop_schema|
+      optional = required.include?(name) ? "" : "?"
+      prop_type = render_type(prop_schema, indent + 1)
+      "#{INDENT * (indent + 1)}#{name}#{optional}: #{prop_type};"
+    end
+    "{\n#{lines.join("\n")}\n#{INDENT * indent}}"
+  when "array"
+    items = schema["items"] || {}
+    item_type = render_type(items, indent)
+    "Array<#{item_type}>"
+  when "string"
+    "string"
+  when "null"
+    "null"
+  when "integer", "number"
+    "number"
+  when "boolean"
+    "boolean"
+  else
+    "unknown"
+  end
+end
+
+schema_files = Dir.glob(File.join(schema_dir, "*.json")).sort
+
+generated = +""
+generated << "// This file is auto-generated from test/schemas/*.json.\n"
+generated << "// Run `bin/generate_schema_types` to update.\n\n"
+
+schema_files.each do |schema_path|
+  schema = JSON.parse(File.read(schema_path))
+  type_name = type_name_for(schema_path)
+  generated << "export type #{type_name} = #{render_type(schema)};\n\n"
+end
+
+Dir.mkdir(output_dir) unless Dir.exist?(output_dir)
+File.write(output_file, generated)
+puts "Wrote #{output_file}"

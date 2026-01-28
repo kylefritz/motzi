@@ -6,16 +6,25 @@ Neighborhood bakery's CSA site
 
 - postgres.app
 - redis
-- mise (manages Ruby/Node)
+- mise (manages Ruby/Bun)
 
-### Getting started
+You need Postgres and Redis running locally, plus a few variables in a `.env` file:
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+STRIPE_PUBLISHABLE_KEY
+
+### Running the app
+
+Run Rails + Bun watch together:
 
 ```
-$ mise install
-$ bundle
-$ yarn install --check-files
-$ rails db:setup
+$ bin/dev
 ```
+
+`bin/dev` uses `Procfile.dev` and runs `bin/setup` by default. Set
+`SKIP_SETUP=1` to skip the setup step.
+
+### Data
 
 #### Test data
 
@@ -42,33 +51,38 @@ Download the menu images from s3
 $ rake s3:download
 ```
 
-### Running the app
-
-```
-$ rails server
-```
-
-You need a few variables in a .env file
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-STRIPE_PUBLISHABLE_KEY
-
-Working on the react apps
-
-```
-$ yarn build:watch
-```
-
 ### Running js tests
 
 ```
-$ npx jest -u
+$ bun run test
 ```
 
-Debug js jest tests
+Watch js tests
 
 ```
-$ node --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.js
+$ bun run test --watch
+```
+
+Debug js tests
+
+```
+$ bun test --inspect-brk test/javascript/menu/items.test.tsx
+```
+
+Or wait for a debugger to attach:
+
+```
+$ bun test --inspect-wait test/javascript/menu/items.test.tsx
+```
+
+Then open the debug URL that Bun prints (it looks like `https://debug.bun.sh/...`).
+
+### Git hooks (Husky)
+
+Skip Husky hooks for a single commit:
+
+```
+HUSKY=0 git commit -m "no hooks run"
 ```
 
 ### Checking emails
@@ -80,3 +94,13 @@ visit `/letter_opener` to see emails sent by rails
 ```
 User.find(SqlQuery.new(:spam_user_ids).execute.pluck("id")).each {|u| u.destroy!}
 ```
+
+### Bun on Heroku with heroku-buildpack-run
+
+Add the buildpack (ensure it runs before the Ruby buildpack):
+
+```
+$ heroku buildpacks:add https://github.com/weibeld/heroku-buildpack-run
+```
+
+Repo contains an executable `buildpack-run.sh` that runs on each deploy.

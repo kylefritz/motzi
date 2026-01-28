@@ -4,57 +4,71 @@ Concise project-specific helpers for CI and local dev.
 
 ## Tooling
 
-- Node version: 20 (see `mise.toml`)
 - Ruby version: 3.3.10 (see `Gemfile` / `mise.toml`)
-- Package manager: Yarn v1 (lockfile is `yarn.lock`)
+- Package manager: Bun (keep `yarn.lock` for Heroku compatibility)
 - Deployment: Heroku. When suggesting changes, consider the deployment impact (builds, assets, env vars, and CI).
 - CI: GitHub Actions runs the test/build pipeline; keep changes compatible with GH CI.
 
-## JavaScript tests (Jest)
+## JavaScript tests (Bun)
 
-Run all tests and update snapshots:
-
-```
-npx jest -u
-```
-
-Run a single test file (no snapshot update):
+Run all JS tests:
 
 ```
-npx jest test/javascript/menu/items.test.js
+bun run test
 ```
 
-Debug a single Jest test in Node inspector:
+Update snapshots (if any):
 
 ```
-node --inspect-brk node_modules/.bin/jest --runInBand -u test/javascript/menu/items.test.js
+bun run test -- -u
+```
+
+Run a single test file:
+
+```
+bun run test -- test/javascript/menu/items.test.tsx
+```
+
+Debug a single test in Bun inspector:
+
+```
+bun --inspect-brk test test/javascript/menu/items.test.tsx
 ```
 
 Logging preference:
+
 - Keep existing `console.log` statements in tests and app code. Do not delete or globally silence logs unless explicitly asked.
+
+## Git hooks (Husky)
+
+Skip Husky hooks for a single commit:
+
+```
+HUSKY=0 git commit -m "no hooks run"
+```
 
 ## JavaScript build (esbuild)
 
 Build JS bundles once:
 
 ```
-yarn build
+bun run build
 ```
 
 Watch and rebuild in development:
 
 ```
-yarn build:watch
+bun run build:watch
 ```
 
 ## CI / deployment build steps
 
-- GitHub Actions runs `yarn install`, `yarn build`, Rails tests, and Jest before deploying to Heroku.
-- Heroku deploys from GH CI on successful `master` builds; make sure asset build changes are compatible with `yarn build`.
+- GitHub Actions runs `bun install`, `bun run build`, Rails tests, and Jest before deploying to Heroku.
+- Heroku deploys from GH CI on successful `master` builds; make sure asset build changes are compatible with `bun run build` and the Heroku buildpack setup.
 
 ## Rails tests
 
-Run all Rails tests:
+Run all Rails tests (agents need elevated permissions):
 
 ```
 bundle exec rails test
@@ -67,8 +81,3 @@ DISABLE_SPRING=1 bundle exec rails test
 ```
 
 Rails tests require a running local Postgres on `127.0.0.1:5432` / `::1:5432`.
-
-Known warnings (as of Jan 27, 2026):
-  - DidYouMean: `SPELL_CHECKERS.merge!` deprecation
-  - PG: `PG::Coder.new(hash)` deprecation
-  - Rails: rendering action with `.` in name (admin/menus/menu_builder.json.jbuilder)

@@ -29,6 +29,8 @@ class CreditItemsControllerTest < ActionDispatch::IntegrationTest
       assert_response :success
     end
 
+    validate_json_schema :credit_item, JSON.load(@response.body)
+
     new_credit_item = CreditItem.last
     assert_equal order_attrs[:credits], new_credit_item.quantity
     refute_nil new_credit_item.stripe_charge_id

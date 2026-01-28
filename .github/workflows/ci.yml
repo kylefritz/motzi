@@ -32,22 +32,18 @@ jobs:
           ruby-version: 3.3.10
           bundler-cache: true
 
-      - name: Set Node.js 20.x
-        uses: actions/setup-node@v4.3.0
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: 20.x
-          cache: yarn
-          cache-dependency-path: yarn.lock
+          bun-version: latest
 
-      - name: Run install
-        uses: borales/actions-yarn@v5.0.0
-        with:
-          cmd: install # will run `yarn install` command
+      - name: Install JS dependencies
+        run: bun install
 
       - name: Build JS assets
-        run: yarn build
+        run: bun run build
 
-      - name: rails db:setup test test:system
+      - name: Rails tests
         env:
           PGHOST: localhost
           PGUSER: postgres
@@ -58,5 +54,5 @@ jobs:
           bin/rails test
           bin/rails test:system
 
-      - name: jest
-        run: npx jest test/javascript
+      - name: JS tests
+        run: bun run test
