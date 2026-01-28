@@ -34,7 +34,7 @@
     "@types/react": "^16.14.62",
     "@types/react-dom": "^16.9.25",
     "bun-types": "^1.0.30",
-    "esbuild": "^0.20.2",
+    "esbuild": "^0.25.0",
     "husky": "^9.1.7",
     "jsdom": "^22.1.0",
     "prettier": "2.0.4",
