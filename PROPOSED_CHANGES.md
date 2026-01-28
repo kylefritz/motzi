@@ -4,6 +4,13 @@ Date: 2026-01-27
 
 This document tracks potential improvements and follow-ups. It is a draft list, not a committed roadmap.
 
+## p0 customer requested features
+
+- First and most important is the ability to have ordering open for two weeks at once so that we can use the heroku for holiday ordering. Having two separate platforms continues to confuse people and complicate our systems for filling orders.
+- Second, is the potential for mistakes inherent in putting in our hours fresh each time we make a new weekly menu. Would be huge to be able to set standard hours that auto populate for each new menu.
+  - [main issue] When you copy a menu, it should copy the pickup days but they should be moved into the current week
+  - When you create a menu, you are greeted by an empty Subscriber note, Menu note, Day of note. We should probably prefill these from the menu that we copy from?
+
 ## Medium-Term (compat / upgrades)
 
 - Review PostgreSQL version in CI (currently 11.5) and align with production.
