@@ -185,7 +185,12 @@ ActiveAdmin.register Menu do
     @menu = resource
     original_menu = Menu.find(params[:original_menu_id])
 
-    @menu.copy_from(original_menu)
+    @menu.copy_from(
+      original_menu,
+      copy_subscriber_note: params[:copy_subscriber_note] == "1",
+      copy_menu_note: params[:copy_menu_note] == "1",
+      copy_day_of_note: params[:copy_day_of_note] == "1"
+    )
 
     notice = "Copied from menu #{params[:original_menu_id]}"
     ActiveAdmin::Comment.create(body: notice,

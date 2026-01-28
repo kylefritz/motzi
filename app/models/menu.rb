@@ -111,7 +111,9 @@ class Menu < ApplicationRecord
     my_menu_items.sort_by {|mi| mi.sort_order.nil? ? 1_000 : mi.sort_order}
   end
 
-  def copy_from(original_menu)
+  def copy_from(original_menu, options = {})
+    copy_notes_from(original_menu, options)
+
     if self.pickup_days.empty?
       copy_pickup_days_from(original_menu)
     end
@@ -143,6 +145,15 @@ class Menu < ApplicationRecord
         )
       end
     end
+  end
+
+  def copy_notes_from(original_menu, options)
+    attrs = {}
+    attrs[:subscriber_note] = original_menu.subscriber_note if options[:copy_subscriber_note]
+    attrs[:menu_note] = original_menu.menu_note if options[:copy_menu_note]
+    attrs[:day_of_note] = original_menu.day_of_note if options[:copy_day_of_note]
+
+    update!(attrs) if attrs.any?
   end
 
   def copy_pickup_days_from(original_menu)

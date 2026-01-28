@@ -106,4 +106,32 @@ class MenuTest < ActiveSupport::TestCase
     assert target.menu_items.all? { |mi| mi.menu_item_pickup_days.all? { |mipd| mipd.pickup_day.menu_id == target.id } },
            "menu item pickup days point at target menu pickup days"
   end
+
+  test "copy_from can copy notes from source menu" do
+    original = menus(:week1)
+    target = menus(:week3)
+
+    original.update!(
+      subscriber_note: "Subscriber note copy",
+      menu_note: "Menu note copy",
+      day_of_note: "Day of note copy"
+    )
+    target.update!(
+      subscriber_note: "Old subscriber note",
+      menu_note: "Old menu note",
+      day_of_note: "Old day of note"
+    )
+
+    target.copy_from(
+      original,
+      copy_subscriber_note: true,
+      copy_menu_note: true,
+      copy_day_of_note: true
+    )
+
+    target.reload
+    assert_equal "Subscriber note copy", target.subscriber_note
+    assert_equal "Menu note copy", target.menu_note
+    assert_equal "Day of note copy", target.day_of_note
+  end
 end

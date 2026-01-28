@@ -36,6 +36,35 @@ export default function CopyFrom({ menuId, recentMenus }: CopyFromProps) {
           </select>
         </Row>
         <Row>
+          <label>
+            <input
+              type="checkbox"
+              name="copy_subscriber_note"
+              value="1"
+              defaultChecked
+            />
+            Subscriber note
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="copy_menu_note"
+              value="1"
+              defaultChecked
+            />
+            Menu note
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="copy_day_of_note"
+              value="1"
+              defaultChecked
+            />
+            Day of note
+          </label>
+        </Row>
+        <Row>
           <input type="submit" value="Copy from" />
         </Row>
       </form>
