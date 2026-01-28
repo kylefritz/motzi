@@ -95,12 +95,7 @@ visit `/letter_opener` to see emails sent by rails
 User.find(SqlQuery.new(:spam_user_ids).execute.pluck("id")).each {|u| u.destroy!}
 ```
 
-### Bun on Heroku with heroku-buildpack-run
+### Bun on Heroku with a Bun buildpack
 
-Add the buildpack (ensure it runs before the Ruby buildpack):
-
-```
-$ heroku buildpacks:add https://github.com/weibeld/heroku-buildpack-run
-```
-
-Repo contains an executable `buildpack-run.sh` that runs on each deploy.
+Ensure a Bun buildpack runs before the Ruby buildpack so `assets:precompile` can run
+`bun run build` via jsbundling-rails.

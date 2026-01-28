@@ -22,6 +22,7 @@ gem 'hashid-rails' # lookup models by hashid
 gem 'image_processing', '~> 1.2' # Use Active Storage variant
 gem 'jaro_winkler', '~> 1.5.5' # pinned for compatibility
 gem 'jbuilder', '~> 2.7' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+gem 'jsbundling-rails' # build JS via rails asset pipeline hooks
 gem 'mutex_m' # stdlib gem (Ruby 3.4 deprecation warning)
 gem 'naturalsort', :require => 'natural_sort_kernel' # implements a natural, human-friendly alphanumeric sort
 gem 'newrelic_rpm' # debugging to new relic
