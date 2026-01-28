@@ -114,18 +114,7 @@ class Menu < ApplicationRecord
   def copy_from(original_menu, options = {})
     copy_notes_from(original_menu, options)
 
-    if self.pickup_days.empty?
-      copy_pickup_days_from(original_menu)
-    end
-
-    if original_menu.pickup_days.count > self.pickup_days.count
-      raise "Can't map onto fewer pickup days"
-    end
-
-    # make a lookup between old pick_up days & new pick_up days
-    new_to_old = Hash[original_menu.pickup_days.zip(self.pickup_days).map do |pud, new_pud|
-      [pud.id, new_pud.id]
-    end]
+    pickup_day_map = map_pickup_days_from(original_menu)
 
     # if there are already items in this menu, append these new ones to the end by offsetting the sort order index
     sort_offset = self.menu_items.pluck(:sort_order).compact.max || 0
@@ -140,9 +129,31 @@ class Menu < ApplicationRecord
 
       original_mi.menu_item_pickup_days.each do |mipud|
         new_mi.menu_item_pickup_days.create!(
-          pickup_day_id: new_to_old[mipud.pickup_day_id],
+          pickup_day_id: pickup_day_map[mipud.pickup_day_id],
           limit: mipud.limit,
         )
+      end
+    end
+  end
+
+  def map_pickup_days_from(original_menu)
+    original_week_start = Time.zone.from_week_id(original_menu.week_id)
+    target_week_start = Time.zone.from_week_id(self.week_id)
+
+    target_days_by_wday = self.pickup_days.index_by { |day| day.pickup_at.wday }
+
+    {}.tap do |map|
+      original_menu.pickup_days.each do |pickup_day|
+        target_day = target_days_by_wday[pickup_day.pickup_at.wday]
+        if target_day.nil?
+          target_day = pickup_days.create!(
+            pickup_at: target_week_start + (pickup_day.pickup_at - original_week_start),
+            order_deadline_at: target_week_start + (pickup_day.order_deadline_at - original_week_start),
+          )
+          target_days_by_wday[pickup_day.pickup_at.wday] = target_day
+        end
+
+        map[pickup_day.id] = target_day.id
       end
     end
   end
@@ -154,18 +165,6 @@ class Menu < ApplicationRecord
     attrs[:day_of_note] = original_menu.day_of_note if options[:copy_day_of_note]
 
     update!(attrs) if attrs.any?
-  end
-
-  def copy_pickup_days_from(original_menu)
-    original_week_start = Time.zone.from_week_id(original_menu.week_id)
-    target_week_start = Time.zone.from_week_id(self.week_id)
-
-    original_menu.pickup_days.each do |pickup_day|
-      pickup_days.create!(
-        pickup_at: target_week_start + (pickup_day.pickup_at - original_week_start),
-        order_deadline_at: target_week_start + (pickup_day.order_deadline_at - original_week_start),
-      )
-    end
   end
 
   MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)

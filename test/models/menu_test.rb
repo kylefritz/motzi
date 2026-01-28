@@ -107,6 +107,31 @@ class MenuTest < ActiveSupport::TestCase
            "menu item pickup days point at target menu pickup days"
   end
 
+  test "copy_from merges pickup days by weekday when target already has some" do
+    original = menus(:week1)
+    target = Menu.create!(name: "week4", week_id: "19w04")
+
+    original_week_start = Time.zone.from_week_id(original.week_id)
+    target_week_start = Time.zone.from_week_id(target.week_id)
+
+    thursday = original.pickup_days.find { |day| day.pickup_at.wday == 4 }
+    saturday = original.pickup_days.find { |day| day.pickup_at.wday == 6 }
+
+    target_thursday = target.pickup_days.create!(
+      pickup_at: target_week_start + (thursday.pickup_at - original_week_start),
+      order_deadline_at: target_week_start + (thursday.order_deadline_at - original_week_start),
+    )
+
+    target.copy_from(original)
+
+    target.reload
+    target_days = target.pickup_days.index_by { |day| day.pickup_at.wday }
+
+    assert_equal target_thursday.id, target_days[4].id, "existing weekday pickup day reused"
+    assert target_days.key?(6), "missing weekday pickup day created"
+    assert_equal target.pickup_days.count, 2, "no duplicate weekdays created"
+  end
+
   test "copy_from can copy notes from source menu" do
     original = menus(:week1)
     target = menus(:week3)

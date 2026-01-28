@@ -185,22 +185,12 @@ ActiveAdmin.register Menu do
     @menu = resource
     original_menu = Menu.find(params[:original_menu_id])
 
-    begin
-      @menu.copy_from(
-        original_menu,
-        copy_subscriber_note: params[:copy_subscriber_note] == "1",
-        copy_menu_note: params[:copy_menu_note] == "1",
-        copy_day_of_note: params[:copy_day_of_note] == "1"
-      )
-    rescue StandardError => error
-      alert = if error.message == "Can't map onto fewer pickup days"
-        "Can't copy: this menu has fewer pickup days. Clear pickup days, then copy again."
-      else
-        "Copy failed: #{error.message}"
-      end
-      redirect_to resource_path, alert: alert
-      return
-    end
+    @menu.copy_from(
+      original_menu,
+      copy_subscriber_note: params[:copy_subscriber_note] == "1",
+      copy_menu_note: params[:copy_menu_note] == "1",
+      copy_day_of_note: params[:copy_day_of_note] == "1"
+    )
 
     notice = "Copied from menu #{params[:original_menu_id]}"
     ActiveAdmin::Comment.create(body: notice,
