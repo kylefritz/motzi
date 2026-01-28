@@ -66,6 +66,14 @@ export default function MenuBuilder() {
         return axios.post("/admin/pickup_days.json", json).then(loadMenu);
       },
 
+      update: (pickupDayId, pickupDay) => {
+        const json = { ...pickupDay };
+        console.log("update pickupDay", pickupDayId, json);
+        return axios
+          .patch(`/admin/pickup_days/${pickupDayId}.json`, json)
+          .then(loadMenu);
+      },
+
       remove: (pickupDayId) => {
         console.log("rm pickupDay", pickupDayId);
         return axios

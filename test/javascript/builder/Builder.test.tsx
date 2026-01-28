@@ -117,8 +117,10 @@ test("edits menu items", async () => {
 
   render(<MenuBuilder />);
 
+  // Wait for the builder to load.
   await waitFor(() => expect(screen.getByText("Menu Items")).toBeTruthy());
 
+  // Toggle marketplace on an item card.
   const sourdoughCard = screen
     .getByText("Sourdough")
     .closest(".MuiCard-root");
@@ -133,6 +135,7 @@ test("edits menu items", async () => {
     marketplace: false,
   });
 
+  // Update sort order.
   const sortOrderLabel = card.getByText("Sort Order").closest("label");
   const sortOrderInput = sortOrderLabel?.querySelector("input");
   if (!sortOrderInput) {
@@ -145,6 +148,7 @@ test("edits menu items", async () => {
     sortOrder: 3,
   });
 
+  // Update per-pickup-day limit.
   const limitLabel = card.getByText("limit:").closest("label");
   const limitInput = limitLabel?.querySelector("input");
   if (!limitInput) {
@@ -157,6 +161,7 @@ test("edits menu items", async () => {
     { limit: 12 }
   );
 
+  // Remove an item from the menu.
   const removeButton = card.getByTitle("remove from menu");
   await userEvent.click(removeButton);
   expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_item.json", {
@@ -169,8 +174,10 @@ test("adds pickup days and items", async () => {
 
   render(<MenuBuilder />);
 
+  // Wait for pickup days section to load.
   await waitFor(() => expect(screen.getByText("Pickup days")).toBeTruthy());
 
+  // Add a pickup day.
   const pickupInput = screen.getByLabelText("Pickup at:");
   const deadlineInput = screen.getByLabelText("Order deadline at:");
   fireEvent.change(pickupInput, { target: { value: "2024-02-01T10:00" } });
@@ -185,10 +192,29 @@ test("adds pickup days and items", async () => {
     menuId: "42",
   });
 
+  // Remove a pickup day.
   const pickupRemoveButtons = screen.getAllByRole("button", { name: "x" });
   await userEvent.click(pickupRemoveButtons[0]);
   expect(deleteMock).toHaveBeenCalledWith("/admin/pickup_days/1.json");
 
+  // Edit an existing pickup day.
+  const firstPickupDay = screen.getByText("Wed 10am").closest("li");
+  if (!firstPickupDay) {
+    throw new Error("Expected first pickup day row to be present");
+  }
+  const pickupDayRow = within(firstPickupDay);
+  await userEvent.click(pickupDayRow.getByRole("button", { name: "Edit" }));
+  const editPickupInput = pickupDayRow.getByLabelText("Pickup at:");
+  const editDeadlineInput = pickupDayRow.getByLabelText("Order deadline at:");
+  fireEvent.change(editPickupInput, { target: { value: "2024-01-15T09:00" } });
+  fireEvent.change(editDeadlineInput, { target: { value: "2024-01-14T09:00" } });
+  await userEvent.click(pickupDayRow.getByRole("button", { name: "Save" }));
+  expect(patchMock).toHaveBeenCalledWith("/admin/pickup_days/1.json", {
+    pickupAt: "2024-01-15T09:00",
+    orderDeadlineAt: "2024-01-14T09:00",
+  });
+
+  // Add a menu item.
   const addItemForm = screen
     .getByRole("button", { name: "Add Item" })
     .closest("form");
