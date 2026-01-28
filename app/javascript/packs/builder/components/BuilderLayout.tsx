@@ -1,5 +1,5 @@
 import React from "react";
-import { AppBar, Tabs, Tab, Box } from "@material-ui/core";
+import { Tabs, Tab, Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import styled from "styled-components";
 
@@ -22,12 +22,38 @@ export default function BuilderLayout({
   const classes = useStyles();
   const api = useApi();
   const [tab, setTab] = React.useState(0);
+  const [pickupDayTab, setPickupDayTab] = React.useState(0);
   const [isClearHover, setIsClearHover] = React.useState(false);
   const handleChange = (_event: React.ChangeEvent<{}>, newTab: number) => {
     setTab(newTab);
   };
+  const handlePickupDayChange = (
+    _event: React.ChangeEvent<{}>,
+    newTab: number
+  ) => {
+    setPickupDayTab(newTab);
+  };
   const { pickupDays, leadtimeHours, recentMenus } = menu;
   const hasItems = menu.items.length > 0;
+  const pickupDayFilters = [
+    { label: "All days", pickupAt: null },
+    ...pickupDays.map((pickupDay) => ({
+      label: pickupDay.debug || pickupDay.deadlineText || pickupDay.pickupAt,
+      pickupAt: pickupDay.pickupAt,
+    })),
+  ];
+  const activePickupAt = pickupDayFilters[pickupDayTab]?.pickupAt || null;
+
+  const filterItemsByPickupDay = (
+    items: AdminMenuBuilderResponse["items"]
+  ) => {
+    if (!activePickupAt) {
+      return items;
+    }
+    return items.filter((item) =>
+      item.pickupDays.some((day) => day.pickupAt === activePickupAt)
+    );
+  };
 
   function handleClearAllItems() {
     if (!hasItems) {
@@ -60,24 +86,43 @@ export default function BuilderLayout({
           {isClearHover ? "💣 Delete all menu items!": "💥 Clear all"}
         </ClearBtn>
       </HeaderRow>
-      <AppBar position="static">
+      <FilterTabs>
+        <Tabs
+          value={pickupDayTab}
+          onChange={handlePickupDayChange}
+          aria-label="pickup day filters"
+        >
+          {pickupDayFilters.map((filter, index) => (
+            <Tab
+              key={filter.label}
+              label={filter.label}
+              {...pickupDayTabProps(index)}
+            />
+          ))}
+        </Tabs>
+      </FilterTabs>
+      <FilterTabs>
         <Tabs
           value={tab}
           onChange={handleChange}
-          aria-label="simple tabs example"
+          aria-label="menu item filters"
         >
-          <Tab label="All" {...a11yProps(0)} />
+          <Tab label="All menus" {...a11yProps(0)} />
           <Tab label="Subscribers" {...a11yProps(1)} />
           <Tab label="Marketplace" {...a11yProps(2)} />
         </Tabs>
-      </AppBar>
+      </FilterTabs>
       <TabPanel value={tab} index={0}>
-        <MenuItemGrid {...{ menuItems: menu.items, pickupDays }} />
+        <MenuItemGrid
+          {...{ menuItems: filterItemsByPickupDay(menu.items), pickupDays }}
+        />
       </TabPanel>
       <TabPanel value={tab} index={1}>
         <MenuItemGrid
           {...{
-            menuItems: menu.items.filter((i) => i.subscriber),
+            menuItems: filterItemsByPickupDay(
+              menu.items.filter((i) => i.subscriber)
+            ),
             pickupDays,
           }}
         />
@@ -85,7 +130,9 @@ export default function BuilderLayout({
       <TabPanel value={tab} index={2}>
         <MenuItemGrid
           {...{
-            menuItems: menu.items.filter((i) => i.marketplace),
+            menuItems: filterItemsByPickupDay(
+              menu.items.filter((i) => i.marketplace)
+            ),
             pickupDays,
           }}
         />
@@ -129,6 +176,13 @@ function a11yProps(index: number) {
   };
 }
 
+function pickupDayTabProps(index: number) {
+  return {
+    id: `pickup-day-tab-${index}`,
+    "aria-controls": `pickup-day-tabpanel-${index}`,
+  };
+}
+
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -164,5 +218,31 @@ const ClearBtn = styled.button`
     background: #f4f4f4;
     border-color: #d0d0d0;
     cursor: not-allowed;
+  }
+`;
+
+const FilterTabs = styled.div`
+  margin: 0.35rem 0 0.75rem;
+  border-bottom: 1px solid #e9e9e9;
+
+  .MuiTabs-indicator {
+    height: 3px;
+    background-color: #3f3a80;
+  }
+
+  .MuiTab-root {
+    text-transform: none;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    min-width: 90px;
+    padding: 6px 12px;
+  }
+
+  .MuiTab-textColorInherit {
+    color: #6b6b6b;
+  }
+
+  .Mui-selected {
+    color: #222;
   }
 `;

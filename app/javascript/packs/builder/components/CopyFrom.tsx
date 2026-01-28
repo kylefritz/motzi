@@ -67,7 +67,7 @@ export default function CopyFrom({ menuId, recentMenus }: CopyFromProps) {
           </label>
         </CheckboxRow>
         <Row>
-          <PrimaryBtn type="submit">Copy from</PrimaryBtn>
+          <PrimaryBtn type="submit">Copy</PrimaryBtn>
           <Hint>
             Copies pickup days and shifts them into this menu’s week.
           </Hint>

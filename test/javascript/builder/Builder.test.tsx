@@ -205,7 +205,8 @@ test("adds pickup days and items", async () => {
   expect(deleteMock).toHaveBeenCalledWith("/admin/pickup_days/1.json");
 
   // Edit an existing pickup day.
-  const firstPickupDay = screen.getByText("Wed 10am").closest("li");
+  const pickupList = screen.getAllByRole("list")[0];
+  const firstPickupDay = within(pickupList).getByText("Wed 10am").closest("li");
   if (!firstPickupDay) {
     throw new Error("Expected first pickup day row to be present");
   }
@@ -216,10 +217,15 @@ test("adds pickup days and items", async () => {
   fireEvent.change(editPickupInput, { target: { value: "2024-01-15T09:00" } });
   fireEvent.change(editDeadlineInput, { target: { value: "2024-01-14T09:00" } });
   await userEvent.click(pickupDayRow.getByRole("button", { name: "Save" }));
-  expect(patchMock).toHaveBeenCalledWith("/admin/pickup_days/1.json", {
-    pickupAt: "2024-01-15T09:00",
-    orderDeadlineAt: "2024-01-14T09:00",
-  });
+  await waitFor(() =>
+    expect(patchMock).toHaveBeenCalledWith("/admin/pickup_days/1.json", {
+      pickupAt: "2024-01-15T09:00",
+      orderDeadlineAt: "2024-01-14T09:00",
+    })
+  );
+  await waitFor(() =>
+    expect(pickupDayRow.getByRole("button", { name: "Edit" })).toBeTruthy()
+  );
 
   // Add a menu item.
   const addItemForm = screen
