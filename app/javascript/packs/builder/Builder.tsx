@@ -3,7 +3,7 @@ import axios from "axios";
 import * as Sentry from "@sentry/browser";
 import _ from "lodash";
 
-import Layout from "./Layout";
+import BuilderLayout from "./components/BuilderLayout";
 import { ApiContext, BuilderApi } from "./Context";
 import type {
   AdminItem,
@@ -50,6 +50,13 @@ export default function MenuBuilder() {
           .post(`/admin/menus/${menuId}/remove_item.json`, { itemId })
           .then(({ data: menu }) => setMenu(menu));
       },
+
+      clearAll: () => {
+        console.log("remove all items");
+        return axios
+          .post(`/admin/menus/${menuId}/remove_items.json`)
+          .then(({ data: menu }) => setMenu(menu));
+      },
     },
     menuItem: {
       update: (menuItemId, json) => {
@@ -64,6 +71,14 @@ export default function MenuBuilder() {
         const json = { ...pickupDay, menuId };
         console.log("add pickupDay", json);
         return axios.post("/admin/pickup_days.json", json).then(loadMenu);
+      },
+
+      update: (pickupDayId, pickupDay) => {
+        const json = { ...pickupDay };
+        console.log("update pickupDay", pickupDayId, json);
+        return axios
+          .patch(`/admin/pickup_days/${pickupDayId}.json`, json)
+          .then(loadMenu);
       },
 
       remove: (pickupDayId) => {
@@ -128,7 +143,7 @@ export default function MenuBuilder() {
 
   return (
     <ApiContext.Provider value={api}>
-      <Layout {...{ menu, allItems }} />
+      <BuilderLayout {...{ menu, allItems }} />
     </ApiContext.Provider>
   );
 }

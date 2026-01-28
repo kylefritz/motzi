@@ -2,16 +2,20 @@ import React, { useState } from "react";
 import { Card, Icon, IconButton } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import styled from "styled-components";
-import { shortDay } from "./PickupDay";
-import { useApi } from "./Context";
+import { shortDay } from "./PickupDaysPanel";
+import { useApi } from "../Context";
 import { isNil } from "lodash";
-import type { AdminMenuItem, AdminMenuItemPickupDay, AdminPickupDay } from "../../types/api";
+import type {
+  AdminMenuItem,
+  AdminMenuItemPickupDay,
+  AdminPickupDay,
+} from "../../../types/api";
 
-type ItemProps = AdminMenuItem & {
+type MenuItemCardProps = AdminMenuItem & {
   menuPickupDays: AdminPickupDay[];
 };
 
-export default function Item({
+export default function MenuItemCard({
   itemId,
   menuItemId,
   name,
@@ -20,7 +24,7 @@ export default function Item({
   sortOrder,
   pickupDays,
   menuPickupDays,
-}: ItemProps) {
+}: MenuItemCardProps) {
   const api = useApi();
   function handleChangeMenuType(
     menuType: "subscriber" | "marketplace",

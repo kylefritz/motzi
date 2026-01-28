@@ -18,6 +18,11 @@ type PickupDayCreatePayload = {
   orderDeadlineAt: string;
 };
 
+type PickupDayUpdatePayload = {
+  pickupAt: string;
+  orderDeadlineAt: string;
+};
+
 type MenuItemPickupDayPayload = {
   menuItemId: number;
   pickupDayId: number;
@@ -32,6 +37,7 @@ export type BuilderApi = {
   item: {
     add: (item: MenuItemAddPayload) => Promise<unknown>;
     remove: (itemId: number) => Promise<unknown>;
+    clearAll: () => Promise<unknown>;
   };
   menuItem: {
     update: (menuItemId: number, json: MenuItemUpdatePayload) => Promise<unknown>;
@@ -39,6 +45,7 @@ export type BuilderApi = {
   pickupDay: {
     add: (pickupDay: PickupDayCreatePayload) => Promise<unknown>;
     remove: (pickupDayId: number) => Promise<unknown>;
+    update: (pickupDayId: number, pickupDay: PickupDayUpdatePayload) => Promise<unknown>;
   };
   menuItemPickupDay: {
     add: (payload: MenuItemPickupDayPayload) => Promise<unknown>;

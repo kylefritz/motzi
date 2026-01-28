@@ -79,4 +79,84 @@ class MenuTest < ActiveSupport::TestCase
     assert_equal week1.menu_items.map {|i| i.menu_item_pickup_days.count}.sum,
                  week3.menu_items.map {|i| i.menu_item_pickup_days.count}.sum, "same sum of menu_item_pickup_days"
   end
+
+  test "copy_from creates pickup days in target week when missing" do
+    original = menus(:week1)
+    target = Menu.create!(name: "week4", week_id: "19w04")
+
+    assert_equal 0, target.pickup_days.count
+
+    target.copy_from(original)
+
+    assert_equal original.pickup_days.count, target.pickup_days.count, "pickup days created"
+
+    original_week_start = Time.zone.from_week_id(original.week_id)
+    target_week_start = Time.zone.from_week_id(target.week_id)
+
+    original.pickup_days.zip(target.pickup_days).each do |original_day, new_day|
+      pickup_offset = original_day.pickup_at - original_week_start
+      deadline_offset = original_day.order_deadline_at - original_week_start
+
+      assert_equal target_week_start + pickup_offset, new_day.pickup_at
+      assert_equal target_week_start + deadline_offset, new_day.order_deadline_at
+    end
+
+    assert_equal original.menu_items.map {|i| i.menu_item_pickup_days.count}.sum,
+                 target.menu_items.map {|i| i.menu_item_pickup_days.count}.sum, "same sum of menu_item_pickup_days"
+    assert target.menu_items.all? { |mi| mi.menu_item_pickup_days.all? { |mipd| mipd.pickup_day.menu_id == target.id } },
+           "menu item pickup days point at target menu pickup days"
+  end
+
+  test "copy_from merges pickup days by weekday when target already has some" do
+    original = menus(:week1)
+    target = Menu.create!(name: "week4", week_id: "19w04")
+
+    original_week_start = Time.zone.from_week_id(original.week_id)
+    target_week_start = Time.zone.from_week_id(target.week_id)
+
+    thursday = original.pickup_days.find { |day| day.pickup_at.wday == 4 }
+    saturday = original.pickup_days.find { |day| day.pickup_at.wday == 6 }
+
+    target_thursday = target.pickup_days.create!(
+      pickup_at: target_week_start + (thursday.pickup_at - original_week_start),
+      order_deadline_at: target_week_start + (thursday.order_deadline_at - original_week_start),
+    )
+
+    target.copy_from(original)
+
+    target.reload
+    target_days = target.pickup_days.index_by { |day| day.pickup_at.wday }
+
+    assert_equal target_thursday.id, target_days[4].id, "existing weekday pickup day reused"
+    assert target_days.key?(6), "missing weekday pickup day created"
+    assert_equal target.pickup_days.count, 2, "no duplicate weekdays created"
+  end
+
+  test "copy_from can copy notes from source menu" do
+    original = menus(:week1)
+    target = menus(:week3)
+
+    original.update!(
+      subscriber_note: "Subscriber note copy",
+      menu_note: "Menu note copy",
+      day_of_note: "Day of note copy"
+    )
+    target.update!(
+      subscriber_note: "Old subscriber note",
+      menu_note: "Old menu note",
+      day_of_note: "Old day of note"
+    )
+
+    target.copy_from(
+      original,
+      copy_subscriber_note: true,
+      copy_menu_note: true,
+      copy_day_of_note: true
+    )
+
+    target.reload
+    assert_equal "Subscriber note copy", target.subscriber_note
+    assert_equal "Menu note copy", target.menu_note
+    assert_equal "Day of note copy", target.day_of_note
+  end
 end

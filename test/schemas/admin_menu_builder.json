@@ -7,6 +7,7 @@
     "id",
     "orderingDeadlineText",
     "leadtimeHours",
+    "recentMenus",
     "pickupDays",
     "items"
   ],
@@ -14,6 +15,19 @@
     "id": { "type": "integer" },
     "orderingDeadlineText": { "type": "string" },
     "leadtimeHours": { "type": ["integer", "null"] },
+    "recentMenus": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "weekId", "pickupDaysLabel"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "weekId": { "type": "string" },
+          "pickupDaysLabel": { "type": "string" }
+        }
+      }
+    },
     "pickupDays": {
       "type": "array",
       "items": {
