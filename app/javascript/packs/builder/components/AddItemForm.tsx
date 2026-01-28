@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import _ from "lodash";
+import styled from "styled-components";
 import { shortDay } from "./PickupDaysPanel";
 import { useApi } from "../Context";
 import type { AdminItem, AdminPickupDay } from "../../../types/api";
@@ -52,8 +53,8 @@ export default function AddItemForm({
     .filter((i) => i.name.length > 0);
 
   return (
-    <form onSubmit={handleAdd} style={{ marginTop: 30, marginBottom: 20 }}>
-      <div>
+    <Form onSubmit={handleAdd}>
+      <SelectRow>
         <select ref={selectRef}>
           {choices.map(({ id, name }) => (
             <option key={id} value={id}>
@@ -61,48 +62,71 @@ export default function AddItemForm({
             </option>
           ))}
         </select>
-      </div>
-      <div style={{ marginTop: 5 }}>
+      </SelectRow>
+      <OptionsRow>
         <label>
           Marketplace
-          <Checkbox
+          <CheckboxInput
             checked={marketplace}
             onChange={(e) => setMarketplace(e.target.checked)}
           />
         </label>
-        <label style={{ marginLeft: 20 }}>
+        <label>
           Subscriber
-          <Checkbox
+          <CheckboxInput
             checked={subscriber}
             onChange={(e) => setSubscriber(e.target.checked)}
           />
         </label>
         {pickupDays.map(({ id, pickupAt }) => {
           return (
-            <label key={id} style={{ marginLeft: 20 }}>
+            <label key={id}>
               {shortDay(pickupAt)}
-              <Checkbox
+              <CheckboxInput
                 checked={new Set(pickupDayIds).has(id)}
                 onChange={(e) => togglePickupDay(id, e.target.checked)}
               />
             </label>
           );
         })}
-        <br />
-        <br />
-        <button type="submit">Add Item</button>
-      </div>
-    </form>
+        <ActionsRow>
+          <button type="submit">Add Item</button>
+        </ActionsRow>
+      </OptionsRow>
+    </Form>
   );
 }
 
-function Checkbox({ onChange, checked }) {
-  return (
-    <input
-      style={{ marginLeft: 3 }}
-      type="checkbox"
-      checked={checked}
-      onChange={onChange}
-    />
-  );
-}
+const Form = styled.form`
+  margin-top: 30px;
+  margin-bottom: 20px;
+`;
+
+const SelectRow = styled.div`
+  select {
+    min-width: 240px;
+  }
+`;
+
+const OptionsRow = styled.div`
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+`;
+
+const ActionsRow = styled.div`
+  flex-basis: 100%;
+  margin-top: 10px;
+`;
+
+const CheckboxInput = styled.input`
+  margin-left: 3px;
+`;

@@ -83,7 +83,7 @@ export default function BuilderLayout({
           onMouseEnter={() => setIsClearHover(true)}
           onMouseLeave={() => setIsClearHover(false)}
         >
-          {isClearHover ? "💣 Delete all menu items!": "💥 Clear all"}
+          {isClearHover ? "💣 Delete all menu items!" : "💥 Clear all"}
         </ClearBtn>
       </HeaderRow>
       <FilterTabs>
