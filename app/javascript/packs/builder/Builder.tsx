@@ -3,7 +3,7 @@ import axios from "axios";
 import * as Sentry from "@sentry/browser";
 import _ from "lodash";
 
-import Layout from "./Layout";
+import BuilderLayout from "./components/BuilderLayout";
 import { ApiContext, BuilderApi } from "./Context";
 import type {
   AdminItem,
@@ -128,7 +128,7 @@ export default function MenuBuilder() {
 
   return (
     <ApiContext.Provider value={api}>
-      <Layout {...{ menu, allItems }} />
+      <BuilderLayout {...{ menu, allItems }} />
     </ApiContext.Provider>
   );
 }

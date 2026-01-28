@@ -1,16 +1,20 @@
 import React, { useState } from "react";
 import _ from "lodash";
-import { shortDay } from "./PickupDay";
-import { useApi } from "./Context";
-import type { AdminItem, AdminPickupDay } from "../../types/api";
+import { shortDay } from "./PickupDaysPanel";
+import { useApi } from "../Context";
+import type { AdminItem, AdminPickupDay } from "../../../types/api";
 
-type AdderProps = {
+type AddItemFormProps = {
   items: AdminItem[];
   not: string[];
   pickupDays: AdminPickupDay[];
 };
 
-export default function Adder({ items, not: rawNot, pickupDays }: AdderProps) {
+export default function AddItemForm({
+  items,
+  not: rawNot,
+  pickupDays,
+}: AddItemFormProps) {
   const api = useApi();
   const [subscriber, setSubscriber] = useState(true);
   const [marketplace, setMarketplace] = useState(true);

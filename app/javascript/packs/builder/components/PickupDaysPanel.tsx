@@ -1,8 +1,8 @@
 import React, { useRef } from "react";
 import styled from "styled-components";
 import moment from "moment";
-import { useApi } from "./Context";
-import type { AdminPickupDay } from "../../types/api";
+import { useApi } from "../Context";
+import type { AdminPickupDay } from "../../../types/api";
 
 export function shortDay(pickupAt: string) {
   const day = moment(pickupAt).format("dddd");
@@ -21,12 +21,15 @@ export function shortDay(pickupAt: string) {
   return day;
 }
 
-type PickupDaysProps = {
+type PickupDaysPanelProps = {
   pickupDays: AdminPickupDay[];
   leadtimeHours: number | null;
 };
 
-export function PickupDays({ pickupDays, leadtimeHours }: PickupDaysProps) {
+export default function PickupDaysPanel({
+  pickupDays,
+  leadtimeHours,
+}: PickupDaysPanelProps) {
   const inputDeadline = useRef<HTMLInputElement | null>(null);
   const inputPickup = useRef<HTMLInputElement | null>(null);
   const api = useApi();
