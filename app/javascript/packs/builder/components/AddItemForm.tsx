@@ -127,6 +127,6 @@ const ActionsRow = styled.div`
   margin-top: 10px;
 `;
 
-const CheckboxInput = styled.input`
+const CheckboxInput = styled.input.attrs({ type: "checkbox" })`
   margin-left: 3px;
 `;
