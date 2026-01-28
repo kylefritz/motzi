@@ -142,9 +142,9 @@ class MenuTest < ActiveSupport::TestCase
       day_of_note: "Day of note copy"
     )
     target.update!(
-      subscriber_note: "Old subscriber note",
-      menu_note: "Old menu note",
-      day_of_note: "Old day of note"
+      subscriber_note: "",
+      menu_note: nil,
+      day_of_note: ""
     )
 
     target.copy_from(
@@ -158,5 +158,33 @@ class MenuTest < ActiveSupport::TestCase
     assert_equal "Subscriber note copy", target.subscriber_note
     assert_equal "Menu note copy", target.menu_note
     assert_equal "Day of note copy", target.day_of_note
+  end
+
+  test "copy_from does not override existing notes" do
+    original = menus(:week1)
+    target = menus(:week3)
+
+    original.update!(
+      subscriber_note: "Subscriber note copy",
+      menu_note: "Menu note copy",
+      day_of_note: "Day of note copy"
+    )
+    target.update!(
+      subscriber_note: "Existing subscriber note",
+      menu_note: "Existing menu note",
+      day_of_note: "Existing day of note"
+    )
+
+    target.copy_from(
+      original,
+      copy_subscriber_note: true,
+      copy_menu_note: true,
+      copy_day_of_note: true
+    )
+
+    target.reload
+    assert_equal "Existing subscriber note", target.subscriber_note
+    assert_equal "Existing menu note", target.menu_note
+    assert_equal "Existing day of note", target.day_of_note
   end
 end
