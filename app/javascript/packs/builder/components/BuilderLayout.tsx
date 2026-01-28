@@ -7,6 +7,7 @@ import AddItemForm from "./AddItemForm";
 import CopyFrom from "./CopyFrom";
 import MenuItemGrid from "./MenuItemGrid";
 import PickupDaysPanel from "./PickupDaysPanel";
+import { Button } from "./ui/Button";
 import { useApi } from "../Context";
 import type { AdminItem, AdminMenuBuilderResponse } from "../../../types/api";
 
@@ -75,8 +76,10 @@ export default function BuilderLayout({
       <hr />
       <HeaderRow>
         <h2>Menu Items</h2>
-        <ClearBtn
+        <Button
           type="button"
+          size="sm"
+          variant="danger"
           onClick={handleClearAllItems}
           disabled={!hasItems}
           title={hasItems ? "Remove all items" : "No items to clear"}
@@ -84,7 +87,7 @@ export default function BuilderLayout({
           onMouseLeave={() => setIsClearHover(false)}
         >
           {isClearHover ? "💣 Delete all menu items!" : "💥 Clear all"}
-        </ClearBtn>
+        </Button>
       </HeaderRow>
       <FilterTabs>
         <Tabs
@@ -196,28 +199,6 @@ const HeaderRow = styled.div`
   gap: 0.75rem;
   h2 {
     margin: 0;
-  }
-`;
-
-const ClearBtn = styled.button`
-  margin-left: 0.25rem;
-  padding: 0.2rem 0.6rem;
-  font-size: 90%;
-  border: 1px solid #c7372f;
-  background: #fff;
-  color: #c7372f;
-  border-radius: 4px;
-
-  &:hover:not(:disabled) {
-    background: #c7372f;
-    color: #fff;
-  }
-
-  &:disabled {
-    color: #8a8a8a;
-    background: #f4f4f4;
-    border-color: #d0d0d0;
-    cursor: not-allowed;
   }
 `;
 

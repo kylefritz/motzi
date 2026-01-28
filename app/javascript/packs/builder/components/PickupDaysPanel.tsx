@@ -3,6 +3,9 @@ import styled from "styled-components";
 import moment from "moment";
 import { useApi } from "../Context";
 import type { AdminPickupDay } from "../../../types/api";
+import { Button } from "./ui/Button";
+import { Panel, PanelBody, PanelHeader } from "./ui/Panel";
+import { ControlInput } from "./ui/FormControls";
 
 export function shortDay(pickupAt: string) {
   const day = moment(pickupAt).format("dddd");
@@ -21,6 +24,14 @@ export function shortDay(pickupAt: string) {
   return day;
 }
 
+function parsePickupDayText(text: string) {
+  const match = text.match(/^(.*?)\s*\(order by\s*(.*?)\)\s*$/i);
+  if (!match) {
+    return { pickupLabel: text, orderByLabel: null };
+  }
+  return { pickupLabel: match[1], orderByLabel: match[2] };
+}
+
 type PickupDaysPanelProps = {
   pickupDays: AdminPickupDay[];
   leadtimeHours: number | null;
@@ -33,6 +44,13 @@ export default function PickupDaysPanel({
   const inputDeadline = useRef<HTMLInputElement | null>(null);
   const inputPickup = useRef<HTMLInputElement | null>(null);
   const api = useApi();
+  const handleRemove = (pickupDayId: number) => {
+    const confirmed = window.confirm("Delete this pickup day?");
+    if (!confirmed) {
+      return;
+    }
+    api.pickupDay.remove(pickupDayId);
+  };
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -70,46 +88,61 @@ export default function PickupDaysPanel({
   return (
     <>
       <h2>Pickup days</h2>
-      <List>
+      <List role="list">
         {pickupDays.map((pickupDay) => (
-          <ListItem key={pickupDay.id}>
+          <PickupDayCard key={pickupDay.id}>
             <EditablePickupDay
               pickupDay={pickupDay}
-              onRemove={() => api.pickupDay.remove(pickupDay.id)}
+              onRemove={() => handleRemove(pickupDay.id)}
               onSave={(payload) => api.pickupDay.update(pickupDay.id, payload)}
             />
-          </ListItem>
+          </PickupDayCard>
         ))}
       </List>
-      <SectionTitle>Add</SectionTitle>
-      <form onSubmit={handleSubmit}>
-        <FieldRow>
-          <label htmlFor="pickup_at">Pickup at:</label>
-          <input id="pickup_at" ref={inputPickup} type="datetime-local" />
-        </FieldRow>
+      <AddPanel>
+        <PanelHeader>Add pickup day</PanelHeader>
+        <PanelBody>
+          <form onSubmit={handleSubmit}>
+            <InlineEditor>
+              <FieldStack>
+                <FieldLabel htmlFor="pickup_at">Pickup at:</FieldLabel>
+                <DateInput
+                  id="pickup_at"
+                  ref={inputPickup}
+                  type="datetime-local"
+                />
+              </FieldStack>
 
-        <FieldRow>
-          <label htmlFor="order_deadline_at">Order deadline at:</label>
-          <input
-            id="order_deadline_at"
-            ref={inputDeadline}
-            type="datetime-local"
-          />
-          <SmBtn type="button" onClick={handleSetDeadline}>
-            Apply lead-time {leadtimeHours} hours
-          </SmBtn>
-          <small>
-            From{" "}
-            <a href="/admin/settings" target="_blank" rel="noreferrer">
-              settings
-            </a>
-          </small>
-        </FieldRow>
+              <FieldStack>
+                <FieldLabel htmlFor="order_deadline_at">
+                  Order deadline at:
+                </FieldLabel>
+                <DateInput
+                  id="order_deadline_at"
+                  ref={inputDeadline}
+                  type="datetime-local"
+                />
+              </FieldStack>
+            </InlineEditor>
 
-        <Row>
-          <PrimaryBtn type="submit">Add pickup day</PrimaryBtn>
-        </Row>
-      </form>
+            <LeadtimeActions>
+              <Button type="button" size="sm" variant="secondary" onClick={handleSetDeadline}>
+                Apply lead-time {leadtimeHours} hours
+              </Button>
+              <small>
+                From{" "}
+                <a href="/admin/settings" target="_blank" rel="noreferrer">
+                  settings
+                </a>
+              </small>
+            </LeadtimeActions>
+
+            <ButtonRow>
+              <Button type="submit">Add pickup day</Button>
+            </ButtonRow>
+          </form>
+        </PanelBody>
+      </AddPanel>
     </>
   );
 }
@@ -131,6 +164,7 @@ function EditablePickupDay({
 }: EditablePickupDayProps) {
   const initialPickupAt = formatDateTimeLocal(pickupDay.pickupAt);
   const initialDeadline = formatDateTimeLocal(pickupDay.orderDeadlineAt);
+  const { pickupLabel, orderByLabel } = parsePickupDayText(pickupDay.deadlineText);
   const [pickupAtValue, setPickupAtValue] = useState(initialPickupAt);
   const [deadlineValue, setDeadlineValue] = useState(initialDeadline);
   const [isEditing, setIsEditing] = useState(false);
@@ -171,146 +205,165 @@ function EditablePickupDay({
   return (
     <>
       {!isEditing ? (
-        <RowInline>
-          <strong>{pickupDay.deadlineText}</strong>
+        <CardHeader>
+          <CardHeaderText>
+            <PickupDayTitle>{pickupLabel}</PickupDayTitle>
+            {orderByLabel && <PickupDayMeta>order by {orderByLabel}</PickupDayMeta>}
+          </CardHeaderText>
           <ActionRow>
-            <SmBtn type="button" onClick={handleEdit}>
+            <Button type="button" size="xs" variant="secondary" onClick={handleEdit}>
               Edit
-            </SmBtn>
-            <DeleteBtn type="button" onClick={onRemove}>
+            </Button>
+            <Button type="button" size="xs" variant="danger" data-icon="true" onClick={onRemove}>
               x
-            </DeleteBtn>
+            </Button>
           </ActionRow>
-        </RowInline>
+        </CardHeader>
       ) : (
-        <EditPanel>
-          <FieldRow>
-            <label htmlFor={`pickup_day_${pickupDay.id}_pickup_at`}>
-              Pickup at:
-            </label>
-            <input
-              id={`pickup_day_${pickupDay.id}_pickup_at`}
-              type="datetime-local"
-              value={pickupAtValue}
-              onChange={(event) => setPickupAtValue(event.target.value)}
-            />
-          </FieldRow>
-          <FieldRow>
-            <label htmlFor={`pickup_day_${pickupDay.id}_order_deadline_at`}>
-              Order deadline at:
-            </label>
-            <input
-              id={`pickup_day_${pickupDay.id}_order_deadline_at`}
-              type="datetime-local"
-              value={deadlineValue}
-              onChange={(event) => setDeadlineValue(event.target.value)}
-            />
-          </FieldRow>
-          <Row>
-            <PrimaryBtn type="button" onClick={handleSave} disabled={!isDirty}>
+        <>
+          <EditPanel>
+            <InlineEditor>
+              <FieldStack>
+                <FieldLabel htmlFor={`pickup_day_${pickupDay.id}_pickup_at`}>
+                  Pickup at:
+                </FieldLabel>
+                <DateInput
+                  id={`pickup_day_${pickupDay.id}_pickup_at`}
+                  type="datetime-local"
+                  value={pickupAtValue}
+                  onChange={(event) => setPickupAtValue(event.target.value)}
+                />
+              </FieldStack>
+              <FieldStack>
+                <FieldLabel htmlFor={`pickup_day_${pickupDay.id}_order_deadline_at`}>
+                  Order deadline at:
+                </FieldLabel>
+                <DateInput
+                  id={`pickup_day_${pickupDay.id}_order_deadline_at`}
+                  type="datetime-local"
+                  value={deadlineValue}
+                  onChange={(event) => setDeadlineValue(event.target.value)}
+                />
+              </FieldStack>
+            </InlineEditor>
+          </EditPanel>
+          <CardFooter>
+            <Button type="button" size="sm" onClick={handleSave} disabled={!isDirty}>
               Save
-            </PrimaryBtn>
-            <SecondaryBtn type="button" onClick={handleCancel}>
+            </Button>
+            <Button type="button" size="sm" variant="secondary" onClick={handleCancel}>
               Cancel
-            </SecondaryBtn>
-            <DeleteBtn type="button" onClick={onRemove}>
-              x
-            </DeleteBtn>
-          </Row>
-        </EditPanel>
+            </Button>
+          </CardFooter>
+        </>
       )}
     </>
   );
 }
 
-const Row = styled.div`
-  margin: 1rem 0;
-  label {
-    margin-right: 1rem;
-  }
-`;
-
-const FieldRow = styled(Row)`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 0.65rem 0;
-
-  label {
-    min-width: 150px;
-  }
-  input {
-    min-width: 240px;
-  }
-`;
-
-const RowInline = styled(Row)`
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0;
-
-  strong {
-    font-weight: 600;
-  }
+const ButtonRow = styled.div`
+  margin: 0.85rem 0 0;
 `;
 
 const ActionRow = styled.div`
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  margin-left: 0.25rem;
+  gap: 0.4rem;
+  margin-left: auto;
 `;
 
-const DeleteBtn = styled.button`
-  padding: 0 0.5rem;
-  border: 1px solid #d0d0d0;
-  background: #fff;
-  border-radius: 4px;
-  font-weight: 600;
+const List = styled.div`
+  margin: 0.75rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 `;
 
-const SmBtn = styled.button`
-  padding: 0.2rem 0.6rem;
-  font-size: 90%;
-  border: 1px solid #d0d0d0;
-  background: #f8f8f8;
-  border-radius: 4px;
-  color: #222;
+const PickupDayCard = styled(Panel).attrs({ role: "listitem" })`
+  flex: 0 0 350px;
+  max-width: 350px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 `;
 
-const PrimaryBtn = styled(SmBtn)`
-  background: #3f3a80;
-  color: #fff;
-  border-color: #3f3a80;
-  &:disabled {
-    background: #d6d6e6;
-    border-color: #d6d6e6;
-    color: #707070;
-    cursor: not-allowed;
-    opacity: 0.9;
-  }
+const CardHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  background: #f6f5ff;
+  border-bottom: 1px solid #e6e6ee;
 `;
 
-const SecondaryBtn = styled(SmBtn)`
-  background: #fff;
+const CardHeaderText = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1 1 auto;
 `;
 
-const List = styled.ol`
+const PickupDayTitle = styled.h3`
   margin: 0;
-  padding-left: 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2e2927;
 `;
 
-const ListItem = styled.li`
-  margin: 0.6rem 0 1rem;
+const PickupDayMeta = styled.p`
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6b6b6b;
 `;
 
-const SectionTitle = styled.h4`
+const AddPanel = styled(Panel)`
   margin-top: 1.5rem;
 `;
 
+const LeadtimeActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  small {
+    color: #6b6b6b;
+  }
+`;
+
+const InlineEditor = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem 1.2rem;
+`;
+
+const DateInput = styled(ControlInput)`
+  width: 100%;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.85rem;
+`;
+
+const FieldStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+`;
+
+const FieldLabel = styled.label`
+  color: #4a4a4a;
+  font-weight: 600;
+  font-size: 0.9rem;
+`;
+
 const EditPanel = styled.div`
-  padding: 0.5rem 0 0.25rem;
-  border-left: 2px solid #ececec;
-  padding-left: 0.75rem;
+  padding: 0.9rem;
+  background: #f6f5ff;
+  border-bottom: 1px solid #e6e6ee;
+`;
+
+const CardFooter = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem 0.85rem;
+  border-top: 1px solid #e6e6ee;
+  background: #fff;
 `;

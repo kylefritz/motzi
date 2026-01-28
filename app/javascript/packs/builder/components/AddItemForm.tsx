@@ -4,6 +4,9 @@ import styled from "styled-components";
 import { shortDay } from "./PickupDaysPanel";
 import { useApi } from "../Context";
 import type { AdminItem, AdminPickupDay } from "../../../types/api";
+import { Button } from "./ui/Button";
+import { Panel, PanelBody, PanelHeader } from "./ui/Panel";
+import { ControlSelect } from "./ui/FormControls";
 
 type AddItemFormProps = {
   items: AdminItem[];
@@ -53,59 +56,66 @@ export default function AddItemForm({
     .filter((i) => i.name.length > 0);
 
   return (
-    <Form onSubmit={handleAdd}>
-      <SelectRow>
-        <select ref={selectRef}>
-          {choices.map(({ id, name }) => (
-            <option key={id} value={id}>
-              {name}
-            </option>
-          ))}
-        </select>
-      </SelectRow>
-      <OptionsRow>
-        <label>
-          Marketplace
-          <CheckboxInput
-            checked={marketplace}
-            onChange={(e) => setMarketplace(e.target.checked)}
-          />
-        </label>
-        <label>
-          Subscriber
-          <CheckboxInput
-            checked={subscriber}
-            onChange={(e) => setSubscriber(e.target.checked)}
-          />
-        </label>
-        {pickupDays.map(({ id, pickupAt }) => {
-          return (
-            <label key={id}>
-              {shortDay(pickupAt)}
+    <AddItemPanel>
+      <PanelHeader>Add item</PanelHeader>
+      <PanelBody>
+        <Form onSubmit={handleAdd}>
+          <SelectRow>
+            <ItemSelect ref={selectRef}>
+              {choices.map(({ id, name }) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </ItemSelect>
+          </SelectRow>
+          <OptionsRow>
+            <label>
+              Marketplace
               <CheckboxInput
-                checked={new Set(pickupDayIds).has(id)}
-                onChange={(e) => togglePickupDay(id, e.target.checked)}
+                checked={marketplace}
+                onChange={(e) => setMarketplace(e.target.checked)}
               />
             </label>
-          );
-        })}
-        <ActionsRow>
-          <button type="submit">Add Item</button>
-        </ActionsRow>
-      </OptionsRow>
-    </Form>
+            <label>
+              Subscriber
+              <CheckboxInput
+                checked={subscriber}
+                onChange={(e) => setSubscriber(e.target.checked)}
+              />
+            </label>
+            {pickupDays.map(({ id, pickupAt }) => {
+              return (
+                <label key={id}>
+                  {shortDay(pickupAt)}
+                  <CheckboxInput
+                    checked={new Set(pickupDayIds).has(id)}
+                    onChange={(e) => togglePickupDay(id, e.target.checked)}
+                  />
+                </label>
+              );
+            })}
+            <ActionsRow>
+              <Button type="submit">Add Item</Button>
+            </ActionsRow>
+          </OptionsRow>
+        </Form>
+      </PanelBody>
+    </AddItemPanel>
   );
 }
 
+const AddItemPanel = styled(Panel)`
+  display: inline-block;
+  margin-top: 1.5rem;
+`;
+
 const Form = styled.form`
-  margin-top: 30px;
-  margin-bottom: 20px;
+  margin: 0;
 `;
 
 const SelectRow = styled.div`
-  select {
-    min-width: 240px;
-  }
+  display: flex;
 `;
 
 const OptionsRow = styled.div`
@@ -129,4 +139,8 @@ const ActionsRow = styled.div`
 
 const CheckboxInput = styled.input.attrs({ type: "checkbox" })`
   margin-left: 3px;
+`;
+
+const ItemSelect = styled(ControlSelect)`
+  min-width: 240px;
 `;

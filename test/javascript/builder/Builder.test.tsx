@@ -199,17 +199,28 @@ test("adds pickup days and items", async () => {
     menuId: "42",
   });
 
-  // Remove a pickup day.
-  const pickupRemoveButtons = screen.getAllByRole("button", { name: "x" });
-  await userEvent.click(pickupRemoveButtons[0]);
+  // Remove a pickup day (confirm before delete).
+  const pickupList = screen.getAllByRole("list")[0];
+  const firstPickupDay = within(pickupList)
+    .getByText("Wed 10am")
+    .closest('[role="listitem"]');
+  if (!firstPickupDay) {
+    throw new Error("Expected first pickup day card to be present");
+  }
+  const pickupDayCard = within(firstPickupDay);
+  const removeButton = pickupDayCard.getByRole("button", { name: "x" });
+
+  const deleteConfirmSpy = mock(() => false);
+  window.confirm = deleteConfirmSpy;
+  await userEvent.click(removeButton);
+  expect(deleteConfirmSpy).toHaveBeenCalled();
+  expect(deleteMock).not.toHaveBeenCalledWith("/admin/pickup_days/1.json");
+
+  window.confirm = mock(() => true);
+  await userEvent.click(removeButton);
   expect(deleteMock).toHaveBeenCalledWith("/admin/pickup_days/1.json");
 
   // Edit an existing pickup day.
-  const pickupList = screen.getAllByRole("list")[0];
-  const firstPickupDay = within(pickupList).getByText("Wed 10am").closest("li");
-  if (!firstPickupDay) {
-    throw new Error("Expected first pickup day row to be present");
-  }
   const pickupDayRow = within(firstPickupDay);
   await userEvent.click(pickupDayRow.getByRole("button", { name: "Edit" }));
   const editPickupInput = pickupDayRow.getByLabelText("Pickup at:");
@@ -248,4 +259,44 @@ test("adds pickup days and items", async () => {
     marketplace: true,
     pickupDayIds: [1, 2],
   });
+});
+
+test("copy from menu defaults are wired up", async () => {
+  const { default: MenuBuilder } = await import("builder/Builder");
+
+  render(<MenuBuilder />);
+
+  // Wait for the copy section to render so the form is available.
+  await waitFor(() => expect(screen.getByText("Copy from menu")).toBeTruthy());
+
+  // Scope queries to the copy-from section to avoid picking up other inputs.
+  const copySection = screen.getByText("Copy from menu").closest("section");
+  if (!copySection) {
+    throw new Error("Expected copy-from section to be present");
+  }
+  const copyForm = within(copySection);
+
+  // The menu selector should exist and be required.
+  const menuSelect = copyForm.getByRole("combobox", { name: "Menu:" });
+  expect(menuSelect).toBeTruthy();
+
+  // All note copy checkboxes should be present and default checked.
+  const subscriberCheckbox = copyForm.getByRole("checkbox", {
+    name: "Subscriber",
+  }) as HTMLInputElement;
+  const menuCheckbox = copyForm.getByRole("checkbox", {
+    name: "Menu",
+  }) as HTMLInputElement;
+  const dayOfCheckbox = copyForm.getByRole("checkbox", {
+    name: "Day of",
+  }) as HTMLInputElement;
+
+  expect(subscriberCheckbox.checked).toBe(true);
+  expect(menuCheckbox.checked).toBe(true);
+  expect(dayOfCheckbox.checked).toBe(true);
+
+  // The helper hint should be visible so the behavior is clear to admins.
+  expect(
+    copyForm.getByText(/Copying .* override an existing note/i)
+  ).toBeTruthy();
 });

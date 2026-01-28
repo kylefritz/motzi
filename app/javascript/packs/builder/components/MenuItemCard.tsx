@@ -3,6 +3,7 @@ import { Card, Icon, IconButton } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import styled from "styled-components";
 import { shortDay } from "./PickupDaysPanel";
+import { Button } from "./ui/Button";
 import { useApi } from "../Context";
 import { isNil } from "lodash";
 import type {
@@ -203,7 +204,11 @@ function Limit({ id, limit }: { id: number; limit: number | null }) {
     <label>
       limit:
       <SmallInput value={newLimit} onChange={handleChange} placeholder="none" />
-      {hasChanged && <MiniBtn onClick={handleSave}>Save</MiniBtn>}
+      {hasChanged && (
+        <Button size="xs" onClick={handleSave}>
+          Save
+        </Button>
+      )}
     </label>
   );
 }
@@ -216,13 +221,6 @@ const RightButton = styled(IconButton)`
 const Sub = styled.h6`
   margin-top: 0;
   margin-bottom: 0.5rem;
-`;
-
-const MiniBtn = styled.button`
-  margin-left: 3px;
-  padding: 2px;
-  font-size: 8px;
-  background: deepskyblue;
 `;
 
 const CheckboxLabel = styled.label`
