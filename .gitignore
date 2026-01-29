@@ -36,5 +36,5 @@ yarn-debug.log*
 !/app/assets/builds/.keep
 /coverage
 
-# mac so
+# mac os
 .DS_Store
