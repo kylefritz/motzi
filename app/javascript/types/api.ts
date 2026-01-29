@@ -41,6 +41,7 @@ export type MenuOrderRequest = {
   menuId?: number;
   comments?: string | null;
   skip?: boolean;
+  menu_id?: number;
   cart: CartItem[];
 };
 

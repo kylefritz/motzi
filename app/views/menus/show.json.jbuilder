@@ -1,6 +1,7 @@
 json.menu do
   json.extract! @menu, :id, :name, :menu_note, :subscriber_note
   json.is_current @menu.current?
+  json.is_open @menu.open_for_ordering?
   json.ordering_deadline_text ordering_deadline_text(@menu)
   json.enable_pay_what_you_can Setting.shop.pay_what_you_can
 
@@ -37,9 +38,9 @@ json.menu do
   end
 end
 
-json.open_menus @open_menus do |menu|
-  json.extract! menu, :id, :name, :week_id
-  json.is_current menu.current?
+json.open_menus Menu.open_for_ordering do |menu|
+  json.extract! menu, :id, :name
+  json.ordering_deadline_text ordering_deadline_text(menu)
 end
 
 json.user do

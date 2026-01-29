@@ -67,6 +67,7 @@ export type MenuResponse = {
     menuNote: null | string;
     subscriberNote: string;
     isCurrent: boolean;
+    isOpen: boolean;
     orderingDeadlineText: string;
     enablePayWhatYouCan: boolean;
     pickupDays: Array<{
@@ -126,7 +127,6 @@ export type MenuResponse = {
   openMenus: Array<{
     id: number;
     name: string;
-    weekId: string;
-    isCurrent: boolean;
+    orderingDeadlineText: string;
   }>;
 };

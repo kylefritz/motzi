@@ -15,7 +15,6 @@ import type {
   MenuOrderRequest,
   MenuResponse,
   MenuUser,
-  OpenMenu,
   MarketplaceOrderRequest,
 } from "../../types/api";
 
@@ -31,39 +30,6 @@ type LayoutProps = {
   setIsEditingOrder: React.Dispatch<React.SetStateAction<boolean>>;
   user: MenuUser | null;
 };
-
-type MenuTabsProps = {
-  menus: OpenMenu[];
-  selectedMenuId?: number;
-  onSelect: (menuId: number) => void;
-};
-
-function MenuTabs({ menus, selectedMenuId, onSelect }: MenuTabsProps) {
-  if (menus.length < 2) {
-    return null;
-  }
-
-  return (
-    <ul className="nav nav-tabs mb-4" role="tablist">
-      {menus.map((menu) => {
-        const isActive = menu.id === selectedMenuId;
-        return (
-          <li className="nav-item" role="presentation" key={menu.id}>
-            <button
-              type="button"
-              className={`nav-link${isActive ? " active" : ""}`}
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => onSelect(menu.id)}
-            >
-              {menu.name}
-            </button>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
 
 function Layout({
   bundles,
@@ -92,7 +58,7 @@ function Layout({
 
   if (order && !isEditingOrder) {
     const handleEditOrder =
-      !orderingClosed ? () => setIsEditingOrder(true) : null;
+      menu.isOpen && !orderingClosed ? () => setIsEditingOrder(true) : null;
     return (
       <Order
         {...{
@@ -131,13 +97,11 @@ export default function App() {
     location.search
   ) as { uid?: string; ignoredeadline?: string };
 
-  const fetchMenu = (menuId?: number) => {
+  const fetchMenu = (menuId?: number | null) => {
     let params = { uid };
-    const id =
-      menuId ||
-      _.get(location.pathname.match(/menus\/(.*)/), 1) ||
-      undefined;
-    const menuPath = id ? `/menus/${id}.json` : "/menu.json";
+    const pathId = _.get(location.pathname.match(/menus\/(.*)/), 1);
+    const resolvedMenuId = menuId ?? (pathId ? Number(pathId) : null);
+    const menuPath = resolvedMenuId ? `/menus/${resolvedMenuId}.json` : "/menu.json";
     axios
       .get<MenuResponse>(menuPath, { params })
       .then(({ data: newData }) => {
@@ -161,13 +125,13 @@ export default function App() {
   ) => {
     const orderId = _.get(data, "order.id");
     const menuId = _.get(data, "menu.id");
+    const payload = menuId ? { ...order, menu_id: menuId } : order;
 
     const method: "put" | "post" = orderId ? "put" : "post";
     const url = orderId ? `/orders/${orderId}.json` : "/orders.json";
-    const orderPayload = menuId ? { ...order, menuId } : order;
-    console.debug("saving order", method, url, orderPayload);
+    console.debug("saving order", method, url, order);
 
-    return axios<MenuResponse>({ method, url, data: orderPayload })
+    return axios<MenuResponse>({ method, url, data: payload })
       .then(({ data: newData }) => {
         setData(newData); // expect: menu, user, order
         setIsEditingOrder(false);
@@ -187,6 +151,16 @@ export default function App() {
   const order = data?.order || null;
   const openMenus = data?.openMenus || [];
   const { orderingDeadlineText, enablePayWhatYouCan } = menu || {};
+  const showTabs = openMenus.length > 1;
+  const activeMenuId = menu?.id;
+
+  const handleSelectMenu = (nextMenuId: number) => {
+    if (nextMenuId === activeMenuId) {
+      return;
+    }
+    setIsEditingOrder(false);
+    fetchMenu(nextMenuId);
+  };
 
   return (
     <SettingsContext.Provider
@@ -203,28 +177,37 @@ export default function App() {
           ignoreDeadline,
         }}
       >
-        <MenuTabs
-          menus={openMenus}
-          selectedMenuId={menu?.id}
-          onSelect={(menuId) => {
-            if (menuId !== menu?.id) {
-              setIsEditingOrder(false);
-              fetchMenu(menuId);
-            }
-          }}
-        />
-        <Layout
-          {...{
-            bundles,
-            error,
-            handleCreateOrder,
-            isEditingOrder,
-            menu,
-            order,
-            setIsEditingOrder,
-            user,
-          }}
-        />
+        <>
+          {showTabs && (
+            <ul className="nav nav-tabs mb-4" role="tablist">
+              {openMenus.map((openMenu) => (
+                <li className="nav-item" key={openMenu.id}>
+                  <button
+                    type="button"
+                    className={`nav-link ${
+                      openMenu.id === activeMenuId ? "active" : ""
+                    }`}
+                    onClick={() => handleSelectMenu(openMenu.id)}
+                  >
+                    {openMenu.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <Layout
+            {...{
+              bundles,
+              error,
+              handleCreateOrder,
+              isEditingOrder,
+              menu,
+              order,
+              setIsEditingOrder,
+              user,
+            }}
+          />
+        </>
       </DayContext.Provider>
     </SettingsContext.Provider>
   );

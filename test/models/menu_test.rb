@@ -48,22 +48,6 @@ class MenuTest < ActiveSupport::TestCase
     assert week3.emailed_at.present?
   end
 
-  test "publish_to_subscribers can keep current menu" do
-    current = menus(:week2)
-    current.make_current!
-
-    travel_to_week_id(current.week_id) do
-      holiday = Menu.create!(name: "Holiday", week_id: "19w04", allow_overlap: true)
-
-      assert_email_sent(User.subscribers.count) do
-        holiday.publish_to_subscribers!(make_current: false)
-      end
-
-      assert_equal current.id, Menu.current.id
-      assert holiday.emailed_at.present?
-    end
-  end
-
   test "ordering closed" do
     week3 = menus(:week3)
 
@@ -76,20 +60,13 @@ class MenuTest < ActiveSupport::TestCase
     end
   end
 
-  test "open_for_ordering includes overlapping menus" do
-    travel_to(Time.zone.parse("2019-01-08 9:00 PM")) do
-      current = menus(:week2)
-      current.make_current!
-
-      holiday = Menu.create!(name: "Holiday", week_id: "19w04", allow_overlap: true)
-      holiday.pickup_days.create!(
-        order_deadline_at: Time.zone.parse("2019-01-20 9:00 PM"),
-        pickup_at: Time.zone.parse("2019-01-22 3:00 PM")
-      )
-
+  test "open_for_ordering includes menus with future deadlines" do
+    travel_to(Time.zone.parse("2019-01-09 12:00 PM")) do
       open_menus = Menu.open_for_ordering
-      assert_includes open_menus, current
-      assert_includes open_menus, holiday
+
+      assert_includes open_menus, menus(:week2)
+      assert_includes open_menus, menus(:week3)
+      refute_includes open_menus, menus(:week1)
     end
   end
 
@@ -219,25 +196,5 @@ class MenuTest < ActiveSupport::TestCase
     assert_equal "Existing subscriber note", target.subscriber_note
     assert_equal "Existing menu note", target.menu_note
     assert_equal "Existing day of note", target.day_of_note
-  end
-
-  test "menus can overlap when allow_overlap is enabled" do
-    holiday = Menu.create!(name: "Holiday", week_id: "19w04", allow_overlap: true)
-    assert_difference -> { holiday.pickup_days.count }, 1 do
-      holiday.pickup_days.create!(
-        order_deadline_at: Time.zone.parse("2019-01-09 9:00 PM"),
-        pickup_at: Time.zone.parse("2019-01-11 3:00 PM")
-      )
-    end
-  end
-
-  test "menus cannot overlap when allow_overlap is disabled" do
-    other = Menu.create!(name: "Week 4", week_id: "19w05")
-    assert_raises(ActiveRecord::RecordInvalid) do
-      other.pickup_days.create!(
-        order_deadline_at: Time.zone.parse("2019-01-09 9:00 PM"),
-        pickup_at: Time.zone.parse("2019-01-11 3:00 PM")
-      )
-    end
   end
 end

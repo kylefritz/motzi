@@ -1,4 +1,5 @@
 class Menu < ApplicationRecord
+  alias_attribute :allow_overlap, :is_special
   has_many :menu_items, dependent: :destroy
   has_many :pickup_days, dependent: :destroy
   has_many :items, through: :menu_items
@@ -7,12 +8,15 @@ class Menu < ApplicationRecord
   has_many :messages, class_name: "Ahoy::Message"
   has_paper_trail
   default_scope { order("LOWER(week_id) desc") }
-  scope :open_for_ordering, -> {
-    joins(:pickup_days).where("pickup_days.order_deadline_at >= ?", Time.zone.now).distinct
-  }
 
   def self.current
     Menu.find(Setting.menu_id)
+  end
+
+  def self.open_for_ordering
+    Menu.joins(:pickup_days)
+        .group("menus.id")
+        .having("MAX(pickup_days.order_deadline_at) >= ?", Time.zone.now)
   end
   def self.for_current_week_id
     Menu.find_by(week_id: Time.zone.now.week_id)
@@ -28,6 +32,10 @@ class Menu < ApplicationRecord
 
   def for_current_week_id?
     self.week_id == Time.zone.now.week_id
+  end
+
+  def allow_overlap?
+    is_special?
   end
 
   def can_publish?
@@ -97,22 +105,8 @@ class Menu < ApplicationRecord
     Time.zone.now > self.latest_deadline
   end
 
-  def ordering_window(deadlines: nil)
-    values = deadlines || pickup_days.pluck(:order_deadline_at)
-    return nil if values.blank?
-
-    values.min..values.max
-  end
-
-  def ordering_window_overlaps?(other, deadlines: nil)
-    range = ordering_window(deadlines: deadlines)
-    other_range = other.ordering_window
-    return false if range.nil? || other_range.nil?
-
-    range.cover?(other_range.begin) ||
-      range.cover?(other_range.end) ||
-      other_range.cover?(range.begin) ||
-      other_range.cover?(range.end)
+  def open_for_ordering?
+    !ordering_closed?
   end
 
   def earliest_deadline
@@ -121,6 +115,26 @@ class Menu < ApplicationRecord
 
   def latest_deadline
     self.pickup_days.maximum(:order_deadline_at)
+  end
+
+  def ordering_window(deadlines: nil)
+    deadlines ||= self.pickup_days.pluck(:order_deadline_at)
+    return nil if deadlines.empty?
+
+    week_start = Time.zone.from_week_id(self.week_id)
+    week_end = week_start + 7.days
+    in_week = deadlines.select { |deadline| deadline >= week_start && deadline <= week_end }
+    return nil if in_week.empty?
+
+    (in_week.min..in_week.max)
+  end
+
+  def ordering_window_overlaps?(other_menu, deadlines: nil)
+    window = ordering_window(deadlines: deadlines)
+    other_window = other_menu.ordering_window
+    return false if window.nil? || other_window.nil?
+
+    window.begin <= other_window.end && other_window.begin <= window.end
   end
 
   def sorted_menu_items(includes: nil)

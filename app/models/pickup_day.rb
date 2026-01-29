@@ -42,7 +42,7 @@ class PickupDay < ApplicationRecord
   private
 
   def validate_ordering_overlap?
-    menu.present? && !menu.allow_overlap?
+    menu.present? && !menu.is_special?
   end
 
   def ordering_window_does_not_overlap
@@ -52,7 +52,7 @@ class PickupDay < ApplicationRecord
     return if window.nil?
 
     conflicts = Menu.includes(:pickup_days).where.not(id: menu.id).select do |other|
-      next if other.allow_overlap?
+      next if other.is_special?
       menu.ordering_window_overlaps?(other, deadlines: deadlines)
     end
 

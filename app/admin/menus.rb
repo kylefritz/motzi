@@ -1,5 +1,5 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note, :allow_overlap
+  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note, :is_special
   includes :pickup_days, menu_items: [:item]
   config.sort_order = 'LOWER(week_id) desc'
 
@@ -11,7 +11,7 @@ ActiveAdmin.register Menu do
   filter :week_id
   filter :menu_note
   filter :day_of_note
-  filter :allow_overlap
+  filter :is_special
 
   scope :all, default: true
   scope("current menu") { |scope| scope.where(id: Setting.menu_id) }
@@ -47,7 +47,7 @@ ActiveAdmin.register Menu do
       t = Time.zone.from_week_id(menu.week_id)
       small "#{t.strftime('%a %m/%d')}"
     end
-    column :allow_overlap
+    column :is_special
     column :stats do |menu|
       if menu.emailed_at.blank? || menu.emailed_at > 6.weeks.ago
         render 'admin/menus/sales', {menu: menu}
@@ -73,8 +73,8 @@ ActiveAdmin.register Menu do
 
   form do |f|
     def week_options(menu_week_id)
-      overlapping_week_ids = Menu.where(allow_overlap: true).pluck(:week_id)
-      week_ids = (-10..10).map {|i| (Time.zone.now + i.weeks).week_id } - Menu.where(allow_overlap: false).pluck(:week_id)
+      overlapping_week_ids = Menu.where(is_special: true).pluck(:week_id)
+      week_ids = (-10..10).map {|i| (Time.zone.now + i.weeks).week_id } - Menu.where(is_special: false).pluck(:week_id)
       week_ids.push(menu_week_id) if menu_week_id.present?
       week_ids.uniq.sort.map do |week_id|
         t = Time.zone.from_week_id(week_id).strftime('%a %m/%d')
@@ -94,7 +94,7 @@ ActiveAdmin.register Menu do
       input :subscriber_note
       input :menu_note
       input :day_of_note, placeholder: 'Included in reminder emails sent out on pickup day'
-      input :allow_overlap, label: "Allow overlap with other menus"
+      input :is_special, label: "Is Special Menu? Allowed overlap with other menus."
     end
     actions
   end
@@ -119,7 +119,7 @@ ActiveAdmin.register Menu do
       row :day_of_note do
         menu.day_of_note_html
       end
-      row :allow_overlap
+      row :is_special
       row :menu_items do
         render 'builder'
       end

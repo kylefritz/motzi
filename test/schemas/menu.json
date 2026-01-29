@@ -13,6 +13,7 @@
         "menuNote",
         "subscriberNote",
         "isCurrent",
+        "isOpen",
         "orderingDeadlineText",
         "enablePayWhatYouCan",
         "pickupDays",
@@ -24,6 +25,7 @@
         "menuNote": { "type": ["null", "string"] },
         "subscriberNote": { "type": "string" },
         "isCurrent": { "type": "boolean" },
+        "isOpen": { "type": "boolean" },
         "orderingDeadlineText": { "type": "string" },
         "enablePayWhatYouCan": { "type": "boolean" },
         "pickupDays": {
@@ -184,12 +186,12 @@
       "title": "openMenus",
       "items": {
         "type": "object",
-        "required": ["id", "name", "weekId", "isCurrent"],
+        "title": "openMenu",
+        "required": ["id", "name", "orderingDeadlineText"],
         "properties": {
           "id": { "type": "integer" },
           "name": { "type": "string" },
-          "weekId": { "type": "string" },
-          "isCurrent": { "type": "boolean" }
+          "orderingDeadlineText": { "type": "string" }
         }
       }
     }

@@ -42,6 +42,7 @@ export default function ({
     menuNote: "menu note copy",
     subscriberNote: "subscribers note copy",
     isCurrent: true,
+    isOpen: true,
     orderingDeadlineText:
       "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
     enablePayWhatYouCan,
@@ -194,6 +195,13 @@ export default function ({
   const data: MenuResponse = {
     menu,
     bundles,
+    openMenus: [
+      {
+        id: menu.id,
+        name: menu.name,
+        orderingDeadlineText: menu.orderingDeadlineText,
+      },
+    ],
     user: withUser === true ? user : withUser || null,
     order: withOrder === true ? order : withOrder || null,
     openMenus: [
