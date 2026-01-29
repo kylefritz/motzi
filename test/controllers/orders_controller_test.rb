@@ -128,6 +128,20 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "hashid_user can order another open menu by menu_id" do
+    special = menus(:valentine_special)
+    setup_menu_item_for(special)
+
+    travel_to(special.pickup_days.first.order_deadline_at - 1.hour) do
+      attrs = order_attrs_for_menu(special, users(:ljf).hashid)
+      attrs[:menu_id] = special.id
+      post '/orders.json', params: attrs, as: :json
+      assert_success_and_validate
+      order = Order.last
+      assert_equal special.id, order.menu_id
+    end
+  end
+
   test "unknown user cannot create order" do
     before_deadline do
       refute_order_placed
@@ -143,6 +157,23 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     {comment: 'test order', cart: [{item_id: item_id, pickup_day_id: pickup_day_id}]}.tap do |attrs|
       attrs[:uid] = hashid if hashid
     end
+  end
+
+  def order_attrs_for_menu(menu, hashid=nil)
+    item_id = items(:rye).id
+    pickup_day_id = menu.pickup_days.first.id
+    {comment: 'test order', cart: [{item_id: item_id, pickup_day_id: pickup_day_id}]}.tap do |attrs|
+      attrs[:uid] = hashid if hashid
+    end
+  end
+
+  def setup_menu_item_for(menu)
+    base_item = items(:rye)
+    menu_item = menu.menu_items.create!(item: base_item, subscriber: true, marketplace: true, sort_order: menu.menu_items.count)
+    menu.pickup_days.each do |pickup_day|
+      menu_item.menu_item_pickup_days.create!(pickup_day: pickup_day, limit: nil)
+    end
+    menu_item
   end
 
   def different_order_attrs(hashid=nil)

@@ -22,3 +22,19 @@ k_w2_donuts:
   order: kyle_week2
   item: donuts
   pickup_day: w2_d1_thurs
+
+# Valentine orders that span the regular week and the special menu for day-of/reminder verifications
+valentine_week_kyle_sat:
+  order: valentine_week_kyle
+  item: donuts
+  pickup_day: valentine_week_sat
+
+valentine_week_jess_sat:
+  order: valentine_week_jess
+  item: classic
+  pickup_day: valentine_week_sat
+
+valentine_special_jess_sat:
+  order: valentine_special_jess
+  item: rye
+  pickup_day: valentine_special_sat

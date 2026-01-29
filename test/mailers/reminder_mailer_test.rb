@@ -12,7 +12,19 @@ class ReminderMailerTest < ActionMailer::TestCase
     @user = users(:kyle)
     @order = @user.order_for_menu(@menu)
     refute_nil @order
-    @email = ReminderMailer.with(user: @user, menu: @menu, pickup_day: @pickup_day, order_items: @order.order_items).day_of_email
+    @email = ReminderMailer.with(
+      user: @user,
+      menu: @menu,
+      pickup_day: @pickup_day,
+      menus: [@menu],
+      order_items_by_menu: [
+        {
+          menu: @menu,
+          pickup_day: @pickup_day,
+          order_items: @order.order_items
+        }
+      ]
+    ).day_of_email
     assert_emails(1) { @email.deliver_now }
 
     assert_equal [@user.email], @email.to
@@ -32,7 +44,19 @@ class ReminderMailerTest < ActionMailer::TestCase
     @user.update(subscriber: false)
     @order = @user.order_for_menu(@menu)
 
-    @email = ReminderMailer.with(user: @user, menu: @menu, pickup_day: @pickup_day, order_items: @order.order_items).day_of_email
+    @email = ReminderMailer.with(
+      user: @user,
+      menu: @menu,
+      pickup_day: @pickup_day,
+      menus: [@menu],
+      order_items_by_menu: [
+        {
+          menu: @menu,
+          pickup_day: @pickup_day,
+          order_items: @order.order_items
+        }
+      ]
+    ).day_of_email
     assert_emails(1) { @email.deliver_now }
 
     refute_in_email 'credits remaining', 'doesnt show credits'
@@ -41,7 +65,7 @@ class ReminderMailerTest < ActionMailer::TestCase
   end
 
   test "havent_ordered email" do
-    @email = ReminderMailer.with(user: @user, menu: @menu).havent_ordered_email
+    @email = ReminderMailer.with(user: @user, menu: @menu, menus: [@menu]).havent_ordered_email
     assert_emails(1) { @email.deliver_now }
 
     assert_equal [@user.email], @email.to

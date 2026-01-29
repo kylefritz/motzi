@@ -52,6 +52,22 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
     refute_reminders_emailed(:sun, '7:01 PM', 'dont send the second time')
   end
 
+  test "overlapping menus only trigger a single havent ordered reminder per user" do
+    menus(:valentine_week).make_current!
+
+    travel_to(Time.zone.parse("2026-02-10 08:00 PM")) do
+      assert_email_sent(3, "special + weekly menus share one reminder") do
+        SendHaventOrderedReminderJob.perform_now
+      end
+    end
+
+    [users(:kyle), users(:adrian), users(:ljf)].each do |reviewed_user|
+      assert_equal 1,
+                   Ahoy::Message.where(user: reviewed_user, mailer: 'ReminderMailer#havent_ordered_email').count,
+                   "#{reviewed_user.email} should only receive one email"
+    end
+  end
+
   private
   def refute_reminders_emailed(day, time, msg)
     assert_reminders_emailed(0, day, time, msg)

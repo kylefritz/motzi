@@ -58,7 +58,7 @@ function Layout({
 
   if (order && !isEditingOrder) {
     const handleEditOrder =
-      menu.isCurrent && !orderingClosed ? () => setIsEditingOrder(true) : null;
+      menu.isOpen && !orderingClosed ? () => setIsEditingOrder(true) : null;
     return (
       <Order
         {...{
@@ -97,10 +97,11 @@ export default function App() {
     location.search
   ) as { uid?: string; ignoredeadline?: string };
 
-  const fetchMenu = () => {
+  const fetchMenu = (menuId?: number | null) => {
     let params = { uid };
-    const id = _.get(location.pathname.match(/menus\/(.*)/), 1);
-    const menuPath = id ? `/menus/${id}.json` : "/menu.json";
+    const pathId = _.get(location.pathname.match(/menus\/(.*)/), 1);
+    const resolvedMenuId = menuId ?? (pathId ? Number(pathId) : null);
+    const menuPath = resolvedMenuId ? `/menus/${resolvedMenuId}.json` : "/menu.json";
     axios
       .get<MenuResponse>(menuPath, { params })
       .then(({ data: newData }) => {
@@ -123,12 +124,14 @@ export default function App() {
     order: MenuOrderRequest | MarketplaceOrderRequest
   ) => {
     const orderId = _.get(data, "order.id");
+    const menuId = _.get(data, "menu.id");
+    const payload = menuId ? { ...order, menu_id: menuId } : order;
 
     const method: "put" | "post" = orderId ? "put" : "post";
     const url = orderId ? `/orders/${orderId}.json` : "/orders.json";
     console.debug("saving order", method, url, order);
 
-    return axios<MenuResponse>({ method, url, data: order })
+    return axios<MenuResponse>({ method, url, data: payload })
       .then(({ data: newData }) => {
         setData(newData); // expect: menu, user, order
         setIsEditingOrder(false);
@@ -146,7 +149,21 @@ export default function App() {
   const bundles = data?.bundles || [];
   const user = data?.user || null;
   const order = data?.order || null;
+  const openMenus = data?.openMenus || [];
   const { orderingDeadlineText, enablePayWhatYouCan } = menu || {};
+  const showTabs = openMenus.length > 1;
+  const activeMenuId = menu?.id;
+  const specialMenu = openMenus.find((openMenu) => openMenu.isSpecial);
+  const formattedSpecialPickup =
+    specialMenu?.pickupSummary || specialMenu?.orderingDeadlineText;
+
+  const handleSelectMenu = (nextMenuId: number) => {
+    if (nextMenuId === activeMenuId) {
+      return;
+    }
+    setIsEditingOrder(false);
+    fetchMenu(nextMenuId);
+  };
 
   return (
     <SettingsContext.Provider
@@ -163,18 +180,62 @@ export default function App() {
           ignoreDeadline,
         }}
       >
-        <Layout
-          {...{
-            bundles,
-            error,
-            handleCreateOrder,
-            isEditingOrder,
-            menu,
-            order,
-            setIsEditingOrder,
-            user,
-          }}
-        />
+        <>
+          {showTabs && (
+            <>
+              <ul className="nav nav-tabs mb-2" role="tablist">
+                {openMenus.map((openMenu) => (
+                  <li className="nav-item" key={openMenu.id}>
+                    <button
+                      type="button"
+                      className={`nav-link ${
+                        openMenu.id === activeMenuId ? "active" : ""
+                      } ${openMenu.isSpecial ? "text-warning" : ""}`}
+                      onClick={() => handleSelectMenu(openMenu.id)}
+                    >
+                      {openMenu.name}
+                      {openMenu.isSpecial && (
+                        <span className="badge badge-pill badge-warning ml-2">
+                          Special
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {specialMenu && (
+                <div className="alert alert-info py-2 px-3 mb-4">
+                  <div className="d-flex align-items-center mb-1">
+                    <span className="badge badge-pill badge-warning mr-2">
+                      Special menu
+                    </span>
+                    <strong>{specialMenu.name}</strong>
+                  </div>
+                  {formattedSpecialPickup && (
+                    <p className="mb-1 text-muted small">
+                      {formattedSpecialPickup}
+                    </p>
+                  )}
+                  {specialMenu.menuNote && (
+                    <p className="mb-0 small">{specialMenu.menuNote}</p>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+          <Layout
+            {...{
+              bundles,
+              error,
+              handleCreateOrder,
+              isEditingOrder,
+              menu,
+              order,
+              setIsEditingOrder,
+              user,
+            }}
+          />
+        </>
       </DayContext.Provider>
     </SettingsContext.Provider>
   );

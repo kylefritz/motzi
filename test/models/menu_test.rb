@@ -33,15 +33,17 @@ class MenuTest < ActiveSupport::TestCase
 
     refute week3.current?, 'week 2 starts as the current menu'
 
-    week3.update!(week_id: Time.zone.now.prev_week_id)
-    assert_raise(StandardError) do
-      week3.publish_to_subscribers!
-    end
+    travel_to_week_id("19w46") do
+      week3.update!(week_id: Time.zone.now.prev_week_id)
+      assert_raise(StandardError) do
+        week3.publish_to_subscribers!
+      end
 
-    week3.update!(week_id: Time.zone.now.week_id)
-    assert_email_sent(User.subscribers.count) do
-      num_emails = week3.publish_to_subscribers!
-      assert_equal num_emails, User.subscribers.count, 'sent emails returned'
+      week3.update!(week_id: Time.zone.now.week_id)
+      assert_email_sent(User.subscribers.count) do
+        num_emails = week3.publish_to_subscribers!
+        assert_equal num_emails, User.subscribers.count, 'sent emails returned'
+      end
     end
 
     assert week3.current?
@@ -60,12 +62,40 @@ class MenuTest < ActiveSupport::TestCase
     end
   end
 
+  test "open_for_ordering includes menus with future deadlines" do
+    travel_to(Time.zone.parse("2019-01-09 12:00 PM")) do
+      open_menus = Menu.open_for_ordering
+
+      assert_includes open_menus, menus(:week2)
+      assert_includes open_menus, menus(:week3)
+      refute_includes open_menus, menus(:week1)
+    end
+  end
+
   test "w3_last_deadline" do
     week3 = menus(:week3)
 
     w3_last_deadline = Time.zone.parse("2019-01-17 10:00 PM")
     assert_equal week3.latest_deadline, w3_last_deadline
     assert_equal week3.pickup_days.maximum(:order_deadline_at), w3_last_deadline
+  end
+
+  test "valentine special menu overlaps the right windows" do
+    # Fixtures model a regular early week, the week immediately before Valentine's,
+    # the Valentine week itself, and a special that starts 1.5 weeks ahead of the
+    # weekend and runs alongside the regular menus.
+    special = menus(:valentine_special)
+    week_before = menus(:valentine_week_before)
+    valentine_week = menus(:valentine_week)
+    non_overlapping = menus(:valentine_week_before_before)
+
+    assert special.is_special?
+    assert special.ordering_window_overlaps?(week_before),
+           "special menu should partially overlap the week before Valentine weekend"
+    assert special.ordering_window_overlaps?(valentine_week),
+           "special menu should fully overlap the Valentine week deadlines"
+    refute special.ordering_window_overlaps?(non_overlapping),
+           "Valentine special should start after the earlier non-overlapping menu closes"
   end
 
   test "copy_from" do

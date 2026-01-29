@@ -82,7 +82,8 @@ export default function Menu({ menu, order, user, onCreateOrder }: MenuProps) {
     );
   }
 
-  const { subscriberNote, isCurrent } = menu;
+  const { subscriberNote } = menu;
+  const { isOpen } = menu;
   const menuClosed = getDeadlineContext().allClosed(menu);
   const insufficientCredits = total.credits > userCredits;
   return (
@@ -144,28 +145,25 @@ export default function Menu({ menu, order, user, onCreateOrder }: MenuProps) {
       <Cart {...{ cart, menu, rmCartItem, skip }} />
       <div className="row mt-2 mb-3">
         <div className="col">
-          <SubmitButton
-            onClick={handleCreateOrder}
-            status={{
-              isCurrent,
-              menuClosed,
-              insufficientCredits,
-              isEditing: !!order,
-            }}
-          />
+        <SubmitButton
+          onClick={handleCreateOrder}
+          status={{
+            isOpen,
+            menuClosed,
+            insufficientCredits,
+            isEditing: !!order,
+          }}
+        />
         </div>
       </div>
     </>
   );
 }
 
-function buttonText({ isCurrent, menuClosed, insufficientCredits, isEditing }) {
+function buttonText({ isOpen, menuClosed, insufficientCredits, isEditing }) {
   const no = (text, title) => ({ disabled: true, title, text });
-  if (!isCurrent) {
-    return no(
-      "Old menu",
-      "This is not the current menu; you cannot submit an order."
-    );
+  if (!isOpen) {
+    return no("Ordering closed", "Ordering for this menu is closed");
   }
   if (menuClosed) {
     return no("Ordering closed", "Ordering for this menu is closed");

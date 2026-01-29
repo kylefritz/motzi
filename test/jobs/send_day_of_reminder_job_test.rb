@@ -53,6 +53,24 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
     refute_reminders_emailed(:tues, '7:00 AM', 'no emails should be sent since all items are now pay it forward')
   end
 
+  test "combines overlapping menus into one day-of reminder" do
+    valentine_week = menus(:valentine_week)
+    valentine_week.make_current!
+
+    travel_to(Time.zone.parse("2026-02-14 07:00 AM")) do
+      assert_email_sent(2, "handle special + weekly menus in a single email") do
+        SendDayOfReminderJob.perform_now
+      end
+
+      jess_messages = Ahoy::Message.where(user: users(:jess), mailer: 'ReminderMailer#day_of_email')
+      assert_equal 1, jess_messages.count, 'still only one email per user even with two menus'
+
+      body = ActionMailer::Base.deliveries.last.body.encoded
+      assert_match menus(:valentine_special).name, body
+      assert_match menus(:valentine_week).name, body
+    end
+  end
+
   private
 
   def order_item(user, item)

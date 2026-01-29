@@ -18,3 +18,16 @@ kyle_week2:
   user: kyle
   menu: week2
   comments: more bread!
+
+# Valentine's weekend orders backing the special and weekly overlap reminder tests
+valentine_week_kyle:
+  user: kyle
+  menu: valentine_week
+
+valentine_week_jess:
+  user: jess
+  menu: valentine_week
+
+valentine_special_jess:
+  user: jess
+  menu: valentine_special

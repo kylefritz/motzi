@@ -1,7 +1,9 @@
-<%= @menu.name %>
-Please order soon.
-<%= ordering_deadline_text(@menu) %>
+Order reminder from <%= Setting.shop.name %>!
 
-Follow this link to this week's menu: <%= current_menu_url(uid: @user.hashid) %>
+Please order soon. The following menus are still open:
+<% @menus.each do |menu| %>
+- <%= menu.name %> (<%= ordering_deadline_text(menu) %>)
+  <%= current_menu_url(uid: @user.hashid, menu_id: menu.id) %>
+<% end %>
 
 <%= render partial: 'menu_mailer/credits_remaining' %>

@@ -149,7 +149,7 @@ test("Menu pick skip", async () => {
 
 test("old menu disables submit", () => {
   const data = mockMenuJson({ order: false });
-  data.menu.isCurrent = false;
+  data.menu.isOpen = false;
 
   render(
     <SettingsContext.Provider
@@ -159,6 +159,8 @@ test("old menu disables submit", () => {
     </SettingsContext.Provider>
   );
 
-  const submitButton = screen.getByRole("button", { name: "Old menu" });
+  const submitButton = screen.getByRole("button", {
+    name: "Ordering closed",
+  });
   expect(submitButton.disabled).toBe(true);
 });

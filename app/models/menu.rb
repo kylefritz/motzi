@@ -1,4 +1,5 @@
 class Menu < ApplicationRecord
+  alias_attribute :allow_overlap, :is_special
   has_many :menu_items, dependent: :destroy
   has_many :pickup_days, dependent: :destroy
   has_many :items, through: :menu_items
@@ -10,6 +11,12 @@ class Menu < ApplicationRecord
 
   def self.current
     Menu.find(Setting.menu_id)
+  end
+
+  def self.open_for_ordering
+    Menu.joins(:pickup_days)
+        .group("menus.id")
+        .having("MAX(pickup_days.order_deadline_at) >= ?", Time.zone.now)
   end
   def self.for_current_week_id
     Menu.find_by(week_id: Time.zone.now.week_id)
@@ -23,8 +30,16 @@ class Menu < ApplicationRecord
     self.id == Setting.menu_id
   end
 
+  def week_start
+    Time.zone.from_week_id(week_id)
+  end
+
   def for_current_week_id?
     self.week_id == Time.zone.now.week_id
+  end
+
+  def allow_overlap?
+    is_special?
   end
 
   def can_publish?
@@ -94,12 +109,39 @@ class Menu < ApplicationRecord
     Time.zone.now > self.latest_deadline
   end
 
+  def open_for_ordering?
+    !ordering_closed?
+  end
+
   def earliest_deadline
     self.pickup_days.minimum(:order_deadline_at)
   end
 
   def latest_deadline
     self.pickup_days.maximum(:order_deadline_at)
+  end
+
+  def ordering_window(deadlines: nil, enforce_week: nil)
+    values = deadlines || pickup_days.pluck(:order_deadline_at)
+    return nil if values.blank?
+
+    enforce_week = !is_special? if enforce_week.nil?
+    if enforce_week
+      week_start = Time.zone.from_week_id(self.week_id)
+      week_end = week_start + 7.days
+      values = values.select { |deadline| deadline >= week_start && deadline <= week_end }
+      return nil if values.empty?
+    end
+
+    values.min..values.max
+  end
+
+  def ordering_window_overlaps?(other_menu, deadlines: nil)
+    window = ordering_window(deadlines: deadlines)
+    other_window = other_menu.ordering_window
+    return false if window.nil? || other_window.nil?
+
+    window.begin <= other_window.end && other_window.begin <= window.end
   end
 
   def sorted_menu_items(includes: nil)

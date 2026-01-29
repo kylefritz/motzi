@@ -43,3 +43,29 @@ week3:
     Warmly,
 
     Motzi Bread (Maya and Russell)
+
+# Valentine scenario menus for the new special + weekly overlap test
+valentine_week_before_before:
+  name: valentine_week_before_before
+  week_id: 26w05
+  subscriber_note: >-
+    The week prior to the Valentine push; ordering windows close before the special menu opens.
+
+valentine_week_before:
+  name: valentine_week_before
+  week_id: 26w06
+  subscriber_note: >-
+    The regular week immediately before Valentine's weekend; this week partially overlaps the holiday special.
+
+valentine_week:
+  name: valentine_week
+  week_id: 26w07
+  subscriber_note: >-
+    The Valentine's weekend week (the special menu fully overlaps these deadlines).
+
+valentine_special:
+  name: valentine_special
+  week_id: 26w08
+  is_special: true
+  subscriber_note: >-
+    The Valentine's Day special that starts 1.5 weeks ahead and runs alongside the regular menus.
