@@ -35,4 +35,6 @@ yarn-debug.log*
 /app/assets/builds/*
 !/app/assets/builds/.keep
 /coverage
-db/.DS_Store
+
+# mac so
+.DS_Store
