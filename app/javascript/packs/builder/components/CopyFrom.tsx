@@ -2,6 +2,9 @@ import React from "react";
 import styled from "styled-components";
 
 import type { AdminMenuBuilderResponse } from "../../../types/api";
+import { Button } from "./ui/Button";
+import { Panel, PanelBody, PanelHeader } from "./ui/Panel";
+import { ControlSelect } from "./ui/FormControls";
 
 type RecentMenu = AdminMenuBuilderResponse["recentMenus"][number];
 
@@ -17,7 +20,7 @@ export default function CopyFrom({ menuId, recentMenus }: CopyFromProps) {
       <form method="POST" action={`/admin/menus/${menuId}/copy_from`}>
         <FieldRow>
           <label htmlFor="original_menu_id">Menu:</label>
-          <select
+          <MenuSelect
             id="original_menu_id"
             name="original_menu_id"
             defaultValue=""
@@ -35,39 +38,49 @@ export default function CopyFrom({ menuId, recentMenus }: CopyFromProps) {
                 </option>
               );
             })}
-          </select>
+          </MenuSelect>
         </FieldRow>
         <CheckboxRow>
-          <label>
-            <input
-              type="checkbox"
-              name="copy_subscriber_note"
-              value="1"
-              defaultChecked
-            />
-            Subscriber note
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              name="copy_menu_note"
-              value="1"
-              defaultChecked
-            />
-            Menu note
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              name="copy_day_of_note"
-              value="1"
-              defaultChecked
-            />
-            Day of note
-          </label>
+          <CopyNotesContainer>
+            <PanelHeader>Copy notes</PanelHeader>
+            <PanelBody>
+              <CopyNotesOptions>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="copy_subscriber_note"
+                    value="1"
+                    defaultChecked
+                  />
+                  Subscriber
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="copy_menu_note"
+                    value="1"
+                    defaultChecked
+                  />
+                  Menu
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="copy_day_of_note"
+                    value="1"
+                    defaultChecked
+                  />
+                  Day of
+                </label>
+              </CopyNotesOptions>
+              <CopyNotesHint>
+                Copying won’t override an existing note.
+              </CopyNotesHint>
+            </PanelBody>
+          </CopyNotesContainer>
         </CheckboxRow>
         <Row>
-          <PrimaryBtn type="submit">Copy</PrimaryBtn>
+          <Button type="submit">Copy</Button>
           <Hint>
             Copies pickup days and shifts them into this menu’s week.
           </Hint>
@@ -94,15 +107,15 @@ const FieldRow = styled(Row)`
   gap: 0.75rem;
   label {
     min-width: 70px;
-  }
-  select {
-    min-width: 320px;
+    color: #4a4a4a;
+    font-weight: 600;
   }
 `;
 
 const CheckboxRow = styled(Row)`
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: 0.75rem 1.25rem;
   label {
     display: inline-flex;
@@ -112,13 +125,26 @@ const CheckboxRow = styled(Row)`
   }
 `;
 
-const PrimaryBtn = styled.button`
-  padding: 0.4rem 1rem;
-  font-size: 95%;
-  border: 1px solid #3f3a80;
-  background: #3f3a80;
-  color: #fff;
-  border-radius: 6px;
+const CopyNotesContainer = styled(Panel)`
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.65rem 0.8rem;
+`;
+
+const MenuSelect = styled(ControlSelect)`
+  min-width: 320px;
+`;
+
+const CopyNotesOptions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+`;
+
+const CopyNotesHint = styled.span`
+  color: #7a7a7a;
+  font-size: 85%;
 `;
 
 const Hint = styled.span`

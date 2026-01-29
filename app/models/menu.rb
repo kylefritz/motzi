@@ -183,9 +183,17 @@ class Menu < ApplicationRecord
 
   def copy_notes_from(original_menu, options)
     attrs = {}
-    attrs[:subscriber_note] = original_menu.subscriber_note if options[:copy_subscriber_note]
-    attrs[:menu_note] = original_menu.menu_note if options[:copy_menu_note]
-    attrs[:day_of_note] = original_menu.day_of_note if options[:copy_day_of_note]
+
+    # for each note, only copy if note is empty in this menu
+    if options[:copy_subscriber_note] && subscriber_note.blank?
+      attrs[:subscriber_note] = original_menu.subscriber_note
+    end
+    if options[:copy_menu_note] && menu_note.blank?
+      attrs[:menu_note] = original_menu.menu_note
+    end
+    if options[:copy_day_of_note] && day_of_note.blank?
+      attrs[:day_of_note] = original_menu.day_of_note
+    end
 
     update!(attrs) if attrs.any?
   end
