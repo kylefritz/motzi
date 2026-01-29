@@ -37,9 +37,12 @@ json.menu do
   end
 end
 
-json.open_menus Menu.open_for_ordering do |menu|
+  json.open_menus @open_menus do |menu|
   json.extract! menu, :id, :name
   json.ordering_deadline_text ordering_deadline_text(menu)
+  json.is_special menu.is_special?
+  json.menu_note menu.subscriber_note
+  json.pickup_summary menu_pickup_summary(menu)
 end
 
 json.user do

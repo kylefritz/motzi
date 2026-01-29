@@ -18,6 +18,11 @@ type MockMenuOptions = {
   enablePayWhatYouCan?: boolean;
 };
 
+const openMenuPickupSummary = (pickupDays: MenuPickupDay[]) =>
+  pickupDays
+    .map((day) => DateTime.fromISO(day.pickupAt).toFormat("ccc h:mm a"))
+    .join(" / ");
+
 export default function ({
   order: withOrder = true,
   user: withUser = true,
@@ -194,13 +199,6 @@ export default function ({
   const data: MenuResponse = {
     menu,
     bundles,
-    openMenus: [
-      {
-        id: menu.id,
-        name: menu.name,
-        orderingDeadlineText: menu.orderingDeadlineText,
-      },
-    ],
     user: withUser === true ? user : withUser || null,
     order: withOrder === true ? order : withOrder || null,
     openMenus: [
@@ -208,6 +206,9 @@ export default function ({
         id: menu.id,
         name: menu.name,
         orderingDeadlineText: menu.orderingDeadlineText,
+        isSpecial: false,
+        menuNote: menu.menuNote,
+        pickupSummary: openMenuPickupSummary(menu.pickupDays),
       },
     ],
   };

@@ -30,6 +30,10 @@ class Menu < ApplicationRecord
     self.id == Setting.menu_id
   end
 
+  def week_start
+    Time.zone.from_week_id(week_id)
+  end
+
   def for_current_week_id?
     self.week_id == Time.zone.now.week_id
   end

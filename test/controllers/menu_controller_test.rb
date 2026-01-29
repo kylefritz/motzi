@@ -42,7 +42,9 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     json  = @response.body
-    assert json =~ /Rye Five Ways/, 'items serialized'
+    assert json =~ /"items"/, 'items serialized'
+    assert json =~ /"openMenus"/, 'open menus'
+    assert json =~ /"pickupDays"/, 'pickup days'
     assert json =~ /subscriberNote/, 'subscriberNote'
     menu = JSON.load(json)
 

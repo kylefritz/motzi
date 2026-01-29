@@ -5,7 +5,9 @@ class ReminderMailer < ApplicationMailer
   def day_of_email
     @menu = params[:menu]
     @user = params[:user]
-    @order_items = params[:order_items]
+    @menus = params[:menus] || []
+    @order_items_by_menu = params[:order_items_by_menu] || []
+    @pickup_day = params[:pickup_day]
 
     mail(to: %("#{@user.name}" <#{@user.email}>),
          cc: @user.additional_email,
@@ -16,6 +18,7 @@ class ReminderMailer < ApplicationMailer
   def havent_ordered_email
     @menu = params[:menu]
     @user = params[:user]
+    @menus = params[:menus] || []
 
     mail(to: %("#{@user.name}" <#{@user.email}>),
          cc: @user.additional_email,

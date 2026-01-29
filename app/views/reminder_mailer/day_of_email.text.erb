@@ -1,12 +1,22 @@
 Reminder to come grab your order today!!
 
+<%= @pickup_day&.deadline_text %>
+
 <%= Setting.pickup_instructions %>
 
-<%= @menu.day_of_note %>
-
+<% @order_items_by_menu.each do |group| %>
+<%= group[:menu].name %><%= " (Special Menu)" if group[:menu].is_special? %>
+<%= group[:pickup_day]&.deadline_text %>
+<% if group[:menu].day_of_note.present? %>
+<%= group[:menu].day_of_note %>
+<% elsif group[:menu].subscriber_note.present? %>
+<%= group[:menu].subscriber_note %>
+<% end %>
 You ordered:
-<% @order_items.map do |oi| %>
+<% group[:order_items].each do |oi| %>
 <%= oi.quantity %>x <%= oi.item.name %>
+<% end %>
+
 <% end %>
 
 <%= render partial: 'menu_mailer/credits_remaining' %>

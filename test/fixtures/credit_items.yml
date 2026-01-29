@@ -21,3 +21,15 @@ jess:
   quantity: 1
   good_for_weeks: 7
   user: jess
+
+jess_extra:
+  memo: extra valentine boost
+  quantity: 2
+  good_for_weeks: 7
+  user: jess
+
+kyle_extra:
+  memo: extra credits for holiday test
+  quantity: 1
+  good_for_weeks: 7
+  user: kyle

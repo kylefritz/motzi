@@ -185,11 +185,14 @@
       "items": {
         "type": "object",
         "title": "openMenu",
-        "required": ["id", "name", "orderingDeadlineText"],
+        "required": ["id", "name", "orderingDeadlineText", "isSpecial", "menuNote", "pickupSummary"],
         "properties": {
           "id": { "type": "integer" },
           "name": { "type": "string" },
-          "orderingDeadlineText": { "type": "string" }
+          "orderingDeadlineText": { "type": "string" },
+          "isSpecial": { "type": "boolean" },
+          "menuNote": { "type": ["null", "string"] },
+          "pickupSummary": { "type": ["null", "string"] }
         }
       }
     }
