@@ -73,11 +73,13 @@ ActiveAdmin.register Menu do
 
   form do |f|
     def week_options(menu_week_id)
-      week_ids = (-10..10).map {|i| (Time.zone.now + i.weeks).week_id } - Menu.pluck(:week_id)
+      overlapping_week_ids = Menu.where(allow_overlap: true).pluck(:week_id)
+      week_ids = (-10..10).map {|i| (Time.zone.now + i.weeks).week_id } - Menu.where(allow_overlap: false).pluck(:week_id)
       week_ids.push(menu_week_id) if menu_week_id.present?
       week_ids.uniq.sort.map do |week_id|
         t = Time.zone.from_week_id(week_id).strftime('%a %m/%d')
-        ["#{week_id} starts #{t}", week_id]
+        label = overlapping_week_ids.include?(week_id) ? "#{week_id} starts #{t} (overlapping)" : "#{week_id} starts #{t}"
+        [label, week_id]
       end
     end
 

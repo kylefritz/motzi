@@ -48,6 +48,22 @@ class MenuTest < ActiveSupport::TestCase
     assert week3.emailed_at.present?
   end
 
+  test "publish_to_subscribers can keep current menu" do
+    current = menus(:week2)
+    current.make_current!
+
+    travel_to_week_id(current.week_id) do
+      holiday = Menu.create!(name: "Holiday", week_id: "19w04", allow_overlap: true)
+
+      assert_email_sent(User.subscribers.count) do
+        holiday.publish_to_subscribers!(make_current: false)
+      end
+
+      assert_equal current.id, Menu.current.id
+      assert holiday.emailed_at.present?
+    end
+  end
+
   test "ordering closed" do
     week3 = menus(:week3)
 
@@ -57,6 +73,23 @@ class MenuTest < ActiveSupport::TestCase
 
     travel_to(week3.latest_deadline - 1.hour) do
       refute week3.ordering_closed?
+    end
+  end
+
+  test "open_for_ordering includes overlapping menus" do
+    travel_to(Time.zone.parse("2019-01-08 9:00 PM")) do
+      current = menus(:week2)
+      current.make_current!
+
+      holiday = Menu.create!(name: "Holiday", week_id: "19w04", allow_overlap: true)
+      holiday.pickup_days.create!(
+        order_deadline_at: Time.zone.parse("2019-01-20 9:00 PM"),
+        pickup_at: Time.zone.parse("2019-01-22 3:00 PM")
+      )
+
+      open_menus = Menu.open_for_ordering
+      assert_includes open_menus, current
+      assert_includes open_menus, holiday
     end
   end
 
