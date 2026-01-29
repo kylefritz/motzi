@@ -33,15 +33,17 @@ class MenuTest < ActiveSupport::TestCase
 
     refute week3.current?, 'week 2 starts as the current menu'
 
-    week3.update!(week_id: Time.zone.now.prev_week_id)
-    assert_raise(StandardError) do
-      week3.publish_to_subscribers!
-    end
+    travel_to_week_id("19w46") do
+      week3.update!(week_id: Time.zone.now.prev_week_id)
+      assert_raise(StandardError) do
+        week3.publish_to_subscribers!
+      end
 
-    week3.update!(week_id: Time.zone.now.week_id)
-    assert_email_sent(User.subscribers.count) do
-      num_emails = week3.publish_to_subscribers!
-      assert_equal num_emails, User.subscribers.count, 'sent emails returned'
+      week3.update!(week_id: Time.zone.now.week_id)
+      assert_email_sent(User.subscribers.count) do
+        num_emails = week3.publish_to_subscribers!
+        assert_equal num_emails, User.subscribers.count, 'sent emails returned'
+      end
     end
 
     assert week3.current?
@@ -79,60 +81,21 @@ class MenuTest < ActiveSupport::TestCase
   end
 
   test "valentine special menu overlaps the right windows" do
-    create_menu = ->(name:, week_id:, pickups:, is_special: false) do
-      menu = Menu.create!(name: name, week_id: week_id, is_special: is_special)
-      pickups.each do |pickup|
-        menu.pickup_days.create!(
-          order_deadline_at: Time.zone.parse(pickup[:deadline]),
-          pickup_at: Time.zone.parse(pickup[:pickup])
-        )
-      end
-      menu
-    end
-
-    non_overlapping = create_menu.(
-      name: "valentine_pre_special",
-      week_id: "26w04",
-      pickups: [
-        { deadline: "2026-01-21 10:00 PM", pickup: "2026-01-22 03:00 PM" },
-        { deadline: "2026-01-23 10:00 PM", pickup: "2026-01-24 08:00 AM" },
-      ],
-    )
-    week_before = create_menu.(
-      name: "valentine_week_before",
-      week_id: "26w06",
-      pickups: [
-        { deadline: "2026-02-03 10:00 PM", pickup: "2026-02-05 03:00 PM" },
-        { deadline: "2026-02-05 10:00 PM", pickup: "2026-02-07 08:00 AM" },
-      ],
-    )
-    valentine_week = create_menu.(
-      name: "valentine_regular_week",
-      week_id: "26w07",
-      pickups: [
-        { deadline: "2026-02-10 10:00 PM", pickup: "2026-02-12 03:00 PM" },
-        { deadline: "2026-02-12 10:00 PM", pickup: "2026-02-14 08:00 AM" },
-      ],
-    )
-    special = create_menu.(
-      name: "valentine_special_menu",
-      week_id: "26w08",
-      is_special: true,
-      pickups: [
-        { deadline: "2026-01-30 10:00 PM", pickup: "2026-01-31 03:00 PM" },
-        { deadline: "2026-02-04 10:00 PM", pickup: "2026-02-06 03:00 PM" },
-        { deadline: "2026-02-10 10:00 PM", pickup: "2026-02-12 03:00 PM" },
-        { deadline: "2026-02-12 10:00 PM", pickup: "2026-02-14 08:00 AM" },
-      ],
-    )
+    # Fixtures model a regular early week, the week immediately before Valentine's,
+    # the Valentine week itself, and a special that starts 1.5 weeks ahead of the
+    # weekend and runs alongside the regular menus.
+    special = menus(:valentine_special)
+    week_before = menus(:valentine_week_before)
+    valentine_week = menus(:valentine_week)
+    non_overlapping = menus(:valentine_week_before_before)
 
     assert special.is_special?
     assert special.ordering_window_overlaps?(week_before),
-           "special menu should partially overlap the week before valentine weekend"
+           "special menu should partially overlap the week before Valentine weekend"
     assert special.ordering_window_overlaps?(valentine_week),
-           "special menu should fully overlap the valentines week deadlines"
+           "special menu should fully overlap the Valentine week deadlines"
     refute special.ordering_window_overlaps?(non_overlapping),
-           "valentine special should start after the earlier non-overlapping menu closes"
+           "Valentine special should start after the earlier non-overlapping menu closes"
   end
 
   test "copy_from" do

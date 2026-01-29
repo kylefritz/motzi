@@ -30,3 +30,54 @@ w3_d2_sat:
   menu: week3
   order_deadline_at: <%= Time.zone.parse("2019-01-17 10:00 PM") %>
   pickup_at: <%= Time.zone.parse("2019-01-19  8:00 AM") %>
+
+# Valentine scenario pickup days
+valentine_week_before_before_thurs:
+  menu: valentine_week_before_before
+  order_deadline_at: <%= Time.zone.parse("2026-01-21 10:00 PM") %>
+  pickup_at: <%= Time.zone.parse("2026-01-22  3:00 PM") %>
+
+valentine_week_before_before_sat:
+  menu: valentine_week_before_before
+  order_deadline_at: <%= Time.zone.parse("2026-01-23 10:00 PM") %>
+  pickup_at: <%= Time.zone.parse("2026-01-24  8:00 AM") %>
+
+valentine_week_before_thurs:
+  menu: valentine_week_before
+  order_deadline_at: <%= Time.zone.parse("2026-02-03 10:00 PM") %>
+  pickup_at: <%= Time.zone.parse("2026-02-05  3:00 PM") %>
+
+valentine_week_before_sat:
+  menu: valentine_week_before
+  order_deadline_at: <%= Time.zone.parse("2026-02-05 10:00 PM") %>
+  pickup_at: <%= Time.zone.parse("2026-02-07  8:00 AM") %>
+
+valentine_week_thurs:
+  menu: valentine_week
+  order_deadline_at: <%= Time.zone.parse("2026-02-10 10:00 PM") %>
+  pickup_at: <%= Time.zone.parse("2026-02-12  3:00 PM") %>
+
+valentine_week_sat:
+  menu: valentine_week
+  order_deadline_at: <%= Time.zone.parse("2026-02-12 10:00 PM") %>
+  pickup_at: <%= Time.zone.parse("2026-02-14  8:00 AM") %>
+
+valentine_special_start:
+  menu: valentine_special
+  order_deadline_at: <%= Time.zone.parse("2026-01-30 10:00 PM") %>
+  pickup_at: <%= Time.zone.parse("2026-01-31  3:00 PM") %>
+
+valentine_special_mid:
+  menu: valentine_special
+  order_deadline_at: <%= Time.zone.parse("2026-02-04 10:00 PM") %>
+  pickup_at: <%= Time.zone.parse("2026-02-06  3:00 PM") %>
+
+valentine_special_thurs:
+  menu: valentine_special
+  order_deadline_at: <%= Time.zone.parse("2026-02-10 10:00 PM") %>
+  pickup_at: <%= Time.zone.parse("2026-02-12  3:00 PM") %>
+
+valentine_special_sat:
+  menu: valentine_special
+  order_deadline_at: <%= Time.zone.parse("2026-02-12 10:00 PM") %>
+  pickup_at: <%= Time.zone.parse("2026-02-14  8:00 AM") %>
