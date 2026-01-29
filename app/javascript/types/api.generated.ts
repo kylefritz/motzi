@@ -66,7 +66,6 @@ export type MenuResponse = {
     name: string;
     menuNote: null | string;
     subscriberNote: string;
-    isCurrent: boolean;
     isOpen: boolean;
     orderingDeadlineText: string;
     enablePayWhatYouCan: boolean;
@@ -130,3 +129,4 @@ export type MenuResponse = {
     orderingDeadlineText: string;
   }>;
 };
+

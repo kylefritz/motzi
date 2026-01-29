@@ -41,7 +41,6 @@ export default function ({
     name: "week 5",
     menuNote: "menu note copy",
     subscriberNote: "subscribers note copy",
-    isCurrent: true,
     isOpen: true,
     orderingDeadlineText:
       "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
@@ -208,8 +207,7 @@ export default function ({
       {
         id: menu.id,
         name: menu.name,
-        weekId: "24w05",
-        isCurrent: menu.isCurrent,
+        orderingDeadlineText: menu.orderingDeadlineText,
       },
     ],
   };

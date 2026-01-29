@@ -117,16 +117,19 @@ class Menu < ApplicationRecord
     self.pickup_days.maximum(:order_deadline_at)
   end
 
-  def ordering_window(deadlines: nil)
-    deadlines ||= self.pickup_days.pluck(:order_deadline_at)
-    return nil if deadlines.empty?
+  def ordering_window(deadlines: nil, enforce_week: nil)
+    values = deadlines || pickup_days.pluck(:order_deadline_at)
+    return nil if values.blank?
 
-    week_start = Time.zone.from_week_id(self.week_id)
-    week_end = week_start + 7.days
-    in_week = deadlines.select { |deadline| deadline >= week_start && deadline <= week_end }
-    return nil if in_week.empty?
+    enforce_week = !is_special? if enforce_week.nil?
+    if enforce_week
+      week_start = Time.zone.from_week_id(self.week_id)
+      week_end = week_start + 7.days
+      values = values.select { |deadline| deadline >= week_start && deadline <= week_end }
+      return nil if values.empty?
+    end
 
-    (in_week.min..in_week.max)
+    values.min..values.max
   end
 
   def ordering_window_overlaps?(other_menu, deadlines: nil)
