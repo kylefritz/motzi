@@ -127,6 +127,9 @@ export type MenuResponse = {
     id: number;
     name: string;
     orderingDeadlineText: string;
+    isSpecial: boolean;
+    menuNote: null | string;
+    pickupSummary: null | string;
   }>;
 };
 

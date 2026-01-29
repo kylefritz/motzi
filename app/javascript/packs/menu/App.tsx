@@ -153,6 +153,9 @@ export default function App() {
   const { orderingDeadlineText, enablePayWhatYouCan } = menu || {};
   const showTabs = openMenus.length > 1;
   const activeMenuId = menu?.id;
+  const specialMenu = openMenus.find((openMenu) => openMenu.isSpecial);
+  const formattedSpecialPickup =
+    specialMenu?.pickupSummary || specialMenu?.orderingDeadlineText;
 
   const handleSelectMenu = (nextMenuId: number) => {
     if (nextMenuId === activeMenuId) {
@@ -179,21 +182,46 @@ export default function App() {
       >
         <>
           {showTabs && (
-            <ul className="nav nav-tabs mb-4" role="tablist">
-              {openMenus.map((openMenu) => (
-                <li className="nav-item" key={openMenu.id}>
-                  <button
-                    type="button"
-                    className={`nav-link ${
-                      openMenu.id === activeMenuId ? "active" : ""
-                    }`}
-                    onClick={() => handleSelectMenu(openMenu.id)}
-                  >
-                    {openMenu.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="nav nav-tabs mb-2" role="tablist">
+                {openMenus.map((openMenu) => (
+                  <li className="nav-item" key={openMenu.id}>
+                    <button
+                      type="button"
+                      className={`nav-link ${
+                        openMenu.id === activeMenuId ? "active" : ""
+                      } ${openMenu.isSpecial ? "text-warning" : ""}`}
+                      onClick={() => handleSelectMenu(openMenu.id)}
+                    >
+                      {openMenu.name}
+                      {openMenu.isSpecial && (
+                        <span className="badge badge-pill badge-warning ml-2">
+                          Special
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {specialMenu && (
+                <div className="alert alert-info py-2 px-3 mb-4">
+                  <div className="d-flex align-items-center mb-1">
+                    <span className="badge badge-pill badge-warning mr-2">
+                      Special menu
+                    </span>
+                    <strong>{specialMenu.name}</strong>
+                  </div>
+                  {formattedSpecialPickup && (
+                    <p className="mb-1 text-muted small">
+                      {formattedSpecialPickup}
+                    </p>
+                  )}
+                  {specialMenu.menuNote && (
+                    <p className="mb-0 small">{specialMenu.menuNote}</p>
+                  )}
+                </div>
+              )}
+            </>
           )}
           <Layout
             {...{

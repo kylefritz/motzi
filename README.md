@@ -51,6 +51,10 @@ Download the menu images from s3
 $ rake s3:download
 ```
 
+### Running tests
+
+If you want to run the full stack of automated tests locally, use the helper script we keep in `bin/tests`. It runs `mise exec -- bundle exec rails test` first and, if the Rails suite succeeds, continues with `bun run test` so you can catch both Ruby and Bun failures in one go.
+
 ### Running js tests
 
 ```
