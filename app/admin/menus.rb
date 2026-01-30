@@ -1,5 +1,5 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note, :is_special
+  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note, :is_special, :starts_at
   includes :pickup_days, menu_items: [:item]
   config.sort_order = 'LOWER(week_id) desc'
 
@@ -30,9 +30,9 @@ ActiveAdmin.register Menu do
     id_column
     column :name do |menu|
       div auto_link menu
-      if menu.current?
+      if menu.open_for_ordering? && menu.ordering_starts_at <= Time.zone.now
         br
-        status_tag true, style: 'margin-left: 3px', label: 'Current'
+        status_tag true, style: 'margin-left: 3px', label: 'Open'
       end
     end
     column :items do |menu|
@@ -85,6 +85,14 @@ ActiveAdmin.register Menu do
 
     inputs do
       input :week_id, :as => :select, :collection => week_options(resource.week_id)
+      starts_at_value = f.object.starts_at&.in_time_zone(Time.zone)
+      input :starts_at,
+            as: :string,
+            input_html: {
+              type: 'datetime-local',
+              value: starts_at_value&.strftime("%Y-%m-%dT%H:%M")
+            },
+            hint: 'Leave blank to default to the week start.'
       input :name
       para style: 'margin-left: 20%; padding-left: 8px' do
         text_node "You can use "
@@ -103,10 +111,11 @@ ActiveAdmin.register Menu do
     attributes_table do
       row :week_id do
         span menu.week_id
-        if menu.current?
-          status_tag true, style: 'margin-left: 3px', label: 'Current'
+        if menu.open_for_ordering? && menu.ordering_starts_at <= Time.zone.now
+          status_tag true, style: 'margin-left: 3px', label: 'Open'
         end
       end
+      row :starts_at
       row :sales do
         render 'admin/menus/sales', {menu: menu}
       end

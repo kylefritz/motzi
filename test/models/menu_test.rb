@@ -31,7 +31,7 @@ class MenuTest < ActiveSupport::TestCase
   test "sending weekly email" do
     week3 = menus(:week3)
 
-    refute week3.current?, 'week 2 starts as the current menu'
+    refute_equal week3, Menu.current, 'week 2 starts as the current menu'
 
     travel_to_week_id("19w46") do
       week3.update!(week_id: Time.zone.now.prev_week_id)
@@ -46,7 +46,7 @@ class MenuTest < ActiveSupport::TestCase
       end
     end
 
-    assert week3.current?
+    assert_equal week3, Menu.current
     assert week3.emailed_at.present?
   end
 

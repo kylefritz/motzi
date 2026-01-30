@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_01_28_073122) do
+ActiveRecord::Schema.define(version: 2026_01_30_120000) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
@@ -239,6 +239,7 @@ ActiveRecord::Schema.define(version: 2026_01_28_073122) do
     t.text "day_of_note"
     t.text "menu_note"
     t.boolean "is_special", default: false, null: false
+    t.datetime "starts_at"
     t.index ["week_id"], name: "index_menus_on_week_id", unique: true
   end
 

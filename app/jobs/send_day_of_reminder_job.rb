@@ -22,7 +22,7 @@ class SendDayOfReminderJob < ApplicationJob
   end
 
   def menu_priority(menu)
-    [menu.is_special? ? 1 : 0, -menu.week_start.to_i]
+    [menu.is_special? ? 1 : 0, -menu.ordering_starts_at.to_i]
   end
 
   def send_reminders_for_day(primary_pickup_day, pickup_days)

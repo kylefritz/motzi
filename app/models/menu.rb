@@ -26,12 +26,12 @@ class Menu < ApplicationRecord
     Setting.menu_id = self.id
   end
 
-  def current?
-    self.id == Setting.menu_id
-  end
-
   def week_start
     Time.zone.from_week_id(week_id)
+  end
+
+  def ordering_starts_at
+    starts_at || week_start
   end
 
   def for_current_week_id?
@@ -106,7 +106,9 @@ class Menu < ApplicationRecord
   end
 
   def ordering_closed?
-    Time.zone.now > self.latest_deadline
+    deadline = latest_deadline
+    return false if deadline.nil?
+    Time.zone.now > deadline
   end
 
   def open_for_ordering?

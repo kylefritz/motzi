@@ -23,7 +23,7 @@ module RenderCurrentOrder
 
     def order_open_menus(menus)
       menus.compact.uniq { |menu| menu.id }.sort_by do |menu|
-        week = menu.week_start
+        week = menu.ordering_starts_at
         is_special = menu.is_special? ? 1 : 0
         [is_special, -week.to_i]
       end
@@ -31,8 +31,8 @@ module RenderCurrentOrder
 
     def select_primary_menu(menus)
       non_special = menus.reject(&:is_special?)
-      return non_special.max_by { |menu| menu.week_start.to_i } if non_special.any?
-      menus.max_by { |menu| menu.week_start.to_i }
+      return non_special.max_by { |menu| menu.ordering_starts_at.to_i } if non_special.any?
+      menus.max_by { |menu| menu.ordering_starts_at.to_i }
     end
 
   end
