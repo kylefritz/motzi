@@ -67,6 +67,7 @@ export type MenuResponse = {
     menuNote: null | string;
     subscriberNote: string;
     isOpen: boolean;
+    isSpecial: boolean;
     orderingDeadlineText: string;
     enablePayWhatYouCan: boolean;
     pickupDays: Array<{

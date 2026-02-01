@@ -1,6 +1,7 @@
 json.menu do
   json.extract! @menu, :id, :name, :menu_note, :subscriber_note
   json.is_open @menu.open_for_ordering?
+  json.is_special @menu.is_special?
   json.ordering_deadline_text ordering_deadline_text(@menu)
   json.enable_pay_what_you_can Setting.shop.pay_what_you_can
 

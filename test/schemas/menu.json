@@ -13,6 +13,7 @@
         "menuNote",
         "subscriberNote",
         "isOpen",
+        "isSpecial",
         "orderingDeadlineText",
         "enablePayWhatYouCan",
         "pickupDays",
@@ -24,6 +25,7 @@
         "menuNote": { "type": ["null", "string"] },
         "subscriberNote": { "type": "string" },
         "isOpen": { "type": "boolean" },
+        "isSpecial": { "type": "boolean" },
         "orderingDeadlineText": { "type": "string" },
         "enablePayWhatYouCan": { "type": "boolean" },
         "pickupDays": {
