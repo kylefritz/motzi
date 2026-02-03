@@ -31,7 +31,13 @@ class Menu < ApplicationRecord
   end
 
   def ordering_starts_at
-    starts_at || week_start
+    if starts_at.present?
+      starts_at
+    elsif is_special?
+      created_at || Time.zone.now
+    else
+      week_start
+    end
   end
 
   def for_current_week_id?

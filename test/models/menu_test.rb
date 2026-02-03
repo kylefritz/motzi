@@ -217,4 +217,17 @@ class MenuTest < ActiveSupport::TestCase
     assert_equal "Existing menu note", target.menu_note
     assert_equal "Existing day of note", target.day_of_note
   end
+
+  test "special menu without explicit start time is open for ordering immediately" do
+    future_week_id = (Time.zone.now + 20.weeks).week_id
+    special_menu = Menu.create!(
+      name: "Future Special",
+      week_id: future_week_id,
+      is_special: true
+    )
+
+    # Should default to created_at/now, so it should be open
+    assert special_menu.ordering_starts_at <= Time.zone.now,
+           "Special menu with no starts_at should be open immediately, but starts at #{special_menu.ordering_starts_at}"
+  end
 end
