@@ -26,7 +26,8 @@ class SendHaventOrderedReminderJob < ApplicationJob
 
   def send_reminders_for_day(primary_pickup_day, pickup_days)
     menu = primary_pickup_day.menu
-    already_reminded = Set[*menu.messages.where(mailer: 'ReminderMailer#havent_ordered_email', pickup_day: primary_pickup_day).pluck(:user_id)]
+    already_reminded = Set[*menu.messages.where(mailer: 'ReminderMailer#havent_ordered_email',
+                                                pickup_day: primary_pickup_day).pluck(:user_id)]
 
     menus = pickup_days.map(&:menu).uniq
     ordered_user_ids_by_menu = menus.index_by(&:id).transform_values do |menu_entry|
@@ -34,6 +35,8 @@ class SendHaventOrderedReminderJob < ApplicationJob
     end
 
     num_reminded = 0
+
+    menus_reminded_counts = Hash.new(0)
 
     User.subscribers.find_each do |user|
       next if already_reminded.include?(user.id)
@@ -52,13 +55,19 @@ class SendHaventOrderedReminderJob < ApplicationJob
         ).havent_ordered_email.deliver_now
         already_reminded << user.id
         num_reminded += 1
-      rescue => e
+
+        pending_menus.each do |pm|
+          menus_reminded_counts[pm] += 1
+        end
+      rescue StandardError => e
         Rails.logger.error "Failed to send haven't ordered email to user #{user.id}: #{e.message}"
       end
     end
 
-    if num_reminded > 0
-      add_comment! menu, "Haven't Ordered reminder job: num_reminded=#{num_reminded}"
+    return unless num_reminded > 0
+
+    menus_reminded_counts.each do |reminded_menu, count|
+      add_comment! reminded_menu, "Haven't Ordered reminder job: num_reminded=#{count}"
     end
   end
 end

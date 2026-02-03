@@ -2,7 +2,7 @@ class SendDayOfReminderJob < ApplicationJob
   queue_as :default
 
   def perform(*args)
-    return unless (7..11).include?(Time.zone.now.hour) # 7a-11a
+    return unless (7..11).cover?(Time.zone.now.hour) # 7a-11a
 
     pickup_day_groups.each do |_, pickup_days|
       primary_pickup_day = select_primary_pickup_day(pickup_days)
@@ -13,6 +13,7 @@ class SendDayOfReminderJob < ApplicationJob
   end
 
   private
+
   def pickup_day_groups
     PickupDay.for_pickup_at(Time.zone.now).group_by(&:pickup_at)
   end
@@ -27,7 +28,8 @@ class SendDayOfReminderJob < ApplicationJob
 
   def send_reminders_for_day(primary_pickup_day, pickup_days)
     menu = primary_pickup_day.menu
-    already_reminded = Set[*menu.messages.where(mailer: "ReminderMailer#day_of_email", pickup_day: primary_pickup_day).pluck(:user_id)]
+    already_reminded = Set[*menu.messages.where(mailer: 'ReminderMailer#day_of_email',
+                                                pickup_day: primary_pickup_day).pluck(:user_id)]
 
     menus = pickup_days.map(&:menu).uniq
 
@@ -56,6 +58,8 @@ class SendDayOfReminderJob < ApplicationJob
 
     num_reminded = 0
 
+    menus_reminded_counts = Hash.new(0)
+
     user_orders.each_value do |payload|
       next if payload[:menu_groups].empty?
 
@@ -72,13 +76,19 @@ class SendDayOfReminderJob < ApplicationJob
         ).day_of_email.deliver_now
         already_reminded << user.id
         num_reminded += 1
-      rescue => e
+
+        payload[:menu_groups].each do |group|
+          menus_reminded_counts[group[:menu]] += 1
+        end
+      rescue StandardError => e
         Rails.logger.error "Failed to send reminder email to user #{user.id}: #{e.message}"
       end
     end
 
-    if num_reminded > 0
-      add_comment! menu, "Day Of reminder job: sent num_reminded=#{num_reminded}"
+    return unless num_reminded > 0
+
+    menus_reminded_counts.each do |reminded_menu, count|
+      add_comment! reminded_menu, "Day Of reminder job: sent num_reminded=#{count}"
     end
   end
 end
