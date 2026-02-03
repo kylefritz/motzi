@@ -93,6 +93,7 @@ ActiveAdmin.register Menu do
               value: starts_at_value&.strftime("%Y-%m-%dT%H:%M")
             },
             hint: 'Leave blank to default to the week start.'
+      input :is_special, label: "Is Special Menu? Allowed overlap with other menus."
       input :name
       para style: 'margin-left: 20%; padding-left: 8px' do
         text_node "You can use "
@@ -102,7 +103,6 @@ ActiveAdmin.register Menu do
       input :subscriber_note
       input :menu_note
       input :day_of_note, placeholder: 'Included in reminder emails sent out on pickup day'
-      input :is_special, label: "Is Special Menu? Allowed overlap with other menus."
     end
     actions
   end
