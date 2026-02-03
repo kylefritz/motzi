@@ -66,7 +66,8 @@ export type MenuResponse = {
     name: string;
     menuNote: null | string;
     subscriberNote: string;
-    isCurrent: boolean;
+    isOpen: boolean;
+    isSpecial: boolean;
     orderingDeadlineText: string;
     enablePayWhatYouCan: boolean;
     pickupDays: Array<{
@@ -122,6 +123,14 @@ export type MenuResponse = {
     price: number;
     credits: number;
     breadsPerWeek: number;
+  }>;
+  openMenus: Array<{
+    id: number;
+    name: string;
+    orderingDeadlineText: string;
+    isSpecial: boolean;
+    menuNote: null | string;
+    pickupSummary: null | string;
   }>;
 };
 

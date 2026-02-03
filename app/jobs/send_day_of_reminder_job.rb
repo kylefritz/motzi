@@ -2,45 +2,93 @@ class SendDayOfReminderJob < ApplicationJob
   queue_as :default
 
   def perform(*args)
-    return unless (7..11).include?(Time.zone.now.hour) # 7a-11a
+    return unless (7..11).cover?(Time.zone.now.hour) # 7a-11a
 
-    PickupDay.for_pickup_at(Time.zone.now).each do |pickup_day|
+    pickup_day_groups.each do |_, pickup_days|
+      primary_pickup_day = select_primary_pickup_day(pickup_days)
+      next unless primary_pickup_day
 
-      next unless pickup_day.menu.current?
-
-      send_reminders_for_day(pickup_day)
+      send_reminders_for_day(primary_pickup_day, pickup_days)
     end
   end
 
   private
-  def send_reminders_for_day(pickup_day)
-    menu = pickup_day.menu
 
-    already_reminded = Set[*menu.messages.where(mailer: "ReminderMailer#day_of_email", pickup_day: pickup_day).pluck(:user_id)]
+  def pickup_day_groups
+    PickupDay.for_pickup_at(Time.zone.now).group_by(&:pickup_at)
+  end
 
-    num_reminded = 0
+  def select_primary_pickup_day(pickup_days)
+    pickup_days.min_by { |pickup_day| menu_priority(pickup_day.menu) }
+  end
 
-    menu.orders.find_each do |order|
-      next if already_reminded.include?(order.user_id)
+  def menu_priority(menu)
+    [menu.is_special? ? 1 : 0, -menu.ordering_starts_at.to_i]
+  end
 
-      order_items_for_day = order.items_for_pickup(pickup_day)
+  def send_reminders_for_day(primary_pickup_day, pickup_days)
+    menu = primary_pickup_day.menu
+    already_reminded = Set[*menu.messages.where(mailer: 'ReminderMailer#day_of_email',
+                                                pickup_day: primary_pickup_day).pluck(:user_id)]
 
-      next if order_items_for_day.empty?
+    menus = pickup_days.map(&:menu).uniq
 
-      begin
-        ReminderMailer.with(user: order.user,
-                            menu: menu,
-                            pickup_day: pickup_day,
-                            order_items: order_items_for_day
-                           ).day_of_email.deliver_now
-        num_reminded += 1
-      rescue => e
-        Rails.logger.error "Failed to send reminder email to user #{order.user_id}: #{e.message}"
+    user_orders = Hash.new { |h, user_id| h[user_id] = { user: nil, menu_groups: [] } }
+
+    menus.each do |candidate_menu|
+      pickup_for_menu = pickup_days.find { |pd| pd.menu_id == candidate_menu.id }
+      next unless pickup_for_menu
+
+      candidate_menu.orders.includes(:user).find_each do |order|
+        next if order.user_id.nil?
+        next if already_reminded.include?(order.user_id)
+
+        items = order.items_for_pickup(pickup_for_menu)
+        next if items.empty?
+
+        entry = user_orders[order.user_id]
+        entry[:user] ||= order.user
+        entry[:menu_groups] << {
+          menu: candidate_menu,
+          pickup_day: pickup_for_menu,
+          order_items: items
+        }
       end
     end
 
-    if num_reminded > 0
-      add_comment! menu, "Day Of reminder job: sent num_reminded=#{num_reminded}"
+    num_reminded = 0
+
+    menus_reminded_counts = Hash.new(0)
+
+    user_orders.each_value do |payload|
+      next if payload[:menu_groups].empty?
+
+      user = payload[:user]
+      next unless user
+
+      begin
+        ReminderMailer.with(
+          user: user,
+          menu: menu,
+          menus: menus.sort_by { |m| menu_priority(m) },
+          pickup_day: primary_pickup_day,
+          order_items_by_menu: payload[:menu_groups].sort_by { |group| menu_priority(group[:menu]) }
+        ).day_of_email.deliver_now
+        already_reminded << user.id
+        num_reminded += 1
+
+        payload[:menu_groups].each do |group|
+          menus_reminded_counts[group[:menu]] += 1
+        end
+      rescue StandardError => e
+        Rails.logger.error "Failed to send reminder email to user #{user.id}: #{e.message}"
+      end
+    end
+
+    return unless num_reminded > 0
+
+    menus_reminded_counts.each do |reminded_menu, count|
+      add_comment! reminded_menu, "Day Of reminder job: sent num_reminded=#{count}"
     end
   end
 end

@@ -1,6 +1,6 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note
-  includes :pickup_days, menu_items: [:item]
+  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note, :is_special, :starts_at
+  includes :pickup_days, menu_items: [:item], orders: [:user, order_items: :item]
   config.sort_order = 'LOWER(week_id) desc'
 
   actions :all, except: [:destroy] # deleting menus can orphan orders, etc
@@ -11,11 +11,13 @@ ActiveAdmin.register Menu do
   filter :week_id
   filter :menu_note
   filter :day_of_note
+  filter :is_special
 
   scope :all, default: true
   scope("current menu") { |scope| scope.where(id: Setting.menu_id) }
   scope("emailed") { |scope| scope.where("emailed_at is not null") }
   scope("not emailed") { |scope| scope.where("emailed_at is null") }
+  scope("open for ordering") { |scope| scope.open_for_ordering }
 
   # create big buttons on every menu page
   action_item :preview, except: [:index, :new] do
@@ -28,9 +30,9 @@ ActiveAdmin.register Menu do
     id_column
     column :name do |menu|
       div auto_link menu
-      if menu.current?
+      if menu.open_for_ordering? && menu.ordering_starts_at <= Time.zone.now
         br
-        status_tag true, style: 'margin-left: 3px', label: 'Current'
+        status_tag true, style: 'margin-left: 3px', label: 'Open'
       end
     end
     column :items do |menu|
@@ -45,6 +47,7 @@ ActiveAdmin.register Menu do
       t = Time.zone.from_week_id(menu.week_id)
       small "#{t.strftime('%a %m/%d')}"
     end
+    column :is_special
     column :stats do |menu|
       if menu.emailed_at.blank? || menu.emailed_at > 6.weeks.ago
         render 'admin/menus/sales', {menu: menu}
@@ -70,16 +73,27 @@ ActiveAdmin.register Menu do
 
   form do |f|
     def week_options(menu_week_id)
-      week_ids = (-10..10).map {|i| (Time.zone.now + i.weeks).week_id } - Menu.pluck(:week_id)
+      overlapping_week_ids = Menu.where(is_special: true).pluck(:week_id)
+      week_ids = (-10..10).map {|i| (Time.zone.now + i.weeks).week_id } - Menu.where(is_special: false).pluck(:week_id)
       week_ids.push(menu_week_id) if menu_week_id.present?
       week_ids.uniq.sort.map do |week_id|
         t = Time.zone.from_week_id(week_id).strftime('%a %m/%d')
-        ["#{week_id} starts #{t}", week_id]
+        label = overlapping_week_ids.include?(week_id) ? "#{week_id} starts #{t} (overlapping)" : "#{week_id} starts #{t}"
+        [label, week_id]
       end
     end
 
     inputs do
       input :week_id, :as => :select, :collection => week_options(resource.week_id)
+      starts_at_value = f.object.starts_at&.in_time_zone(Time.zone)
+      input :starts_at,
+            as: :string,
+            input_html: {
+              type: 'datetime-local',
+              value: starts_at_value&.strftime("%Y-%m-%dT%H:%M")
+            },
+            hint: 'Leave blank to default to the week start.'
+      input :is_special, label: "Is Special Menu? Allowed overlap with other menus."
       input :name
       para style: 'margin-left: 20%; padding-left: 8px' do
         text_node "You can use "
@@ -97,10 +111,11 @@ ActiveAdmin.register Menu do
     attributes_table do
       row :week_id do
         span menu.week_id
-        if menu.current?
-          status_tag true, style: 'margin-left: 3px', label: 'Current'
+        if menu.open_for_ordering? && menu.ordering_starts_at <= Time.zone.now
+          status_tag true, style: 'margin-left: 3px', label: 'Open'
         end
       end
+      row :starts_at
       row :sales do
         render 'admin/menus/sales', {menu: menu}
       end
@@ -113,6 +128,7 @@ ActiveAdmin.register Menu do
       row :day_of_note do
         menu.day_of_note_html
       end
+      row :is_special
       row :menu_items do
         render 'builder'
       end

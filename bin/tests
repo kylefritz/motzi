@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! DISABLE_SPRING=1 mise exec -- bundle exec rails test; then
+  exit 1
+fi
+
+bun run test

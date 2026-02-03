@@ -90,14 +90,15 @@ export default function PickupDaysPanel({
       <h2>Pickup days</h2>
       <List role="list">
         {pickupDays.map((pickupDay) => (
-          <PickupDayCard key={pickupDay.id}>
-            <EditablePickupDay
-              pickupDay={pickupDay}
-              onRemove={() => handleRemove(pickupDay.id)}
-              onSave={(payload) => api.pickupDay.update(pickupDay.id, payload)}
-            />
-          </PickupDayCard>
-        ))}
+        <PickupDayCard key={pickupDay.id}>
+          <EditablePickupDay
+            pickupDay={pickupDay}
+            leadtimeHours={leadtimeHours}
+            onRemove={() => handleRemove(pickupDay.id)}
+            onSave={(payload) => api.pickupDay.update(pickupDay.id, payload)}
+          />
+        </PickupDayCard>
+      ))}
       </List>
       <AddPanel>
         <PanelHeader>Add pickup day</PanelHeader>
@@ -151,6 +152,7 @@ type EditablePickupDayProps = {
   pickupDay: AdminPickupDay;
   onRemove: () => void;
   onSave: (payload: { pickupAt: string; orderDeadlineAt: string }) => Promise<unknown>;
+  leadtimeHours: number | null;
 };
 
 function formatDateTimeLocal(value: string) {
@@ -161,6 +163,7 @@ function EditablePickupDay({
   pickupDay,
   onRemove,
   onSave,
+  leadtimeHours,
 }: EditablePickupDayProps) {
   const initialPickupAt = formatDateTimeLocal(pickupDay.pickupAt);
   const initialDeadline = formatDateTimeLocal(pickupDay.orderDeadlineAt);
@@ -176,6 +179,24 @@ function EditablePickupDay({
     setDeadlineValue(initialDeadline);
     setIsEditing(false);
   }, [initialPickupAt, initialDeadline]);
+
+  function handleApplyLeadtime(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    if (!pickupAtValue) {
+      return;
+    }
+    const pickup = moment(pickupAtValue);
+    if (!pickup.isValid()) {
+      return;
+    }
+
+    const deadline = pickup
+      .clone()
+      .subtract(moment.duration(leadtimeHours || 27, "hours"))
+      .format("YYYY-MM-DDTHH:mm");
+
+    setDeadlineValue(deadline);
+  }
 
   function handleSave(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
@@ -247,18 +268,21 @@ function EditablePickupDay({
               </FieldStack>
             </InlineEditor>
           </EditPanel>
-          <CardFooter>
-            <Button type="button" size="sm" onClick={handleSave} disabled={!isDirty}>
-              Save
-            </Button>
-            <Button type="button" size="sm" variant="secondary" onClick={handleCancel}>
-              Cancel
-            </Button>
-          </CardFooter>
-        </>
-      )}
-    </>
-  );
+        <CardFooter>
+          <Button type="button" size="sm" onClick={handleSave} disabled={!isDirty}>
+            Save
+          </Button>
+          <Button type="button" size="sm" variant="secondary" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button type="button" size="sm" variant="secondary" onClick={handleApplyLeadtime}>
+            Apply lead-time {leadtimeHours || 27} hours
+          </Button>
+        </CardFooter>
+      </>
+    )}
+  </>
+);
 }
 
 const ButtonRow = styled.div`

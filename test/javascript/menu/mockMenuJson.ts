@@ -18,6 +18,11 @@ type MockMenuOptions = {
   enablePayWhatYouCan?: boolean;
 };
 
+const openMenuPickupSummary = (pickupDays: MenuPickupDay[]) =>
+  pickupDays
+    .map((day) => DateTime.fromISO(day.pickupAt).toFormat("ccc h:mm a"))
+    .join(" / ");
+
 export default function ({
   order: withOrder = true,
   user: withUser = true,
@@ -41,7 +46,7 @@ export default function ({
     name: "week 5",
     menuNote: "menu note copy",
     subscriberNote: "subscribers note copy",
-    isCurrent: true,
+    isOpen: true,
     orderingDeadlineText:
       "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
     enablePayWhatYouCan,
@@ -196,6 +201,16 @@ export default function ({
     bundles,
     user: withUser === true ? user : withUser || null,
     order: withOrder === true ? order : withOrder || null,
+    openMenus: [
+      {
+        id: menu.id,
+        name: menu.name,
+        orderingDeadlineText: menu.orderingDeadlineText,
+        isSpecial: false,
+        menuNote: menu.menuNote,
+        pickupSummary: openMenuPickupSummary(menu.pickupDays),
+      },
+    ],
   };
 
   return data;

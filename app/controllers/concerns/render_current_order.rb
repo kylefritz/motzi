@@ -4,11 +4,42 @@ module RenderCurrentOrder
   included do
     protected
 
-    def render_current_order(menu_id=nil, user=nil)
-      @menu = menu_id ? Menu.find(menu_id) : Menu.current
+    def render_current_order(menu_id = nil, user = nil)
+      requested_menu = menu_id ? Menu.find(menu_id) : nil
+
+      # gather candidates but don't sort yet
+      open_menus = Menu.open_for_ordering.to_a
+      open_menus << requested_menu if requested_menu.present?
+
+      # pick the primary menu from the candidates, or fall back to global current
+      @menu = requested_menu || select_primary_menu(open_menus) || Menu.current
+
+      # ensure the selected menu is included in the final list
+      open_menus << @menu if @menu.present?
+
+      # final unique + sort
+      @open_menus = order_open_menus(open_menus)
+
       @user = user || current_user
       @order = @user&.order_for_menu(@menu)
       render 'menus/show', format: :json
+    end
+
+    private
+
+    def order_open_menus(menus)
+      menus.compact.uniq { |menu| menu.id }.sort_by do |menu|
+        week = menu.ordering_starts_at
+        is_special = menu.is_special? ? 1 : 0
+        [is_special, -week.to_i]
+      end
+    end
+
+    def select_primary_menu(menus)
+      non_special = menus.reject(&:is_special?)
+      return non_special.max_by { |menu| menu.ordering_starts_at.to_i } if non_special.any?
+
+      menus.max_by { |menu| menu.ordering_starts_at.to_i }
     end
   end
 end

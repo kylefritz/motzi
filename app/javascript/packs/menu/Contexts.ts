@@ -65,6 +65,10 @@ export function getDeadlineContext() {
     }
 
     const lastPickupDay = _.last(pickupDays);
+    if (!lastPickupDay || !lastPickupDay.orderDeadlineAt) {
+      return false;
+    }
+
     return isClosed(lastPickupDay.orderDeadlineAt);
   };
 

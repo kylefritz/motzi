@@ -1,21 +1,37 @@
 <h2>Reminder to come grab your order today!!</h2>
 
+<p>
+  <strong><%= @pickup_day&.deadline_text %></strong>
+</p>
+
 <div>
   <%= Setting.pickup_instructions_html %>
 </div>
 
-<div class="day-of-note">
-  <%= @menu.day_of_note_html %>
-</div>
-
-<p>You ordered:</p>
-<table>
-  <% @order_items.map do |oi| %>
-  <tr>
-    <td><%= oi.quantity %>x</td>
-    <td><%= oi.item.name %></td>
-  </tr>
-  <% end %>
-</table>
+<% @order_items_by_menu.each do |group| %>
+  <section class="menu-reminder">
+    <h3>
+      <%= group[:menu].name %>
+      <% if group[:menu].is_special? %>
+        <span class="badge badge-pill badge-warning">Special Menu</span>
+      <% end %>
+    </h3>
+    <p class="pickup-note"><%= group[:pickup_day]&.deadline_text %></p>
+    <% if group[:menu].day_of_note.present? %>
+      <div class="day-of-note"><%= group[:menu].day_of_note_html %></div>
+    <% elsif group[:menu].subscriber_note.present? %>
+      <div class="day-of-note"><%= group[:menu].subscriber_note %></div>
+    <% end %>
+    <p>You ordered:</p>
+    <table>
+      <% group[:order_items].each do |oi| %>
+        <tr>
+          <td><%= oi.quantity %>x</td>
+          <td><%= oi.item.name %></td>
+        </tr>
+      <% end %>
+    </table>
+  </section>
+<% end %>
 
 <%= render partial: 'menu_mailer/credits_remaining' %>

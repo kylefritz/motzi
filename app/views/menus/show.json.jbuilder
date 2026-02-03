@@ -1,6 +1,7 @@
 json.menu do
   json.extract! @menu, :id, :name, :menu_note, :subscriber_note
-  json.is_current @menu.current?
+  json.is_open @menu.open_for_ordering?
+  json.is_special @menu.is_special?
   json.ordering_deadline_text ordering_deadline_text(@menu)
   json.enable_pay_what_you_can Setting.shop.pay_what_you_can
 
@@ -35,6 +36,14 @@ json.menu do
       json.remaining remaining(mi_pd.limit, (ordered_item_counts[item.id] || {})[mi_pd.pickup_day_id])
     end
   end
+end
+
+  json.open_menus @open_menus do |menu|
+  json.extract! menu, :id, :name
+  json.ordering_deadline_text ordering_deadline_text(menu)
+  json.is_special menu.is_special?
+  json.menu_note menu.subscriber_note
+  json.pickup_summary menu_pickup_summary(menu)
 end
 
 json.user do
