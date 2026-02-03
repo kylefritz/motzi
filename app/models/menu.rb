@@ -122,15 +122,29 @@ class Menu < ApplicationRecord
   end
 
   def earliest_deadline
-    self.pickup_days.minimum(:order_deadline_at)
+    if pickup_days.loaded?
+      pickup_days.map(&:order_deadline_at).min
+    else
+      self.pickup_days.minimum(:order_deadline_at)
+    end
   end
 
   def latest_deadline
-    self.pickup_days.maximum(:order_deadline_at)
+    if pickup_days.loaded?
+      pickup_days.map(&:order_deadline_at).max
+    else
+      self.pickup_days.maximum(:order_deadline_at)
+    end
   end
 
   def ordering_window(deadlines: nil, enforce_week: nil)
-    values = deadlines || pickup_days.pluck(:order_deadline_at)
+    values = deadlines
+    values ||= if pickup_days.loaded?
+      pickup_days.map(&:order_deadline_at)
+    else
+      pickup_days.pluck(:order_deadline_at)
+    end
+
     return nil if values.blank?
 
     enforce_week = !is_special? if enforce_week.nil?

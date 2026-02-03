@@ -9,6 +9,8 @@ class CreditItem < ApplicationRecord
   }
 
   def retail_price
-    CreditBundle.find_by(credits: quantity)&.price || 0
+    # Simple memoization to avoid N+1 queries
+    @credit_bundles ||= CreditBundle.all.index_by(&:credits)
+    @credit_bundles[quantity]&.price || CreditBundle.find_by(credits: quantity)&.price || 0
   end
 end

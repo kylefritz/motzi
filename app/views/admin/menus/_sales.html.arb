@@ -1,4 +1,11 @@
-marketplace = Order.for_menu_id(menu.id).includes(order_items: :item).marketplace
+if menu.orders.loaded?
+  orders = menu.orders.select { |o| o.user_id.present? }
+else
+  orders = Order.for_menu_id(menu.id).includes(order_items: :item)
+end
+
+marketplace = orders.select { |o| o.stripe_charge_amount.present? }
+
 mp = {
   type: "Market Place",
   qty: marketplace.map {|o| o.order_items.map(&:quantity).sum}.sum,

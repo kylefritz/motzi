@@ -1,6 +1,6 @@
 ActiveAdmin.register Menu do
   permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note, :is_special, :starts_at
-  includes :pickup_days, menu_items: [:item]
+  includes :pickup_days, menu_items: [:item], orders: [:user, order_items: :item]
   config.sort_order = 'LOWER(week_id) desc'
 
   actions :all, except: [:destroy] # deleting menus can orphan orders, etc
