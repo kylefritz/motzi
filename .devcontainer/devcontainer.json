@@ -1,0 +1,34 @@
+{
+  "name": "Motzi Rails",
+  "image": "mcr.microsoft.com/devcontainers/base:jammy",
+  "features": {
+    /* Installs mise to handle ruby "3.3.10" and bun "latest" defined in mise.toml */
+    "ghcr.io/devcontainers-contrib/features/mise:2": {},
+    /* Installs Postgres to satisfy config/database.yml */
+    "ghcr.io/devcontainers/features/postgres:1": {
+      "version": "14"
+    },
+    /* Installs Redis to satisfy config/cable.yml and Sidekiq */
+    "ghcr.io/devcontainers/features/redis:1": {}
+  },
+  /* * 1. Checks if .env exists.
+   * 2. If not, writes the placeholder secrets to it.
+   * 3. Runs bin/setup to install gems and prepare the DB.
+   */
+  "postCreateCommand": "if [ ! -f .env ]; then printf \"SECRET_KEY_BASE=development_secret\\nSTRIPE_PUBLISHABLE_KEY=pk_test_placeholder\\nSTRIPE_SECRET_KEY=sk_test_placeholder\\n\" > .env; fi && bin/setup",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rebornix.ruby",
+        "castwide.solargraph",
+        "misogi.ruby-rubocop",
+        "kaiwood.endwise",
+        "visualstudioexptteam.vscodeintellicode",
+        "sumnerevans.ant-intelli-sense",
+        "wingrunr21.vscode-ruby"
+      ]
+    }
+  },
+  "forwardPorts": [3000],
+  "remoteUser": "vscode"
+}
