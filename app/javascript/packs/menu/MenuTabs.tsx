@@ -88,10 +88,8 @@ export default function MenuTabs({
           <Tab
             label={
               <span>
+                {!holidayOrder && <HolidayLabel>Holiday</HolidayLabel>}
                 {holidayMenu.name}
-                {!holidayOrder && (
-                  <NewBadge>Holiday</NewBadge>
-                )}
               </span>
             }
             {...a11yProps(regularMenu ? 1 : 0)}
@@ -128,33 +126,33 @@ export default function MenuTabs({
 
 const MenuTabBar = styled.div`
   margin: 0 0 1.75rem;
-  border-bottom: 2px solid #e8d9c4;
+  border-bottom: 1px solid #e0d0b8;
 
   .MuiTabs-indicator {
-    height: 3px;
-    background-color: #3f3a80;
-    border-radius: 3px 3px 0 0;
+    height: 2px;
+    background-color: #352c63;
   }
 
   .MuiTab-root {
     text-transform: none;
-    font-weight: 600;
-    font-size: 1rem;
-    letter-spacing: 0.01em;
-    min-width: 130px;
-    padding: 10px 20px;
-    color: #8b7355;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    min-width: 0;
+    padding: 10px 24px 10px 0;
+    color: #9e8c7a;
     opacity: 1;
+    align-items: flex-end;
   }
 
   .MuiTab-textColorInherit {
-    color: #8b7355;
-    opacity: 0.75;
+    color: #9e8c7a;
+    opacity: 1;
   }
 
   .Mui-selected {
-    color: #3f3a80;
-    opacity: 1;
+    color: #352c63;
   }
 
   .MuiTabs-root {
@@ -162,18 +160,13 @@ const MenuTabBar = styled.div`
   }
 `;
 
-const NewBadge = styled.span`
-  margin-left: 7px;
-  font-size: 0.65rem;
-  font-weight: 700;
+const HolidayLabel = styled.span`
+  display: block;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: #fff3e0;
-  color: #b45309;
-  border: 1px solid #f0c070;
-  padding: 2px 7px;
-  border-radius: 3px;
-  vertical-align: middle;
-  position: relative;
-  top: -1px;
+  letter-spacing: 0.1em;
+  color: #d54a2c;
+  margin-bottom: 2px;
 `;
