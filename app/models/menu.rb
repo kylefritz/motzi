@@ -164,7 +164,7 @@ class Menu < ApplicationRecord
       original_mi.menu_item_pickup_days.each do |mipud|
         new_mi.menu_item_pickup_days.create!(
           pickup_day_id: pickup_day_map[mipud.pickup_day_id],
-          limit: mipud.limit,
+          limit: mipud.limit&.positive? ? mipud.limit : nil,
         )
       end
     end

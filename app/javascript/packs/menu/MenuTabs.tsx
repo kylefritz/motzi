@@ -90,7 +90,7 @@ export default function MenuTabs({
               <span>
                 {holidayMenu.name}
                 {!holidayOrder && (
-                  <NewBadge>New</NewBadge>
+                  <NewBadge>Holiday</NewBadge>
                 )}
               </span>
             }
@@ -127,38 +127,53 @@ export default function MenuTabs({
 }
 
 const MenuTabBar = styled.div`
-  margin: 0 0 1.5rem;
-  border-bottom: 1px solid #e9e9e9;
+  margin: 0 0 1.75rem;
+  border-bottom: 2px solid #e8d9c4;
 
   .MuiTabs-indicator {
     height: 3px;
     background-color: #3f3a80;
+    border-radius: 3px 3px 0 0;
   }
 
   .MuiTab-root {
     text-transform: none;
     font-weight: 600;
-    letter-spacing: 0.02em;
-    min-width: 120px;
-    padding: 8px 16px;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+    min-width: 130px;
+    padding: 10px 20px;
+    color: #8b7355;
+    opacity: 1;
   }
 
   .MuiTab-textColorInherit {
-    color: #6b6b6b;
+    color: #8b7355;
+    opacity: 0.75;
   }
 
   .Mui-selected {
-    color: #222;
+    color: #3f3a80;
+    opacity: 1;
+  }
+
+  .MuiTabs-root {
+    min-height: 44px;
   }
 `;
 
 const NewBadge = styled.span`
-  margin-left: 6px;
-  font-size: 0.7rem;
+  margin-left: 7px;
+  font-size: 0.65rem;
   font-weight: 700;
-  background: #e8f5e9;
-  color: #2e7d32;
-  padding: 1px 6px;
-  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: #fff3e0;
+  color: #b45309;
+  border: 1px solid #f0c070;
+  padding: 2px 7px;
+  border-radius: 3px;
   vertical-align: middle;
+  position: relative;
+  top: -1px;
 `;

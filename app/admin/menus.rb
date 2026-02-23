@@ -76,7 +76,7 @@ ActiveAdmin.register Menu do
   form do |f|
     def week_options(week_id, menu_type)
       existing = Menu.where(menu_type: menu_type).pluck(:week_id)
-      week_ids = (-10..10).map { |i| (Time.zone.now + i.weeks).week_id } - existing
+      week_ids = (0..10).map { |i| (Time.zone.now + i.weeks).week_id } - existing
       week_ids.push(week_id) if week_id.present?
       week_ids.uniq.sort.map do |w|
         t = Time.zone.from_week_id(w).strftime('%a %m/%d')
@@ -126,7 +126,11 @@ ActiveAdmin.register Menu do
         render 'builder'
       end
       row :send_test_email do
-        button_to("Send yourself a test menu email", test_email_admin_menu_path(menu), method: :post)
+        if menu.holiday?
+          em "Holiday menus don't send emails — announce in the regular weekly menu's subscriber note."
+        else
+          button_to("Send yourself a test menu email", test_email_admin_menu_path(menu), method: :post)
+        end
       end
       row :created_at
       row :updated_at

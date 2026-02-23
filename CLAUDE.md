@@ -26,7 +26,7 @@ Neighborhood bakery's CSA (Community Supported Agriculture) site. Members browse
 - **JS/TS**: Prettier runs on commit (Husky). Run `bun run typecheck` for TypeScript checks.
 - **Ruby**: RuboCop per `.rubocop.yml`. No frozen string literal comments. No doc comments required.
 - **Database**: Never modify existing migrations. Always create a new one.
-- **JSON APIs**: Responses use camelCase (via `olive_branch` gem).
+- **JSON APIs**: Responses use camelCase (via `olive_branch` gem). Use `jq` to parse JSON in the shell (not python3).
 - **Complex SQL**: Lives in `app/sql_queries/` using ERB templates with the `sql_query` gem.
 
 ## Sensitive Files — Never Edit Without Explicit Approval
