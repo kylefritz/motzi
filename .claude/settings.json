@@ -1,0 +1,65 @@
+{
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(bun run test*)",
+      "Bash(bun run build*)",
+      "Bash(bun run typecheck*)",
+      "Bash(bundle exec rails test*)",
+      "Bash(DISABLE_SPRING=1 bundle exec rails test*)",
+      "Bash(bin/rails db:migrate*)",
+      "Bash(bin/rails db:rollback*)",
+      "Bash(bin/rails routes*)",
+      "Bash(bundle exec rubocop*)"
+    ],
+    "deny": [
+      "Edit(.env)",
+      "Edit(Gemfile.lock)",
+      "Edit(bun.lockb)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_TOOL_INPUT_FILE_PATH\" =~ \\.(ts|tsx|js|jsx)$ ]]; then npx prettier --write \"$CLAUDE_TOOL_INPUT_FILE_PATH\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_TOOL_INPUT_FILE_PATH\" =~ \\.rb$ ]]; then bundle exec rubocop --autocorrect-all \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null; fi"
+          }
+        ]
+      }
+    ]
+  },
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp", "--autoConnect"]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgres://localhost/motzi"]
+    }
+  }
+}
