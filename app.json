@@ -16,21 +16,11 @@
     }
   ],
   "env": {
-    "RAILS_ENV":               { "value": "production" },
-    "RACK_ENV":                { "value": "production" },
-    "RAILS_LOG_TO_STDOUT":     { "value": "enabled" },
-    "RAILS_SERVE_STATIC_FILES":{ "value": "enabled" },
-    "SECRET_KEY_BASE":         { "generator": "secret" },
-    "HASHID_SALT":             { "required": true },
-    "AWS_ACCESS_KEY_ID":       { "required": true },
-    "AWS_SECRET_ACCESS_KEY":   { "required": true },
-    "STRIPE_PUBLISHABLE_KEY":  { "required": true },
-    "STRIPE_SECRET_KEY":       { "required": true },
-    "SENDGRID_USERNAME":       { "required": true },
-    "SENDGRID_PASSWORD":       { "required": true },
-    "RECAPTCHA_SITE_KEY":      { "required": true },
-    "RECAPTCHA_SECRET_KEY":    { "required": true },
-    "SENTRY_DSN":              { "required": true }
+    "RAILS_ENV":                { "value": "production" },
+    "RACK_ENV":                 { "value": "production" },
+    "RAILS_LOG_TO_STDOUT":      { "value": "enabled" },
+    "RAILS_SERVE_STATIC_FILES": { "value": "enabled" },
+    "SECRET_KEY_BASE":          { "generator": "secret" }
   },
   "formation": {
     "web":    { "quantity": 1, "size": "basic" },
