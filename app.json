@@ -1,0 +1,42 @@
+{
+  "name": "Motzi",
+  "description": "Neighborhood bakery CSA ordering site",
+  "buildpacks": [
+    { "url": "https://github.com/jakeg/heroku-buildpack-bun" },
+    { "url": "https://github.com/heroku/heroku-buildpack-activestorage-preview" },
+    { "url": "heroku/ruby" }
+  ],
+  "addons": [
+    {
+      "plan": "heroku-postgresql:essential-0",
+      "options": { "version": "14" }
+    },
+    {
+      "plan": "heroku-redis:mini"
+    }
+  ],
+  "env": {
+    "RAILS_ENV":               { "value": "production" },
+    "RACK_ENV":                { "value": "production" },
+    "RAILS_LOG_TO_STDOUT":     { "value": "enabled" },
+    "RAILS_SERVE_STATIC_FILES":{ "value": "enabled" },
+    "SECRET_KEY_BASE":         { "generator": "secret" },
+    "HASHID_SALT":             { "required": true },
+    "AWS_ACCESS_KEY_ID":       { "required": true },
+    "AWS_SECRET_ACCESS_KEY":   { "required": true },
+    "STRIPE_PUBLISHABLE_KEY":  { "required": true },
+    "STRIPE_SECRET_KEY":       { "required": true },
+    "SENDGRID_USERNAME":       { "required": true },
+    "SENDGRID_PASSWORD":       { "required": true },
+    "RECAPTCHA_SITE_KEY":      { "required": true },
+    "RECAPTCHA_SECRET_KEY":    { "required": true },
+    "SENTRY_DSN":              { "required": true }
+  },
+  "formation": {
+    "web":    { "quantity": 1, "size": "basic" },
+    "worker": { "quantity": 1, "size": "basic" }
+  },
+  "scripts": {
+    "postdeploy": "bin/rails db:migrate"
+  }
+}
