@@ -9,7 +9,7 @@
   "addons": [
     {
       "plan": "heroku-postgresql:essential-0",
-      "options": { "version": "14" }
+      "options": { "version": "17" }
     },
     {
       "plan": "heroku-redis:mini"
