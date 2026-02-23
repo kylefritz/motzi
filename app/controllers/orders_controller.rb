@@ -19,11 +19,13 @@ class OrdersController < ApplicationController
   end
 
   def create
-    if current_user&.current_order
-      logger.warn "user=#{current_user.email} already placed an order. returning that order"
+    target_menu = params[:menu_id].present? ? Menu.find(params[:menu_id]) : Menu.current
+
+    if current_user&.order_for_menu(target_menu).present?
+      logger.warn "user=#{current_user.email} already placed an order for menu #{target_menu.id}. returning current order"
       return render_current_order
     end
-    @menu = Menu.current
+    @menu = target_menu
 
     if @menu.ordering_closed? && current_admin_user.blank?
       return render_ordering_closed
@@ -46,7 +48,7 @@ class OrdersController < ApplicationController
           quantity: cart_item_params[:quantity].presence || 1,
           pickup_day_id: cart_item_params[:pickup_day_id] || @menu.pickup_days.first.id
         }
-        
+
         order.order_items.create!(filtered_params)
       end
 
@@ -88,6 +90,8 @@ class OrdersController < ApplicationController
     # send confirmation email
     ConfirmationMailer.with(order: @order).order_email.deliver_later
 
+    @holiday_menu  = Menu.current_holiday
+    @holiday_order = @user&.order_for_menu(@holiday_menu) if @holiday_menu
     render 'menus/show', format: :json # requires @menu, @user, @order
 
     rescue OrderError => e

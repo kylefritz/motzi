@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_04_12_045510) do
+ActiveRecord::Schema.define(version: 2026_02_22_000001) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
@@ -238,7 +238,8 @@ ActiveRecord::Schema.define(version: 2023_04_12_045510) do
     t.string "week_id", null: false
     t.text "day_of_note"
     t.text "menu_note"
-    t.index ["week_id"], name: "index_menus_on_week_id", unique: true
+    t.string "menu_type", default: "regular", null: false
+    t.index ["week_id", "menu_type"], name: "index_menus_on_week_id_and_menu_type", unique: true
   end
 
   create_table "order_items", force: :cascade do |t|

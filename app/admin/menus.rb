@@ -1,5 +1,5 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note
+  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note, :menu_type
   includes :pickup_days, menu_items: [:item]
   config.sort_order = 'LOWER(week_id) desc'
 
@@ -16,6 +16,7 @@ ActiveAdmin.register Menu do
   scope("current menu") { |scope| scope.where(id: Setting.menu_id) }
   scope("emailed") { |scope| scope.where("emailed_at is not null") }
   scope("not emailed") { |scope| scope.where("emailed_at is null") }
+  scope("holiday menus") { |scope| scope.holiday }
 
   # create big buttons on every menu page
   action_item :preview, except: [:index, :new] do
@@ -31,6 +32,10 @@ ActiveAdmin.register Menu do
       if menu.current?
         br
         status_tag true, style: 'margin-left: 3px', label: 'Current'
+      end
+      if menu.holiday?
+        br
+        status_tag 'Holiday', color: 'orange', style: 'margin-left: 3px'
       end
     end
     column :items do |menu|
@@ -69,17 +74,21 @@ ActiveAdmin.register Menu do
   end
 
   form do |f|
-    def week_options(menu_week_id)
-      week_ids = (-10..10).map {|i| (Time.zone.now + i.weeks).week_id } - Menu.pluck(:week_id)
-      week_ids.push(menu_week_id) if menu_week_id.present?
-      week_ids.uniq.sort.map do |week_id|
-        t = Time.zone.from_week_id(week_id).strftime('%a %m/%d')
-        ["#{week_id} starts #{t}", week_id]
+    def week_options(week_id, menu_type)
+      existing = Menu.where(menu_type: menu_type).pluck(:week_id)
+      week_ids = (-10..10).map { |i| (Time.zone.now + i.weeks).week_id } - existing
+      week_ids.push(week_id) if week_id.present?
+      week_ids.uniq.sort.map do |w|
+        t = Time.zone.from_week_id(w).strftime('%a %m/%d')
+        ["#{w} starts #{t}", w]
       end
     end
 
     inputs do
-      input :week_id, :as => :select, :collection => week_options(resource.week_id)
+      input :menu_type, as: :select,
+            collection: [['Regular', 'regular'], ['Holiday', 'holiday']],
+            include_blank: false
+      input :week_id, as: :select, collection: week_options(resource.week_id, resource.menu_type || 'regular')
       input :name
       para style: 'margin-left: 20%; padding-left: 8px' do
         text_node "You can use "
@@ -122,7 +131,11 @@ ActiveAdmin.register Menu do
       row :created_at
       row :updated_at
       row :emailed_at do
-        render 'email', { menu: menu }
+        if menu.holiday?
+          render 'holiday_open', menu: menu
+        else
+          render 'email', { menu: menu }
+        end
       end
     end
 
@@ -166,6 +179,14 @@ ActiveAdmin.register Menu do
                                 author: current_admin_user)
 
     redirect_to collection_path, notice: notice
+  end
+
+  member_action :open_for_orders, method: :post do
+    resource.open_for_orders!
+    notice = "#{resource.name} is now open for pre-orders. Announce it in your next regular menu subscriber note."
+    redirect_to resource_path, notice: notice
+  rescue => e
+    redirect_to resource_path, alert: e.message
   end
 
   member_action :test_email, method: :post do

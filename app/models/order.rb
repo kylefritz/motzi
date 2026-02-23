@@ -15,6 +15,12 @@ class Order < ApplicationRecord
     self.for_menu_id(Menu.current.id)
   end
 
+  def self.for_holiday_menu
+    holiday_menu = Menu.current_holiday
+    return none unless holiday_menu
+    self.for_menu_id(holiday_menu.id)
+  end
+
   def self.for_menu_id(menu_id)
     self.includes(:user, :items).where(menu_id: menu_id).where("user_id is not null")
   end

@@ -30,3 +30,14 @@ w3_d2_sat:
   menu: week3
   order_deadline_at: <%= Time.zone.parse("2019-01-17 10:00 PM") %>
   pickup_at: <%= Time.zone.parse("2019-01-19  8:00 AM") %>
+
+# passover 2026
+passover_fri:
+  menu: passover_2026
+  order_deadline_at: <%= Time.zone.parse("2026-04-08 21:00") %>
+  pickup_at:         <%= Time.zone.parse("2026-04-10 12:00") %>
+
+passover_sat:
+  menu: passover_2026
+  order_deadline_at: <%= Time.zone.parse("2026-04-09 21:00") %>
+  pickup_at:         <%= Time.zone.parse("2026-04-11 09:00") %>

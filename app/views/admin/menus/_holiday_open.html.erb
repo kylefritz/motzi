@@ -1,0 +1,17 @@
+<%# NOTE: Does NOT send email. Bakers announce in the regular weekly menu subscriber note. %>
+<p>
+  Status: <%= menu.current? ? tag.span("Open for pre-orders", class: "status_tag yes") : "Not open for pre-orders" %>
+</p>
+<p><em>Opening makes this holiday menu available on the ordering page.
+   Announce it to subscribers in the regular weekly menu's subscriber note — no email is sent automatically.</em></p>
+
+<% if menu.can_publish? %>
+  <%= button_to "Open for Pre-Orders",
+                open_for_orders_admin_menu_path(menu),
+                method: :post,
+                data: { confirm: "Open #{menu.name} for pre-orders? No email will be sent." } %>
+<% elsif !menu.pickup_days.any? %>
+  <p>Add pickup days before opening for pre-orders.</p>
+<% else %>
+  <p>All ordering deadlines have passed.</p>
+<% end %>
