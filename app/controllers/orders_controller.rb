@@ -90,7 +90,12 @@ class OrdersController < ApplicationController
     # send confirmation email
     ConfirmationMailer.with(order: @order).order_email.deliver_later
 
-    render_current_order(nil, @user, order: @order)
+    # Place order in the correct response slot (regular vs holiday)
+    if @menu.holiday?
+      @holiday_order = @order
+      @order = nil
+    end
+    render_current_order(nil, @user)
 
     rescue OrderError => e
       render_validation_failed(e.message)
@@ -135,7 +140,7 @@ class OrdersController < ApplicationController
       ahoy.track "order_updated"
     end
 
-    render_current_order(nil, current_user, order: order)
+    render_current_order
   end
 
   private

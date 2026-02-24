@@ -160,6 +160,32 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_equal Menu.current.id, json["menu"]["id"], "primary menu should be the regular current menu"
     assert_equal holiday_menu.id, json["holidayMenu"]["id"], "holiday menu should be returned separately"
     assert_not_nil json["holidayOrder"], "holiday order should be present"
+    assert_nil json["order"], "regular order slot should be empty for user with no regular order"
+  end
+
+  test "updating holiday order keeps it in the holidayOrder slot" do
+    holiday_menu = menus(:passover_2026)
+    holiday_menu.open_for_orders!
+
+    sign_in users(:kyle)
+
+    # kyle_passover fixture order exists
+    holiday_order = orders(:kyle_passover)
+    new_item_id = items(:matzo_toffee).id
+    pickup_day_id = holiday_menu.pickup_days.first.id
+
+    travel_to(holiday_menu.earliest_deadline - 2.hours) do
+      put "/orders/#{holiday_order.id}.json", params: {
+        cart: [{ item_id: new_item_id, quantity: 2, pickup_day_id: pickup_day_id }]
+      }, as: :json
+    end
+
+    assert_response :success
+    json = JSON.parse(response.body)
+
+    assert_equal Menu.current.id, json["menu"]["id"], "primary menu is regular"
+    assert_not_nil json["holidayOrder"], "holiday order should be in holidayOrder slot"
+    assert_equal holiday_order.id, json["holidayOrder"]["id"]
   end
 
   private

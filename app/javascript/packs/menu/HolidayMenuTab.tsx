@@ -49,8 +49,11 @@ export default function HolidayMenuTab({
     );
   }
 
+  const handleSave = (o: MenuOrderRequest | MarketplaceOrderRequest) =>
+    handleCreateOrder(o).then(() => setIsEditingOrder(false));
+
   if (!user) {
-    return <Marketplace {...{ menu, onCreateOrder: handleCreateOrder }} />;
+    return <Marketplace {...{ menu, onCreateOrder: handleSave }} />;
   }
 
   return (
@@ -60,7 +63,7 @@ export default function HolidayMenuTab({
         order,
         menu,
         bundles,
-        onCreateOrder: handleCreateOrder,
+        onCreateOrder: handleSave,
         isHoliday: true,
       }}
     />
