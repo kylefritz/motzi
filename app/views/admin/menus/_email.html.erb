@@ -1,5 +1,7 @@
-<% if ReviewAppMailInterceptor.active %>
+<% if defined?(ReviewAppMailInterceptor) && ReviewAppMailInterceptor.active %>
   <p class="flash flash_alert" style="margin-bottom: 12px">Review app — emails are only delivered to admin users.</p>
+<% elsif Rails.env.development? %>
+  <p class="flash flash_alert" style="margin-bottom: 12px">Local dev — emails open in browser via <a href="/letter_opener">letter_opener</a>.</p>
 <% end %>
 <!-- has the menu been emailed yet -->
 <p>

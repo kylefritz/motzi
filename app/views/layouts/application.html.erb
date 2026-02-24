@@ -28,6 +28,11 @@
 </head>
 
 <body class="<%= Setting.shop.id%>">
+  <% if ENV['REVIEW_APP'].present? || Rails.env.development? %>
+  <div id="review-app-banner">
+    <span>🍞 <%= ENV['REVIEW_APP'].present? ? 'Review app' : 'Local dev' %> — no real orders or charges!</span>
+  </div>
+  <% end %>
   <div id="background" style="background-image: url(<%= image_url("#{Setting.shop.id}-background.jpg") %>)">
     <div class="container">
       <div id="logo-wrapper">

@@ -3,9 +3,15 @@ ActiveAdmin.register_page "Dashboard" do
   menu priority: 1
 
   content title: "Hello friend" do
-    if ReviewAppMailInterceptor.active
+    if defined?(ReviewAppMailInterceptor) && ReviewAppMailInterceptor.active
       div class: 'flash flash_alert', style: 'margin-bottom: 16px' do
         span "Review app — emails are only delivered to admin users."
+      end
+    elsif Rails.env.development?
+      div class: 'flash flash_alert', style: 'margin-bottom: 16px' do
+        text_node "Local dev — emails open in browser via "
+        a "letter_opener", href: "/letter_opener"
+        text_node "."
       end
     end
 
