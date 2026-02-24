@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROD_APP="motzibread"
+
+if [ $# -ne 1 ]; then
+  echo "Usage: bin/seed_review_app <review-app-name>"
+  exit 1
+fi
+
+REVIEW_APP="$1"
+
+echo "==> Copying $PROD_APP database to $REVIEW_APP..."
+heroku pg:copy "$PROD_APP::DATABASE_URL" DATABASE_URL --app "$REVIEW_APP" --confirm "$REVIEW_APP"
+
+echo "==> Running migrations on $REVIEW_APP..."
+heroku run bin/rails db:migrate --app "$REVIEW_APP"
+
+echo "==> Restarting dynos to clear settings cache..."
+heroku dyno:restart --app "$REVIEW_APP"
+
+echo "==> Done. $REVIEW_APP is loaded with prod data."

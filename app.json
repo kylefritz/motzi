@@ -20,7 +20,12 @@
     "RACK_ENV":                 { "value": "production" },
     "RAILS_LOG_TO_STDOUT":      { "value": "enabled" },
     "RAILS_SERVE_STATIC_FILES": { "value": "enabled" },
-    "SECRET_KEY_BASE":          { "generator": "secret" }
+    "SECRET_KEY_BASE":          { "generator": "secret" },
+    "AWS_ACCESS_KEY_ID":        { "required": true },
+    "AWS_SECRET_ACCESS_KEY":    { "required": true },
+    "HASHID_SALT":              { "required": true },
+    "STRIPE_PUBLISHABLE_KEY":   { "value": "pk_test_uAmNwPrPVkEoywEZYTE66AnV00mGp7H2Ud" },
+    "STRIPE_SECRET_KEY":        { "required": false }
   },
   "formation": {
     "web":    { "quantity": 1, "size": "basic" },
