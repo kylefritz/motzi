@@ -12,6 +12,8 @@ class Admin::PickupListControllerTest < ActionDispatch::IntegrationTest
   test "pickup list for date with only regular orders (week1)" do
     menus(:week1).make_current!
     get "/admin/pickup_lists/2019-01-03"
+    assert_response :redirect
+    follow_redirect!
     assert_response :success
 
     assert_el_count 1, '#pickup-list'
@@ -20,6 +22,8 @@ class Admin::PickupListControllerTest < ActionDispatch::IntegrationTest
 
   test "pickup list for date with both regular and holiday orders" do
     get "/admin/pickup_lists/2026-04-10"
+    assert_response :redirect
+    follow_redirect!
     assert_response :success
 
     assert_el_count 1, '#pickup-list'
@@ -29,10 +33,11 @@ class Admin::PickupListControllerTest < ActionDispatch::IntegrationTest
 
   test "pickup list by-item tab shows items from both menus" do
     get "/admin/pickup_lists/2026-04-10"
+    follow_redirect!
     assert_response :success
 
-    # 4 items: Almond Cake, Classic, Matzo Toffee, Rye
-    assert_el_count 4, '#by-item .column', 'almond cake, classic, matzo toffee, rye'
+    # 4 items: Almond Cake, Classic, Matzo Toffee, Rye — each in a column div
+    assert_el_count 4, '.columns .column h3', 'almond cake, classic, matzo toffee, rye'
   end
 
   test "pickup list 404s for date with no pickup days" do

@@ -55,11 +55,7 @@ ActiveAdmin.register_page "Dashboard" do
         end
 
         panel "Sales" do
-          render 'admin/menus/sales', {menu: menu}
-          if holiday_menu
-            h4 "Holiday", style: 'margin: 10px 0 4px'
-            render 'admin/menus/sales', {menu: holiday_menu, hide_credits: true}
-          end
+          render 'admin/menus/sales', {menu: menu, holiday_menu: holiday_menu}
         end
       end
       column span: 3 do
