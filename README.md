@@ -4,98 +4,56 @@ Neighborhood bakery's CSA site
 
 ## Development
 
-- postgres.app
-- redis
-- mise (manages Ruby/Bun)
-
-You need Postgres and Redis running locally, plus a few variables in a `.env` file:
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-STRIPE_PUBLISHABLE_KEY
-
-### Running the app
-
-Run Rails + Bun watch together:
+Requires Postgres, Redis, and mise (manages Ruby/Bun). Add to `.env`:
 
 ```
-$ bin/dev
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+STRIPE_PUBLISHABLE_KEY=...
 ```
 
-`bin/dev` uses `Procfile.dev` and runs `bin/setup` by default. Set
-`SKIP_SETUP=1` to skip the setup step.
+Real data from prod: `bin/seed_local`
+
+Start everything: `bin/dev`
 
 ### Data
 
-#### Test data
+Fixtures: `rails db:fixtures:load fake_data:users fake_data:orders`
 
-Try loading the fixtures into your local development database so you have some data to play with
+### Emails
 
-```
-$ rails db:fixtures:load
-$ rails fake_data:users
-$ rails fake_data:orders
-```
+Visit `/letter_opener` to see emails sent locally.
 
-#### Real data
-
-Copy the db from heroku to your local postgres
-
-```
-$ dropdb motzi
-$ heroku pg:pull DATABASE_URL --app motzibread motzi
-```
-
-Download the menu images from s3
-
-```
-$ rake s3:download
-```
-
-### Running js tests
-
-```
-$ bun run test
-```
-
-Watch js tests
-
-```
-$ bun run test --watch
-```
-
-Debug js tests
-
-```
-$ bun test --inspect-brk test/javascript/menu/items.test.tsx
-```
-
-Or wait for a debugger to attach:
-
-```
-$ bun test --inspect-wait test/javascript/menu/items.test.tsx
-```
-
-Then open the debug URL that Bun prints (it looks like `https://debug.bun.sh/...`).
-
-### Git hooks (Husky)
-
-Skip Husky hooks for a single commit:
-
-```
-HUSKY=0 git commit -m "no hooks run"
-```
-
-### Checking emails
-
-visit `/letter_opener` to see emails sent by rails
-
-### spam users
+### Spam users
 
 ```
 User.find(SqlQuery.new(:spam_user_ids).execute.pluck("id")).each {|u| u.destroy!}
 ```
 
-### Bun on Heroku with a Bun buildpack
+## Heroku
 
-Ensure a Bun buildpack runs before the Ruby buildpack so `assets:precompile` can run
-`bun run build` via jsbundling-rails.
+Auto-deploys from `master` when CI passes. Full review-app config in `app.json`.
+
+### Addons
+
+| Addon | Plan | Purpose |
+|-------|------|---------|
+| heroku-postgresql | essential-0 (v17) | Primary database |
+| heroku-redis | mini | Sidekiq, ActionCable |
+| scheduler | standard | Recurring tasks |
+| scheduler-monitor | test-free | Monitors scheduler runs |
+
+### Scheduled jobs
+
+| Job | Frequency |
+|-----|-----------|
+| `rails reminders:havent_ordered reminders:pick_up_bread` | Hourly |
+| `rails cleanup:trim_analytics` | Daily |
+
+### Email
+
+SendGrid via `SENDGRID_USERNAME` / `SENDGRID_PASSWORD`. On review apps, `ReviewAppMailInterceptor` restricts delivery to admin users only.
+
+### Review apps
+
+`REVIEW_APP=true` set automatically via `app.json`. Use `bin/seed_review_app <app-name>` to copy prod data and config vars. The seed script verifies scheduler provisioning and lists jobs to configure.
