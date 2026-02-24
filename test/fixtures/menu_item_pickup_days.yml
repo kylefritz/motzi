@@ -56,3 +56,20 @@ passover_toffee_fri:
 passover_toffee_sat:
   menu_item: passover_matzo_toffee
   pickup_day: passover_sat
+
+# week 26w15
+w26w15_classic_fri:
+  menu_item: w26w15_classic
+  pickup_day: w26w15_fri
+
+w26w15_classic_sat:
+  menu_item: w26w15_classic
+  pickup_day: w26w15_sat
+
+w26w15_rye_fri:
+  menu_item: w26w15_rye
+  pickup_day: w26w15_fri
+
+w26w15_rye_sat:
+  menu_item: w26w15_rye
+  pickup_day: w26w15_sat

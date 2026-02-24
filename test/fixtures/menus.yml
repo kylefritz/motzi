@@ -50,3 +50,9 @@ passover_2026:
   menu_type: holiday
   subscriber_note: |
     Order your Passover specials here! Pickup April 10-11.
+
+week_26w15:
+  name: week_26w15
+  week_id: 26w15
+  subscriber_note: |
+    Regular bread this week!

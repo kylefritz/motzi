@@ -41,3 +41,14 @@ passover_sat:
   menu: passover_2026
   order_deadline_at: <%= Time.zone.parse("2026-04-09 21:00") %>
   pickup_at:         <%= Time.zone.parse("2026-04-11 09:00") %>
+
+# week 26w15 (same dates as passover)
+w26w15_fri:
+  menu: week_26w15
+  order_deadline_at: <%= Time.zone.parse("2026-04-08 22:00") %>
+  pickup_at:         <%= Time.zone.parse("2026-04-10 15:00") %>
+
+w26w15_sat:
+  menu: week_26w15
+  order_deadline_at: <%= Time.zone.parse("2026-04-09 22:00") %>
+  pickup_at:         <%= Time.zone.parse("2026-04-11 08:00") %>
