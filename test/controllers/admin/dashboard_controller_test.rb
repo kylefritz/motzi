@@ -66,24 +66,34 @@ class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
     rows = document_root_element.css('.subscribers tbody tr')
     assert_equal 3, rows.size, 'subscribers + marketplace + holiday'
 
+    # Columns: type(0), not_ordered(1), orders(2), skip(3), credits(4), total(5)
     subscriber_cells = rows[0].css('td').map(&:text).map(&:strip)
     assert_equal 'Subscribers', subscriber_cells[0]
     assert_equal '3', subscriber_cells[1], 'not_ordered: adrian, ljf, jess'
     assert_equal '1', subscriber_cells[2], 'ordered: kyle'
+    assert_equal '2', subscriber_cells[4], 'credits: kyle has classic(1) + rye(1) = 2'
 
     marketplace_cells = rows[1].css('td').map(&:text).map(&:strip)
     assert_equal 'Marketplace', marketplace_cells[0]
     assert_equal '0', marketplace_cells[2], 'no marketplace orders'
+    assert_equal '0', marketplace_cells[4], 'no marketplace credits'
 
     holiday_cells = rows[2].css('td').map(&:text).map(&:strip)
     assert_equal 'Holiday', holiday_cells[0]
     assert_equal '2', holiday_cells[2], 'ordered: kyle + ljf'
+    assert_equal '3', holiday_cells[4], 'credits: kyle almond_cake(1) + ljf matzo_toffee(1) + almond_cake(1) = 3'
 
-    # Sales: single table with 3 rows — marketplace, credits, holiday
-    sales_rows = document_root_element.css('.sales tbody tr')
-    assert_equal 3, sales_rows.size, 'marketplace + credits + holiday'
-    assert_equal 'Market Place', sales_rows[0].css('td')[0].text.strip
-    assert_equal 'Credits', sales_rows[1].css('td')[0].text.strip
-    assert_equal 'Holiday', sales_rows[2].css('td')[0].text.strip
+    # Sales: two tables — regular (marketplace + credit sales) and holiday (marketplace only)
+    sales_tables = document_root_element.css('.sales')
+    assert_equal 2, sales_tables.size, 'regular + holiday sales tables'
+
+    regular_rows = sales_tables[0].css('tbody tr')
+    assert_equal 2, regular_rows.size
+    assert_equal 'Market Place', regular_rows[0].css('td')[0].text.strip
+    assert_equal 'Credit Sales', regular_rows[1].css('td')[0].text.strip
+
+    holiday_rows = sales_tables[1].css('tbody tr')
+    assert_equal 1, holiday_rows.size, 'marketplace only — credits are per-week, not per-menu'
+    assert_equal 'Market Place', holiday_rows[0].css('td')[0].text.strip
   end
 end

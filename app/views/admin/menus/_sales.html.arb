@@ -6,24 +6,14 @@ mp = {
   paid: marketplace.map(&:stripe_charge_amount).sum,
 }
 
-credit_items = CreditItem.for_menu(menu).bought
-ci = {
-  type: "Credits",
-  qty: credit_items.map(&:quantity).sum,
-  retail: credit_items.map(&:retail_price).sum,
-  paid: credit_items.map(&:stripe_charge_amount).sum,
-}
-
-rows = [mp, ci]
-
-hm = defined?(holiday_menu) ? holiday_menu : nil
-if hm
-  h_marketplace = Order.for_menu_id(hm.id).includes(order_items: :item).marketplace
+rows = [mp]
+unless menu.holiday?
+  credit_items = CreditItem.for_menu(menu).bought
   rows << {
-    type: "Holiday",
-    qty: h_marketplace.map {|o| o.order_items.map(&:quantity).sum}.sum,
-    retail: h_marketplace.map(&:retail_price).sum,
-    paid: h_marketplace.map(&:stripe_charge_amount).sum,
+    type: "Credit Sales",
+    qty: credit_items.map(&:quantity).sum,
+    retail: credit_items.map(&:retail_price).sum,
+    paid: credit_items.map(&:stripe_charge_amount).sum,
   }
 end
 

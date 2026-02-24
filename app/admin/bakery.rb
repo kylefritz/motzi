@@ -21,42 +21,53 @@ ActiveAdmin.register_page "Dashboard" do
           def compute(name, subs)
             total = subs.count
             orders = Order.for_current_menu.where(user_id: subs.pluck(:id))
-            ordered = orders.not_skip.count
+            ordered = orders.not_skip
             skipped = orders.skip.count
-            orders = Order.for_current_menu.where(user_id: subs.pluck(:id)).count
+            num_orders = orders.count
             {
               type: name,
-              ordered: ordered,
+              ordered: ordered.count,
               skipped: skipped,
-              not_ordered: total - orders,
+              not_ordered: total - num_orders,
               total: total,
+              credits: ordered.includes(order_items: :item).sum(&:credits),
             }
           end
 
           subscribers = compute("Subscribers", User.subscribers)
-          num_marketplace = Order.for_current_menu.marketplace.count
+          mp_orders = Order.for_current_menu.marketplace.not_skip.includes(order_items: :item)
           marketplace = {
             type: "Marketplace",
-            ordered: num_marketplace,
-            total: num_marketplace,
+            ordered: mp_orders.count,
+            total: mp_orders.count,
+            credits: mp_orders.sum(&:credits),
           }
           rows = [subscribers, marketplace]
           if holiday_menu
-            num_holiday = Order.for_holiday_menu.not_skip.count
-            rows << {type: "Holiday", ordered: num_holiday, total: num_holiday}
+            h_orders = Order.for_holiday_menu.not_skip.includes(order_items: :item)
+            rows << {type: "Holiday", ordered: h_orders.count, total: h_orders.count, credits: h_orders.sum(&:credits)}
           end
           table_for rows, class: 'subscribers' do
             column :type
             column :not_ordered
-            column :ordered
-            column :skipped
+            column("Orders") { |h| h[:ordered] }
+            column("Skip") { |h| h[:skipped] }
+            column("Credits used") { |h| h[:credits] }
             column(:total) { |h| strong(h[:total]) }
           end
         end
 
         panel "Sales" do
-          render 'admin/menus/sales', {menu: menu, holiday_menu: holiday_menu}
+          render 'admin/menus/sales', {menu: menu}
+          if holiday_menu
+            h4 do
+              text_node holiday_menu.name
+              status_tag 'Holiday', color: 'orange', style: 'margin-left: 6px; vertical-align: middle'
+            end
+            render 'admin/menus/sales', {menu: holiday_menu}
+          end
         end
+
       end
       column span: 3 do
         bake_menus = [menu, holiday_menu].compact
