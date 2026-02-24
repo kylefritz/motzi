@@ -10,6 +10,13 @@ fi
 
 REVIEW_APP="$1"
 
+echo "==> Copying config vars from $PROD_APP to $REVIEW_APP..."
+for var in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY HASHID_SALT SENDGRID_USERNAME SENDGRID_PASSWORD; do
+  val=$(heroku config:get "$var" --app "$PROD_APP")
+  heroku config:set "$var=$val" --app "$REVIEW_APP" >/dev/null
+  echo "    $var set"
+done
+
 echo "==> Copying $PROD_APP database to $REVIEW_APP..."
 heroku pg:copy "$PROD_APP::DATABASE_URL" DATABASE_URL --app "$REVIEW_APP" --confirm "$REVIEW_APP"
 
