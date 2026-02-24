@@ -75,13 +75,16 @@ ActiveAdmin.register Menu do
   end
 
   form do |f|
-    def week_options(week_id, menu_type)
-      existing = Menu.where(menu_type: menu_type).pluck(:week_id)
-      week_ids = (0..10).map { |i| (Time.zone.now + i.weeks).week_id } - existing
-      week_ids.push(week_id) if week_id.present?
+    def week_options(menu)
+      taken = Menu.where.not(id: menu.id).pluck(:week_id, :menu_type)
+                  .group_by(&:first).transform_values { |pairs| pairs.map(&:last) }
+      week_ids = (0..10).map { |i| (Time.zone.now + i.weeks).week_id }
+      week_ids.push(menu.week_id) if menu.week_id.present?
       week_ids.uniq.sort.map do |w|
         t = Time.zone.from_week_id(w).strftime('%a %m/%d')
-        ["#{w} starts #{t}", w]
+        types_taken = taken[w] || []
+        suffix = types_taken.any? ? " (has #{types_taken.join(', ')})" : ""
+        ["#{w} starts #{t}#{suffix}", w]
       end
     end
 
@@ -89,7 +92,7 @@ ActiveAdmin.register Menu do
       input :menu_type, as: :select,
             collection: [['Regular', 'regular'], ['Holiday', 'holiday']],
             include_blank: false
-      input :week_id, as: :select, collection: week_options(resource.week_id, resource.menu_type || 'regular')
+      input :week_id, as: :select, collection: week_options(resource)
       input :name
       para style: 'margin-left: 20%; padding-left: 8px' do
         text_node "You can use "
@@ -274,7 +277,7 @@ ActiveAdmin.register Menu do
 
   member_action :item, method: :post do
     @menu = Menu.find(params[:id])
-    Menu.transaction do 
+    Menu.transaction do
       mi = @menu.menu_items.create!(
         item_id: params[:item_id],
         subscriber: params[:subscriber],
@@ -302,7 +305,7 @@ ActiveAdmin.register Menu do
   member_action :remove_item, method: :post do
     @menu = Menu.find(params[:id])
     MenuItem.where(menu: @menu, item_id: params[:item_id]).destroy_all
-    
+
     render 'admin/menus/menu_builder', formats: [:json]
   end
 

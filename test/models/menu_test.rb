@@ -80,6 +80,24 @@ class MenuTest < ActiveSupport::TestCase
                  week3.menu_items.map {|i| i.menu_item_pickup_days.count}.sum, "same sum of menu_item_pickup_days"
   end
 
+  test "copy_from clears sold-out limits" do
+    original = menus(:week1)
+    target = Menu.create!(name: "week4", week_id: "19w04")
+
+    # Set limits on the original: one positive, one zero (sold out), one nil (unlimited)
+    mipds = original.menu_items.flat_map(&:menu_item_pickup_days)
+    mipds[0].update!(limit: 5)
+    mipds[1].update!(limit: 0)
+
+    target.copy_from(original)
+
+    target_mipds = target.menu_items.flat_map(&:menu_item_pickup_days)
+    limits = target_mipds.map(&:limit)
+
+    assert_includes limits, 5, "positive limit carried over"
+    refute_includes limits, 0, "sold-out limit (0) should be cleared to nil"
+  end
+
   test "copy_from creates pickup days in target week when missing" do
     original = menus(:week1)
     target = Menu.create!(name: "week4", week_id: "19w04")
