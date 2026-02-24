@@ -8,19 +8,37 @@ class Menu < ApplicationRecord
   has_paper_trail
   default_scope { order("LOWER(week_id) desc") }
 
+  enum menu_type: { regular: 'regular', holiday: 'holiday' }
+
   def self.current
     Menu.find(Setting.menu_id)
   end
+
+  def self.current_holiday
+    return nil unless Setting.holiday_menu_id.present?
+    Menu.find(Setting.holiday_menu_id)
+  rescue ActiveRecord::RecordNotFound
+    nil
+  end
+
   def self.for_current_week_id
     Menu.find_by(week_id: Time.zone.now.week_id)
   end
 
   def make_current!
-    Setting.menu_id = self.id
+    if holiday?
+      Setting.holiday_menu_id = self.id
+    else
+      Setting.menu_id = self.id
+    end
   end
 
   def current?
-    self.id == Setting.menu_id
+    if holiday?
+      self.id == Setting.holiday_menu_id
+    else
+      self.id == Setting.menu_id
+    end
   end
 
   def for_current_week_id?
@@ -28,7 +46,24 @@ class Menu < ApplicationRecord
   end
 
   def can_publish?
-    self.week_id >= Time.zone.now.week_id
+    if holiday?
+      latest_deadline.present? && Time.zone.now < latest_deadline
+    else
+      self.week_id >= Time.zone.now.week_id
+    end
+  end
+
+  # Opens holiday menu for pre-orders — NO EMAIL, intentionally.
+  #
+  # IMPORTANT: This does NOT send any notification to subscribers.
+  # Bakers announce holiday pre-orders in the regular weekly menu's subscriber_note.
+  # This is intentional: bakers control the announcement timing themselves.
+  #
+  # Contrast: publish_to_subscribers! (regular menus) makes current AND sends the weekly email.
+  def open_for_orders!
+    raise "open_for_orders! is only for holiday menus. Use publish_to_subscribers! for regular menus." unless holiday?
+    raise "Cannot open: no pickup days set or all deadlines have passed." unless can_publish?
+    make_current!
   end
 
   def item_counts
@@ -130,7 +165,7 @@ class Menu < ApplicationRecord
       original_mi.menu_item_pickup_days.each do |mipud|
         new_mi.menu_item_pickup_days.create!(
           pickup_day_id: pickup_day_map[mipud.pickup_day_id],
-          limit: mipud.limit,
+          limit: mipud.limit&.positive? ? mipud.limit : nil,
         )
       end
     end

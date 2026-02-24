@@ -36,6 +36,43 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     assert_menu_json
   end
 
+  test "GET /menu.json with no holiday menu returns holidayMenu null" do
+    Setting.holiday_menu_id = nil
+    get '/menu.json'
+    assert_response :success
+    json = JSON.parse(@response.body)
+    assert_nil json['holidayMenu']
+    assert_nil json['holidayOrder']
+    validate_json_schema :menu, @response.body
+  end
+
+  test "GET /menu.json with active holiday menu returns holidayMenu" do
+    holiday = menus(:passover_2026)
+    Setting.holiday_menu_id = holiday.id
+    get '/menu.json'
+    assert_response :success
+    json = JSON.parse(@response.body)
+    assert_not_nil json['holidayMenu']
+    assert_equal holiday.id, json['holidayMenu']['id']
+    validate_json_schema :menu, @response.body
+  ensure
+    Setting.holiday_menu_id = nil
+  end
+
+  test "GET /menu.json signed in with placed holiday order returns holidayOrder" do
+    holiday = menus(:passover_2026)
+    Setting.holiday_menu_id = holiday.id
+    sign_in users(:ljf)
+    get '/menu.json'
+    assert_response :success
+    json = JSON.parse(@response.body)
+    assert_not_nil json['holidayMenu']
+    assert_not_nil json['holidayOrder'], 'ljf has the passover order fixture'
+    validate_json_schema :menu, @response.body
+  ensure
+    Setting.holiday_menu_id = nil
+  end
+
   private
 
   def assert_menu_json

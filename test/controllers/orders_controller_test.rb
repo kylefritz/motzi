@@ -135,6 +135,109 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test "non-admin user cannot order from a non-current non-holiday menu" do
+    sign_in users(:jess)
+    non_current_menu = menus(:week3)
+
+    before_deadline do
+      refute_ordered do
+        post '/orders.json', params: {
+          menu_id: non_current_menu.id,
+          cart: [{ item_id: Menu.current.items.first.id, quantity: 1 }]
+        }, as: :json
+      end
+    end
+    assert_response :unprocessable_entity
+    json = JSON.parse(response.body)
+    assert_equal "this menu is not available for ordering", json["message"]
+  end
+
+  test "creating holiday order returns regular menu as primary menu" do
+    holiday_menu = menus(:passover_2026)
+    holiday_menu.open_for_orders!
+
+    sign_in users(:jess)
+
+    item_id = holiday_menu.items.first.id
+    pickup_day_id = holiday_menu.pickup_days.first.id
+
+    travel_to(holiday_menu.earliest_deadline - 2.hours) do
+      assert_ordered do
+        post '/orders.json', params: {
+          menu_id: holiday_menu.id,
+          cart: [{ item_id: item_id, quantity: 1, pickup_day_id: pickup_day_id }]
+        }, as: :json
+      end
+    end
+
+    assert_response :success
+    json = JSON.parse(response.body)
+
+    # The primary menu should be the regular menu, not the holiday one
+    assert_equal Menu.current.id, json["menu"]["id"], "primary menu should be the regular current menu"
+    assert_equal holiday_menu.id, json["holidayMenu"]["id"], "holiday menu should be returned separately"
+    assert_not_nil json["holidayOrder"], "holiday order should be present"
+    assert_nil json["order"], "regular order slot should be empty for user with no regular order"
+  end
+
+  test "creating marketplace holiday order returns it in the holidayOrder slot" do
+    holiday_menu = menus(:passover_2026)
+    holiday_menu.open_for_orders!
+
+    item_id = holiday_menu.items.first.id
+    pickup_day_id = holiday_menu.pickup_days.first.id
+
+    travel_to(holiday_menu.earliest_deadline - 2.hours) do
+      assert_ordered do
+        assert_email_sent do
+          post '/orders.json', params: {
+            menu_id: holiday_menu.id,
+            email: "marketplace@example.com",
+            first_name: "Market",
+            last_name: "Buyer",
+            phone: "555-000-1234",
+            price: 0,
+            cart: [{ item_id: item_id, quantity: 1, pickup_day_id: pickup_day_id }]
+          }, as: :json
+        end
+      end
+    end
+
+    assert_response :success
+    json = JSON.parse(response.body)
+
+    assert_equal Menu.current.id, json["menu"]["id"], "primary menu should be the regular current menu"
+    assert_equal holiday_menu.id, json["holidayMenu"]["id"], "holiday menu should be returned separately"
+    assert_not_nil json["holidayOrder"], "holiday order should be in holidayOrder slot"
+    assert_equal 0, json["holidayOrder"]["stripeChargeAmount"], "marketplace order should have stripe_charge_amount set"
+    assert_nil json["order"], "regular order slot should be null for marketplace holiday order"
+  end
+
+  test "updating holiday order keeps it in the holidayOrder slot" do
+    holiday_menu = menus(:passover_2026)
+    holiday_menu.open_for_orders!
+
+    sign_in users(:kyle)
+
+    # kyle_passover fixture order exists
+    holiday_order = orders(:kyle_passover)
+    new_item_id = items(:matzo_toffee).id
+    pickup_day_id = holiday_menu.pickup_days.first.id
+
+    travel_to(holiday_menu.earliest_deadline - 2.hours) do
+      put "/orders/#{holiday_order.id}.json", params: {
+        cart: [{ item_id: new_item_id, quantity: 2, pickup_day_id: pickup_day_id }]
+      }, as: :json
+    end
+
+    assert_response :success
+    json = JSON.parse(response.body)
+
+    assert_equal Menu.current.id, json["menu"]["id"], "primary menu is regular"
+    assert_not_nil json["holidayOrder"], "holiday order should be in holidayOrder slot"
+    assert_equal holiday_order.id, json["holidayOrder"]["id"]
+  end
+
   private
 
   def order_attrs(hashid)

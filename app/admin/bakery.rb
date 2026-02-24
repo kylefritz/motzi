@@ -3,66 +3,92 @@ ActiveAdmin.register_page "Dashboard" do
   menu priority: 1
 
   content title: "Hello friend" do
+    if defined?(ReviewAppMailInterceptor) && ReviewAppMailInterceptor.active
+      div class: 'flash flash_alert', style: 'margin-bottom: 16px' do
+        span "Review app — emails are only delivered to admin users."
+      end
+    elsif Rails.env.development?
+      div class: 'flash flash_alert', style: 'margin-bottom: 16px' do
+        text_node "Local dev — emails open in browser via "
+        a "letter_opener", href: "/letter_opener"
+        text_node "."
+      end
+    end
+
     menu = Menu.current
+    holiday_menu = Menu.current_holiday
 
     columns do
       column do
         panel "Menu" do
           h4 a(menu.name, href: admin_menu_path(menu.id), class: 'bigger')
+          if holiday_menu
+            h4 do
+              a(holiday_menu.name, href: admin_menu_path(holiday_menu.id), class: 'bigger')
+              status_tag 'Holiday', color: 'orange', class: 'holiday-tag'
+            end
+          end
         end
         panel "Orders" do
           def compute(name, subs)
             total = subs.count
             orders = Order.for_current_menu.where(user_id: subs.pluck(:id))
-            ordered = orders.not_skip.count
+            ordered = orders.not_skip
             skipped = orders.skip.count
-            orders = Order.for_current_menu.where(user_id: subs.pluck(:id)).count
+            num_orders = orders.count
             {
               type: name,
-              ordered: ordered,
+              ordered: ordered.count,
               skipped: skipped,
-              not_ordered: total - orders,
+              not_ordered: total - num_orders,
               total: total,
+              credits: ordered.includes(order_items: :item).sum(&:credits),
             }
           end
 
           subscribers = compute("Subscribers", User.subscribers)
-          num_marketplace = Order.for_current_menu.marketplace.count
+          mp_orders = Order.for_current_menu.marketplace.not_skip.includes(order_items: :item)
           marketplace = {
             type: "Marketplace",
-            ordered: num_marketplace,
-            total: num_marketplace,
+            ordered: mp_orders.count,
+            total: mp_orders.count,
+            credits: mp_orders.sum(&:credits),
           }
-          table_for [subscribers, marketplace], class: 'subscribers' do
+          rows = [subscribers, marketplace]
+          if holiday_menu
+            h_orders = Order.for_holiday_menu.not_skip.includes(order_items: :item)
+            rows << {type: "Holiday", not_ordered: "—", skipped: "—", ordered: h_orders.count, total: h_orders.count, credits: h_orders.sum(&:credits)}
+          end
+          table_for rows, class: 'subscribers' do
             column :type
             column :not_ordered
-            column :ordered
-            column :skipped
+            column("Orders") { |h| h[:ordered] }
+            column("Skip") { |h| h[:skipped] }
+            column("Credits used") { |h| h[:credits] }
             column(:total) { |h| strong(h[:total]) }
           end
         end
 
         panel "Sales" do
           render 'admin/menus/sales', {menu: menu}
+          if holiday_menu
+            h4 do
+              text_node holiday_menu.name
+              status_tag 'Holiday', color: 'orange', class: 'holiday-tag'
+            end
+            render 'admin/menus/sales', {menu: holiday_menu}
+          end
         end
+
       end
       column span: 3 do
-        render 'admin/menus/what_to_bake', {menu: menu}
+        bake_menus = [menu, holiday_menu].compact
+        render 'admin/menus/what_to_bake_combined', {menus: bake_menus}
       end
     end
 
 
     columns do
-      column do
-        panel "Special Requests" do
-          table_for menu.orders.includes(:user).with_comments do
-            column ("comments") { |order| order.comments_html }
-            column ("user") { |order| order.user }
-            column ("order") { |order| order }
-          end
-        end
-      end
-
       column do
         panel "New Credits - last 2 weeks" do
           credit_items = CreditItem.order('id desc').where("created_at > ?", 2.weeks.ago).includes(:user).limit(20)
@@ -74,27 +100,38 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
 
-    end # end columns
-
-    columns do
       column do
         panel "Credit balance < 4" do
-          low_credit_users = SqlQuery.new(:low_credit_users, balance: 4).execute
+          low_credit_users = SqlQuery.new(:low_credit_users, balance: 4, ordered_within_days: 30).execute
           users = Hash[User.find(low_credit_users.map {|r| r["user_id"]}).map{|u| [u.id, u] }]
+          para "Subscribers with low credit balance who ordered in the last 30 days.", style: "color: #888; font-size: 0.85em; margin-bottom: 8px"
           table_for low_credit_users do
             column ("user") { |r| users[r["user_id"]] }
             column ("balance") { |r| r["credit_balance"] }
+            column ("menu") { |r| r["last_menu_name"] }
           end
         end
       end
+    end
 
-      def get_user_credits(users_ids)
-        if users_ids.empty?
-          return {}
+    def get_user_credits(users_ids)
+      if users_ids.empty?
+        return {}
+      end
+      # can't send 0 users_ids to :user_credits
+      rows = SqlQuery.new(:user_credits, user_ids: users_ids).execute
+      Hash[rows.map {|r| [r["user_id"], r["credit_balance"]]} ]
+    end
+
+    columns do
+      column do
+        panel "Special Requests" do
+          table_for menu.orders.includes(:user).with_comments do
+            column ("comments") { |order| order.comments_html }
+            column ("user") { |order| order.user }
+            column ("order") { |order| order }
+          end
         end
-        # can't send 0 users_ids to :user_credits
-        rows = SqlQuery.new(:user_credits, user_ids: users_ids).execute
-        Hash[rows.map {|r| [r["user_id"], r["credit_balance"]]} ]
       end
 
       column do
@@ -118,7 +155,6 @@ ActiveAdmin.register_page "Dashboard" do
           end
         end
       end
-
     end
 
 

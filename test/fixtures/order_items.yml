@@ -22,3 +22,31 @@ k_w2_donuts:
   order: kyle_week2
   item: donuts
   pickup_day: w2_d1_thurs
+
+# week 26w15 regular orders (kyle)
+k_w26_classic_fri:
+  order: kyle_week_26w15
+  item: classic
+  pickup_day: w26w15_fri
+
+k_w26_rye_fri:
+  order: kyle_week_26w15
+  item: rye
+  pickup_day: w26w15_fri
+
+# passover orders (kyle)
+k_passover_almond_fri:
+  order: kyle_passover
+  item: almond_cake
+  pickup_day: passover_fri
+
+# ljf already has ljf_passover order — add order items
+ljf_passover_toffee_fri:
+  order: ljf_passover
+  item: matzo_toffee
+  pickup_day: passover_fri
+
+ljf_passover_almond_sat:
+  order: ljf_passover
+  item: almond_cake
+  pickup_day: passover_sat

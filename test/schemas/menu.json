@@ -2,7 +2,7 @@
   "definitions": {},
   "$id": "/menu.json",
   "type": "object",
-  "required": ["menu", "user", "order", "bundles"],
+  "required": ["menu", "user", "order", "bundles", "holidayMenu", "holidayOrder"],
   "properties": {
     "menu": {
       "type": "object",
@@ -177,6 +177,122 @@
             "default": 1.0
           }
         }
+      }
+    },
+    "holidayMenu": {
+      "type": ["object", "null"],
+      "title": "holidayMenu",
+      "required": [
+        "id",
+        "name",
+        "menuNote",
+        "subscriberNote",
+        "isCurrent",
+        "orderingDeadlineText",
+        "enablePayWhatYouCan",
+        "pickupDays",
+        "items"
+      ],
+      "properties": {
+        "id": { "type": "integer" },
+        "name": { "type": "string" },
+        "menuNote": { "type": ["null", "string"] },
+        "subscriberNote": { "type": "string" },
+        "isCurrent": { "type": "boolean" },
+        "orderingDeadlineText": { "type": "string" },
+        "enablePayWhatYouCan": { "type": "boolean" },
+        "pickupDays": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "pickupAt", "orderDeadlineAt"],
+            "properties": {
+              "id": { "type": "integer" },
+              "pickupAt": { "type": "string" },
+              "orderDeadlineAt": { "type": "string" },
+              "debug": { "type": "string" }
+            }
+          }
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "description",
+              "price",
+              "credits",
+              "subscriber",
+              "marketplace",
+              "pickupDays"
+            ],
+            "properties": {
+              "id": { "type": "integer" },
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "price": { "type": "number" },
+              "credits": { "type": "integer" },
+              "image": { "type": ["null", "string"] },
+              "subscriber": { "type": "boolean" },
+              "marketplace": { "type": "boolean" },
+              "pickupDays": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "pickupAt",
+                    "orderDeadlineAt",
+                    "remaining"
+                  ],
+                  "properties": {
+                    "id": { "type": "integer" },
+                    "pickupAt": { "type": "string" },
+                    "orderDeadlineAt": { "type": "string" },
+                    "debug": { "type": "string" },
+                    "remaining": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "holidayOrder": {
+      "type": ["object", "null"],
+      "title": "holidayOrder",
+      "required": ["items", "id", "comments", "skip"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "title": "items",
+          "items": {
+            "type": "object",
+            "title": "item",
+            "required": [
+              "itemId",
+              "quantity",
+              "day",
+              "pickupDayId",
+              "pickupAt"
+            ],
+            "properties": {
+              "itemId": { "type": "integer" },
+              "quantity": { "type": "integer" },
+              "day": { "type": "string" },
+              "pickupDayId": { "type": "integer" },
+              "pickupAt": { "type": "string" }
+            }
+          }
+        },
+        "id": { "type": "integer" },
+        "comments": { "type": ["string", "null"] },
+        "skip": { "type": "boolean" },
+        "stripeReceiptUrl": { "type": ["string", "null"] },
+        "stripeChargeAmount": { "type": ["number", "null"] }
       }
     }
   }

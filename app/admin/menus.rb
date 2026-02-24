@@ -1,9 +1,9 @@
 ActiveAdmin.register Menu do
-  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note
+  permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note, :menu_type
   includes :pickup_days, menu_items: [:item]
   config.sort_order = 'LOWER(week_id) desc'
 
-  actions :all, except: [:destroy] # deleting menus can orphan orders, etc
+  actions :all, except: [:destroy]
 
   filter :items
   filter :name
@@ -16,6 +16,7 @@ ActiveAdmin.register Menu do
   scope("current menu") { |scope| scope.where(id: Setting.menu_id) }
   scope("emailed") { |scope| scope.where("emailed_at is not null") }
   scope("not emailed") { |scope| scope.where("emailed_at is null") }
+  scope("holiday menus") { |scope| scope.holiday }
 
   # create big buttons on every menu page
   action_item :preview, except: [:index, :new] do
@@ -24,6 +25,7 @@ ActiveAdmin.register Menu do
     end
   end
 
+
   index do
     id_column
     column :name do |menu|
@@ -31,6 +33,10 @@ ActiveAdmin.register Menu do
       if menu.current?
         br
         status_tag true, style: 'margin-left: 3px', label: 'Current'
+      end
+      if menu.holiday?
+        br
+        status_tag 'Holiday', color: 'orange', style: 'margin-left: 3px'
       end
     end
     column :items do |menu|
@@ -69,17 +75,24 @@ ActiveAdmin.register Menu do
   end
 
   form do |f|
-    def week_options(menu_week_id)
-      week_ids = (-10..10).map {|i| (Time.zone.now + i.weeks).week_id } - Menu.pluck(:week_id)
-      week_ids.push(menu_week_id) if menu_week_id.present?
-      week_ids.uniq.sort.map do |week_id|
-        t = Time.zone.from_week_id(week_id).strftime('%a %m/%d')
-        ["#{week_id} starts #{t}", week_id]
+    def week_options(menu)
+      taken = Menu.where.not(id: menu.id).pluck(:week_id, :menu_type)
+                  .group_by(&:first).transform_values { |pairs| pairs.map(&:last) }
+      week_ids = (0..10).map { |i| (Time.zone.now + i.weeks).week_id }
+      week_ids.push(menu.week_id) if menu.week_id.present?
+      week_ids.uniq.sort.map do |w|
+        t = Time.zone.from_week_id(w).strftime('%a %m/%d')
+        types_taken = taken[w] || []
+        suffix = types_taken.any? ? " (has #{types_taken.join(', ')})" : ""
+        ["#{w} starts #{t}#{suffix}", w]
       end
     end
 
     inputs do
-      input :week_id, :as => :select, :collection => week_options(resource.week_id)
+      input :menu_type, as: :select,
+            collection: [['Regular', 'regular'], ['Holiday', 'holiday']],
+            include_blank: false
+      input :week_id, as: :select, collection: week_options(resource)
       input :name
       para style: 'margin-left: 20%; padding-left: 8px' do
         text_node "You can use "
@@ -117,12 +130,20 @@ ActiveAdmin.register Menu do
         render 'builder'
       end
       row :send_test_email do
-        button_to("Send yourself a test menu email", test_email_admin_menu_path(menu), method: :post)
+        if menu.holiday?
+          em "Holiday menus don't send emails — announce in the regular weekly menu's subscriber note."
+        else
+          button_to("Send yourself a test menu email", test_email_admin_menu_path(menu), method: :post)
+        end
       end
       row :created_at
       row :updated_at
       row :emailed_at do
-        render 'email', { menu: menu }
+        if menu.holiday?
+          render 'holiday_open', menu: menu
+        else
+          render 'email', { menu: menu }
+        end
       end
     end
 
@@ -135,6 +156,26 @@ ActiveAdmin.register Menu do
 
     panel "Orders" do
       render 'admin/menus/what_to_bake', {menu: menu}
+    end
+
+    panel "Danger Zone", class: 'danger-zone' do
+      para "Menus without orders can be deleted. To delete a menu that has orders, delete its orders first.", style: 'color: #888; margin-bottom: 12px'
+      if menu.current?
+        para "This is the current menu and cannot be deleted.", style: 'color: #888'
+      elsif menu.orders.any?
+        para do
+          a "Show #{menu.orders.count} orders",
+            href: admin_orders_path(q: { menu_id_eq: menu.id }),
+            class: 'action-disabled'
+        end
+      else
+        para do
+          a "Delete Menu", href: delete_menu_admin_menu_path(menu),
+            'data-method': :post,
+            'data-confirm': "Delete \"#{menu.name}\"? This cannot be undone.",
+            class: 'action-danger'
+        end
+      end
     end
 
     panel "Emails" do
@@ -168,6 +209,14 @@ ActiveAdmin.register Menu do
     redirect_to collection_path, notice: notice
   end
 
+  member_action :open_for_orders, method: :post do
+    resource.open_for_orders!
+    notice = "#{resource.name} is now open for pre-orders. Announce it in your next regular menu subscriber note."
+    redirect_to resource_path, notice: notice
+  rescue => e
+    redirect_to resource_path, alert: e.message
+  end
+
   member_action :test_email, method: :post do
     menu = resource
     MenuMailer.with(menu: menu, user: current_user).weekly_menu_email.deliver_later
@@ -179,6 +228,25 @@ ActiveAdmin.register Menu do
                                 author: current_admin_user)
 
     redirect_to resource_path, notice: notice
+  end
+
+  member_action :delete_menu, method: :post do
+    menu = resource
+    if menu.current?
+      redirect_to resource_path, alert: "Can't delete the current menu"
+      return
+    end
+
+    if menu.orders.any?
+      redirect_to resource_path, alert: "Can't delete — menu has #{menu.orders.count} orders"
+      return
+    end
+
+    name = menu.name
+    ActiveAdmin::Comment.where(resource: menu).delete_all
+    menu.destroy!
+
+    redirect_to collection_path, notice: "Menu \"#{name}\" has been deleted"
   end
 
   member_action :copy_from, method: :post do
@@ -211,7 +279,7 @@ ActiveAdmin.register Menu do
 
   member_action :item, method: :post do
     @menu = Menu.find(params[:id])
-    Menu.transaction do 
+    Menu.transaction do
       mi = @menu.menu_items.create!(
         item_id: params[:item_id],
         subscriber: params[:subscriber],
@@ -239,7 +307,7 @@ ActiveAdmin.register Menu do
   member_action :remove_item, method: :post do
     @menu = Menu.find(params[:id])
     MenuItem.where(menu: @menu, item_id: params[:item_id]).destroy_all
-    
+
     render 'admin/menus/menu_builder', formats: [:json]
   end
 

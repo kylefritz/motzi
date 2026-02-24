@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROD_APP="motzibread"
+
+if [ $# -ne 1 ]; then
+  echo "Usage: bin/seed_review_app <review-app-name>"
+  exit 1
+fi
+
+REVIEW_APP="$1"
+
+echo "==> Copying config vars from $PROD_APP to $REVIEW_APP..."
+for var in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY HASHID_SALT SENDGRID_USERNAME SENDGRID_PASSWORD; do
+  val=$(heroku config:get "$var" --app "$PROD_APP")
+  heroku config:set "$var=$val" --app "$REVIEW_APP" >/dev/null
+  echo "    $var set"
+done
+
+echo "==> Copying $PROD_APP database to $REVIEW_APP..."
+heroku pg:copy "$PROD_APP::DATABASE_URL" DATABASE_URL --app "$REVIEW_APP" --confirm "$REVIEW_APP"
+
+echo "==> Running migrations on $REVIEW_APP..."
+heroku run bin/rails db:migrate --app "$REVIEW_APP"
+
+echo "==> Restarting dynos to clear settings cache..."
+heroku dyno:restart --app "$REVIEW_APP"
+
+echo "==> Checking Heroku Scheduler..."
+if heroku addons --app "$REVIEW_APP" 2>/dev/null | grep -q scheduler; then
+  echo "    Scheduler & Monitor addons are provisioned (via app.json)."
+  echo "    Configure jobs at: https://dashboard.heroku.com/apps/$REVIEW_APP/scheduler"
+  echo "    Prod jobs to replicate:"
+  echo "      rails reminders:havent_ordered reminders:pick_up_bread  (hourly)"
+  echo "      rails cleanup:trim_analytics                            (daily)"
+else
+  echo "    ⚠️  Scheduler addon not found! It should auto-provision via app.json."
+  echo "    Add manually with: heroku addons:create scheduler:standard --app $REVIEW_APP"
+fi
+
+echo "==> Done. $REVIEW_APP is loaded with prod data."

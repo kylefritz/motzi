@@ -80,6 +80,24 @@ class MenuTest < ActiveSupport::TestCase
                  week3.menu_items.map {|i| i.menu_item_pickup_days.count}.sum, "same sum of menu_item_pickup_days"
   end
 
+  test "copy_from clears sold-out limits" do
+    original = menus(:week1)
+    target = Menu.create!(name: "week4", week_id: "19w04")
+
+    # Set limits on the original: one positive, one zero (sold out), one nil (unlimited)
+    mipds = original.menu_items.flat_map(&:menu_item_pickup_days)
+    mipds[0].update!(limit: 5)
+    mipds[1].update!(limit: 0)
+
+    target.copy_from(original)
+
+    target_mipds = target.menu_items.flat_map(&:menu_item_pickup_days)
+    limits = target_mipds.map(&:limit)
+
+    assert_includes limits, 5, "positive limit carried over"
+    refute_includes limits, 0, "sold-out limit (0) should be cleared to nil"
+  end
+
   test "copy_from creates pickup days in target week when missing" do
     original = menus(:week1)
     target = Menu.create!(name: "week4", week_id: "19w04")
@@ -186,5 +204,125 @@ class MenuTest < ActiveSupport::TestCase
     assert_equal "Existing subscriber note", target.subscriber_note
     assert_equal "Existing menu note", target.menu_note
     assert_equal "Existing day of note", target.day_of_note
+  end
+
+  # Holiday menu tests
+  test "Menu.current_holiday returns nil when no holiday_menu_id set" do
+    Setting.holiday_menu_id = nil
+    assert_nil Menu.current_holiday
+  end
+
+  test "Menu.current_holiday returns the holiday menu when set" do
+    holiday = menus(:passover_2026)
+    Setting.holiday_menu_id = holiday.id
+    assert_equal holiday, Menu.current_holiday
+  ensure
+    Setting.holiday_menu_id = nil
+  end
+
+  test "Menu.current_holiday returns nil when holiday_menu_id points to missing record" do
+    Setting.holiday_menu_id = 999999
+    assert_nil Menu.current_holiday
+  ensure
+    Setting.holiday_menu_id = nil
+  end
+
+  test "make_current! for holiday menu sets holiday_menu_id, not menu_id" do
+    holiday = menus(:passover_2026)
+    original_menu_id = Setting.menu_id
+    holiday.make_current!
+    assert_equal holiday.id, Setting.holiday_menu_id
+    assert_equal original_menu_id, Setting.menu_id, 'regular menu_id unchanged'
+  ensure
+    Setting.holiday_menu_id = nil
+  end
+
+  test "make_current! for regular menu does not change holiday_menu_id" do
+    Setting.holiday_menu_id = nil
+    menus(:week1).make_current!
+    assert_nil Setting.holiday_menu_id
+  end
+
+  test "current? works correctly for holiday menu" do
+    holiday = menus(:passover_2026)
+    refute holiday.current?
+    Setting.holiday_menu_id = holiday.id
+    assert holiday.current?
+  ensure
+    Setting.holiday_menu_id = nil
+  end
+
+  test "current? for regular menu is unaffected by holiday_menu_id" do
+    week2 = menus(:week2)
+    Setting.holiday_menu_id = menus(:passover_2026).id
+    assert week2.current?, 'regular menu still current'
+  ensure
+    Setting.holiday_menu_id = nil
+  end
+
+  test "can_publish? for holiday allows months ahead" do
+    holiday = menus(:passover_2026)
+    # passover deadline is 2026-04-08, today is 2026-02-22
+    assert holiday.can_publish?, 'can publish holiday with future deadline'
+  end
+
+  test "can_publish? for holiday rejects after all deadlines passed" do
+    holiday = menus(:passover_2026)
+    travel_to(holiday.latest_deadline + 1.day) do
+      refute holiday.can_publish?
+    end
+  end
+
+  test "can_publish? for holiday returns false when no pickup days" do
+    holiday = Menu.create!(name: 'Empty Holiday', week_id: '26w20', menu_type: 'holiday')
+    refute holiday.can_publish?
+  end
+
+  test "open_for_orders! makes holiday menu current without sending email" do
+    holiday = menus(:passover_2026)
+    assert_no_enqueued_jobs do
+      holiday.open_for_orders!
+    end
+    assert_equal holiday.id, Setting.holiday_menu_id
+  ensure
+    Setting.holiday_menu_id = nil
+  end
+
+  test "open_for_orders! rejects regular menus" do
+    regular = menus(:week3)
+    regular.update!(week_id: Time.zone.now.week_id)
+    assert_raises(RuntimeError, /holiday/) { regular.open_for_orders! }
+  end
+
+  test "open_for_orders! raises when deadline passed" do
+    holiday = menus(:passover_2026)
+    travel_to(holiday.latest_deadline + 1.day) do
+      assert_raises(RuntimeError) { holiday.open_for_orders! }
+    end
+  end
+
+  test "publish_to_subscribers! still works for regular menu (regression)" do
+    week3 = menus(:week3)
+    week3.update!(week_id: Time.zone.now.week_id)
+    assert_email_sent(User.subscribers.count) do
+      week3.publish_to_subscribers!
+    end
+    assert week3.current?
+  end
+
+  test "two menus can share week_id with different menu_type" do
+    week_id = '26w20'
+    regular = Menu.create!(name: 'Regular 26w20', week_id: week_id, menu_type: 'regular')
+    holiday = Menu.create!(name: 'Holiday 26w20', week_id: week_id, menu_type: 'holiday')
+    assert regular.persisted?
+    assert holiday.persisted?
+  end
+
+  test "two holiday menus for same week_id raises uniqueness error" do
+    week_id = '26w21'
+    Menu.create!(name: 'Holiday A', week_id: week_id, menu_type: 'holiday')
+    assert_raises(ActiveRecord::RecordNotUnique) do
+      Menu.create!(name: 'Holiday B', week_id: week_id, menu_type: 'holiday')
+    end
   end
 end

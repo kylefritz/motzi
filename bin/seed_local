@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROD_APP="motzibread"
+LOCAL_DB="motzi"
+
+if ! pg_isready -q; then
+  echo "Postgres is not running (start postgres.app)" >&2
+  exit 1
+fi
+
+echo "==> Dropping local database..."
+dropdb --if-exists "$LOCAL_DB"
+
+echo "==> Pulling $PROD_APP database to $LOCAL_DB..."
+heroku pg:pull DATABASE_URL "$LOCAL_DB" --app "$PROD_APP"
+
+echo "==> Running migrations..."
+bin/rails db:migrate
+
+echo "==> Downloading menu images from S3..."
+bin/rails s3:download
+
+echo "==> Done. Local database is loaded with prod data."

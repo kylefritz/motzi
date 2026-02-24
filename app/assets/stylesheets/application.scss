@@ -191,6 +191,20 @@ a {
   background: white;
 }
 
+#review-app-banner {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  background: $primary;
+  color: $background-color;
+  text-align: center;
+  padding: 6px 12px;
+  font-family: $accent-font-family;
+  font-size: 0.85rem;
+  letter-spacing: 0.08rem;
+  text-transform: uppercase;
+}
+
 .StripeElement--focus {
   box-shadow: rgba(50, 50, 93, 0.109804) 0px 4px 6px,
     rgba(0, 0, 0, 0.0784314) 0px 1px 3px;

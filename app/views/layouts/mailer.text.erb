@@ -2,3 +2,8 @@
 
 Thanks!!
 <%= Setting.shop.name %>
+<% if ENV['REVIEW_APP'].present? || Rails.env.development? %>
+
+---
+This email was sent from the <%= ENV['REVIEW_APP'].present? ? 'review app' : 'local dev' %> — not production.
+<% end %>

@@ -22,9 +22,10 @@ type MenuProps = {
   order: MenuOrder | null;
   user: MenuUser;
   onCreateOrder: (order: MenuOrderRequest) => Promise<unknown>;
+  isHoliday?: boolean;
 };
 
-export default function Menu({ menu, order, user, onCreateOrder }: MenuProps) {
+export default function Menu({ menu, order, user, onCreateOrder, isHoliday }: MenuProps) {
   const {
     cart,
     addToCart,
@@ -117,7 +118,7 @@ export default function Menu({ menu, order, user, onCreateOrder }: MenuProps) {
         <>
           <Items items={subscriberItems} onAddToCart={addToCart} />
 
-          <SkipThisWeek onSkip={handleSkip} disabled={menuClosed} />
+          {!isHoliday && <SkipThisWeek onSkip={handleSkip} disabled={menuClosed} />}
           {payItForward && (
             <PayItForward
               {...payItForward}

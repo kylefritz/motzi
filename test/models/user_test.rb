@@ -10,8 +10,8 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "credits remaining" do
-    assert_equal 0, users(:ljf).credits
-    assert_equal 23, users(:kyle).credits
+    assert_equal(-2, users(:ljf).credits)
+    assert_equal 20, users(:kyle).credits
 
     # buy a multi-credit item
     menu = menus(:week1)
@@ -19,7 +19,7 @@ class UserTest < ActiveSupport::TestCase
     item = Item.create!(name: 'multi-credit item', credits: 6)
     pickup_day =  menu.pickup_days.first
     order.order_items.create!(item: item, pickup_day: pickup_day)
-    assert_equal 23 - item.credits, users(:kyle).credits
+    assert_equal 20 - item.credits, users(:kyle).credits
   end
 
   test "subscriber" do
