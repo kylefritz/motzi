@@ -25,6 +25,14 @@ class Admin::OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "delete order" do
+    order = Menu.current.orders.first
+    assert_difference 'Order.count', -1 do
+      delete "/admin/orders/#{order.id}"
+    end
+    assert_redirected_to '/admin/orders'
+  end
+
   test "item_list view" do
     def render(order_items)
       OrdersController.render(partial: 'admin/orders/order_items', locals: {order_items: order_items})

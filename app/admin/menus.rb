@@ -3,7 +3,7 @@ ActiveAdmin.register Menu do
   includes :pickup_days, menu_items: [:item]
   config.sort_order = 'LOWER(week_id) desc'
 
-  actions :all, except: [:destroy] # deleting menus can orphan orders, etc
+  actions :all, except: [:destroy]
 
   filter :items
   filter :name
@@ -24,6 +24,7 @@ ActiveAdmin.register Menu do
       link_to 'Preview Menu', menu_path(params[:id]), target: "_blank"
     end
   end
+
 
   index do
     id_column
@@ -154,6 +155,24 @@ ActiveAdmin.register Menu do
       render 'admin/menus/what_to_bake', {menu: menu}
     end
 
+    panel "Danger Zone", class: 'danger-zone' do
+      para "Menus without orders can be deleted. To delete a menu that has orders, delete its orders first.", style: 'color: #888; margin-bottom: 12px'
+      if menu.orders.any?
+        para do
+          a "🔍 Show #{menu.orders.count} orders",
+            href: admin_orders_path(q: { menu_id_eq: menu.id }),
+            class: 'action-disabled'
+        end
+      else
+        para do
+          a "🗑 Delete Menu", href: delete_menu_admin_menu_path(menu),
+            'data-method': :post,
+            'data-confirm': "Delete \"#{menu.name}\"? This cannot be undone.",
+            class: 'action-danger'
+        end
+      end
+    end
+
     panel "Emails" do
       table_for menu.messages.includes(:user) do
         column :mailer
@@ -204,6 +223,20 @@ ActiveAdmin.register Menu do
                                 author: current_admin_user)
 
     redirect_to resource_path, notice: notice
+  end
+
+  member_action :delete_menu, method: :post do
+    menu = resource
+    if menu.orders.any?
+      redirect_to resource_path, alert: "Can't delete — menu has #{menu.orders.count} orders"
+      return
+    end
+
+    name = menu.name
+    ActiveAdmin::Comment.where(resource: menu).delete_all
+    menu.destroy!
+
+    redirect_to collection_path, notice: "Menu \"#{name}\" has been deleted"
   end
 
   member_action :copy_from, method: :post do
