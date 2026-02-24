@@ -1,8 +1,25 @@
 <%= partial :user_credits %>
 
+<% if @ordered_within_days %>
+, last_orders as (
+    select distinct on (user_id)
+        user_id, orders.created_at as last_ordered_at, menus.name as last_menu_name
+    from orders
+    join menus on menus.id = orders.menu_id
+    order by user_id, orders.created_at desc
+)
+<% end %>
+
 select users.id as user_id, COALESCE(credit_balance, 0) as credit_balance
+<% if @ordered_within_days %>
+    , last_orders.last_ordered_at, last_orders.last_menu_name
+<% end %>
 from users
     left join user_credits on users.id = user_credits.user_id
+<% if @ordered_within_days %>
+    join last_orders on users.id = last_orders.user_id
+        and last_orders.last_ordered_at > now() - interval '<%= @ordered_within_days.to_i %> days'
+<% end %>
 where credit_balance < <%= @balance %>
     and subscriber
 <% if (owner_ids = User.owners.map(&:id).join(',')).present? %>

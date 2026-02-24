@@ -78,16 +78,6 @@ ActiveAdmin.register_page "Dashboard" do
 
     columns do
       column do
-        panel "Special Requests" do
-          table_for menu.orders.includes(:user).with_comments do
-            column ("comments") { |order| order.comments_html }
-            column ("user") { |order| order.user }
-            column ("order") { |order| order }
-          end
-        end
-      end
-
-      column do
         panel "New Credits - last 2 weeks" do
           credit_items = CreditItem.order('id desc').where("created_at > ?", 2.weeks.ago).includes(:user).limit(20)
           table_for credit_items do
@@ -98,27 +88,38 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
 
-    end # end columns
-
-    columns do
       column do
         panel "Credit balance < 4" do
-          low_credit_users = SqlQuery.new(:low_credit_users, balance: 4).execute
+          low_credit_users = SqlQuery.new(:low_credit_users, balance: 4, ordered_within_days: 30).execute
           users = Hash[User.find(low_credit_users.map {|r| r["user_id"]}).map{|u| [u.id, u] }]
+          para "Subscribers with low credit balance who ordered in the last 30 days.", style: "color: #888; font-size: 0.85em; margin-bottom: 8px"
           table_for low_credit_users do
             column ("user") { |r| users[r["user_id"]] }
             column ("balance") { |r| r["credit_balance"] }
+            column ("menu") { |r| r["last_menu_name"] }
           end
         end
       end
+    end
 
-      def get_user_credits(users_ids)
-        if users_ids.empty?
-          return {}
+    def get_user_credits(users_ids)
+      if users_ids.empty?
+        return {}
+      end
+      # can't send 0 users_ids to :user_credits
+      rows = SqlQuery.new(:user_credits, user_ids: users_ids).execute
+      Hash[rows.map {|r| [r["user_id"], r["credit_balance"]]} ]
+    end
+
+    columns do
+      column do
+        panel "Special Requests" do
+          table_for menu.orders.includes(:user).with_comments do
+            column ("comments") { |order| order.comments_html }
+            column ("user") { |order| order.user }
+            column ("order") { |order| order }
+          end
         end
-        # can't send 0 users_ids to :user_credits
-        rows = SqlQuery.new(:user_credits, user_ids: users_ids).execute
-        Hash[rows.map {|r| [r["user_id"], r["credit_balance"]]} ]
       end
 
       column do
@@ -142,7 +143,6 @@ ActiveAdmin.register_page "Dashboard" do
           end
         end
       end
-
     end
 
 
