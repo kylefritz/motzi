@@ -40,7 +40,12 @@ ActiveAdmin.register_page "Dashboard" do
             ordered: num_marketplace,
             total: num_marketplace,
           }
-          table_for [subscribers, marketplace], class: 'subscribers' do
+          rows = [subscribers, marketplace]
+          if holiday_menu
+            num_holiday = Order.for_holiday_menu.not_skip.count
+            rows << {type: "Holiday", ordered: num_holiday, total: num_holiday}
+          end
+          table_for rows, class: 'subscribers' do
             column :type
             column :not_ordered
             column :ordered
@@ -51,19 +56,8 @@ ActiveAdmin.register_page "Dashboard" do
 
         panel "Sales" do
           render 'admin/menus/sales', {menu: menu}
-        end
-
-        if holiday_menu
-          panel "Holiday Orders: #{holiday_menu.name}" do
-            num_orders = Order.for_holiday_menu.not_skip.count
-            table_for [{type: "Holiday", ordered: num_orders, total: num_orders}], class: 'subscribers' do
-              column :type
-              column :ordered
-              column(:total) { |h| strong(h[:total]) }
-            end
-          end
-
-          panel "Holiday Sales: #{holiday_menu.name}" do
+          if holiday_menu
+            h4 "Holiday", style: 'margin: 10px 0 4px'
             render 'admin/menus/sales', {menu: holiday_menu}
           end
         end

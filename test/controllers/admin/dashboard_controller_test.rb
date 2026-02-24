@@ -51,16 +51,16 @@ class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_el_count 1, '#what-to-bake-Thu .breads', 'single table, no holiday'
   end
 
-  test "dashboard shows holiday orders and sales" do
+  test "dashboard includes holiday row in orders and sales when holiday menu is current" do
     menus(:week_26w15).make_current!
     menus(:passover_2026).make_current!
 
     get '/admin/dashboard'
     assert_response :success
 
-    # Holiday orders panel exists
-    assert_select 'h3', text: /Holiday Orders/
-    # Holiday sales panel exists
-    assert_select 'h3', text: /Holiday Sales/
+    # Orders table has 3 rows: Subscribers, Marketplace, Holiday
+    assert_el_count 3, '.subscribers tbody tr', 'subscribers + marketplace + holiday'
+    # Sales panel has 2 sales tables (regular + holiday)
+    assert_el_count 2, '.sales', 'regular sales + holiday sales'
   end
 end
