@@ -163,6 +163,39 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_nil json["order"], "regular order slot should be empty for user with no regular order"
   end
 
+  test "creating marketplace holiday order returns it in the holidayOrder slot" do
+    holiday_menu = menus(:passover_2026)
+    holiday_menu.open_for_orders!
+
+    item_id = holiday_menu.items.first.id
+    pickup_day_id = holiday_menu.pickup_days.first.id
+
+    travel_to(holiday_menu.earliest_deadline - 2.hours) do
+      assert_ordered do
+        assert_email_sent do
+          post '/orders.json', params: {
+            menu_id: holiday_menu.id,
+            email: "marketplace@example.com",
+            first_name: "Market",
+            last_name: "Buyer",
+            phone: "555-000-1234",
+            price: 0,
+            cart: [{ item_id: item_id, quantity: 1, pickup_day_id: pickup_day_id }]
+          }, as: :json
+        end
+      end
+    end
+
+    assert_response :success
+    json = JSON.parse(response.body)
+
+    assert_equal Menu.current.id, json["menu"]["id"], "primary menu should be the regular current menu"
+    assert_equal holiday_menu.id, json["holidayMenu"]["id"], "holiday menu should be returned separately"
+    assert_not_nil json["holidayOrder"], "holiday order should be in holidayOrder slot"
+    assert_equal 0, json["holidayOrder"]["stripeChargeAmount"], "marketplace order should have stripe_charge_amount set"
+    assert_nil json["order"], "regular order slot should be null for marketplace holiday order"
+  end
+
   test "updating holiday order keeps it in the holidayOrder slot" do
     holiday_menu = menus(:passover_2026)
     holiday_menu.open_for_orders!
