@@ -90,13 +90,7 @@ class OrdersController < ApplicationController
     # send confirmation email
     ConfirmationMailer.with(order: @order).order_email.deliver_later
 
-    # Render directly (not via render_current_order) so that @order
-    # reflects the just-created order — including marketplace orders,
-    # which order_for_menu intentionally excludes.
-    @menu = Menu.current
-    @holiday_menu  = Menu.current_holiday
-    @holiday_order = @user&.order_for_menu(@holiday_menu) if @holiday_menu
-    render 'menus/show', format: :json
+    render_current_order(nil, @user, order: @order)
 
     rescue OrderError => e
       render_validation_failed(e.message)

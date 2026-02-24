@@ -4,10 +4,10 @@ module RenderCurrentOrder
   included do
     protected
 
-    def render_current_order(menu_id=nil, user=nil)
+    def render_current_order(menu_id=nil, user=nil, order: nil)
       @menu  = menu_id ? Menu.find(menu_id) : Menu.current
       @user  = user || current_user
-      @order = @user&.order_for_menu(@menu)
+      @order = order || @user&.order_for_menu(@menu)
 
       # Holiday menu data (nil when no holiday menu is active)
       @holiday_menu  = Menu.current_holiday
