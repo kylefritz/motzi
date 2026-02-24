@@ -1,7 +1,7 @@
-import React, { useContext } from "react";
+import React from "react";
 import _ from "lodash";
 
-import { getDeadlineContext, HideMenuNameContext } from "./Contexts";
+import { getDeadlineContext } from "./Contexts";
 import type { MenuPickupDay } from "../../types/api";
 
 function When({ orderingDeadlineText }) {
@@ -34,11 +34,10 @@ type TitleProps = {
 export default function Title({ menu }: TitleProps) {
   const { name, orderingDeadlineText } = menu;
   const isClosed = getDeadlineContext().allClosed(menu);
-  const hideMenuName = useContext(HideMenuNameContext);
 
   return (
     <>
-      {!hideMenuName && <h2 id="menu-name">{name}</h2>}
+      <h2 id="menu-name">{name}</h2>
       {isClosed ? (
         <div
           id="past-deadline"

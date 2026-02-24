@@ -90,9 +90,7 @@ class OrdersController < ApplicationController
     # send confirmation email
     ConfirmationMailer.with(order: @order).order_email.deliver_later
 
-    @holiday_menu  = Menu.current_holiday
-    @holiday_order = @user&.order_for_menu(@holiday_menu) if @holiday_menu
-    render 'menus/show', format: :json # requires @menu, @user, @order
+    render_current_order
 
     rescue OrderError => e
       render_validation_failed(e.message)

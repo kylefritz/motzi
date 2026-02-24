@@ -135,6 +135,33 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test "creating holiday order returns regular menu as primary menu" do
+    holiday_menu = menus(:passover_2026)
+    holiday_menu.open_for_orders!
+
+    sign_in users(:jess)
+
+    item_id = holiday_menu.items.first.id
+    pickup_day_id = holiday_menu.pickup_days.first.id
+
+    travel_to(holiday_menu.earliest_deadline - 2.hours) do
+      assert_ordered do
+        post '/orders.json', params: {
+          menu_id: holiday_menu.id,
+          cart: [{ item_id: item_id, quantity: 1, pickup_day_id: pickup_day_id }]
+        }, as: :json
+      end
+    end
+
+    assert_response :success
+    json = JSON.parse(response.body)
+
+    # The primary menu should be the regular menu, not the holiday one
+    assert_equal Menu.current.id, json["menu"]["id"], "primary menu should be the regular current menu"
+    assert_equal holiday_menu.id, json["holidayMenu"]["id"], "holiday menu should be returned separately"
+    assert_not_nil json["holidayOrder"], "holiday order should be present"
+  end
+
   private
 
   def order_attrs(hashid)

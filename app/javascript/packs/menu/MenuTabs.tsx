@@ -62,7 +62,7 @@ export default function MenuTabs({
           active={showHoliday}
           onClick={() => setShowHoliday(true)}
         >
-          {!holidayOrder && <HolidayBadge>Holiday</HolidayBadge>}
+          <HolidayBadge>Holiday</HolidayBadge>
           {holidayMenu.name}
         </TabButton>
       </TabBar>
@@ -95,7 +95,7 @@ export default function MenuTabs({
 const TabBar = styled.div`
   display: flex;
   gap: 4px;
-  margin-bottom: 4px;
+  margin-bottom: 16px;
 `;
 
 const TabButton = styled.button<{ active: boolean }>`

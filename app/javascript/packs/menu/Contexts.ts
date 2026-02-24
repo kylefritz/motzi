@@ -22,9 +22,7 @@ type SettingsContextValue = {
 
 const DayContext = React.createContext<DayContextValue | null>(null);
 const SettingsContext = React.createContext<SettingsContextValue | null>(null);
-const HideMenuNameContext = React.createContext<boolean>(false);
-
-export { DayContext, SettingsContext, HideMenuNameContext };
+export { DayContext, SettingsContext };
 
 export function getSettingsContext(): SettingsContextValue {
   const ctx = useContext(SettingsContext);
