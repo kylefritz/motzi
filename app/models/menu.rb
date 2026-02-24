@@ -61,6 +61,7 @@ class Menu < ApplicationRecord
   #
   # Contrast: publish_to_subscribers! (regular menus) makes current AND sends the weekly email.
   def open_for_orders!
+    raise "open_for_orders! is only for holiday menus. Use publish_to_subscribers! for regular menus." unless holiday?
     raise "Cannot open: no pickup days set or all deadlines have passed." unless can_publish?
     make_current!
   end

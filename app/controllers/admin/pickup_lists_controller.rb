@@ -13,5 +13,7 @@ class Admin::PickupListsController < ApplicationController
     else
       head :not_found
     end
+  rescue ArgumentError
+    head :bad_request
   end
 end

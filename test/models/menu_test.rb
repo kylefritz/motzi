@@ -270,6 +270,12 @@ class MenuTest < ActiveSupport::TestCase
     Setting.holiday_menu_id = nil
   end
 
+  test "open_for_orders! rejects regular menus" do
+    regular = menus(:week3)
+    regular.update!(week_id: Time.zone.now.week_id)
+    assert_raises(RuntimeError, /holiday/) { regular.open_for_orders! }
+  end
+
   test "open_for_orders! raises when deadline passed" do
     holiday = menus(:passover_2026)
     travel_to(holiday.latest_deadline + 1.day) do

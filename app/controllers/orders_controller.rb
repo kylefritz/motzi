@@ -21,6 +21,10 @@ class OrdersController < ApplicationController
   def create
     target_menu = params[:menu_id].present? ? Menu.find(params[:menu_id]) : Menu.current
 
+    unless current_admin_user.present? || target_menu.id.in?([Menu.current.id, Menu.current_holiday&.id].compact)
+      return render_validation_failed("this menu is not available for ordering")
+    end
+
     if current_user&.order_for_menu(target_menu).present?
       logger.warn "user=#{current_user.email} already placed an order for menu #{target_menu.id}. returning current order"
       return render_current_order

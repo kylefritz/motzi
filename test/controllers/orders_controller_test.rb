@@ -135,6 +135,23 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test "non-admin user cannot order from a non-current non-holiday menu" do
+    sign_in users(:jess)
+    non_current_menu = menus(:week3)
+
+    before_deadline do
+      refute_ordered do
+        post '/orders.json', params: {
+          menu_id: non_current_menu.id,
+          cart: [{ item_id: Menu.current.items.first.id, quantity: 1 }]
+        }, as: :json
+      end
+    end
+    assert_response :unprocessable_entity
+    json = JSON.parse(response.body)
+    assert_equal "this menu is not available for ordering", json["message"]
+  end
+
   test "creating holiday order returns regular menu as primary menu" do
     holiday_menu = menus(:passover_2026)
     holiday_menu.open_for_orders!

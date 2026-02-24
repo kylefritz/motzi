@@ -44,4 +44,9 @@ class Admin::PickupListControllerTest < ActionDispatch::IntegrationTest
     get "/admin/pickup_lists/2099-01-01"
     assert_response :not_found
   end
+
+  test "pickup list returns 400 for malformed date" do
+    get "/admin/pickup_lists/not-a-date"
+    assert_response :bad_request
+  end
 end
