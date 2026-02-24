@@ -24,7 +24,7 @@ ActiveAdmin.register PickupDay do
         text_node "Menu: "
         a menu.name, href: admin_menu_path(menu)
         if menu.holiday?
-          status_tag 'Holiday', color: 'orange', style: 'margin-left: 6px; vertical-align: middle'
+          status_tag 'Holiday', color: 'orange', class: 'holiday-tag'
         end
       end
     end

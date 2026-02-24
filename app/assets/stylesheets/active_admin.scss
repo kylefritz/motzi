@@ -235,6 +235,11 @@ a.action-disabled {
   }
 }
 
+.status_tag.holiday-tag {
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
 .panel.danger-zone {
   > h3 {
     background-color: lighten($secondary, 10%);

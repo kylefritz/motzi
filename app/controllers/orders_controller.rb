@@ -144,6 +144,12 @@ class OrdersController < ApplicationController
       ahoy.track "order_updated"
     end
 
+    # Place order in the correct response slot (regular vs holiday)
+    if order.menu.holiday?
+      @holiday_order = order
+    else
+      @order = order
+    end
     render_current_order
   end
 

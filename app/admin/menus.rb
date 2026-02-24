@@ -160,15 +160,17 @@ ActiveAdmin.register Menu do
 
     panel "Danger Zone", class: 'danger-zone' do
       para "Menus without orders can be deleted. To delete a menu that has orders, delete its orders first.", style: 'color: #888; margin-bottom: 12px'
-      if menu.orders.any?
+      if menu.current?
+        para "This is the current menu and cannot be deleted.", style: 'color: #888'
+      elsif menu.orders.any?
         para do
-          a "🔍 Show #{menu.orders.count} orders",
+          a "Show #{menu.orders.count} orders",
             href: admin_orders_path(q: { menu_id_eq: menu.id }),
             class: 'action-disabled'
         end
       else
         para do
-          a "🗑 Delete Menu", href: delete_menu_admin_menu_path(menu),
+          a "Delete Menu", href: delete_menu_admin_menu_path(menu),
             'data-method': :post,
             'data-confirm': "Delete \"#{menu.name}\"? This cannot be undone.",
             class: 'action-danger'

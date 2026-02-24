@@ -32,7 +32,7 @@ columns do
             h4 style: 'margin: 12px 0 4px' do
               text_node m.name
               if m.holiday?
-                status_tag 'Holiday', color: 'orange', style: 'margin-left: 6px; vertical-align: middle'
+                status_tag 'Holiday', color: 'orange', class: 'holiday-tag'
               end
             end
           end

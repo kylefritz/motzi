@@ -25,7 +25,7 @@ ActiveAdmin.register_page "Dashboard" do
           if holiday_menu
             h4 do
               a(holiday_menu.name, href: admin_menu_path(holiday_menu.id), class: 'bigger')
-              status_tag 'Holiday', color: 'orange', style: 'margin-left: 6px; vertical-align: middle'
+              status_tag 'Holiday', color: 'orange', class: 'holiday-tag'
             end
           end
         end
@@ -57,7 +57,7 @@ ActiveAdmin.register_page "Dashboard" do
           rows = [subscribers, marketplace]
           if holiday_menu
             h_orders = Order.for_holiday_menu.not_skip.includes(order_items: :item)
-            rows << {type: "Holiday", ordered: h_orders.count, total: h_orders.count, credits: h_orders.sum(&:credits)}
+            rows << {type: "Holiday", not_ordered: "—", skipped: "—", ordered: h_orders.count, total: h_orders.count, credits: h_orders.sum(&:credits)}
           end
           table_for rows, class: 'subscribers' do
             column :type
@@ -74,7 +74,7 @@ ActiveAdmin.register_page "Dashboard" do
           if holiday_menu
             h4 do
               text_node holiday_menu.name
-              status_tag 'Holiday', color: 'orange', style: 'margin-left: 6px; vertical-align: middle'
+              status_tag 'Holiday', color: 'orange', class: 'holiday-tag'
             end
             render 'admin/menus/sales', {menu: holiday_menu}
           end

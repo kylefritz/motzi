@@ -61,6 +61,15 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to '/admin/menus'
   end
 
+  test "danger zone shows message instead of delete button for current menu" do
+    menu = menus(:week2) # current menu (set in setup)
+    get "/admin/menus/#{menu.id}"
+    assert_response :success
+    assert_select '.danger-zone a.action-danger', count: 0
+    assert_select '.danger-zone a.action-disabled', count: 0
+    assert_select '.danger-zone', text: /current menu/
+  end
+
   test "delete button disabled on menu with orders" do
     menu = menus(:week1)
     get "/admin/menus/#{menu.id}"
