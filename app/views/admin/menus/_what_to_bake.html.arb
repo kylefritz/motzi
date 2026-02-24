@@ -1,8 +1,7 @@
-prefix = defined?(id_prefix) ? id_prefix : ''
 item_counts_by_pickup_day = menu.item_counts_by_pickup_day
 columns do
   menu.pickup_days.each do |pickup_day|
-    column id: "#{prefix}what-to-bake-#{pickup_day.day_abbr}" do
+    column id: "what-to-bake-#{pickup_day.day_abbr}" do
       panel "#{pickup_day.day_str} - What to bake" do
         a("Pickup List", href: admin_pickup_list_path(date: pickup_day.pickup_at.to_date))
         counts = item_counts_by_pickup_day[pickup_day.id] || {}

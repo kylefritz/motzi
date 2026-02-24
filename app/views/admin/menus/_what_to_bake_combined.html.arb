@@ -1,0 +1,53 @@
+# Renders what-to-bake for multiple menus, grouped by pickup date.
+# Each date gets one card with a table per menu.
+#
+# Expects locals: menus (array of Menu)
+menus_list = defined?(menus) ? menus : [menu]
+
+# Collect all pickup days grouped by calendar date
+days_by_date = {}
+counts_by_menu = {}
+
+menus_list.each do |m|
+  counts_by_menu[m.id] = m.item_counts_by_pickup_day
+  m.pickup_days.each do |pd|
+    date = pd.pickup_at.to_date
+    days_by_date[date] ||= []
+    days_by_date[date] << pd
+  end
+end
+
+columns do
+  days_by_date.sort.each do |date, pickup_days|
+    day_abbr = pickup_days.first.day_abbr
+    column id: "what-to-bake-#{day_abbr}" do
+      panel "#{pickup_days.first.day_str} - What to bake" do
+        a("Pickup List", href: admin_pickup_list_path(date: date))
+
+        pickup_days.each do |pickup_day|
+          m = pickup_day.menu
+          counts = counts_by_menu[m.id][pickup_day.id] || {}
+
+          if menus_list.size > 1
+            h4 style: 'margin: 12px 0 4px' do
+              text_node m.name
+              if m.holiday?
+                status_tag 'Holiday', color: 'orange', style: 'margin-left: 6px; vertical-align: middle'
+              end
+            end
+          end
+
+          sorted_keys_without_total = Item.where(id: counts.keys).pluck(:name, :id).sort_by(&:first)
+          total_tag = "<strong>TOTAL</strong>".html_safe
+          counts[total_tag] = "<strong>#{counts.values.sum}</strong>".html_safe
+          sorted_keys_without_total.push([total_tag, total_tag])
+
+          table_for sorted_keys_without_total, class: 'mt-0 breads' do
+            column("Item") { |name, id| name }
+            column("Quantity") { |name, id| counts[id] }
+          end
+        end
+      end
+    end
+  end
+end

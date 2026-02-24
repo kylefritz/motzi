@@ -10,6 +10,12 @@ ActiveAdmin.register_page "Dashboard" do
       column do
         panel "Menu" do
           h4 a(menu.name, href: admin_menu_path(menu.id), class: 'bigger')
+          if holiday_menu
+            h4 do
+              a(holiday_menu.name, href: admin_menu_path(holiday_menu.id), class: 'bigger')
+              status_tag 'Holiday', color: 'orange', style: 'margin-left: 6px; vertical-align: middle'
+            end
+          end
         end
         panel "Orders" do
           def compute(name, subs)
@@ -63,10 +69,8 @@ ActiveAdmin.register_page "Dashboard" do
         end
       end
       column span: 3 do
-        render 'admin/menus/what_to_bake', {menu: menu}
-        if holiday_menu
-          render 'admin/menus/what_to_bake', {menu: holiday_menu, id_prefix: 'holiday-'}
-        end
+        bake_menus = [menu, holiday_menu].compact
+        render 'admin/menus/what_to_bake_combined', {menus: bake_menus}
       end
     end
 
