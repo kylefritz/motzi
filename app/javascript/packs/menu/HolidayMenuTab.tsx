@@ -61,6 +61,7 @@ export default function HolidayMenuTab({
         menu,
         bundles,
         onCreateOrder: handleCreateOrder,
+        isHoliday: true,
       }}
     />
   );
