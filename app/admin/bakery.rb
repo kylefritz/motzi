@@ -4,6 +4,7 @@ ActiveAdmin.register_page "Dashboard" do
 
   content title: "Hello friend" do
     menu = Menu.current
+    holiday_menu = Menu.current_holiday
 
     columns do
       column do
@@ -45,9 +46,27 @@ ActiveAdmin.register_page "Dashboard" do
         panel "Sales" do
           render 'admin/menus/sales', {menu: menu}
         end
+
+        if holiday_menu
+          panel "Holiday Orders: #{holiday_menu.name}" do
+            num_orders = Order.for_holiday_menu.not_skip.count
+            table_for [{type: "Holiday", ordered: num_orders, total: num_orders}], class: 'subscribers' do
+              column :type
+              column :ordered
+              column(:total) { |h| strong(h[:total]) }
+            end
+          end
+
+          panel "Holiday Sales: #{holiday_menu.name}" do
+            render 'admin/menus/sales', {menu: holiday_menu}
+          end
+        end
       end
       column span: 3 do
         render 'admin/menus/what_to_bake', {menu: menu}
+        if holiday_menu
+          render 'admin/menus/what_to_bake', {menu: holiday_menu, id_prefix: 'holiday-'}
+        end
       end
     end
 
