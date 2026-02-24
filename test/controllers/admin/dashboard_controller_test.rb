@@ -51,16 +51,43 @@ class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_el_count 1, '#what-to-bake-Thu .breads', 'single table, no holiday'
   end
 
-  test "dashboard includes holiday row in orders and sales when holiday menu is current" do
+  test "dashboard orders and sales with holiday menu" do
     menus(:week_26w15).make_current!
     menus(:passover_2026).make_current!
 
     get '/admin/dashboard'
     assert_response :success
 
-    # Orders table has 3 rows: Subscribers, Marketplace, Holiday
-    assert_el_count 3, '.subscribers tbody tr', 'subscribers + marketplace + holiday'
-    # Sales panel has 2 sales tables (regular + holiday)
-    assert_el_count 2, '.sales', 'regular sales + holiday sales'
+    # Orders table: Subscribers, Marketplace, Holiday
+    # Fixtures: 4 subscribers (kyle, adrian, ljf, jess)
+    #   kyle has order for week_26w15 → ordered=1, not_ordered=3
+    #   0 marketplace orders (none have stripe_charge_amount)
+    #   2 holiday orders: kyle_passover, ljf_passover
+    rows = document_root_element.css('.subscribers tbody tr')
+    assert_equal 3, rows.size, 'subscribers + marketplace + holiday'
+
+    subscriber_cells = rows[0].css('td').map(&:text).map(&:strip)
+    assert_equal 'Subscribers', subscriber_cells[0]
+    assert_equal '3', subscriber_cells[1], 'not_ordered: adrian, ljf, jess'
+    assert_equal '1', subscriber_cells[2], 'ordered: kyle'
+
+    marketplace_cells = rows[1].css('td').map(&:text).map(&:strip)
+    assert_equal 'Marketplace', marketplace_cells[0]
+    assert_equal '0', marketplace_cells[2], 'no marketplace orders'
+
+    holiday_cells = rows[2].css('td').map(&:text).map(&:strip)
+    assert_equal 'Holiday', holiday_cells[0]
+    assert_equal '2', holiday_cells[2], 'ordered: kyle + ljf'
+
+    # Sales: both menus have 0 marketplace revenue and 0 credit purchases
+    # (fixture orders have no stripe_charge_amount, credit_items have no stripe_charge_amount)
+    sales_tables = document_root_element.css('.sales')
+    assert_equal 2, sales_tables.size, 'regular + holiday sales tables'
+    sales_tables.each do |table|
+      table.css('tbody tr').each do |row|
+        qty = row.css('td')[1].text.strip
+        assert_equal '0', qty, "no paid orders in fixtures — qty should be 0"
+      end
+    end
   end
 end
