@@ -25,7 +25,10 @@
     "AWS_SECRET_ACCESS_KEY":    { "required": true },
     "HASHID_SALT":              { "required": true },
     "STRIPE_PUBLISHABLE_KEY":   { "value": "pk_test_uAmNwPrPVkEoywEZYTE66AnV00mGp7H2Ud" },
-    "STRIPE_SECRET_KEY":        { "required": false }
+    "STRIPE_SECRET_KEY":        { "required": false },
+    "REVIEW_APP":               { "value": "true" },
+    "SENDGRID_USERNAME":        { "required": true },
+    "SENDGRID_PASSWORD":        { "required": true }
   },
   "formation": {
     "web":    { "quantity": 1, "size": "basic" },

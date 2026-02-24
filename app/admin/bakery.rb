@@ -3,6 +3,12 @@ ActiveAdmin.register_page "Dashboard" do
   menu priority: 1
 
   content title: "Hello friend" do
+    if ReviewAppMailInterceptor.active
+      div class: 'flash flash_alert', style: 'margin-bottom: 16px' do
+        span "Review app — emails are only delivered to admin users."
+      end
+    end
+
     menu = Menu.current
     holiday_menu = Menu.current_holiday
 

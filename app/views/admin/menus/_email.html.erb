@@ -1,3 +1,6 @@
+<% if ReviewAppMailInterceptor.active %>
+  <p class="flash flash_alert" style="margin-bottom: 12px">Review app — emails are only delivered to admin users.</p>
+<% end %>
 <!-- has the menu been emailed yet -->
 <p>
   <%- if menu.emailed_at.present? %>
