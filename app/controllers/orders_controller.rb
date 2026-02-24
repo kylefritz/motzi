@@ -135,7 +135,7 @@ class OrdersController < ApplicationController
       ahoy.track "order_updated"
     end
 
-    render_current_order
+    render_current_order(nil, current_user, order: order)
   end
 
   private
