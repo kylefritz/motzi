@@ -227,6 +227,11 @@ ActiveAdmin.register Menu do
 
   member_action :delete_menu, method: :post do
     menu = resource
+    if menu.current?
+      redirect_to resource_path, alert: "Can't delete the current menu"
+      return
+    end
+
     if menu.orders.any?
       redirect_to resource_path, alert: "Can't delete — menu has #{menu.orders.count} orders"
       return
