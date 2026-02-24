@@ -6,15 +6,20 @@ mp = {
   paid: marketplace.map(&:stripe_charge_amount).sum,
 }
 
-credit_items = CreditItem.for_menu(menu).bought
-ci = {
-  type: "Credits",
-  qty: credit_items.map(&:quantity).sum,
-  retail: credit_items.map(&:retail_price).sum,
-  paid: credit_items.map(&:stripe_charge_amount).sum,
-}
+hide_credits = defined?(hide_credits) ? hide_credits : false
+rows = [mp]
+unless hide_credits
+  credit_items = CreditItem.for_menu(menu).bought
+  ci = {
+    type: "Credits",
+    qty: credit_items.map(&:quantity).sum,
+    retail: credit_items.map(&:retail_price).sum,
+    paid: credit_items.map(&:stripe_charge_amount).sum,
+  }
+  rows << ci
+end
 
-table_for [mp, ci], class: 'sales' do
+table_for rows, class: 'sales' do
   column :type
   column :qty
   if Setting.shop.pay_what_you_can

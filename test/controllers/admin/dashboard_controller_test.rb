@@ -79,15 +79,18 @@ class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_equal 'Holiday', holiday_cells[0]
     assert_equal '2', holiday_cells[2], 'ordered: kyle + ljf'
 
-    # Sales: both menus have 0 marketplace revenue and 0 credit purchases
-    # (fixture orders have no stripe_charge_amount, credit_items have no stripe_charge_amount)
+    # Sales: regular table has 2 rows (marketplace + credits), holiday has 1 (marketplace only)
+    # Credits are per-week, not per-menu, so only shown once in regular section
     sales_tables = document_root_element.css('.sales')
     assert_equal 2, sales_tables.size, 'regular + holiday sales tables'
-    sales_tables.each do |table|
-      table.css('tbody tr').each do |row|
-        qty = row.css('td')[1].text.strip
-        assert_equal '0', qty, "no paid orders in fixtures — qty should be 0"
-      end
-    end
+
+    regular_sales_rows = sales_tables[0].css('tbody tr')
+    assert_equal 2, regular_sales_rows.size, 'marketplace + credits'
+    assert_equal 'Market Place', regular_sales_rows[0].css('td')[0].text.strip
+    assert_equal 'Credits', regular_sales_rows[1].css('td')[0].text.strip
+
+    holiday_sales_rows = sales_tables[1].css('tbody tr')
+    assert_equal 1, holiday_sales_rows.size, 'marketplace only — credits not duplicated'
+    assert_equal 'Market Place', holiday_sales_rows[0].css('td')[0].text.strip
   end
 end
