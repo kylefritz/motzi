@@ -37,7 +37,7 @@ class PassoverPreorderFlowTest < ActionDispatch::IntegrationTest
 
   test "user can place a holiday order independently of regular menu" do
     Setting.holiday_menu_id = @holiday.id
-    sign_in users(:kyle)
+    sign_in users(:jess)
 
     pickup_day_id = pickup_days(:passover_fri).id
     item_id = items(:almond_cake).id

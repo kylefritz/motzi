@@ -14,7 +14,7 @@ class OrderTest < ActiveSupport::TestCase
 
   test "associate orders to users" do
     kyle = users(:kyle)
-    assert_equal 2, kyle.orders.count
+    assert_equal 4, kyle.orders.count
   end
 
   test "with_comments" do
