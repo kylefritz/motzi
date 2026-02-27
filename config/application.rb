@@ -23,8 +23,6 @@ module Motzi
     # zeitwerk makes ruby file autoloading better?
     config.autoloader = :zeitwerk
 
-    # Rails 7 compatibility while we keep pre-7.0 load defaults during incremental upgrades.
-    config.active_record.legacy_connection_handling = false
     config.time_zone = 'Eastern Time (US & Canada)'
   end
 end

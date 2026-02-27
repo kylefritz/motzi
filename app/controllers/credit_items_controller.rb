@@ -45,7 +45,7 @@ class CreditItemsController < ApplicationController
       logger.warn "Stripe::CardError Status=#{e.http_status} Type=#{e.error.type} Charge ID=#{e.error.charge} \
         Code=#{e.error.code} cecline_code=#{e.error.decline_code} param=#{e.error.param} message=#{e.error.message}"
 
-      render json: {error: e.error.message}.to_json, status: :unprocessable_entity
+      render json: {error: e.error.message}.to_json, status: :unprocessable_content
     end
   end
 end
