@@ -8,7 +8,7 @@ class Menu < ApplicationRecord
   has_paper_trail
   default_scope { order("LOWER(week_id) desc") }
 
-  enum menu_type: { regular: 'regular', holiday: 'holiday' }
+  enum :menu_type, { regular: 'regular', holiday: 'holiday' }
 
   def self.current
     Menu.find(Setting.menu_id)

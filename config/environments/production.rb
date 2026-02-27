@@ -60,7 +60,7 @@ Rails.application.configure do
   # config.cache_store = :mem_cache_store
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
-  config.active_job.queue_adapter = ShopConfig.shop.queue_adapter.to_sym
+  config.active_job.queue_adapter = :solid_queue
   # config.active_job.queue_name_prefix = "motzi_production"
   
   # change queue for our work back to the "default" queue

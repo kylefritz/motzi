@@ -56,3 +56,7 @@ jobs:
 
       - name: JS tests
         run: bun run test
+
+      - name: Typecheck
+        continue-on-error: true
+        run: bun run typecheck

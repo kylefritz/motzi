@@ -6,7 +6,7 @@ ruby '3.3.10'
 #
 # please keep gems sorted; include comment for why a gem is needed
 #
-gem 'activeadmin', '~> 2.13.1' # admin ui
+gem 'activeadmin', '~> 3.4' # admin ui
 gem 'ahoy_email', '~> 1.1.1' # email analytics (v2 sadly removes open tracking)
 gem 'ahoy_matey' # analytics
 gem 'aws-sdk-s3', require: false # for s3/active storage
@@ -32,14 +32,15 @@ gem 'pg', '>= 0.18', '< 2.0'
 gem 'progress_bar'
 gem 'puma', '~> 7.0' # web/app server
 gem 'rails-settings-cached' # site-wide settings
-gem 'rails', '~> 6.1.7.3'
+gem 'rails', '~> 7.2.0'
 gem 'redcarpet' # markdown the baker's note in admin
 gem 'sass-rails', '~> 6' # css
 gem 'sentry-ruby' # New Sentry SDK
 gem 'sentry-rails' # Rails integration for Sentry
-gem 'sidekiq' # background work
+gem 'solid_queue' # database-backed ActiveJob backend (Rails 7.2+)
 gem 'sql_query' # load SQL queries from erb templates
 gem 'stripe' # accept credit cards
+gem 'mission_control-jobs' # job UI for ActiveJob backends
 
 
 gem 'redis', '~> 4.0' # Use Redis adapter to run Action Cable in production
@@ -51,6 +52,7 @@ group :development, :test do
   gem 'faker' # fake names
   gem 'json-schema' # make sure json objects have the right schema
   gem 'letter_opener_web' # nice place to preview emails
+  gem 'minitest', '< 6' # Rails 6.1 parallel test runner compatibility
 end
 
 group :development do
