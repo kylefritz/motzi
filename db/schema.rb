@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_02_22_000001) do
-
+ActiveRecord::Schema[7.0].define(version: 2026_02_22_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -23,8 +22,8 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.bigint "resource_id"
     t.string "author_type"
     t.bigint "author_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["author_type", "author_id"], name: "index_active_admin_comments_on_author_type_and_author_id"
     t.index ["namespace"], name: "index_active_admin_comments_on_namespace"
     t.index ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource_type_and_resource_id"
@@ -35,7 +34,7 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.string "record_type", null: false
     t.bigint "record_id", null: false
     t.bigint "blob_id", null: false
-    t.datetime "created_at", null: false
+    t.datetime "created_at", precision: nil, null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
   end
@@ -47,7 +46,7 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.text "metadata"
     t.bigint "byte_size", null: false
     t.string "checksum", null: false
-    t.datetime "created_at", null: false
+    t.datetime "created_at", precision: nil, null: false
     t.string "service_name", null: false
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
   end
@@ -63,7 +62,7 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.bigint "user_id"
     t.string "name"
     t.jsonb "properties"
-    t.datetime "time"
+    t.datetime "time", precision: nil
     t.index ["name", "time"], name: "index_ahoy_events_on_name_and_time"
     t.index ["properties"], name: "index_ahoy_events_on_properties", opclass: :jsonb_path_ops, using: :gin
     t.index ["user_id"], name: "index_ahoy_events_on_user_id"
@@ -76,11 +75,11 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.text "to"
     t.string "mailer"
     t.text "subject"
-    t.datetime "sent_at"
+    t.datetime "sent_at", precision: nil
     t.bigint "menu_id"
     t.string "token"
-    t.datetime "opened_at"
-    t.datetime "clicked_at"
+    t.datetime "opened_at", precision: nil
+    t.datetime "clicked_at", precision: nil
     t.bigint "pickup_day_id"
     t.index ["menu_id"], name: "index_ahoy_messages_on_menu_id"
     t.index ["token"], name: "index_ahoy_messages_on_token"
@@ -112,7 +111,7 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.string "app_version"
     t.string "os_version"
     t.string "platform"
-    t.datetime "started_at"
+    t.datetime "started_at", precision: nil
     t.index ["user_id"], name: "index_ahoy_visits_on_user_id"
     t.index ["visit_token"], name: "index_ahoy_visits_on_visit_token", unique: true
   end
@@ -122,7 +121,7 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.bigint "query_id"
     t.text "statement"
     t.string "data_source"
-    t.datetime "created_at"
+    t.datetime "created_at", precision: nil
     t.index ["query_id"], name: "index_blazer_audits_on_query_id"
     t.index ["user_id"], name: "index_blazer_audits_on_user_id"
   end
@@ -136,9 +135,9 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.text "slack_channels"
     t.string "check_type"
     t.text "message"
-    t.datetime "last_run_at"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "last_run_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_blazer_checks_on_creator_id"
     t.index ["query_id"], name: "index_blazer_checks_on_query_id"
   end
@@ -147,8 +146,8 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.bigint "dashboard_id"
     t.bigint "query_id"
     t.integer "position"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["dashboard_id"], name: "index_blazer_dashboard_queries_on_dashboard_id"
     t.index ["query_id"], name: "index_blazer_dashboard_queries_on_query_id"
   end
@@ -156,8 +155,8 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
   create_table "blazer_dashboards", force: :cascade do |t|
     t.bigint "creator_id"
     t.text "name"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_blazer_dashboards_on_creator_id"
   end
 
@@ -167,8 +166,8 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.text "description"
     t.text "statement"
     t.string "data_source"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_blazer_queries_on_creator_id"
   end
 
@@ -179,8 +178,8 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.decimal "price", precision: 8, scale: 2, null: false
     t.decimal "breads_per_week", precision: 8, scale: 2, default: "1.0", null: false
     t.integer "sort_order"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "credit_items", force: :cascade do |t|
@@ -188,8 +187,8 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.integer "quantity"
     t.integer "good_for_weeks"
     t.bigint "user_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "stripe_charge_id"
     t.string "stripe_receipt_url"
     t.decimal "stripe_charge_amount", precision: 8, scale: 2
@@ -199,8 +198,8 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
   create_table "items", force: :cascade do |t|
     t.string "name"
     t.text "description"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.decimal "price", precision: 8, scale: 2, default: "5.0", null: false
     t.integer "credits", default: 1, null: false
     t.index "lower((name)::text)", name: "index_items_on_LOWER_name"
@@ -210,8 +209,8 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.bigint "menu_item_id", null: false
     t.bigint "pickup_day_id", null: false
     t.integer "limit"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["menu_item_id", "pickup_day_id"], name: "index_menu_item_pickup_days_on_menu_item_id_and_pickup_day_id", unique: true
     t.index ["menu_item_id"], name: "index_menu_item_pickup_days_on_menu_item_id"
     t.index ["pickup_day_id"], name: "index_menu_item_pickup_days_on_pickup_day_id"
@@ -220,8 +219,8 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
   create_table "menu_items", force: :cascade do |t|
     t.bigint "menu_id"
     t.bigint "item_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.boolean "subscriber", default: true
     t.boolean "marketplace", default: true
     t.integer "sort_order"
@@ -232,9 +231,9 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
   create_table "menus", force: :cascade do |t|
     t.string "name"
     t.text "subscriber_note"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.datetime "emailed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "emailed_at", precision: nil
     t.string "week_id", null: false
     t.text "day_of_note"
     t.text "menu_note"
@@ -245,8 +244,8 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
   create_table "order_items", force: :cascade do |t|
     t.bigint "order_id"
     t.bigint "item_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.integer "quantity", default: 1, null: false
     t.bigint "pickup_day_id", null: false
     t.index ["item_id"], name: "index_order_items_on_item_id"
@@ -257,8 +256,8 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.text "comments"
     t.bigint "menu_id"
     t.bigint "user_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "ahoy_visit_id"
     t.boolean "skip", default: false, null: false
     t.string "stripe_charge_id"
@@ -270,18 +269,18 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
 
   create_table "pickup_days", force: :cascade do |t|
     t.bigint "menu_id", null: false
-    t.datetime "pickup_at", null: false
-    t.datetime "order_deadline_at", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "pickup_at", precision: nil, null: false
+    t.datetime "order_deadline_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["menu_id"], name: "index_pickup_days_on_menu_id"
   end
 
   create_table "settings", force: :cascade do |t|
     t.string "var", null: false
     t.text "value"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["var"], name: "index_settings_on_var", unique: true
   end
 
@@ -290,16 +289,16 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.string "last_name"
     t.string "additional_email"
     t.boolean "is_admin"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
+    t.datetime "reset_password_sent_at", precision: nil
+    t.datetime "remember_created_at", precision: nil
     t.integer "sign_in_count", default: 0, null: false
-    t.datetime "current_sign_in_at"
-    t.datetime "last_sign_in_at"
+    t.datetime "current_sign_in_at", precision: nil
+    t.datetime "last_sign_in_at", precision: nil
     t.inet "current_sign_in_ip"
     t.inet "last_sign_in_ip"
     t.boolean "subscriber", default: false, null: false
@@ -317,7 +316,7 @@ ActiveRecord::Schema.define(version: 2026_02_22_000001) do
     t.string "event", null: false
     t.string "whodunnit"
     t.text "object"
-    t.datetime "created_at"
+    t.datetime "created_at", precision: nil
     t.text "object_changes"
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
