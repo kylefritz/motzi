@@ -38,8 +38,10 @@ gem 'sass-rails', '~> 6' # css
 gem 'sentry-ruby' # New Sentry SDK
 gem 'sentry-rails' # Rails integration for Sentry
 gem 'sidekiq' # background work
+gem 'solid_queue' # database-backed ActiveJob backend (Rails 7.2+)
 gem 'sql_query' # load SQL queries from erb templates
 gem 'stripe' # accept credit cards
+gem 'mission_control-jobs' # job UI for ActiveJob backends
 
 
 gem 'redis', '~> 4.0' # Use Redis adapter to run Action Cable in production
