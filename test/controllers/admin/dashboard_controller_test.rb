@@ -2,6 +2,7 @@ require 'test_helper'
 
 class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
+  include ActiveJob::TestHelper
 
   def setup
     week1 = menus(:week1)
@@ -95,5 +96,15 @@ class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
     holiday_rows = sales_tables[1].css('tbody tr')
     assert_equal 1, holiday_rows.size, 'marketplace only — credits are per-week, not per-menu'
     assert_equal 'Market Place', holiday_rows[0].css('td')[0].text.strip
+  end
+
+  test "dashboard can enqueue queue demo job" do
+    assert_enqueued_with(job: QueueDemoJob) do
+      post "/admin/dashboard/enqueue_queue_demo"
+    end
+
+    assert_redirected_to "/admin/dashboard"
+    follow_redirect!
+    assert_select ".flash_notice", text: /Queued demo job/
   end
 end

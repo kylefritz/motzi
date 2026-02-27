@@ -2,6 +2,11 @@ include PriceHelper
 ActiveAdmin.register_page "Dashboard" do
   menu priority: 1
 
+  page_action :enqueue_queue_demo, method: :post do
+    QueueDemoJob.perform_later(current_admin_user.id)
+    redirect_to admin_dashboard_path, notice: "Queued demo job. Watch progress in Jobs."
+  end
+
   content title: "Hello friend" do
     if defined?(ReviewAppMailInterceptor) && ReviewAppMailInterceptor.active
       div class: 'flash flash_alert', style: 'margin-bottom: 16px' do
@@ -29,6 +34,17 @@ ActiveAdmin.register_page "Dashboard" do
             end
           end
         end
+
+        panel "Jobs" do
+          para "Queue a 20-second demo job to verify Solid Queue + Mission Control."
+          para do
+            button_to "Queue Demo Job", "/admin/dashboard/enqueue_queue_demo", method: :post
+          end
+          para do
+            a "Open Jobs Monitor", href: "/jobs", target: "_blank"
+          end
+        end
+
         panel "Orders" do
           def compute(name, subs)
             total = subs.count

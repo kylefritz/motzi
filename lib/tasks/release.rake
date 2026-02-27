@@ -1,5 +1,3 @@
-require "sidekiq/deploy"
-
 desc "post-release tasks run by Heroku"
 task release: :environment do
   # Run rails db:migrate
@@ -37,10 +35,4 @@ task release: :environment do
     end
   end
 
-  puts "Running Sidekiq::Deploy.mark! #{gitdesc}"
-  begin
-    Sidekiq::Deploy.mark!(gitdesc)
-  rescue => e
-    puts "Error during Sidekiq::Deploy.mark!: #{e.message}"
-  end
 end
