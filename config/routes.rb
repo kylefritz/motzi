@@ -1,5 +1,3 @@
-require 'sidekiq/web'
-
 Rails.application.routes.draw do
   devise_for :users
   ActiveAdmin.routes(self)
@@ -32,8 +30,7 @@ Rails.application.routes.draw do
     get '/admin/pickup_lists/:date', to: 'admin/pickup_lists#show', as: :admin_pickup_list
 
     mount Blazer::Engine, at: "/blazer"
-
-    mount Sidekiq::Web, at: "/sidekiq"
+    mount MissionControl::Jobs::Engine, at: "/jobs"
   end
 
   # review emails in development
