@@ -6,7 +6,7 @@ ruby '3.3.10'
 #
 # please keep gems sorted; include comment for why a gem is needed
 #
-gem 'activeadmin', '~> 2.13.1' # admin ui
+gem 'activeadmin', '~> 3.4' # admin ui
 gem 'ahoy_email', '~> 1.1.1' # email analytics (v2 sadly removes open tracking)
 gem 'ahoy_matey' # analytics
 gem 'aws-sdk-s3', require: false # for s3/active storage
@@ -51,6 +51,7 @@ group :development, :test do
   gem 'faker' # fake names
   gem 'json-schema' # make sure json objects have the right schema
   gem 'letter_opener_web' # nice place to preview emails
+  gem 'minitest', '< 6' # Rails 6.1 parallel test runner compatibility
 end
 
 group :development do
