@@ -9,7 +9,7 @@ Bundler.require(*Rails.groups)
 module Motzi
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 6.0
+    config.load_defaults 6.1
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration can go into files in config/initializers
@@ -23,6 +23,8 @@ module Motzi
     # zeitwerk makes ruby file autoloading better?
     config.autoloader = :zeitwerk
 
+    # Rails 7 compatibility while we keep pre-7.0 load defaults during incremental upgrades.
+    config.active_record.legacy_connection_handling = false
     config.time_zone = 'Eastern Time (US & Canada)'
   end
 end
