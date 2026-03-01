@@ -27,16 +27,17 @@ task release: :environment do
   end
 
   # Get release information
-  gitdesc = ENV['HEROKU_RELEASE_VERSION'] || `git log -1 --format="%h %s"`.strip
+  release_version = ENV["HEROKU_RELEASE_VERSION"]
+  release = release_version || `git log -1 --format="%h %s"`.strip
 
   if defined?(Sentry)
-    puts "Notifying Sentry of release and deploy: #{gitdesc}"
+    puts "Notifying Sentry of release and deploy: #{release}"
     
     begin      
       Sentry.sdk_create_deploy(
-        release: gitdesc,
+        release: release,
         environment: Rails.env,
-        url: "https://dashboard.heroku.com/apps/#{ENV['HEROKU_APP_NAME']}/activity/releases/#{release_version}"
+        url: release_version ? "https://dashboard.heroku.com/apps/#{ENV['HEROKU_APP_NAME']}/activity/releases/#{release_version}" : nil
       )
     rescue => e
       puts "Error notifying Sentry of release/deploy: #{e.message}"
