@@ -4,7 +4,7 @@ ActiveAdmin.register_page "Dashboard" do
 
   page_action :enqueue_queue_demo, method: :post do
     QueueDemoJob.perform_later(current_admin_user.id)
-    redirect_to admin_dashboard_path, notice: "Queued demo job. Watch progress in Jobs."
+    redirect_to admin_dashboard_path, notice: "Queued demo job on the demo queue. Watch progress in Jobs."
   end
 
   content title: "Hello friend" do
@@ -167,7 +167,7 @@ ActiveAdmin.register_page "Dashboard" do
     columns do
       column do
         panel "Jobs" do
-          para "Queue a 20-second demo job to verify Solid Queue + Mission Control."
+          para "Queue a 20-second demo job on the dedicated demo queue to verify Solid Queue + Mission Control."
           para do
             button_to "Queue Demo Job", "/admin/dashboard/enqueue_queue_demo", method: :post
           end

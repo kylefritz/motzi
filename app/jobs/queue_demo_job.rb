@@ -1,5 +1,5 @@
 class QueueDemoJob < ApplicationJob
-  queue_as :default
+  queue_as :demo
 
   def perform(enqueued_by_user_id = nil)
     user_id = enqueued_by_user_id || "unknown"
