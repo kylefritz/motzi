@@ -1,5 +1,4 @@
 require "active_support/core_ext/integer/time"
-require_relative "../../app/models/shop_config"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -33,7 +32,6 @@ Rails.application.configure do
 
   # Use Solid Queue in development so jobs are visible in Mission Control.
   config.active_job.queue_adapter = :solid_queue
-  # config.active_job.queue_adapter = ShopConfig.shop.queue_adapter.to_sym
   # config.action_mailer.deliver_later_queue_name = "mailers"        # defaults to "mailers"
   # config.active_storage.queues.analysis         = "active_storage" # defaults to "active_storage_analysis"
   # config.active_storage.queues.purge            = "active_storage" # defaults to "active_storage_purge"
