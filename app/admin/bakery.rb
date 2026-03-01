@@ -35,16 +35,6 @@ ActiveAdmin.register_page "Dashboard" do
           end
         end
 
-        panel "Jobs" do
-          para "Queue a 20-second demo job to verify Solid Queue + Mission Control."
-          para do
-            button_to "Queue Demo Job", "/admin/dashboard/enqueue_queue_demo", method: :post
-          end
-          para do
-            a "Open Jobs Monitor", href: "/jobs", target: "_blank"
-          end
-        end
-
         panel "Orders" do
           def compute(name, subs)
             total = subs.count
@@ -176,6 +166,16 @@ ActiveAdmin.register_page "Dashboard" do
 
     columns do
       column do
+        panel "Jobs" do
+          para "Queue a 20-second demo job to verify Solid Queue + Mission Control."
+          para do
+            button_to "Queue Demo Job", "/admin/dashboard/enqueue_queue_demo", method: :post
+          end
+          para do
+            a "Open Jobs Monitor", href: "/jobs", target: "_blank"
+          end
+        end
+
         panel "Recently updated content" do
           versions = PaperTrail::Version.order('id desc').limit(20).includes(:item)
           users = Hash[User.find(versions.map(&:whodunnit)).map{|u| [u.id.to_s, u] }]
