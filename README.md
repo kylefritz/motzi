@@ -16,6 +16,14 @@ Real data from prod: `bin/seed_local`
 
 Start everything: `bin/dev`
 
+Background jobs use Solid Queue. Run workers with:
+
+```
+bin/jobs start
+```
+
+Mission Control Jobs UI is mounted at `/jobs` (admin access required).
+
 ### Data
 
 Fixtures: `rails db:fixtures:load fake_data:users fake_data:orders`
@@ -41,6 +49,8 @@ Auto-deploys from `master` when CI passes. Full review-app config in `app.json`.
 | heroku-postgresql | essential-0 (v17) | Primary database |
 | scheduler | standard | Recurring tasks |
 | scheduler-monitor | test-free | Monitors scheduler runs |
+
+ActionCable runs with the `async` adapter in production, so Redis is not required for runtime.
 
 ### Scheduled jobs
 
