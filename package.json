@@ -45,7 +45,7 @@
     "test": "bun test",
     "test-watch": "bun test --watch",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
+    "typecheck:test": "IS_REACT_ACT_ENVIRONMENT=false tsc --noEmit -p tsconfig.test.json",
     "prepare": "husky"
   },
   "husky": {
