@@ -31,8 +31,8 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
-  # uncomment to test production queue settings
-  #
+  # Use Solid Queue in development so jobs are visible in Mission Control.
+  config.active_job.queue_adapter = :solid_queue
   # config.active_job.queue_adapter = ShopConfig.shop.queue_adapter.to_sym
   # config.action_mailer.deliver_later_queue_name = "mailers"        # defaults to "mailers"
   # config.active_storage.queues.analysis         = "active_storage" # defaults to "active_storage_analysis"
