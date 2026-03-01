@@ -9,6 +9,14 @@ task release: :environment do
     raise e  # Re-raise the error because we want the release to fail
   end
 
+  puts "Ensuring Solid Queue tables exist"
+  begin
+    Rake::Task["solid_queue:bootstrap"].invoke
+  rescue => e
+    puts "Error during solid_queue:bootstrap: #{e.message}. Rethrowing exception to cancel release."
+    raise e
+  end
+
   # Run rails db:seed
   puts "Running db:seed"
   begin

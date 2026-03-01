@@ -74,6 +74,7 @@ FileUtils.chdir APP_ROOT do
   puts "\n== Preparing database =="
   db_task = ENV['DB_SETUP'] == '1' ? 'db:setup' : 'db:prepare'
   system_mise! 'bin/rails', db_task
+  system_mise! 'bin/rails', 'solid_queue:bootstrap'
 
   unless skip_step?('SKIP_LOG_CLEAR')
     puts "\n== Removing old logs and tempfiles =="
