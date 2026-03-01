@@ -24,6 +24,28 @@ bin/jobs start
 
 Mission Control Jobs UI is mounted at `/jobs` (admin access required).
 
+## JavaScript / TypeScript
+
+Run tests:
+
+```
+bun run test
+```
+
+Typecheck app code (default gate):
+
+```
+bun run typecheck
+```
+
+Typecheck tests too (stricter, may expose legacy test typings):
+
+```
+bun run typecheck:test
+```
+
+Note: React `act(...)` warnings can still appear during `bun run test`; those are runtime test warnings, not TypeScript failures.
+
 ### Data
 
 Fixtures: `rails db:fixtures:load fake_data:users fake_data:orders`
