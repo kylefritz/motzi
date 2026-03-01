@@ -30,7 +30,7 @@ echo "Branch: $(git branch --show-current)"
 
 echo
 echo "== Dependency snapshot =="
-run_in_toolchain bundle list | rg -i "rails \(|activeadmin \(|sidekiq \(|redis \(" || true
+run_in_toolchain bundle list | rg -i "rails \(|activeadmin \(|solid_queue \(|mission_control-jobs \(" || true
 cat package.json | rg -n "react|material|stripe|testing-library|react-test-renderer" || true
 
 run_check "Rails tests" run_in_toolchain env DISABLE_SPRING=1 bundle exec rails test

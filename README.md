@@ -4,7 +4,7 @@ Neighborhood bakery's CSA site
 
 ## Development
 
-Requires Postgres, Redis, and mise (manages Ruby/Bun). Add to `.env`:
+Requires Postgres and mise (manages Ruby/Bun). Add to `.env`:
 
 ```
 AWS_ACCESS_KEY_ID=...
@@ -39,7 +39,6 @@ Auto-deploys from `master` when CI passes. Full review-app config in `app.json`.
 | Addon | Plan | Purpose |
 |-------|------|---------|
 | heroku-postgresql | essential-0 (v17) | Primary database |
-| heroku-redis | mini | Sidekiq, ActionCable |
 | scheduler | standard | Recurring tasks |
 | scheduler-monitor | test-free | Monitors scheduler runs |
 

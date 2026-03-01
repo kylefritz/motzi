@@ -42,10 +42,6 @@ gem 'sql_query' # load SQL queries from erb templates
 gem 'stripe' # accept credit cards
 gem 'mission_control-jobs' # job UI for ActiveJob backends
 
-
-gem 'redis', '~> 4.0' # Use Redis adapter to run Action Cable in production
-
-
 group :development, :test do
   gem 'byebug' # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'dotenv-rails' # load secrets `.env` file (ask kyle for it; not checked into git)

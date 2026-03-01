@@ -431,7 +431,6 @@ GEM
       psych (>= 4.0.0)
       tsort
     redcarpet (3.6.1)
-    redis (4.8.1)
     regexp_parser (2.10.0)
     reline (0.6.3)
       io-console (~> 0.5)
@@ -630,7 +629,6 @@ DEPENDENCIES
   rails-settings-cached
   rcodetools
   redcarpet
-  redis (~> 4.0)
   sass-rails (~> 6)
   selenium-webdriver (>= 4.0.0.rc1)
   sentry-rails

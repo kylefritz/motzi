@@ -12,9 +12,6 @@
       "options": { "version": "17" }
     },
     {
-      "plan": "heroku-redis:mini"
-    },
-    {
       "plan": "scheduler:standard"
     },
     {
