@@ -4,9 +4,8 @@
   "dependencies": {
     "@stripe/react-stripe-js": "^2.9.0",
     "@stripe/stripe-js": "^5.5.0",
-    "@rails/actioncable": "^6.0.0-alpha",
-    "@rails/activestorage": "^6.0.0-alpha",
-    "@rails/ujs": "^6.0.0-alpha",
+    "@rails/activestorage": "^7.1.600",
+    "@rails/ujs": "^7.1.600",
     "@sentry/browser": "^5.7.1",
     "accounting": "^0.4.1",
     "ahoy.js": "^0.3.4",
