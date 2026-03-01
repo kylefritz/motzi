@@ -1,15 +1,16 @@
 import React, { useState } from "react";
-import { CardElement } from "react-stripe-elements";
+import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { formatMoney } from "accounting";
 
 export default function Card({
-  stripe,
   onToken,
   credits,
   price,
   submitting,
   disabled,
 }) {
+  const stripe = useStripe();
+  const elements = useElements();
   const [errorMessage, setErrorMessage] = useState();
   const [waitingOnStripe, setWaitingOnStripe] = useState();
   const [cardFilled, setCardFilled] = useState(false);
@@ -18,18 +19,27 @@ export default function Card({
     setCardFilled(complete);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!stripe) {
+    if (price > 0 && (!stripe || !elements)) {
       console.log("Stripe.js hasn't loaded yet.");
       return;
     }
     if (price > 0) {
       setWaitingOnStripe(true);
-      stripe.createToken().then((token) => {
-        onToken(token);
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) {
         setWaitingOnStripe(false);
-      });
+        return;
+      }
+      const { token, error } = await stripe.createToken(cardElement);
+      if (error) {
+        setErrorMessage(error.message);
+        setWaitingOnStripe(false);
+        return;
+      }
+      onToken({ token });
+      setWaitingOnStripe(false);
     } else {
       onToken({ token: { id: null } });
     }
