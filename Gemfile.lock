@@ -373,6 +373,8 @@ GEM
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.2.5)
+    rack-mini-profiler (4.0.1)
+      rack (>= 1.2.0)
     rack-session (2.1.1)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
@@ -622,6 +624,7 @@ DEPENDENCIES
   pg (>= 0.18, < 2.0)
   progress_bar
   puma (~> 7.0)
+  rack-mini-profiler (~> 4.0)
   rails (~> 7.2.0)
   rails-settings-cached
   rcodetools
