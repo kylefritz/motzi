@@ -48,7 +48,7 @@ group :development, :test do
   gem 'faker' # fake names
   gem 'json-schema' # make sure json objects have the right schema
   gem 'letter_opener_web' # nice place to preview emails
-  gem 'minitest', '< 6' # Rails 6.1 parallel test runner compatibility
+  gem 'minitest' # test framework; keep unpinned so Rails can track supported versions
 end
 
 group :development do

@@ -612,7 +612,7 @@ DEPENDENCIES
   json-schema
   letter_opener_web
   listen (~> 3.3)
-  minitest (< 6)
+  minitest
   mission_control-jobs
   mutex_m
   naturalsort
