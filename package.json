@@ -44,7 +44,7 @@
     "build:watch": "esbuild app/javascript/packs/*.ts app/javascript/packs/*.tsx --bundle --sourcemap --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx --outdir=app/assets/builds --public-path=/assets --watch",
     "test": "bun test",
     "test-watch": "bun test --watch",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "prepare": "husky"
   },
   "husky": {

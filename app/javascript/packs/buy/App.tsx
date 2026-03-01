@@ -9,6 +9,7 @@ import Payment from "./Payment";
 import PayWhatYouCan from "./PayWhatYouCan";
 import { applyTip } from "./Tip";
 import { getSettingsContext } from "../menu/Contexts";
+import type { User as SentryUser } from "@sentry/browser";
 import type {
   CreditItemResponse,
   CreditBundle,
@@ -64,7 +65,11 @@ export default function Buy({ user: passedUser }: BuyProps) {
             setUser(user);
             setBundles(nextBundles);
             setEnablePayWhatYouCan(nextEnablePayWhatYouCan);
-            Sentry.configureScope((scope) => scope.setUser(user));
+            const sentryUser: SentryUser = {
+              id: String(user.id),
+              email: user.email,
+            };
+            Sentry.configureScope((scope) => scope.setUser(sentryUser));
           } else {
             setError("We can't load your user account");
           }
@@ -88,7 +93,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
     console.log("selected", credits, "for", "price");
   };
 
-  const handlePriceChanged = (newPrice) => {
+  const handlePriceChanged = (newPrice: number) => {
     if (_.isNumber(newPrice) && newPrice > 0) {
       setPrice(newPrice);
     }
@@ -115,13 +120,16 @@ export default function Buy({ user: passedUser }: BuyProps) {
         setReceipt(creditItem.stripeReceiptUrl);
 
         if (onComplete) {
-          onComplete(creditItem);
+          onComplete();
         }
       })
       .catch((error) => {
         const { message } = error.response.data || {};
         console.error("Can't buy credits", error, message);
-        window.alert(`Couldn't buy credits: ${message || error}`);
+        const alertWindow = window as Window & {
+          alert: (message?: string) => void;
+        };
+        alertWindow.alert(`Couldn't buy credits: ${message || error}`);
         Sentry.captureException(error);
       })
       .then(() => setSubmitting(false));
@@ -184,6 +192,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
                 onPricedChanged={handlePriceChanged}
                 tip={tip}
                 onTip={setTip}
+                disabled={submitting}
               />
             </>
           ) : (
@@ -195,6 +204,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
             stripeApiKey={stripeApiKey}
             onCardToken={handleCardToken}
             submitting={submitting}
+            disabled={submitting}
           />
         </>
       )}

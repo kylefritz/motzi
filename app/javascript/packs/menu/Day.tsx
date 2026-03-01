@@ -1,13 +1,24 @@
 import React from "react";
 import _ from "lodash";
 
-export default class Day extends React.Component {
-  constructor(props) {
+type DayProps = {
+  name: string;
+  description?: string;
+  onChange?: (name: string) => void;
+  checked?: boolean;
+};
+
+export default class Day extends React.Component<DayProps> {
+  cbRef: React.RefObject<HTMLInputElement>;
+
+  constructor(props: DayProps) {
     super(props);
     this.cbRef = React.createRef();
   }
   handleClickToCheck() {
-    this.cbRef.current.checked = true;
+    if (this.cbRef.current) {
+      this.cbRef.current.checked = true;
+    }
     this.handleChanged();
   }
   handleChanged() {
