@@ -21,7 +21,6 @@
   "env": {
     "RAILS_ENV":                { "value": "production" },
     "RACK_ENV":                 { "value": "production" },
-    "RAILS_LOG_TO_STDOUT":      { "value": "enabled" },
     "RAILS_SERVE_STATIC_FILES": { "value": "enabled" },
     "SECRET_KEY_BASE":          { "generator": "secret" },
     "AWS_ACCESS_KEY_ID":        { "required": false },

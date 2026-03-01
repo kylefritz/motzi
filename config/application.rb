@@ -24,5 +24,9 @@ module Motzi
     config.autoloader = :zeitwerk
 
     config.time_zone = 'Eastern Time (US & Canada)'
+
+    # Keep finished jobs visible for two weeks in Mission Control before
+    # recurring Solid Queue cleanup removes them.
+    config.solid_queue.clear_finished_jobs_after = 14.days
   end
 end
