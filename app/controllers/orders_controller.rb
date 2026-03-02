@@ -19,11 +19,17 @@ class OrdersController < ApplicationController
   end
 
   def create
-    if current_user&.current_order
-      logger.warn "user=#{current_user.email} already placed an order. returning that order"
+    target_menu = params[:menu_id].present? ? Menu.find(params[:menu_id]) : Menu.current
+
+    unless current_admin_user.present? || target_menu.id.in?([Menu.current.id, Menu.current_holiday&.id].compact)
+      return render_validation_failed("this menu is not available for ordering")
+    end
+
+    if current_user&.order_for_menu(target_menu).present?
+      logger.warn "user=#{current_user.email} already placed an order for menu #{target_menu.id}. returning current order"
       return render_current_order
     end
-    @menu = Menu.current
+    @menu = target_menu
 
     if @menu.ordering_closed? && current_admin_user.blank?
       return render_ordering_closed
@@ -46,7 +52,7 @@ class OrdersController < ApplicationController
           quantity: cart_item_params[:quantity].presence || 1,
           pickup_day_id: cart_item_params[:pickup_day_id] || @menu.pickup_days.first.id
         }
-        
+
         order.order_items.create!(filtered_params)
       end
 
@@ -88,7 +94,12 @@ class OrdersController < ApplicationController
     # send confirmation email
     ConfirmationMailer.with(order: @order).order_email.deliver_later
 
-    render 'menus/show', format: :json # requires @menu, @user, @order
+    # Place order in the correct response slot (regular vs holiday)
+    if @menu.holiday?
+      @holiday_order = @order
+      @order = nil
+    end
+    render_current_order(nil, @user)
 
     rescue OrderError => e
       render_validation_failed(e.message)
@@ -133,6 +144,12 @@ class OrdersController < ApplicationController
       ahoy.track "order_updated"
     end
 
+    # Place order in the correct response slot (regular vs holiday)
+    if order.menu.holiday?
+      @holiday_order = order
+    else
+      @order = order
+    end
     render_current_order
   end
 

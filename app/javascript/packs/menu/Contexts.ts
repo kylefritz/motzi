@@ -22,7 +22,6 @@ type SettingsContextValue = {
 
 const DayContext = React.createContext<DayContextValue | null>(null);
 const SettingsContext = React.createContext<SettingsContextValue | null>(null);
-
 export { DayContext, SettingsContext };
 
 export function getSettingsContext(): SettingsContextValue {

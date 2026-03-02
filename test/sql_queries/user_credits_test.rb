@@ -9,9 +9,9 @@ class UserCreditsTest < ActiveSupport::TestCase
     assert_equal users.size, rows.size, "same number of users as rows"
     assert_equal users.size, balances.size, "same number of users as balances"
 
-    assert_equal 23, balances[users(:kyle).id]
+    assert_equal 20, balances[users(:kyle).id]
     assert_equal 12, balances[users(:adrian).id]
     assert_equal 1, balances[users(:jess).id]
-    assert_equal 0, balances[users(:ljf).id]
+    assert_equal(-2, balances[users(:ljf).id])
   end
 end

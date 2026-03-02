@@ -23,6 +23,8 @@ export type CreditBundle = MenuResponse["bundles"][number];
 export type MenuUser = NonNullable<MenuResponse["user"]>;
 export type MenuOrder = NonNullable<MenuResponse["order"]>;
 export type MenuOrderItem = MenuOrder["items"][number];
+export type HolidayMenu = NonNullable<MenuResponse["holidayMenu"]>;
+export type HolidayOrder = NonNullable<MenuResponse["holidayOrder"]>;
 
 export type CartItem = Pick<MenuOrderItem, "itemId" | "quantity" | "pickupDayId"> &
   Partial<Pick<MenuOrderItem, "day" | "pickupAt">>;

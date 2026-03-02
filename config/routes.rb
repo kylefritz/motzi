@@ -29,6 +29,8 @@ Rails.application.routes.draw do
 
   # mounted admin-only apps
   authenticate :user, ->(user) { user.is_admin? } do
+    get '/admin/pickup_lists/:date', to: 'admin/pickup_lists#show', as: :admin_pickup_list
+
     mount Blazer::Engine, at: "/blazer"
 
     mount Sidekiq::Web, at: "/sidekiq"

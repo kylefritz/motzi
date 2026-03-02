@@ -28,3 +28,31 @@ w2_donut:
   <<: *default
   menu: week2
   item: donuts
+
+#
+# passover 2026
+#
+passover_almond_cake:
+  menu: passover_2026
+  item: almond_cake
+  subscriber: true
+  marketplace: true
+
+passover_matzo_toffee:
+  menu: passover_2026
+  item: matzo_toffee
+  subscriber: true
+  marketplace: true
+
+#
+# week 26w15
+#
+w26w15_classic:
+  <<: *default
+  menu: week_26w15
+  item: classic
+
+w26w15_rye:
+  <<: *default
+  menu: week_26w15
+  item: rye

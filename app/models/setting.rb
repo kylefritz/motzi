@@ -3,6 +3,7 @@ class Setting < RailsSettings::Base
   has_paper_trail
 
   field :menu_id, type: :integer, default: nil
+  field :holiday_menu_id, type: :integer, default: nil
   field :google_analytics_tracker, default: nil, type: :string
   field :automated_reminder_emails, default: true, type: :boolean
   field :pickup_day1, default: "Tuesday", type: :string

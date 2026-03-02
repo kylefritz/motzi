@@ -123,5 +123,51 @@ export type MenuResponse = {
     credits: number;
     breadsPerWeek: number;
   }>;
+  holidayMenu: {
+    id: number;
+    name: string;
+    menuNote: null | string;
+    subscriberNote: string;
+    isCurrent: boolean;
+    orderingDeadlineText: string;
+    enablePayWhatYouCan: boolean;
+    pickupDays: Array<{
+      id: number;
+      pickupAt: string;
+      orderDeadlineAt: string;
+      debug?: string;
+    }>;
+    items: Array<{
+      id: number;
+      name: string;
+      description: string;
+      price: number;
+      credits: number;
+      image?: null | string;
+      subscriber: boolean;
+      marketplace: boolean;
+      pickupDays: Array<{
+        id: number;
+        pickupAt: string;
+        orderDeadlineAt: string;
+        debug?: string;
+        remaining: number;
+      }>;
+    }>;
+  } | null;
+  holidayOrder: {
+    items: Array<{
+      itemId: number;
+      quantity: number;
+      day: string;
+      pickupDayId: number;
+      pickupAt: string;
+    }>;
+    id: number;
+    comments: string | null;
+    skip: boolean;
+    stripeReceiptUrl?: string | null;
+    stripeChargeAmount?: number | null;
+  } | null;
 };
 

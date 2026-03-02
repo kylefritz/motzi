@@ -75,7 +75,7 @@ Rails.application.configure do
   # Setup the mailer config
   config.action_mailer.default_url_options = { host: ShopConfig.shop.app_domain }
   config.action_mailer.perform_caching = false
-  config.action_mailer.perform_deliveries = true
+  config.action_mailer.perform_deliveries = ENV['SENDGRID_USERNAME'].present?
   # from send grid
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {

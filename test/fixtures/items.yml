@@ -26,3 +26,13 @@ donuts:
   name: Donuts
   description: You want them
   price: 6
+
+almond_cake:
+  name: Almond Cake
+  description: Flourless almond cake, Passover-friendly
+  price: 12.00
+
+matzo_toffee:
+  name: Matzo Toffee
+  description: Dark chocolate matzo toffee
+  price: 8.00
