@@ -16,9 +16,6 @@
     },
     {
       "plan": "scheduler:standard"
-    },
-    {
-      "plan": "scheduler-monitor:test-free"
     }
   ],
   "env": {
