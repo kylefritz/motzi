@@ -10,9 +10,6 @@
     {
       "plan": "heroku-postgresql:essential-0",
       "options": { "version": "17" }
-    },
-    {
-      "plan": "scheduler:standard"
     }
   ],
   "env": {

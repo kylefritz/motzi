@@ -2,6 +2,8 @@ class SendHaventOrderedReminderJob < ApplicationJob
   queue_as :default
 
   def perform(*args)
+    return unless Setting.automated_reminder_emails?
+
     PickupDay.for_order_deadline_at(Time.zone.now).each do |pickup_day|
       send_reminders_for_day(pickup_day)
     end
