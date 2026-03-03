@@ -1,17 +1,6 @@
 ActiveAdmin.register_page "Activity Feed" do
   menu priority: 2, label: "Activity"
 
-  controller do
-    def index
-      @week_id = params[:week_id] || Time.zone.now.week_id
-      @verbose = params[:verbose] == "true"
-      @feed = ActivityFeed.new(@week_id)
-      @events = @verbose ? @feed.verbose_events : @feed.summary
-      @email_summary = @feed.email_summary
-      @analyses = AnomalyAnalysis.for_week(@week_id).order(created_at: :desc)
-    end
-  end
-
   # JSON endpoint
   page_action :json_feed, method: :get do
     week_id = params[:week_id] || Time.zone.now.week_id
@@ -56,12 +45,19 @@ ActiveAdmin.register_page "Activity Feed" do
       notice: "Analysis complete — #{first_line}"
   end
 
-  content title: proc { "Activity Feed: #{@week_id}" } do
+  content title: "Activity Feed" do
+    week_id = params[:week_id] || Time.zone.now.week_id
+    verbose = params[:verbose] == "true"
+    feed = ActivityFeed.new(week_id)
+    events = verbose ? feed.verbose_events : feed.summary
+    email_summary = feed.email_summary
+    analyses = AnomalyAnalysis.for_week(week_id).order(created_at: :desc)
+
     # Week navigation
     div class: "activity-feed-nav", style: "margin-bottom: 16px" do
       weeks = (0..8).map { |i| (Time.zone.now - i.weeks).week_id }.uniq
       weeks.each do |wid|
-        if wid == @week_id
+        if wid == week_id
           span wid, style: "margin-right: 12px; font-weight: bold; text-decoration: underline"
         else
           a wid, href: admin_activity_feed_path(week_id: wid), style: "margin-right: 12px"
@@ -71,25 +67,25 @@ ActiveAdmin.register_page "Activity Feed" do
 
     # Format links and controls
     div style: "margin-bottom: 16px" do
-      if @verbose
-        a "Summary View", href: admin_activity_feed_path(week_id: @week_id)
+      if verbose
+        a "Summary View", href: admin_activity_feed_path(week_id: week_id)
       else
-        a "Verbose View (all details)", href: admin_activity_feed_path(week_id: @week_id, verbose: true)
+        a "Verbose View (all details)", href: admin_activity_feed_path(week_id: week_id, verbose: true)
       end
       span " | ", style: "margin: 0 8px"
-      a "JSON", href: admin_activity_feed_json_feed_path(week_id: @week_id, verbose: @verbose), target: "_blank"
+      a "JSON", href: admin_activity_feed_json_feed_path(week_id: week_id, verbose: verbose), target: "_blank"
       span " | ", style: "margin: 0 8px"
-      a "Text", href: admin_activity_feed_plain_feed_path(week_id: @week_id, verbose: @verbose), target: "_blank"
+      a "Text", href: admin_activity_feed_plain_feed_path(week_id: week_id, verbose: verbose), target: "_blank"
       span " | ", style: "margin: 0 8px"
-      text_node button_to("Analyze with Claude", admin_activity_feed_analyze_path(week_id: @week_id), method: :post, style: "display: inline")
+      text_node button_to("Analyze with Claude", admin_activity_feed_analyze_path(week_id: week_id), method: :post, style: "display: inline")
     end
 
     # Email Health Panel
     panel "Email Health" do
-      if @email_summary.empty?
-        para "No email data for #{@week_id}", style: "color: #888"
+      if email_summary.empty?
+        para "No email data for #{week_id}", style: "color: #888"
       else
-        table_for @email_summary.values do
+        table_for email_summary.values do
           column("Email Type") { |row| row[:label] }
           column("Sent") { |row| row[:sent] }
           column("Opened") { |row|
@@ -113,11 +109,11 @@ ActiveAdmin.register_page "Activity Feed" do
     end
 
     # Events table
-    panel "Events (#{@events.size})" do
-      if @events.empty?
-        para "No activity for #{@week_id}", style: "color: #888"
+    panel "Events (#{events.size})" do
+      if events.empty?
+        para "No activity for #{week_id}", style: "color: #888"
       else
-        table_for @events do
+        table_for events do
           column("Time") { |e| e.timestamp&.strftime("%y-%m-%d %l:%M%P") }
           column("Source") { |e|
             case e.category
@@ -127,6 +123,8 @@ ActiveAdmin.register_page "Activity Feed" do
               status_tag(e.category, color: "blue")
             when "customer"
               status_tag(e.category, color: "green")
+            when "system"
+              status_tag(e.category, color: "orange")
             else
               status_tag(e.category)
             end
@@ -138,9 +136,9 @@ ActiveAdmin.register_page "Activity Feed" do
     end
 
     # Past analyses
-    if @analyses.any?
+    if analyses.any?
       panel "Claude Analyses" do
-        @analyses.each do |analysis|
+        analyses.each do |analysis|
           div style: "margin-bottom: 16px; padding: 12px; background: #f9f9f9; border-radius: 4px" do
             div style: "margin-bottom: 8px" do
               strong analysis.created_at.strftime("%y-%m-%d %l:%M%P")

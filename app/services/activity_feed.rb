@@ -1,6 +1,14 @@
 class ActivityFeed
   Event = Struct.new(:timestamp, :category, :action, :description, :details, keyword_init: true)
 
+  RECURRING_JOB_LABELS = {
+    "SendDayOfReminderJob" => "Day-of reminder job",
+    "SendHaventOrderedReminderJob" => "Haven't-ordered reminder job",
+    "SendWeeklyMenuJob" => "Weekly menu email job",
+    "AnalyzeAnomaliesJob" => "Anomaly analysis job",
+    "SolidQueue::RecurringJob" => "Recurring command"
+  }.freeze
+
   MAILER_LABELS = {
     "MenuMailer#weekly_menu_email" => "Weekly menu email",
     "ConfirmationMailer#order_email" => "Order confirmations",
@@ -25,6 +33,7 @@ class ActivityFeed
     all.concat(order_events(verbose: verbose))
     all.concat(credit_events(verbose: verbose))
     all.concat(email_events(verbose: verbose))
+    all.concat(recurring_job_events(verbose: verbose))
     all.sort_by(&:timestamp)
   end
 
@@ -199,6 +208,45 @@ class ActivityFeed
           action: "credits_summary",
           description: "#{purchases.size} purchases (#{total_credits} credits, $#{'%.2f' % total_dollars})",
           details: { source: "credit_items", count: purchases.size, total_credits: total_credits }
+        )
+      end
+    end
+    events
+  end
+
+  def recurring_job_events(verbose: false)
+    events = []
+    return events unless defined?(SolidQueue::Job)
+
+    jobs = SolidQueue::Job.where(created_at: @week_start..@week_end)
+      .where(class_name: RECURRING_JOB_LABELS.keys)
+      .order(:created_at)
+
+    if verbose
+      jobs.each do |job|
+        label = RECURRING_JOB_LABELS[job.class_name] || job.class_name
+        status = job.finished? ? "completed" : "running"
+        events << Event.new(
+          timestamp: job.created_at,
+          category: "system",
+          action: "recurring_job",
+          description: "#{label} #{status}",
+          details: { source: "solid_queue", id: job.id, class_name: job.class_name }
+        )
+      end
+    else
+      jobs.group_by(&:class_name).each do |class_name, class_jobs|
+        label = RECURRING_JOB_LABELS[class_name] || class_name
+        finished = class_jobs.count(&:finished?)
+        failed = class_jobs.size - finished
+        desc = "#{label}: #{finished} runs"
+        desc += " (#{failed} incomplete)" if failed > 0
+        events << Event.new(
+          timestamp: class_jobs.last.created_at,
+          category: "system",
+          action: "recurring_jobs_summary",
+          description: desc,
+          details: { source: "solid_queue", class_name: class_name, total: class_jobs.size, finished: finished }
         )
       end
     end
