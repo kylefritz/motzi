@@ -27,7 +27,8 @@
     "STRIPE_SECRET_KEY":        { "required": false },
     "REVIEW_APP":               { "value": "true" },
     "SENDGRID_USERNAME":        { "required": false },
-    "SENDGRID_PASSWORD":        { "required": false }
+    "SENDGRID_PASSWORD":        { "required": false },
+    "ANTHROPIC_API_KEY":        { "required": false }
   },
   "formation": {
     "web":    { "quantity": 1, "size": "basic" },
