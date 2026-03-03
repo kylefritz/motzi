@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_22_000001) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_03_081155) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -57,6 +57,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_22_000001) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "activity_events", force: :cascade do |t|
+    t.string "action", null: false
+    t.string "week_id", null: false
+    t.string "description", null: false
+    t.jsonb "metadata", default: {}
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["action"], name: "index_activity_events_on_action"
+    t.index ["user_id"], name: "index_activity_events_on_user_id"
+    t.index ["week_id"], name: "index_activity_events_on_week_id"
   end
 
   create_table "ahoy_events", force: :cascade do |t|
@@ -116,6 +129,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_22_000001) do
     t.datetime "started_at", precision: nil
     t.index ["user_id"], name: "index_ahoy_visits_on_user_id"
     t.index ["visit_token"], name: "index_ahoy_visits_on_visit_token", unique: true
+  end
+
+  create_table "anomaly_analyses", force: :cascade do |t|
+    t.string "week_id", null: false
+    t.text "result", null: false
+    t.text "prompt_used"
+    t.string "model_used"
+    t.integer "input_tokens"
+    t.integer "output_tokens"
+    t.string "trigger", null: false
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_anomaly_analyses_on_user_id"
+    t.index ["week_id"], name: "index_anomaly_analyses_on_week_id"
   end
 
   create_table "blazer_audits", force: :cascade do |t|
@@ -446,6 +474,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_22_000001) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "activity_events", "users"
+  add_foreign_key "anomaly_analyses", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

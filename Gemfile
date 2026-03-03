@@ -41,6 +41,7 @@ gem 'solid_queue' # database-backed ActiveJob backend (Rails 7.2+)
 gem 'sql_query' # load SQL queries from erb templates
 gem 'stripe' # accept credit cards
 gem 'mission_control-jobs' # job UI for ActiveJob backends
+gem 'anthropic' # Claude API for anomaly detection
 
 group :development, :test do
   gem 'byebug' # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -67,5 +68,7 @@ group :test do
   gem 'capybara', '>= 3.26' # Adds support for Capybara system testing and selenium driver
   gem 'stripe-ruby-mock', '3.1.0.rc3', :require => 'stripe_mock' # test Stripe code without hitting Stripe's servers
   gem 'selenium-webdriver', '>= 4.0.0.rc1'
+  gem 'vcr' # record and replay HTTP interactions for tests
   gem 'webdrivers' # Easy installation and use of web drivers to run system tests with browsers
+  gem 'webmock' # stub HTTP requests in tests
 end

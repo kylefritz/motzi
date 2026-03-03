@@ -26,7 +26,14 @@ class SendWeeklyMenuJob < ApplicationJob
     end
     
     add_comment! menu, "SendWeeklyMenuJob: Completed queueing #{count} emails for menu #{menu.id}"
-    
+
+    ActivityEvent.log(
+      action: "weekly_menu_email_sent",
+      week_id: menu.week_id,
+      description: "Weekly menu email queued for #{count} subscribers",
+      metadata: { menu_id: menu.id, count: count }
+    )
+
     # TODO: ideas to "fix" send_weekly_menu_job
     #
     # Add recurring job that looks for current menu and then looks for the "emailed at" comment on the menu.
