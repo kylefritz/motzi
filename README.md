@@ -69,17 +69,18 @@ Auto-deploys from `master` when CI passes. Full review-app config in `app.json`.
 | Addon | Plan | Purpose |
 |-------|------|---------|
 | heroku-postgresql | essential-0 (v17) | Primary database |
-| scheduler | standard | Recurring tasks |
-| scheduler-monitor | test-free | Monitors scheduler runs |
 
 ActionCable runs with the `async` adapter in production, so Redis is not required for runtime.
 
-### Scheduled jobs
+### Recurring jobs
+
+All recurring jobs run via Solid Queue (`config/recurring.yml`):
 
 | Job | Frequency |
 |-----|-----------|
-| `rails reminders:havent_ordered reminders:pick_up_bread` | Hourly |
-| `rails cleanup:trim_analytics` | Daily |
+| `SendDayOfReminderJob` | Hourly |
+| `SendHaventOrderedReminderJob` | Hourly |
+| `trim_analytics` | Daily at 4am |
 
 ### Email
 
@@ -87,4 +88,4 @@ SendGrid via `SENDGRID_USERNAME` / `SENDGRID_PASSWORD`. On review apps, `ReviewA
 
 ### Review apps
 
-`REVIEW_APP=true` set automatically via `app.json`. Use `bin/seed_review_app <app-name>` to copy prod data and config vars. The seed script verifies scheduler provisioning and lists jobs to configure.
+`REVIEW_APP=true` set automatically via `app.json`. Use `bin/seed_review_app <app-name>` to copy prod data and config vars.
