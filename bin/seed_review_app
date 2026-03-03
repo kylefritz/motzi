@@ -26,8 +26,6 @@ heroku run bin/rails db:migrate --app "$REVIEW_APP"
 echo "==> Restarting dynos to clear settings cache..."
 heroku dyno:restart --app "$REVIEW_APP"
 
-echo "==> Recurring jobs run via Solid Queue (config/recurring.yml) — no Scheduler addon needed."
-
 echo "==> Done. $REVIEW_APP is loaded with prod data."
 echo ""
 echo "==> NEXT STEP: Run the release command from the Heroku dashboard to apply migrations."
