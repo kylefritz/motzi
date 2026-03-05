@@ -169,6 +169,37 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert_includes credit_events.first.description, "Kyle Fritz"
   end
 
+  test "visit summary shows unique visitors for the week" do
+    week_start = Time.zone.from_week_id(@week_id)
+    3.times do |i|
+      Ahoy::Visit.create!(started_at: week_start + i.days, visitor_token: "visitor_#{i}", visit_token: "visit_#{i}")
+    end
+    # duplicate visitor on a different day
+    Ahoy::Visit.create!(started_at: week_start + 1.day, visitor_token: "visitor_0", visit_token: "visit_dup")
+
+    feed = ActivityFeed.new(@week_id)
+    evts = feed.summary.select { |e| e.action == "visits_summary" }
+
+    assert evts.any?, "Should have visit summary event"
+    assert_match(/3 unique visitors/, evts.first.description)
+    assert_match(/4 visits/, evts.first.description)
+  end
+
+  test "verbose visit events show daily breakdown" do
+    week_start = Time.zone.from_week_id(@week_id)
+    2.times do |i|
+      Ahoy::Visit.create!(started_at: week_start + i.days, visitor_token: "v_#{i}", visit_token: "vt_#{i}")
+    end
+
+    feed = ActivityFeed.new(@week_id)
+    evts = feed.verbose_events.select { |e| e.action == "daily_visits" }
+
+    assert_equal 2, evts.size, "Should have one event per day with visits"
+    evts.each do |e|
+      assert_match(/\d+ unique visitors/, e.description)
+    end
+  end
+
   test "activity events include metadata in verbose mode" do
     travel_to_week_id(@week_id) do
       ActivityEvent.log(
