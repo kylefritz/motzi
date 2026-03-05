@@ -6,7 +6,7 @@ Rails.application.configure do
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
-  config.cache_classes = false
+  config.enable_reloading = true
 
   # Do not eager load code on boot.
   config.eager_load = false
@@ -32,11 +32,6 @@ Rails.application.configure do
 
   # Use Solid Queue in development so jobs are visible in Mission Control.
   config.active_job.queue_adapter = :solid_queue
-  # config.action_mailer.deliver_later_queue_name = "mailers"        # defaults to "mailers"
-  # config.active_storage.queues.analysis         = "active_storage" # defaults to "active_storage_analysis"
-  # config.active_storage.queues.purge            = "active_storage" # defaults to "active_storage_purge"
-  # config.active_storage.queues.mirror           = "active_storage" # defaults to "active_storage_mirror"
-  # config.active_storage.queues.purge            = "active_storage" # alternatively, put purge jobs in the `low` queue
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
