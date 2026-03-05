@@ -270,3 +270,245 @@ form fieldset.actions li.cancel a {
   // give lists a little more room to breath
   line-height: 1.5;
 }
+
+// ─── Activity Feed page ───
+
+.activity-feed-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+
+  .week-id {
+    font-size: 1.6em;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .date-range {
+    font-size: 1em;
+    color: #888;
+    font-weight: 300;
+  }
+}
+
+.activity-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.activity-feed-nav {
+  display: flex;
+  gap: 2px;
+
+  a, span {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 3px;
+    font-size: 1em;
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+    color: #555;
+    transition: background 0.15s;
+
+    &:hover { background: #f0f0f0; }
+  }
+  span {
+    background: $primary;
+    color: #fff;
+    font-weight: 500;
+  }
+}
+
+.activity-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .export-links {
+    font-size: 1em;
+    a { color: #888; text-decoration: none; &:hover { color: $primary; } }
+    .sep { margin: 0 6px; color: #ccc; }
+  }
+}
+
+// Grid table
+.activity-grid {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+
+  th {
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #888;
+    font-weight: 500;
+    padding: 4px 10px 6px;
+    border-bottom: 2px solid #e0e0e0;
+    text-align: left;
+  }
+  th:first-child { width: 120px; }
+
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 1.15em;
+    line-height: 1.5;
+    vertical-align: top;
+    color: #333;
+  }
+  td:first-child {
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .cell-item {
+    white-space: nowrap;
+    padding: 2px 0;
+    line-height: 1.4;
+  }
+  .cell-num {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .cell-label {
+    color: #555;
+  }
+  .cell-dim {
+    color: #888;
+    font-size: 0.92em;
+  }
+  .cell-link {
+    text-decoration: none;
+    color: inherit;
+    &:hover { text-decoration: underline; }
+  }
+  .cell-empty { color: #ddd; }
+
+  tr.is-today {
+    td { background: lighten($motzi-background, 2%); }
+    td:first-child { border-left: 3px solid $primary; padding-left: 9px; }
+  }
+  .today-label {
+    font-size: 0.75em;
+    color: $primary;
+    font-weight: 500;
+    margin-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+}
+
+// Analysis card
+.analysis-card {
+  margin-bottom: 20px;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  overflow: hidden;
+
+  .analysis-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #fafafa;
+    border-bottom: 1px solid #eee;
+    font-size: 0.85em;
+
+    .analysis-time { font-weight: 500; }
+    .analysis-meta { color: #999; }
+  }
+
+  .analysis-body {
+    padding: 20px 24px;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+
+    h1 { font-size: 1.15em; margin: 0 0 8px; font-weight: 500; color: #222; }
+    h2 { font-size: 1em; margin: 16px 0 6px; font-weight: 500; color: #222; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+    h3 { font-size: 0.95em; margin: 12px 0 4px; font-weight: 500; color: #333; }
+    p { margin: 0 0 8px; }
+    ol, ul { margin: 0 0 8px; padding-left: 20px; }
+    li { margin-bottom: 6px; }
+    li > ul, li > ol { margin-top: 4px; }
+    strong { color: #111; }
+    code { background: #f0ebe4; padding: 1px 5px; border-radius: 3px; font-size: 0.88em; color: $primary; }
+    hr { border: none; border-top: 1px solid #eee; margin: 14px 0; }
+  }
+
+  .analysis-footer {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding: 12px 20px;
+    background: #fafafa;
+    border-top: 1px solid #eee;
+    font-size: 0.82em;
+    color: #666;
+
+    .meta-label { color: #999; font-weight: 500; margin-right: 4px; }
+  }
+}
+
+// Analyze button area
+.analyze-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .analysis-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .spinner {
+    display: none;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #ddd;
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  .elapsed {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.85em;
+    color: #999;
+    min-width: 24px;
+  }
+  .progress-msg {
+    font-size: 0.85em;
+    color: #888;
+    font-style: italic;
+  }
+}
+
+.email-health-row {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #eee;
+
+  .email-stat {
+    font-size: 1.3em;
+  }
+  .email-stat-num {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .email-stat-label {
+    font-size: 0.65em;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #888;
+    margin-bottom: 2px;
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

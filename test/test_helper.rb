@@ -7,8 +7,10 @@ class ActiveSupport::TestCase
   # Run tests in parallel with specified workers
   parallelize(workers: :number_of_processors)
   parallelize_setup do |worker|
-    schema_path = Rails.root.join("db/queue_schema.rb")
-    load(schema_path) if File.exist?(schema_path)
+    %w[db/queue_schema.rb db/cable_schema.rb].each do |path|
+      schema_path = Rails.root.join(path)
+      load(schema_path) if File.exist?(schema_path)
+    end
   end
 
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.

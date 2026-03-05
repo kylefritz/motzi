@@ -25,7 +25,7 @@ echo "==> Copying $PROD_APP database to $REVIEW_APP..."
 heroku pg:copy "$PROD_APP::DATABASE_URL" DATABASE_URL --app "$REVIEW_APP" --confirm "$REVIEW_APP"
 
 echo "==> Running migrations on $REVIEW_APP..."
-heroku run bin/rails db:migrate solid_queue:bootstrap --app "$REVIEW_APP"
+heroku run bin/rails db:migrate solid:bootstrap --app "$REVIEW_APP"
 
 echo "==> Restarting dynos to clear settings cache..."
 heroku dyno:restart --app "$REVIEW_APP"

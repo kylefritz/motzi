@@ -72,3 +72,5 @@ group :test do
   gem 'webdrivers' # Easy installation and use of web drivers to run system tests with browsers
   gem 'webmock' # stub HTTP requests in tests
 end
+
+gem "solid_cable", "~> 3.0"

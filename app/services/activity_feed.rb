@@ -11,9 +11,9 @@ class ActivityFeed
 
   MAILER_LABELS = {
     "MenuMailer#weekly_menu_email" => "Weekly menu email",
+    "ReminderMailer#havent_ordered_email" => "Haven't-ordered reminders",
     "ConfirmationMailer#order_email" => "Order confirmations",
     "ReminderMailer#day_of_email" => "Day-of reminders",
-    "ReminderMailer#havent_ordered_email" => "Haven't-ordered reminders",
     "ConfirmationMailer#credit_email" => "Credit purchase confirmations"
   }.freeze
 
@@ -76,9 +76,42 @@ class ActivityFeed
     stats
   end
 
+  # Returns a hash: { Date => { action_name => [events] } }
+  # for building the grid view. Dates cover the full week (Sun–Sat).
+  def daily_grid
+    grid = {}
+    (0..6).each { |i| grid[(@week_start + i.days).to_date] = {} }
+
+    summary.each do |event|
+      date = event.timestamp.to_date
+      next unless grid.key?(date)
+      grid[date][event.action] ||= []
+      grid[date][event.action] << event
+    end
+    grid
+  end
+
+  # All unique action names across the week, in display order
+  def grid_columns
+    actions = summary.map(&:action).uniq
+    # Preferred order, then anything else
+    preferred = %w[daily_visits orders_summary credits_summary email_summary recurring_jobs_summary]
+    (preferred & actions) + (actions - preferred)
+  end
+
+  GRID_COLUMN_LABELS = {
+    "daily_visits" => "Visitors",
+    "orders_summary" => "Orders",
+    "credits_summary" => "Credits",
+    "email_summary" => "Emails",
+    "recurring_jobs_summary" => "Jobs"
+  }.freeze
+
   def to_text(verbose: false)
+    week_end = @week_start + 6.days
     lines = []
-    lines << "Activity Feed: #{@week_id}"
+    lines << "Activity Feed: #{@week_id} (#{@week_start.strftime('%A %-m/%-d')} — #{week_end.strftime('%A %-m/%-d/%Y')})"
+    lines << "Today: #{Time.zone.today.strftime('%A %-m/%-d/%Y')}"
     lines << "=" * 40
     lines << ""
 
@@ -160,13 +193,13 @@ class ActivityFeed
           end
         end
       else
-        if orders.any?
+        orders.group_by { |o| o.created_at.to_date }.each do |date, daily_orders|
           events << Event.new(
-            timestamp: orders.maximum(:created_at),
+            timestamp: daily_orders.last.created_at,
             category: "customer",
             action: "orders_summary",
-            description: "#{orders.size} orders placed for #{menu.name}",
-            details: { source: "orders", menu_id: menu.id, count: orders.size }
+            description: "#{daily_orders.size} orders placed for #{menu.name}",
+            details: { source: "orders", menu_id: menu.id, count: daily_orders.size, date: date.to_s }
           )
         end
       end
@@ -189,15 +222,15 @@ class ActivityFeed
         )
       end
     else
-      if purchases.any?
-        total_credits = purchases.sum(:quantity)
-        total_dollars = purchases.sum(:stripe_charge_amount) / 100.0
+      purchases.group_by { |ci| ci.created_at.to_date }.each do |date, daily|
+        total_credits = daily.sum(&:quantity)
+        total_dollars = daily.sum(&:stripe_charge_amount) / 100.0
         events << Event.new(
-          timestamp: purchases.maximum(:created_at),
+          timestamp: daily.last.created_at,
           category: "customer",
           action: "credits_summary",
-          description: "#{purchases.size} purchases (#{total_credits} credits, $#{'%.2f' % total_dollars})",
-          details: { source: "credit_items", count: purchases.size, total_credits: total_credits }
+          description: "#{daily.size} purchases (#{total_credits} credits, $#{'%.2f' % total_dollars})",
+          details: { source: "credit_items", count: daily.size, total_credits: total_credits, date: date.to_s }
         )
       end
     end
@@ -225,18 +258,18 @@ class ActivityFeed
         )
       end
     else
-      jobs.group_by(&:class_name).each do |class_name, class_jobs|
+      jobs.group_by { |j| [j.class_name, j.created_at.to_date] }.each do |(class_name, date), day_jobs|
         label = RECURRING_JOB_LABELS[class_name] || class_name
-        finished = class_jobs.count(&:finished?)
-        failed = class_jobs.size - finished
+        finished = day_jobs.count(&:finished?)
+        failed = day_jobs.size - finished
         desc = "#{label}: #{finished} runs"
         desc += " (#{failed} incomplete)" if failed > 0
         events << Event.new(
-          timestamp: class_jobs.last.created_at,
+          timestamp: day_jobs.last.created_at,
           category: "system",
           action: "recurring_jobs_summary",
           description: desc,
-          details: { source: "solid_queue", class_name: class_name, total: class_jobs.size, finished: finished }
+          details: { source: "solid_queue", class_name: class_name, total: day_jobs.size, finished: finished, date: date.to_s }
         )
       end
     end
@@ -251,30 +284,15 @@ class ActivityFeed
     daily_visits = daily.count
     daily_unique = daily.distinct.count(:visitor_token)
 
-    if verbose
-      daily_visits.sort.each do |date, count|
-        unique = daily_unique[date] || 0
-        events << Event.new(
-          timestamp: date.to_time.in_time_zone,
-          category: "traffic",
-          action: "daily_visits",
-          description: "#{unique} unique visitors (#{count} visits)",
-          details: { source: "ahoy_visits", date: date.to_s, visits: count, unique: unique }
-        )
-      end
-    else
-      if daily_visits.any?
-        total_visits = daily_visits.values.sum
-        total_unique = visits.distinct.count(:visitor_token)
-        avg_daily = (total_unique.to_f / daily_visits.size).round
-        events << Event.new(
-          timestamp: @week_start,
-          category: "traffic",
-          action: "visits_summary",
-          description: "#{total_unique} unique visitors (#{total_visits} visits, ~#{avg_daily}/day)",
-          details: { source: "ahoy_visits", total_visits: total_visits, unique: total_unique, days: daily_visits.size }
-        )
-      end
+    daily_visits.sort.each do |date, count|
+      unique = daily_unique[date] || 0
+      events << Event.new(
+        timestamp: date.to_time.in_time_zone,
+        category: "traffic",
+        action: "daily_visits",
+        description: "#{unique} unique visitors (#{count} visits)",
+        details: { source: "ahoy_visits", date: date.to_s, visits: count, unique: unique }
+      )
     end
     events
   end
@@ -302,18 +320,20 @@ class ActivityFeed
             )
           end
         else
-          sent_count = messages.size
-          opened_count = messages.count { |m| m.opened_at.present? }
-          open_rate = sent_count > 0 ? (opened_count.to_f / sent_count * 100).round : 0
-          timestamp = messages.filter_map(&:sent_at).min || messages.map(&:created_at).min
+          messages.group_by { |m| (m.sent_at || m.created_at).to_date }.each do |date, daily_msgs|
+            sent_count = daily_msgs.size
+            opened_count = daily_msgs.count { |m| m.opened_at.present? }
+            open_rate = sent_count > 0 ? (opened_count.to_f / sent_count * 100).round : 0
+            timestamp = daily_msgs.filter_map(&:sent_at).min || daily_msgs.map(&:created_at).min
 
-          events << Event.new(
-            timestamp: timestamp,
-            category: "email",
-            action: "email_summary",
-            description: "#{opened_count}/#{sent_count} #{label.downcase} opened (#{open_rate}%)",
-            details: { source: "ahoy_messages", mailer: mailer, sent: sent_count, opened: opened_count, open_rate: open_rate }
-          )
+            events << Event.new(
+              timestamp: timestamp,
+              category: "email",
+              action: "email_summary",
+              description: "#{opened_count}/#{sent_count} #{label.downcase} opened (#{open_rate}%)",
+              details: { source: "ahoy_messages", mailer: mailer, sent: sent_count, opened: opened_count, open_rate: open_rate, date: date.to_s }
+            )
+          end
         end
       end
     end
