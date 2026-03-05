@@ -1,0 +1,7 @@
+Activity Report: <%= @analysis.week_id %>
+<%= "=" * 40 %>
+
+<%= @analysis.result %>
+
+---
+Generated at <%= @analysis.created_at.strftime("%Y-%m-%d %l:%M%P %Z") %> using <%= @analysis.model_used %> (<%= @analysis.input_tokens %> input / <%= @analysis.output_tokens %> output tokens)

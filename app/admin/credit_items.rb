@@ -25,4 +25,23 @@ ActiveAdmin.register CreditItem do
     actions
   end
 
+  controller do
+    def create
+      super do |success, failure|
+        success.html do
+          if resource.persisted?
+            ActivityEvent.log(
+              action: "credits_added_by_admin",
+              week_id: Time.zone.now.week_id,
+              description: "#{resource.quantity} credits added to #{resource.user.name}",
+              metadata: { credit_item_id: resource.id, user_id: resource.user_id, quantity: resource.quantity },
+              user: current_admin_user
+            )
+          end
+          redirect_to resource_path
+        end
+      end
+    end
+  end
+
 end

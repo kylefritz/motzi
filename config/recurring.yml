@@ -25,3 +25,7 @@ production:
   trim_analytics:
     command: "Rake::Task['cleanup:trim_analytics'].invoke"
     schedule: at 4am every day
+
+  analyze_anomalies:
+    class: AnalyzeAnomaliesJob
+    schedule: every day at 9pm America/New_York

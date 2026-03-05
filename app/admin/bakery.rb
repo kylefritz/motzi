@@ -39,21 +39,17 @@ ActiveAdmin.register_page "Dashboard" do
           def compute(name, subs)
             total = subs.count
             orders = Order.for_current_menu.where(user_id: subs.pluck(:id))
-            ordered = orders.not_skip
-            skipped = orders.skip.count
-            num_orders = orders.count
             {
               type: name,
-              ordered: ordered.count,
-              skipped: skipped,
-              not_ordered: total - num_orders,
+              ordered: orders.count,
+              not_ordered: total - orders.count,
               total: total,
-              credits: ordered.includes(order_items: :item).sum(&:credits),
+              credits: orders.includes(order_items: :item).sum(&:credits),
             }
           end
 
           subscribers = compute("Subscribers", User.subscribers)
-          mp_orders = Order.for_current_menu.marketplace.not_skip.includes(order_items: :item)
+          mp_orders = Order.for_current_menu.marketplace.includes(order_items: :item)
           marketplace = {
             type: "Marketplace",
             ordered: mp_orders.count,
@@ -62,14 +58,13 @@ ActiveAdmin.register_page "Dashboard" do
           }
           rows = [subscribers, marketplace]
           if holiday_menu
-            h_orders = Order.for_holiday_menu.not_skip.includes(order_items: :item)
-            rows << {type: "Holiday", not_ordered: "—", skipped: "—", ordered: h_orders.count, total: h_orders.count, credits: h_orders.sum(&:credits)}
+            h_orders = Order.for_holiday_menu.includes(order_items: :item)
+            rows << {type: "Holiday", not_ordered: "—", ordered: h_orders.count, total: h_orders.count, credits: h_orders.sum(&:credits)}
           end
           table_for rows, class: 'subscribers' do
             column :type
             column :not_ordered
             column("Orders") { |h| h[:ordered] }
-            column("Skip") { |h| h[:skipped] }
             column("Credits used") { |h| h[:credits] }
             column(:total) { |h| strong(h[:total]) }
           end

@@ -7,7 +7,6 @@ import Cart, { useCart, orderCredits } from "./Cart";
 import Title from "./Title";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
-import SkipThisWeek from "./SkipThisWeek";
 import Subscription from "./Subscription";
 import { getDeadlineContext } from "./Contexts";
 import type {
@@ -38,18 +37,12 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday }: Me
     order,
     items: menu.items,
   });
-  const [skip, setSkip] = useState<boolean>(_.get(order, "skip", false));
   const [comments, setComments] = useState<string | null>(
     _.get(order, "comments", null)
   );
 
-  const handleSkip = () => {
-    setSkip(true);
-    setCart([]);
-  };
-
   const handleCreateOrder = () => {
-    if (_.isEmpty(cart) && !skip) {
+    if (_.isEmpty(cart)) {
       alert("Make a selection!");
       return;
     }
@@ -58,13 +51,12 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday }: Me
       comments,
       cart,
       uid: user.hashid,
-      skip,
     });
   };
 
   // if editing an order, "give back" credits from the order
   const userCredits = user.credits + orderCredits({ order, items: menu.items });
-  if (userCredits < 1) {
+  if (!isHoliday && userCredits < 1) {
     // Must buy credits!
     return (
       <>
@@ -85,48 +77,27 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday }: Me
 
   const { subscriberNote, isCurrent } = menu;
   const menuClosed = getDeadlineContext().allClosed(menu);
-  const insufficientCredits = total.credits > userCredits;
+  const insufficientCredits = !isHoliday && total.credits > userCredits;
   return (
     <>
-      <Subscription user={user} />
+      <Subscription user={user} showBuyMoreButton={!isHoliday} />
 
       {/* if low, show nag to buy credits*/}
-      {(userCredits < 4 || insufficientCredits) && <BuyCredits user={user} />}
+      {!isHoliday && (userCredits < 4 || insufficientCredits) && <BuyCredits user={user} />}
 
       <Title menu={menu} />
 
       <BakersNote note={subscriberNote} />
 
       <h5>Menu</h5>
-      {skip ? (
-        <>
-          <p>
-            <strong>You'll skip this week.</strong>&nbsp;
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setSkip(false);
-              }}
-              className="ml-1"
-            >
-              <small>I want to order</small>
-            </a>
-          </p>
-        </>
-      ) : (
-        <>
-          <Items items={subscriberItems} onAddToCart={addToCart} />
+      <Items items={subscriberItems} onAddToCart={addToCart} />
 
-          {!isHoliday && <SkipThisWeek onSkip={handleSkip} disabled={menuClosed} />}
-          {payItForward && (
-            <PayItForward
-              {...payItForward}
-              onAddToCart={addToCart}
-              disabled={menuClosed}
-            />
-          )}
-        </>
+      {payItForward && (
+        <PayItForward
+          {...payItForward}
+          onAddToCart={addToCart}
+          disabled={menuClosed}
+        />
       )}
 
       <h5>Feedback, Comments & Special Requests</h5>
@@ -142,7 +113,7 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday }: Me
           />
         </div>
       </div>
-      <Cart {...{ cart, menu, rmCartItem, skip }} />
+      <Cart {...{ cart, menu, rmCartItem }} />
       <div className="row mt-2 mb-3">
         <div className="col">
           <SubmitButton
