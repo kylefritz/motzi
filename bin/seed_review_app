@@ -31,6 +31,3 @@ echo "==> Restarting dynos to clear settings cache..."
 heroku dyno:restart --app "$REVIEW_APP"
 
 echo "==> Done. $REVIEW_APP is loaded with prod data."
-echo ""
-echo "==> NEXT STEP: Run the release command from the Heroku dashboard to apply migrations."
-echo "    https://dashboard.heroku.com/pipelines/1bddd8c1-efd3-4b2d-b5e5-dbbeafb7d26b"
