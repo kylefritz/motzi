@@ -16,7 +16,7 @@ echo "==> Pulling $PROD_APP database to $LOCAL_DB..."
 heroku pg:pull DATABASE_URL "$LOCAL_DB" --app "$PROD_APP"
 
 echo "==> Running migrations..."
-bin/rails db:migrate
+bin/rails db:migrate solid_queue:bootstrap
 
 echo "==> Downloading menu images from S3..."
 bin/rails s3:download

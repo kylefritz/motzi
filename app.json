@@ -31,6 +31,6 @@
     "worker": { "quantity": 1, "size": "basic" }
   },
   "scripts": {
-    "postdeploy": "bin/rails db:migrate"
+    "postdeploy": "bin/rails db:migrate solid_queue:bootstrap db:seed"
   }
 }
