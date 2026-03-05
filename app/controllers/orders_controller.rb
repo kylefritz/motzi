@@ -165,6 +165,6 @@ class OrdersController < ApplicationController
   end
 
   def render_validation_failed(message)
-    return render json: { message: message }, status: :unprocessable_entity
+    return render json: { message: message }, status: :unprocessable_content
   end
 end

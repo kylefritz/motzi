@@ -1,40 +1,9 @@
-#
-# store shop settings that aren't meant to be modified here
-# if something might reasonably be modified, put it in Setting.rb
-# kind of a fine line to draw :)
-#
-#
-# if one shop has a setting, the other shops should have it too
-
 motzi:
   name: Motzi Bread
   short_name: Motzi
   marketing_domain: motzibread.com
   app_domain: motzibread.herokuapp.com
   email_reply_to: motzi.bread@gmail.com
-  queue_adapter: sidekiq
   pay_it_forward: true
   pay_what_you_can: true
   js_tracking: true
-
-jinji:
-  name: Jinji Chocolate Collective
-  short_name: Jinji
-  marketing_domain: jinjichocolate.com
-  app_domain: jinjichocolate.herokuapp.com
-  email_reply_to: info@jinjichocolate.com
-  queue_adapter: async
-  pay_it_forward: false
-  pay_what_you_can: false
-  js_tracking: false
-
-dutch_courage:
-  name: Dutch Courage
-  short_name: Dutch Courage
-  marketing_domain: dutchcouragebar.com
-  app_domain: dutchcourage.herokuapp.com
-  email_reply_to: bjdorr@gmail.com
-  queue_adapter: async
-  pay_it_forward: false
-  pay_what_you_can: false
-  js_tracking: false

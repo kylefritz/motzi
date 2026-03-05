@@ -4,26 +4,21 @@ import { cleanup } from "@testing-library/react";
 
 type StripeToken = { token: { id: string } };
 
-const createToken = mock(() => Promise.resolve({ token: { id: "test_id" } }));
+const createToken = mock(() =>
+  Promise.resolve({ token: { id: "test_id" }, error: null })
+);
 
 const mockStripe = {
   createToken,
 };
 
+const mockElements = {
+  getElement: mock(() => ({})),
+};
+
 const Elements: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <div data-testid="stripe-elements">{children}</div>
 );
-
-const StripeProvider: React.FC<{ children?: React.ReactNode }> = ({
-  children,
-}) => <div data-testid="stripe-provider">{children}</div>;
-
-const injectStripe =
-  <P extends object>(
-    Component: React.ComponentType<P & { stripe: typeof mockStripe }>
-  ) =>
-  (props: P) =>
-    <Component {...props} stripe={mockStripe} />;
 
 const CardElement: React.FC<{ onChange?: (event: { complete: boolean }) => void }> = ({
   onChange,
@@ -36,12 +31,16 @@ const CardElement: React.FC<{ onChange?: (event: { complete: boolean }) => void 
 
 const PaymentRequestButtonElement: React.FC = () => null;
 
-mock.module("react-stripe-elements", () => ({
+mock.module("@stripe/react-stripe-js", () => ({
   Elements,
-  StripeProvider,
-  injectStripe,
+  useStripe: () => mockStripe,
+  useElements: () => mockElements,
   CardElement,
   PaymentRequestButtonElement,
+}));
+
+mock.module("@stripe/stripe-js", () => ({
+  loadStripe: mock(() => Promise.resolve(mockStripe)),
 }));
 
 beforeAll(() => {

@@ -128,7 +128,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
       refute_ordered do
         refute_emails_sent do
           post '/orders.json', params: order_attrs, as: :json
-          assert_response :unprocessable_entity
+          assert_response :unprocessable_content
         end
       end
     end

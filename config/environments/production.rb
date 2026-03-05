@@ -5,7 +5,7 @@ Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.
-  config.cache_classes = true
+  config.enable_reloading = false
 
   # Eager load code on boot. This eager loads most of Rails and
   # your application in memory, allowing both threaded web servers
@@ -59,18 +59,8 @@ Rails.application.configure do
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
 
-  # Use a real queuing backend for Active Job (and separate queues per environment).
-  config.active_job.queue_adapter = ShopConfig.shop.queue_adapter.to_sym
-  # config.active_job.queue_name_prefix = "motzi_production"
-  
-  # change queue for our work back to the "default" queue
-  #
-  # nil will use the "default" queue (some of these options will not work with your Rails version; add/remove as necessary)
-  config.action_mailer.deliver_later_queue_name = "mailers"        # defaults to "mailers"
-  config.active_storage.queues.analysis         = "active_storage" # defaults to "active_storage_analysis"
-  config.active_storage.queues.purge            = "active_storage" # defaults to "active_storage_purge"
-  config.active_storage.queues.mirror           = "active_storage" # defaults to "active_storage_mirror"
-  config.active_storage.queues.purge            = "active_storage" # alternatively, put purge jobs in the `low` queue
+  # Use Solid Queue for Active Job.
+  config.active_job.queue_adapter = :solid_queue
 
   # Setup the mailer config
   config.action_mailer.default_url_options = { host: ShopConfig.shop.app_domain }
@@ -112,33 +102,13 @@ Rails.application.configure do
   # require 'syslog/logger'
   # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new 'app-name')
 
-  if ENV["RAILS_LOG_TO_STDOUT"].present?
-    logger           = ActiveSupport::Logger.new(STDOUT)
-    logger.formatter = config.log_formatter
-    config.logger    = ActiveSupport::TaggedLogging.new(logger)
-  end
+  # Always log to STDOUT for 12-factor style runtime logging.
+  # This keeps web and worker process logs unified in platform log drains.
+  logger           = ActiveSupport::Logger.new(STDOUT)
+  logger.formatter = config.log_formatter
+  config.logger    = ActiveSupport::TaggedLogging.new(logger)
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
-  # Inserts middleware to perform automatic connection switching.
-  # The `database_selector` hash is used to pass options to the DatabaseSelector
-  # middleware. The `delay` is used to determine how long to wait after a write
-  # to send a subsequent read to the primary.
-  #
-  # The `database_resolver` class is used by the middleware to determine which
-  # database is appropriate to use based on the time delay.
-  #
-  # The `database_resolver_context` class is used by the middleware to set
-  # timestamps for the last write to the primary. The resolver uses the context
-  # class timestamps to determine how long to wait before reading from the
-  # replica.
-  #
-  # By default Rails will store a last write timestamp in the session. The
-  # DatabaseSelector middleware is designed as such you can define your own
-  # strategy for connection switching and pass that into the middleware through
-  # these configuration options.
-  # config.active_record.database_selector = { delay: 2.seconds }
-  # config.active_record.database_resolver = ActiveRecord::Middleware::DatabaseSelector::Resolver
-  # config.active_record.database_resolver_context = ActiveRecord::Middleware::DatabaseSelector::Resolver::Session
 end

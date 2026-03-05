@@ -6,7 +6,7 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
   
-  config.cache_classes = false
+  config.enable_reloading = true
 
   # Do not eager load code on boot. This avoids loading your whole application
   # just for the purpose of running a single test. If you are using a tool that
@@ -57,4 +57,9 @@ Rails.application.configure do
 
   # Annotate rendered view with file names.
   config.action_view.annotate_rendered_view_with_filenames = true
+
+  # Keep test process logging on STDOUT for consistency with dev/prod and CI.
+  # Note: this is intentionally noisier than file-based test logging.
+  logger = ActiveSupport::Logger.new(STDOUT)
+  config.logger = ActiveSupport::TaggedLogging.new(logger)
 end

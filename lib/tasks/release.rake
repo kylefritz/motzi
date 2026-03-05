@@ -1,5 +1,3 @@
-require "sidekiq/deploy"
-
 desc "post-release tasks run by Heroku"
 task release: :environment do
   # Run rails db:migrate
@@ -9,6 +7,14 @@ task release: :environment do
   rescue => e
     puts "Error during db:migrate: #{e.message}. Rethrowing exception to cancel release."
     raise e  # Re-raise the error because we want the release to fail
+  end
+
+  puts "Ensuring Solid Queue tables exist"
+  begin
+    Rake::Task["solid_queue:bootstrap"].invoke
+  rescue => e
+    puts "Error during solid_queue:bootstrap: #{e.message}. Rethrowing exception to cancel release."
+    raise e
   end
 
   # Run rails db:seed
@@ -21,26 +27,21 @@ task release: :environment do
   end
 
   # Get release information
-  gitdesc = ENV['HEROKU_RELEASE_VERSION'] || `git log -1 --format="%h %s"`.strip
+  release_version = ENV["HEROKU_RELEASE_VERSION"]
+  release = release_version || `git log -1 --format="%h %s"`.strip
 
   if defined?(Sentry)
-    puts "Notifying Sentry of release and deploy: #{gitdesc}"
+    puts "Notifying Sentry of release and deploy: #{release}"
     
     begin      
       Sentry.sdk_create_deploy(
-        release: gitdesc,
+        release: release,
         environment: Rails.env,
-        url: "https://dashboard.heroku.com/apps/#{ENV['HEROKU_APP_NAME']}/activity/releases/#{release_version}"
+        url: release_version ? "https://dashboard.heroku.com/apps/#{ENV['HEROKU_APP_NAME']}/activity/releases/#{release_version}" : nil
       )
     rescue => e
       puts "Error notifying Sentry of release/deploy: #{e.message}"
     end
   end
 
-  puts "Running Sidekiq::Deploy.mark! #{gitdesc}"
-  begin
-    Sidekiq::Deploy.mark!(gitdesc)
-  rescue => e
-    puts "Error during Sidekiq::Deploy.mark!: #{e.message}"
-  end
 end

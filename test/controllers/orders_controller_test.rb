@@ -38,7 +38,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
         post '/orders.json', params: order, as: :json
       end
     end
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
   end
 
   test "hashid_user can skip" do
@@ -72,7 +72,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     after_deadline do
       refute_order_placed users(:ljf).hashid
     end
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
   end
 
   test "hashid_user can update their own order" do
@@ -103,7 +103,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     after_deadline do
       put_order users(:ljf).current_order.id, different_order_attrs(users(:ljf).hashid)
     end
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
   end
 
   test "admin can update any order" do
@@ -147,7 +147,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
         }, as: :json
       end
     end
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     json = JSON.parse(response.body)
     assert_equal "this menu is not available for ordering", json["message"]
   end

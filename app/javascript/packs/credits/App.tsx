@@ -25,8 +25,10 @@ export default function App() {
     axios
       .post(`/admin/credit_items.json`, credit)
       .then(({ data }) => {
-        // reload page
-        document.location = document.location;
+        // reload page in browser, skip in test env (jsdom navigation is unimplemented)
+        if (process.env.NODE_ENV !== "test") {
+          window.location.reload();
+        }
       })
       .catch((error) => {
         console.error("couldn't create credit", error);

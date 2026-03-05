@@ -4,11 +4,12 @@ Neighborhood bakery's CSA (Community Supported Agriculture) site. Members browse
 
 ## Architecture
 
-- **Backend**: Rails 6.1, PostgreSQL, Redis, Sidekiq
-- **Frontend**: React 16 + TypeScript, esbuild via jsbundling-rails, Material UI
+- **Backend**: Rails 7.2, PostgreSQL, Solid Queue
+- **Frontend**: React 18 + TypeScript, esbuild via jsbundling-rails, styled-components
 - **Auth**: Devise
 - **Payments**: Stripe
 - **Admin**: ActiveAdmin at `/admin`
+- **Jobs UI**: Mission Control Jobs at `/jobs` (admin-only)
 - **Analytics**: Blazer at `/blazer`, Ahoy for event tracking
 - **Errors**: Sentry (Ruby + browser)
 - **Storage**: ActiveStorage + S3
@@ -23,24 +24,26 @@ Neighborhood bakery's CSA (Community Supported Agriculture) site. Members browse
 
 ## Conventions
 
-- **JS/TS**: Prettier runs on commit (Husky). Run `bun run typecheck` for TypeScript checks.
+- **JS/TS**: Prettier runs on commit (Husky). Keep React test `act(...)` warnings as-is unless explicitly asked to change.
+- **Typecheck**:
+  - `bun run typecheck` checks app code only (`tsconfig.app.json`) and is the default gate.
+  - `bun run typecheck:test` checks test code (`tsconfig.test.json`) and may fail on legacy test typings.
 - **Ruby**: RuboCop per `.rubocop.yml`. No frozen string literal comments. No doc comments required.
 - **Database**: Never modify existing migrations. Always create a new one.
 - **JSON APIs**: Responses use camelCase (via `olive_branch` gem). Use `jq` to parse JSON in the shell (not python3).
 - **Complex SQL**: Lives in `app/sql_queries/` using ERB templates with the `sql_query` gem.
 - **Logging**: Keep existing `console.log` statements in tests and app code. Do not delete or globally silence logs unless explicitly asked.
 
-## Sensitive Files — Never Edit Without Explicit Approval
+## Sensitive Files
 
 - `.env` — secrets (gitignored, loaded by direnv)
-- `Gemfile.lock` — managed by Bundler
-- `bun.lockb` — managed by Bun
+- `Gemfile.lock` and `bun.lockb` are managed files: edit only through `bundle install` / `bun install`.
 
 ## Tooling
 
 - Ruby version: 3.3.10 (see `Gemfile` / `mise.toml`)
-- Package manager: Bun (keep `yarn.lock` for Heroku compatibility)
-- CI: GitHub Actions runs `bun install`, `bun run build`, Rails tests, and Jest before deploying to Heroku.
+- Package manager: Bun
+- CI: GitHub Actions runs `bun install`, `bun run build`, Rails tests, Bun tests, and typecheck.
 
 ## Testing
 
@@ -70,6 +73,20 @@ Run a single test: `bun run test -- test/javascript/menu/items.test.tsx`
 
 Debug: `bun --inspect-brk test test/javascript/menu/items.test.tsx`
 
+### TypeScript checks
+
+App-only (default):
+
+```
+bun run typecheck
+```
+
+Include tests too:
+
+```
+bun run typecheck:test
+```
+
 ### JavaScript build (esbuild)
 
 Build once: `bun run build`
@@ -82,7 +99,7 @@ Skip hooks: `HUSKY=0 git commit -m "no hooks run"`
 
 ## Deployment
 
-Heroku auto-deploys from `master` when GitHub Actions CI passes. Make sure asset build changes are compatible with `bun run build` and the Heroku buildpack setup.
+Heroku auto-deploys from `master` when GitHub Actions CI passes. Background workers run via Solid Queue (`bin/jobs start`) and ActionCable uses the `async` adapter (no Redis runtime requirement).
 
 ## MCP Notes
 

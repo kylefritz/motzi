@@ -4,7 +4,7 @@ Neighborhood bakery's CSA site
 
 ## Development
 
-Requires Postgres, Redis, and mise (manages Ruby/Bun). Add to `.env`:
+Requires Postgres and mise (manages Ruby/Bun). Add to `.env`:
 
 ```
 AWS_ACCESS_KEY_ID=...
@@ -15,6 +15,36 @@ STRIPE_PUBLISHABLE_KEY=...
 Real data from prod: `bin/seed_local`
 
 Start everything: `bin/dev`
+
+Background jobs use Solid Queue. Run workers with:
+
+```
+bin/jobs start
+```
+
+Mission Control Jobs UI is mounted at `/jobs` (admin access required).
+
+## JavaScript / TypeScript
+
+Run tests:
+
+```
+bun run test
+```
+
+Typecheck app code (default gate):
+
+```
+bun run typecheck
+```
+
+Typecheck tests too (stricter, may expose legacy test typings):
+
+```
+bun run typecheck:test
+```
+
+Note: React `act(...)` warnings can still appear during `bun run test`; those are runtime test warnings, not TypeScript failures.
 
 ### Data
 
@@ -39,16 +69,18 @@ Auto-deploys from `master` when CI passes. Full review-app config in `app.json`.
 | Addon | Plan | Purpose |
 |-------|------|---------|
 | heroku-postgresql | essential-0 (v17) | Primary database |
-| heroku-redis | mini | Sidekiq, ActionCable |
-| scheduler | standard | Recurring tasks |
-| scheduler-monitor | test-free | Monitors scheduler runs |
 
-### Scheduled jobs
+ActionCable runs with the `async` adapter in production, so Redis is not required for runtime.
+
+### Recurring jobs
+
+All recurring jobs run via Solid Queue (`config/recurring.yml`):
 
 | Job | Frequency |
 |-----|-----------|
-| `rails reminders:havent_ordered reminders:pick_up_bread` | Hourly |
-| `rails cleanup:trim_analytics` | Daily |
+| `SendDayOfReminderJob` | Hourly |
+| `SendHaventOrderedReminderJob` | Hourly |
+| `trim_analytics` | Daily at 4am |
 
 ### Email
 
@@ -56,4 +88,4 @@ SendGrid via `SENDGRID_USERNAME` / `SENDGRID_PASSWORD`. On review apps, `ReviewA
 
 ### Review apps
 
-`REVIEW_APP=true` set automatically via `app.json`. Use `bin/seed_review_app <app-name>` to copy prod data and config vars. The seed script verifies scheduler provisioning and lists jobs to configure.
+`REVIEW_APP=true` set automatically via `app.json`. Use `bin/seed_review_app <app-name>` to copy prod data and config vars.
