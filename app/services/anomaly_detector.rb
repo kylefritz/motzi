@@ -58,6 +58,18 @@ class AnomalyDetector
       parts << ""
     end
 
+    prior_analyses = recent_analyses
+    if prior_analyses.any?
+      @on_progress.call("Including #{prior_analyses.size} prior analyses for context…")
+      parts << "---"
+      parts << "## Prior Analyses (for context — avoid repeating resolved findings)"
+      prior_analyses.each do |a|
+        parts << ""
+        parts << "### #{a.week_id} — #{a.created_at.strftime('%-m/%-d/%Y')} (#{a.trigger})"
+        parts << a.result
+      end
+    end
+
     parts.join("\n")
   end
 
@@ -69,6 +81,10 @@ class AnomalyDetector
       ids << t.week_id
     end
     ids
+  end
+
+  def recent_analyses
+    AnomalyAnalysis.order(created_at: :desc).limit(6).to_a.reverse
   end
 
   def call_claude(user_message)

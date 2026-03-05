@@ -59,9 +59,10 @@ ActiveAdmin.register_page "Activity Feed" do
     week_end = week_start + 6.days
 
     # Week header
+    menu = Menu.find_by(week_id: week_id)
     div class: "activity-feed-header" do
-      span week_id, class: "week-id"
-      span "#{week_start.strftime('%A %-m/%-d')} — #{week_end.strftime('%A %-m/%-d/%Y')}", class: "date-range"
+      span(menu&.name || week_id, class: "week-id")
+      span "#{week_id} · #{week_start.strftime('%A %-m/%-d')} — #{week_end.strftime('%A %-m/%-d/%Y')}", class: "date-range"
     end
 
     # Week navigation + controls on same line
