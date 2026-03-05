@@ -34,6 +34,7 @@ class ActivityFeed
     all.concat(credit_events(verbose: verbose))
     all.concat(email_events(verbose: verbose))
     all.concat(recurring_job_events(verbose: verbose))
+    all.concat(visit_events(verbose: verbose))
     all.sort_by(&:timestamp)
   end
 
@@ -236,6 +237,42 @@ class ActivityFeed
           action: "recurring_jobs_summary",
           description: desc,
           details: { source: "solid_queue", class_name: class_name, total: class_jobs.size, finished: finished }
+        )
+      end
+    end
+    events
+  end
+
+  def visit_events(verbose: false)
+    events = []
+    visits = Ahoy::Visit.where(started_at: @week_start..@week_end)
+
+    daily = visits.group("started_at::date")
+    daily_visits = daily.count
+    daily_unique = daily.distinct.count(:visitor_token)
+
+    if verbose
+      daily_visits.sort.each do |date, count|
+        unique = daily_unique[date] || 0
+        events << Event.new(
+          timestamp: date.to_time.in_time_zone,
+          category: "traffic",
+          action: "daily_visits",
+          description: "#{unique} unique visitors (#{count} visits)",
+          details: { source: "ahoy_visits", date: date.to_s, visits: count, unique: unique }
+        )
+      end
+    else
+      if daily_visits.any?
+        total_visits = daily_visits.values.sum
+        total_unique = visits.distinct.count(:visitor_token)
+        avg_daily = (total_unique.to_f / daily_visits.size).round
+        events << Event.new(
+          timestamp: @week_start,
+          category: "traffic",
+          action: "visits_summary",
+          description: "#{total_unique} unique visitors (#{total_visits} visits, ~#{avg_daily}/day)",
+          details: { source: "ahoy_visits", total_visits: total_visits, unique: total_unique, days: daily_visits.size }
         )
       end
     end
