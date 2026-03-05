@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 
-import { getDeadlineContext } from "./Contexts";
-import Menu from "./Menu";
+import { getDeadlineContext, SettingsContext, getSettingsContext } from "./Contexts";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
 import type {
@@ -32,40 +31,42 @@ export default function HolidayMenuTab({
 }: HolidayMenuTabProps) {
   const [isEditingOrder, setIsEditingOrder] = useState(false);
   const orderingClosed = getDeadlineContext().allClosed(menu);
+  const parentSettings = getSettingsContext();
+
+  // Override showCredits to false for holiday menus — show USD pricing
+  const holidaySettings = { ...parentSettings, showCredits: false };
+
+  // Ensure all items are available as marketplace items for card payment
+  const marketplaceMenu = useMemo(() => ({
+    ...menu,
+    items: menu.items.map((item) => ({ ...item, marketplace: true })),
+  }), [menu]);
 
   if (order && !isEditingOrder) {
     const handleEditOrder =
       menu.isCurrent && !orderingClosed ? () => setIsEditingOrder(true) : null;
     return (
-      <Order
-        {...{
-          user,
-          order,
-          menu,
-          bundles,
-          onEditOrder: handleEditOrder,
-        }}
-      />
+      <SettingsContext.Provider value={holidaySettings}>
+        <Order
+          {...{
+            user,
+            order,
+            menu,
+            bundles,
+            onEditOrder: handleEditOrder,
+          }}
+        />
+      </SettingsContext.Provider>
     );
   }
 
   const handleSave = (o: MenuOrderRequest | MarketplaceOrderRequest) =>
     handleCreateOrder(o).then(() => setIsEditingOrder(false));
 
-  if (!user) {
-    return <Marketplace {...{ menu, onCreateOrder: handleSave }} />;
-  }
-
+  // Holiday orders always require card payment — use Marketplace for all users
   return (
-    <Menu
-      {...{
-        user,
-        order,
-        menu,
-        bundles,
-        onCreateOrder: handleSave,
-        isHoliday: true,
-      }}
-    />
+    <SettingsContext.Provider value={holidaySettings}>
+      <Marketplace menu={marketplaceMenu} onCreateOrder={handleSave} />
+    </SettingsContext.Provider>
   );
 }

@@ -64,7 +64,7 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday }: Me
 
   // if editing an order, "give back" credits from the order
   const userCredits = user.credits + orderCredits({ order, items: menu.items });
-  if (userCredits < 1) {
+  if (!isHoliday && userCredits < 1) {
     // Must buy credits!
     return (
       <>
@@ -85,13 +85,13 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday }: Me
 
   const { subscriberNote, isCurrent } = menu;
   const menuClosed = getDeadlineContext().allClosed(menu);
-  const insufficientCredits = total.credits > userCredits;
+  const insufficientCredits = !isHoliday && total.credits > userCredits;
   return (
     <>
-      <Subscription user={user} />
+      <Subscription user={user} showBuyMoreButton={!isHoliday} />
 
       {/* if low, show nag to buy credits*/}
-      {(userCredits < 4 || insufficientCredits) && <BuyCredits user={user} />}
+      {!isHoliday && (userCredits < 4 || insufficientCredits) && <BuyCredits user={user} />}
 
       <Title menu={menu} />
 
