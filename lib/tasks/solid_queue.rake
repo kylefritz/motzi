@@ -1,3 +1,7 @@
+Rake::Task["db:test:prepare"].enhance do
+  Rake::Task["solid_queue:bootstrap"].invoke
+end
+
 namespace :solid_queue do
   desc "Create Solid Queue tables in the current database when missing"
   task bootstrap: :environment do

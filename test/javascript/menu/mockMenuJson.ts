@@ -153,7 +153,6 @@ export default function ({
 
   const order: MenuOrder = {
     id: 12345,
-    skip: false,
     comments: null,
     items: orderItems,
     stripeReceiptUrl: null,

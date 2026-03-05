@@ -132,8 +132,7 @@ class ActivityFeed
   def order_events(verbose: false)
     events = []
     @menus.each do |menu|
-      orders = menu.orders.not_skip.includes(:user, order_items: :item)
-      skips = menu.orders.skip
+      orders = menu.orders.includes(:user, order_items: :item)
 
       if verbose
         orders.each do |order|
@@ -147,7 +146,7 @@ class ActivityFeed
         end
 
         # Order edits via PaperTrail
-        order_ids = orders.map(&:id) + skips.map(&:id)
+        order_ids = orders.map(&:id)
         if order_ids.any?
           PaperTrail::Version.where(item_type: "Order", item_id: order_ids, event: "update").each do |version|
             events << Event.new(
@@ -169,16 +168,6 @@ class ActivityFeed
             details: { source: "orders", menu_id: menu.id, count: orders.size }
           )
         end
-      end
-
-      if skips.any?
-        events << Event.new(
-          timestamp: skips.maximum(:created_at),
-          category: "customer",
-          action: "skips_summary",
-          description: "#{skips.size} members skipped #{menu.name}",
-          details: { source: "skips", menu_id: menu.id, count: skips.size }
-        )
       end
     end
     events
