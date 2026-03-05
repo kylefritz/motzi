@@ -343,13 +343,13 @@ form fieldset.actions li.cancel a {
     font-size: 0.8em;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #888;
+    color: #999;
     font-weight: 500;
-    padding: 4px 10px 6px;
-    border-bottom: 2px solid #e0e0e0;
+    padding: 8px 10px 6px;
+    border-bottom: 2px solid #e8e2da;
     text-align: left;
   }
-  th:first-child { width: 120px; }
+  th:first-child { width: 110px; white-space: nowrap; }
 
   td {
     padding: 6px 10px;
@@ -385,7 +385,9 @@ form fieldset.actions li.cancel a {
     color: inherit;
     &:hover { text-decoration: underline; }
   }
-  .cell-empty { color: #ddd; }
+  .cell-empty { color: #ccc; font-size: 0.85em; }
+
+  tbody tr:nth-child(even) td { background: #fdfcfb; }
 
   tr.is-today {
     td { background: lighten($motzi-background, 2%); }
@@ -422,34 +424,35 @@ form fieldset.actions li.cancel a {
   }
 
   .analysis-body {
-    padding: 20px 24px;
+    padding: 20px 28px;
     font-size: 14px;
     color: #333;
-    line-height: 1.5;
+    line-height: 1.6;
 
-    h1 { font-size: 1.15em; margin: 0 0 8px; font-weight: 500; color: #222; }
-    h2 { font-size: 1em; margin: 16px 0 6px; font-weight: 500; color: #222; border-bottom: 1px solid #eee; padding-bottom: 4px; }
-    h3 { font-size: 0.95em; margin: 12px 0 4px; font-weight: 500; color: #333; }
-    p { margin: 0 0 8px; }
-    ol, ul { margin: 0 0 8px; padding-left: 20px; }
-    li { margin-bottom: 6px; }
-    li > ul, li > ol { margin-top: 4px; }
-    strong { color: #111; }
-    code { background: #f0ebe4; padding: 1px 5px; border-radius: 3px; font-size: 0.88em; color: $primary; }
-    hr { border: none; border-top: 1px solid #eee; margin: 14px 0; }
+    h1 { font-size: 1.15em; margin: 0 0 10px; font-weight: 600; color: #1a1a1a; }
+    h2 { font-size: 1em; margin: 20px 0 8px; font-weight: 600; color: #1a1a1a; border-bottom: 1px solid #e8e2da; padding-bottom: 5px; }
+    h3 { font-size: 0.95em; margin: 14px 0 6px; font-weight: 600; color: #333; }
+    p { margin: 0 0 10px; }
+    ol, ul { margin: 0 0 12px; padding-left: 22px; }
+    li { margin-bottom: 10px; line-height: 1.55; }
+    li > ul, li > ol { margin-top: 6px; }
+    strong { color: #111; font-weight: 600; }
+    code { background: #f0ebe4; padding: 2px 6px; border-radius: 3px; font-size: 0.88em; color: $primary; }
+    hr { border: none; border-top: 1px solid #e8e2da; margin: 18px 0; }
   }
 
   .analysis-footer {
     display: flex;
-    gap: 24px;
+    gap: 28px;
     flex-wrap: wrap;
-    padding: 12px 20px;
-    background: #fafafa;
-    border-top: 1px solid #eee;
+    padding: 10px 20px;
+    background: #f5f3f0;
+    border-top: 2px solid #e8e2da;
     font-size: 0.82em;
-    color: #666;
+    color: #777;
+    font-variant-numeric: tabular-nums;
 
-    .meta-label { color: #999; font-weight: 500; margin-right: 4px; }
+    .meta-label { color: #aaa; font-weight: 500; margin-right: 4px; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.03em; }
   }
 }
 
@@ -489,25 +492,27 @@ form fieldset.actions li.cancel a {
 
 .email-health-row {
   display: flex;
-  gap: 40px;
+  gap: 48px;
   flex-wrap: wrap;
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid #eee;
+  padding: 14px 16px;
+  margin-bottom: 0;
+  background: #faf8f5;
+  border-bottom: 2px solid #e8e2da;
 
   .email-stat {
     font-size: 1.3em;
   }
   .email-stat-num {
-    font-weight: 500;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
   .email-stat-label {
     font-size: 0.65em;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #888;
-    margin-bottom: 2px;
+    letter-spacing: 0.05em;
+    color: #999;
+    margin-bottom: 3px;
+    font-weight: 500;
   }
 }
 
