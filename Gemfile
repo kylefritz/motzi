@@ -41,6 +41,8 @@ gem 'solid_queue' # database-backed ActiveJob backend (Rails 7.2+)
 gem 'sql_query' # load SQL queries from erb templates
 gem 'stripe' # accept credit cards
 gem 'mission_control-jobs' # job UI for ActiveJob backends
+gem 'mjml-rails' # responsive email templates with MJML
+gem 'mrml' # Rust MJML binary (no Node dependency)
 gem 'anthropic' # Claude API for anomaly detection
 
 group :development, :test do

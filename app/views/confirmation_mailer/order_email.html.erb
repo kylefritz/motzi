@@ -1,8 +1,0 @@
-<h2>Thanks for ordering from <%= Setting.shop.name %>.</h2>
-
-<p>Your order: <%= @order.item_list%></p>
-<% if @order.stripe_charge_amount.present? %>
-<p>You were charged: <%= number_to_currency(@order.stripe_charge_amount) %></p>
-<% end %>
-
-<%= Setting.pickup_instructions_html %>

@@ -7,6 +7,11 @@ ActiveAdmin.register_page "Dashboard" do
     redirect_to admin_dashboard_path, notice: "Queued demo job on the demo queue. Watch progress in Jobs."
   end
 
+  page_action :send_test_emails, method: :post do
+    EmailTestJob.perform_later
+    redirect_to admin_dashboard_path, notice: "Test emails queued for #{User.kyle&.email}. Check letter_opener."
+  end
+
   content title: "Hello friend" do
     if defined?(ReviewAppMailInterceptor) && ReviewAppMailInterceptor.active
       div class: 'flash flash_alert', style: 'margin-bottom: 16px' do
@@ -161,13 +166,25 @@ ActiveAdmin.register_page "Dashboard" do
 
     columns do
       column do
-        panel "Jobs" do
-          para "Queue a 20-second demo job on the dedicated demo queue to verify Solid Queue + Mission Control."
-          para do
-            button_to "Queue Demo Job", "/admin/dashboard/enqueue_queue_demo", method: :post
-          end
-          para do
-            a "Open Jobs Monitor", href: "/jobs", target: "_blank"
+        panel "Jobs & Tools" do
+          div style: "display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px" do
+            div style: "flex: 1; min-width: 180px; border: 1px solid #e8e8e8; border-radius: 4px; padding: 16px" do
+              h4 "Queue Demo", style: "margin: 0 0 6px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #666"
+              para "20-second job to verify Solid Queue.", style: "font-size: 13px; color: #999; margin-bottom: 12px"
+              text_node button_to("Queue Demo Job", "/admin/dashboard/enqueue_queue_demo", method: :post)
+            end
+            div style: "flex: 1; min-width: 180px; border: 1px solid #e8e8e8; border-radius: 4px; padding: 16px" do
+              h4 "Test Emails", style: "margin: 0 0 6px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #666"
+              para "Send all email types to #{User.kyle&.email || 'kyle'}.", style: "font-size: 13px; color: #999; margin-bottom: 12px"
+              text_node button_to("Send Test Emails", "/admin/dashboard/send_test_emails", method: :post)
+            end
+            div style: "flex: 1; min-width: 180px; border: 1px solid #e8e8e8; border-radius: 4px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between" do
+              h4 "Monitoring", style: "margin: 0 0 6px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #666"
+              div style: "display: flex; flex-direction: column; gap: 8px; margin-top: 8px" do
+                a "Jobs Monitor", href: "/jobs", target: "_blank", style: "font-size: 14px"
+                a "Letter Opener", href: "/letter_opener", target: "_blank", style: "font-size: 14px" if Rails.env.development?
+              end
+            end
           end
         end
 
