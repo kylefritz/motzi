@@ -29,8 +29,8 @@
         </mj-button>
 
         <%# ── Ordering deadline ── %>
-        <mj-text font-size="14px" color="#352C63" font-weight="500" align="center" padding-bottom="24px">
-          <%= ordering_deadline_text(@menu) %>
+        <mj-text padding-bottom="24px">
+          <%= render partial: "shared_mailer/ordering_deadlines", locals: { menu: @menu }, formats: [:html] %>
         </mj-text>
 
         <mj-divider border-color="#FFECD6" border-width="1px" padding-bottom="16px" />

@@ -1,0 +1,12 @@
+<% menu.pickup_days.each do |pd| %>
+  <% d = pd.deadline_data %>
+  <p style="margin: 0 0 12px 0; text-align: center;">
+    <span style="font-size: 15px; font-weight: 600; color: #352C63;">
+      <%= d[:pickup_day] %>, <%= d[:pickup_date] %> &middot; pickup at <%= d[:pickup_time] %>
+    </span>
+    <br />
+    <span style="font-size: 13px; font-weight: 400; color: #888888;">
+      order by <%= d[:deadline_day] %>, <%= d[:deadline_date] %> at <%= d[:deadline_time] %>
+    </span>
+  </p>
+<% end %>
