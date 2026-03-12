@@ -1,26 +1,37 @@
 import React from "react";
-import _ from "lodash";
+import moment from "moment";
 
 import { getDeadlineContext } from "./Contexts";
 import type { MenuPickupDay } from "../../types/api";
 
-function When({ orderingDeadlineText }) {
-  if (!orderingDeadlineText) {
-    console.warn("menu.orderingDeadlineText is null");
-    return null;
-  }
+function formatTime(m: moment.Moment) {
+  const minutes = m.minutes();
+  const formatted = minutes === 0 ? m.format("ha") : m.format("h:mma");
+  return formatted.replace("am", "a").replace("pm", "p");
+}
 
-  const days = orderingDeadlineText.split(" or\n");
-  if (days.length > 0) {
-    days[0] = _.upperFirst(days[0]);
-  }
+function PickupSchedule({ pickupDays }: { pickupDays: MenuPickupDay[] }) {
+  if (!pickupDays || pickupDays.length === 0) return null;
 
-  return days.map((words, index) => (
-    <React.Fragment key={index}>
-      {words}
-      {index != days.length - 1 && <br />}
-    </React.Fragment>
-  ));
+  return (
+    <>
+      {pickupDays.map(({ id, pickupAt, orderDeadlineAt }) => {
+        const pickup = moment(pickupAt);
+        const deadline = moment(orderDeadlineAt);
+        return (
+          <div key={id} style={{ marginBottom: pickupDays.length > 1 ? 4 : 0 }}>
+            <span>
+              {pickup.format("ddd, MMM D")} &middot; pickup at {formatTime(pickup)}
+            </span>
+            <br />
+            <span className="text-muted" style={{ fontSize: "0.85em" }}>
+              order by {deadline.format("ddd, MMM D")} at {formatTime(deadline)}
+            </span>
+          </div>
+        );
+      })}
+    </>
+  );
 }
 
 type TitleProps = {
@@ -32,7 +43,7 @@ type TitleProps = {
 };
 
 export default function Title({ menu }: TitleProps) {
-  const { name, orderingDeadlineText } = menu;
+  const { name, pickupDays } = menu;
   const isClosed = getDeadlineContext().allClosed(menu);
 
   return (
@@ -45,12 +56,12 @@ export default function Title({ menu }: TitleProps) {
           role="alert"
         >
           <h6 className="alert-heading">Ordering is closed for this menu</h6>
-          <When {...{ orderingDeadlineText }} />
+          <PickupSchedule pickupDays={pickupDays} />
         </div>
       ) : (
         <div id="deadline">
           <small>
-            <When {...{ orderingDeadlineText }} />
+            <PickupSchedule pickupDays={pickupDays} />
           </small>
         </div>
       )}
