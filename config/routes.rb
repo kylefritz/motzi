@@ -36,5 +36,6 @@ Rails.application.routes.draw do
   # review emails in development
   if Rails.env.development?
     mount LetterOpenerWeb::Engine, at: "/letter_opener"
+    get "/dev/login_as_admin", to: "dev#login_as_admin"
   end
 end
