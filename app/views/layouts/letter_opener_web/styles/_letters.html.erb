@@ -1,0 +1,21 @@
+<%#
+  Override letter_opener_web's default styles to disable dark mode.
+
+  letter_opener_web applies a CSS filter that inverts all colors when the OS
+  is in dark mode. This mangles our carefully-designed MJML email previews
+  (cream backgrounds turn black, purple turns yellow, etc.).
+
+  This file shadows the gem's built-in partial at the same engine path.
+  It renders the original styles first, then layers on a media query that
+  neutralizes the dark-mode inversion so emails preview true-to-color.
+%>
+<style>
+  <%= render file: LetterOpenerWeb::Engine.root.join("app/views/layouts/letter_opener_web/styles/_letters.html.erb") %>
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: white !important;
+      color: black !important;
+      filter: none !important;
+    }
+  }
+</style>
