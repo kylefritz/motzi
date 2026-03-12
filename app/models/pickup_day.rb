@@ -28,14 +28,20 @@ class PickupDay < ApplicationRecord
     pickup_at.strftime('%a %m/%d')
   end
 
-  def deadline_text
-    def clean_strftime(time, format)
-      time.strftime(format).gsub(/:00/i, '').gsub(/ AM/i, 'a').gsub(/ PM/i, 'p')
-    end
-    pickup = clean_strftime(pickup_at, '%a %m/%d %-l:%M %p')
-    deadline = clean_strftime(order_deadline_at, '%a %m/%d %-l:%M %p')
+  def deadline_data
+    {
+      pickup_day: pickup_at.strftime('%a'),
+      pickup_date: pickup_at.strftime('%b %-d'),
+      pickup_time: pickup_at.strftime('%-l:%M %p').gsub(/:00/, '').gsub(/ AM/i, 'a').gsub(/ PM/i, 'p'),
+      deadline_day: order_deadline_at.strftime('%a'),
+      deadline_date: order_deadline_at.strftime('%b %-d'),
+      deadline_time: order_deadline_at.strftime('%-l:%M %p').gsub(/:00/, '').gsub(/ AM/i, 'a').gsub(/ PM/i, 'p')
+    }
+  end
 
-    "#{pickup} pickup (order by #{deadline})"
+  def deadline_text
+    d = deadline_data
+    "#{d[:pickup_day]}, #{d[:pickup_date]} at #{d[:pickup_time]} — order by #{d[:deadline_day]}, #{d[:deadline_date]} at #{d[:deadline_time]}"
   end
 end
  
