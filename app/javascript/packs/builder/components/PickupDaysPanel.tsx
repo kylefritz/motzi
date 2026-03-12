@@ -24,12 +24,20 @@ export function shortDay(pickupAt: string) {
   return day;
 }
 
-function parsePickupDayText(text: string) {
-  const match = text.match(/^(.*?)\s*\(order by\s*(.*?)\)\s*$/i);
-  if (!match) {
-    return { pickupLabel: text, orderByLabel: null };
-  }
-  return { pickupLabel: match[1], orderByLabel: match[2] };
+function formatTime(m: moment.Moment) {
+  const minutes = m.minutes();
+  const formatted = minutes === 0 ? m.format("ha") : m.format("h:mma");
+  return formatted.replace("am", "a").replace("pm", "p");
+}
+
+function formatPickupLabel(pickupAt: string) {
+  const m = moment(pickupAt);
+  return `${m.format("ddd, MMM D")} at ${formatTime(m)}`;
+}
+
+function formatDeadlineLabel(orderDeadlineAt: string) {
+  const m = moment(orderDeadlineAt);
+  return `order by ${m.format("ddd, MMM D")} at ${formatTime(m)}`;
 }
 
 type PickupDaysPanelProps = {
@@ -164,7 +172,8 @@ function EditablePickupDay({
 }: EditablePickupDayProps) {
   const initialPickupAt = formatDateTimeLocal(pickupDay.pickupAt);
   const initialDeadline = formatDateTimeLocal(pickupDay.orderDeadlineAt);
-  const { pickupLabel, orderByLabel } = parsePickupDayText(pickupDay.deadlineText);
+  const pickupLabel = formatPickupLabel(pickupDay.pickupAt);
+  const orderByLabel = formatDeadlineLabel(pickupDay.orderDeadlineAt);
   const [pickupAtValue, setPickupAtValue] = useState(initialPickupAt);
   const [deadlineValue, setDeadlineValue] = useState(initialDeadline);
   const [isEditing, setIsEditing] = useState(false);
