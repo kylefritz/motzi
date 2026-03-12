@@ -20,6 +20,8 @@ class AnomalyDetector
     response = call_claude(user_message)
     @on_progress.call("Analysis received, saving…")
 
+    cost = self.class.estimate_cost(response[:input_tokens], response[:output_tokens])
+
     AnomalyAnalysis.create!(
       week_id: @week_id,
       result: response[:text],
@@ -31,6 +33,7 @@ class AnomalyDetector
       cache_creation_input_tokens: response[:cache_creation_input_tokens],
       cache_read_input_tokens: response[:cache_read_input_tokens],
       stop_reason: response[:stop_reason],
+      cost_cents: (cost * 100).round,
       trigger: trigger,
       user: user
     )

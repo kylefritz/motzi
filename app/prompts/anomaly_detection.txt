@@ -20,7 +20,10 @@ You are reviewing the activity feed for the current week and comparing it to rec
 Start with a TL;DR — one to three sentences with the most important takeaway. If everything is fine, say so in one sentence.
 
 Then provide:
-1. Overall status: ✅ Healthy, ⚠️ Warning, or 🔴 Problem
+1. Overall status — this line is machine-parsed, so use EXACTLY one of these three strings:
+   - `Status: ✅ Healthy`
+   - `Status: ⚠️ Warning`
+   - `Status: 🔴 Problem`
 2. Only actual anomalies, each with:
    - What you noticed (with specific numbers)
    - Why it matters operationally

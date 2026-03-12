@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_05_072702) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_12_055136) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -146,6 +146,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_05_072702) do
     t.integer "cache_read_input_tokens"
     t.string "stop_reason"
     t.string "api_model"
+    t.integer "cost_cents"
+    t.string "overall_status"
     t.index ["user_id"], name: "index_anomaly_analyses_on_user_id"
     t.index ["week_id"], name: "index_anomaly_analyses_on_week_id"
   end

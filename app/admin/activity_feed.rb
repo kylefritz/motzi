@@ -246,7 +246,7 @@ ActiveAdmin.register_page "Activity Feed" do
             end
 
             div class: "analysis-footer" do
-              cost = AnomalyDetector.estimate_cost(analysis.input_tokens, analysis.output_tokens)
+              cost = analysis.cost || AnomalyDetector.estimate_cost(analysis.input_tokens, analysis.output_tokens)
               span do
                 span "Model", class: "meta-label"
                 text_node(analysis.api_model || analysis.model_used)
