@@ -37,7 +37,7 @@ function formatPickupLabel(pickupAt: string) {
 
 function formatDeadlineLabel(orderDeadlineAt: string) {
   const m = moment(orderDeadlineAt);
-  return `order by ${m.format("ddd, MMM D")} at ${formatTime(m)}`;
+  return `${m.format("ddd, MMM D")} at ${formatTime(m)}`;
 }
 
 type PickupDaysPanelProps = {
