@@ -10,7 +10,7 @@ function formatTime(m: moment.Moment) {
   return formatted.replace("am", "a").replace("pm", "p");
 }
 
-function PickupSchedule({ pickupDays }: { pickupDays: MenuPickupDay[] }) {
+function PickupSchedule({ pickupDays, muted }: { pickupDays: MenuPickupDay[]; muted?: string }) {
   if (!pickupDays || pickupDays.length === 0) return null;
 
   return (
@@ -24,7 +24,7 @@ function PickupSchedule({ pickupDays }: { pickupDays: MenuPickupDay[] }) {
               {pickup.format("ddd, MMM D")} &middot; pickup at {formatTime(pickup)}
             </span>
             <br />
-            <span className="text-muted" style={{ fontSize: "0.85em" }}>
+            <span style={{ fontSize: "0.85em", opacity: 0.7, color: muted }}>
               order by {deadline.format("ddd, MMM D")} at {formatTime(deadline)}
             </span>
           </div>
