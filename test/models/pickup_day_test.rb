@@ -34,6 +34,6 @@ class PickupDayTest < ActiveSupport::TestCase
 
   test "deadline text" do
     pickup_day = pickup_days(:w1_d1_thurs)
-    assert_equal "Thu, Jan 3 at 3p — order by Tue, Jan 1 at 10p", pickup_day.deadline_text
+    assert_equal "Thu, Jan 3 pickup after 3p — order by Tue, Jan 1 at 10p", pickup_day.deadline_text
   end
 end
