@@ -5,11 +5,8 @@ ActiveAdmin.register_page "Activity Feed" do
   page_action :prompt_preview, method: :get do
     week_id = params[:week_id] || Time.zone.now.week_id
     detector = AnomalyDetector.new(week_id)
-    system_prompt = File.read(Rails.root.join("app/prompts/anomaly_detection.txt"))
-    system_prompt = "Current date/time: #{Time.zone.now.strftime('%A, %B %-d, %Y at %-l:%M%P %Z')}\n\n#{system_prompt}"
-    user_message = detector.send(:build_user_message)
 
-    text = "=== SYSTEM PROMPT ===\n\n#{system_prompt}\n\n=== USER MESSAGE ===\n\n#{user_message}"
+    text = "=== SYSTEM PROMPT ===\n\n#{detector.system_prompt}\n\n=== USER MESSAGE ===\n\n#{detector.build_user_message}"
     render plain: text, content_type: "text/plain"
   end
 
@@ -56,7 +53,7 @@ ActiveAdmin.register_page "Activity Feed" do
           a "Prompt Preview", href: admin_activity_feed_prompt_preview_path(week_id: week_id), target: "_blank"
         end
 
-        analyze_tooltip = "Sends this week's verbose activity feed plus #{AnomalyDetector.new(week_id).send(:prior_week_ids).size} prior weeks' summaries to Claude (#{AnomalyDetector::MODEL}). Claude compares order counts, email delivery rates, credit purchases, visitor traffic, and job runs against recent patterns to flag missing actions, unusual volumes, timing anomalies, or delivery problems. Results are emailed to the bakery operator."
+        analyze_tooltip = "Sends this week's verbose activity feed plus 4 prior weeks' summaries to Claude (#{AnomalyDetector::MODEL}). Claude compares order counts, email delivery rates, credit purchases, visitor traffic, and job runs against recent patterns to flag missing actions, unusual volumes, timing anomalies, or delivery problems. Results are emailed to the bakery operator."
         div class: "analyze-area" do
           text_node button_to(
             "Analyze with Claude",

@@ -155,14 +155,16 @@ class ActivityFeed
     lines.join("\n")
   end
 
+  private
+
   def orders_by_day_text
     today = Time.zone.today
     lines = ["== Orders by Day =="]
     total = 0
 
     @menus.each do |menu|
-      orders = menu.orders
-      by_day = orders.group_by { |o| o.created_at.to_date }
+      by_day = menu.orders.where(created_at: @week_start..@week_end)
+                   .group_by { |o| o.created_at.to_date }
 
       (0..6).each do |i|
         date = (@week_start + i.days).to_date
@@ -183,8 +185,6 @@ class ActivityFeed
     lines << "  Total so far: #{total}"
     lines.join("\n")
   end
-
-  private
 
   def activity_events(verbose: false)
     ActivityEvent.for_week(@week_id).order(:created_at).map do |ae|

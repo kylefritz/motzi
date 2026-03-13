@@ -1,9 +1,6 @@
 <mjml>
   <mj-head>
     <%= render partial: "shared_mailer/head", formats: [:html] %>
-    <mj-attributes>
-      <mj-body width="1200px" />
-    </mj-attributes>
   </mj-head>
   <mj-body background-color="#FFECD6" width="1200px">
     <%= render partial: "shared_mailer/header", formats: [:html] %>

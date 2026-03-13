@@ -39,7 +39,10 @@ class AnomalyDetector
     )
   end
 
-  private
+  def system_prompt
+    prompt = File.read(Rails.root.join("app/prompts/anomaly_detection.txt"))
+    "Current date/time: #{Time.zone.now.strftime('%A, %B %-d, %Y at %-l:%M%P %Z')}\n\n#{prompt}"
+  end
 
   def build_user_message
     parts = []
@@ -81,6 +84,8 @@ class AnomalyDetector
     parts.join("\n")
   end
 
+  private
+
   def prior_week_ids
     ids = []
     t = Time.zone.from_week_id(@week_id)
@@ -96,8 +101,6 @@ class AnomalyDetector
   end
 
   def call_claude(user_message)
-    system_prompt = File.read(Rails.root.join("app/prompts/anomaly_detection.txt"))
-    system_prompt = "Current date/time: #{Time.zone.now.strftime('%A, %B %-d, %Y at %-l:%M%P %Z')}\n\n#{system_prompt}"
     client = Anthropic::Client.new
     response = client.messages.create(
       model: MODEL,
