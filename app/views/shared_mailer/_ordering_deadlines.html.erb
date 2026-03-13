@@ -1,12 +1,21 @@
-<% menu.pickup_days.each do |pd| %>
-  <% d = pd.deadline_data %>
-  <p style="margin: 0 0 12px 0; text-align: center;">
-    <span style="font-size: 15px; font-weight: 600; color: #352C63;">
-      <%= d[:pickup_day] %>, <%= d[:pickup_date] %> &middot; pickup at <%= d[:pickup_time] %>
-    </span>
-    <br />
-    <span style="font-size: 13px; font-weight: 400; color: #888888;">
-      order by <%= d[:deadline_day] %>, <%= d[:deadline_date] %> at <%= d[:deadline_time] %>
-    </span>
-  </p>
-<% end %>
+<% days = menu.pickup_days.map(&:deadline_data) %>
+<% col_width = (100.0 / days.size).floor %>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout: fixed;">
+  <tr>
+    <% days.each do |d| %>
+      <td width="<%= col_width %>%" style="text-align: center; vertical-align: top; padding: 0 4px;">
+        <span style="font-size: 15px; font-weight: 600; color: #352C63; white-space: nowrap;">
+          <%= d[:pickup_day] %>, <%= d[:pickup_date] %>
+        </span>
+        <br />
+        <span style="font-size: 13px; font-weight: 400; color: #352C63;">
+          pickup at <%= d[:pickup_time] %>
+        </span>
+        <br />
+        <span style="font-size: 12px; font-weight: 400; color: #888888;">
+          order by <%= d[:deadline_day] %>, <%= d[:deadline_date] %> at <%= d[:deadline_time] %>
+        </span>
+      </td>
+    <% end %>
+  </tr>
+</table>
