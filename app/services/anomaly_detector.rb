@@ -48,7 +48,12 @@ class AnomalyDetector
     current_events = current_feed.verbose_events
     @on_progress.call("#{@week_id}: #{current_events.size} events collected")
     parts << "## Current Week (analyze this week for anomalies):"
-    parts << current_feed.to_text(verbose: true)
+    parts << ""
+    parts << "### Summary of Events:"
+    parts << current_feed.to_text(verbose: false)
+    parts << ""
+    parts << "### Detailed Events:"
+    parts << current_feed.to_text(verbose: true, header: false)
     parts << ""
 
     prior_week_ids.each do |wid|
@@ -92,6 +97,7 @@ class AnomalyDetector
 
   def call_claude(user_message)
     system_prompt = File.read(Rails.root.join("app/prompts/anomaly_detection.txt"))
+    system_prompt = "Current date/time: #{Time.zone.now.strftime('%A, %B %-d, %Y at %-l:%M%P %Z')}\n\n#{system_prompt}"
     client = Anthropic::Client.new
     response = client.messages.create(
       model: MODEL,

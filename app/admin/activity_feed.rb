@@ -1,43 +1,16 @@
 ActiveAdmin.register_page "Activity Feed" do
   menu priority: 2, label: "Activity"
 
-  # JSON endpoint
-  page_action :json_feed, method: :get do
+  # Preview the full prompt that would be sent to Claude
+  page_action :prompt_preview, method: :get do
     week_id = params[:week_id] || Time.zone.now.week_id
-    verbose = params[:verbose] == "true"
-    feed = ActivityFeed.new(week_id)
-    events = verbose ? feed.verbose_events : feed.summary
+    detector = AnomalyDetector.new(week_id)
+    system_prompt = File.read(Rails.root.join("app/prompts/anomaly_detection.txt"))
+    system_prompt = "Current date/time: #{Time.zone.now.strftime('%A, %B %-d, %Y at %-l:%M%P %Z')}\n\n#{system_prompt}"
+    user_message = detector.send(:build_user_message)
 
-    week_start = Time.zone.from_week_id(week_id)
-    week_end = week_start + 6.days
-
-    render json: {
-      week_id: week_id,
-      today: Time.zone.today.iso8601,
-      week_start: week_start.to_date.iso8601,
-      week_end: week_end.to_date.iso8601,
-      date_range: "#{week_start.strftime('%A %-m/%-d')} — #{week_end.strftime('%A %-m/%-d/%Y')}",
-      verbose: verbose,
-      email_summary: feed.email_summary,
-      event_count: events.size,
-      events: events.map do |e|
-        {
-          timestamp: e.timestamp&.iso8601,
-          category: e.category,
-          action: e.action,
-          description: e.description,
-          details: e.details
-        }
-      end
-    }
-  end
-
-  # Plain text endpoint
-  page_action :plain_feed, method: :get do
-    week_id = params[:week_id] || Time.zone.now.week_id
-    verbose = params[:verbose] == "true"
-    feed = ActivityFeed.new(week_id)
-    render plain: feed.to_text(verbose: verbose), content_type: "text/plain"
+    text = "=== SYSTEM PROMPT ===\n\n#{system_prompt}\n\n=== USER MESSAGE ===\n\n#{user_message}"
+    render plain: text, content_type: "text/plain"
   end
 
   # Analyze with Claude (enqueues background job)
@@ -80,9 +53,7 @@ ActiveAdmin.register_page "Activity Feed" do
 
       div class: "activity-controls" do
         div class: "export-links" do
-          a "JSON", href: admin_activity_feed_json_feed_path(week_id: week_id), target: "_blank"
-          span "|", class: "sep"
-          a "Text", href: admin_activity_feed_plain_feed_path(week_id: week_id), target: "_blank"
+          a "Prompt Preview", href: admin_activity_feed_prompt_preview_path(week_id: week_id), target: "_blank"
         end
 
         analyze_tooltip = "Sends this week's verbose activity feed plus #{AnomalyDetector.new(week_id).send(:prior_week_ids).size} prior weeks' summaries to Claude (#{AnomalyDetector::MODEL}). Claude compares order counts, email delivery rates, credit purchases, visitor traffic, and job runs against recent patterns to flag missing actions, unusual volumes, timing anomalies, or delivery problems. Results are emailed to the bakery operator."

@@ -1,10 +1,10 @@
-<mj-section background-color="#f7f0e8" padding="20px 40px">
+<mj-section background-color="#352C63" padding="20px 40px">
   <mj-column>
-    <mj-text font-size="13px" color="#999999" align="center" line-height="1.5">
+    <mj-text font-size="13px" color="#ffffff" align="center" line-height="1.5">
       Thanks!! &mdash; <%= Setting.shop.name %>
     </mj-text>
     <% if ENV['REVIEW_APP'].present? || Rails.env.development? %>
-    <mj-text font-size="11px" color="#cc9966" align="center" padding-top="8px">
+    <mj-text font-size="11px" color="#FFECD6" align="center" padding-top="8px">
       This email was sent from the <%= ENV['REVIEW_APP'].present? ? 'review app' : 'local dev' %> &mdash; not production.
     </mj-text>
     <% end %>

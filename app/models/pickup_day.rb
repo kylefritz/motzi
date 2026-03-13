@@ -41,7 +41,7 @@ class PickupDay < ApplicationRecord
 
   def deadline_text
     d = deadline_data
-    "#{d[:pickup_day]}, #{d[:pickup_date]} at #{d[:pickup_time]} — order by #{d[:deadline_day]}, #{d[:deadline_date]} at #{d[:deadline_time]}"
+    "#{d[:pickup_day]}, #{d[:pickup_date]} pickup after #{d[:pickup_time]} — order by #{d[:deadline_day]}, #{d[:deadline_date]} at #{d[:deadline_time]}"
   end
 end
  

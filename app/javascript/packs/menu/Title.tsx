@@ -14,14 +14,18 @@ function PickupSchedule({ pickupDays, muted }: { pickupDays: MenuPickupDay[]; mu
   if (!pickupDays || pickupDays.length === 0) return null;
 
   return (
-    <>
+    <div style={{ display: "flex", justifyContent: "center", gap: "16px", textAlign: "center" }}>
       {pickupDays.map(({ id, pickupAt, orderDeadlineAt }) => {
         const pickup = moment(pickupAt);
         const deadline = moment(orderDeadlineAt);
         return (
-          <div key={id} style={{ marginBottom: pickupDays.length > 1 ? 4 : 0 }}>
+          <div key={id} style={{ flex: 1 }}>
             <span>
-              {pickup.format("ddd, MMM D")} &middot; pickup at {formatTime(pickup)}
+              {pickup.format("ddd, MMM D")}
+            </span>
+            <br />
+            <span>
+              pickup after {formatTime(pickup)}
             </span>
             <br />
             <span style={{ fontSize: "0.85em", opacity: 0.7, color: muted }}>
@@ -30,7 +34,7 @@ function PickupSchedule({ pickupDays, muted }: { pickupDays: MenuPickupDay[]; mu
           </div>
         );
       })}
-    </>
+    </div>
   );
 }
 

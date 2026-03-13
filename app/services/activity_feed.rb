@@ -107,13 +107,21 @@ class ActivityFeed
     "recurring_jobs_summary" => "Jobs"
   }.freeze
 
-  def to_text(verbose: false)
+  def to_text(verbose: false, header: true)
     week_end = @week_start + 6.days
     lines = []
-    lines << "Activity Feed: #{@week_id} (#{@week_start.strftime('%A %-m/%-d')} — #{week_end.strftime('%A %-m/%-d/%Y')})"
-    lines << "Today: #{Time.zone.today.strftime('%A %-m/%-d/%Y')}"
-    lines << "=" * 40
-    lines << ""
+
+    if header
+      today = Time.zone.today
+      days_elapsed = [(today - @week_start.to_date).to_i, 7].min.clamp(0, 7)
+      lines << "Activity Feed: #{@week_id} (#{@week_start.strftime('%A %-m/%-d')} — #{week_end.strftime('%A %-m/%-d/%Y')})"
+      lines << "Today: #{today.strftime('%A %-m/%-d/%Y')} — #{days_elapsed}/7 days elapsed (#{((days_elapsed / 7.0) * 100).round}% through the week)"
+      lines << "=" * 40
+      lines << ""
+
+      lines << orders_by_day_text
+      lines << ""
+    end
 
     es = email_summary
     if es.any?
@@ -144,6 +152,35 @@ class ActivityFeed
     lines << ""
     lines << "#{evts.size} events"
 
+    lines.join("\n")
+  end
+
+  def orders_by_day_text
+    today = Time.zone.today
+    lines = ["== Orders by Day =="]
+    total = 0
+
+    @menus.each do |menu|
+      orders = menu.orders
+      by_day = orders.group_by { |o| o.created_at.to_date }
+
+      (0..6).each do |i|
+        date = (@week_start + i.days).to_date
+        count = (by_day[date] || []).size
+        total += count
+        day_label = date.strftime("%a %-m/%-d")
+
+        if date > today
+          lines << "  #{day_label}: (upcoming)"
+        elsif date == today
+          lines << "  #{day_label}: #{count} orders (today, still in progress)"
+        else
+          lines << "  #{day_label}: #{count} orders"
+        end
+      end
+    end
+
+    lines << "  Total so far: #{total}"
     lines.join("\n")
   end
 

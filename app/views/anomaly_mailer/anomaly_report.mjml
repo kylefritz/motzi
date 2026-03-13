@@ -1,8 +1,11 @@
 <mjml>
   <mj-head>
     <%= render partial: "shared_mailer/head", formats: [:html] %>
+    <mj-attributes>
+      <mj-body width="1200px" />
+    </mj-attributes>
   </mj-head>
-  <mj-body background-color="#FFECD6">
+  <mj-body background-color="#FFECD6" width="1200px">
     <%= render partial: "shared_mailer/header", formats: [:html] %>
 
     <mj-section background-color="#ffffff" padding="32px 40px 24px 40px">
@@ -27,12 +30,12 @@
         <% end %>
 
         <mj-text padding="16px 20px" background-color="#f7f0e8" border-radius="4px" font-size="14px" line-height="1.7" color="#2E2927" font-family="Menlo, Consolas, monospace">
-          <%= simple_format(@analysis.result) %>
+          <%= Redcarpet::Markdown.new(Redcarpet::Render::HTML, tables: true, fenced_code_blocks: true, autolink: true).render(@analysis.result).html_safe %>
         </mj-text>
 
         <mj-divider border-color="#e8e0d8" border-width="1px" padding="28px 0 16px 0" />
 
-        <mj-text padding="0" font-size="12px" line-height="1.5" color="#999999">
+        <mj-text padding="0" font-size="12px" line-height="1.5" color="#2E2927">
           Generated at <%= @analysis.created_at.strftime("%Y-%m-%d %l:%M%P %Z") %>
           using <%= @analysis.model_used %>
           (<%= @analysis.input_tokens %> input / <%= @analysis.output_tokens %> output tokens)
