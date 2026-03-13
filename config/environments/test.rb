@@ -64,8 +64,4 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
-
-  # Use Solid Queue so Mission Control dashboard works in integration tests.
-  config.active_job.queue_adapter = :solid_queue
-  config.solid_queue.connects_to = { database: { writing: :primary } }
 end
