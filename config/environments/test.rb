@@ -58,8 +58,7 @@ Rails.application.configure do
   # Annotate rendered view with file names.
   config.action_view.annotate_rendered_view_with_filenames = true
 
-  # Keep test process logging on STDOUT for consistency with dev/prod and CI.
-  # Note: this is intentionally noisier than file-based test logging.
-  logger = ActiveSupport::Logger.new(STDOUT)
-  config.logger = ActiveSupport::TaggedLogging.new(logger)
+  # Use Solid Queue so Mission Control dashboard works in integration tests.
+  config.active_job.queue_adapter = :solid_queue
+  config.solid_queue.connects_to = { database: { writing: :primary } }
 end

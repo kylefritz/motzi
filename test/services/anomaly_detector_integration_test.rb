@@ -23,7 +23,7 @@ class AnomalyDetectorIntegrationTest < ActiveSupport::TestCase
       detector = AnomalyDetector.new(menu.week_id, comparison_weeks: 2)
       message = detector.send(:build_user_message)
 
-      assert_includes message, "Current Week: #{menu.week_id}"
+      assert_includes message, "Current Week (analyze this week for anomalies):"
       assert_includes message, "Comparison Week:"
     end
   end
