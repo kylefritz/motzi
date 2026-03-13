@@ -4,13 +4,15 @@ import ErrorBoundary from "./ErrorBoundary";
 import Builder from "./builder/Builder";
 
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 document.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(
+  const container = document.getElementById("react-builder");
+  if (!container) return;
+
+  createRoot(container).render(
     <ErrorBoundary>
       <Builder />
-    </ErrorBoundary>,
-    document.getElementById("react-builder")
+    </ErrorBoundary>
   );
 });

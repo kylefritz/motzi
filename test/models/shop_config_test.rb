@@ -1,13 +1,9 @@
 require 'test_helper'
 
 class ShopConfigTest < ActiveSupport::TestCase
-  test "same keys; has keys" do
-    motzi, jinji = ["motzi", "jinji"].map() do |shop_id|
-      ShopConfig.load_config_for_shop_id!(shop_id)
-    end
+  test "has config for motzi" do
+    motzi = ShopConfig.load_config_for_shop_id!("motzi")
 
-    assert_equal motzi.keys, jinji.keys, "should have same keys"
-    refute_equal motzi, jinji, "not same thing"
     refute motzi.empty?, "should have keys"
   end
 
@@ -25,6 +21,16 @@ class ShopConfigTest < ActiveSupport::TestCase
   test "non-existant shop" do
     assert_raise do
       ShopConfig.load_config_for_shop_id!("shoppy")
+    end
+  end
+
+  test "no config for retired shops" do
+    assert_raise do
+      ShopConfig.load_config_for_shop_id!("jinji")
+    end
+
+    assert_raise do
+      ShopConfig.load_config_for_shop_id!("dutch_courage")
     end
   end
 end

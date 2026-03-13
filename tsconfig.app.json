@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["app/javascript/**/*", "types/**/*"],
+  "exclude": ["test/javascript/**/*"]
+}

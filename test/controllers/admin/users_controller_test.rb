@@ -32,4 +32,37 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     end
     assert_response :redirect
   end
+
+  test "delete user with orders is blocked" do
+    obj = users(:kyle)
+    assert obj.orders.any?, "fixture user should have orders"
+
+    assert_no_difference "User.count" do
+      delete "/admin/users/#{obj.id}"
+    end
+    assert_redirected_to "/admin/users"
+    follow_redirect!
+    assert_select ".flash_alert", text: /without orders/
+  end
+
+  test "batch delete only removes users without orders" do
+    deletable = User.create!(
+      email: "deletable@example.com",
+      first_name: "Delete",
+      last_name: "Me",
+      password: "password123"
+    )
+    keep = users(:kyle)
+    assert keep.orders.any?, "fixture user should have orders"
+
+    assert_difference "User.count", -1 do
+      delete "/admin/users/batch_action", params: {
+        collection_selection: [deletable.id, keep.id]
+      }
+    end
+
+    assert_redirected_to "/admin/users"
+    assert_nil User.find_by(id: deletable.id)
+    assert User.exists?(keep.id)
+  end
 end

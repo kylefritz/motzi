@@ -128,12 +128,7 @@ test("edits menu items", async () => {
   expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_items.json");
 
   // Toggle marketplace on an item card.
-  const sourdoughCard = screen
-    .getByText("Sourdough")
-    .closest(".MuiCard-root");
-  if (!sourdoughCard) {
-    throw new Error("Expected Sourdough card to be present");
-  }
+  const sourdoughCard = screen.getByTestId("menu-item-card-100");
   const card = within(sourdoughCard);
 
   const marketplaceCheckbox = card.getByLabelText("Marketplace");

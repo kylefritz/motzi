@@ -1,5 +1,4 @@
 require "active_support/core_ext/integer/time"
-require_relative "../../app/models/shop_config"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -7,7 +6,7 @@ Rails.application.configure do
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
-  config.cache_classes = false
+  config.enable_reloading = true
 
   # Do not eager load code on boot.
   config.eager_load = false
@@ -31,14 +30,8 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
-  # uncomment to test production queue settings
-  #
-  # config.active_job.queue_adapter = ShopConfig.shop.queue_adapter.to_sym
-  # config.action_mailer.deliver_later_queue_name = "mailers"        # defaults to "mailers"
-  # config.active_storage.queues.analysis         = "active_storage" # defaults to "active_storage_analysis"
-  # config.active_storage.queues.purge            = "active_storage" # defaults to "active_storage_purge"
-  # config.active_storage.queues.mirror           = "active_storage" # defaults to "active_storage_mirror"
-  # config.active_storage.queues.purge            = "active_storage" # alternatively, put purge jobs in the `low` queue
+  # Use Solid Queue in development so jobs are visible in Mission Control.
+  config.active_job.queue_adapter = :solid_queue
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
@@ -81,6 +74,12 @@ Rails.application.configure do
 
   # Suppress logger output for asset requests.
   config.assets.quiet = true
+
+  # Always log to STDOUT so all foreman-managed processes (web/worker/js)
+  # stream to the same terminal output in local development.
+  logger = ActiveSupport::Logger.new(STDOUT)
+  logger.formatter = config.log_formatter
+  config.logger = ActiveSupport::TaggedLogging.new(logger)
 
   # Raises error for missing translations.
   # config.action_view.raise_on_missing_translations = true

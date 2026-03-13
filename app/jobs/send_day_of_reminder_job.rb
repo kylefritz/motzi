@@ -2,6 +2,7 @@ class SendDayOfReminderJob < ApplicationJob
   queue_as :default
 
   def perform(*args)
+    return unless Setting.automated_reminder_emails?
     return unless (7..11).include?(Time.zone.now.hour) # 7a-11a
 
     PickupDay.for_pickup_at(Time.zone.now).each do |pickup_day|
