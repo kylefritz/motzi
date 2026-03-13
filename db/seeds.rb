@@ -22,6 +22,7 @@ unless Menu.any?
   menu.make_current!
 end
 
+User.reset_column_information
 unless User.system
   User.create!(
     id: User::SYSTEM_ID,
