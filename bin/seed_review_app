@@ -11,22 +11,23 @@ fi
 REVIEW_APP="$1"
 
 echo "==> Copying config vars from $PROD_APP to $REVIEW_APP..."
-for var in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY HASHID_SALT SENDGRID_USERNAME SENDGRID_PASSWORD; do
+VARS=(AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY HASHID_SALT SENDGRID_USERNAME SENDGRID_PASSWORD ANTHROPIC_API_KEY)
+CONFIG_ARGS=()
+for var in "${VARS[@]}"; do
   val=$(heroku config:get "$var" --app "$PROD_APP")
-  heroku config:set "$var=$val" --app "$REVIEW_APP" >/dev/null
-  echo "    $var set"
+  CONFIG_ARGS+=("$var=$val")
+  echo "    $var read"
 done
+heroku config:set "${CONFIG_ARGS[@]}" --app "$REVIEW_APP" >/dev/null
+echo "    All config vars set"
 
 echo "==> Copying $PROD_APP database to $REVIEW_APP..."
 heroku pg:copy "$PROD_APP::DATABASE_URL" DATABASE_URL --app "$REVIEW_APP" --confirm "$REVIEW_APP"
 
 echo "==> Running migrations on $REVIEW_APP..."
-heroku run bin/rails db:migrate solid_queue:bootstrap --app "$REVIEW_APP"
+heroku run bin/rails db:migrate solid:bootstrap --app "$REVIEW_APP"
 
 echo "==> Restarting dynos to clear settings cache..."
 heroku dyno:restart --app "$REVIEW_APP"
 
 echo "==> Done. $REVIEW_APP is loaded with prod data."
-echo ""
-echo "==> NEXT STEP: Run the release command from the Heroku dashboard to apply migrations."
-echo "    https://dashboard.heroku.com/pipelines/1bddd8c1-efd3-4b2d-b5e5-dbbeafb7d26b"

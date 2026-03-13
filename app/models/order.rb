@@ -6,8 +6,6 @@ class Order < ApplicationRecord
   has_paper_trail
   visitable :ahoy_visit
   scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> ''",) }
-  scope :not_skip, -> { where("skip is FALSE") }
-  scope :skip, -> { where("skip is TRUE") }
   scope :marketplace, -> { where("stripe_charge_amount is not NULL")}
   scope :subscriber, -> { where("stripe_charge_amount is NULL")}
 
@@ -38,9 +36,6 @@ class Order < ApplicationRecord
   end
 
   def item_list
-    if skip && order_items.empty?
-      return "Skip this week"
-    end
     if order_items.empty?
       return "No items"
     end

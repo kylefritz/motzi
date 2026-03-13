@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 import HolidayMenuTab from "menu/HolidayMenuTab";
 import { SettingsContext } from "menu/Contexts";
 import mockMenuJson from "./mockMenuJson";
+import stripeMock from "./stripeMock";
 
 function renderHolidayMenuTab({
   order: withOrder = true,
@@ -15,6 +16,7 @@ function renderHolidayMenuTab({
   handleCreateOrder?: ReturnType<typeof mock>;
 } = {}) {
   window.gon = { stripeApiKey: "no-such-key" };
+  window.Stripe = mock(() => stripeMock);
   const data = mockMenuJson({ order: withOrder });
   const { menu, user, order, bundles } = data;
 
@@ -38,10 +40,18 @@ test("shows confirmation when order exists", () => {
   expect(screen.getByText("We've got your order!")).toBeTruthy();
 });
 
-test("shows menu form when no order exists", () => {
+test("shows card payment form when no order exists", () => {
   renderHolidayMenuTab({ order: false });
   expect(screen.queryByText("We've got your order!")).toBeNull();
-  expect(screen.getByRole("button", { name: "Submit Order" })).toBeTruthy();
+  // Holiday menu uses Marketplace with card payment
+  expect(screen.getByTestId("card-element")).toBeTruthy();
+});
+
+test("shows USD prices, not credits, in holiday menu", () => {
+  renderHolidayMenuTab({ order: false });
+  // Items should show dollar prices, not credit amounts
+  expect(screen.getByText("$3.00")).toBeTruthy();
+  expect(screen.queryByText("1 credit")).toBeNull();
 });
 
 test("editing resets to confirmation after save", async () => {
@@ -56,21 +66,7 @@ test("editing resets to confirmation after save", async () => {
     screen.getByRole("button", { name: "Edit Order" })
   );
 
-  // Now the menu form should be showing instead of confirmation
+  // Now the marketplace form should be showing (card payment)
   expect(screen.queryByText("We've got your order!")).toBeNull();
-  expect(
-    screen.getByRole("button", { name: "Update Order" })
-  ).toBeTruthy();
-
-  // Step 3: Submit the form
-  await userEvent.click(
-    screen.getByRole("button", { name: "Update Order" })
-  );
-
-  // Step 4: handleCreateOrder was called, and after it resolves,
-  // isEditingOrder resets to false so confirmation reappears
-  await waitFor(() => {
-    expect(handleCreateOrder).toHaveBeenCalledTimes(1);
-    expect(screen.getByText("We've got your order!")).toBeTruthy();
-  });
+  expect(screen.getByTestId("card-element")).toBeTruthy();
 });

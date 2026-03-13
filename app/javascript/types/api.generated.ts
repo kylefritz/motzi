@@ -112,7 +112,6 @@ export type MenuResponse = {
     }>;
     id: number;
     comments: string | null;
-    skip: boolean;
     stripeReceiptUrl?: string | null;
     stripeChargeAmount?: number | null;
   } | null;
@@ -165,7 +164,6 @@ export type MenuResponse = {
     }>;
     id: number;
     comments: string | null;
-    skip: boolean;
     stripeReceiptUrl?: string | null;
     stripeChargeAmount?: number | null;
   } | null;

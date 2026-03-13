@@ -32,6 +32,12 @@
     </div>
   <% end %>
 
+  <% if Rails.env.development? %>
+    <div class="text-center mt-4 mb-4">
+      <%= link_to "Dev: Sign in as admin", dev_login_as_admin_path, class: "btn btn-outline-secondary btn-sm" %>
+    </div>
+  <% end %>
+
   <div class="actions">
     <%= f.submit "Log in to access credits", class: "btn btn-primary btn-lg btn-block" %>
   </div>

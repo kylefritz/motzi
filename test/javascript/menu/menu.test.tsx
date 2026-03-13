@@ -51,11 +51,10 @@ test("menu for uid-user, add item to cart", async () => {
 
   const order = onCreateOrder.mock.calls[0][0];
   expect(order).toBeTruthy();
-  const { uid, skip, cart } = order;
+  const { uid, cart } = order;
   console.log("submitted card", cart);
 
   expect(uid).toBe("Dot9gKn9w");
-  expect(skip).toBeFalsy();
   expect(cart).toHaveLength(1);
   expect(cart[0]).toStrictEqual({
     itemId: 3,
@@ -124,27 +123,6 @@ test("must buy more credits", () => {
   renderMenu({ user: { credits: 5 }, order: false });
   expect(screen.queryByText("Buy credits")).toBeNull();
   expect(screen.getByRole("button", { name: "Submit Order" })).toBeTruthy();
-});
-
-test("Menu pick skip", async () => {
-  const { onCreateOrder } = renderMenu();
-
-  expect(getCartTotalText()).toContain("3 credits");
-
-  await userEvent.click(screen.getByRole("button", { name: "Skip Now" }));
-
-  expect(screen.getByText("Skip this week")).toBeTruthy();
-
-  await userEvent.click(screen.getByRole("button", { name: "Update Order" }));
-
-  await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));
-
-  const order = onCreateOrder.mock.calls[0][0];
-  expect(order).toBeTruthy();
-  const { uid, skip } = order;
-
-  expect(uid).toBe("Dot9gKn9w");
-  expect(skip).toBeTruthy();
 });
 
 test("old menu disables submit", () => {

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import BuyCredits from "../buy/App";
+import { getPriceContext } from "./Contexts";
 import type { MenuUser } from "../../types/api";
 
 export const humanizeBreadsPerWeek = (perWeek: number) => {
@@ -28,6 +29,7 @@ export default function Subscription({
   showBuyMoreButton = true,
 }: SubscriptionProps) {
   const [showForm, setShowForm] = useState(false);
+  const { showCredits } = getPriceContext();
   return (
     <>
       <div className="row">
@@ -44,7 +46,7 @@ export default function Subscription({
             </div>
           </div>
         </div>
-        {user.subscriber && (
+        {user.subscriber && showCredits && (
           <>
             <div className="col">
               <h5 className="text-center">Credits</h5>

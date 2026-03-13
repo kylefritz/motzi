@@ -1,0 +1,224 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.anthropic.com/v1/messages
+    body:
+      encoding: UTF-8
+      string: '{"model":"claude-opus-4-6","max_tokens":4096,"system":"You are an operations
+        analyst for a small neighborhood bakery CSA (Community Supported Agriculture).\nYou
+        are reviewing the activity feed for the current week and comparing it to recent
+        weeks to detect anomalies.\n\nLook for:\n- Missing expected actions (e.g.,
+        menu not published when it usually is by now)\n- Unusual order counts (significantly
+        higher or lower than recent weeks)\n- Email delivery problems (sent count
+        much lower than usual, low open rates)\n- Timing anomalies (actions happening
+        at unusual times)\n- Credit purchase patterns that deviate from normal\n-
+        Any other patterns that suggest something might be broken or unusual\n\nRespond
+        with:\n1. A brief overall status (healthy / warning / problem)\n2. Any anomalies
+        found, each with:\n   - What you noticed\n   - Why it might be a problem\n   -
+        Severity (info / warning / critical)\n3. If everything looks normal, say so
+        briefly\n\nBe concise. This report is emailed to the bakery operator.\n","messages":[{"role":"user","content":"##
+        Current Week: 19w01 (analyze this week for anomalies)\n\nActivity Feed: 19w01\n========================================\n\n==
+        Events ==\n[3/03  3:41am] [customer] Kyle Fritz ordered: Thu: Pumpkin\n[3/03  3:41am]
+        [customer] Adrian Alday ordered: Thu: Classic\n[3/03  3:41am] [customer] Laura
+        Flamm ordered: Sat: Classic\n\n3 events\n\n## Comparison Week: 18w52\n\nActivity
+        Feed: 18w52\n========================================\n\n== Events ==\n\n0
+        events\n\n## Comparison Week: 18w51\n\nActivity Feed: 18w51\n========================================\n\n==
+        Events ==\n\n0 events\n\n## Comparison Week: 18w50\n\nActivity Feed: 18w50\n========================================\n\n==
+        Events ==\n\n0 events\n\n## Comparison Week: 18w49\n\nActivity Feed: 18w49\n========================================\n\n==
+        Events ==\n\n0 events\n"}]}'
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - application/json
+      User-Agent:
+      - Anthropic::Client/Ruby 1.23.0
+      Host:
+      - api.anthropic.com
+      X-Stainless-Arch:
+      - arm64
+      X-Stainless-Lang:
+      - ruby
+      X-Stainless-Os:
+      - MacOS
+      X-Stainless-Package-Version:
+      - 1.23.0
+      X-Stainless-Runtime:
+      - ruby
+      X-Stainless-Runtime-Version:
+      - 3.3.10
+      Content-Type:
+      - application/json
+      Anthropic-Version:
+      - '2023-06-01'
+      X-Api-Key:
+      - "<ANTHROPIC_API_KEY>"
+      X-Stainless-Retry-Count:
+      - '0'
+      X-Stainless-Timeout:
+      - '600.0'
+      Content-Length:
+      - '1885'
+  response:
+    status:
+      code: 529
+      message: "<none>"
+    headers:
+      Date:
+      - Tue, 03 Mar 2026 08:42:10 GMT
+      Content-Type:
+      - application/json
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Should-Retry:
+      - 'true'
+      Request-Id:
+      - req_011CYfrD55L9ZG9wfRerUYYQ
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Anthropic-Organization-Id:
+      - b8ae1aef-5d79-4d28-a47d-577a49f24cbb
+      Server:
+      - cloudflare
+      X-Envoy-Upstream-Service-Time:
+      - '5550'
+      Vary:
+      - Accept-Encoding
+      Cf-Cache-Status:
+      - DYNAMIC
+      X-Robots-Tag:
+      - none
+      Content-Security-Policy:
+      - default-src 'none'; frame-ancestors 'none'
+      Cf-Ray:
+      - 9d6758825f019289-DEN
+    body:
+      encoding: ASCII-8BIT
+      string: '{"type":"error","error":{"type":"overloaded_error","message":"Overloaded"},"request_id":"req_011CYfrD55L9ZG9wfRerUYYQ"}'
+  recorded_at: Sun, 30 Dec 2018 14:00:00 GMT
+- request:
+    method: post
+    uri: https://api.anthropic.com/v1/messages
+    body:
+      encoding: UTF-8
+      string: '{"model":"claude-opus-4-6","max_tokens":4096,"system":"You are an operations
+        analyst for a small neighborhood bakery CSA (Community Supported Agriculture).\nYou
+        are reviewing the activity feed for the current week and comparing it to recent
+        weeks to detect anomalies.\n\nLook for:\n- Missing expected actions (e.g.,
+        menu not published when it usually is by now)\n- Unusual order counts (significantly
+        higher or lower than recent weeks)\n- Email delivery problems (sent count
+        much lower than usual, low open rates)\n- Timing anomalies (actions happening
+        at unusual times)\n- Credit purchase patterns that deviate from normal\n-
+        Any other patterns that suggest something might be broken or unusual\n\nRespond
+        with:\n1. A brief overall status (healthy / warning / problem)\n2. Any anomalies
+        found, each with:\n   - What you noticed\n   - Why it might be a problem\n   -
+        Severity (info / warning / critical)\n3. If everything looks normal, say so
+        briefly\n\nBe concise. This report is emailed to the bakery operator.\n","messages":[{"role":"user","content":"##
+        Current Week: 19w01 (analyze this week for anomalies)\n\nActivity Feed: 19w01\n========================================\n\n==
+        Events ==\n[3/03  3:41am] [customer] Kyle Fritz ordered: Thu: Pumpkin\n[3/03  3:41am]
+        [customer] Adrian Alday ordered: Thu: Classic\n[3/03  3:41am] [customer] Laura
+        Flamm ordered: Sat: Classic\n\n3 events\n\n## Comparison Week: 18w52\n\nActivity
+        Feed: 18w52\n========================================\n\n== Events ==\n\n0
+        events\n\n## Comparison Week: 18w51\n\nActivity Feed: 18w51\n========================================\n\n==
+        Events ==\n\n0 events\n\n## Comparison Week: 18w50\n\nActivity Feed: 18w50\n========================================\n\n==
+        Events ==\n\n0 events\n\n## Comparison Week: 18w49\n\nActivity Feed: 18w49\n========================================\n\n==
+        Events ==\n\n0 events\n"}]}'
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - application/json
+      User-Agent:
+      - Anthropic::Client/Ruby 1.23.0
+      Host:
+      - api.anthropic.com
+      X-Stainless-Arch:
+      - arm64
+      X-Stainless-Lang:
+      - ruby
+      X-Stainless-Os:
+      - MacOS
+      X-Stainless-Package-Version:
+      - 1.23.0
+      X-Stainless-Runtime:
+      - ruby
+      X-Stainless-Runtime-Version:
+      - 3.3.10
+      Content-Type:
+      - application/json
+      Anthropic-Version:
+      - '2023-06-01'
+      X-Api-Key:
+      - "<ANTHROPIC_API_KEY>"
+      X-Stainless-Retry-Count:
+      - '1'
+      X-Stainless-Timeout:
+      - '600.0'
+      Content-Length:
+      - '1885'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Tue, 03 Mar 2026 08:42:27 GMT
+      Content-Type:
+      - application/json
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      Anthropic-Ratelimit-Input-Tokens-Limit:
+      - '450000'
+      Anthropic-Ratelimit-Input-Tokens-Remaining:
+      - '450000'
+      Anthropic-Ratelimit-Input-Tokens-Reset:
+      - '2026-03-03T08:42:12Z'
+      Anthropic-Ratelimit-Output-Tokens-Limit:
+      - '90000'
+      Anthropic-Ratelimit-Output-Tokens-Remaining:
+      - '90000'
+      Anthropic-Ratelimit-Output-Tokens-Reset:
+      - '2026-03-03T08:42:27Z'
+      Anthropic-Ratelimit-Requests-Limit:
+      - '1000'
+      Anthropic-Ratelimit-Requests-Remaining:
+      - '999'
+      Anthropic-Ratelimit-Requests-Reset:
+      - '2026-03-03T08:42:10Z'
+      Anthropic-Ratelimit-Tokens-Limit:
+      - '540000'
+      Anthropic-Ratelimit-Tokens-Remaining:
+      - '540000'
+      Anthropic-Ratelimit-Tokens-Reset:
+      - '2026-03-03T08:42:12Z'
+      Request-Id:
+      - req_011CYfrDVVGqLp5q6DCSjTYg
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Anthropic-Organization-Id:
+      - b8ae1aef-5d79-4d28-a47d-577a49f24cbb
+      Server:
+      - cloudflare
+      X-Envoy-Upstream-Service-Time:
+      - '16762'
+      Vary:
+      - Accept-Encoding
+      Cf-Cache-Status:
+      - DYNAMIC
+      X-Robots-Tag:
+      - none
+      Content-Security-Policy:
+      - default-src 'none'; frame-ancestors 'none'
+      Cf-Ray:
+      - 9d6758a60ebf2fab-DEN
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        eyJtb2RlbCI6ImNsYXVkZS1vcHVzLTQtNiIsImlkIjoibXNnXzAxUDhRQnN4eVdpV1pkZ3hYTGhrZTd0WSIsInR5cGUiOiJtZXNzYWdlIiwicm9sZSI6ImFzc2lzdGFudCIsImNvbnRlbnQiOlt7InR5cGUiOiJ0ZXh0IiwidGV4dCI6IiMgV2Vla2x5IEFjdGl2aXR5IFJlcG9ydDogMTl3MDFcblxuIyMgT3ZlcmFsbCBTdGF0dXM6IOKaoO+4jyBXQVJOSU5HXG5cbi0tLVxuXG4jIyMgQW5vbWFsaWVzIEZvdW5kXG5cbioqMS4gT3JkZXJzIGFwcGVhcmVkIGFmdGVyIHdlZWtzIG9mIHplcm8gYWN0aXZpdHkqKlxuLSAqKldoYXQ6KiogMyBvcmRlcnMgY2FtZSBpbiB0aGlzIHdlZWsgYWZ0ZXIgYXQgbGVhc3QgNCBjb25zZWN1dGl2ZSB3ZWVrcyAoMTh3NDnigJMxOHc1Mikgd2l0aCB6ZXJvIGFjdGl2aXR5IG9mIGFueSBraW5kLlxuLSAqKldoeSBpdCBtYXR0ZXJzOioqIFRoaXMgY291bGQgYmUgbm9ybWFsIChlLmcuLCBob2xpZGF5IGJyZWFrIGVuZGluZywgbmV3IHNlYXNvbiBsYXVuY2gpLCBidXQgdGhlIGNvbXBsZXRlIGFic2VuY2Ugb2YgYWN0aXZpdHkgZm9yIGEgZnVsbCBtb250aCBiZWZvcmUgdGhpcyBpcyB1bnVzdWFsLiBXb3J0aCBjb25maXJtaW5nIHRoaXMgd2FzIGludGVudGlvbmFsIChwbGFubmVkIGhpYXR1cykgcmF0aGVyIHRoYW4gYSBzeXN0ZW0gaXNzdWUgdGhhdCBzdXBwcmVzc2VkIGV2ZW50cyBkdXJpbmcgdGhvc2Ugd2Vla3MuXG4tICoqU2V2ZXJpdHk6Kiog4pqg77iPIFdhcm5pbmdcblxuKioyLiBObyBtZW51IHB1Ymxpc2ggZXZlbnQgdmlzaWJsZSoqXG4tICoqV2hhdDoqKiBUaHJlZSBjdXN0b21lcnMgcGxhY2VkIG9yZGVycywgYnV0IHRoZXJlJ3Mgbm8gcmVjb3JkIG9mIGEgbWVudSBiZWluZyBwdWJsaXNoZWQgb3IgYW4gZW1haWwgYmVpbmcgc2VudCB0aGlzIHdlZWsuXG4tICoqV2h5IGl0IG1hdHRlcnM6KiogTm9ybWFsbHkgeW91J2QgZXhwZWN0IHRvIHNlZSBhIG1lbnUgcHVibGljYXRpb24gYW5kIGEgbm90aWZpY2F0aW9uIGVtYWlsIGJlZm9yZSBvcmRlcnMgY29tZSBpbi4gRWl0aGVyIHRoZXNlIGV2ZW50cyBhcmVuJ3QgYmVpbmcgbG9nZ2VkLCBvciBjdXN0b21lcnMgb3JkZXJlZCBmcm9tIGEgc3RhbGUvZGVmYXVsdCBtZW51LiBJZiBubyBlbWFpbCB3ZW50IG91dCwgb3JkZXIgdm9sdW1lIG1heSBiZSBhcnRpZmljaWFsbHkgbG93IOKAlCBvbmx5IDMgb3JkZXJzIGZyb20gcGVvcGxlIHdobyBmb3VuZCBpdCBvbiB0aGVpciBvd24uXG4tICoqU2V2ZXJpdHk6Kiog4pqg77iPIFdhcm5pbmdcblxuKiozLiBBbGwgMyBvcmRlcnMgcGxhY2VkIGF0IHRoZSBleGFjdCBzYW1lIHRpbWVzdGFtcCoqXG4tICoqV2hhdDoqKiBBbGwgb3JkZXJzIGxvZ2dlZCBhdCAzLzAzIDM6NDFhbSDigJQgaWRlbnRpY2FsIHRvIHRoZSBzZWNvbmQuXG4tICoqV2h5IGl0IG1hdHRlcnM6KiogVGhpcyBpcyB1bnVzdWFsIGZvciBvcmdhbmljIGN1c3RvbWVyIGJlaGF2aW9yLiBDb3VsZCBpbmRpY2F0ZSBhIGJhdGNoIGltcG9ydCwgYSBzeXN0ZW0gYmFja2xvZyB0aGF0IHByb2Nlc3NlZCBxdWV1ZWQgb3JkZXJzIHNpbXVsdGFuZW91c2x5LCBvciBhIHRlc3QuIFdvcnRoIHZlcmlmeWluZyB0aGVzZSBhcmUgcmVhbCBjdXN0b21lciBvcmRlcnMuXG4tICoqU2V2ZXJpdHk6Kiog4oS577iPIEluZm9cblxuKio0LiBWZXJ5IGxvdyBvcmRlciBjb3VudCoqXG4tICoqV2hhdDoqKiBPbmx5IDMgb3JkZXJzLiBXaXRoIG5vIGJhc2VsaW5lIGZyb20gcmVjZW50IHdlZWtzIChhbGwgd2VyZSB6ZXJvKSwgaXQncyBoYXJkIHRvIGJlbmNobWFyaywgYnV0IDMgb3JkZXJzIGZlZWxzIGxvdyBpZiB5b3UgaGF2ZSBhbiBhY3RpdmUgc3Vic2NyaWJlciBsaXN0LlxuLSAqKldoeSBpdCBtYXR0ZXJzOioqIElmIHlvdSBub3JtYWxseSBleHBlY3QgbW9yZSBvcmRlcnMsIHRoZSBtaXNzaW5nIGVtYWlsL25vdGlmaWNhdGlvbiAoc2VlICMyKSBjb3VsZCBleHBsYWluIHRoZSBsb3cgdm9sdW1lLlxuLSAqKlNldmVyaXR5OioqIOKaoO+4jyBXYXJuaW5nXG5cbi0tLVxuXG4jIyMgUmVjb21tZW5kZWQgQWN0aW9uc1xuMS4gKipDb25maXJtIHRoZSA0LXdlZWsgZ2FwIHdhcyBhIHBsYW5uZWQgYnJlYWsqKiDigJQgcnVsZSBvdXQgYSBsb2dnaW5nIG9yIHN5c3RlbSBvdXRhZ2UuXG4yLiAqKkNoZWNrIGlmIHRoZSB3ZWVrbHkgbWVudSBlbWFpbCB3YXMgYWN0dWFsbHkgc2VudCoqIOKAlCBpZiBub3QsIHRoYXQgbGlrZWx5IGV4cGxhaW5zIHRoZSBsb3cgb3JkZXIgY291bnQgYW5kIHlvdSBtYXkgd2FudCB0byByZXNlbmQuXG4zLiAqKlZlcmlmeSB0aGUgMyBvcmRlcnMgYXJlIGxlZ2l0aW1hdGUqKiAoaWRlbnRpY2FsIHRpbWVzdGFtcHMgYXJlIHN1c3BpY2lvdXMpLiJ9XSwic3RvcF9yZWFzb24iOiJlbmRfdHVybiIsInN0b3Bfc2VxdWVuY2UiOm51bGwsInVzYWdlIjp7ImlucHV0X3Rva2VucyI6NDUyLCJjYWNoZV9jcmVhdGlvbl9pbnB1dF90b2tlbnMiOjAsImNhY2hlX3JlYWRfaW5wdXRfdG9rZW5zIjowLCJjYWNoZV9jcmVhdGlvbiI6eyJlcGhlbWVyYWxfNW1faW5wdXRfdG9rZW5zIjowLCJlcGhlbWVyYWxfMWhfaW5wdXRfdG9rZW5zIjowfSwib3V0cHV0X3Rva2VucyI6NTYzLCJzZXJ2aWNlX3RpZXIiOiJzdGFuZGFyZCIsImluZmVyZW5jZV9nZW8iOiJnbG9iYWwifX0=
+  recorded_at: Sun, 30 Dec 2018 14:00:00 GMT
+recorded_with: VCR 6.4.0

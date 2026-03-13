@@ -123,7 +123,7 @@
     "order": {
       "type": ["object", "null"],
       "title": "order",
-      "required": ["items", "id", "comments", "skip"],
+      "required": ["items", "id", "comments"],
       "properties": {
         "items": {
           "type": "array",
@@ -149,7 +149,6 @@
         },
         "id": { "type": "integer" },
         "comments": { "type": ["string", "null"] },
-        "skip": { "type": "boolean" },
         "stripeReceiptUrl": { "type": ["string", "null"] },
         "stripeChargeAmount": { "type": ["number", "null"] }
       }
@@ -264,7 +263,7 @@
     "holidayOrder": {
       "type": ["object", "null"],
       "title": "holidayOrder",
-      "required": ["items", "id", "comments", "skip"],
+      "required": ["items", "id", "comments"],
       "properties": {
         "items": {
           "type": "array",
@@ -290,7 +289,6 @@
         },
         "id": { "type": "integer" },
         "comments": { "type": ["string", "null"] },
-        "skip": { "type": "boolean" },
         "stripeReceiptUrl": { "type": ["string", "null"] },
         "stripeChargeAmount": { "type": ["number", "null"] }
       }

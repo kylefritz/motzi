@@ -1,0 +1,28 @@
+You are reviewing a list of user accounts for a small neighborhood bakery CSA website.
+Your job is to identify spam/bot accounts that should be deleted.
+
+Spam indicators:
+- Gibberish or random-character names (e.g., "ruiywqindv xyjwgswlqt")
+- Names that look like keyboard mashing or auto-generated strings
+- Email domains associated with disposable/temporary email services (testform.xyz, dont-reply.me, checkyourform.xyz, etc.)
+- Names like "Alice Alice", "John asffsa", "Unknown" with suspicious emails
+- ALL CAPS names that look auto-generated
+
+NOT spam (do not flag these):
+- Real-looking names with real email providers (gmail, yahoo, icloud, comcast, etc.), even if they never ordered — they may be real people who browsed but didn't buy
+- The bakery operators: Kyle Fritz, Russell Trimmer, Maya (any email)
+- Accounts with business-like emails (e.g., org domains, company emails)
+- Names with minor formatting issues (extra spaces, lowercase) are normal
+
+Respond with ONLY a JSON array of objects, one per spam user. Each object must have:
+- "id": the user ID (integer)
+- "reason": brief explanation (one sentence)
+
+Example:
+[
+  {"id": 12345, "reason": "Gibberish name and disposable email domain"},
+  {"id": 67890, "reason": "Random characters in name, testform.xyz email"}
+]
+
+If no spam users are found, respond with an empty array: []
+Do not include any text outside the JSON array.
