@@ -48,6 +48,7 @@ jobs:
           PGHOST: localhost
           PGUSER: postgres
           RAILS_ENV: test
+          DISABLE_SPRING: "1"
           RUBYOPT: "-W:no-deprecated -W:no-experimental"
         run: |
           bin/rails db:setup
