@@ -401,6 +401,13 @@ form fieldset.actions li.cancel a {
     text-transform: uppercase;
     letter-spacing: 0.03em;
   }
+
+  .totals-row td {
+    border-top: 2px solid #e8e2da;
+    border-bottom: none;
+    font-weight: 600;
+    background: #faf8f6;
+  }
 }
 
 // Analysis card

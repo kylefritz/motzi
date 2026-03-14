@@ -178,6 +178,50 @@ ActiveAdmin.register_page "Activity Feed" do
                 end
               end
             end
+            tfoot do
+              tr class: "totals-row" do
+                td do
+                  strong "Total"
+                end
+                grid_columns.each do |col|
+                  td do
+                    all_events = grid.values.flat_map { |actions| actions[col] || [] }
+                    case col
+                    when "daily_visits"
+                      total_unique = all_events.sum { |e| e.details[:unique].to_i }
+                      total_visits = all_events.sum { |e| e.details[:visits].to_i }
+                      span total_unique.to_s, class: "cell-num"
+                      span " visitors ", class: "cell-label"
+                      span "(#{total_visits} hits)", class: "cell-dim"
+                    when "orders_summary"
+                      total = all_events.sum { |e| e.details[:count].to_i }
+                      span total.to_s, class: "cell-num"
+                      span " orders", class: "cell-label"
+                    when "credits_summary"
+                      total_count = all_events.sum { |e| e.details[:count].to_i }
+                      total_credits = all_events.sum { |e| e.details[:total_credits].to_f }
+                      span total_count.to_s, class: "cell-num"
+                      span " purchases ", class: "cell-label"
+                      span "$#{'%.0f' % total_credits}", class: "cell-dim"
+                    when "email_summary"
+                      total_sent = all_events.sum { |e| e.details[:sent].to_i }
+                      total_opened = all_events.sum { |e| e.details[:opened].to_i }
+                      rate = total_sent > 0 ? (total_opened.to_f / total_sent * 100).round : 0
+                      span total_sent.to_s, class: "cell-num"
+                      span " sent", class: "cell-label"
+                      rate_color = rate >= 50 ? "green" : rate >= 20 ? "orange" : "red"
+                      span " · #{rate}% opened", style: "color: #{rate_color}", class: "cell-dim"
+                    when "recurring_jobs_summary"
+                      total = all_events.size
+                      span total.to_s, class: "cell-num"
+                      span " runs", class: "cell-label"
+                    else
+                      span "—", class: "cell-empty"
+                    end
+                  end
+                end
+              end
+            end
           end
         end
       end
