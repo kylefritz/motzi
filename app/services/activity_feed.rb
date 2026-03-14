@@ -160,29 +160,33 @@ class ActivityFeed
   def orders_by_day_text
     today = Time.zone.today
     lines = ["== Orders by Day =="]
-    total = 0
+    total_orders = 0
+    total_items = 0
 
     @menus.each do |menu|
-      by_day = menu.orders.where(created_at: @week_start..@week_end)
+      by_day = menu.orders.includes(:order_items).where(created_at: @week_start..@week_end)
                    .group_by { |o| o.created_at.to_date }
 
       (0..6).each do |i|
         date = (@week_start + i.days).to_date
-        count = (by_day[date] || []).size
-        total += count
+        daily_orders = by_day[date] || []
+        count = daily_orders.size
+        items = daily_orders.sum { |o| o.order_items.size }
+        total_orders += count
+        total_items += items
         day_label = date.strftime("%a %-m/%-d")
 
         if date > today
           lines << "  #{day_label}: (upcoming)"
         elsif date == today
-          lines << "  #{day_label}: #{count} orders (today, still in progress)"
+          lines << "  #{day_label}: #{count} orders (#{items} items) (today, still in progress)"
         else
-          lines << "  #{day_label}: #{count} orders"
+          lines << "  #{day_label}: #{count} orders (#{items} items)"
         end
       end
     end
 
-    lines << "  Total so far: #{total}"
+    lines << "  Total so far: #{total_orders} orders (#{total_items} items)"
     lines.join("\n")
   end
 
@@ -231,12 +235,13 @@ class ActivityFeed
         end
       else
         orders.group_by { |o| o.created_at.to_date }.each do |date, daily_orders|
+          item_count = daily_orders.sum { |o| o.order_items.size }
           events << Event.new(
             timestamp: daily_orders.last.created_at,
             category: "customer",
             action: "orders_summary",
-            description: "#{daily_orders.size} orders placed for #{menu.name}",
-            details: { source: "orders", menu_id: menu.id, count: daily_orders.size, date: date.to_s }
+            description: "#{daily_orders.size} orders placed for #{menu.name} (#{item_count} items)",
+            details: { source: "orders", menu_id: menu.id, count: daily_orders.size, item_count: item_count, date: date.to_s }
           )
         end
       end

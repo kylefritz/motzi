@@ -27,7 +27,7 @@ ActiveAdmin.register_page "Activity Feed" do
 
     week_start = Time.zone.from_week_id(week_id)
     week_end = week_start + 6.days
-    weeks = (0..8).map { |i| (Time.zone.now - i.weeks).week_id }.uniq
+    weeks = (0..16).map { |i| (Time.zone.now - i.weeks).week_id }.uniq
 
     # Week header
     menu = Menu.find_by(week_id: week_id)
@@ -72,15 +72,15 @@ ActiveAdmin.register_page "Activity Feed" do
     end
 
     # Weekly trends chart
-    weeks = (0..8).map { |i| (Time.zone.now - i.weeks).week_id }
     trend_data = weeks.map do |wid|
       ws = Time.zone.from_week_id(wid)
       we = ws + 7.days
       menus = Menu.where(week_id: wid)
       order_count = menus.any? ? Order.where(menu_id: menus.select(:id)).count : 0
+      item_count = menus.any? ? OrderItem.joins(:order).where(orders: { menu_id: menus.select(:id) }).count : 0
       email_count = menus.any? ? Ahoy::Message.where(menu_id: menus.select(:id)).count : 0
       visitor_count = Ahoy::Visit.where(started_at: ws..we).distinct.count(:visitor_token)
-      { week: wid, orders: order_count, emails: email_count, visitors: visitor_count }
+      { week: wid, orders: order_count, items: item_count, emails: email_count, visitors: visitor_count }
     end
 
     panel "Weekly Trends" do
@@ -106,6 +106,18 @@ ActiveAdmin.register_page "Activity Feed" do
                     borderWidth: 2,
                     tension: 0.3,
                     fill: true,
+                    yAxisID: 'y_orders',
+                    pointRadius: 3
+                  },
+                  {
+                    label: 'Items',
+                    data: #{trend_data.map { |d| d[:items] }.to_json},
+                    borderColor: '#66BB6A',
+                    backgroundColor: 'rgba(102, 187, 106, 0.05)',
+                    borderWidth: 2,
+                    borderDash: [4, 3],
+                    tension: 0.3,
+                    fill: false,
                     yAxisID: 'y_orders',
                     pointRadius: 3
                   },
@@ -242,7 +254,7 @@ ActiveAdmin.register_page "Activity Feed" do
                 is_today = date == Time.zone.today
                 tr class: is_today ? "is-today" : nil do
                   td do
-                    text_node date.strftime("%A %-m/%-d")
+                    text_node date.strftime("%a %-m/%-d")
                     span "today", class: "today-label" if is_today
                   end
                   grid_columns.each do |col|
@@ -264,7 +276,8 @@ ActiveAdmin.register_page "Activity Feed" do
                               next_day = (Date.parse(d[:date]) + 1).to_s
                               a href: admin_orders_path(q: { created_at_gteq: d[:date], created_at_lteq: next_day }), class: "cell-link" do
                                 span d[:count].to_s, class: "cell-num"
-                                span " orders", class: "cell-label"
+                                span " orders ", class: "cell-label"
+                                span "(#{d[:item_count]} items)", class: "cell-dim" if d[:item_count].to_i > 0
                               end
                             when "credits_summary"
                               d = e.details
@@ -316,8 +329,10 @@ ActiveAdmin.register_page "Activity Feed" do
                       span "(#{total_visits} hits)", class: "cell-dim"
                     when "orders_summary"
                       total = all_events.sum { |e| e.details[:count].to_i }
+                      total_items = all_events.sum { |e| e.details[:item_count].to_i }
                       span total.to_s, class: "cell-num"
-                      span " orders", class: "cell-label"
+                      span " orders ", class: "cell-label"
+                      span "(#{total_items} items)", class: "cell-dim" if total_items > 0
                     when "credits_summary"
                       total_count = all_events.sum { |e| e.details[:count].to_i }
                       total_credits = all_events.sum { |e| e.details[:total_credits].to_f }
