@@ -15,28 +15,33 @@ class AnomalyDetector
   end
 
   def analyze(trigger:, user: nil)
-    user_message = build_user_message
-    @on_progress.call("Sending to Claude (#{MODEL})…")
-    response = call_claude(user_message)
+    result = run_analysis
     @on_progress.call("Analysis received, saving…")
-
-    cost = self.class.estimate_cost(response[:input_tokens], response[:output_tokens])
 
     AnomalyAnalysis.create!(
       week_id: @week_id,
-      result: response[:text],
-      prompt_used: user_message,
+      result: result[:text],
+      prompt_used: result[:prompt],
       model_used: MODEL,
-      api_model: response[:model],
-      input_tokens: response[:input_tokens],
-      output_tokens: response[:output_tokens],
-      cache_creation_input_tokens: response[:cache_creation_input_tokens],
-      cache_read_input_tokens: response[:cache_read_input_tokens],
-      stop_reason: response[:stop_reason],
-      cost_cents: (cost * 100).round,
+      api_model: result[:model],
+      input_tokens: result[:input_tokens],
+      output_tokens: result[:output_tokens],
+      cache_creation_input_tokens: result[:cache_creation_input_tokens],
+      cache_read_input_tokens: result[:cache_read_input_tokens],
+      stop_reason: result[:stop_reason],
+      cost_cents: (result[:cost] * 100).round,
       trigger: trigger,
       user: user
     )
+  end
+
+  # Run analysis and return results without persisting to the database.
+  def run_analysis
+    user_message = build_user_message
+    @on_progress.call("Sending to Claude (#{MODEL})…")
+    response = call_claude(user_message)
+    cost = self.class.estimate_cost(response[:input_tokens], response[:output_tokens])
+    response.merge(prompt: user_message, cost: cost)
   end
 
   def system_prompt

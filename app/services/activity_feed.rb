@@ -119,6 +119,8 @@ class ActivityFeed
       lines << "=" * 40
       lines << ""
 
+      lines << menu_context_text
+      lines << ""
       lines << orders_by_day_text
       lines << ""
     end
@@ -156,6 +158,17 @@ class ActivityFeed
   end
 
   private
+
+  def menu_context_text
+    lines = ["== Menu Context =="]
+    @menus.each do |menu|
+      lines << "Menu: #{menu.name}"
+      lines << "  Baker's note: #{menu.subscriber_note}" if menu.subscriber_note.present?
+      lines << "  Menu note: #{menu.menu_note}" if menu.menu_note.present?
+      lines << "  Day-of note: #{menu.day_of_note}" if menu.day_of_note.present?
+    end
+    lines.join("\n")
+  end
 
   def orders_by_day_text
     today = Time.zone.today
