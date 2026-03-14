@@ -1,0 +1,39 @@
+# Ground truth for anomaly detector prompt evaluation.
+# expected_status: healthy | warning | problem
+# Adjust these based on your knowledge of what actually happened each week.
+
+26w03:
+  expected_status: healthy
+  notes: "Normal week, 55 orders"
+
+26w04:
+  expected_status: healthy
+  notes: "Strong week, 80 orders — not anomalous"
+
+26w05:
+  expected_status: healthy
+  notes: "45 orders after a strong week — normal regression, not a real anomaly"
+
+26w06:
+  expected_status: healthy
+  notes: "45 orders, steady"
+
+26w07:
+  expected_status: healthy
+  notes: "113 orders — Valentine's week, expected spike"
+
+26w08:
+  expected_status: healthy
+  notes: "43 orders — normal post-holiday dip"
+
+26w09:
+  expected_status: healthy
+  notes: "50 orders, normal"
+
+26w10:
+  expected_status: healthy
+  notes: "59 orders, strong non-holiday week"
+
+26w11:
+  expected_status: healthy
+  notes: "46 orders, normal week"

@@ -118,6 +118,8 @@ class ActivityFeedTest < ActiveSupport::TestCase
     order_events = evts.select { |e| e.action == "orders_summary" }
     assert order_events.any?, "Should have order summary events for week with orders"
     assert_match(/\d+ orders placed/, order_events.first.description)
+    assert_match(/\d+ items/, order_events.first.description)
+    assert order_events.first.details[:item_count].is_a?(Integer), "Should include item_count in details"
   end
 
   test "verbose order events show individual orders" do

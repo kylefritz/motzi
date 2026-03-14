@@ -1,0 +1,58 @@
+<mjml>
+  <mj-head>
+    <%= render partial: "shared_mailer/head", formats: [:html] %>
+  </mj-head>
+  <mj-body background-color="#FFECD6">
+    <%= render partial: "shared_mailer/header", formats: [:html] %>
+
+    <mj-section background-color="#ffffff" padding="32px 40px 24px 40px">
+      <mj-column>
+        <mj-text padding="0 0 8px 0" font-size="13px" font-weight="500" letter-spacing="0.08em" text-transform="uppercase" color="#D5482C">
+          Pickup Day
+        </mj-text>
+
+        <mj-text padding="0 0 20px 0" font-size="26px" font-weight="700" line-height="1.3" color="#352C63">
+          Your order is ready! Time to grab your bread.
+        </mj-text>
+
+        <mj-divider border-color="#D5482C" border-width="2px" padding="0 0 24px 0" />
+
+        <%# ── Pickup instructions callout ── %>
+        <mj-text padding="16px 20px" background-color="#FFECD6" border-radius="4px" font-size="15px" line-height="1.6" color="#2E2927">
+          <strong style="color: #352C63; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;">Pickup Details</strong>
+          <br /><br />
+          <%= Setting.pickup_instructions_html %>
+        </mj-text>
+
+        <%# ── Baker's day-of note ── %>
+        <% if @menu.day_of_note_html.present? %>
+        <mj-text padding="20px 0 0 0" font-size="15px" font-style="italic" line-height="1.6" color="#666666">
+          <%= @menu.day_of_note_html %>
+        </mj-text>
+        <% end %>
+
+        <mj-divider border-color="#FFECD6" border-width="1px" padding="24px 0" />
+
+        <%# ── Order summary ── %>
+        <mj-text padding="0 0 12px 0" font-size="12px" font-weight="500" letter-spacing="0.1em" text-transform="uppercase" color="#999999">
+          Your Order
+        </mj-text>
+
+        <mj-table cellpadding="6px" font-size="16px" color="#2E2927">
+          <% @order_items.each do |oi| %>
+          <tr>
+            <td style="padding: 6px 12px 6px 0; font-weight: 500; color: #352C63; width: 40px;"><%= oi.quantity %>x</td>
+            <td style="padding: 6px 0; font-weight: 300;"><%= oi.item.name %></td>
+          </tr>
+          <% end %>
+        </mj-table>
+
+        <mj-divider border-color="#FFECD6" border-width="1px" padding="20px 0 16px 0" />
+
+        <%= render partial: "menu_mailer/credits_remaining", formats: [:html] %>
+      </mj-column>
+    </mj-section>
+
+    <%= render partial: "shared_mailer/footer", formats: [:html] %>
+  </mj-body>
+</mjml>

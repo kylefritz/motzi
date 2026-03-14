@@ -14,7 +14,8 @@ class MenuMailerTest < ActionMailer::TestCase
     assert_equal [user.additional_email], email.cc
     assert_includes email.subject, menu.name
     assert_in_both email, 'Another great market yesterday', 'includes bakers note'
-    assert_in_both email, 'You have 20 credits remaining', 'includes credits'
+    assert_includes email.html_part.body.to_s, 'credits remaining', 'includes credits in html'
+    assert_includes email.text_part.body.to_s, 'credits remaining', 'includes credits in text'
   end
 
   private

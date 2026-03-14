@@ -1,0 +1,40 @@
+<mjml>
+  <mj-head>
+    <%= render partial: "shared_mailer/head", formats: [:html] %>
+  </mj-head>
+  <mj-body background-color="#FFECD6">
+    <%= render partial: "shared_mailer/header", formats: [:html] %>
+
+    <mj-section background-color="#ffffff" padding="32px 40px 24px 40px">
+      <mj-column>
+        <mj-text padding="0 0 8px 0" font-size="13px" font-weight="500" letter-spacing="0.08em" text-transform="uppercase" color="#D5482C">
+          Friendly Reminder
+        </mj-text>
+
+        <mj-text padding="0 0 20px 0" font-size="26px" font-weight="700" line-height="1.3" color="#352C63">
+          <%= @menu.name %>
+        </mj-text>
+
+        <mj-divider border-color="#352C63" border-width="2px" padding="0 0 24px 0" />
+
+        <mj-text padding="0 0 28px 0" font-size="17px" line-height="1.7" color="#2E2927" font-weight="300">
+          You haven't placed your order yet this week &mdash; we'd love to bake for you!
+        </mj-text>
+
+        <mj-button background-color="#D5482C" color="#ffffff" href="<%= current_menu_url(uid: @user.hashid) %>" padding-bottom="28px">
+          View This Week's Menu
+        </mj-button>
+
+        <mj-text padding-bottom="24px">
+          <%= render partial: "shared_mailer/ordering_deadlines", locals: { menu: @menu }, formats: [:html] %>
+        </mj-text>
+
+        <mj-divider border-color="#FFECD6" border-width="1px" padding-bottom="16px" />
+
+        <%= render partial: "menu_mailer/credits_remaining", formats: [:html] %>
+      </mj-column>
+    </mj-section>
+
+    <%= render partial: "shared_mailer/footer", formats: [:html] %>
+  </mj-body>
+</mjml>

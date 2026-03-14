@@ -197,7 +197,7 @@ test("adds pickup days and items", async () => {
   // Remove a pickup day (confirm before delete).
   const pickupList = screen.getAllByRole("list")[0];
   const firstPickupDay = within(pickupList)
-    .getByText("Wed 10am")
+    .getByText("Wed, Jan 10 at 10a")
     .closest('[role="listitem"]');
   if (!firstPickupDay) {
     throw new Error("Expected first pickup day card to be present");
@@ -215,8 +215,11 @@ test("adds pickup days and items", async () => {
   await userEvent.click(removeButton);
   expect(deleteMock).toHaveBeenCalledWith("/admin/pickup_days/1.json");
 
-  // Edit an existing pickup day.
-  const pickupDayRow = within(firstPickupDay);
+  // Edit an existing pickup day (re-query after delete re-render).
+  const freshPickupDay = within(screen.getAllByRole("list")[0])
+    .getByText("Wed, Jan 10 at 10a")
+    .closest('[role="listitem"]')!;
+  const pickupDayRow = within(freshPickupDay);
   await userEvent.click(pickupDayRow.getByRole("button", { name: "Edit" }));
   const editPickupInput = pickupDayRow.getByLabelText("Pickup at:");
   const editDeadlineInput = pickupDayRow.getByLabelText("Order deadline at:");

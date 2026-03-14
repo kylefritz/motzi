@@ -32,7 +32,9 @@ Rails.application.configure do
   config.assets.compile = false
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
-  # config.asset_host = 'http://assets.example.com'
+  # Use HEROKU_APP_NAME (from runtime-dyno-metadata) so review apps get their own domain.
+  app_domain = ENV['HEROKU_APP_NAME'] ? "#{ENV['HEROKU_APP_NAME']}.herokuapp.com" : ShopConfig.shop.app_domain
+  config.asset_host = "https://#{app_domain}"
 
   # Specifies the header that your server uses for sending files.
   # config.action_dispatch.x_sendfile_header = 'X-Sendfile' # for Apache
@@ -63,7 +65,7 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
 
   # Setup the mailer config
-  config.action_mailer.default_url_options = { host: ShopConfig.shop.app_domain }
+  config.action_mailer.default_url_options = { host: app_domain }
   config.action_mailer.perform_caching = false
   config.action_mailer.perform_deliveries = ENV['SENDGRID_USERNAME'].present?
   # from send grid

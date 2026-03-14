@@ -9,8 +9,10 @@ class ReminderMailer < ApplicationMailer
 
     mail(to: %("#{@user.name}" <#{@user.email}>),
          cc: @user.additional_email,
-         subject: "Pick up #{Setting.shop.name} today!",
-         template_name: 'day_of_email')
+         subject: "Pick up #{Setting.shop.name} today!") do |format|
+      format.text
+      format.mjml
+    end
   end
 
   def havent_ordered_email
@@ -19,6 +21,9 @@ class ReminderMailer < ApplicationMailer
 
     mail(to: %("#{@user.name}" <#{@user.email}>),
          cc: @user.additional_email,
-         subject: "Make your selection soon! #{Setting.shop.name} - #{@menu.name}")
+         subject: "Make your selection soon! #{Setting.shop.name} - #{@menu.name}") do |format|
+      format.text
+      format.mjml
+    end
   end
 end

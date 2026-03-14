@@ -26,3 +26,7 @@ Heroku auto-deploys from `master` when CI passes. No Redis runtime — ActionCab
 - **github**: Set `GITHUB_TOKEN=$(gh auth token)` in `.env` to enable GitHub MCP.
 - **postgres**: MCP connects to `postgres://localhost/motzi` (local dev DB).
 - **context7**: No auth needed — provides live Rails, React, Stripe docs.
+
+## Before commit
+
+- Run the rails tests (they're fast) & fix an errors

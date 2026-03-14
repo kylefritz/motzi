@@ -9,6 +9,6 @@ class DeadlineHelperTest < ActiveSupport::TestCase
   end
 
   test "ordering_deadline_text" do
-    assert_equal "Thu 01/03 3p pickup (order by Tue 01/01 10p);\nSat 01/05 8a pickup (order by Thu 01/03 10p)", ordering_deadline_text(@menu)
+    assert_equal "Thu, Jan 3 pickup after 3p — order by Tue, Jan 1 at 10p\nSat, Jan 5 pickup after 8a — order by Thu, Jan 3 at 10p", ordering_deadline_text(@menu)
   end
 end

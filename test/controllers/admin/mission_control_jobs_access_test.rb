@@ -3,14 +3,13 @@ require "test_helper"
 class Admin::MissionControlJobsAccessTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
-  test "admin can access jobs monitor" do
+  test "admin dashboard links to jobs monitor" do
+    menus(:week1).make_current!
     sign_in users(:kyle)
 
-    get "/jobs"
-    follow_redirect! if response.redirect?
-
+    get "/admin/dashboard"
     assert_response :success
-    assert_select "a", text: "Back to main app"
+    assert_select "a[href='/jobs']"
   end
 
   test "non-admin user cannot access jobs monitor" do

@@ -73,8 +73,8 @@ $container-margin-padding: 34px + $container-margin;
   color: white;
   background: $primary;
   text-transform: none;
-  padding-top: 45px;
-  padding-bottom: 25px;
+  padding-top: 25px;
+  padding-bottom: 15px;
   font-size: 1.6rem;
   letter-spacing: 0.05rem;
 }
@@ -85,6 +85,7 @@ $container-margin-padding: 34px + $container-margin;
   margin-right: -$container-margin-padding;
   padding-left: $container-margin-padding;
   padding-right: $container-margin-padding;
+  padding-bottom: 30px;
   margin-bottom: 2rem;
   text-align: center;
 }

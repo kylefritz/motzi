@@ -9,7 +9,10 @@ class ConfirmationMailer < ApplicationMailer
 
     mail(to: %("#{@user.name}" <#{@user.email}>),
          cc: @user.additional_email,
-         subject: "Order Confirmation - #{Setting.shop.name} - #{@menu.name}")
+         subject: "Order Confirmation - #{Setting.shop.name} - #{@menu.name}") do |format|
+      format.text
+      format.mjml
+    end
   end
 
   def credit_email
@@ -18,6 +21,9 @@ class ConfirmationMailer < ApplicationMailer
 
     mail(to: %("#{@user.name}" <#{@user.email}>),
          cc: @user.additional_email,
-         subject: "Credit Purchase Confirmation - #{Setting.shop.name}")
+         subject: "Credit Purchase Confirmation - #{Setting.shop.name}") do |format|
+      format.text
+      format.mjml
+    end
   end
 end
