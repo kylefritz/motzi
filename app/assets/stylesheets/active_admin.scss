@@ -97,6 +97,15 @@ body {
   text-decoration: underline;
 }
 
+@media (max-width: 1300px) {
+  #header {
+    ul.tabs { display: flex; flex-wrap: wrap; gap: 0; }
+    ul.tabs > li { margin-top: 2.5px; margin-bottom: 2.5px; }
+    ul.tabs > li a { padding: 4px 4px; font-size: 0.95em; }
+    h1 { font-size: 1.2em; }
+  }
+}
+
 #title_bar {
   background-color: rgb(255, 238, 214);
 }
