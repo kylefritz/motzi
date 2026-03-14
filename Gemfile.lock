@@ -184,6 +184,12 @@ GEM
     execjs (2.10.0)
     faker (3.5.1)
       i18n (>= 1.8.11, < 2)
+    faraday (2.14.1)
+      faraday-net_http (>= 2.0, < 3.5)
+      json
+      logger
+    faraday-net_http (3.4.2)
+      net-http (~> 0.5)
     fastri (0.3.1.1)
     ffi (1.17.1)
     ffi (1.17.1-aarch64-linux-gnu)
@@ -330,6 +336,8 @@ GEM
     multi_json (1.15.0)
     mutex_m (0.3.0)
     naturalsort (1.3.0)
+    net-http (0.9.1)
+      uri (>= 0.11.1)
     net-imap (0.6.3)
       date
       net-protocol
@@ -360,6 +368,9 @@ GEM
       racc (~> 1.4)
     nokogiri (1.19.1-x86_64-linux-musl)
       racc (~> 1.4)
+    octokit (10.0.0)
+      faraday (>= 1, < 3)
+      sawyer (~> 0.9)
     olive_branch (4.0.1)
       multi_json
       rails (>= 4.0)
@@ -494,6 +505,9 @@ GEM
       sprockets (> 3.0)
       sprockets-rails
       tilt
+    sawyer (0.9.3)
+      addressable (>= 2.3.5)
+      faraday (>= 0.17.3, < 3)
     securerandom (0.4.1)
     selenium-webdriver (4.29.1)
       base64 (~> 0.2)
@@ -577,6 +591,7 @@ GEM
     unicode-display_width (3.1.4)
       unicode-emoji (~> 4.0, >= 4.0.4)
     unicode-emoji (4.0.4)
+    uri (1.1.1)
     useragent (0.16.11)
     vcr (6.4.0)
     warden (1.2.9)
@@ -652,6 +667,7 @@ DEPENDENCIES
   mutex_m
   naturalsort
   newrelic_rpm
+  octokit (~> 10.0)
   olive_branch
   paper_trail
   pg (>= 0.18, < 2.0)

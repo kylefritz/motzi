@@ -196,6 +196,31 @@ namespace :ai do
     end
   end
 
+  desc "Show weekly metrics for a year. Usage: rake ai:metrics[25] or rake ai:metrics[24]"
+  task :metrics, [:year] => :quiet do |_t, args|
+    year_prefix = args[:year] || "25"
+    puts "week_id | menu_name                                      | orders | items | emails | opened | visitors | notes"
+    puts "--------|------------------------------------------------|--------|-------|--------|--------|----------|------"
+
+    Menu.where("week_id LIKE ?", "#{year_prefix}w%").where(menu_type: "regular").order(:week_id).each do |m|
+      ws = Time.zone.from_week_id(m.week_id)
+      we = ws + 7.days
+      order_count = m.orders.count
+      item_count = OrderItem.joins(:order).where(orders: { menu_id: m.id }).count
+      email_count = Ahoy::Message.where(menu_id: m.id).count
+      opened_count = Ahoy::Message.where(menu_id: m.id).where.not(opened_at: nil).count
+      visitor_count = Ahoy::Visit.where(started_at: ws..we).distinct.count(:visitor_token)
+
+      notes = []
+      notes << "CLOSED" if m.name =~ /closed/i
+      notes << "HOLIDAY" if m.name =~ /holiday|thanksgiving|challah|yom kippur|purim|hamantaschen|passover/i
+      notes << "SPECIAL" if m.name =~ /special|valentine|vday/i
+      notes << "REDUCED" if m.name =~ /wednesday|closed.*thurs|closed.*sat|no thursday/i
+
+      puts "#{m.week_id} | #{m.name.to_s.truncate(46).ljust(46)} | #{order_count.to_s.rjust(6)} | #{item_count.to_s.rjust(5)} | #{email_count.to_s.rjust(6)} | #{opened_count.to_s.rjust(6)} | #{visitor_count.to_s.rjust(8)} | #{notes.join(', ')}"
+    end
+  end
+
   def print_scorecard(results, total_cost, results_file)
     passed = results.count { |r| r[:passed] }
     failed = results.count { |r| !r[:passed] }

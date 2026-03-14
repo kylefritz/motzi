@@ -123,6 +123,11 @@ class ActivityFeed
       lines << ""
       lines << orders_by_day_text
       lines << ""
+      commits = git_commits_text
+      if commits
+        lines << commits
+        lines << ""
+      end
     end
 
     es = email_summary
@@ -158,6 +163,34 @@ class ActivityFeed
   end
 
   private
+
+  GITHUB_REPO = "kylefritz/motzi"
+
+  def git_commits_text
+    token = ENV["GITHUB_TOKEN"]
+    unless token.present?
+      Rails.logger.warn "[ActivityFeed] GITHUB_TOKEN not set — git history unavailable"
+      return "== Code Changes ==\n  (unavailable — GITHUB_TOKEN not configured. There may be relevant code changes not shown here.)"
+    end
+
+    client = Octokit::Client.new(access_token: token)
+    # Include commits from 4 weeks before through end of this week
+    # so Claude can see recent deploys that may explain this week's behavior
+    since = (@week_start - 4.weeks).iso8601
+    commits = client.commits(GITHUB_REPO, sha: "master", since: since, until: @week_end.iso8601)
+    return nil if commits.empty?
+
+    lines = ["== Code Changes =="]
+    commits.reverse_each do |c|
+      date = c.commit.author.date.strftime("%-m/%-d")
+      msg = c.commit.message.lines.first&.strip
+      lines << "  #{date} #{c.sha[0..6]} #{msg}"
+    end
+    lines.join("\n")
+  rescue Octokit::Error => e
+    Rails.logger.warn "[ActivityFeed] GitHub API error: #{e.message}"
+    nil
+  end
 
   def menu_context_text
     lines = ["== Menu Context =="]

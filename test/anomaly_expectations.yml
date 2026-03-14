@@ -2,6 +2,38 @@
 # expected_status: healthy | warning | problem
 # Adjust these based on your knowledge of what actually happened each week.
 
+# --- 2024 known anomalies ---
+
+24w06:
+  expected_status: problem
+  notes: "16 orders, 0 items, half emails — broken order creation bug"
+
+# --- 2025 known anomalies ---
+
+25w17:
+  expected_status: warning
+  notes: "Email double-sends began — 973 menu emails and 938 reminders vs normal ~500"
+
+25w18:
+  expected_status: warning
+  notes: "Email double-sends continued — 971 menu emails and 1,119 reminders"
+
+25w19:
+  expected_status: warning
+  notes: "Email double-sends worst week — 1,210 menu emails and 1,319 reminders (2.5x normal)"
+
+# --- 2025 healthy weeks ---
+
+25w15:
+  expected_status: healthy
+  notes: "Normal week before the email double-send bug, 59 orders"
+
+25w20:
+  expected_status: healthy
+  notes: "Normal week after email bug resolved, 46 orders"
+
+# --- 2026 healthy weeks ---
+
 26w03:
   expected_status: healthy
   notes: "Normal week, 55 orders"
