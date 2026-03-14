@@ -223,35 +223,7 @@ ActiveAdmin.register_page "Activity Feed" do
     grid = feed.daily_grid
     grid_columns = feed.grid_columns
 
-    panel "Activity" do
-      # Email health cards
-      if email_summary.any?
-        label_order = ActivityFeed::MAILER_LABELS.keys
-        sorted_stats = email_summary.sort_by { |k, _| label_order.index(k) || label_order.size }.map(&:last)
-        div class: "email-health-row" do
-          sorted_stats.each do |row|
-            div class: "email-stat" do
-              div class: "email-stat-label" do
-                text_node row[:label]
-              end
-              if row[:sent] > 0
-                span row[:sent].to_s, class: "email-stat-num"
-                span " sent", class: "cell-label"
-                rate = row[:open_rate]
-                rate_color = rate >= 50 ? "green" : rate >= 20 ? "orange" : "red"
-                span " · #{rate}% opened", style: "color: #{rate_color}", title: "Tracking pixel open-rate percent"
-                if row[:clicked] > 0
-                  span " · #{row[:clicked]} clicked", class: "cell-dim"
-                end
-              else
-                span "—", class: "cell-dim"
-              end
-            end
-          end
-        end
-      end
-
-      # Daily grid
+    panel "Daily Stats" do
       if grid_columns.empty?
         para "No activity for #{week_id}", style: "color: #999"
       else
@@ -368,6 +340,35 @@ ActiveAdmin.register_page "Activity Feed" do
                     end
                   end
                 end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    # Email health cards
+    if email_summary.any?
+      panel "Email" do
+        label_order = ActivityFeed::MAILER_LABELS.keys
+        sorted_stats = email_summary.sort_by { |k, _| label_order.index(k) || label_order.size }.map(&:last)
+        div class: "email-health-row" do
+          sorted_stats.each do |row|
+            div class: "email-stat" do
+              div class: "email-stat-label" do
+                text_node row[:label]
+              end
+              if row[:sent] > 0
+                span row[:sent].to_s, class: "email-stat-num"
+                span " sent", class: "cell-label"
+                rate = row[:open_rate]
+                rate_color = rate >= 50 ? "green" : rate >= 20 ? "orange" : "red"
+                span " · #{rate}% opened", style: "color: #{rate_color}", title: "Tracking pixel open-rate percent"
+                if row[:clicked] > 0
+                  span " · #{row[:clicked]} clicked", class: "cell-dim"
+                end
+              else
+                span "—", class: "cell-dim"
               end
             end
           end
