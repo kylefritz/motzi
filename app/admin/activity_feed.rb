@@ -84,7 +84,7 @@ ActiveAdmin.register_page "Activity Feed" do
     end
 
     panel "Weekly Trends" do
-      div style: "position: relative; width: 100%; height: 180px; min-width: 0;" do
+      div style: "position: relative; width: 100%; height: 180px; min-width: 0; overflow: hidden;" do
         canvas id: "weekly-trends-chart"
       end
       script src: "https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"
@@ -309,7 +309,7 @@ ActiveAdmin.register_page "Activity Feed" do
                               next_day = (Date.parse(d[:date]) + 1).to_s
                               a href: admin_emails_path(q: { sent_at_gteq: d[:date], sent_at_lteq: next_day }), class: "cell-link" do
                                 span d[:sent].to_s, class: "cell-num"
-                                span " #{label} sent", class: "cell-label"
+                                span " #{label}", class: "cell-label"
                                 span " · #{d[:open_rate]}% opened", style: "color: #{rate_color}", class: "cell-dim", title: "Tracking pixel open-rate percent"
                               end
                             when "recurring_jobs_summary"
@@ -357,7 +357,6 @@ ActiveAdmin.register_page "Activity Feed" do
                       total_opened = all_events.sum { |e| e.details[:opened].to_i }
                       rate = total_sent > 0 ? (total_opened.to_f / total_sent * 100).round : 0
                       span total_sent.to_s, class: "cell-num"
-                      span " sent", class: "cell-label"
                       rate_color = rate >= 50 ? "green" : rate >= 20 ? "orange" : "red"
                       span " · #{rate}% opened", style: "color: #{rate_color}", class: "cell-dim"
                     when "recurring_jobs_summary"

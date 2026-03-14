@@ -6,6 +6,11 @@
 @import "active_admin/mixins";
 @import "active_admin/base";
 
+// Fix ActiveAdmin #wrapper display:table preventing chart from shrinking
+body.admin_activity_feed #wrapper {
+  display: block;
+}
+
 // colors like bootstrap
 .text-success {
   color: #28a745 !important;
