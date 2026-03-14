@@ -315,6 +315,9 @@ form fieldset.actions li.cancel a {
 .activity-feed-nav {
   display: flex;
   gap: 2px;
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-width: 0;
 
   a, span {
     display: inline-block;
@@ -339,6 +342,7 @@ form fieldset.actions li.cancel a {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex: 0 0 auto;
 
   .export-links {
     font-size: 1em;
