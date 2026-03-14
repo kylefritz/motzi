@@ -1,3 +1,6 @@
+# Analyzes weekly activity for anomalies using Claude.
+# Prompt tuning: use `rake ai:eval` to test against historical weeks.
+# See also: rake ai:full_prompt, rake ai:analysis, rake ai:history
 class AnomalyDetector
   MODEL = "claude-opus-4-6"
   # Per-token pricing (dollars per token)

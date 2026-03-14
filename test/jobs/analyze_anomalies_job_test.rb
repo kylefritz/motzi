@@ -1,5 +1,8 @@
 require 'test_helper'
 
+# Smoke test for the anomaly detection pipeline.
+# For prompt quality testing, use `rake ai:eval` which runs against
+# historical weeks with expected outcomes (test/anomaly_expectations.yml).
 class AnalyzeAnomaliesJobTest < ActiveJob::TestCase
   include ActionMailer::TestHelper
 

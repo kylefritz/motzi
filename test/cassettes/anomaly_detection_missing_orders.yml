@@ -1,32 +1,508 @@
 ---
 http_interactions:
 - request:
+    method: get
+    uri: https://api.github.com/repos/kylefritz/motzi/commits?sha=master&since=2018-12-02T09:00:00-05:00&until=2019-01-06T09:00:00-05:00
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/vnd.github.v3+json
+      User-Agent:
+      - Octokit Ruby Gem 10.0.0
+      Content-Type:
+      - application/json
+      Authorization:
+      - token <GITHUB_TOKEN>
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 14 Mar 2026 16:31:05 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Content-Length:
+      - '2'
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      Etag:
+      - '"b55cd51d51ee9d3acd2ff5675411437b92cd5c35e8d4f2effe32ec20b0dcf822"'
+      X-Oauth-Scopes:
+      - gist, read:org, repo, workflow
+      X-Accepted-Oauth-Scopes:
+      - ''
+      X-Oauth-Client-Id:
+      - 178c6fc778ccc68e1d6a
+      X-Github-Media-Type:
+      - github.v3; format=json
+      X-Github-Api-Version-Selected:
+      - '2022-11-28'
+      X-Ratelimit-Limit:
+      - '5000'
+      X-Ratelimit-Remaining:
+      - '4981'
+      X-Ratelimit-Reset:
+      - '1773509424'
+      X-Ratelimit-Used:
+      - '19'
+      X-Ratelimit-Resource:
+      - core
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Access-Control-Allow-Origin:
+      - "*"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      X-Frame-Options:
+      - deny
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - '0'
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Content-Security-Policy:
+      - default-src 'none'
+      X-Github-Request-Id:
+      - EA5F:355362:F13F5D:3F750B8:69B58D49
+      Server:
+      - github.com
+    body:
+      encoding: UTF-8
+      string: "[]"
+  recorded_at: Sun, 30 Dec 2018 14:00:00 GMT
+- request:
+    method: get
+    uri: https://api.github.com/repos/kylefritz/motzi/commits?sha=master&since=2018-11-25T09:00:00-05:00&until=2018-12-30T09:00:00-05:00
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/vnd.github.v3+json
+      User-Agent:
+      - Octokit Ruby Gem 10.0.0
+      Content-Type:
+      - application/json
+      Authorization:
+      - token <GITHUB_TOKEN>
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 14 Mar 2026 16:31:06 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Content-Length:
+      - '2'
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      Etag:
+      - '"b55cd51d51ee9d3acd2ff5675411437b92cd5c35e8d4f2effe32ec20b0dcf822"'
+      X-Oauth-Scopes:
+      - gist, read:org, repo, workflow
+      X-Accepted-Oauth-Scopes:
+      - ''
+      X-Oauth-Client-Id:
+      - 178c6fc778ccc68e1d6a
+      X-Github-Media-Type:
+      - github.v3; format=json
+      X-Github-Api-Version-Selected:
+      - '2022-11-28'
+      X-Ratelimit-Limit:
+      - '5000'
+      X-Ratelimit-Remaining:
+      - '4980'
+      X-Ratelimit-Reset:
+      - '1773509424'
+      X-Ratelimit-Used:
+      - '20'
+      X-Ratelimit-Resource:
+      - core
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Access-Control-Allow-Origin:
+      - "*"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      X-Frame-Options:
+      - deny
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - '0'
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Content-Security-Policy:
+      - default-src 'none'
+      X-Github-Request-Id:
+      - EA60:34E007:ED010C:3E67775:69B58D49
+      Server:
+      - github.com
+    body:
+      encoding: UTF-8
+      string: "[]"
+  recorded_at: Sun, 30 Dec 2018 14:00:00 GMT
+- request:
+    method: get
+    uri: https://api.github.com/repos/kylefritz/motzi/commits?sha=master&since=2018-11-18T09:00:00-05:00&until=2018-12-23T09:00:00-05:00
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/vnd.github.v3+json
+      User-Agent:
+      - Octokit Ruby Gem 10.0.0
+      Content-Type:
+      - application/json
+      Authorization:
+      - token <GITHUB_TOKEN>
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 14 Mar 2026 16:31:06 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Content-Length:
+      - '2'
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      Etag:
+      - '"b55cd51d51ee9d3acd2ff5675411437b92cd5c35e8d4f2effe32ec20b0dcf822"'
+      X-Oauth-Scopes:
+      - gist, read:org, repo, workflow
+      X-Accepted-Oauth-Scopes:
+      - ''
+      X-Oauth-Client-Id:
+      - 178c6fc778ccc68e1d6a
+      X-Github-Media-Type:
+      - github.v3; format=json
+      X-Github-Api-Version-Selected:
+      - '2022-11-28'
+      X-Ratelimit-Limit:
+      - '5000'
+      X-Ratelimit-Remaining:
+      - '4979'
+      X-Ratelimit-Reset:
+      - '1773509424'
+      X-Ratelimit-Used:
+      - '21'
+      X-Ratelimit-Resource:
+      - core
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Access-Control-Allow-Origin:
+      - "*"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      X-Frame-Options:
+      - deny
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - '0'
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Content-Security-Policy:
+      - default-src 'none'
+      X-Github-Request-Id:
+      - EA61:28B68B:E72C07:3CC5FF3:69B58D4A
+      Server:
+      - github.com
+    body:
+      encoding: UTF-8
+      string: "[]"
+  recorded_at: Sun, 30 Dec 2018 14:00:00 GMT
+- request:
+    method: get
+    uri: https://api.github.com/repos/kylefritz/motzi/commits?sha=master&since=2018-11-11T09:00:00-05:00&until=2018-12-16T09:00:00-05:00
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/vnd.github.v3+json
+      User-Agent:
+      - Octokit Ruby Gem 10.0.0
+      Content-Type:
+      - application/json
+      Authorization:
+      - token <GITHUB_TOKEN>
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 14 Mar 2026 16:31:06 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Content-Length:
+      - '2'
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      Etag:
+      - '"b55cd51d51ee9d3acd2ff5675411437b92cd5c35e8d4f2effe32ec20b0dcf822"'
+      X-Oauth-Scopes:
+      - gist, read:org, repo, workflow
+      X-Accepted-Oauth-Scopes:
+      - ''
+      X-Oauth-Client-Id:
+      - 178c6fc778ccc68e1d6a
+      X-Github-Media-Type:
+      - github.v3; format=json
+      X-Github-Api-Version-Selected:
+      - '2022-11-28'
+      X-Ratelimit-Limit:
+      - '5000'
+      X-Ratelimit-Remaining:
+      - '4978'
+      X-Ratelimit-Reset:
+      - '1773509424'
+      X-Ratelimit-Used:
+      - '22'
+      X-Ratelimit-Resource:
+      - core
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Access-Control-Allow-Origin:
+      - "*"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      X-Frame-Options:
+      - deny
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - '0'
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Content-Security-Policy:
+      - default-src 'none'
+      X-Github-Request-Id:
+      - EA62:3CB286:F096C3:3F2C4F2:69B58D4A
+      Server:
+      - github.com
+    body:
+      encoding: UTF-8
+      string: "[]"
+  recorded_at: Sun, 30 Dec 2018 14:00:00 GMT
+- request:
+    method: get
+    uri: https://api.github.com/repos/kylefritz/motzi/commits?sha=master&since=2018-11-04T09:00:00-05:00&until=2018-12-09T09:00:00-05:00
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/vnd.github.v3+json
+      User-Agent:
+      - Octokit Ruby Gem 10.0.0
+      Content-Type:
+      - application/json
+      Authorization:
+      - token <GITHUB_TOKEN>
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Sat, 14 Mar 2026 16:31:07 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Content-Length:
+      - '2'
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      Etag:
+      - '"b55cd51d51ee9d3acd2ff5675411437b92cd5c35e8d4f2effe32ec20b0dcf822"'
+      X-Oauth-Scopes:
+      - gist, read:org, repo, workflow
+      X-Accepted-Oauth-Scopes:
+      - ''
+      X-Oauth-Client-Id:
+      - 178c6fc778ccc68e1d6a
+      X-Github-Media-Type:
+      - github.v3; format=json
+      X-Github-Api-Version-Selected:
+      - '2022-11-28'
+      X-Ratelimit-Limit:
+      - '5000'
+      X-Ratelimit-Remaining:
+      - '4977'
+      X-Ratelimit-Reset:
+      - '1773509424'
+      X-Ratelimit-Used:
+      - '23'
+      X-Ratelimit-Resource:
+      - core
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Access-Control-Allow-Origin:
+      - "*"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      X-Frame-Options:
+      - deny
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - '0'
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Content-Security-Policy:
+      - default-src 'none'
+      X-Github-Request-Id:
+      - EA63:2C40A2:E76065:3CC72E7:69B58D4A
+      Server:
+      - github.com
+    body:
+      encoding: UTF-8
+      string: "[]"
+  recorded_at: Sun, 30 Dec 2018 14:00:00 GMT
+- request:
     method: post
     uri: https://api.anthropic.com/v1/messages
     body:
       encoding: UTF-8
-      string: '{"model":"claude-opus-4-6","max_tokens":4096,"system":"You are an operations
-        analyst for a small neighborhood bakery CSA (Community Supported Agriculture).\nYou
+      string: "{\"model\":\"claude-opus-4-6\",\"max_tokens\":4096,\"system\":\"Current
+        date/time: Sunday, December 30, 2018 at 9:00am EST\\n\\nYou are an operations
+        analyst for Motzi, a small neighborhood bakery CSA (Community Supported Agriculture).\\nYou
         are reviewing the activity feed for the current week and comparing it to recent
-        weeks to detect anomalies.\n\nLook for:\n- Missing expected actions (e.g.,
-        menu not published when it usually is by now)\n- Unusual order counts (significantly
-        higher or lower than recent weeks)\n- Email delivery problems (sent count
-        much lower than usual, low open rates)\n- Timing anomalies (actions happening
-        at unusual times)\n- Credit purchase patterns that deviate from normal\n-
-        Any other patterns that suggest something might be broken or unusual\n\nRespond
-        with:\n1. A brief overall status (healthy / warning / problem)\n2. Any anomalies
-        found, each with:\n   - What you noticed\n   - Why it might be a problem\n   -
-        Severity (info / warning / critical)\n3. If everything looks normal, say so
-        briefly\n\nBe concise. This report is emailed to the bakery operator.\n","messages":[{"role":"user","content":"##
-        Current Week: 19w01 (analyze this week for anomalies)\n\nActivity Feed: 19w01\n========================================\n\n==
-        Events ==\n[3/03  3:41am] [customer] Kyle Fritz ordered: Thu: Pumpkin\n[3/03  3:41am]
-        [customer] Adrian Alday ordered: Thu: Classic\n[3/03  3:41am] [customer] Laura
-        Flamm ordered: Sat: Classic\n\n3 events\n\n## Comparison Week: 18w52\n\nActivity
-        Feed: 18w52\n========================================\n\n== Events ==\n\n0
-        events\n\n## Comparison Week: 18w51\n\nActivity Feed: 18w51\n========================================\n\n==
-        Events ==\n\n0 events\n\n## Comparison Week: 18w50\n\nActivity Feed: 18w50\n========================================\n\n==
-        Events ==\n\n0 events\n\n## Comparison Week: 18w49\n\nActivity Feed: 18w49\n========================================\n\n==
-        Events ==\n\n0 events\n"}]}'
+        weeks to detect anomalies.\\n\\n## Team\\n- **Russell Trimmer** — baker and
+        bakery owner\\n- **Maya Muñoz** — front-of-house and bakery owner\\n- **Kyle
+        Fritz** — web engineer (builds and maintains the site)\\n\\n## What to look
+        for\\n- Missing automated actions (menu not published, reminders not sent,
+        jobs not running)\\n- Email delivery problems (sent counts dropping, open
+        rates declining across multiple email types)\\n- Order volume shifts that
+        suggest a system problem (not just normal week-to-week fluctuation)\\n- Broken
+        patterns in timing or sequencing of automated workflows\\n- Anything that
+        suggests the system is malfunctioning or a process was missed\\n\\n## What
+        NOT to flag\\n- **Established patterns**: The menu email goes out on Saturday
+        afternoon for the upcoming week. This is normal. Do not flag it.\\n- **Team
+        activity**: Orders, tests, and admin actions from Kyle, Russell, or Maya are
+        not anomalies.\\n- **Normal order volume range**: This bakery typically gets
+        35–70 orders per week depending on the season and menu. Anything in that range
+        is healthy, even after a strong week. A drop from 70 to 45 is regression to
+        the mean, not an anomaly. Only flag order volume if it falls below 25 or if
+        there's a clear system issue causing the drop (e.g., emails not sending, site
+        down). Holiday/special weeks (Valentine's, Purim, etc.) routinely spike to
+        80–130 orders — the return to normal afterwards is expected, not a warning.\\n-
+        **Email open rate fluctuations**: Open rates for reminder emails naturally
+        vary 40–60% week to week. Small multi-week trends (e.g., 53% → 48% → 45%)
+        are normal noise, not actionable. Only flag if rates drop below 30% or if
+        there's a sudden dramatic change suggesting a deliverability problem.\\n-
+        **Spam/test accounts**: Low-severity background issue. Do not elevate overall
+        status to Warning just because spam accounts exist on the mailing list. Mention
+        them as info-level only if there's a significant new development (e.g., sudden
+        surge of new signups).\\n- **Report timing**: Do not comment on when the report
+        is being generated relative to the week being analyzed.\\n- **Things that
+        are working fine**: Do not list normal items just to say they're normal. Only
+        mention healthy metrics if the reader needs context for a related anomaly.\\n\\n##
+        Response format\\n\\nStart with a TL;DR — one to three sentences with the
+        most important takeaway. If everything is fine, say so in one sentence.\\n\\nThen
+        provide:\\n1. Overall status — this line is machine-parsed, so use EXACTLY
+        one of these three strings:\\n   - `Status: ✅ Healthy`\\n   - `Status: ⚠️
+        Warning`\\n   - `Status: \U0001F534 Problem`\\n2. Only actual anomalies, each
+        with:\\n   - What you noticed (with specific numbers)\\n   - Why it matters
+        operationally\\n   - Severity (info / warning / critical)\\n3. If relevant,
+        a brief \\\"action items\\\" list\\n\\nYou may also receive prior analyses
+        at the end of the message. Use them to:\\n- Avoid repeating findings that
+        were already flagged and haven't changed\\n- Track whether previously flagged
+        issues have been resolved or worsened\\n- Note trends across multiple weeks
+        (e.g., \\\"open rates have declined for 3 consecutive weeks\\\")\\n- Reference
+        prior findings briefly if relevant (e.g., \\\"spam accounts flagged in prior
+        reports are still present\\\")\\n\\nBe concise and direct. This report is
+        emailed to the bakery operator who is already familiar with the business.
+        Don't explain how the bakery works — focus on what's different or broken this
+        week. A short, focused report with 1-2 real findings is far more valuable
+        than a long report padded with info-level non-issues.\\n\",\"messages\":[{\"role\":\"user\",\"content\":\"##
+        Current Week (analyze this week for anomalies):\\n\\n### Summary of Events:\\nActivity
+        Feed: 19w01 (Sunday 12/30 — Saturday 1/5/2019)\\nToday: Sunday 12/30/2018
+        — 0/7 days elapsed (0% through the week)\\n========================================\\n\\n==
+        Menu Context ==\\nMenu: week1\\n  Baker's note: Hello, all!\\n\\nGreat to
+        see many of you at market yesterday! Sorry for the late selection email! We
+        had quite a week: we closed on our big construction loan, had our last construction
+        permit approved, officially joined the Bread Baker's Guild of America, and
+        made the most breads of any week yet (~330 to be exact!). Right now two generous
+        Motzi subscribers and talented programmers are working on a new subscription
+        platform for you all. It'll roll out in a few weeks and allow for easy tracking
+        and adding of credits. Get excited!\\n\\nA couple breads we did for market
+        yesterday will debut for subscribers this week. We've got Black Sesame Rye
+        for you which has toasted and sprouted rye berries inside and is coated in
+        black sesame. We're also going to do baguettes. Since they're a bit smaller
+        that selection will also include two panela donuts as well. Other options
+        include Classic and English Muffins.\\n\\nThanks for everything!\\n\\nWarmly,\\n\\nMotzi
+        Bread (Maya and Russell)\\n\\n\\n== Orders by Day ==\\n  Sun 12/30: 0 orders
+        (0 items) (today, still in progress)\\n  Mon 12/31: (upcoming)\\n  Tue 1/1:
+        (upcoming)\\n  Wed 1/2: (upcoming)\\n  Thu 1/3: (upcoming)\\n  Fri 1/4: (upcoming)\\n
+        \ Sat 1/5: (upcoming)\\n  Total so far: 0 orders (0 items)\\n\\n== Events
+        ==\\n[3/14 12:31pm] [customer] 3 orders placed for week1 (3 items)\\n\\n1
+        events\\n\\n### Detailed Events:\\n== Events ==\\n[3/14 12:31pm] [customer]
+        Kyle Fritz ordered: Thu: Pumpkin\\n[3/14 12:31pm] [customer] Adrian Alday
+        ordered: Thu: Classic\\n[3/14 12:31pm] [customer] Laura Flamm ordered: Sat:
+        Classic\\n\\n3 events\\n\\n## Comparison Week: 18w52\\nActivity Feed: 18w52
+        (Sunday 12/23 — Saturday 12/29/2018)\\nToday: Sunday 12/30/2018 — 7/7 days
+        elapsed (100% through the week)\\n========================================\\n\\n==
+        Menu Context ==\\n\\n== Orders by Day ==\\n  Total so far: 0 orders (0 items)\\n\\n==
+        Events ==\\n\\n0 events\\n\\n## Comparison Week: 18w51\\nActivity Feed: 18w51
+        (Sunday 12/16 — Saturday 12/22/2018)\\nToday: Sunday 12/30/2018 — 7/7 days
+        elapsed (100% through the week)\\n========================================\\n\\n==
+        Menu Context ==\\n\\n== Orders by Day ==\\n  Total so far: 0 orders (0 items)\\n\\n==
+        Events ==\\n\\n0 events\\n\\n## Comparison Week: 18w50\\nActivity Feed: 18w50
+        (Sunday 12/9 — Saturday 12/15/2018)\\nToday: Sunday 12/30/2018 — 7/7 days
+        elapsed (100% through the week)\\n========================================\\n\\n==
+        Menu Context ==\\n\\n== Orders by Day ==\\n  Total so far: 0 orders (0 items)\\n\\n==
+        Events ==\\n\\n0 events\\n\\n## Comparison Week: 18w49\\nActivity Feed: 18w49
+        (Sunday 12/2 — Saturday 12/8/2018)\\nToday: Sunday 12/30/2018 — 7/7 days elapsed
+        (100% through the week)\\n========================================\\n\\n==
+        Menu Context ==\\n\\n== Orders by Day ==\\n  Total so far: 0 orders (0 items)\\n\\n==
+        Events ==\\n\\n0 events\\n\"}]}"
     headers:
       Accept-Encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
@@ -59,113 +535,14 @@ http_interactions:
       X-Stainless-Timeout:
       - '600.0'
       Content-Length:
-      - '1885'
-  response:
-    status:
-      code: 529
-      message: "<none>"
-    headers:
-      Date:
-      - Tue, 03 Mar 2026 08:42:10 GMT
-      Content-Type:
-      - application/json
-      Transfer-Encoding:
-      - chunked
-      Connection:
-      - keep-alive
-      X-Should-Retry:
-      - 'true'
-      Request-Id:
-      - req_011CYfrD55L9ZG9wfRerUYYQ
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubDomains; preload
-      Anthropic-Organization-Id:
-      - b8ae1aef-5d79-4d28-a47d-577a49f24cbb
-      Server:
-      - cloudflare
-      X-Envoy-Upstream-Service-Time:
-      - '5550'
-      Vary:
-      - Accept-Encoding
-      Cf-Cache-Status:
-      - DYNAMIC
-      X-Robots-Tag:
-      - none
-      Content-Security-Policy:
-      - default-src 'none'; frame-ancestors 'none'
-      Cf-Ray:
-      - 9d6758825f019289-DEN
-    body:
-      encoding: ASCII-8BIT
-      string: '{"type":"error","error":{"type":"overloaded_error","message":"Overloaded"},"request_id":"req_011CYfrD55L9ZG9wfRerUYYQ"}'
-  recorded_at: Sun, 30 Dec 2018 14:00:00 GMT
-- request:
-    method: post
-    uri: https://api.anthropic.com/v1/messages
-    body:
-      encoding: UTF-8
-      string: '{"model":"claude-opus-4-6","max_tokens":4096,"system":"You are an operations
-        analyst for a small neighborhood bakery CSA (Community Supported Agriculture).\nYou
-        are reviewing the activity feed for the current week and comparing it to recent
-        weeks to detect anomalies.\n\nLook for:\n- Missing expected actions (e.g.,
-        menu not published when it usually is by now)\n- Unusual order counts (significantly
-        higher or lower than recent weeks)\n- Email delivery problems (sent count
-        much lower than usual, low open rates)\n- Timing anomalies (actions happening
-        at unusual times)\n- Credit purchase patterns that deviate from normal\n-
-        Any other patterns that suggest something might be broken or unusual\n\nRespond
-        with:\n1. A brief overall status (healthy / warning / problem)\n2. Any anomalies
-        found, each with:\n   - What you noticed\n   - Why it might be a problem\n   -
-        Severity (info / warning / critical)\n3. If everything looks normal, say so
-        briefly\n\nBe concise. This report is emailed to the bakery operator.\n","messages":[{"role":"user","content":"##
-        Current Week: 19w01 (analyze this week for anomalies)\n\nActivity Feed: 19w01\n========================================\n\n==
-        Events ==\n[3/03  3:41am] [customer] Kyle Fritz ordered: Thu: Pumpkin\n[3/03  3:41am]
-        [customer] Adrian Alday ordered: Thu: Classic\n[3/03  3:41am] [customer] Laura
-        Flamm ordered: Sat: Classic\n\n3 events\n\n## Comparison Week: 18w52\n\nActivity
-        Feed: 18w52\n========================================\n\n== Events ==\n\n0
-        events\n\n## Comparison Week: 18w51\n\nActivity Feed: 18w51\n========================================\n\n==
-        Events ==\n\n0 events\n\n## Comparison Week: 18w50\n\nActivity Feed: 18w50\n========================================\n\n==
-        Events ==\n\n0 events\n\n## Comparison Week: 18w49\n\nActivity Feed: 18w49\n========================================\n\n==
-        Events ==\n\n0 events\n"}]}'
-    headers:
-      Accept-Encoding:
-      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
-      Accept:
-      - application/json
-      User-Agent:
-      - Anthropic::Client/Ruby 1.23.0
-      Host:
-      - api.anthropic.com
-      X-Stainless-Arch:
-      - arm64
-      X-Stainless-Lang:
-      - ruby
-      X-Stainless-Os:
-      - MacOS
-      X-Stainless-Package-Version:
-      - 1.23.0
-      X-Stainless-Runtime:
-      - ruby
-      X-Stainless-Runtime-Version:
-      - 3.3.10
-      Content-Type:
-      - application/json
-      Anthropic-Version:
-      - '2023-06-01'
-      X-Api-Key:
-      - "<ANTHROPIC_API_KEY>"
-      X-Stainless-Retry-Count:
-      - '1'
-      X-Stainless-Timeout:
-      - '600.0'
-      Content-Length:
-      - '1885'
+      - '7081'
   response:
     status:
       code: 200
       message: OK
     headers:
       Date:
-      - Tue, 03 Mar 2026 08:42:27 GMT
+      - Sat, 14 Mar 2026 16:31:25 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -175,29 +552,29 @@ http_interactions:
       Anthropic-Ratelimit-Input-Tokens-Limit:
       - '450000'
       Anthropic-Ratelimit-Input-Tokens-Remaining:
-      - '450000'
+      - '449000'
       Anthropic-Ratelimit-Input-Tokens-Reset:
-      - '2026-03-03T08:42:12Z'
+      - '2026-03-14T16:31:09Z'
       Anthropic-Ratelimit-Output-Tokens-Limit:
       - '90000'
       Anthropic-Ratelimit-Output-Tokens-Remaining:
       - '90000'
       Anthropic-Ratelimit-Output-Tokens-Reset:
-      - '2026-03-03T08:42:27Z'
+      - '2026-03-14T16:31:26Z'
       Anthropic-Ratelimit-Requests-Limit:
       - '1000'
       Anthropic-Ratelimit-Requests-Remaining:
       - '999'
       Anthropic-Ratelimit-Requests-Reset:
-      - '2026-03-03T08:42:10Z'
+      - '2026-03-14T16:31:07Z'
       Anthropic-Ratelimit-Tokens-Limit:
       - '540000'
       Anthropic-Ratelimit-Tokens-Remaining:
-      - '540000'
+      - '539000'
       Anthropic-Ratelimit-Tokens-Reset:
-      - '2026-03-03T08:42:12Z'
+      - '2026-03-14T16:31:09Z'
       Request-Id:
-      - req_011CYfrDVVGqLp5q6DCSjTYg
+      - req_011CZ3HsfttVuiD6jGhcKJoX
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Anthropic-Organization-Id:
@@ -205,9 +582,11 @@ http_interactions:
       Server:
       - cloudflare
       X-Envoy-Upstream-Service-Time:
-      - '16762'
+      - '18561'
       Vary:
       - Accept-Encoding
+      Server-Timing:
+      - proxy;dur=18561
       Cf-Cache-Status:
       - DYNAMIC
       X-Robots-Tag:
@@ -215,10 +594,10 @@ http_interactions:
       Content-Security-Policy:
       - default-src 'none'; frame-ancestors 'none'
       Cf-Ray:
-      - 9d6758a60ebf2fab-DEN
+      - 9dc4aab6e884e061-DEN
     body:
       encoding: ASCII-8BIT
       string: !binary |-
-        eyJtb2RlbCI6ImNsYXVkZS1vcHVzLTQtNiIsImlkIjoibXNnXzAxUDhRQnN4eVdpV1pkZ3hYTGhrZTd0WSIsInR5cGUiOiJtZXNzYWdlIiwicm9sZSI6ImFzc2lzdGFudCIsImNvbnRlbnQiOlt7InR5cGUiOiJ0ZXh0IiwidGV4dCI6IiMgV2Vla2x5IEFjdGl2aXR5IFJlcG9ydDogMTl3MDFcblxuIyMgT3ZlcmFsbCBTdGF0dXM6IOKaoO+4jyBXQVJOSU5HXG5cbi0tLVxuXG4jIyMgQW5vbWFsaWVzIEZvdW5kXG5cbioqMS4gT3JkZXJzIGFwcGVhcmVkIGFmdGVyIHdlZWtzIG9mIHplcm8gYWN0aXZpdHkqKlxuLSAqKldoYXQ6KiogMyBvcmRlcnMgY2FtZSBpbiB0aGlzIHdlZWsgYWZ0ZXIgYXQgbGVhc3QgNCBjb25zZWN1dGl2ZSB3ZWVrcyAoMTh3NDnigJMxOHc1Mikgd2l0aCB6ZXJvIGFjdGl2aXR5IG9mIGFueSBraW5kLlxuLSAqKldoeSBpdCBtYXR0ZXJzOioqIFRoaXMgY291bGQgYmUgbm9ybWFsIChlLmcuLCBob2xpZGF5IGJyZWFrIGVuZGluZywgbmV3IHNlYXNvbiBsYXVuY2gpLCBidXQgdGhlIGNvbXBsZXRlIGFic2VuY2Ugb2YgYWN0aXZpdHkgZm9yIGEgZnVsbCBtb250aCBiZWZvcmUgdGhpcyBpcyB1bnVzdWFsLiBXb3J0aCBjb25maXJtaW5nIHRoaXMgd2FzIGludGVudGlvbmFsIChwbGFubmVkIGhpYXR1cykgcmF0aGVyIHRoYW4gYSBzeXN0ZW0gaXNzdWUgdGhhdCBzdXBwcmVzc2VkIGV2ZW50cyBkdXJpbmcgdGhvc2Ugd2Vla3MuXG4tICoqU2V2ZXJpdHk6Kiog4pqg77iPIFdhcm5pbmdcblxuKioyLiBObyBtZW51IHB1Ymxpc2ggZXZlbnQgdmlzaWJsZSoqXG4tICoqV2hhdDoqKiBUaHJlZSBjdXN0b21lcnMgcGxhY2VkIG9yZGVycywgYnV0IHRoZXJlJ3Mgbm8gcmVjb3JkIG9mIGEgbWVudSBiZWluZyBwdWJsaXNoZWQgb3IgYW4gZW1haWwgYmVpbmcgc2VudCB0aGlzIHdlZWsuXG4tICoqV2h5IGl0IG1hdHRlcnM6KiogTm9ybWFsbHkgeW91J2QgZXhwZWN0IHRvIHNlZSBhIG1lbnUgcHVibGljYXRpb24gYW5kIGEgbm90aWZpY2F0aW9uIGVtYWlsIGJlZm9yZSBvcmRlcnMgY29tZSBpbi4gRWl0aGVyIHRoZXNlIGV2ZW50cyBhcmVuJ3QgYmVpbmcgbG9nZ2VkLCBvciBjdXN0b21lcnMgb3JkZXJlZCBmcm9tIGEgc3RhbGUvZGVmYXVsdCBtZW51LiBJZiBubyBlbWFpbCB3ZW50IG91dCwgb3JkZXIgdm9sdW1lIG1heSBiZSBhcnRpZmljaWFsbHkgbG93IOKAlCBvbmx5IDMgb3JkZXJzIGZyb20gcGVvcGxlIHdobyBmb3VuZCBpdCBvbiB0aGVpciBvd24uXG4tICoqU2V2ZXJpdHk6Kiog4pqg77iPIFdhcm5pbmdcblxuKiozLiBBbGwgMyBvcmRlcnMgcGxhY2VkIGF0IHRoZSBleGFjdCBzYW1lIHRpbWVzdGFtcCoqXG4tICoqV2hhdDoqKiBBbGwgb3JkZXJzIGxvZ2dlZCBhdCAzLzAzIDM6NDFhbSDigJQgaWRlbnRpY2FsIHRvIHRoZSBzZWNvbmQuXG4tICoqV2h5IGl0IG1hdHRlcnM6KiogVGhpcyBpcyB1bnVzdWFsIGZvciBvcmdhbmljIGN1c3RvbWVyIGJlaGF2aW9yLiBDb3VsZCBpbmRpY2F0ZSBhIGJhdGNoIGltcG9ydCwgYSBzeXN0ZW0gYmFja2xvZyB0aGF0IHByb2Nlc3NlZCBxdWV1ZWQgb3JkZXJzIHNpbXVsdGFuZW91c2x5LCBvciBhIHRlc3QuIFdvcnRoIHZlcmlmeWluZyB0aGVzZSBhcmUgcmVhbCBjdXN0b21lciBvcmRlcnMuXG4tICoqU2V2ZXJpdHk6Kiog4oS577iPIEluZm9cblxuKio0LiBWZXJ5IGxvdyBvcmRlciBjb3VudCoqXG4tICoqV2hhdDoqKiBPbmx5IDMgb3JkZXJzLiBXaXRoIG5vIGJhc2VsaW5lIGZyb20gcmVjZW50IHdlZWtzIChhbGwgd2VyZSB6ZXJvKSwgaXQncyBoYXJkIHRvIGJlbmNobWFyaywgYnV0IDMgb3JkZXJzIGZlZWxzIGxvdyBpZiB5b3UgaGF2ZSBhbiBhY3RpdmUgc3Vic2NyaWJlciBsaXN0LlxuLSAqKldoeSBpdCBtYXR0ZXJzOioqIElmIHlvdSBub3JtYWxseSBleHBlY3QgbW9yZSBvcmRlcnMsIHRoZSBtaXNzaW5nIGVtYWlsL25vdGlmaWNhdGlvbiAoc2VlICMyKSBjb3VsZCBleHBsYWluIHRoZSBsb3cgdm9sdW1lLlxuLSAqKlNldmVyaXR5OioqIOKaoO+4jyBXYXJuaW5nXG5cbi0tLVxuXG4jIyMgUmVjb21tZW5kZWQgQWN0aW9uc1xuMS4gKipDb25maXJtIHRoZSA0LXdlZWsgZ2FwIHdhcyBhIHBsYW5uZWQgYnJlYWsqKiDigJQgcnVsZSBvdXQgYSBsb2dnaW5nIG9yIHN5c3RlbSBvdXRhZ2UuXG4yLiAqKkNoZWNrIGlmIHRoZSB3ZWVrbHkgbWVudSBlbWFpbCB3YXMgYWN0dWFsbHkgc2VudCoqIOKAlCBpZiBub3QsIHRoYXQgbGlrZWx5IGV4cGxhaW5zIHRoZSBsb3cgb3JkZXIgY291bnQgYW5kIHlvdSBtYXkgd2FudCB0byByZXNlbmQuXG4zLiAqKlZlcmlmeSB0aGUgMyBvcmRlcnMgYXJlIGxlZ2l0aW1hdGUqKiAoaWRlbnRpY2FsIHRpbWVzdGFtcHMgYXJlIHN1c3BpY2lvdXMpLiJ9XSwic3RvcF9yZWFzb24iOiJlbmRfdHVybiIsInN0b3Bfc2VxdWVuY2UiOm51bGwsInVzYWdlIjp7ImlucHV0X3Rva2VucyI6NDUyLCJjYWNoZV9jcmVhdGlvbl9pbnB1dF90b2tlbnMiOjAsImNhY2hlX3JlYWRfaW5wdXRfdG9rZW5zIjowLCJjYWNoZV9jcmVhdGlvbiI6eyJlcGhlbWVyYWxfNW1faW5wdXRfdG9rZW5zIjowLCJlcGhlbWVyYWxfMWhfaW5wdXRfdG9rZW5zIjowfSwib3V0cHV0X3Rva2VucyI6NTYzLCJzZXJ2aWNlX3RpZXIiOiJzdGFuZGFyZCIsImluZmVyZW5jZV9nZW8iOiJnbG9iYWwifX0=
+        eyJtb2RlbCI6ImNsYXVkZS1vcHVzLTQtNiIsImlkIjoibXNnXzAxVlhwZkRlU1RCejlHM0FOalhwckFNOCIsInR5cGUiOiJtZXNzYWdlIiwicm9sZSI6ImFzc2lzdGFudCIsImNvbnRlbnQiOlt7InR5cGUiOiJ0ZXh0IiwidGV4dCI6IioqVEw7RFI6KiogVGhlIGRhdGEgZm9yIHRoaXMgd2VlayBhbmQgYWxsIGNvbXBhcmlzb24gd2Vla3MgYXBwZWFycyBsYXJnZWx5IGVtcHR5IG9yIG1hbGZvcm1lZCwgbWFraW5nIGl0IGltcG9zc2libGUgdG8gYXNzZXNzIHdoZXRoZXIgYXV0b21hdGVkIHdvcmtmbG93cyBhcmUgZnVuY3Rpb25pbmcgY29ycmVjdGx5LiBUaGUgb25seSBvcmRlcnMgbG9nZ2VkIGZvciB3ZWVrIDE5dzAxIGNhcnJ5IHRpbWVzdGFtcHMgb2YgMy8xNCAoTWFyY2ggMTQpLCB3aGljaCBpcyBtb250aHMgaW4gdGhlIGZ1dHVyZSDigJQgc3VnZ2VzdGluZyBhIGRhdGEvbG9nZ2luZyBpc3N1ZSByYXRoZXIgdGhhbiByZWFsIGN1cnJlbnQtd2VlayBhY3Rpdml0eS5cblxuKipTdGF0dXM6IOKaoO+4jyBXYXJuaW5nKipcblxuLS0tXG5cbiMjIyBBbm9tYWxpZXNcblxuKioxLiBUaW1lc3RhbXAgbWlzbWF0Y2ggb24gd2VlayAxOXcwMSBvcmRlcnMqKlxuVGhlIHRocmVlIG9yZGVycyBhdHRyaWJ1dGVkIHRvIHRoaXMgd2VlayAoS3lsZSBGcml0eiwgQWRyaWFuIEFsZGF5LCBMYXVyYSBGbGFtbSkgYWxsIGhhdmUgdGltZXN0YW1wcyBvZiBgMy8xNCAxMjozMXBtYCDigJQgTWFyY2ggMTQsIDIwMTkg4oCUIHdoaWNoIGlzIDIuNSBtb250aHMgZnJvbSBub3cuIFRoZXNlIG9yZGVycyBhbHNvIHJlZmVyZW5jZSBpdGVtcyAoXCJQdW1wa2luLFwiIFwiQ2xhc3NpY1wiKSB0aGF0IGRvbid0IG1hdGNoIHRoZSBjdXJyZW50IG1lbnUgb2ZmZXJpbmdzIChCbGFjayBTZXNhbWUgUnllLCBCYWd1ZXR0ZXMgKyBQYW5lbGEgRG9udXRzLCBDbGFzc2ljLCBFbmdsaXNoIE11ZmZpbnMg4oCUIHRob3VnaCBcIkNsYXNzaWNcIiBkb2VzIG92ZXJsYXApLiBUaGUgZnV0dXJlIHRpbWVzdGFtcCBzdWdnZXN0cyBlaXRoZXIgYSBsb2dnaW5nL3RpbWV6b25lIGJ1ZyBvciB0aGF0IHRoZXNlIHJlY29yZHMgd2VyZSBpbmNvcnJlY3RseSBhc3NvY2lhdGVkIHdpdGggdGhpcyB3ZWVrLlxuLSAqKlNldmVyaXR5OiB3YXJuaW5nKipcblxuKioyLiBGb3VyIGNvbnNlY3V0aXZlIGNvbXBhcmlzb24gd2Vla3Mgc2hvdyB6ZXJvIGFjdGl2aXR5KipcbldlZWtzIDE4dzQ5IHRocm91Z2ggMTh3NTIgYWxsIHNob3cgMCBvcmRlcnMsIDAgZXZlbnRzLCBhbmQgbm8gbWVudSBjb250ZXh0LiBGb3IgYSBiYWtlcnkgdGhhdCB0eXBpY2FsbHkgZG9lcyAzNeKAkzcwIG9yZGVycy93ZWVrLCBmb3VyIHN0cmFpZ2h0IHdlZWtzIG9mIGNvbXBsZXRlIHNpbGVuY2UgaXMgbm90IHBsYXVzaWJsZSBhcyBub3JtYWwgYnVzaW5lc3MuIFRoaXMgbGlrZWx5IG1lYW5zIHRoZSBhY3Rpdml0eSBmZWVkIGRhdGEgZm9yIHRob3NlIHdlZWtzIGlzIG1pc3Npbmcgb3Igd2Fzbid0IGNhcHR1cmVkLCByYXRoZXIgdGhhbiB0aGF0IHRoZSBiYWtlcnkgd2FzIHRydWx5IGluYWN0aXZlLiBXaXRob3V0IHZhbGlkIGNvbXBhcmlzb24gZGF0YSwgaXQncyBoYXJkIHRvIGJhc2VsaW5lIHdoYXQncyBub3JtYWwgcmlnaHQgbm93LlxuLSAqKlNldmVyaXR5OiB3YXJuaW5nKipcblxuKiozLiBObyBhdXRvbWF0ZWQgZW1haWxzIG9yIG1lbnUgcHVibGlzaCBldmVudHMgdmlzaWJsZSoqXG5UaGUgbWVudSBmb3Igd2VlazEgZXhpc3RzICh3aXRoIGEgYmFrZXIncyBub3RlKSwgYnV0IHRoZXJlJ3Mgbm8gZXZlbnQgbG9nZ2VkIGZvciBtZW51IHB1YmxpY2F0aW9uLCBubyBzZWxlY3Rpb24gcmVtaW5kZXIgZW1haWwsIGFuZCBubyBkZWxpdmVyeSByZW1pbmRlci4gSXQncyB0aGUgdmVyeSBzdGFydCBvZiB0aGUgd2VlayAoU3VuZGF5IG1vcm5pbmcpLCBzbyBzb21lIG9mIHRoZXNlIG1heSBub3QgaGF2ZSBmaXJlZCB5ZXQg4oCUIGJ1dCB0aGUgbWVudSBlbWFpbCB0eXBpY2FsbHkgZ29lcyBvdXQgU2F0dXJkYXkgYWZ0ZXJub29uLCBhbmQgdGhlcmUncyBubyByZWNvcmQgb2YgaXQuXG4tICoqU2V2ZXJpdHk6IGluZm8qKiAobWF5IHJlc29sdmUgYXMgdGhlIHdlZWsgcHJvZ3Jlc3NlcywgYnV0IHdvcnRoIHZlcmlmeWluZyB0aGUgU2F0dXJkYXkgbWVudSBlbWFpbCBhY3R1YWxseSB3ZW50IG91dClcblxuLS0tXG5cbiMjIyBBY3Rpb24gSXRlbXNcbjEuICoqS3lsZSoqIOKAlCBJbnZlc3RpZ2F0ZSB0aGUgYDMvMTRgIHRpbWVzdGFtcHMgb24gdGhlIHRocmVlIG9yZGVycy4gRGV0ZXJtaW5lIGlmIHRoaXMgaXMgYSBkaXNwbGF5IGJ1ZyBvciBpZiBvcmRlcnMgYXJlIGJlaW5nIGxvZ2dlZCB3aXRoIGluY29ycmVjdCBkYXRlcy5cbjIuICoqS3lsZSoqIOKAlCBDaGVjayB3aHkgY29tcGFyaXNvbiB3ZWVrcyAxOHc0OeKAkzE4dzUyIHNob3cgY29tcGxldGVseSBlbXB0eSBhY3Rpdml0eSBmZWVkcy4gSWYgdGhlIGxvZ2dpbmcgc3lzdGVtIHdhcyBvZmZsaW5lIG9yIGRhdGEgd2Fzbid0IG1pZ3JhdGVkLCB0aGF0J3Mgd29ydGgga25vd2luZy5cbjMuICoqTWF5YS9SdXNzZWxsKiog4oCUIENvbmZpcm0gdGhlIG1lbnUvc2VsZWN0aW9uIGVtYWlsIHdlbnQgb3V0IFNhdHVyZGF5IDEyLzI5IGFzIGV4cGVjdGVkLiBJZiBzdWJzY3JpYmVycyBoYXZlbid0IGJlZW4gbm90aWZpZWQgYWJvdXQgdGhpcyB3ZWVrJ3MgbWVudSwgb3JkZXJzIHdpbGwgYmUgYXJ0aWZpY2lhbGx5IGxvdy4ifV0sInN0b3BfcmVhc29uIjoiZW5kX3R1cm4iLCJzdG9wX3NlcXVlbmNlIjpudWxsLCJ1c2FnZSI6eyJpbnB1dF90b2tlbnMiOjE5MDMsImNhY2hlX2NyZWF0aW9uX2lucHV0X3Rva2VucyI6MCwiY2FjaGVfcmVhZF9pbnB1dF90b2tlbnMiOjAsImNhY2hlX2NyZWF0aW9uIjp7ImVwaGVtZXJhbF81bV9pbnB1dF90b2tlbnMiOjAsImVwaGVtZXJhbF8xaF9pbnB1dF90b2tlbnMiOjB9LCJvdXRwdXRfdG9rZW5zIjo2NDQsInNlcnZpY2VfdGllciI6InN0YW5kYXJkIiwiaW5mZXJlbmNlX2dlbyI6Imdsb2JhbCJ9fQ==
   recorded_at: Sun, 30 Dec 2018 14:00:00 GMT
 recorded_with: VCR 6.4.0
