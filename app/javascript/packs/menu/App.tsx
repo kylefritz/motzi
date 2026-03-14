@@ -23,7 +23,7 @@ export default function App() {
   const [error, setError] = useState<string | undefined>();
   const [isEditingOrder, setIsEditingOrder] = useState(false);
   const { uid, ignoredeadline: ignoreDeadline } = queryString.parse(
-    location.search
+    location.search,
   ) as { uid?: string; ignoredeadline?: string };
 
   const fetchMenu = () => {
@@ -50,7 +50,7 @@ export default function App() {
   useEffect(fetchMenu, []);
 
   const handleCreateOrder = (
-    order: MenuOrderRequest | MarketplaceOrderRequest
+    order: MenuOrderRequest | MarketplaceOrderRequest,
   ) => {
     const orderId = _.get(data, "order.id");
 
@@ -66,15 +66,15 @@ export default function App() {
         window.scrollTo(0, 0);
       })
       .catch((err) => {
-        const { message } = err.response.data || {};
-        console.error("Couldn't create order", err, err.response.data);
+        const { message } = err.response?.data || {};
+        console.error("Couldn't create order", err, err.response?.data);
         window.alert(`Couldn't create order: ${message || err}`);
         Sentry.captureException(err);
       });
   };
 
   const handleCreateHolidayOrder = (
-    order: MenuOrderRequest | MarketplaceOrderRequest
+    order: MenuOrderRequest | MarketplaceOrderRequest,
   ) => {
     const holidayOrderId = _.get(data, "holidayOrder.id");
     const method: "put" | "post" = holidayOrderId ? "put" : "post";
@@ -93,8 +93,8 @@ export default function App() {
         window.scrollTo(0, 0);
       })
       .catch((err) => {
-        const { message } = err.response.data || {};
-        console.error("Couldn't create holiday order", err, err.response.data);
+        const { message } = err.response?.data || {};
+        console.error("Couldn't create holiday order", err, err.response?.data);
         window.alert(`Couldn't create holiday order: ${message || err}`);
         Sentry.captureException(err);
       });

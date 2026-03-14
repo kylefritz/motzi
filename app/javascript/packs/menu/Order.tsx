@@ -14,12 +14,7 @@ type OrderProps = {
 
 export default function Order({ menu, user, order, onEditOrder }: OrderProps) {
   const { name } = menu;
-  const {
-    items: cart,
-    comments,
-    stripeReceiptUrl,
-    stripeChargeAmount,
-  } = order;
+  const { items: cart, comments, stripeReceiptUrl, stripeChargeAmount } = order;
 
   const isSubscriptionOrder = _.get(user, "subscriber");
   return (
@@ -31,7 +26,7 @@ export default function Order({ menu, user, order, onEditOrder }: OrderProps) {
       <Cart {...{ cart, menu, stripeChargeAmount }} />
       {stripeReceiptUrl && (
         <p className="text-center my-2">
-          <a href={stripeReceiptUrl} target="blank">
+          <a href={stripeReceiptUrl} target="_blank" rel="noopener noreferrer">
             View receipt
           </a>
         </p>

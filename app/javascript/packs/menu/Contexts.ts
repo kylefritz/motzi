@@ -50,11 +50,7 @@ export function getDeadlineContext() {
     return pastDeadline(orderDeadlineAt);
   };
 
-  const allClosed = ({
-    pickupDays,
-  }: {
-    pickupDays?: MenuPickupDay[];
-  }) => {
+  const allClosed = ({ pickupDays }: { pickupDays?: MenuPickupDay[] }) => {
     if (ctx.ignoreDeadline) {
       return false;
     }
@@ -64,6 +60,7 @@ export function getDeadlineContext() {
     }
 
     const lastPickupDay = _.last(pickupDays);
+    if (!lastPickupDay) return false;
     return isClosed(lastPickupDay.orderDeadlineAt);
   };
 

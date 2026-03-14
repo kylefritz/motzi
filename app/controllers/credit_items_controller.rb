@@ -3,7 +3,7 @@ class CreditItemsController < ApplicationController
   before_action :require_hashid_user_or_devise_user!
 
   def create
-    price = params[:price].to_f.clamp(1, CreditBundle::MAX_PRICE)
+    price = BigDecimal(params[:price].to_s).clamp(1, CreditBundle::MAX_PRICE).round(2)
     price_cents = (price * 100).to_i
     quantity = params[:credits].to_i.clamp(1, CreditBundle::MAX_CREDITS)
     bundle = CreditBundle.find_by(credits: quantity)
@@ -45,7 +45,7 @@ class CreditItemsController < ApplicationController
       logger.warn "Stripe::CardError Status=#{e.http_status} Type=#{e.error.type} Charge ID=#{e.error.charge} \
         Code=#{e.error.code} cecline_code=#{e.error.decline_code} param=#{e.error.param} message=#{e.error.message}"
 
-      render json: {error: e.error.message}.to_json, status: :unprocessable_content
+      render json: {error: e.error.message}, status: :unprocessable_content
     end
   end
 end

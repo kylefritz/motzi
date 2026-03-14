@@ -46,4 +46,5 @@ export function applyTip(price, tip) {
     const fraction = 1.0 + parseFloat(tip.slice(0, tip.length - 1)) / 100.0;
     return parseFloat((price * fraction).toFixed(2));
   }
+  return price;
 }

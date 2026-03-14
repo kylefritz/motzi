@@ -117,7 +117,7 @@ class Menu < ApplicationRecord
 
   def publish_to_subscribers!
     unless can_publish?
-      throw "can only publish_to_subscribers for current week's menu or future week's menu"
+      raise "can only publish_to_subscribers for current week's menu or future week's menu"
     end
     self.make_current!
     self.touch :emailed_at # create audit that email was sent
@@ -128,7 +128,9 @@ class Menu < ApplicationRecord
   end
 
   def ordering_closed?
-    Time.zone.now > self.latest_deadline
+    deadline = self.latest_deadline
+    return true if deadline.nil?
+    Time.zone.now > deadline
   end
 
   def earliest_deadline

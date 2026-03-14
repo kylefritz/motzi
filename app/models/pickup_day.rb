@@ -9,7 +9,7 @@ class PickupDay < ApplicationRecord
      PickupDay.where("? between pickup_at - interval '8 hours' AND pickup_at + interval '2 hours' ", dt)
   end
   def self.for_order_deadline_at(dt)
-    PickupDay.where("? between order_deadline_at - interval '#{Setting.reminder_hours} hours' AND order_deadline_at", dt)
+    PickupDay.where("? between order_deadline_at - interval '1 hour' * ? AND order_deadline_at", dt, Setting.reminder_hours.to_i)
   end
 
   def day_str

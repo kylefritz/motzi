@@ -90,7 +90,9 @@ class Order < ApplicationRecord
 
   def comments_html
     if self.comments.present?
-      Menu::MARKDOWN.render(self.comments).html_safe
+      Rails::HTML5::SafeListSanitizer.new.sanitize(
+        Menu::MARKDOWN.render(self.comments)
+      ).html_safe
     end
   end
 end

@@ -62,7 +62,7 @@ class OrdersController < ApplicationController
       if params[:price].present?
 
         # we let the customer set the price so ok to trust customer input
-        price = params[:price].to_f.clamp(0, 250)
+        price = BigDecimal(params[:price].to_s).clamp(0, 250).round(2)
         price_cents = (price * 100).to_i
 
         # make stripe change

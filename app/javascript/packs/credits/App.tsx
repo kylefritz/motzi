@@ -5,12 +5,12 @@ import _ from "lodash";
 import type { AdminCreditItemRequest } from "../../types/api";
 
 export default function App() {
-  const memoRef = React.createRef<HTMLInputElement>();
-  const quantityRef = React.createRef<HTMLInputElement>();
-  const weeksRef = React.createRef<HTMLInputElement>();
+  const memoRef = React.useRef<HTMLInputElement>(null);
+  const quantityRef = React.useRef<HTMLInputElement>(null);
+  const weeksRef = React.useRef<HTMLInputElement>(null);
   const userId = parseInt(
     _.get(window.location?.pathname.match(/users\/(.*)/), 1),
-    10
+    10,
   );
 
   const handleSubmit = (event: React.FormEvent) => {

@@ -91,11 +91,11 @@ function Days({ menu, cart, rmCartItem }: DaysProps) {
 
   const cartPickupDays = new Set(cart.map(({ pickupDayId }) => pickupDayId));
   const pickupDays = menu.pickupDays.filter(({ id: pickupDayId }) =>
-    cartPickupDays.has(pickupDayId)
+    cartPickupDays.has(pickupDayId),
   );
   const [items, payItForward] = _.partition(
     cart,
-    ({ itemId }) => itemId !== PAY_IT_FORWARD_ID
+    ({ itemId }) => itemId !== PAY_IT_FORWARD_ID,
   );
 
   const sections = pickupDays.map(({ id, pickupAt, orderDeadlineAt }) => {
@@ -129,7 +129,7 @@ function Days({ menu, cart, rmCartItem }: DaysProps) {
             cart: payItForward,
           }}
         />
-      </div>
+      </div>,
     );
   }
 
@@ -177,7 +177,9 @@ function Cart(props: DaysProps & { cart: CartItemType[] }) {
   );
 }
 
-export default function CartWrapper(props: DaysProps & { cart: CartItemType[] }) {
+export default function CartWrapper(
+  props: DaysProps & { cart: CartItemType[] },
+) {
   return (
     <>
       <h5>Your order</h5>
@@ -205,8 +207,8 @@ function cartTotal({
     _.sum(
       cart.map(
         ({ itemId, quantity }) =>
-          _.get(menuItemsById[itemId], attribute, 0) * quantity
-      )
+          _.get(menuItemsById[itemId], attribute, 0) * quantity,
+      ),
     );
 
   return { price: addBy("price"), credits: addBy("credits") };
@@ -237,12 +239,16 @@ type AddToCartPayload = {
 
 export function useCart({ order = null, items }: UseCartInput) {
   const [cart, setCart] = useState<CartItemType[]>(
-    (_.get(order, "items", []) as MenuOrderItem[]) || []
+    (_.get(order, "items", []) as MenuOrderItem[]) || [],
   );
 
   const calcTotal = (cart: CartItemType[]) => cartTotal({ cart, items });
 
-  const addToCart = ({ id: itemId, quantity, pickupDayId }: AddToCartPayload) => {
+  const addToCart = ({
+    id: itemId,
+    quantity,
+    pickupDayId,
+  }: AddToCartPayload) => {
     console.log("addToCart", itemId, "x", quantity, "on", pickupDayId);
     const nextCart = [...cart, { itemId, quantity, pickupDayId }];
     setCart(nextCart);
@@ -252,16 +258,17 @@ export function useCart({ order = null, items }: UseCartInput) {
   const rmCartItem = (
     itemId: number,
     quantity: number,
-    pickupDayId?: number
+    pickupDayId?: number,
   ) => {
     const index = _.findIndex(
       cart,
       (ci) =>
         ci.itemId === itemId &&
         ci.quantity === quantity &&
-        ci.pickupDayId === pickupDayId
+        ci.pickupDayId === pickupDayId,
     );
     console.log("rmCartItem", { itemId, quantity, pickupDayId }, "@", index);
+    if (index === -1) return;
     const nextCart = [...cart];
     nextCart.splice(index, 1);
     setCart(nextCart);
@@ -281,7 +288,7 @@ export function useCart({ order = null, items }: UseCartInput) {
     }
     const pickupDay = item.pickupDays.find(({ id }) => id === pickupDayId);
     if (pickupDay === undefined) {
-      throw "cant find pickupDay";
+      throw new Error("cant find pickupDay");
     }
     pickupDay.remaining -= quantity;
   });

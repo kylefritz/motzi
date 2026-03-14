@@ -38,7 +38,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
   const [user, setUser] = useState<MenuUser | undefined>(passedUser);
   const [bundles, setBundles] = useState<CreditBundle[]>(passedBundles || []);
   const [enablePayWhatYouCan, setEnablePayWhatYouCan] = useState(
-    !!passedEnablePayWhatYouCan
+    !!passedEnablePayWhatYouCan,
   );
   const [error, setError] = useState<string | undefined>();
   const [receipt, setReceipt] = useState<string | null>(null);
@@ -73,7 +73,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
           } else {
             setError("We can't load your user account");
           }
-        }
+        },
       )
       .catch((error) => {
         console.error("cant load user from menu page", error);
@@ -90,7 +90,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
     setCredits(credits);
     setPrice(price);
     setBreadsPerWeek(breadsPerWeek);
-    console.log("selected", credits, "for", "price");
+    console.log("selected", credits, "for", price);
   };
 
   const handlePriceChanged = (newPrice: number) => {
@@ -124,7 +124,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
         }
       })
       .catch((error) => {
-        const { message } = error.response.data || {};
+        const { message } = error.response?.data || {};
         console.error("Can't buy credits", error, message);
         const alertWindow = window as Window & {
           alert: (message?: string) => void;
@@ -140,7 +140,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
       <div className="alert alert-success" role="alert">
         <h2>Thanks for your support!!</h2>
         <p className="text-center my-3">
-          <a href={receipt} target="blank">
+          <a href={receipt} target="_blank" rel="noopener noreferrer">
             Here's your receipt
           </a>
         </p>
