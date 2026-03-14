@@ -27,6 +27,7 @@ ActiveAdmin.register_page "Activity Feed" do
 
     week_start = Time.zone.from_week_id(week_id)
     week_end = week_start + 6.days
+    weeks = (0..8).map { |i| (Time.zone.now - i.weeks).week_id }.uniq
 
     # Week header
     menu = Menu.find_by(week_id: week_id)
@@ -38,7 +39,6 @@ ActiveAdmin.register_page "Activity Feed" do
     # Week navigation + controls on same line
     div class: "activity-toolbar" do
       div class: "activity-feed-nav" do
-        weeks = (0..8).map { |i| (Time.zone.now - i.weeks).week_id }.uniq
         weeks.each do |wid|
           if wid == week_id
             span wid
@@ -61,12 +61,161 @@ ActiveAdmin.register_page "Activity Feed" do
             method: :post,
             title: analyze_tooltip
           )
-          div id: "analysis-status", "data-week-id": week_id, class: "analysis-progress" do
-            span id: "analysis-loader", class: "spinner"
-            span id: "analysis-timer", class: "elapsed"
-            span id: "analysis-message", class: "progress-msg"
-          end
         end
+      end
+    end
+
+    div id: "analysis-status", "data-week-id": week_id, class: "analysis-progress" do
+      span id: "analysis-loader", class: "spinner"
+      span id: "analysis-timer", class: "elapsed"
+      span id: "analysis-message", class: "progress-msg"
+    end
+
+    # Weekly trends chart
+    weeks = (0..8).map { |i| (Time.zone.now - i.weeks).week_id }
+    trend_data = weeks.map do |wid|
+      ws = Time.zone.from_week_id(wid)
+      we = ws + 7.days
+      menus = Menu.where(week_id: wid)
+      order_count = menus.any? ? Order.where(menu_id: menus.select(:id)).count : 0
+      email_count = menus.any? ? Ahoy::Message.where(menu_id: menus.select(:id)).count : 0
+      visitor_count = Ahoy::Visit.where(started_at: ws..we).distinct.count(:visitor_token)
+      { week: wid, orders: order_count, emails: email_count, visitors: visitor_count }
+    end
+
+    panel "Weekly Trends" do
+      div style: "position: relative; width: 100%; height: 180px; min-width: 0;" do
+        canvas id: "weekly-trends-chart"
+      end
+      script src: "https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"
+      script do
+        text_node <<~JS.html_safe
+          document.addEventListener('DOMContentLoaded', function() {
+            var selectedWeek = #{week_id.to_json};
+            var currentWeek = #{Time.zone.now.week_id.to_json};
+            var chartConfig = {
+              type: 'line',
+              data: {
+                labels: #{trend_data.map { |d| d[:week] }.to_json},
+                datasets: [
+                  {
+                    label: 'Orders',
+                    data: #{trend_data.map { |d| d[:orders] }.to_json},
+                    borderColor: '#2E7D32',
+                    backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    yAxisID: 'y_orders',
+                    pointRadius: 3
+                  },
+                  {
+                    label: 'Emails Sent',
+                    data: #{trend_data.map { |d| d[:emails] }.to_json},
+                    borderColor: '#D5482C',
+                    backgroundColor: 'rgba(213, 72, 44, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    yAxisID: 'y_emails',
+                    pointRadius: 3
+                  },
+                  {
+                    label: 'Visitors',
+                    data: #{trend_data.map { |d| d[:visitors] }.to_json},
+                    borderColor: '#888888',
+                    backgroundColor: 'rgba(136, 136, 136, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    yAxisID: 'y_emails',
+                    pointRadius: 3
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                  legend: { display: false }
+                },
+                scales: {
+                  y_orders: { beginAtZero: true, position: 'left', grid: { color: 'rgba(0,0,0,0.05)' }, title: { display: true, text: 'Orders', color: '#2E7D32' } },
+                  y_emails: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Emails / Visitors', color: '#888' } },
+                  x: {
+                    type: 'category',
+                    grid: { display: false },
+                    ticks: {
+                      padding: 8,
+                      font: function(context) {
+                        var label = context.chart.data.labels[context.index];
+                        if (label === currentWeek) return { weight: 'bold' };
+                        return {};
+                      },
+                      color: function(context) {
+                        var label = context.chart.data.labels[context.index];
+                        return label === selectedWeek ? '#352C63' : '#666';
+                      }
+                    }
+                  }
+                },
+                layout: { padding: { right: 16 } }
+              }
+            };
+
+            chartConfig.plugins = [{
+              afterDraw: function(chart) {
+                var xAxis = chart.scales.x;
+                var ctx = chart.ctx;
+                var labels = chart.data.labels;
+                labels.forEach(function(label, i) {
+                  if (label === selectedWeek) {
+                    var x = xAxis.getPixelForTick(i);
+                    var y = xAxis.bottom - 2;
+                    ctx.save();
+                    ctx.strokeStyle = '#352C63';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(x - 20, y);
+                    ctx.lineTo(x + 20, y);
+                    ctx.stroke();
+                    ctx.restore();
+                  }
+                });
+              }
+            }];
+            var weekUrls = #{weeks.map { |wid| [wid, admin_activity_feed_path(week_id: wid)] }.to_h.to_json};
+            var chart = new Chart(document.getElementById('weekly-trends-chart'), chartConfig);
+            chart.canvas.addEventListener('click', function(e) {
+              var xAxis = chart.scales.x;
+              if (e.offsetY >= xAxis.top) {
+                var labels = chart.data.labels;
+                for (var i = 0; i < labels.length; i++) {
+                  var x = xAxis.getPixelForTick(i);
+                  if (Math.abs(e.offsetX - x) < 30) {
+                    window.location.href = weekUrls[labels[i]];
+                    break;
+                  }
+                }
+              }
+            });
+            chart.canvas.addEventListener('mousemove', function(e) {
+              var xAxis = chart.scales.x;
+              if (e.offsetY >= xAxis.top) {
+                var labels = chart.data.labels;
+                for (var i = 0; i < labels.length; i++) {
+                  var x = xAxis.getPixelForTick(i);
+                  if (Math.abs(e.offsetX - x) < 30) {
+                    chart.canvas.style.cursor = 'pointer';
+                    return;
+                  }
+                }
+              }
+              chart.canvas.style.cursor = 'default';
+            });
+          });
+        JS
       end
     end
 
