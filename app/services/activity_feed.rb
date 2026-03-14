@@ -162,9 +162,10 @@ class ActivityFeed
     lines = ["== Orders by Day =="]
     total_orders = 0
     total_items = 0
+    all_orders = []
 
     @menus.each do |menu|
-      by_day = menu.orders.includes(:order_items).where(created_at: @week_start..@week_end)
+      by_day = menu.orders.includes(:user, order_items: :item).where(created_at: @week_start..@week_end)
                    .group_by { |o| o.created_at.to_date }
 
       (0..6).each do |i|
@@ -174,6 +175,7 @@ class ActivityFeed
         items = daily_orders.sum { |o| o.order_items.size }
         total_orders += count
         total_items += items
+        all_orders.concat(daily_orders)
         day_label = date.strftime("%a %-m/%-d")
 
         if date > today
@@ -187,6 +189,15 @@ class ActivityFeed
     end
 
     lines << "  Total so far: #{total_orders} orders (#{total_items} items)"
+
+    if all_orders.any?
+      lines << ""
+      lines << "== Order Details (check for unusual items or quantities) =="
+      all_orders.sort_by(&:created_at).each do |order|
+        lines << "  #{order.user.name}: #{order.item_list}"
+      end
+    end
+
     lines.join("\n")
   end
 
