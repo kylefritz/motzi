@@ -12,9 +12,9 @@ class Admin::ActivityFeedControllerTest < ActionDispatch::IntegrationTest
   test "get index" do
     get '/admin/activity_feed'
     assert_response :success
-    assert_select 'h3', text: 'At a Glance'
-    assert_select 'h3', text: 'Watchlist'
-    assert_select 'h3', text: 'Code Changes'
+    assert_select '.dense-title', text: 'At a Glance'
+    assert_select '.dense-title', text: 'Watchlist'
+    assert_select '.dense-title', text: 'Code Changes'
   end
 
   test "get index with week_id" do
