@@ -27,4 +27,12 @@ class AnomalyDetectorIntegrationTest < ActiveSupport::TestCase
       assert_includes message, "Comparison Week:"
     end
   end
+
+  test "system prompt asks claude to consider relevant code changes" do
+    detector = AnomalyDetector.new("19w01")
+    prompt = detector.system_prompt
+
+    assert_includes prompt, "Whether recent code changes could plausibly explain the behavior you see this week"
+    assert_includes prompt, "Treat code changes as supporting evidence, not proof"
+  end
 end

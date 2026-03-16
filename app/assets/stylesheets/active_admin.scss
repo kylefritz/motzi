@@ -351,6 +351,247 @@ form fieldset.actions li.cancel a {
   }
 }
 
+body.admin_activity_feed {
+  .panel,
+  .columns {
+    margin-bottom: 8px;
+  }
+
+  .panel > h3 {
+    padding: 5px 8px;
+    font-size: 0.8em;
+  }
+}
+
+.activity-ops-board {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.activity-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.dense-section {
+  border: 1px solid #dfdfdf;
+  background: #fcfcfb;
+  border-radius: 3px;
+  min-width: 0;
+}
+
+.dense-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 6px;
+  border-bottom: 1px solid #e5ddd0;
+  background: #f2f2f1;
+}
+
+.dense-title {
+  font-size: 0.78em;
+  font-weight: 600;
+  color: #4b4b4b;
+}
+
+.dense-meta {
+  font-size: 0.7em;
+  color: #8a8177;
+  white-space: nowrap;
+}
+
+.activity-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  padding: 5px;
+}
+
+.activity-metric-card,
+.watch-item,
+.analysis-summary-card,
+.commit-card {
+  border: 1px solid #e7dcc9;
+  background: #fffdfa;
+  border-radius: 2px;
+}
+
+.activity-metric-card {
+  padding: 5px 6px;
+
+  .metric-label {
+    font-size: 0.62em;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #8c8174;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .metric-value {
+    font-size: 1.15em;
+    line-height: 1;
+    font-weight: 600;
+    color: #2d241f;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 2px;
+  }
+
+  .metric-detail {
+    color: #5f5448;
+    font-size: 0.7em;
+    margin-bottom: 2px;
+  }
+
+  .metric-delta {
+    font-size: 0.68em;
+    font-weight: 500;
+  }
+}
+
+.watchlist {
+  display: grid;
+  gap: 4px;
+  padding: 5px;
+}
+
+.watch-item {
+  padding: 5px 6px;
+
+  .watch-title {
+    font-weight: 600;
+    color: #2f2822;
+    margin-bottom: 1px;
+    font-size: 0.78em;
+  }
+
+  .watch-body {
+    color: #5f5448;
+    line-height: 1.2;
+    font-size: 0.7em;
+  }
+}
+
+.analysis-summary-card {
+  padding: 5px 6px;
+  border: none;
+  background: transparent;
+
+  .analysis-summary-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .analysis-summary-text {
+    margin: 0 0 4px;
+    font-size: 0.74em;
+    color: #40362f;
+    line-height: 1.25;
+  }
+
+  .analysis-status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 1px 6px;
+    background: #f2e8d8;
+    color: #6a5235;
+    font-size: 0.64em;
+    font-weight: 600;
+  }
+
+  .analysis-action-list {
+    margin: 0;
+    padding-left: 14px;
+    color: #5d5044;
+    font-size: 0.7em;
+    line-height: 1.2;
+  }
+}
+
+.commit-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 5px;
+}
+
+.commit-card {
+  padding: 4px 5px;
+
+  &.is-current-week {
+    border-color: #d4c09d;
+    box-shadow: inset 0 0 0 1px rgba(183, 137, 69, 0.08);
+  }
+
+  .commit-meta,
+  .commit-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #857766;
+    font-size: 0.66em;
+  }
+
+  .commit-title {
+    margin: 2px 0 1px;
+    color: #2f2822;
+    font-weight: 500;
+    line-height: 1.15;
+    font-size: 0.72em;
+  }
+
+  .commit-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0 4px;
+    background: #efe4cf;
+    color: #8b6530;
+    font-size: 0.68em;
+    font-weight: 600;
+  }
+}
+
+.tone-danger {
+  .metric-delta,
+  .watch-title {
+    color: #b64528;
+  }
+}
+
+.tone-warning {
+  .metric-delta,
+  .watch-title {
+    color: #9a6a15;
+  }
+}
+
+.tone-ok {
+  .metric-delta,
+  .watch-title {
+    color: #2c7a4b;
+  }
+}
+
+.tone-muted {
+  .metric-delta,
+  .watch-title {
+    color: #7f7263;
+  }
+}
+
+.empty-state {
+  color: #8d8378;
+}
+
 // Grid table
 .activity-grid {
   width: 100%;
@@ -358,22 +599,22 @@ form fieldset.actions li.cancel a {
   border-spacing: 0;
 
   th {
-    font-size: 0.8em;
+    font-size: 0.66em;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #999;
     font-weight: 500;
-    padding: 8px 10px 6px;
+    padding: 4px 6px 3px;
     border-bottom: 2px solid #e8e2da;
     text-align: left;
   }
   th:first-child { width: 110px; white-space: nowrap; }
 
   td {
-    padding: 6px 10px;
+    padding: 3px 6px;
     border-bottom: 1px solid #f0f0f0;
-    font-size: 1.15em;
-    line-height: 1.5;
+    font-size: 0.8em;
+    line-height: 1.15;
     vertical-align: top;
     color: #333;
   }
@@ -384,8 +625,8 @@ form fieldset.actions li.cancel a {
 
   .cell-item {
     white-space: nowrap;
-    padding: 2px 0;
-    line-height: 1.4;
+    padding: 0;
+    line-height: 1.1;
   }
   .cell-num {
     font-weight: 500;
@@ -396,7 +637,7 @@ form fieldset.actions li.cancel a {
   }
   .cell-dim {
     color: #888;
-    font-size: 0.92em;
+    font-size: 0.76em;
   }
   .cell-link {
     text-decoration: none;
@@ -412,7 +653,7 @@ form fieldset.actions li.cancel a {
     td:first-child { border-left: 3px solid $primary; padding-left: 9px; }
   }
   .today-label {
-    font-size: 0.75em;
+    font-size: 0.62em;
     color: $primary;
     font-weight: 500;
     margin-left: 4px;
@@ -430,50 +671,50 @@ form fieldset.actions li.cancel a {
 
 // Analysis card
 .analysis-card {
-  margin-bottom: 20px;
+  margin-bottom: 6px;
   border: 1px solid #e8e8e8;
-  border-radius: 6px;
+  border-radius: 4px;
   overflow: hidden;
 
   .analysis-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 16px;
+    padding: 4px 6px;
     background: #fafafa;
     border-bottom: 1px solid #eee;
-    font-size: 0.85em;
+    font-size: 0.68em;
 
     .analysis-time { font-weight: 500; }
     .analysis-meta { color: #999; }
   }
 
   .analysis-body {
-    padding: 20px 28px;
-    font-size: 14px;
+    padding: 6px 8px;
+    font-size: 11px;
     color: #333;
-    line-height: 1.6;
+    line-height: 1.25;
 
-    h1 { font-size: 1.15em; margin: 0 0 10px; font-weight: 600; color: #1a1a1a; }
-    h2 { font-size: 1em; margin: 20px 0 8px; font-weight: 600; color: #1a1a1a; border-bottom: 1px solid #e8e2da; padding-bottom: 5px; }
-    h3 { font-size: 0.95em; margin: 14px 0 6px; font-weight: 600; color: #333; }
-    p { margin: 0 0 10px; }
-    ol, ul { margin: 0 0 12px; padding-left: 22px; }
-    li { margin-bottom: 10px; line-height: 1.55; }
-    li > ul, li > ol { margin-top: 6px; }
+    h1 { font-size: 0.96em; margin: 0 0 4px; font-weight: 600; color: #1a1a1a; }
+    h2 { font-size: 0.86em; margin: 7px 0 4px; font-weight: 600; color: #1a1a1a; border-bottom: 1px solid #e8e2da; padding-bottom: 2px; }
+    h3 { font-size: 0.8em; margin: 5px 0 2px; font-weight: 600; color: #333; }
+    p { margin: 0 0 4px; }
+    ol, ul { margin: 0 0 5px; padding-left: 16px; }
+    li { margin-bottom: 3px; line-height: 1.2; }
+    li > ul, li > ol { margin-top: 4px; }
     strong { color: #111; font-weight: 600; }
-    code { background: #f0ebe4; padding: 2px 6px; border-radius: 3px; font-size: 0.88em; color: $primary; }
-    hr { border: none; border-top: 1px solid #e8e2da; margin: 18px 0; }
+    code { background: #f0ebe4; padding: 0 3px; border-radius: 2px; font-size: 0.8em; color: $primary; }
+    hr { border: none; border-top: 1px solid #e8e2da; margin: 6px 0; }
   }
 
   .analysis-footer {
     display: flex;
-    gap: 28px;
+    gap: 10px;
     flex-wrap: wrap;
-    padding: 10px 20px;
+    padding: 4px 6px;
     background: #f5f3f0;
     border-top: 2px solid #e8e2da;
-    font-size: 0.82em;
+    font-size: 0.66em;
     color: #777;
     font-variant-numeric: tabular-nums;
 
@@ -517,27 +758,42 @@ form fieldset.actions li.cancel a {
 
 .email-health-row {
   display: flex;
-  gap: 48px;
+  gap: 10px;
   flex-wrap: wrap;
-  padding: 14px 16px;
+  padding: 5px 6px;
   margin-bottom: 0;
   background: #faf8f5;
   border-bottom: 2px solid #e8e2da;
 
   .email-stat {
-    font-size: 1.3em;
+    font-size: 0.76em;
+    line-height: 1.2;
   }
   .email-stat-num {
     font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
   .email-stat-label {
-    font-size: 0.65em;
+    font-size: 0.52em;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #999;
-    margin-bottom: 3px;
+    margin-bottom: 1px;
     font-weight: 500;
+  }
+}
+
+@media (max-width: 1400px) {
+  .activity-metric-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .activity-summary-grid,
+  .activity-metric-grid,
+  .commit-list {
+    grid-template-columns: 1fr;
   }
 }
 
