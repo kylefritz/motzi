@@ -18,7 +18,17 @@ class ActiveSupport::TestCase
 
   # Add more helper methods to be used by all tests here...
 
+  # Suppress external API calls in tests. GitHub token is cleared so
+  # ActivityFeed#git_commits_text skips the Octokit call (it already
+  # handles a missing token gracefully). Tests that need real GitHub
+  # responses should use a VCR cassette instead.
+  setup do
+    @original_github_token = ENV["GITHUB_TOKEN"]
+    ENV["GITHUB_TOKEN"] = nil
+  end
+
   teardown do
+    ENV["GITHUB_TOKEN"] = @original_github_token
     Setting.clear_cache
   end
 

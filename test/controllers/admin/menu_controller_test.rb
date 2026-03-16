@@ -19,6 +19,14 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "get show after menu has been emailed" do
+    menu = menus(:week2)
+    menu.update!(emailed_at: 1.hour.ago)
+    get "/admin/menus/#{menu.id}"
+    assert_response :success
+    assert_select "strong[title]", text: /hour/
+  end
+
   test "get edit" do
     obj = menus(:week2)
     get "/admin/menus/#{obj.id}/edit"
