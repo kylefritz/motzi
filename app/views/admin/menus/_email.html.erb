@@ -6,7 +6,7 @@
 <!-- has the menu been emailed yet -->
 <p>
   <%- if menu.emailed_at.present? %>
-    Emailed to subscribers <strong title="<%=menu.emailed_at.to_s(:long) %>"><%= time_ago_in_words(menu.emailed_at) %></strong> ago
+    Emailed to subscribers <strong title="<%=menu.emailed_at.to_fs(:long) %>"><%= time_ago_in_words(menu.emailed_at) %></strong> ago
   <% else %>
     Has not been emailed to subscribers.
   <% end %>

@@ -221,7 +221,7 @@ test("adds pickup days and items", async () => {
     .closest('[role="listitem"]')!;
   const pickupDayRow = within(freshPickupDay);
   await userEvent.click(pickupDayRow.getByRole("button", { name: "Edit" }));
-  const editPickupInput = pickupDayRow.getByLabelText("Pickup at:");
+  const editPickupInput = await waitFor(() => pickupDayRow.getByLabelText("Pickup at:"));
   const editDeadlineInput = pickupDayRow.getByLabelText("Order deadline at:");
   fireEvent.change(editPickupInput, { target: { value: "2024-01-15T09:00" } });
   fireEvent.change(editDeadlineInput, { target: { value: "2024-01-14T09:00" } });
