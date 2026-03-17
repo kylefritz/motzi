@@ -1,0 +1,71 @@
+# Ground truth for anomaly detector prompt evaluation.
+# expected_status: healthy | warning | problem
+# Adjust these based on your knowledge of what actually happened each week.
+
+# --- 2024 known anomalies ---
+
+24w06:
+  expected_status: problem
+  notes: "16 orders, 0 items, half emails — broken order creation bug"
+
+# --- 2025 known anomalies ---
+
+25w17:
+  expected_status: warning
+  notes: "Email double-sends began — 973 menu emails and 938 reminders vs normal ~500"
+
+25w18:
+  expected_status: warning
+  notes: "Email double-sends continued — 971 menu emails and 1,119 reminders"
+
+25w19:
+  expected_status: warning
+  notes: "Email double-sends worst week — 1,210 menu emails and 1,319 reminders (2.5x normal)"
+
+# --- 2025 healthy weeks ---
+
+25w15:
+  expected_status: healthy
+  notes: "Normal week before the email double-send bug, 59 orders"
+
+25w20:
+  expected_status: healthy
+  notes: "Normal week after email bug resolved, 46 orders"
+
+# --- 2026 healthy weeks ---
+
+26w03:
+  expected_status: healthy
+  notes: "Normal week, 55 orders"
+
+26w04:
+  expected_status: healthy
+  notes: "Strong week, 80 orders — not anomalous"
+
+26w05:
+  expected_status: healthy
+  notes: "45 orders after a strong week — normal regression, not a real anomaly"
+
+26w06:
+  expected_status: healthy
+  notes: "45 orders, steady"
+
+26w07:
+  expected_status: healthy
+  notes: "113 orders — Valentine's week, expected spike"
+
+26w08:
+  expected_status: healthy
+  notes: "43 orders — normal post-holiday dip"
+
+26w09:
+  expected_status: healthy
+  notes: "50 orders, normal"
+
+26w10:
+  expected_status: healthy
+  notes: "59 orders, strong non-holiday week"
+
+26w11:
+  expected_status: healthy
+  notes: "46 orders, normal week"

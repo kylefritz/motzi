@@ -6,6 +6,11 @@
 @import "active_admin/mixins";
 @import "active_admin/base";
 
+// Fix ActiveAdmin #wrapper display:table preventing chart from shrinking
+body.admin_activity_feed #wrapper {
+  display: block;
+}
+
 // colors like bootstrap
 .text-success {
   color: #28a745 !important;
@@ -90,6 +95,15 @@ body {
   background: transparent;
   color: lightsalmon;
   text-decoration: underline;
+}
+
+@media (max-width: 1300px) {
+  #header {
+    ul.tabs { display: flex; flex-wrap: wrap; gap: 0; }
+    ul.tabs > li { margin-top: 2.5px; margin-bottom: 2.5px; }
+    ul.tabs > li a { padding: 4px 4px; font-size: 0.95em; }
+    h1 { font-size: 1.2em; }
+  }
 }
 
 #title_bar {
@@ -301,6 +315,9 @@ form fieldset.actions li.cancel a {
 .activity-feed-nav {
   display: flex;
   gap: 2px;
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-width: 0;
 
   a, span {
     display: inline-block;
@@ -325,6 +342,7 @@ form fieldset.actions li.cancel a {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex: 0 0 auto;
 
   .export-links {
     font-size: 1em;
@@ -400,6 +418,13 @@ form fieldset.actions li.cancel a {
     margin-left: 4px;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+  }
+
+  .totals-row td {
+    border-top: 2px solid #e8e2da;
+    border-bottom: none;
+    font-weight: 600;
+    background: #faf8f6;
   }
 }
 

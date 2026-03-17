@@ -8,6 +8,9 @@ class MenuMailer < ApplicationMailer
 
     mail(to: %("#{@user.name}" <#{@user.email}>),
          cc: @user.additional_email,
-         subject: "#{Setting.shop.name} - #{@menu.name}")
+         subject: "#{Setting.shop.name} - #{@menu.name}") do |format|
+      format.text
+      format.mjml
+    end
   end
 end

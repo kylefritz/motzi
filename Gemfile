@@ -9,6 +9,7 @@ ruby '3.3.10'
 gem 'activeadmin', '~> 3.4' # admin ui
 gem 'ahoy_email', '~> 1.1.1' # email analytics (v2 sadly removes open tracking)
 gem 'ahoy_matey' # analytics
+gem 'anthropic' # Claude API for anomaly detection
 gem 'aws-sdk-s3', require: false # for s3/active storage
 gem 'bcrypt', '~> 3.1.7' # for devise
 gem 'blazer' # analytics
@@ -23,25 +24,28 @@ gem 'image_processing', '~> 1.2' # Use Active Storage variant
 gem 'jaro_winkler', '~> 1.5.5' # pinned for compatibility
 gem 'jbuilder', '~> 2.7' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jsbundling-rails' # build JS via rails asset pipeline hooks
+gem 'mission_control-jobs' # job UI for ActiveJob backends
+gem 'mjml-rails' # responsive email templates with MJML
+gem 'mrml' # Rust MJML binary (no Node dependency)
 gem 'mutex_m' # stdlib gem (Ruby 3.4 deprecation warning)
 gem 'naturalsort', :require => 'natural_sort_kernel' # implements a natural, human-friendly alphanumeric sort
 gem 'newrelic_rpm' # debugging to new relic
+gem 'octokit', '~> 10.0' # GitHub API for git commit history in anomaly detection
 gem 'olive_branch' # convert snake_case to camelCase for json
 gem 'paper_trail' # audits
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'progress_bar'
 gem 'puma', '~> 7.0' # web/app server
-gem 'rails-settings-cached' # site-wide settings
 gem 'rails', '~> 7.2.0'
+gem 'rails-settings-cached' # site-wide settings
 gem 'redcarpet' # markdown the baker's note in admin
 gem 'sass-rails', '~> 6' # css
-gem 'sentry-ruby' # New Sentry SDK
 gem 'sentry-rails' # Rails integration for Sentry
+gem 'sentry-ruby' # New Sentry SDK
+gem 'solid_cable', '~> 3.0' # database-backed ActionCable adapter (no Redis)
 gem 'solid_queue' # database-backed ActiveJob backend (Rails 7.2+)
 gem 'sql_query' # load SQL queries from erb templates
 gem 'stripe' # accept credit cards
-gem 'mission_control-jobs' # job UI for ActiveJob backends
-gem 'anthropic' # Claude API for anomaly detection
 
 group :development, :test do
   gem 'byebug' # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -66,11 +70,9 @@ end
 
 group :test do
   gem 'capybara', '>= 3.26' # Adds support for Capybara system testing and selenium driver
-  gem 'stripe-ruby-mock', '3.1.0.rc3', :require => 'stripe_mock' # test Stripe code without hitting Stripe's servers
   gem 'selenium-webdriver', '>= 4.0.0.rc1'
+  gem 'stripe-ruby-mock', '3.1.0.rc3', :require => 'stripe_mock' # test Stripe code without hitting Stripe's servers
   gem 'vcr' # record and replay HTTP interactions for tests
   gem 'webdrivers' # Easy installation and use of web drivers to run system tests with browsers
   gem 'webmock' # stub HTTP requests in tests
 end
-
-gem "solid_cable", "~> 3.0"

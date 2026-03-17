@@ -25,7 +25,8 @@
     "REVIEW_APP":               { "value": "true" },
     "SENDGRID_USERNAME":        { "required": false },
     "SENDGRID_PASSWORD":        { "required": false },
-    "ANTHROPIC_API_KEY":        { "required": false }
+    "ANTHROPIC_API_KEY":        { "required": false },
+    "GITHUB_TOKEN":             { "required": false }
   },
   "formation": {
     "web":    { "quantity": 1, "size": "basic" },

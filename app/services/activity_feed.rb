@@ -107,13 +107,28 @@ class ActivityFeed
     "recurring_jobs_summary" => "Jobs"
   }.freeze
 
-  def to_text(verbose: false)
+  def to_text(verbose: false, header: true)
     week_end = @week_start + 6.days
     lines = []
-    lines << "Activity Feed: #{@week_id} (#{@week_start.strftime('%A %-m/%-d')} — #{week_end.strftime('%A %-m/%-d/%Y')})"
-    lines << "Today: #{Time.zone.today.strftime('%A %-m/%-d/%Y')}"
-    lines << "=" * 40
-    lines << ""
+
+    if header
+      today = Time.zone.today
+      days_elapsed = [(today - @week_start.to_date).to_i, 7].min.clamp(0, 7)
+      lines << "Activity Feed: #{@week_id} (#{@week_start.strftime('%A %-m/%-d')} — #{week_end.strftime('%A %-m/%-d/%Y')})"
+      lines << "Today: #{today.strftime('%A %-m/%-d/%Y')} — #{days_elapsed}/7 days elapsed (#{((days_elapsed / 7.0) * 100).round}% through the week)"
+      lines << "=" * 40
+      lines << ""
+
+      lines << menu_context_text
+      lines << ""
+      lines << orders_by_day_text
+      lines << ""
+      commits = git_commits_text
+      if commits
+        lines << commits
+        lines << ""
+      end
+    end
 
     es = email_summary
     if es.any?
@@ -148,6 +163,89 @@ class ActivityFeed
   end
 
   private
+
+  GITHUB_REPO = "kylefritz/motzi"
+
+  def git_commits_text
+    token = ENV["GITHUB_TOKEN"]
+    unless token.present?
+      Rails.logger.warn "[ActivityFeed] GITHUB_TOKEN not set — git history unavailable"
+      return "== Code Changes ==\n  (unavailable — GITHUB_TOKEN not configured. There may be relevant code changes not shown here.)"
+    end
+
+    client = Octokit::Client.new(access_token: token)
+    # Include commits from 4 weeks before through end of this week
+    # so Claude can see recent deploys that may explain this week's behavior
+    since = (@week_start - 4.weeks).iso8601
+    commits = client.commits(GITHUB_REPO, sha: "master", since: since, until: @week_end.iso8601)
+    return nil if commits.empty?
+
+    lines = ["== Code Changes =="]
+    commits.reverse_each do |c|
+      date = c.commit.author.date.strftime("%-m/%-d")
+      msg = c.commit.message.lines.first&.strip
+      lines << "  #{date} #{c.sha[0..6]} #{msg}"
+    end
+    lines.join("\n")
+  rescue Octokit::Error => e
+    Rails.logger.warn "[ActivityFeed] GitHub API error: #{e.message}"
+    nil
+  end
+
+  def menu_context_text
+    lines = ["== Menu Context =="]
+    @menus.each do |menu|
+      lines << "Menu: #{menu.name}"
+      lines << "  Baker's note: #{menu.subscriber_note}" if menu.subscriber_note.present?
+      lines << "  Menu note: #{menu.menu_note}" if menu.menu_note.present?
+      lines << "  Day-of note: #{menu.day_of_note}" if menu.day_of_note.present?
+    end
+    lines.join("\n")
+  end
+
+  def orders_by_day_text
+    today = Time.zone.today
+    lines = ["== Orders by Day =="]
+    total_orders = 0
+    total_items = 0
+    all_orders = []
+
+    @menus.each do |menu|
+      by_day = menu.orders.includes(:user, order_items: :item).where(created_at: @week_start..@week_end)
+                   .group_by { |o| o.created_at.to_date }
+
+      (0..6).each do |i|
+        date = (@week_start + i.days).to_date
+        daily_orders = by_day[date] || []
+        count = daily_orders.size
+        items = daily_orders.sum { |o| o.order_items.size }
+        total_orders += count
+        total_items += items
+        all_orders.concat(daily_orders)
+        day_label = date.strftime("%a %-m/%-d")
+
+        if date > today
+          lines << "  #{day_label}: (upcoming)"
+        elsif date == today
+          lines << "  #{day_label}: #{count} orders (#{items} items) (today, still in progress)"
+        else
+          lines << "  #{day_label}: #{count} orders (#{items} items)"
+        end
+      end
+    end
+
+    lines << "  Total so far: #{total_orders} orders (#{total_items} items)"
+
+    if all_orders.any?
+      lines << ""
+      lines << "== Order Details (check for unusual items or quantities) =="
+      all_orders.sort_by(&:created_at).each do |order|
+        lines << "  #{order.user.name}: #{order.item_list}"
+      end
+    end
+
+    lines.join("\n")
+  end
 
   def activity_events(verbose: false)
     ActivityEvent.for_week(@week_id).order(:created_at).map do |ae|
@@ -194,12 +292,13 @@ class ActivityFeed
         end
       else
         orders.group_by { |o| o.created_at.to_date }.each do |date, daily_orders|
+          item_count = daily_orders.sum { |o| o.order_items.size }
           events << Event.new(
             timestamp: daily_orders.last.created_at,
             category: "customer",
             action: "orders_summary",
-            description: "#{daily_orders.size} orders placed for #{menu.name}",
-            details: { source: "orders", menu_id: menu.id, count: daily_orders.size, date: date.to_s }
+            description: "#{daily_orders.size} orders placed for #{menu.name} (#{item_count} items)",
+            details: { source: "orders", menu_id: menu.id, count: daily_orders.size, item_count: item_count, date: date.to_s }
           )
         end
       end

@@ -17,12 +17,13 @@ class ReminderMailerTest < ActionMailer::TestCase
 
     assert_equal [@user.email], @email.to
     assert_equal "Pick up #{Setting.shop.name} today!", @email.subject
-    assert_in_email 'Reminder to come grab your order today'
-    assert_in_email 'You ordered'
+    assert_includes @email.text_part.body.to_s, 'Reminder to come grab your order today'
+    assert_includes @email.html_part.body.to_s, 'Your order is ready', 'html headline'
     assert_in_email 'Rye Five', 'item'
     assert_in_email 'Donuts', 'add-on'
     assert_in_email 'Bread is at the shop now!', 'day of note'
-    assert_in_email 'credits remaining', 'includes credits'
+    assert_includes @email.html_part.body.to_s, 'credits remaining', 'includes credits in html'
+    assert_includes @email.text_part.body.to_s, 'credits remaining', 'includes credits in text'
 
     assert_day_of_email_recorded
   end
@@ -47,7 +48,8 @@ class ReminderMailerTest < ActionMailer::TestCase
     assert_equal [@user.email], @email.to
     assert_includes @email.subject, 'Make your selection soon'
     assert_in_email @menu.name
-    assert_in_email ordering_deadline_text(@menu)
+    assert_includes @email.text_part.body.to_s, ordering_deadline_text(@menu), 'text has deadline'
+    assert_includes @email.html_part.body.to_s, 'order by', 'html has deadline'
   end
   private
 

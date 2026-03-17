@@ -4,7 +4,7 @@ class AnomalyDetectorIntegrationTest < ActiveSupport::TestCase
   test "detects anomaly when orders are missing" do
     menu = menus(:week1)
     travel_to_week_id(menu.week_id) do
-      VCR.use_cassette("anomaly_detection_missing_orders", record: :new_episodes) do
+      VCR.use_cassette("anomaly_detection_missing_orders") do
         detector = AnomalyDetector.new(menu.week_id)
         analysis = detector.analyze(trigger: "test")
 

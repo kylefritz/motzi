@@ -14,7 +14,12 @@ class OrdersController < ApplicationController
       return existing_user
     end
 
-    User.create!(params.permit(:first_name, :last_name, :email, :phone, :opt_in))
+    user = User.create!(params.permit(:first_name, :last_name, :email, :phone, :opt_in))
+    if user.opt_in?
+      _, message = MailerliteSubscriber.subscribe(user)
+      ActiveAdmin::Comment.create!(body: message, namespace: "admin", resource: user, author: User.system)
+    end
+    user
   end
 
   def create

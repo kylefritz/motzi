@@ -80,25 +80,4 @@ class OrderTest < ActiveSupport::TestCase
     o.order_items.create!(item_id: Item::PAY_IT_FORWARD_ID, quantity: 1, pickup_day: day2)
     assert_equal 2, o.items_for_pickup(day2).count
   end
-
-  private
-
-  # TODO: extract into test_helper
-  def known_day(day, time="9:00 AM")
-    days = {mon:   '11-11',
-            tues:  '11-12',
-            wed:   '11-13',
-            thurs: '11-14',
-            fri:   '11-15',
-            sat:   '11-16',
-            sun:   '11-17'}
-    datetime_str = "2019-#{days[day]} #{time} EST"
-    DateTime.parse(datetime_str)
-  end
-
-  def with_known_day(day, &block)
-    travel_to(known_day(day)) do
-      block.call
-    end
-  end
 end
