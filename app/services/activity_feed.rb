@@ -14,10 +14,10 @@ class ActivityFeed
 
   MAILER_LABELS = {
     "MenuMailer#weekly_menu_email" => "Weekly menu email",
-    "ReminderMailer#havent_ordered_email" => "Haven't-ordered reminders",
-    "ConfirmationMailer#order_email" => "Order confirmations",
-    "ReminderMailer#day_of_email" => "Day-of reminders",
-    "ConfirmationMailer#credit_email" => "Credit purchase confirmations"
+    "ReminderMailer#havent_ordered_email" => "Haven't-ordered email",
+    "ConfirmationMailer#order_email" => "Order email",
+    "ReminderMailer#day_of_email" => "Day-of reminder email",
+    "ConfirmationMailer#credit_email" => "Credit purchase email"
   }.freeze
 
   def initialize(week_id)
@@ -116,11 +116,10 @@ class ActivityFeed
     average = comparison[:average]
 
     [
-      metric_card("Orders", current[:orders], "#{current[:items]} items", compare_metric(current[:orders], average[:orders], "vs avg")),
-      metric_card("Visitors", current[:visitors], "#{current[:visits]} hits", compare_metric(current[:visitors], average[:visitors], "vs avg")),
-      metric_card("Emails", current[:emails_sent], email_rate_label(current), compare_metric(current[:email_open_rate], average[:email_open_rate], "open rate")),
-      metric_card("Credits", current[:credit_purchases], "#{current[:credit_credits]} credits sold", compare_metric(current[:credit_purchases], average[:credit_purchases], "vs avg")),
-      metric_card("Jobs", current[:job_runs], job_context(current), compare_metric(current[:job_runs], average[:job_runs], "vs avg"))
+      metric_card("Orders", current[:orders], nil, compare_metric(current[:orders], average[:orders], "vs avg")),
+      metric_card("Items", current[:items], nil, compare_metric(current[:items], average[:items], "vs avg")),
+      metric_card("Visitors", current[:visits], nil, compare_metric(current[:visits], average[:visits], "vs avg")),
+      metric_card("Credits", current[:credit_credits], "credits sold", compare_metric(current[:credit_credits], average[:credit_credits], "vs avg"))
     ]
   end
 
@@ -261,12 +260,13 @@ class ActivityFeed
       value: value,
       detail: detail,
       delta: delta[:text],
+      delta_tooltip: delta[:tooltip],
       tone: delta[:tone]
     }
   end
 
   def compare_metric(current, average, suffix)
-    return { text: "No comparison yet", tone: :muted } if average.to_f.zero?
+    return { text: "No comparison yet", tone: :muted, tooltip: nil } if average.to_f.zero?
 
     change = percent_change(current, average)
     tone =
@@ -280,7 +280,11 @@ class ActivityFeed
         :muted
       end
 
-    { text: "#{format_change(change)} #{suffix}", tone: tone }
+    lookback = 4
+    day_label = current_week? ? "through #{Time.zone.today.strftime('%a %-m/%-d')}" : "full week"
+    tooltip = "Avg: #{average} (#{lookback}-week avg, #{day_label})"
+
+    { text: "#{format_change(change)} #{suffix}", tone: tone, tooltip: tooltip }
   end
 
   def job_context(current)

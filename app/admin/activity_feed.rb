@@ -25,13 +25,8 @@ ActiveAdmin.register_page "Activity Feed" do
     email_summary = feed.email_summary
     analyses = AnomalyAnalysis.for_week(week_id).order(created_at: :desc)
     headline_metrics = feed.headline_metrics
-    watchlist_items = feed.watchlist_items
     commits = feed.git_commits
     comparison = feed.comparison_snapshot
-    latest_analysis = analyses.first
-    latest_tldr = latest_analysis&.result&.match(/\*\*TL;DR:\*\*\s*(.+?)(?:\n\n|\nStatus:|\z)/m)&.captures&.first&.squish
-    latest_status = latest_analysis&.result&.match(/^Status:\s*(.+)$/)&.captures&.first
-    latest_actions = latest_analysis ? latest_analysis.result.scan(/^- \[ \]\s*(.+)$/).flatten.first(3) : []
 
     week_start = Time.zone.from_week_id(week_id)
     week_end = week_start + 6.days
@@ -77,103 +72,6 @@ ActiveAdmin.register_page "Activity Feed" do
       span id: "analysis-loader", class: "spinner"
       span id: "analysis-timer", class: "elapsed"
       span id: "analysis-message", class: "progress-msg"
-    end
-
-    div class: "activity-ops-board" do
-      div class: "dense-section section-glance" do
-        div class: "dense-section-header" do
-          span "At a Glance", class: "dense-title"
-          span "Compared #{comparison[:label]} · #{comparison[:previous].size}-week baseline", class: "dense-meta"
-        end
-
-        div class: "activity-metric-grid" do
-          headline_metrics.each do |metric|
-            div class: "activity-metric-card tone-#{metric[:tone]}" do
-              div metric[:label], class: "metric-label"
-              div metric[:value].to_s, class: "metric-value"
-              div metric[:detail], class: "metric-detail"
-              div metric[:delta], class: "metric-delta"
-            end
-          end
-        end
-      end
-
-      div class: "activity-summary-grid" do
-        div class: "dense-section section-watchlist" do
-          div class: "dense-section-header" do
-            span "Watchlist", class: "dense-title"
-            span "#{watchlist_items.size} signals", class: "dense-meta"
-          end
-          div class: "watchlist" do
-            watchlist_items.each do |item|
-              div class: "watch-item tone-#{item[:tone]}" do
-                div item[:title], class: "watch-title"
-                div item[:body], class: "watch-body"
-              end
-            end
-          end
-        end
-
-        div class: "dense-section section-commits" do
-          div class: "dense-section-header" do
-            span "Code Changes", class: "dense-title"
-            span "master", class: "dense-meta"
-          end
-          if commits.any?
-            div class: "commit-list" do
-              commits.each do |commit|
-                div class: "commit-card #{'is-current-week' if commit.current_week}" do
-                  div class: "commit-meta" do
-                    span commit.committed_at.strftime("%a %-m/%-d %l:%M%P").strip, class: "commit-time"
-                    if commit.current_week
-                      span "this week", class: "commit-badge"
-                    end
-                  end
-                  div class: "commit-title" do
-                    text_node commit.summary
-                  end
-                  div class: "commit-links" do
-                    if commit.url.present?
-                      a commit.short_sha, href: commit.url, target: "_blank", rel: "noopener"
-                    else
-                      span commit.short_sha
-                    end
-                  end
-                end
-              end
-            end
-          else
-            para "No commit history available for this window.", class: "empty-state"
-          end
-        end
-      end
-
-      if latest_analysis
-        div class: "dense-section section-analysis" do
-          div class: "dense-section-header" do
-            span "Latest Analysis", class: "dense-title"
-            span latest_analysis.created_at.strftime("%-m/%-d %l:%M%P").strip, class: "dense-meta"
-          end
-
-          div class: "analysis-summary-card" do
-            div class: "analysis-summary-header" do
-              span(latest_status.presence || latest_analysis.trigger, class: "analysis-status-badge")
-            end
-
-            if latest_tldr.present?
-              para latest_tldr, class: "analysis-summary-text"
-            end
-
-            if latest_actions.any?
-              ul class: "analysis-action-list" do
-                latest_actions.each do |action|
-                  li action
-                end
-              end
-            end
-          end
-        end
-      end
     end
 
     # Weekly trends chart
@@ -340,6 +238,7 @@ ActiveAdmin.register_page "Activity Feed" do
     grid = feed.daily_grid
     grid_columns = feed.grid_columns
 
+    div class: "daily-stats-row" do
     panel "Daily Stats" do
       if grid_columns.empty?
         para "No activity for #{week_id}", style: "color: #999"
@@ -469,34 +368,78 @@ ActiveAdmin.register_page "Activity Feed" do
       end
     end
 
-    # Email health cards
-    if email_summary.any?
-      panel "Email" do
-        label_order = ActivityFeed::MAILER_LABELS.keys
-        sorted_stats = email_summary.sort_by { |k, _| label_order.index(k) || label_order.size }.map(&:last)
-        div class: "email-health-row" do
-          sorted_stats.each do |row|
-            div class: "email-stat" do
-              div class: "email-stat-label" do
-                text_node row[:label]
-              end
-              if row[:sent] > 0
-                span row[:sent].to_s, class: "email-stat-num"
-                span " sent", class: "cell-label"
-                rate = row[:open_rate]
-                rate_color = rate >= 50 ? "green" : rate >= 20 ? "orange" : "red"
-                span " · #{rate}% opened", style: "color: #{rate_color}", title: "Tracking pixel open-rate percent"
-                if row[:clicked] > 0
-                  span " · #{row[:clicked]} clicked", class: "cell-dim"
+    div class: "dense-section section-commits" do
+      div class: "dense-section-header" do
+        span "Code Changes", class: "dense-title"
+        span "master", class: "dense-meta"
+      end
+      if commits.any?
+        div class: "commit-list" do
+          commits.each do |commit|
+            div class: "commit-card #{'is-current-week' if commit.current_week}" do
+              div class: "commit-meta" do
+                span commit.committed_at.strftime("%a %-m/%-d %l:%M%P").strip, class: "commit-time"
+                if commit.current_week
+                  span "this week", class: "commit-badge"
                 end
-              else
-                span "—", class: "cell-dim"
               end
+              div class: "commit-title" do
+                text_node commit.summary
+              end
+              div class: "commit-links" do
+                if commit.url.present?
+                  a commit.short_sha, href: commit.url, target: "_blank", rel: "noopener"
+                else
+                  span commit.short_sha
+                end
+              end
+            end
+          end
+        end
+      else
+        para "No commit history available for this window.", class: "empty-state"
+      end
+    end
+    end # daily-stats-row
+
+    panel "At a Glance" do
+      label_order = ActivityFeed::MAILER_LABELS.keys
+      sorted_stats = email_summary.sort_by { |k, _| label_order.index(k) || label_order.size }.map(&:last)
+      div class: "glance-row" do
+        headline_metrics.each do |metric|
+          div class: "glance-stat tone-#{metric[:tone]}" do
+            div metric[:label], class: "glance-label"
+            div metric[:value].to_s, class: "glance-num"
+            div metric[:detail], class: "glance-detail" if metric[:detail].present?
+            if metric[:delta].present?
+              delta_attrs = { class: "glance-delta tone-#{metric[:tone]}-text" }
+              delta_attrs[:title] = metric[:delta_tooltip] if metric[:delta_tooltip].present?
+              div metric[:delta], **delta_attrs
+            end
+          end
+        end
+        sorted_stats.each do |row|
+          div class: "glance-stat" do
+            div row[:label], class: "glance-label"
+            if row[:sent] > 0
+              div "#{row[:sent]} sent", class: "glance-num"
+              rate = row[:open_rate]
+              rate_color = rate >= 50 ? "green" : rate >= 20 ? "orange" : "red"
+              div class: "glance-detail" do
+                span "#{rate}% opened", style: "color: #{rate_color}", title: "Tracking pixel open-rate percent"
+                if row[:clicked] > 0
+                  span " · #{row[:clicked]} clicked"
+                end
+              end
+            else
+              div "—", class: "glance-detail"
             end
           end
         end
       end
     end
+
+    # Email panel removed — merged into "At a Glance" above
 
     # Admin events
     admin_events = events.select { |e| e.category == "admin" }
