@@ -20,6 +20,7 @@ gem 'devise' # for authentication
 gem 'drb' # stdlib gem (Ruby 3.4 deprecation warning)
 gem 'gon' # rails variables in javascript
 gem 'hashid-rails' # lookup models by hashid
+gem 'heroku-api-postgres' # Heroku Postgres API for automated backups
 gem 'image_processing', '~> 1.2' # Use Active Storage variant
 gem 'jaro_winkler', '~> 1.5.5' # pinned for compatibility
 gem 'jbuilder', '~> 2.7' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
