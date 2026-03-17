@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { Card, Icon, IconButton } from "@material-ui/core";
-import { Delete } from "@material-ui/icons";
 import styled from "styled-components";
 import { shortDay } from "./PickupDaysPanel";
 import { Button } from "./ui/Button";
@@ -38,7 +36,7 @@ export default function MenuItemCard({
   }
 
   return (
-    <CardContent>
+    <CardContent data-testid={`menu-item-card-${itemId}`}>
       <Header>
         <Name>
           <a href={`/admin/items/${itemId}`} target="_blank">
@@ -47,11 +45,10 @@ export default function MenuItemCard({
         </Name>
         <RightButton
           aria-label="delete"
-          color="primary"
           title="remove from menu"
           onClick={() => api.item.remove(itemId)}
         >
-          <Delete />
+          ×
         </RightButton>
       </Header>
 
@@ -213,9 +210,15 @@ function Limit({ id, limit }: { id: number; limit: number | null }) {
   );
 }
 
-const RightButton = styled(IconButton)`
-  margin-top: -10px;
-  margin-right: -10px;
+const RightButton = styled.button`
+  border: 0;
+  background: transparent;
+  color: #3f3a80;
+  font-size: 1.2rem;
+  line-height: 1;
+  margin-top: -6px;
+  margin-right: -6px;
+  cursor: pointer;
 `;
 
 const Sub = styled.h6`
@@ -266,9 +269,12 @@ const Name = styled.div`
   margin-bottom: 0.1rem;
 `;
 
-const CardContent = styled(Card)`
+const CardContent = styled.article`
   padding: 0.8rem;
   width: 225px;
   margin-bottom: 20px;
   margin-right: 20px;
+  border: 1px solid #e3e3e3;
+  border-radius: 8px;
+  background: #fff;
 `;

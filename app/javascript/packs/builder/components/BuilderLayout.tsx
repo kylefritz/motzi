@@ -1,6 +1,4 @@
 import React from "react";
-import { Tabs, Tab, Box } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
 import styled from "styled-components";
 
 import AddItemForm from "./AddItemForm";
@@ -20,20 +18,10 @@ export default function BuilderLayout({
   allItems,
   menu,
 }: BuilderLayoutProps) {
-  const classes = useStyles();
   const api = useApi();
   const [tab, setTab] = React.useState(0);
   const [pickupDayTab, setPickupDayTab] = React.useState(0);
   const [isClearHover, setIsClearHover] = React.useState(false);
-  const handleChange = (_event: React.ChangeEvent<{}>, newTab: number) => {
-    setTab(newTab);
-  };
-  const handlePickupDayChange = (
-    _event: React.ChangeEvent<{}>,
-    newTab: number
-  ) => {
-    setPickupDayTab(newTab);
-  };
   const { pickupDays, leadtimeHours, recentMenus } = menu;
   const hasItems = menu.items.length > 0;
   const pickupDayFilters = [
@@ -69,7 +57,7 @@ export default function BuilderLayout({
     api.item.clearAll();
   }
   return (
-    <div className={classes.root}>
+    <Root>
       <CopyFrom menuId={menu.id} recentMenus={recentMenus} />
       <hr />
       <PickupDaysPanel pickupDays={pickupDays} leadtimeHours={leadtimeHours} />
@@ -90,30 +78,55 @@ export default function BuilderLayout({
         </Button>
       </HeaderRow>
       <FilterTabs>
-        <Tabs
-          value={pickupDayTab}
-          onChange={handlePickupDayChange}
-          aria-label="pickup day filters"
-        >
+        <TabList role="tablist" aria-label="pickup day filters">
           {pickupDayFilters.map((filter, index) => (
-            <Tab
+            <TabButton
               key={filter.label}
-              label={filter.label}
+              type="button"
+              role="tab"
+              aria-selected={pickupDayTab === index}
+              active={pickupDayTab === index}
+              onClick={() => setPickupDayTab(index)}
               {...pickupDayTabProps(index)}
-            />
+            >
+              {filter.label}
+            </TabButton>
           ))}
-        </Tabs>
+        </TabList>
       </FilterTabs>
       <FilterTabs>
-        <Tabs
-          value={tab}
-          onChange={handleChange}
-          aria-label="menu item filters"
-        >
-          <Tab label="All menus" {...a11yProps(0)} />
-          <Tab label="Subscribers" {...a11yProps(1)} />
-          <Tab label="Marketplace" {...a11yProps(2)} />
-        </Tabs>
+        <TabList role="tablist" aria-label="menu item filters">
+          <TabButton
+            type="button"
+            role="tab"
+            aria-selected={tab === 0}
+            active={tab === 0}
+            onClick={() => setTab(0)}
+            {...a11yProps(0)}
+          >
+            All menus
+          </TabButton>
+          <TabButton
+            type="button"
+            role="tab"
+            aria-selected={tab === 1}
+            active={tab === 1}
+            onClick={() => setTab(1)}
+            {...a11yProps(1)}
+          >
+            Subscribers
+          </TabButton>
+          <TabButton
+            type="button"
+            role="tab"
+            aria-selected={tab === 2}
+            active={tab === 2}
+            onClick={() => setTab(2)}
+            {...a11yProps(2)}
+          >
+            Marketplace
+          </TabButton>
+        </TabList>
       </FilterTabs>
       <TabPanel value={tab} index={0}>
         <MenuItemGrid
@@ -146,7 +159,7 @@ export default function BuilderLayout({
         not={menu.items.map(({ name }) => name)}
         pickupDays={menu.pickupDays}
       />
-    </div>
+    </Root>
   );
 }
 
@@ -167,7 +180,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && <Box p={3}>{children}</Box>}
+      {value === index && <PanelContent>{children}</PanelContent>}
     </div>
   );
 }
@@ -186,12 +199,14 @@ function pickupDayTabProps(index: number) {
   };
 }
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-    backgroundColor: theme.palette.background.paper,
-  },
-}));
+const Root = styled.div`
+  flex-grow: 1;
+  background: #fff;
+`;
+
+const PanelContent = styled.div`
+  padding: 0.75rem 0.2rem 0.4rem;
+`;
 
 const HeaderRow = styled.div`
   display: flex;
@@ -205,25 +220,28 @@ const HeaderRow = styled.div`
 const FilterTabs = styled.div`
   margin: 0.35rem 0 0.75rem;
   border-bottom: 1px solid #e9e9e9;
+`;
 
-  .MuiTabs-indicator {
-    height: 3px;
-    background-color: #3f3a80;
-  }
+const TabList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+`;
 
-  .MuiTab-root {
-    text-transform: none;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    min-width: 90px;
-    padding: 6px 12px;
-  }
+const TabButton = styled.button<{ active: boolean }>`
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  min-width: 90px;
+  padding: 6px 12px;
+  border: 0;
+  border-bottom: 3px solid ${({ active }) => (active ? "#3f3a80" : "transparent")};
+  color: ${({ active }) => (active ? "#222" : "#6b6b6b")};
+  background: transparent;
+  cursor: pointer;
 
-  .MuiTab-textColorInherit {
-    color: #6b6b6b;
-  }
-
-  .Mui-selected {
-    color: #222;
+  &:focus-visible {
+    outline: 2px solid #3f3a80;
+    outline-offset: 1px;
   }
 `;

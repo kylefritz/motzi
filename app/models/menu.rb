@@ -8,7 +8,9 @@ class Menu < ApplicationRecord
   has_paper_trail
   default_scope { order("LOWER(week_id) desc") }
 
-  enum menu_type: { regular: 'regular', holiday: 'holiday' }
+  # Explicit attribute needed so older migrations can load Menu before the column exists
+  attribute :menu_type, :string, default: 'regular'
+  enum :menu_type, { regular: 'regular', holiday: 'holiday' }
 
   def self.current
     Menu.find(Setting.menu_id)

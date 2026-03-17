@@ -3,6 +3,7 @@ import axios from "axios";
 import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
 import _ from "lodash";
+import type { User as SentryUser } from "@sentry/browser";
 
 import { DayContext, SettingsContext } from "./Contexts";
 import Layout from "./Layout";
@@ -34,9 +35,10 @@ export default function App() {
       .then(({ data: newData }) => {
         setData(newData); // expect: menu, user, order
         const { user } = newData;
-        Sentry.configureScope((scope) =>
-          scope.setUser(user ? { id: user.id, email: user.email } : null)
-        );
+        const sentryUser: SentryUser | null = user
+          ? { id: String(user.id), email: user.email }
+          : null;
+        Sentry.configureScope((scope) => scope.setUser(sentryUser));
       })
       .catch((err) => {
         console.error("cant load menu", err);
@@ -56,7 +58,7 @@ export default function App() {
     const url = orderId ? `/orders/${orderId}.json` : "/orders.json";
     console.debug("saving order", method, url, order);
 
-    return axios<MenuResponse>({ method, url, data: order })
+    return axios({ method, url, data: order })
       .then(({ data: newData }) => {
         setData(newData); // expect: menu, user, order
         setIsEditingOrder(false);

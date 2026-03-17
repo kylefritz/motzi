@@ -4,13 +4,15 @@ import ErrorBoundary from "./ErrorBoundary";
 import App from "./buy/App";
 
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 document.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(
+  const container = document.getElementById("react-buy");
+  if (!container) return;
+
+  createRoot(container).render(
     <ErrorBoundary>
       <App />
-    </ErrorBoundary>,
-    document.getElementById("react-buy")
+    </ErrorBoundary>
   );
 });

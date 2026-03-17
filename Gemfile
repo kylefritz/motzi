@@ -6,7 +6,7 @@ ruby '3.3.10'
 #
 # please keep gems sorted; include comment for why a gem is needed
 #
-gem 'activeadmin', '~> 2.13.1' # admin ui
+gem 'activeadmin', '~> 3.4' # admin ui
 gem 'ahoy_email', '~> 1.1.1' # email analytics (v2 sadly removes open tracking)
 gem 'ahoy_matey' # analytics
 gem 'aws-sdk-s3', require: false # for s3/active storage
@@ -32,18 +32,15 @@ gem 'pg', '>= 0.18', '< 2.0'
 gem 'progress_bar'
 gem 'puma', '~> 7.0' # web/app server
 gem 'rails-settings-cached' # site-wide settings
-gem 'rails', '~> 6.1.7.3'
+gem 'rails', '~> 7.2.0'
 gem 'redcarpet' # markdown the baker's note in admin
 gem 'sass-rails', '~> 6' # css
 gem 'sentry-ruby' # New Sentry SDK
 gem 'sentry-rails' # Rails integration for Sentry
-gem 'sidekiq' # background work
+gem 'solid_queue' # database-backed ActiveJob backend (Rails 7.2+)
 gem 'sql_query' # load SQL queries from erb templates
 gem 'stripe' # accept credit cards
-
-
-gem 'redis', '~> 4.0' # Use Redis adapter to run Action Cable in production
-
+gem 'mission_control-jobs' # job UI for ActiveJob backends
 
 group :development, :test do
   gem 'byebug' # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -51,12 +48,13 @@ group :development, :test do
   gem 'faker' # fake names
   gem 'json-schema' # make sure json objects have the right schema
   gem 'letter_opener_web' # nice place to preview emails
+  gem 'minitest' # test framework; keep unpinned so Rails can track supported versions
 end
 
 group :development do
   gem 'foreman' # run Procfile.dev (Rails + bun watch) locally
   gem 'listen', '~> 3.3' # listen to changes on a file
-  gem 'rack-mini-profiler', '~> 2.0' # perf info like SQL time and flame graphs for each request in your browser. Can be configured to work on production as well see: https://github.com/MiniProfiler/rack-mini-profiler/blob/master/README.md
+  gem 'rack-mini-profiler', '~> 4.0' # request profiling UI compatible with modern Rack/Rails
   gem 'rcodetools' # code completion in vscode; requires ruby extension
   gem 'fastri' # helps rcodetools
   gem 'solargraph' # ruby intellisense in vscode; requires solargraph extension

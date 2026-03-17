@@ -67,13 +67,10 @@ FileUtils.chdir APP_ROOT do
     abort("\n== Postgres is not running on #{pg_host}:5432 (start postgres.app) ==")
   end
 
-  unless service_listening?('127.0.0.1', 6379)
-    abort("\n== Redis is not running on 127.0.0.1:6379 (start redis) ==")
-  end
-
   puts "\n== Preparing database =="
   db_task = ENV['DB_SETUP'] == '1' ? 'db:setup' : 'db:prepare'
   system_mise! 'bin/rails', db_task
+  system_mise! 'bin/rails', 'solid_queue:bootstrap'
 
   unless skip_step?('SKIP_LOG_CLEAR')
     puts "\n== Removing old logs and tempfiles =="

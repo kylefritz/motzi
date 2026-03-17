@@ -253,6 +253,7 @@ ActiveAdmin.setup do |config|
   config.namespace :admin do |admin|
     admin.build_menu :default do |menu|
       menu.add label: "Reports", url: "/blazer", html_options: { target: :blank }
+      menu.add label: "Jobs", url: "/jobs", html_options: { target: :blank }
     end
   end
 

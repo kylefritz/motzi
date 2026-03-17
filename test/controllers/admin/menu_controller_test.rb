@@ -155,4 +155,65 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
 
     validate_json_schema :admin_menu_builder, @response.body
   end
+
+  test "open_for_orders sets current holiday menu" do
+    menu = menus(:passover_2026)
+    travel_to(Time.zone.parse("2026-04-01 10:00")) do
+      post "/admin/menus/#{menu.id}/open_for_orders"
+    end
+
+    assert_redirected_to "/admin/menus/#{menu.id}"
+    assert_equal menu.id, Setting.holiday_menu_id
+    follow_redirect!
+    assert_select ".flash_notice", text: /open for pre-orders/
+  end
+
+  test "open_for_orders rejects regular menu" do
+    menu = menus(:week2)
+    post "/admin/menus/#{menu.id}/open_for_orders"
+
+    assert_redirected_to "/admin/menus/#{menu.id}"
+    follow_redirect!
+    assert_select ".flash_alert", text: /only for holiday menus/
+  end
+
+  test "copy_from copies notes and menu items" do
+    original = Menu.create!(
+      name: "Copy Source",
+      week_id: "26w20",
+      menu_type: "regular",
+      subscriber_note: "Source subscriber note",
+      menu_note: "Source menu note",
+      day_of_note: "Source day note"
+    )
+    original.pickup_days.create!(
+      pickup_at: Time.zone.parse("2026-05-15 12:00"),
+      order_deadline_at: Time.zone.parse("2026-05-13 22:00")
+    )
+    original.menu_items.create!(
+      item: items(:classic),
+      subscriber: true,
+      marketplace: false,
+      sort_order: 1
+    )
+
+    target = Menu.create!(name: "Copy Target", week_id: "26w21", menu_type: "regular")
+
+    assert_difference("ActiveAdmin::Comment.count", 1) do
+      post "/admin/menus/#{target.id}/copy_from",
+        params: {
+          original_menu_id: original.id,
+          copy_subscriber_note: "1",
+          copy_menu_note: "1",
+          copy_day_of_note: "1"
+        }
+    end
+
+    target.reload
+    assert_redirected_to "/admin/menus/#{target.id}"
+    assert_equal 1, target.menu_items.count
+    assert_equal "Source subscriber note", target.subscriber_note
+    assert_equal "Source menu note", target.menu_note
+    assert_equal "Source day note", target.day_of_note
+  end
 end
