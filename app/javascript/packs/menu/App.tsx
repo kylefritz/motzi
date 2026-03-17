@@ -86,7 +86,7 @@ export default function App() {
       : order;
     console.debug("saving holiday order", method, url, orderWithMenu);
 
-    return axios({ method, url, data: orderWithMenu })
+    return axios<MenuResponse>({ method, url, data: orderWithMenu })
       .then(({ data: newData }) => {
         setData(newData);
         console.log("save_holiday_order success", newData);
