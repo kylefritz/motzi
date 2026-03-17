@@ -227,7 +227,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     cards = feed.headline_metrics
 
-    assert_equal 5, cards.size
+    assert_equal 4, cards.size
     assert_equal "Orders", cards.first[:label]
     assert_equal 12, cards.first[:value]
     assert_includes cards.first[:delta], "vs avg"

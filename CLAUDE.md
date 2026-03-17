@@ -10,7 +10,7 @@ Neighborhood bakery's CSA site. Members browse menus, choose pickup days, and pl
 - **Complex SQL**: Lives in `app/sql_queries/` using ERB templates with the `sql_query` gem.
 - **Logging**: Keep existing `console.log` statements. Do not delete or globally silence logs unless explicitly asked.
 - **React tests**: Keep `act(...)` warnings as-is unless explicitly asked to change.
-- Spring socket errors: `DISABLE_SPRING=1 bin/rails test`
+- If you run into Spring socket errors, then use `DISABLE_SPRING=1`. Otherwise dont use that and let spring do it's thing!
 - Skip hooks: `HUSKY=0 git commit -m "no hooks run"` — fix any failing tests afterward.
 
 ## Deployment
