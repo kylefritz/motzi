@@ -42,6 +42,12 @@ class SendDayOfReminderJob < ApplicationJob
 
     if num_reminded > 0
       add_comment! menu, "Day Of reminder job: sent num_reminded=#{num_reminded}"
+      ActivityEvent.log(
+        action: "day_of_reminder_sent",
+        week_id: menu.week_id,
+        description: "Day-of reminder sent to #{num_reminded} members for #{pickup_day.name_abbr}",
+        metadata: { menu_id: menu.id, pickup_day_id: pickup_day.id, count: num_reminded }
+      )
     end
   end
 end

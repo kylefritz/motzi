@@ -34,10 +34,10 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
     assert_reminders_emailed(2, :thurs, '7:00 AM', 'sends to jess too')
   end
 
-  test "weekly orders who skipped shouldn't get reminders" do
+  test "orders with no items shouldn't get reminders" do
     @thurs.order_items.destroy_all
     assert @thurs.order_items.empty?, 'cleared the orders'
-    assert_reminders_emailed(0, :thurs, '7:00 AM', 'shouldnt send to laura since skipped')
+    assert_reminders_emailed(0, :thurs, '7:00 AM', 'shouldnt send since no items')
   end
 
   test "Doesnt send to users multiple times on same menu" do

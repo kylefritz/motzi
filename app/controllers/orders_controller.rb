@@ -3,7 +3,6 @@ class OrdersController < ApplicationController
 
   include UserHashidable
   include RenderCurrentOrder
-  before_action :require_not_skip_and_cart_items
 
   def current_user_or_create_user
     if !params.include?(:email)
@@ -37,13 +36,11 @@ class OrdersController < ApplicationController
 
     @user, @order = Order.transaction do
       user = current_user_or_create_user
-      order_params = params.permit(:comments, :skip).merge(menu: @menu, user: user)
+      order_params = params.permit(:comments).merge(menu: @menu, user: user)
 
       order = Order.create!(order_params)
-      unless order.skip?
-        if params.fetch(:cart).empty?
-          raise OrderError.new("Add an item to your cart")
-        end
+      if params.fetch(:cart).empty?
+        raise OrderError.new("Add an item to your cart")
       end
       params.fetch(:cart).each do |cart_item_params|
         # Create a clean hash with only permitted attributes and ensure quantity is not null
@@ -125,7 +122,7 @@ class OrdersController < ApplicationController
     end
 
     Order.transaction do
-      order.update!(params.permit(:comments, :skip))
+      order.update!(params.permit(:comments))
       order.order_items.destroy_all
       params[:cart].each do |cart_item_params|
         # Create a clean hash with only permitted attributes and ensure quantity is not null
@@ -154,11 +151,6 @@ class OrdersController < ApplicationController
   end
 
   private
-  def require_not_skip_and_cart_items
-    if params[:skip] && params[:cart].present?
-      throw "Can't skip when have items in cart"
-    end
-  end
 
   def render_ordering_closed
     return render_validation_failed("ordering for this menu is closed")

@@ -8,8 +8,6 @@ ActiveAdmin.register Order do
   scope :subscriber
   scope :marketplace
   scope :with_comments
-  scope :skip
-  scope :not_skip
 
   filter :user_id_equals
   filter :comments

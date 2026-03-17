@@ -33,6 +33,12 @@ class SendHaventOrderedReminderJob < ApplicationJob
 
     if num_reminded > 0
       add_comment! menu, "Haven't Ordered reminder job: num_reminded=#{num_reminded}"
+      ActivityEvent.log(
+        action: "havent_ordered_reminder_sent",
+        week_id: menu.week_id,
+        description: "Haven't-ordered reminder sent to #{num_reminded} subscribers",
+        metadata: { menu_id: menu.id, count: num_reminded }
+      )
     end
   end
 end

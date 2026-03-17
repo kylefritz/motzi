@@ -1,8 +1,14 @@
+# Solid Cable uses the same database — no separate cable DB needed.
+# In dev, async won't relay broadcasts from background jobs (Solid Queue runs in a separate process).
 development:
-  adapter: async
+  adapter: solid_cable
+  polling_interval: 0.1.seconds
+  message_retention: 1.day
 
 test:
   adapter: test
 
 production:
-  adapter: async
+  adapter: solid_cable
+  polling_interval: 0.1.seconds
+  message_retention: 1.day

@@ -206,12 +206,27 @@ ActiveAdmin.register Menu do
                                 resource: resource,
                                 author: current_admin_user)
 
+    ActivityEvent.log(
+      action: "menu_published",
+      week_id: resource.week_id,
+      description: notice,
+      metadata: { menu_id: resource.id, count: num_emails },
+      user: current_admin_user
+    )
+
     redirect_to collection_path, notice: notice
   end
 
   member_action :open_for_orders, method: :post do
     resource.open_for_orders!
     notice = "#{resource.name} is now open for pre-orders. Announce it in your next regular menu subscriber note."
+    ActivityEvent.log(
+      action: "menu_opened_for_orders",
+      week_id: resource.week_id,
+      description: notice,
+      metadata: { menu_id: resource.id },
+      user: current_admin_user
+    )
     redirect_to resource_path, notice: notice
   rescue => e
     redirect_to resource_path, alert: e.message
@@ -266,6 +281,14 @@ ActiveAdmin.register Menu do
                                 resource: @menu,
                                 author: current_admin_user)
 
+    ActivityEvent.log(
+      action: "menu_copied",
+      week_id: @menu.week_id,
+      description: "Copied menu from '#{original_menu.name}' to '#{@menu.name}'",
+      metadata: { menu_id: @menu.id, original_menu_id: original_menu.id },
+      user: current_admin_user
+    )
+
     redirect_to resource_path, notice: notice
   end
 
@@ -316,5 +339,24 @@ ActiveAdmin.register Menu do
     MenuItem.where(menu: @menu).destroy_all
 
     render 'admin/menus/menu_builder', formats: [:json]
+  end
+
+  controller do
+    def create
+      super do |success, failure|
+        success.html do
+          if resource.persisted?
+            ActivityEvent.log(
+              action: "menu_created",
+              week_id: resource.week_id,
+              description: "Menu '#{resource.name}' created for #{resource.week_id}",
+              metadata: { menu_id: resource.id },
+              user: current_admin_user
+            )
+          end
+          redirect_to resource_path
+        end
+      end
+    end
   end
 end

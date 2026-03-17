@@ -84,19 +84,10 @@ type DaysProps = {
   menu: MenuType;
   cart: CartItemType[];
   rmCartItem?: (itemId: number, quantity: number, pickupDayId?: number) => void;
-  skip?: boolean;
 };
 
-function Days({ menu, cart, rmCartItem, skip }: DaysProps) {
+function Days({ menu, cart, rmCartItem }: DaysProps) {
   const { isClosed } = getDeadlineContext();
-
-  if (skip) {
-    return (
-      <div>
-        <p>Skip this week</p>
-      </div>
-    );
-  }
 
   const cartPickupDays = new Set(cart.map(({ pickupDayId }) => pickupDayId));
   const pickupDays = menu.pickupDays.filter(({ id: pickupDayId }) =>
@@ -174,8 +165,8 @@ function Total({
 }
 
 function Cart(props: DaysProps & { cart: CartItemType[] }) {
-  const { cart, skip } = props;
-  if (!cart.length && !skip) {
+  const { cart } = props;
+  if (!cart.length) {
     return <p>No items</p>;
   }
   return (

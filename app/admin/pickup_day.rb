@@ -10,7 +10,7 @@ ActiveAdmin.register PickupDay do
 
     rows_hash = {}
     pickup_days.each do |pd|
-      pd.menu.orders.not_skip.includes(:user, order_items: :item).each do |order|
+      pd.menu.orders.includes(:user, order_items: :item).each do |order|
         order_items = order.order_items.select { |oi| oi.pickup_day_id == pd.id }
         next if order_items.empty?
         rows_hash[order.user] ||= []

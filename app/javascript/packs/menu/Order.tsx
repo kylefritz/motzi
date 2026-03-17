@@ -16,7 +16,6 @@ export default function Order({ menu, user, order, onEditOrder }: OrderProps) {
   const { name } = menu;
   const {
     items: cart,
-    skip,
     comments,
     stripeReceiptUrl,
     stripeChargeAmount,
@@ -29,7 +28,7 @@ export default function Order({ menu, user, order, onEditOrder }: OrderProps) {
 
       <h3 className="mt-5 mb-4">We've got your order!</h3>
 
-      <Cart {...{ cart, menu, skip, stripeChargeAmount }} />
+      <Cart {...{ cart, menu, stripeChargeAmount }} />
       {stripeReceiptUrl && (
         <p className="text-center my-2">
           <a href={stripeReceiptUrl} target="blank">

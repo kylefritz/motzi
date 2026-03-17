@@ -67,22 +67,22 @@ class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
     rows = document_root_element.css('.subscribers tbody tr')
     assert_equal 3, rows.size, 'subscribers + marketplace + holiday'
 
-    # Columns: type(0), not_ordered(1), orders(2), skip(3), credits(4), total(5)
+    # Columns: type(0), not_ordered(1), orders(2), credits(3), total(4)
     subscriber_cells = rows[0].css('td').map(&:text).map(&:strip)
     assert_equal 'Subscribers', subscriber_cells[0]
     assert_equal '3', subscriber_cells[1], 'not_ordered: adrian, ljf, jess'
     assert_equal '1', subscriber_cells[2], 'ordered: kyle'
-    assert_equal '2', subscriber_cells[4], 'credits: kyle has classic(1) + rye(1) = 2'
+    assert_equal '2', subscriber_cells[3], 'credits: kyle has classic(1) + rye(1) = 2'
 
     marketplace_cells = rows[1].css('td').map(&:text).map(&:strip)
     assert_equal 'Marketplace', marketplace_cells[0]
     assert_equal '0', marketplace_cells[2], 'no marketplace orders'
-    assert_equal '0', marketplace_cells[4], 'no marketplace credits'
+    assert_equal '0', marketplace_cells[3], 'no marketplace credits'
 
     holiday_cells = rows[2].css('td').map(&:text).map(&:strip)
     assert_equal 'Holiday', holiday_cells[0]
     assert_equal '2', holiday_cells[2], 'ordered: kyle + ljf'
-    assert_equal '3', holiday_cells[4], 'credits: kyle almond_cake(1) + ljf matzo_toffee(1) + almond_cake(1) = 3'
+    assert_equal '3', holiday_cells[3], 'credits: kyle almond_cake(1) + ljf matzo_toffee(1) + almond_cake(1) = 3'
 
     # Sales: two tables — regular (marketplace + credit sales) and holiday (marketplace only)
     sales_tables = document_root_element.css('.sales')

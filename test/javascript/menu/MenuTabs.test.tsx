@@ -8,7 +8,6 @@ import mockMenuJson from "./mockMenuJson";
 
 const emptyOrder = {
   id: 999,
-  skip: false,
   comments: null,
   items: [],
   stripeReceiptUrl: null,

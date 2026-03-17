@@ -40,7 +40,6 @@ export type CreditItem = CreditItemResponse["creditItem"];
 export type MenuOrderRequest = {
   uid?: string | null;
   comments?: string | null;
-  skip?: boolean;
   cart: CartItem[];
 };
 

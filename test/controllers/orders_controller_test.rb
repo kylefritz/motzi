@@ -41,19 +41,6 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_content
   end
 
-  test "hashid_user can skip" do
-    order = order_attrs(users(:ljf).hashid)
-    order[:cart] = []
-    order[:skip] = true
-    before_deadline do
-      assert_ordered do
-        post '/orders.json', params: order, as: :json
-      end
-    end
-    assert_success_and_validate
-    assert Order.last.skip
-  end
-
   test "hashid_user can pay_it_forward" do
     order = order_attrs(users(:ljf).hashid)
     order[:cart] = [

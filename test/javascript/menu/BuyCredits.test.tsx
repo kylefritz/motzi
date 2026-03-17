@@ -19,7 +19,7 @@ test("buy credits", async () => {
   const { user: subscriber, bundles } = mockMenuJson();
 
   const { container } = render(
-    <SettingsContext.Provider value={{ bundles, enablePayWhatYouCan: true }}>
+    <SettingsContext.Provider value={{ bundles, enablePayWhatYouCan: true, showCredits: true }}>
       <Subscription user={subscriber} />
     </SettingsContext.Provider>
   );
@@ -63,7 +63,7 @@ test("no payWhatYouCan", async () => {
 
   const { user: subscriber, bundles } = mockMenuJson();
   render(
-    <SettingsContext.Provider value={{ bundles, enablePayWhatYouCan: false }}>
+    <SettingsContext.Provider value={{ bundles, enablePayWhatYouCan: false, showCredits: true }}>
       <Subscription user={subscriber} />
     </SettingsContext.Provider>
   );
