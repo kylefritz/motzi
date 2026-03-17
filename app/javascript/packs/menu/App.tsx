@@ -4,10 +4,9 @@ import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
 import _ from "lodash";
 
-import { getDeadlineContext, DayContext, SettingsContext } from "./Contexts";
-import Menu from "./Menu";
-import Marketplace from "./Marketplace";
-import Order from "./Order";
+import { DayContext, SettingsContext } from "./Contexts";
+import Layout from "./Layout";
+import MenuTabs from "./MenuTabs";
 import type {
   CreditBundle,
   Menu as MenuType,
@@ -17,77 +16,6 @@ import type {
   MenuUser,
   MarketplaceOrderRequest,
 } from "../../types/api";
-
-type LayoutProps = {
-  bundles: CreditBundle[];
-  error?: string;
-  handleCreateOrder: (
-    order: MenuOrderRequest | MarketplaceOrderRequest
-  ) => Promise<unknown>;
-  isEditingOrder: boolean;
-  menu: MenuType | null;
-  order: MenuOrder | null;
-  setIsEditingOrder: React.Dispatch<React.SetStateAction<boolean>>;
-  user: MenuUser | null;
-};
-
-function Layout({
-  bundles,
-  error,
-  handleCreateOrder,
-  isEditingOrder,
-  menu,
-  order,
-  setIsEditingOrder,
-  user,
-}: LayoutProps) {
-  if (error) {
-    return (
-      <>
-        <h2 className="mt-5">{error}</h2>
-        <p className="text-center">Sorry. Maybe try again or try back later?</p>
-      </>
-    );
-  }
-
-  if (!menu) {
-    return <h2 className="mt-5">loading...</h2>;
-  }
-
-  const orderingClosed = getDeadlineContext().allClosed(menu);
-
-  if (order && !isEditingOrder) {
-    const handleEditOrder =
-      menu.isCurrent && !orderingClosed ? () => setIsEditingOrder(true) : null;
-    return (
-      <Order
-        {...{
-          user,
-          order,
-          menu,
-          bundles,
-          onEditOrder: handleEditOrder,
-        }}
-      />
-    );
-  }
-
-  if (!user) {
-    return <Marketplace {...{ menu, onCreateOrder: handleCreateOrder }} />;
-  }
-
-  return (
-    <Menu
-      {...{
-        user,
-        order,
-        menu,
-        bundles,
-        onCreateOrder: handleCreateOrder,
-      }}
-    />
-  );
-}
 
 export default function App() {
   const [data, setData] = useState<MenuResponse | null>(null); // expect: menu, user, order
@@ -142,10 +70,40 @@ export default function App() {
         Sentry.captureException(err);
       });
   };
+
+  const handleCreateHolidayOrder = (
+    order: MenuOrderRequest | MarketplaceOrderRequest
+  ) => {
+    const holidayOrderId = _.get(data, "holidayOrder.id");
+    const method: "put" | "post" = holidayOrderId ? "put" : "post";
+    const url = holidayOrderId
+      ? `/orders/${holidayOrderId}.json`
+      : "/orders.json";
+    const orderWithMenu = holidayMenu
+      ? { ...order, menu_id: holidayMenu.id }
+      : order;
+    console.debug("saving holiday order", method, url, orderWithMenu);
+
+    return axios<MenuResponse>({ method, url, data: orderWithMenu })
+      .then(({ data: newData }) => {
+        setData(newData);
+        console.log("save_holiday_order success", newData);
+        window.scrollTo(0, 0);
+      })
+      .catch((err) => {
+        const { message } = err.response.data || {};
+        console.error("Couldn't create holiday order", err, err.response.data);
+        window.alert(`Couldn't create holiday order: ${message || err}`);
+        Sentry.captureException(err);
+      });
+  };
+
   const menu = data?.menu || null;
   const bundles = data?.bundles || [];
   const user = data?.user || null;
   const order = data?.order || null;
+  const holidayMenu = data?.holidayMenu || null;
+  const holidayOrder = data?.holidayOrder || null;
   const { orderingDeadlineText, enablePayWhatYouCan } = menu || {};
 
   return (
@@ -163,18 +121,31 @@ export default function App() {
           ignoreDeadline,
         }}
       >
-        <Layout
-          {...{
-            bundles,
-            error,
-            handleCreateOrder,
-            isEditingOrder,
-            menu,
-            order,
-            setIsEditingOrder,
-            user,
-          }}
-        />
+        {holidayMenu ? (
+          <MenuTabs
+            bundles={bundles}
+            handleCreateRegularOrder={handleCreateOrder}
+            handleCreateHolidayOrder={handleCreateHolidayOrder}
+            isEditingOrder={isEditingOrder}
+            regularMenu={menu}
+            regularOrder={order}
+            holidayMenu={holidayMenu}
+            holidayOrder={holidayOrder}
+            setIsEditingOrder={setIsEditingOrder}
+            user={user}
+          />
+        ) : (
+          <Layout
+            bundles={bundles}
+            error={error}
+            handleCreateOrder={handleCreateOrder}
+            isEditingOrder={isEditingOrder}
+            menu={menu}
+            order={order}
+            setIsEditingOrder={setIsEditingOrder}
+            user={user}
+          />
+        )}
       </DayContext.Provider>
     </SettingsContext.Provider>
   );

@@ -11,5 +11,11 @@
     <%= yield %>
     <p>Thanks!!</p>
     <p><%= Setting.shop.name %></p>
+    <% if ENV['REVIEW_APP'].present? || Rails.env.development? %>
+    <hr style="margin-top: 24px; border: none; border-top: 1px solid #ccc;">
+    <p style="color: #999; font-size: 12px; text-align: center;">
+      🍞 This email was sent from the <%= ENV['REVIEW_APP'].present? ? 'review app' : 'local dev' %> — not production.
+    </p>
+    <% end %>
   </body>
 </html>

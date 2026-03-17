@@ -196,6 +196,8 @@ export default function ({
     bundles,
     user: withUser === true ? user : withUser || null,
     order: withOrder === true ? order : withOrder || null,
+    holidayMenu: null,
+    holidayOrder: null,
   };
 
   return data;

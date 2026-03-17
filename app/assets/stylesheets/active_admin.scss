@@ -198,6 +198,55 @@ form button,
   }
 }
 
+a.action-danger {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  color: #fff;
+  background-color: lighten($secondary, 10%);
+  border: 1px solid lighten($secondary, 10%);
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    color: #fff !important;
+    background-color: lighten($secondary, 5%) !important;
+    border-color: lighten($secondary, 5%) !important;
+  }
+}
+
+a.action-disabled {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.9em;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  color: #999;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  text-decoration: none;
+
+  &:hover {
+    color: #666 !important;
+    background-color: #eee !important;
+    border-color: #ccc !important;
+  }
+}
+
+.status_tag.holiday-tag {
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.panel.danger-zone {
+  > h3 {
+    background-color: lighten($secondary, 10%);
+    color: #fff;
+  }
+}
+
 form.filter_form a.clear_filters_btn,
 form fieldset.buttons li.cancel a,
 form fieldset.actions li.cancel a {

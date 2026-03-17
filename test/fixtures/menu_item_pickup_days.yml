@@ -39,3 +39,37 @@ w2_donut_thurs:
 w2_donut_sat:
   menu_item: w2_donut
   pickup_day: w2_d2_sat
+
+# passover 2026
+passover_almond_fri:
+  menu_item: passover_almond_cake
+  pickup_day: passover_fri
+
+passover_almond_sat:
+  menu_item: passover_almond_cake
+  pickup_day: passover_sat
+
+passover_toffee_fri:
+  menu_item: passover_matzo_toffee
+  pickup_day: passover_fri
+
+passover_toffee_sat:
+  menu_item: passover_matzo_toffee
+  pickup_day: passover_sat
+
+# week 26w15
+w26w15_classic_fri:
+  menu_item: w26w15_classic
+  pickup_day: w26w15_fri
+
+w26w15_classic_sat:
+  menu_item: w26w15_classic
+  pickup_day: w26w15_sat
+
+w26w15_rye_fri:
+  menu_item: w26w15_rye
+  pickup_day: w26w15_fri
+
+w26w15_rye_sat:
+  menu_item: w26w15_rye
+  pickup_day: w26w15_sat
