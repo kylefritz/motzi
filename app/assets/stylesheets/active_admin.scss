@@ -283,6 +283,23 @@ form fieldset.actions li.cancel a {
 #by-item {
   // give lists a little more room to breath
   line-height: 1.5;
+
+  .columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 0;
+
+    .column {
+      float: none !important;
+      width: auto !important;
+      min-width: 180px;
+      max-width: 250px;
+      flex: 1 0 180px;
+      padding: 0 10px;
+
+      h3 { margin-top: 0; margin-bottom: 10px; }
+    }
+  }
 }
 
 // ─── Activity Feed page ───
