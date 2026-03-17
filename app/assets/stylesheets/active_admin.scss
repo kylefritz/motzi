@@ -42,10 +42,10 @@ body.admin_activity_feed #wrapper {
 //
 body {
   font-family: $font-family;
-  font-weight: 300;
+  font-weight: 400;
   color: #2e2927;
   background-color: white;
-  line-height: 1.25;
+  line-height: 1.45;
 }
 #active_admin_content {
   padding-top: 8px;
@@ -78,6 +78,7 @@ body {
 .panel > h3 {
   border: none;
   border-bottom: 1px solid #d6d6d6;
+  font-weight: 500;
 }
 .section,
 .panel {
@@ -283,6 +284,23 @@ form fieldset.actions li.cancel a {
 #by-item {
   // give lists a little more room to breath
   line-height: 1.5;
+
+  .columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 0;
+
+    .column {
+      float: none !important;
+      width: auto !important;
+      min-width: 180px;
+      max-width: 250px;
+      flex: 1 0 180px;
+      padding: 0 10px;
+
+      h3 { margin-top: 0; margin-bottom: 10px; }
+    }
+  }
 }
 
 // ─── Activity Feed page ───
@@ -351,6 +369,267 @@ form fieldset.actions li.cancel a {
   }
 }
 
+body.admin_activity_feed {
+  .panel,
+  .columns {
+    margin-bottom: 10px;
+  }
+
+  .panel_contents {
+    padding: 0;
+  }
+}
+
+.daily-stats-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
+  align-items: start;
+  margin-bottom: 10px;
+
+  h3 {
+    margin-top: 0;
+  }
+
+  > .panel {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 1100px) {
+  .daily-stats-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.activity-ops-board {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.activity-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.dense-section {
+  border: 1px solid #dfdfdf;
+  background: #fcfcfb;
+  border-radius: 3px;
+  min-width: 0;
+}
+
+.dense-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  border-bottom: 1px solid #e5ddd0;
+  background: #f2f2f1;
+}
+
+.dense-title {
+  font-weight: 600;
+  color: #4b4b4b;
+}
+
+.dense-meta {
+  color: #8a8177;
+  white-space: nowrap;
+}
+
+.activity-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  padding: 5px;
+}
+
+.activity-metric-card,
+.watch-item,
+.analysis-summary-card,
+.commit-card {
+  border: 1px solid #e7dcc9;
+  background: #fffdfa;
+  border-radius: 2px;
+}
+
+.activity-metric-card {
+  padding: 6px 8px;
+
+  .metric-label {
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #8c8174;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .metric-value {
+    font-size: 1.25em;
+    line-height: 1;
+    font-weight: 600;
+    color: #2d241f;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 3px;
+  }
+
+  .metric-detail {
+    color: #5f5448;
+    font-size: 0.85em;
+    margin-bottom: 2px;
+  }
+
+  .metric-delta {
+    font-size: 0.82em;
+    font-weight: 500;
+  }
+}
+
+.watchlist {
+  display: grid;
+  gap: 4px;
+  padding: 5px;
+}
+
+.watch-item {
+  padding: 6px 8px;
+
+  .watch-title {
+    font-weight: 600;
+    color: #2f2822;
+    margin-bottom: 2px;
+    font-size: 0.85em;
+  }
+
+  .watch-body {
+    color: #5f5448;
+    line-height: 1.3;
+    font-size: 0.78em;
+  }
+}
+
+.analysis-summary-card {
+  padding: 5px 6px;
+  border: none;
+  background: transparent;
+
+  .analysis-summary-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .analysis-summary-text {
+    margin: 0 0 4px;
+    font-size: 0.82em;
+    color: #40362f;
+    line-height: 1.35;
+  }
+
+  .analysis-status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 2px 8px;
+    background: #f2e8d8;
+    color: #6a5235;
+    font-size: 0.72em;
+    font-weight: 600;
+  }
+
+  .analysis-action-list {
+    margin: 0;
+    padding-left: 16px;
+    color: #5d5044;
+    font-size: 0.78em;
+    line-height: 1.3;
+  }
+}
+
+.commit-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  padding: 5px;
+}
+
+.commit-card {
+  padding: 7px 10px;
+
+  &.is-current-week {
+    border-color: #d4c09d;
+    box-shadow: inset 0 0 0 1px rgba(183, 137, 69, 0.08);
+  }
+
+  .commit-meta,
+  .commit-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #857766;
+  }
+
+  .commit-title {
+    margin: 2px 0 1px;
+    color: #2f2822;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  .commit-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0 5px;
+    background: #efe4cf;
+    color: #8b6530;
+    font-weight: 600;
+  }
+}
+
+.tone-danger {
+  .metric-delta,
+  .watch-title {
+    color: #c06048;
+  }
+}
+.tone-danger-text { color: #c06048; }
+
+.tone-warning {
+  .metric-delta,
+  .watch-title {
+    color: #a8802e;
+  }
+}
+.tone-warning-text { color: #a8802e; }
+
+.tone-ok {
+  .metric-delta,
+  .watch-title {
+    color: #2c7a4b;
+  }
+}
+.tone-ok-text { color: #2c7a4b; }
+
+.tone-muted {
+  .metric-delta,
+  .watch-title {
+    color: #7f7263;
+  }
+}
+.tone-muted-text { color: #7f7263; }
+
+.empty-state {
+  color: #8d8378;
+}
+
 // Grid table
 .activity-grid {
   width: 100%;
@@ -363,7 +642,7 @@ form fieldset.actions li.cancel a {
     letter-spacing: 0.05em;
     color: #999;
     font-weight: 500;
-    padding: 8px 10px 6px;
+    padding: 6px 10px 4px;
     border-bottom: 2px solid #e8e2da;
     text-align: left;
   }
@@ -373,7 +652,6 @@ form fieldset.actions li.cancel a {
     padding: 6px 10px;
     border-bottom: 1px solid #f0f0f0;
     font-size: 1.15em;
-    line-height: 1.5;
     vertical-align: top;
     color: #333;
   }
@@ -384,8 +662,8 @@ form fieldset.actions li.cancel a {
 
   .cell-item {
     white-space: nowrap;
-    padding: 2px 0;
-    line-height: 1.4;
+    padding: 1px 0;
+    line-height: 1.3;
   }
   .cell-num {
     font-weight: 500;
@@ -396,7 +674,7 @@ form fieldset.actions li.cancel a {
   }
   .cell-dim {
     color: #888;
-    font-size: 0.92em;
+    font-size: 0.9em;
   }
   .cell-link {
     text-decoration: none;
@@ -412,7 +690,7 @@ form fieldset.actions li.cancel a {
     td:first-child { border-left: 3px solid $primary; padding-left: 9px; }
   }
   .today-label {
-    font-size: 0.75em;
+    font-size: 0.7em;
     color: $primary;
     font-weight: 500;
     margin-left: 4px;
@@ -430,16 +708,16 @@ form fieldset.actions li.cancel a {
 
 // Analysis card
 .analysis-card {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   border: 1px solid #e8e8e8;
-  border-radius: 6px;
+  border-radius: 5px;
   overflow: hidden;
 
   .analysis-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 16px;
+    padding: 6px 12px;
     background: #fafafa;
     border-bottom: 1px solid #eee;
     font-size: 0.85em;
@@ -449,28 +727,28 @@ form fieldset.actions li.cancel a {
   }
 
   .analysis-body {
-    padding: 20px 28px;
+    padding: 12px 16px;
     font-size: 14px;
     color: #333;
-    line-height: 1.6;
+    line-height: 1.5;
 
-    h1 { font-size: 1.15em; margin: 0 0 10px; font-weight: 600; color: #1a1a1a; }
-    h2 { font-size: 1em; margin: 20px 0 8px; font-weight: 600; color: #1a1a1a; border-bottom: 1px solid #e8e2da; padding-bottom: 5px; }
-    h3 { font-size: 0.95em; margin: 14px 0 6px; font-weight: 600; color: #333; }
-    p { margin: 0 0 10px; }
-    ol, ul { margin: 0 0 12px; padding-left: 22px; }
-    li { margin-bottom: 10px; line-height: 1.55; }
-    li > ul, li > ol { margin-top: 6px; }
+    h1 { font-size: 1.1em; margin: 0 0 8px; font-weight: 600; color: #1a1a1a; }
+    h2 { font-size: 0.95em; margin: 14px 0 6px; font-weight: 600; color: #1a1a1a; border-bottom: 1px solid #e8e2da; padding-bottom: 3px; }
+    h3 { font-size: 0.9em; margin: 10px 0 4px; font-weight: 600; color: #333; }
+    p { margin: 0 0 8px; }
+    ol, ul { margin: 0 0 8px; padding-left: 20px; }
+    li { margin-bottom: 6px; line-height: 1.45; }
+    li > ul, li > ol { margin-top: 4px; }
     strong { color: #111; font-weight: 600; }
-    code { background: #f0ebe4; padding: 2px 6px; border-radius: 3px; font-size: 0.88em; color: $primary; }
-    hr { border: none; border-top: 1px solid #e8e2da; margin: 18px 0; }
+    code { background: #f0ebe4; padding: 1px 4px; border-radius: 3px; font-size: 0.85em; color: $primary; }
+    hr { border: none; border-top: 1px solid #e8e2da; margin: 12px 0; }
   }
 
   .analysis-footer {
     display: flex;
-    gap: 28px;
+    gap: 18px;
     flex-wrap: wrap;
-    padding: 10px 20px;
+    padding: 6px 12px;
     background: #f5f3f0;
     border-top: 2px solid #e8e2da;
     font-size: 0.82em;
@@ -515,29 +793,51 @@ form fieldset.actions li.cancel a {
   }
 }
 
-.email-health-row {
+.glance-row {
   display: flex;
-  gap: 48px;
+  gap: 24px;
   flex-wrap: wrap;
-  padding: 14px 16px;
-  margin-bottom: 0;
-  background: #faf8f5;
-  border-bottom: 2px solid #e8e2da;
+  padding: 10px 14px;
+}
 
-  .email-stat {
-    font-size: 1.3em;
+.glance-stat {
+  .glance-label {
+    font-size: 0.78em;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #999;
+    font-weight: 500;
+    margin-bottom: 1px;
   }
-  .email-stat-num {
+  .glance-num {
+    font-size: 1.2em;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
+    line-height: 1.2;
   }
-  .email-stat-label {
-    font-size: 0.65em;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #999;
-    margin-bottom: 3px;
-    font-weight: 500;
+  .glance-detail {
+    font-size: 0.85em;
+    color: #777;
+    line-height: 1.3;
+  }
+  .glance-delta {
+    font-size: 0.82em;
+    color: #888;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 1400px) {
+  .activity-metric-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .activity-summary-grid,
+  .activity-metric-grid,
+  .commit-list {
+    grid-template-columns: 1fr;
   }
 }
 

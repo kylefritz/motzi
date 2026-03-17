@@ -89,7 +89,7 @@ ActiveAdmin.register_page "Dashboard" do
       end
       column span: 3 do
         bake_menus = [menu, holiday_menu].compact
-        render 'admin/menus/what_to_bake_combined', {menus: bake_menus}
+        render 'admin/menus/what_to_bake', {menus: bake_menus}
       end
     end
 

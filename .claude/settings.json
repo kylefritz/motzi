@@ -2,27 +2,33 @@
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
     "playwright@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true
   },
   "permissions": {
     "allow": [
-      "Bash(bun run test*)",
-      "Bash(bun run build*)",
-      "Bash(bun run typecheck*)",
-      "Bash(bundle exec rails test*)",
-      "Bash(DISABLE_SPRING=1 bundle exec rails test*)",
       "Bash(bin/rails db:migrate*)",
       "Bash(bin/rails db:rollback*)",
       "Bash(bin/rails routes*)",
-      "Bash(bundle exec rubocop*)"
+      "Bash(bin/rails test*)",
+      "Bash(bun run build*)",
+      "Bash(bun run test*)",
+      "Bash(bun run typecheck*)",
+      "Bash(bundle exec rails test*)",
+      "Bash(bundle exec rubocop*)",
+      "Bash(DISABLE_SPRING=1 bin/rails test*)",
+      "Bash(DISABLE_SPRING=1 bundle exec rails test*)",
+      "Bash(git add*)",
+      "Bash(git checkout -- *)",
+      "Bash(git checkout HEAD*)",
+      "Bash(git commit*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git status*)",
+      "mcp__plugin_playwright_playwright__*"
     ],
-    "deny": [
-      "Edit(.env)",
-      "Edit(Gemfile.lock)",
-      "Edit(bun.lockb)"
-    ]
+    "deny": ["Edit(.env)", "Edit(Gemfile.lock)", "Edit(bun.lockb)"]
   },
   "hooks": {
     "PostToolUse": [
@@ -42,10 +48,6 @@
     ]
   },
   "mcpServers": {
-    "chrome-devtools": {
-      "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp", "--autoConnect"]
-    },
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"]
@@ -59,7 +61,11 @@
     },
     "postgres": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgres://localhost/motzi"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgres://localhost/motzi"
+      ]
     }
   }
 }

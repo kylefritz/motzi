@@ -1,5 +1,8 @@
+require "open3"
+
 class ActivityFeed
   Event = Struct.new(:timestamp, :category, :action, :description, :details, keyword_init: true)
+  Commit = Struct.new(:sha, :short_sha, :summary, :committed_at, :url, :current_week, keyword_init: true)
 
   RECURRING_JOB_LABELS = {
     "SendDayOfReminderJob" => "Day-of reminder job",
@@ -11,10 +14,10 @@ class ActivityFeed
 
   MAILER_LABELS = {
     "MenuMailer#weekly_menu_email" => "Weekly menu email",
-    "ReminderMailer#havent_ordered_email" => "Haven't-ordered reminders",
-    "ConfirmationMailer#order_email" => "Order confirmations",
-    "ReminderMailer#day_of_email" => "Day-of reminders",
-    "ConfirmationMailer#credit_email" => "Credit purchase confirmations"
+    "ReminderMailer#havent_ordered_email" => "Haven't-ordered email",
+    "ConfirmationMailer#order_email" => "Order email",
+    "ReminderMailer#day_of_email" => "Day-of reminder email",
+    "ConfirmationMailer#credit_email" => "Credit purchase email"
   }.freeze
 
   def initialize(week_id)
@@ -107,6 +110,91 @@ class ActivityFeed
     "recurring_jobs_summary" => "Jobs"
   }.freeze
 
+  def headline_metrics(lookback: 4)
+    comparison = comparison_snapshot(lookback: lookback)
+    current = comparison[:current]
+    average = comparison[:average]
+
+    [
+      metric_card("Orders", current[:orders], nil, compare_metric(current[:orders], average[:orders], "vs avg")),
+      metric_card("Items", current[:items], nil, compare_metric(current[:items], average[:items], "vs avg")),
+      metric_card("Visitors", current[:visits], nil, compare_metric(current[:visits], average[:visits], "vs avg")),
+      metric_card("Credits", current[:credit_credits], "credits sold", compare_metric(current[:credit_credits], average[:credit_credits], "vs avg"))
+    ]
+  end
+
+  def comparison_snapshot(lookback: 4)
+    current = comparable_totals
+    previous = prior_week_ids(lookback).map { |wid| self.class.new(wid).send(:comparable_totals, day_index: comparison_day_index) }
+    samples = previous.size.nonzero? || 1
+
+    {
+      label: comparison_label,
+      current: current,
+      previous: previous,
+      average: average_totals(previous, samples)
+    }
+  end
+
+  def watchlist_items(lookback: 4)
+    comparison = comparison_snapshot(lookback: lookback)
+    current = comparison[:current]
+    average = comparison[:average]
+    items = []
+
+    if average[:orders] >= 10 && current[:orders] < (average[:orders] * 0.85)
+      change = percent_change(current[:orders], average[:orders])
+      items << {
+        tone: current[:orders] < (average[:orders] * 0.7) ? :danger : :warning,
+        title: "Orders are tracking below normal",
+        body: "#{current[:orders]} orders #{comparison[:label]}, #{change.abs}% below the #{lookback}-week average of #{average[:orders]}."
+      }
+    end
+
+    if average[:visitors] >= 25 && current[:visitors] < (average[:visitors] * 0.8)
+      change = percent_change(current[:visitors], average[:visitors])
+      items << {
+        tone: :warning,
+        title: "Traffic is softer than usual",
+        body: "#{current[:visitors]} visitors #{comparison[:label]}, #{change.abs}% below the recent average of #{average[:visitors]}."
+      }
+    end
+
+    havent_ordered_trend = mailer_open_rate_trend("ReminderMailer#havent_ordered_email", lookback: lookback)
+    if havent_ordered_trend[:current_rate] && havent_ordered_trend[:average_rate] && havent_ordered_trend[:current_rate] < (havent_ordered_trend[:average_rate] - 5)
+      items << {
+        tone: :warning,
+        title: "Haven't-ordered reminder engagement is slipping",
+        body: "#{havent_ordered_trend[:current_rate]}% opened this week versus a #{lookback}-week average of #{havent_ordered_trend[:average_rate]}%."
+      }
+    end
+
+    if current[:incomplete_jobs] > 0 || current[:anomaly_jobs] > 3
+      detail = []
+      detail << "#{current[:anomaly_jobs]} anomaly runs" if current[:anomaly_jobs] > 0
+      detail << "#{current[:incomplete_jobs]} incomplete jobs" if current[:incomplete_jobs] > 0
+      items << {
+        tone: current[:incomplete_jobs] > 0 ? :danger : :warning,
+        title: "Background job activity needs a look",
+        body: detail.join(" and ").capitalize
+      }
+    end
+
+    items << {
+      tone: :ok,
+      title: "No automatic watchlist issues",
+      body: "Core metrics are inside recent norms for #{comparison[:label]}."
+    } if items.empty?
+
+    items
+  end
+
+  def git_commits(limit: 8)
+    commits = github_commits
+    commits = local_git_commits if commits.empty?
+    commits.first(limit)
+  end
+
   def to_text(verbose: false, header: true)
     week_end = @week_start + 6.days
     lines = []
@@ -166,30 +254,216 @@ class ActivityFeed
 
   GITHUB_REPO = "kylefritz/motzi"
 
-  def git_commits_text
-    token = ENV["GITHUB_TOKEN"]
-    unless token.present?
-      Rails.logger.warn "[ActivityFeed] GITHUB_TOKEN not set — git history unavailable"
-      return "== Code Changes ==\n  (unavailable — GITHUB_TOKEN not configured. There may be relevant code changes not shown here.)"
+  def metric_card(label, value, detail, delta)
+    {
+      label: label,
+      value: value,
+      detail: detail,
+      delta: delta[:text],
+      delta_tooltip: delta[:tooltip],
+      tone: delta[:tone]
+    }
+  end
+
+  def compare_metric(current, average, suffix)
+    return { text: "No comparison yet", tone: :muted, tooltip: nil } if average.to_f.zero?
+
+    change = percent_change(current, average)
+    tone =
+      if change <= -20
+        :danger
+      elsif change <= -8
+        :warning
+      elsif change >= 20
+        :ok
+      else
+        :muted
+      end
+
+    lookback = 4
+    day_label = current_week? ? "through #{Time.zone.today.strftime('%a %-m/%-d')}" : "full week"
+    tooltip = "Avg: #{average} (#{lookback}-week avg, #{day_label})"
+
+    { text: "#{format_change(change)} #{suffix}", tone: tone, tooltip: tooltip }
+  end
+
+  def job_context(current)
+    return "#{current[:incomplete_jobs]} incomplete" if current[:incomplete_jobs].positive?
+
+    "#{current[:anomaly_jobs]} anomaly runs"
+  end
+
+  def percent_change(current, average)
+    return 0 if average.to_f.zero?
+
+    (((current.to_f - average.to_f) / average.to_f) * 100).round
+  end
+
+  def format_change(change)
+    "#{change.positive? ? '+' : ''}#{change}%"
+  end
+
+  def comparison_day_index
+    return 6 unless current_week?
+
+    [(Time.zone.today - @week_start.to_date).to_i, 6].min
+  end
+
+  def comparison_label
+    current_week? ? "through #{Time.zone.today.strftime('%a %-m/%-d')} so far" : "for the full week"
+  end
+
+  def current_week?
+    Time.zone.today.between?(@week_start.to_date, (@week_end - 1.day).to_date)
+  end
+
+  def prior_week_ids(count)
+    (1..count).map { |i| (@week_start - i.weeks).week_id }
+  end
+
+  def comparable_totals(day_index: comparison_day_index)
+    cutoff_date = (@week_start + day_index.days).to_date
+    build_totals(summary.select do |event|
+      event_date = event.timestamp.to_date
+      event_date >= @week_start.to_date && event_date <= cutoff_date
+    end)
+  end
+
+  def average_totals(previous, samples)
+    {
+      orders: average_for(previous, :orders, samples),
+      items: average_for(previous, :items, samples),
+      visitors: average_for(previous, :visitors, samples),
+      visits: average_for(previous, :visits, samples),
+      credit_purchases: average_for(previous, :credit_purchases, samples),
+      credit_credits: average_for(previous, :credit_credits, samples),
+      emails_sent: average_for(previous, :emails_sent, samples),
+      emails_opened: average_for(previous, :emails_opened, samples),
+      email_open_rate: average_for(previous, :email_open_rate, samples),
+      job_runs: average_for(previous, :job_runs, samples),
+      anomaly_jobs: average_for(previous, :anomaly_jobs, samples),
+      incomplete_jobs: average_for(previous, :incomplete_jobs, samples)
+    }
+  end
+
+  def average_for(previous, key, samples)
+    (previous.sum { |row| row[key].to_f } / samples).round
+  end
+
+  def build_totals(events)
+    orders = events.select { |event| event.action == "orders_summary" }
+    visits = events.select { |event| event.action == "daily_visits" }
+    credits = events.select { |event| event.action == "credits_summary" }
+    emails = events.select { |event| event.action == "email_summary" }
+    jobs = events.select { |event| event.action == "recurring_jobs_summary" }
+
+    sent = emails.sum { |event| event.details[:sent].to_i }
+    opened = emails.sum { |event| event.details[:opened].to_i }
+    anomaly_jobs = jobs.select { |event| event.details[:class_name] == "AnalyzeAnomaliesJob" }
+
+    {
+      orders: orders.sum { |event| event.details[:count].to_i },
+      items: orders.sum { |event| event.details[:item_count].to_i },
+      visitors: visits.sum { |event| event.details[:unique].to_i },
+      visits: visits.sum { |event| event.details[:visits].to_i },
+      credit_purchases: credits.sum { |event| event.details[:count].to_i },
+      credit_credits: credits.sum { |event| event.details[:total_credits].to_i },
+      emails_sent: sent,
+      emails_opened: opened,
+      email_open_rate: sent.positive? ? ((opened.to_f / sent) * 100).round : 0,
+      job_runs: jobs.sum { |event| event.details[:finished].to_i },
+      anomaly_jobs: anomaly_jobs.sum { |event| event.details[:total].to_i },
+      incomplete_jobs: jobs.sum { |event| event.details[:total].to_i - event.details[:finished].to_i }
+    }
+  end
+
+  def email_rate_label(current)
+    "#{current[:email_open_rate]}% opened"
+  end
+
+  def mailer_open_rate_trend(mailer, lookback: 4)
+    current = email_summary[mailer]
+    previous = prior_week_ids(lookback).filter_map do |wid|
+      self.class.new(wid).email_summary[mailer]&.dig(:open_rate)
+    end
+    average = if previous.any?
+      (previous.sum.to_f / previous.size).round
     end
 
-    client = Octokit::Client.new(access_token: token)
-    # Include commits from 4 weeks before through end of this week
-    # so Claude can see recent deploys that may explain this week's behavior
-    since = (@week_start - 4.weeks).iso8601
-    commits = client.commits(GITHUB_REPO, sha: "master", since: since, until: @week_end.iso8601)
+    {
+      current_rate: current&.dig(:open_rate),
+      average_rate: average
+    }
+  end
+
+  def git_commits_text
+    commits = git_commits(limit: 50)
     return nil if commits.empty?
 
     lines = ["== Code Changes =="]
-    commits.reverse_each do |c|
-      date = c.commit.author.date.strftime("%-m/%-d")
-      msg = c.commit.message.lines.first&.strip
-      lines << "  #{date} #{c.sha[0..6]} #{msg}"
+    commits.reverse_each do |commit|
+      lines << "  #{commit.committed_at.strftime('%-m/%-d')} #{commit.short_sha} #{commit.summary}"
     end
     lines.join("\n")
+  end
+
+  def github_commits
+    token = ENV["GITHUB_TOKEN"]
+    unless token.present?
+      Rails.logger.warn "[ActivityFeed] GITHUB_TOKEN not set — falling back to local git history when available"
+      return []
+    end
+
+    client = Octokit::Client.new(access_token: token)
+    client.commits(GITHUB_REPO, sha: "master", since: (@week_start - 4.weeks).iso8601, until: @week_end.iso8601).map do |commit|
+      build_commit(
+        sha: commit.sha,
+        summary: commit.commit.message.lines.first&.strip,
+        committed_at: commit.commit.author.date,
+        url: commit.respond_to?(:html_url) ? commit.html_url : nil
+      )
+    end.reverse
   rescue Octokit::Error => e
     Rails.logger.warn "[ActivityFeed] GitHub API error: #{e.message}"
-    nil
+    []
+  end
+
+  def local_git_commits
+    return [] unless Rails.root.join(".git").exist?
+
+    stdout, status = Open3.capture2(
+      "git", "-C", Rails.root.to_s, "log", "master",
+      "--since=#{(@week_start - 4.weeks).iso8601}",
+      "--until=#{@week_end.iso8601}",
+      "--pretty=format:%H%x1f%aI%x1f%s"
+    )
+    return [] unless status.success?
+
+    stdout.lines.map do |line|
+      sha, committed_at, summary = line.strip.split("\u001f", 3)
+      next if sha.blank? || committed_at.blank? || summary.blank?
+
+      build_commit(
+        sha: sha,
+        summary: summary,
+        committed_at: Time.zone.parse(committed_at),
+        url: "https://github.com/#{GITHUB_REPO}/commit/#{sha}"
+      )
+    end.compact
+  rescue StandardError => e
+    Rails.logger.warn "[ActivityFeed] Local git history unavailable: #{e.message}"
+    []
+  end
+
+  def build_commit(sha:, summary:, committed_at:, url:)
+    Commit.new(
+      sha: sha,
+      short_sha: sha.first(7),
+      summary: summary,
+      committed_at: committed_at.in_time_zone,
+      url: url,
+      current_week: committed_at.to_date >= @week_start.to_date
+    )
   end
 
   def menu_context_text

@@ -213,4 +213,63 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert verbose_evts.any?
     assert_includes verbose_evts.first.description, "menu_id"
   end
+
+  test "headline metrics summarize current totals" do
+    feed = ActivityFeed.new(@week_id)
+    feed.define_singleton_method(:comparison_snapshot) do |lookback: 4|
+      {
+        label: "through Fri 1/4 so far",
+        current: { orders: 12, items: 20, visitors: 80, visits: 95, credit_purchases: 2, credit_credits: 13, emails_sent: 50, emails_opened: 25, email_open_rate: 50, job_runs: 3, anomaly_jobs: 1, incomplete_jobs: 0 },
+        previous: Array.new(lookback) { {} },
+        average: { orders: 10, items: 18, visitors: 75, visits: 90, credit_purchases: 1, credit_credits: 6, emails_sent: 48, emails_opened: 22, email_open_rate: 46, job_runs: 2, anomaly_jobs: 1, incomplete_jobs: 0 }
+      }
+    end
+
+    cards = feed.headline_metrics
+
+    assert_equal 4, cards.size
+    assert_equal "Orders", cards.first[:label]
+    assert_equal 12, cards.first[:value]
+    assert_includes cards.first[:delta], "vs avg"
+  end
+
+  test "watchlist flags low orders and repeated anomaly jobs" do
+    feed = ActivityFeed.new(@week_id)
+    feed.define_singleton_method(:comparison_snapshot) do |lookback: 4|
+      {
+        label: "through Fri 1/4 so far",
+        current: { orders: 18, items: 30, visitors: 60, visits: 72, credit_purchases: 1, credit_credits: 13, emails_sent: 50, emails_opened: 25, email_open_rate: 50, job_runs: 4, anomaly_jobs: 6, incomplete_jobs: 1 },
+        previous: Array.new(lookback) { {} },
+        average: { orders: 30, items: 40, visitors: 80, visits: 95, credit_purchases: 2, credit_credits: 8, emails_sent: 48, emails_opened: 24, email_open_rate: 50, job_runs: 2, anomaly_jobs: 1, incomplete_jobs: 0 }
+      }
+    end
+    feed.define_singleton_method(:mailer_open_rate_trend) do |_mailer, lookback: 4|
+      { current_rate: 40, average_rate: 50 }
+    end
+
+    items = feed.watchlist_items
+
+    assert items.any? { |item| item[:title].include?("Orders are tracking below normal") }
+    assert items.any? { |item| item[:title].include?("Background job activity needs a look") }
+    assert items.any? { |item| item[:title].include?("Haven't-ordered reminder engagement is slipping") }
+  end
+
+  test "git commits falls back to local history" do
+    feed = ActivityFeed.new(@week_id)
+    feed.define_singleton_method(:github_commits) { [] }
+    commit = ActivityFeed::Commit.new(
+      sha: "abcdef123456",
+      short_sha: "abcdef1",
+      summary: "Test commit",
+      committed_at: Time.zone.parse("2019-01-01 12:00"),
+      url: "https://example.com/commit",
+      current_week: true
+    )
+    feed.define_singleton_method(:local_git_commits) { [commit] }
+
+    commits = feed.git_commits
+
+    assert_equal 1, commits.size
+    assert_equal "Test commit", commits.first.summary
+  end
 end

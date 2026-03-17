@@ -24,6 +24,9 @@ ActiveAdmin.register_page "Activity Feed" do
     events = feed.summary
     email_summary = feed.email_summary
     analyses = AnomalyAnalysis.for_week(week_id).order(created_at: :desc)
+    headline_metrics = feed.headline_metrics
+    commits = feed.git_commits
+    comparison = feed.comparison_snapshot
 
     week_start = Time.zone.from_week_id(week_id)
     week_end = week_start + 6.days
@@ -235,6 +238,7 @@ ActiveAdmin.register_page "Activity Feed" do
     grid = feed.daily_grid
     grid_columns = feed.grid_columns
 
+    div class: "daily-stats-row" do
     panel "Daily Stats" do
       if grid_columns.empty?
         para "No activity for #{week_id}", style: "color: #999"
@@ -347,9 +351,11 @@ ActiveAdmin.register_page "Activity Feed" do
                       rate_color = rate >= 50 ? "green" : rate >= 20 ? "orange" : "red"
                       span " · #{rate}% opened", style: "color: #{rate_color}", class: "cell-dim"
                     when "recurring_jobs_summary"
-                      total = all_events.size
-                      span total.to_s, class: "cell-num"
+                      total_runs = all_events.sum { |e| e.details[:total].to_i }
+                      incomplete = all_events.sum { |e| e.details[:total].to_i - e.details[:finished].to_i }
+                      span total_runs.to_s, class: "cell-num"
                       span " runs", class: "cell-label"
+                      span " (#{incomplete} incomplete)", class: "cell-dim" if incomplete.positive?
                     else
                       span "—", class: "cell-empty"
                     end
@@ -362,34 +368,78 @@ ActiveAdmin.register_page "Activity Feed" do
       end
     end
 
-    # Email health cards
-    if email_summary.any?
-      panel "Email" do
-        label_order = ActivityFeed::MAILER_LABELS.keys
-        sorted_stats = email_summary.sort_by { |k, _| label_order.index(k) || label_order.size }.map(&:last)
-        div class: "email-health-row" do
-          sorted_stats.each do |row|
-            div class: "email-stat" do
-              div class: "email-stat-label" do
-                text_node row[:label]
-              end
-              if row[:sent] > 0
-                span row[:sent].to_s, class: "email-stat-num"
-                span " sent", class: "cell-label"
-                rate = row[:open_rate]
-                rate_color = rate >= 50 ? "green" : rate >= 20 ? "orange" : "red"
-                span " · #{rate}% opened", style: "color: #{rate_color}", title: "Tracking pixel open-rate percent"
-                if row[:clicked] > 0
-                  span " · #{row[:clicked]} clicked", class: "cell-dim"
+    div class: "dense-section section-commits" do
+      div class: "dense-section-header" do
+        span "Code Changes", class: "dense-title"
+        span "master", class: "dense-meta"
+      end
+      if commits.any?
+        div class: "commit-list" do
+          commits.each do |commit|
+            div class: "commit-card #{'is-current-week' if commit.current_week}" do
+              div class: "commit-meta" do
+                span commit.committed_at.strftime("%a %-m/%-d %l:%M%P").strip, class: "commit-time"
+                if commit.current_week
+                  span "this week", class: "commit-badge"
                 end
-              else
-                span "—", class: "cell-dim"
               end
+              div class: "commit-title" do
+                text_node commit.summary
+              end
+              div class: "commit-links" do
+                if commit.url.present?
+                  a commit.short_sha, href: commit.url, target: "_blank", rel: "noopener"
+                else
+                  span commit.short_sha
+                end
+              end
+            end
+          end
+        end
+      else
+        para "No commit history available for this window.", class: "empty-state"
+      end
+    end
+    end # daily-stats-row
+
+    panel "At a Glance" do
+      label_order = ActivityFeed::MAILER_LABELS.keys
+      sorted_stats = email_summary.sort_by { |k, _| label_order.index(k) || label_order.size }.map(&:last)
+      div class: "glance-row" do
+        headline_metrics.each do |metric|
+          div class: "glance-stat tone-#{metric[:tone]}" do
+            div metric[:label], class: "glance-label"
+            div metric[:value].to_s, class: "glance-num"
+            div metric[:detail], class: "glance-detail" if metric[:detail].present?
+            if metric[:delta].present?
+              delta_attrs = { class: "glance-delta tone-#{metric[:tone]}-text" }
+              delta_attrs[:title] = metric[:delta_tooltip] if metric[:delta_tooltip].present?
+              div metric[:delta], **delta_attrs
+            end
+          end
+        end
+        sorted_stats.each do |row|
+          div class: "glance-stat" do
+            div row[:label], class: "glance-label"
+            if row[:sent] > 0
+              div "#{row[:sent]} sent", class: "glance-num"
+              rate = row[:open_rate]
+              rate_color = rate >= 50 ? "green" : rate >= 20 ? "orange" : "red"
+              div class: "glance-detail" do
+                span "#{rate}% opened", style: "color: #{rate_color}", title: "Tracking pixel open-rate percent"
+                if row[:clicked] > 0
+                  span " · #{row[:clicked]} clicked"
+                end
+              end
+            else
+              div "—", class: "glance-detail"
             end
           end
         end
       end
     end
+
+    # Email panel removed — merged into "At a Glance" above
 
     # Admin events
     admin_events = events.select { |e| e.category == "admin" }

@@ -10,7 +10,7 @@ class AnalyzeAnomaliesJobTest < ActiveJob::TestCase
     menu = menus(:week1)
 
     travel_to_week_id(menu.week_id) do
-      VCR.use_cassette("anomaly_detection_missing_orders") do
+      VCR.use_cassette("anomaly_detection_missing_orders", record: :new_episodes) do
         assert_emails 1 do
           AnalyzeAnomaliesJob.perform_now(week_id: menu.week_id, trigger: "test", user_id: users(:kyle).id)
         end

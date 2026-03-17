@@ -12,6 +12,8 @@ class Admin::ActivityFeedControllerTest < ActionDispatch::IntegrationTest
   test "get index" do
     get '/admin/activity_feed'
     assert_response :success
+    assert_select '.panel h3', text: 'At a Glance'
+    assert_select '.dense-title', text: 'Code Changes'
   end
 
   test "get index with week_id" do
