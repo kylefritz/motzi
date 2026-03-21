@@ -3,7 +3,7 @@
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout: fixed;">
   <tr>
     <% days.each do |d| %>
-      <td width="<%= col_width %>%" style="text-align: center; vertical-align: top; padding: 0 8px;">
+      <td class="deadline-cell" width="<%= col_width %>%" style="text-align: center; vertical-align: top; padding: 0 8px;">
         <span style="font-size: 15px; font-weight: 600; color: #352C63; white-space: nowrap;">
           <%= d[:pickup_day] %>, <%= d[:pickup_date] %>
         </span>
