@@ -14,7 +14,7 @@ function PickupSchedule({ pickupDays, muted }: { pickupDays: MenuPickupDay[]; mu
   if (!pickupDays || pickupDays.length === 0) return null;
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", gap: "16px", textAlign: "center" }}>
+    <div style={{ display: "flex", justifyContent: "center", gap: "16px", textAlign: "center", flexWrap: "wrap" }}>
       {pickupDays.map(({ id, pickupAt, orderDeadlineAt }) => {
         const pickup = moment(pickupAt);
         const deadline = moment(orderDeadlineAt);

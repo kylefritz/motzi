@@ -37,3 +37,33 @@ test("Before deadline: small warning", () => {
   const warningEl = container.querySelector("#past-deadline");
   expect(warningEl).toBeTruthy();
 });
+
+test("Multiple pickup days: schedule wraps for mobile", () => {
+  const now = DateTime.now();
+  const pickupDays = [
+    {
+      id: 1,
+      pickupAt: now.plus({ days: 1 }).toISO(),
+      orderDeadlineAt: now.plus({ hours: 12 }).toISO(),
+    },
+    {
+      id: 2,
+      pickupAt: now.plus({ days: 3 }).toISO(),
+      orderDeadlineAt: now.plus({ days: 2 }).toISO(),
+    },
+  ];
+
+  const { container } = render(
+    <Title
+      menu={{
+        name: "Week 6: toast",
+        orderingDeadlineText: "",
+        pickupDays,
+      }}
+    />
+  );
+
+  const scheduleContainer = container.querySelector("#deadline > small > div");
+  expect(scheduleContainer).toBeTruthy();
+  expect(scheduleContainer!.style.flexWrap).toBe("wrap");
+});
