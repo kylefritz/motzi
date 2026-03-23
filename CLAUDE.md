@@ -26,6 +26,14 @@ Heroku auto-deploys from `master` when CI passes. No Redis runtime — ActionCab
 - **postgres**: MCP connects to `postgres://localhost/motzi` (local dev DB).
 - **context7**: No auth needed — provides live Rails, React, Stripe docs.
 
+## Worktrees
+
+Feature work uses git worktrees in `.worktrees/`. When running `bundle` commands inside a worktree, set `BUNDLE_GEMFILE` to the worktree's Gemfile so bundler writes the lockfile to the right place:
+
+```sh
+BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update
+```
+
 ## Before commit
 
 - Run the rails tests (they're fast) & fix an errors

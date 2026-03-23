@@ -9,7 +9,7 @@
     "allow": [
       "Bash(bin/rails *)",
       "Bash(rails *)",
-      "Bash(bundle exec *)",
+      "Bash(bundle *)",
       "Bash(DISABLE_SPRING=1 *)",
       "Bash(bun run *)",
       "Bash(bun test *)",
