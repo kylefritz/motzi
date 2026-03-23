@@ -51,6 +51,11 @@ test("Multiple pickup days: schedule wraps for mobile", () => {
       pickupAt: now.plus({ days: 3 }).toISO(),
       orderDeadlineAt: now.plus({ days: 2 }).toISO(),
     },
+    {
+      id: 3,
+      pickupAt: now.plus({ days: 5 }).toISO(),
+      orderDeadlineAt: now.plus({ days: 4 }).toISO(),
+    },
   ];
 
   const { container } = render(
