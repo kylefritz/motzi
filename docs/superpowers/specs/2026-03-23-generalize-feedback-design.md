@@ -46,6 +46,7 @@ Rename table `error_feedbacks` → `feedbacks`, rename column `page_type` → `s
 
 `ActiveAdmin.register Feedback` replaces `ErrorFeedback`
 
+- Menu priority 10, label "Feedback" — appears before the advanced items (Spam, Visits, Versions)
 - Filter on `source` instead of `page_type`
 - Same index/show layout
 
