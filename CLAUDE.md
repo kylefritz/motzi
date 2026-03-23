@@ -11,11 +11,10 @@ Neighborhood bakery's CSA site. Members browse menus, choose pickup days, and pl
 - **Logging**: Keep existing `console.log` statements. Do not delete or globally silence logs unless explicitly asked.
 - **React tests**: Keep `act(...)` warnings as-is unless explicitly asked to change.
 - If you run into Spring socket errors, then use `DISABLE_SPRING=1`. Otherwise dont use that and let spring do it's thing!
-- Skip hooks: `HUSKY=0 git commit -m "no hooks run"` — fix any failing tests afterward.
 
 ## Deployment
 
-Heroku auto-deploys from `master` when CI passes. No Redis runtime — ActionCable uses `async` adapter.
+Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgres 15 (essential-1). No Redis — everything runs on Postgres via Solid Queue (jobs), Solid Cable (ActionCable), and Solid Cache.
 
 ## Dev Shortcuts
 
@@ -27,6 +26,21 @@ Heroku auto-deploys from `master` when CI passes. No Redis runtime — ActionCab
 - **postgres**: MCP connects to `postgres://localhost/motzi` (local dev DB).
 - **context7**: No auth needed — provides live Rails, React, Stripe docs.
 
+## Worktrees
+
+Feature work uses git worktrees in `.worktrees/`. When setting up a worktree:
+
+- **Symlink `.env`**: `ln -s ../../.env .env` (worktrees don't get untracked files)
+- **Bundler lockfile**: use `BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update` so bundler writes to the worktree, not the main repo
+
+## Issues
+
+We track work in GitHub Issues (`gh issue list`). When wrapping up a conversation or between tasks, feel free to suggest an open issue that might be worth tackling next.
+
 ## Before commit
 
-- Run the rails tests (they're fast) & fix an errors
+- Run the rails tests (they're fast) & fix any errors
+
+## After push
+
+- Check GitHub Actions status in the background after pushing: `gh run list --branch $(git branch --show-current) --limit 1 --json databaseId --jq '.[0].databaseId' | xargs gh run watch --exit-status`. If anything fails, investigate and fix.
