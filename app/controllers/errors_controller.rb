@@ -9,4 +9,8 @@ class ErrorsController < ApplicationController
   def unprocessable
     render status: :unprocessable_entity
   end
+
+  def internal_server_error
+    render "errors/internal_server_error", status: 500
+  end
 end

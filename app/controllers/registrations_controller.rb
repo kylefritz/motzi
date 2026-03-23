@@ -16,6 +16,8 @@ class RegistrationsController < Devise::RegistrationsController
     result = JSON.parse(response.body)
 
     reject_as_bot unless result["success"]
+  rescue StandardError
+    reject_as_bot
   end
 
   def reject_as_bot

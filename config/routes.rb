@@ -38,9 +38,10 @@ Rails.application.routes.draw do
     resources :error_feedbacks, only: [:create]
   end
 
-  # Custom error pages
+  # Custom error pages (404/422 are controller-rendered; 500 falls through to public/500.html)
   match "/404", to: "errors#not_found", via: :all
   match "/422", to: "errors#unprocessable", via: :all
+  match "/500", to: "errors#internal_server_error", via: :all
 
   # review emails in development
   if Rails.env.development?

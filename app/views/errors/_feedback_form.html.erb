@@ -23,21 +23,21 @@
 
 <% turnstile_site_key = ENV['TURNSTILE_SITE_KEY'] %>
 <% if turnstile_site_key.present? %>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad" async defer></script>
 <% end %>
 
 <script>
   var turnstileToken = null;
   var turnstileSiteKey = '<%= turnstile_site_key %>';
 
-  document.addEventListener('DOMContentLoaded', function() {
-    if (turnstileSiteKey && typeof turnstile !== 'undefined') {
+  function onTurnstileLoad() {
+    if (turnstileSiteKey) {
       turnstile.render('#turnstile-widget', {
         sitekey: turnstileSiteKey,
         callback: function(token) { turnstileToken = token; }
       });
     }
-  });
+  }
 
   function submitFeedback(e) {
     e.preventDefault();

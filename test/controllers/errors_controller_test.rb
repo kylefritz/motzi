@@ -14,4 +14,10 @@ class ErrorsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", /422/
     assert_select "textarea" # feedback form
   end
+
+  test "500 renders internal server error page" do
+    get "/500"
+    assert_select "h1", /500/
+    assert_select "textarea" # feedback form
+  end
 end
