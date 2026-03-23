@@ -20,6 +20,18 @@ Neighborhood bakery's CSA site. Members browse menus, choose pickup days, and pl
 - **Public prefix**: `s3://motzi/public/` is publicly readable. Everything else (Active Storage files) is private.
 - **PR screenshots**: Uploaded to `s3://motzi/public/gh/pr-<NUMBER>/` — see "PR Screenshots" below.
 
+## Visual Tests (Email Screenshots)
+
+Playwright tests screenshot all email templates at mobile and desktop viewports, then send each screenshot to Claude Haiku for visual QA (checks for overlapping text, broken layout, etc.). Requires Rails running on localhost:3000 and `ANTHROPIC_API_KEY` in `.env`.
+
+```
+bunx playwright test                              # run all (mobile + desktop)
+bunx playwright test --project mobile             # mobile only
+bunx playwright test --grep "havent_ordered"       # single email
+```
+
+Run these when changing email templates, MJML partials, or shared mailer styles. Screenshots land in `test/visual/screenshots/` (gitignored). The prompt for Claude's visual check is in `test/visual/email-check-prompt.txt`.
+
 ## PR Screenshots
 
 PRs with visual changes should include screenshots in the PR description (not comments).
@@ -27,6 +39,7 @@ PRs with visual changes should include screenshots in the PR description (not co
 **Quick way** (screenshots multiple URLs and updates the PR description):
 ```
 bin/screenshot-pr /404 /422 /500.html
+bin/screenshot-pr --device "iPhone 14" /rails/mailers/reminder_mailer/havent_ordered_email
 ```
 
 **Manual way** (screenshot a single URL):

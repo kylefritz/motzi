@@ -19,7 +19,7 @@ function PickupSchedule({ pickupDays, muted }: { pickupDays: MenuPickupDay[]; mu
         const pickup = moment(pickupAt);
         const deadline = moment(orderDeadlineAt);
         return (
-          <div key={id} style={{ flex: 1 }}>
+          <div key={id} style={{ flex: "1 1 140px" }}>
             <span>
               {pickup.format("ddd, MMM D")}
             </span>
