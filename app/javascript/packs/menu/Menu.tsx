@@ -7,6 +7,7 @@ import Cart, { useCart, orderCredits } from "./Cart";
 import Title from "./Title";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
+import FeedbackForm from "./FeedbackForm";
 import Subscription from "./Subscription";
 import { getDeadlineContext } from "./Contexts";
 import type {
@@ -127,6 +128,7 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday }: Me
           />
         </div>
       </div>
+      <FeedbackForm />
     </>
   );
 }
