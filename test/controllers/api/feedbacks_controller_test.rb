@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'webmock/minitest'
 
-class Api::ErrorFeedbacksControllerTest < ActionDispatch::IntegrationTest
+class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
   TURNSTILE_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
   setup do
@@ -16,11 +16,11 @@ class Api::ErrorFeedbacksControllerTest < ActionDispatch::IntegrationTest
   test "creates feedback and sends email" do
     stub_turnstile(success: true)
 
-    assert_difference 'ErrorFeedback.count', 1 do
+    assert_difference 'Feedback.count', 1 do
       assert_emails 1 do
-        post api_error_feedbacks_path, params: {
-          error_feedback: {
-            page_type: "404",
+        post api_feedbacks_path, params: {
+          feedback: {
+            source: "404",
             message: "Can't find sourdough",
             email: "customer@example.com",
             url: "/sourdough"
@@ -31,8 +31,8 @@ class Api::ErrorFeedbacksControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :created
-    feedback = ErrorFeedback.last
-    assert_equal "404", feedback.page_type
+    feedback = Feedback.last
+    assert_equal "404", feedback.source
     assert_equal "Can't find sourdough", feedback.message
     assert_equal "customer@example.com", feedback.email
     assert_equal "/sourdough", feedback.url
@@ -41,9 +41,9 @@ class Api::ErrorFeedbacksControllerTest < ActionDispatch::IntegrationTest
   test "returns 422 with invalid params" do
     stub_turnstile(success: true)
 
-    assert_no_difference 'ErrorFeedback.count' do
-      post api_error_feedbacks_path, params: {
-        error_feedback: { page_type: "404", message: "" },
+    assert_no_difference 'Feedback.count' do
+      post api_feedbacks_path, params: {
+        feedback: { source: "404", message: "" },
         turnstile_token: "valid-token"
       }, as: :json
     end
@@ -54,9 +54,9 @@ class Api::ErrorFeedbacksControllerTest < ActionDispatch::IntegrationTest
   test "returns 403 with invalid turnstile token" do
     stub_turnstile(success: false)
 
-    assert_no_difference 'ErrorFeedback.count' do
-      post api_error_feedbacks_path, params: {
-        error_feedback: { page_type: "404", message: "test" },
+    assert_no_difference 'Feedback.count' do
+      post api_feedbacks_path, params: {
+        feedback: { source: "404", message: "test" },
         turnstile_token: "invalid"
       }, as: :json
     end
@@ -65,10 +65,10 @@ class Api::ErrorFeedbacksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "skips turnstile for 500 page without token" do
-    assert_difference 'ErrorFeedback.count', 1 do
-      post api_error_feedbacks_path, params: {
-        error_feedback: {
-          page_type: "500",
+    assert_difference 'Feedback.count', 1 do
+      post api_feedbacks_path, params: {
+        feedback: {
+          source: "500",
           message: "Everything broke"
         }
       }, as: :json
@@ -80,16 +80,16 @@ class Api::ErrorFeedbacksControllerTest < ActionDispatch::IntegrationTest
   test "captures user agent" do
     stub_turnstile(success: true)
 
-    post api_error_feedbacks_path,
+    post api_feedbacks_path,
       params: {
-        error_feedback: { page_type: "404", message: "test" },
+        feedback: { source: "404", message: "test" },
         turnstile_token: "valid-token"
       },
       headers: { "User-Agent" => "TestBrowser/1.0" },
       as: :json
 
     assert_response :created
-    assert_equal "TestBrowser/1.0", ErrorFeedback.last.user_agent
+    assert_equal "TestBrowser/1.0", Feedback.last.user_agent
   end
 
   private

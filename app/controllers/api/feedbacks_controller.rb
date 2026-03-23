@@ -1,4 +1,4 @@
-class Api::ErrorFeedbacksController < ApplicationController
+class Api::FeedbacksController < ApplicationController
   skip_before_action :authenticate_user!
 
   def create
@@ -6,11 +6,11 @@ class Api::ErrorFeedbacksController < ApplicationController
       return render json: { error: "Verification failed" }, status: :forbidden
     end
 
-    feedback = ErrorFeedback.new(feedback_params)
+    feedback = Feedback.new(feedback_params)
     feedback.user_agent = request.user_agent
 
     if feedback.save
-      ErrorFeedbackMailer.with(feedback: feedback).feedback_received.deliver_now
+      FeedbackMailer.with(feedback: feedback).feedback_received.deliver_now
       render json: { success: true }, status: :created
     else
       render json: { error: feedback.errors.full_messages.join(", ") }, status: :unprocessable_entity
@@ -20,7 +20,7 @@ class Api::ErrorFeedbacksController < ApplicationController
   private
 
   def feedback_params
-    params.require(:error_feedback).permit(:page_type, :message, :email, :url)
+    params.require(:feedback).permit(:source, :message, :email, :url)
   end
 
   def verify_turnstile
@@ -41,6 +41,6 @@ class Api::ErrorFeedbacksController < ApplicationController
 
   # Allow 500 page submissions without Turnstile (degraded state)
   def skip_turnstile?
-    params[:turnstile_token].blank? && feedback_params[:page_type] == "500"
+    params[:turnstile_token].blank? && feedback_params[:source] == "500"
   end
 end

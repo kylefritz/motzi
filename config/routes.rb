@@ -35,7 +35,7 @@ Rails.application.routes.draw do
 
   # Error feedback API (used by error pages)
   namespace :api do
-    resources :error_feedbacks, only: [:create]
+    resources :feedbacks, only: [:create]
   end
 
   # Custom error pages (404/422 are controller-rendered; 500 falls through to public/500.html)
