@@ -1,5 +1,4 @@
-name: ci
-# Run Rails tests & Jest. If pass & on master, deploy to Heroku.
+name: CI
 on: push
 concurrency:
   group: ci-${{ github.ref }}
@@ -10,21 +9,17 @@ jobs:
 
     services:
       postgres:
-        image: postgres:11.5
+        image: postgres:16
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-    env:
-      HUSKY: "0"
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
 
-      - name: Install PostgreSQL 11 client
+      - name: Install PostgreSQL client
         run: sudo apt-get -yqq install libpq-dev
 
-      - name: Increase the amount of inotify watchers
-        # started getting this error around 20-03-01
-        # https://github.com/guard/listen/wiki/Increasing-the-amount-of-inotify-watchers
+      - name: Increase inotify watchers
         run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
       - uses: ruby/setup-ruby@v1
@@ -59,5 +54,4 @@ jobs:
         run: bun run test
 
       - name: Typecheck
-        continue-on-error: true
         run: bun run typecheck
