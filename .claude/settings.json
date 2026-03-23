@@ -16,6 +16,10 @@
       "Bash(git *)",
       "Bash(gh *)",
       "Bash(bin/generate_schema_types*)",
+      "Bash(bin/screenshot *)",
+      "Bash(bin/screenshot-pr *)",
+      "Bash(aws s3 cp *)",
+      "Bash(aws s3 ls *)",
       "mcp__plugin_playwright_playwright__*"
     ],
     "deny": []

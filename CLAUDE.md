@@ -12,6 +12,31 @@ Neighborhood bakery's CSA site. Members browse menus, choose pickup days, and pl
 - **React tests**: Keep `act(...)` warnings as-is unless explicitly asked to change.
 - If you run into Spring socket errors, then use `DISABLE_SPRING=1`. Otherwise dont use that and let spring do it's thing!
 
+## AWS / S3
+
+- **Bucket**: `motzi` in `us-east-1` — used by Active Storage for item images
+- **IAM user**: `motzi-s3` — can read/write objects but cannot manage bucket policies
+- **Config**: `config/storage.yml` (`amazon` service), credentials via `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`
+- **Public prefix**: `s3://motzi/public/` is publicly readable. Everything else (Active Storage files) is private.
+- **PR screenshots**: Uploaded to `s3://motzi/public/gh/pr-<NUMBER>/` — see "PR Screenshots" below.
+
+## PR Screenshots
+
+PRs with visual changes should include screenshots in the PR description (not comments).
+
+**Quick way** (screenshots multiple URLs and updates the PR description):
+```
+bin/screenshot-pr /404 /422 /500.html
+```
+
+**Manual way** (screenshot a single URL):
+```
+bin/screenshot /some-page my-feature
+# outputs S3 URL and markdown to paste
+```
+
+Screenshots are uploaded to `s3://motzi/public/gh/pr-<NUMBER>/` and embedded in the PR body under a `## Screenshots` section. The `bin/screenshot-pr` script replaces any existing screenshots section when re-run.
+
 ## Deployment
 
 Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgres 15 (essential-1). No Redis — everything runs on Postgres via Solid Queue (jobs), Solid Cable (ActionCable), and Solid Cache.
