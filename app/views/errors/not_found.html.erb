@@ -1,0 +1,10 @@
+<%# app/views/errors/not_found.html.erb %>
+<div class="text-center mt-4 mb-4">
+  <h1>404 &mdash; Page Not Found</h1>
+  <p class="mt-3" style="font-size: 1.1rem;">
+    The page you're looking for doesn't exist or may have been moved.
+  </p>
+  <a href="/" class="btn btn-primary mt-3">Back to the bakery</a>
+</div>
+
+<%= render "errors/feedback_form", page_type: "404" %>

@@ -38,6 +38,10 @@ Rails.application.routes.draw do
     resources :error_feedbacks, only: [:create]
   end
 
+  # Custom error pages
+  match "/404", to: "errors#not_found", via: :all
+  match "/422", to: "errors#unprocessable", via: :all
+
   # review emails in development
   if Rails.env.development?
     mount LetterOpenerWeb::Engine, at: "/letter_opener"
