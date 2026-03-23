@@ -36,4 +36,8 @@ BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update
 
 ## Before commit
 
-- Run the rails tests (they're fast) & fix an errors
+- Run the rails tests (they're fast) & fix any errors
+
+## After push
+
+- Run `gh run watch` in the background to monitor CI. If it fails, investigate and fix.
