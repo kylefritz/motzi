@@ -82,7 +82,20 @@ export default function FeedbackForm() {
   }
 
   return (
-    <div className="mt-2 mb-3">
+    <div
+      className="mt-3 mb-3 p-3"
+      style={{
+        background: "#f7f0e8",
+        borderRadius: 6,
+        border: "1px solid #e8e0d8",
+      }}
+    >
+      <h5
+        className="text-center mb-3"
+        style={{ textTransform: "none", marginTop: 0, fontSize: "1rem" }}
+      >
+        Share feedback
+      </h5>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <textarea
@@ -92,6 +105,7 @@ export default function FeedbackForm() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             required
+            style={{ fontSize: "0.9rem" }}
           />
         </div>
         <div className="form-group">
@@ -101,6 +115,7 @@ export default function FeedbackForm() {
             placeholder="Your email (optional)"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            style={{ fontSize: "0.9rem" }}
           />
         </div>
         <button
@@ -110,7 +125,7 @@ export default function FeedbackForm() {
         >
           {submitting ? "Sending..." : "Send Feedback"}
         </button>
-        <div className="text-center mt-1">
+        <div className="text-center mt-2">
           <small>
             <a
               href="#"
