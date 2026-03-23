@@ -10,7 +10,7 @@ const emails = [
 ];
 
 for (const { mailer, action } of emails) {
-  test(`${mailer}/${action}`, async ({ page }) => {
+  test(`${mailer}/${action}`, async ({ page }, testInfo) => {
     // Rails mailer previews wrap the email in an iframe — navigate to the
     // raw HTML part directly via the ?part query param
     const url = `/rails/mailers/${mailer}/${action}?part=text%2Fhtml`;
@@ -18,7 +18,7 @@ for (const { mailer, action } of emails) {
     await page.waitForLoadState("networkidle");
 
     await page.screenshot({
-      path: `test/visual/screenshots/${mailer}--${action}.png`,
+      path: `test/visual/screenshots/${mailer}--${action}--${testInfo.project.name}.png`,
       fullPage: true,
     });
   });

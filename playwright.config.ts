@@ -11,8 +11,14 @@ export default defineConfig({
       name: "mobile",
       use: {
         ...devices["iPhone 14"],
-        // Use Chromium instead of WebKit — faster, already installed
         browserName: "chromium",
+      },
+    },
+    {
+      name: "desktop",
+      use: {
+        browserName: "chromium",
+        viewport: { width: 1280, height: 800 },
       },
     },
   ],

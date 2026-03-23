@@ -3,19 +3,36 @@
 # Take screenshots of multiple URLs and append them to the current PR description.
 #
 # Usage:
-#   bin/screenshot-pr <url> [url2] [url3] ...
+#   bin/screenshot-pr [--device "iPhone 14"] <url> [url2] [url3] ...
 #   bin/screenshot-pr /404 /422 /500.html
 #   bin/screenshot-pr /menu /admin/error_feedbacks
+#   bin/screenshot-pr --device "iPhone 14" /rails/mailers/reminder_mailer/havent_ordered_email
 #
 # Each URL is screenshotted and uploaded to S3 under the PR's folder.
 # A "## Screenshots" section is appended to the PR body with all images.
+#
+# Options:
+#   --device <name>   Emulate a device (e.g. "iPhone 14", "Pixel 7")
 #
 # Requirements: gh cli, npx playwright, aws cli
 
 set -euo pipefail
 
+DEVICE=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --device)
+      DEVICE="$2"
+      shift 2
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
 if [[ $# -eq 0 ]]; then
-  echo "Usage: bin/screenshot-pr <url> [url2] [url3] ..."
+  echo "Usage: bin/screenshot-pr [--device \"iPhone 14\"] <url> [url2] [url3] ..."
   exit 1
 fi
 
@@ -44,13 +61,30 @@ for URL in "$@"; do
   FILENAME=$(echo "$URL" | sed 's|^https\?://[^/]*||' | sed 's|^/||' | sed 's|/|-|g' | sed 's|[^a-zA-Z0-9_.-]||g')
   [[ -z "$FILENAME" ]] && FILENAME="page"
   FILENAME="${FILENAME%.png}"
+  if [[ -n "$DEVICE" ]]; then
+    DEVICE_SLUG=$(echo "$DEVICE" | tr '[:upper:] ' '[:lower:]-')
+    FILENAME="${FILENAME}--${DEVICE_SLUG}"
+  fi
 
   # Take screenshot
   LOCAL_DIR="$HOME/Desktop/screenshots"
   mkdir -p "$LOCAL_DIR"
   LOCAL_PATH="${LOCAL_DIR}/${FILENAME}.png"
-  echo "📸 ${URL}..."
-  if ! npx --yes playwright screenshot --full-page "${FULL_URL}" "${LOCAL_PATH}"; then
+  echo "📸 ${URL}${DEVICE:+ (${DEVICE})}..."
+  SCREENSHOT_CMD=(npx --yes playwright screenshot --full-page -b chromium)
+  if [[ -n "$DEVICE" ]]; then
+    # Use viewport-size instead of --device to avoid WebKit dependency.
+    # Map known devices to their viewport sizes.
+    case "$DEVICE" in
+      "iPhone 14"|"iPhone 13"|"iPhone 12") SCREENSHOT_CMD+=(--viewport-size "390,844") ;;
+      "iPhone 14 Pro Max")                 SCREENSHOT_CMD+=(--viewport-size "430,932") ;;
+      "iPhone SE")                         SCREENSHOT_CMD+=(--viewport-size "375,667") ;;
+      "Pixel 7")                           SCREENSHOT_CMD+=(--viewport-size "412,915") ;;
+      *)                                   SCREENSHOT_CMD+=(--device "$DEVICE") ;;
+    esac
+  fi
+  SCREENSHOT_CMD+=("${FULL_URL}" "${LOCAL_PATH}")
+  if ! "${SCREENSHOT_CMD[@]}"; then
     echo "   ❌ Screenshot failed"
     FAILURES=$((FAILURES + 1))
     continue
