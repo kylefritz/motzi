@@ -1027,7 +1027,6 @@ body.admin_activity_feed {
 
 .cache-input-key { flex: 1 1 200px; min-width: 150px; }
 .cache-input-value { flex: 2 1 300px; min-width: 150px; }
-.cache-input-ttl { flex: 0 0 auto; width: 110px; }
 
 .cache-add-btn {
   flex: 0 0 auto;
@@ -1087,14 +1086,6 @@ body.admin_activity_feed {
     white-space: nowrap;
     color: #888;
     font-size: 0.9em;
-  }
-
-  .cache-expiry {
-    white-space: nowrap;
-    font-size: 0.9em;
-
-    .cache-expires { color: #888; }
-    .cache-expired { color: $secondary; font-weight: 500; }
   }
 
   .cache-actions {

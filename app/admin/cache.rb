@@ -1,28 +1,17 @@
 ActiveAdmin.register_page 'Cache' do
   menu parent: 'Advanced', priority: 1
 
-  TTL_OPTIONS = [
-    ['1 hour', 1.hour.to_i],
-    ['6 hours', 6.hours.to_i],
-    ['1 day', 1.day.to_i],
-    ['7 days', 7.days.to_i],
-    ['30 days', 30.days.to_i],
-    ['Never', 0]
-  ].freeze
-
   # Add a new cache entry
   page_action :create_entry, method: :post do
     key = params[:cache_key].to_s.strip
     value = params[:cache_value].to_s
-    ttl = params[:cache_ttl].to_i
 
     if key.blank?
       redirect_to admin_cache_path, alert: 'Key cannot be blank.'
       return
     end
 
-    opts = ttl.positive? ? { expires_in: ttl.seconds } : {}
-    Rails.cache.write(key, value, **opts)
+    Rails.cache.write(key, value)
     redirect_to admin_cache_path, notice: "Cached '#{key}' successfully."
   end
 
@@ -46,8 +35,6 @@ ActiveAdmin.register_page 'Cache' do
                 SolidCache::Entry.none.page(1).per(25)
               end
 
-    max_age = Rails.cache.try(:max_age) || 30.days
-
     # Toolbar: count + actions
     div class: 'cache-toolbar' do
       div class: 'cache-toolbar-left' do
@@ -68,7 +55,6 @@ ActiveAdmin.register_page 'Cache' do
         safe_join([
           text_field_tag(:cache_key, nil, placeholder: 'Key', class: 'cache-input cache-input-key'),
           text_field_tag(:cache_value, nil, placeholder: 'Value', class: 'cache-input cache-input-value'),
-          select_tag(:cache_ttl, options_for_select(TTL_OPTIONS), class: 'cache-input cache-input-ttl'),
           submit_tag('Add', class: 'cache-add-btn')
         ])
       }
@@ -82,7 +68,6 @@ ActiveAdmin.register_page 'Cache' do
             th 'Value'
             th 'Size'
             th 'Created'
-            th 'Est. Expiry'
             th ''
           end
         end
@@ -98,8 +83,6 @@ ActiveAdmin.register_page 'Cache' do
               "(error: #{e.message.truncate(50)})"
             end
 
-            estimated_expiry = entry.created_at ? entry.created_at + max_age : nil
-
             tr do
               td class: 'cache-key' do
                 code display_key
@@ -112,17 +95,6 @@ ActiveAdmin.register_page 'Cache' do
               end
               td class: 'cache-time' do
                 span(entry.created_at ? time_ago_in_words(entry.created_at) + ' ago' : '—')
-              end
-              td class: 'cache-expiry' do
-                if estimated_expiry
-                  if estimated_expiry > Time.current
-                    span "~#{time_ago_in_words(estimated_expiry)}", class: 'cache-expires'
-                  else
-                    span 'Expired', class: 'cache-expired'
-                  end
-                else
-                  span '—'
-                end
               end
               td class: 'cache-actions' do
                 text_node button_to('Delete',
