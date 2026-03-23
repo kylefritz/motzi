@@ -10,6 +10,7 @@ import PayItForward from "./PayItForward";
 import Payment from "../buy/Payment";
 import { applyTip } from "../buy/Tip";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
+import FeedbackForm from "./FeedbackForm";
 import { getDeadlineContext } from "./Contexts";
 import type {
   CartItem,
@@ -157,6 +158,7 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
         submitting={submitting}
         disabled={disabled}
       />
+      <FeedbackForm />
     </>
   );
 }
