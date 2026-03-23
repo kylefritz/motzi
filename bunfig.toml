@@ -1,2 +1,3 @@
 [test]
 preload = ["./test/javascript/setupDom.ts", "./test/javascript/setupTests.tsx"]
+root = "./test/javascript"

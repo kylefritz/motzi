@@ -5,7 +5,7 @@
   <mj-body background-color="#FFECD6">
     <%= render partial: "shared_mailer/header", formats: [:html] %>
 
-    <mj-section background-color="#ffffff" padding="32px 40px 24px 40px">
+    <mj-section background-color="#ffffff" padding="32px 40px 24px 40px" css-class="full-width-mobile">
       <mj-column>
         <mj-text padding="0 0 8px 0" font-size="13px" font-weight="500" letter-spacing="0.08em" text-transform="uppercase" color="#D5482C">
           Pickup Day
