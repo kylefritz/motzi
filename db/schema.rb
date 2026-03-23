@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_23_073828) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_23_102413) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -231,8 +231,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_23_073828) do
     t.index ["user_id"], name: "index_credit_items_on_user_id"
   end
 
-  create_table "error_feedbacks", force: :cascade do |t|
-    t.string "page_type", null: false
+  create_table "feedbacks", force: :cascade do |t|
+    t.string "source", null: false
     t.text "message", null: false
     t.string "email"
     t.string "url"
