@@ -46,8 +46,8 @@
     btn.textContent = 'Sending...';
 
     var body = {
-      error_feedback: {
-        page_type: '<%= page_type %>',
+      feedback: {
+        source: '<%= page_type %>',
         message: document.getElementById('feedback-message').value,
         email: document.getElementById('feedback-email').value,
         url: window.location.href
@@ -55,7 +55,7 @@
     };
     if (turnstileToken) body.turnstile_token = turnstileToken;
 
-    fetch('/api/error_feedbacks', {
+    fetch('/api/feedbacks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
