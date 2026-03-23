@@ -43,6 +43,7 @@ gem 'sass-rails', '~> 6' # css
 gem 'sentry-rails' # Rails integration for Sentry
 gem 'sentry-ruby' # New Sentry SDK
 gem 'solid_cable', '~> 3.0' # database-backed ActionCable adapter (no Redis)
+gem 'solid_cache' # Postgres-backed Rails cache store (no Redis/Memcached)
 gem 'solid_queue' # database-backed ActiveJob backend (Rails 7.2+)
 gem 'sql_query' # load SQL queries from erb templates
 gem 'stripe' # accept credit cards
