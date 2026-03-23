@@ -14,7 +14,7 @@ Neighborhood bakery's CSA site. Members browse menus, choose pickup days, and pl
 
 ## Deployment
 
-Heroku auto-deploys from `master` when CI passes. No Redis runtime — ActionCable uses `async` adapter.
+Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgres 15 (essential-1). No Redis runtime — ActionCable uses `async` adapter.
 
 ## Dev Shortcuts
 
