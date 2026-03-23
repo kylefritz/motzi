@@ -39,4 +39,4 @@ Feature work uses git worktrees in `.worktrees/`. When setting up a worktree:
 
 ## After push
 
-- Monitor CI in the background: `gh run list --branch $(git branch --show-current) --limit 1 --json databaseId --jq '.[0].databaseId' | xargs gh run watch --exit-status`. If it fails, investigate and fix.
+- Monitor CI in the background: `gh run list --branch $(git branch --show-current) --workflow ci.yml --limit 1 --json databaseId --jq '.[0].databaseId' | xargs gh run watch --exit-status`. If it fails, investigate and fix.
