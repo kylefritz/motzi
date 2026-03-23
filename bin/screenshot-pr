@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+#
+# Take screenshots of multiple URLs and append them to the current PR description.
+#
+# Usage:
+#   bin/screenshot-pr <url> [url2] [url3] ...
+#   bin/screenshot-pr /404 /422 /500.html
+#   bin/screenshot-pr /menu /admin/error_feedbacks
+#
+# Each URL is screenshotted and uploaded to S3 under the PR's folder.
+# A "## Screenshots" section is appended to the PR body with all images.
+#
+# Requirements: gh cli, npx playwright, aws cli
+
+set -euo pipefail
+
+if [[ $# -eq 0 ]]; then
+  echo "Usage: bin/screenshot-pr <url> [url2] [url3] ..."
+  exit 1
+fi
+
+# Get PR number
+PR_NUMBER=$(gh pr view --json number --jq .number 2>/dev/null || echo "")
+if [[ -z "$PR_NUMBER" ]]; then
+  echo "❌ No PR found for current branch. Push and create a PR first."
+  exit 1
+fi
+
+echo "📋 PR #${PR_NUMBER}"
+echo ""
+
+MARKDOWN=""
+
+for URL in "$@"; do
+  # Resolve relative paths
+  if [[ "$URL" == /* ]]; then
+    FULL_URL="http://localhost:3000${URL}"
+  else
+    FULL_URL="$URL"
+  fi
+
+  # Generate filename from path
+  FILENAME=$(echo "$URL" | sed 's|^https\?://[^/]*||' | sed 's|^/||' | sed 's|/|-|g' | sed 's|[^a-zA-Z0-9_.-]||g')
+  [[ -z "$FILENAME" ]] && FILENAME="page"
+  FILENAME="${FILENAME%.png}"
+
+  # Take screenshot
+  LOCAL_DIR="$HOME/Desktop/screenshots"
+  mkdir -p "$LOCAL_DIR"
+  LOCAL_PATH="${LOCAL_DIR}/${FILENAME}.png"
+  echo "📸 ${URL}..."
+  npx --yes playwright screenshot --full-page "${FULL_URL}" "${LOCAL_PATH}" 2>/dev/null
+
+  # Upload to S3
+  S3_KEY="public/gh/pr-${PR_NUMBER}/${FILENAME}.png"
+  aws s3 cp "${LOCAL_PATH}" "s3://motzi/${S3_KEY}" --quiet
+  S3_URL="https://motzi.s3.us-east-1.amazonaws.com/${S3_KEY}"
+  echo "   ✓ ${S3_URL}"
+
+  # Build markdown
+  # Clean up the name for display
+  DISPLAY_NAME=$(echo "$URL" | sed 's|^/||')
+  MARKDOWN="${MARKDOWN}
+### ${DISPLAY_NAME}
+![${DISPLAY_NAME}](${S3_URL})
+"
+done
+
+# Get current PR body and append screenshots
+CURRENT_BODY=$(gh pr view --json body --jq .body)
+
+# Remove existing screenshots section if present
+CLEAN_BODY=$(echo "$CURRENT_BODY" | sed '/^## Screenshots$/,$d')
+
+# Append new screenshots section
+NEW_BODY="${CLEAN_BODY}
+## Screenshots
+${MARKDOWN}"
+
+# Update PR
+gh pr edit "$PR_NUMBER" --body "$NEW_BODY"
+
+echo ""
+echo "✅ PR #${PR_NUMBER} updated with ${#} screenshot(s)"

@@ -65,7 +65,7 @@ group :development do
   gem 'fastri' # helps rcodetools
   gem 'solargraph' # ruby intellisense in vscode; requires solargraph extension
   gem 'spring'   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
-  gem 'standard' # ruby formatting in vscode; requires ruby extension
+  gem 'rubocop-rails-omakase' # Rails 8 default rubocop config
   gem 'web-console', '>= 4.1.0' # Access an interactive console on exception pages or by calling 'console' anywhere in the code.
 end
 
