@@ -1,5 +1,5 @@
 ActiveAdmin.register Ahoy::Visit, as: 'Visit' do
-  menu parent: 'Developer', priority: 7
+  menu parent: 'Advanced', priority: 9
 
   actions :index, :show
 

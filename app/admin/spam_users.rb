@@ -1,5 +1,5 @@
 ActiveAdmin.register_page 'Spam Users' do
-  menu parent: 'Developer', label: 'Spam', priority: 5
+  menu parent: 'Advanced', label: 'Spam', priority: 7
 
   controller do
     helper_method :spam_cache_key

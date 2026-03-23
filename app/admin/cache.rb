@@ -1,5 +1,5 @@
 ActiveAdmin.register_page 'Cache' do
-  menu parent: 'Developer', priority: 0
+  menu parent: 'Advanced', priority: 1
 
   TTL_OPTIONS = [
     ['1 hour', 1.hour.to_i],
