@@ -33,6 +33,10 @@ Feature work uses git worktrees in `.worktrees/`. When setting up a worktree:
 - **Symlink `.env`**: `ln -s ../../.env .env` (worktrees don't get untracked files)
 - **Bundler lockfile**: use `BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update` so bundler writes to the worktree, not the main repo
 
+## Issues
+
+We track work in GitHub Issues (`gh issue list`). When wrapping up a conversation or between tasks, feel free to suggest an open issue that might be worth tackling next.
+
 ## Before commit
 
 - Run the rails tests (they're fast) & fix any errors
