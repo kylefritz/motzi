@@ -39,8 +39,10 @@ class Api::FeedbacksController < ApplicationController
     false
   end
 
-  # Allow 500 page submissions without Turnstile (degraded state)
+  # Skip Turnstile for sources that don't include the widget:
+  # - "500" pages (degraded state, minimal dependencies)
+  # - "menu"/"general" (user is already authenticated in the app)
   def skip_turnstile?
-    params[:turnstile_token].blank? && feedback_params[:source] == "500"
+    params[:turnstile_token].blank? && feedback_params[:source].in?(%w[500 menu general])
   end
 end
