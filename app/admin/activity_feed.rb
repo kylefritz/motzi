@@ -1,5 +1,5 @@
 ActiveAdmin.register_page "Activity Feed" do
-  menu priority: 2, label: "Activity"
+  menu parent: 'Advanced', label: 'Activity', priority: 0
 
   # Preview the full prompt that would be sent to Claude
   page_action :prompt_preview, method: :get do

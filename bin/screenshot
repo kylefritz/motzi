@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+#
+# Take a screenshot of a local dev URL and upload it to S3.
+#
+# Usage:
+#   bin/screenshot <url> [filename]
+#   bin/screenshot /404 error-404
+#   bin/screenshot /menu                    # auto-names as "menu"
+#   bin/screenshot /admin/error_feedbacks   # auto-names as "admin-error_feedbacks"
+#
+# Screenshots are saved locally to ~/Desktop/screenshots/ and uploaded to
+# s3://motzi/public/gh/pr-<NUMBER>/<filename>.png (if on a PR branch)
+# or s3://motzi/public/gh/screenshots/<filename>.png (if not).
+#
+# Outputs the public S3 URL for use in PR descriptions.
+#
+# Requirements: npx playwright, aws cli
+
+set -euo pipefail
+
+URL="${1:?Usage: bin/screenshot <url-or-path> [filename]}"
+FILENAME="${2:-}"
+
+# Resolve relative paths to localhost
+if [[ "$URL" == /* ]]; then
+  FULL_URL="http://localhost:3000${URL}"
+else
+  FULL_URL="$URL"
+fi
+
+# Auto-generate filename from URL path if not provided
+if [[ -z "$FILENAME" ]]; then
+  FILENAME=$(echo "$URL" | sed 's|^https\?://[^/]*||' | sed 's|^/||' | sed 's|/|-|g' | sed 's|[^a-zA-Z0-9_-]||g')
+  [[ -z "$FILENAME" ]] && FILENAME="page"
+fi
+
+# Ensure .png extension
+FILENAME="${FILENAME%.png}"
+
+# Local save directory
+LOCAL_DIR="$HOME/Desktop/screenshots"
+mkdir -p "$LOCAL_DIR"
+LOCAL_PATH="${LOCAL_DIR}/${FILENAME}.png"
+
+# Take screenshot with Playwright
+echo "📸 Taking screenshot of ${FULL_URL}..."
+if ! npx --yes playwright screenshot --full-page "${FULL_URL}" "${LOCAL_PATH}"; then
+  echo "❌ Screenshot failed for ${FULL_URL}"
+  exit 1
+fi
+
+if [[ ! -s "$LOCAL_PATH" ]]; then
+  echo "❌ Screenshot file is empty or missing: ${LOCAL_PATH}"
+  exit 1
+fi
+
+echo "   Saved to ${LOCAL_PATH} ($(du -h "$LOCAL_PATH" | cut -f1))"
+
+# Determine S3 path — organize by PR number if on a branch with a PR
+PR_NUMBER=$(gh pr view --json number --jq .number 2>/dev/null || echo "")
+if [[ -n "$PR_NUMBER" ]]; then
+  S3_KEY="public/gh/pr-${PR_NUMBER}/${FILENAME}.png"
+else
+  S3_KEY="public/gh/screenshots/${FILENAME}.png"
+fi
+
+# Upload to S3
+S3_URL="https://motzi.s3.us-east-1.amazonaws.com/${S3_KEY}"
+echo "☁️  Uploading to s3://motzi/${S3_KEY}..."
+if ! aws s3 cp "${LOCAL_PATH}" "s3://motzi/${S3_KEY}"; then
+  echo "❌ S3 upload failed"
+  exit 1
+fi
+
+# Verify the upload is publicly accessible
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$S3_URL")
+if [[ "$HTTP_STATUS" != "200" ]]; then
+  echo "❌ Upload succeeded but URL returned HTTP ${HTTP_STATUS}: ${S3_URL}"
+  exit 1
+fi
+
+echo "   ✓ ${S3_URL}"
+
+# Output markdown for easy pasting
+echo ""
+echo "Markdown:"
+echo "![${FILENAME}](${S3_URL})"

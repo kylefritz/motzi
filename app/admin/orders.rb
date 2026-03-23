@@ -1,5 +1,6 @@
 include PriceHelper
 ActiveAdmin.register Order do
+  menu priority: 4
   permit_params :comments, :menu, :user
   includes :menu, :user, order_items: [:item, :pickup_day]
 

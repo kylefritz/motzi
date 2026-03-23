@@ -43,6 +43,7 @@ gem 'sass-rails', '~> 6' # css
 gem 'sentry-rails' # Rails integration for Sentry
 gem 'sentry-ruby' # New Sentry SDK
 gem 'solid_cable', '~> 3.0' # database-backed ActionCable adapter (no Redis)
+gem 'solid_cache' # Postgres-backed Rails cache store (no Redis/Memcached)
 gem 'solid_queue' # database-backed ActiveJob backend (Rails 7.2+)
 gem 'sql_query' # load SQL queries from erb templates
 gem 'stripe' # accept credit cards
@@ -64,7 +65,7 @@ group :development do
   gem 'fastri' # helps rcodetools
   gem 'solargraph' # ruby intellisense in vscode; requires solargraph extension
   gem 'spring'   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
-  gem 'standard' # ruby formatting in vscode; requires ruby extension
+  gem 'rubocop-rails-omakase' # Rails 8 default rubocop config
   gem 'web-console', '>= 4.1.0' # Access an interactive console on exception pages or by calling 'console' anywhere in the code.
 end
 
