@@ -1,12 +1,53 @@
 #!/usr/bin/env bash
+# Start the dev server fast. Detects when bin/setup is needed.
 set -euo pipefail
 
-if [[ "${SKIP_SETUP:-}" != "1" ]]; then
-  SKIP_LOG_CLEAR=1 SKIP_APP_RESTART=1 bin/setup
+needs_setup=()
+
+# Check postgres
+pg_host="${PGHOST:-127.0.0.1}"
+if ! ruby -e "require 'socket'; require 'timeout'; Timeout.timeout(1) { TCPSocket.new('$pg_host', 5432).close }" 2>/dev/null; then
+  echo "ERROR: Postgres not running on ${pg_host}:5432 (start postgres.app)"
+  exit 1
 fi
 
-if command -v mise >/dev/null 2>&1; then
-  exec mise exec -- bundle exec foreman start -f Procfile.dev
+# Check port 3000
+if lsof -iTCP:3000 -sTCP:LISTEN -t > /dev/null 2>&1; then
+  pid=$(lsof -iTCP:3000 -sTCP:LISTEN -t 2>/dev/null | head -1)
+  echo "==> Port 3000 in use (pid $pid)"
+  read -rp "==> Kill it? [Y/n] " answer
+  if [[ "${answer:-Y}" =~ ^[Yy]?$ ]]; then
+    kill "$pid" 2>/dev/null && echo "==> Killed $pid" || echo "==> Could not kill $pid"
+    sleep 1
+  else
+    echo "ERROR: Port 3000 in use, can't start"
+    exit 1
+  fi
+fi
+
+# Check bundle
+bundle check > /dev/null 2>&1 || needs_setup+=("bundle outdated")
+
+# Check bun
+if [ ! -d node_modules ]; then
+  needs_setup+=("node_modules missing")
+fi
+
+# Check pending migrations — run them inline with pg-terminate to avoid stalls
+if bin/rails db:migrate:status 2>&1 | grep -q 'down'; then
+  echo "==> Pending migrations detected, running db:prepare..."
+  bin/pg-terminate
+  bin/rails db:prepare
+fi
+
+if [ ${#needs_setup[@]} -gt 0 ]; then
+  echo "==> Setup needed: ${needs_setup[*]}"
+  read -rp "==> Run bin/setup now? [Y/n] " answer
+  if [[ "${answer:-Y}" =~ ^[Yy]?$ ]]; then
+    bin/setup
+  else
+    echo "==> Skipping setup, starting anyway..."
+  fi
 fi
 
 exec bundle exec foreman start -f Procfile.dev
