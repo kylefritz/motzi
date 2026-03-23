@@ -28,11 +28,10 @@ Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgr
 
 ## Worktrees
 
-Feature work uses git worktrees in `.worktrees/`. When running `bundle` commands inside a worktree, set `BUNDLE_GEMFILE` to the worktree's Gemfile so bundler writes the lockfile to the right place:
+Feature work uses git worktrees in `.worktrees/`. When setting up a worktree:
 
-```sh
-BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update
-```
+- **Symlink `.env`**: `ln -s ../../.env .env` (worktrees don't get untracked files)
+- **Bundler lockfile**: use `BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update` so bundler writes to the worktree, not the main repo
 
 ## Before commit
 
