@@ -33,6 +33,11 @@ Rails.application.routes.draw do
     mount MissionControl::Jobs::Engine, at: "/jobs"
   end
 
+  # Error feedback API (used by error pages)
+  namespace :api do
+    resources :error_feedbacks, only: [:create]
+  end
+
   # review emails in development
   if Rails.env.development?
     mount LetterOpenerWeb::Engine, at: "/letter_opener"
