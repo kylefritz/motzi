@@ -1,4 +1,5 @@
 ActiveAdmin.register Menu do
+  menu priority: 2
   permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note, :menu_type
   includes :pickup_days, menu_items: [:item]
   config.sort_order = 'LOWER(week_id) desc'

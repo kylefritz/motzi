@@ -1,4 +1,5 @@
 ActiveAdmin.register CreditItem do
+  menu parent: 'Credits', label: 'Items', priority: 2
   permit_params :memo, :good_for_weeks, :quantity, :user, :user_id
   includes :user
 
