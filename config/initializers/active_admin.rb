@@ -136,6 +136,7 @@ ActiveAdmin.setup do |config|
   #
   # You can completely disable comments:
   # config.comments = false
+  config.comments_menu = { parent: 'Advanced', label: 'Comments', priority: 2 }
   #
   # You can change the name under which comments are registered:
   # config.comments_registration_name = 'AdminComment'
@@ -253,8 +254,11 @@ ActiveAdmin.setup do |config|
   #
   config.namespace :admin do |admin|
     admin.build_menu :default do |menu|
-      menu.add label: "Reports", url: "/blazer", html_options: { target: :blank }
-      menu.add label: "Jobs", url: "/jobs", html_options: { target: :blank }
+      menu.add label: "Credits", id: "credits", priority: 6
+      menu.add label: "Advanced", id: "advanced", priority: 100 do |dev|
+        dev.add label: "Jobs", url: "/jobs", html_options: { target: :blank }, priority: 4
+        dev.add label: "Reports", url: "/blazer", html_options: { target: :blank }, priority: 5
+      end
     end
   end
 

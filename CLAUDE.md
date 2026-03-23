@@ -68,4 +68,4 @@ We track work in GitHub Issues (`gh issue list`). When wrapping up a conversatio
 
 ## After push
 
-- Check GitHub Actions status in the background after pushing: `gh run list --branch $(git branch --show-current) --limit 1 --json databaseId --jq '.[0].databaseId' | xargs gh run watch --exit-status`. If anything fails, investigate and fix.
+- Check GitHub Actions status in the background after pushing: `gh run list --branch $(git branch --show-current) --workflow CI --limit 1 --json databaseId --jq '.[0].databaseId' | xargs gh run watch --exit-status`. If anything fails, investigate and fix.

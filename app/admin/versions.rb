@@ -1,4 +1,4 @@
 ActiveAdmin.register PaperTrail::Version, as: 'Version' do
-  menu priority: 12
+  menu parent: 'Advanced', priority: 8
   actions :index, :show
 end

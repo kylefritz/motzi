@@ -1,4 +1,5 @@
 ActiveAdmin.register Item do
+  menu priority: 3
   permit_params :name, :description, :image, :price, :credits
   includes image_attachment: :blob
   config.sort_order = 'LOWER(name)'

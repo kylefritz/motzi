@@ -1,5 +1,5 @@
 ActiveAdmin.register Feedback do
-  menu priority: 10, label: "Feedback"
+  menu priority: 6, label: "Feedback"
   actions :index, :show, :destroy
 
   filter :source, as: :select, collection: %w[404 422 500 menu general]
