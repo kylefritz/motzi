@@ -1,5 +1,6 @@
 class EmailTestJob < ApplicationJob
   queue_as :default
+  limits_concurrency to: 1, key: "email_test"
 
   def perform
     user = User.kyle

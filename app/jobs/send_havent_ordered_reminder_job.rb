@@ -1,5 +1,6 @@
 class SendHaventOrderedReminderJob < ApplicationJob
   queue_as :default
+  limits_concurrency to: 1, key: "send_havent_ordered_reminder"
 
   def perform(*args)
     return unless Setting.automated_reminder_emails?

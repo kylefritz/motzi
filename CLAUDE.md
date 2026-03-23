@@ -2,6 +2,10 @@
 
 Neighborhood bakery's CSA site. Members browse menus, choose pickup days, and place orders.
 
+## Sandbox
+
+Rails commands (`bundle exec rails test`, `bin/rails`, migrations, etc.) need to connect to Postgres. Always run them with `dangerouslyDisableSandbox: true`.
+
 ## Conventions
 
 - **Typecheck**: `bun run typecheck` (app only, default gate). `bun run typecheck:test` may fail on legacy test typings.

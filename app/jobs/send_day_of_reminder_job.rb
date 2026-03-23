@@ -1,5 +1,6 @@
 class SendDayOfReminderJob < ApplicationJob
   queue_as :default
+  limits_concurrency to: 1, key: "send_day_of_reminder"
 
   def perform(*args)
     return unless Setting.automated_reminder_emails?

@@ -1,5 +1,6 @@
 class TrimAnalyticsJob < ApplicationJob
   queue_as :default
+  limits_concurrency to: 1, key: "trim_analytics"
 
   def perform
     cutoff = 90.days.ago
