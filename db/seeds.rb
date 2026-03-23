@@ -32,13 +32,14 @@ unless User.system
   )
 end
 
-# Admin account for review apps — uses the same password as production
 if ENV['REVIEW_APP'].present? && !User.find_by(email: 'kyle.p.fritz@gmail.com')
+  password = SecureRandom.hex(16)
   User.create!(
     email: 'kyle.p.fritz@gmail.com',
     first_name: 'Kyle',
     last_name: 'Fritz',
     is_admin: true,
-    encrypted_password: '$2a$11$yjTtvz3CIZ29DrS0WcXgueq6durSyPy.pBeDmslhwa26H0hHuoi3u',
+    password: password,
   )
+  Rails.logger.info "Review app admin password: #{password}"
 end

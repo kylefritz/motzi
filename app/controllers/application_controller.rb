@@ -11,8 +11,7 @@ class ApplicationController < ActionController::Base
 
   def set_sentry_context
     unless Rails.env.test?
-      Sentry.set_user(id: current_user&.id, email: current_user&.email, is_admin: current_user&.is_admin)
-      Sentry.set_extras(params: params.to_unsafe_h, url: request.url)
+      Sentry.set_user(id: current_user&.id, is_admin: current_user&.is_admin)
     end
   end
 

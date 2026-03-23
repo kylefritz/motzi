@@ -127,8 +127,8 @@ export default function ({
   const user: MenuUser = {
     id: 584273342,
     name: "Kyle Fritz",
-    email: "kyle.p.fritz@gmail.com",
-    hashid: "Dot9gKn9w",
+    email: "kyle@example.com",
+    hashid: "fake_hashid",
     credits: 9,
     breadsPerWeek: 1.0,
     subscriber: true,

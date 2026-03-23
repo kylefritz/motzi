@@ -59,8 +59,9 @@ class User < ApplicationRecord
   #
   # vanity users
   #
+  KYLE_EMAIL = 'kyle.p.fritz@gmail.com'
   def self.kyle
-    User.find_by(email: 'kyle.p.fritz@gmail.com')
+    User.find_by(email: KYLE_EMAIL)
   end
   MAYA_EMAIL = 'mayapamela@gmail.com'
   def self.maya

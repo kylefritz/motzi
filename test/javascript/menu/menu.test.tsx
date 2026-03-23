@@ -54,7 +54,7 @@ test("menu for uid-user, add item to cart", async () => {
   const { uid, cart } = order;
   console.log("submitted card", cart);
 
-  expect(uid).toBe("Dot9gKn9w");
+  expect(uid).toBe("fake_hashid");
   expect(cart).toHaveLength(1);
   expect(cart[0]).toStrictEqual({
     itemId: 3,
