@@ -1,21 +1,22 @@
 <% days = menu.pickup_days.map(&:deadline_data) %>
-<% col_width = (100.0 / days.size).floor %>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout: fixed;">
-  <tr>
-    <% days.each do |d| %>
-      <td class="deadline-cell" width="<%= col_width %>%" style="text-align: center; vertical-align: top; padding: 0 8px;">
-        <span style="font-size: 15px; font-weight: 600; color: #352C63; white-space: nowrap;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <% days.each do |d| %>
+    <tr>
+      <td style="text-align: center; padding: 6px 0 2px 0;">
+        <span style="font-size: 15px; font-weight: 600; color: #352C63;">
           <%= d[:pickup_day] %>, <%= d[:pickup_date] %>
         </span>
-        <br />
         <span style="font-size: 13px; font-weight: 400; color: #888888;">
           pickup after <%= d[:pickup_time] %>
         </span>
-        <br />
-        <span style="font-size: 11px; font-weight: 400; color: #D5482C; white-space: nowrap;">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center; padding: 0 0 8px 0;">
+        <span style="font-size: 11px; font-weight: 400; color: #D5482C;">
           order by <%= d[:deadline_day] %>, <%= d[:deadline_date] %> at <%= d[:deadline_time] %>
         </span>
       </td>
-    <% end %>
-  </tr>
+    </tr>
+  <% end %>
 </table>

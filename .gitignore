@@ -36,3 +36,6 @@ yarn-debug.log*
 !/app/assets/builds/.keep
 /coverage
 .playwright-mcp/
+test/visual/screenshots/
+/test-results/
+/playwright-report/
