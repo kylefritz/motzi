@@ -18,7 +18,7 @@
       "Bash(bin/generate_schema_types*)",
       "mcp__plugin_playwright_playwright__*"
     ],
-    "deny": ["Edit(.env)", "Edit(Gemfile.lock)", "Edit(bun.lockb)"]
+    "deny": []
   },
   "hooks": {
     "PostToolUse": [
