@@ -48,37 +48,30 @@ ActiveAdmin.register_page 'Cache' do
 
     max_age = Rails.cache.try(:max_age) || 30.days
 
-    # Add entry form
-    div class: 'cache-toolbar' do
-      h4 'Add Entry'
-      form_for :cache, url: admin_cache_create_entry_path, method: :post, html: { class: 'cache-add-form' } do |_f|
-        div class: 'cache-form-fields' do
-          label_tag :cache_key, 'Key'
-          text_field_tag :cache_key, nil, placeholder: 'my/cache/key', class: 'cache-input'
-
-          label_tag :cache_value, 'Value'
-          text_area_tag :cache_value, nil, placeholder: 'Value...', rows: 2, class: 'cache-input cache-textarea'
-
-          label_tag :cache_ttl, 'TTL'
-          select_tag :cache_ttl, options_for_select(TTL_OPTIONS), class: 'cache-input'
-
-          submit_tag 'Add', class: 'cache-submit-btn'
-        end
-      end
-    end
-
-    # Toolbar
+    # Toolbar: count + actions
     div class: 'cache-toolbar' do
       div class: 'cache-toolbar-left' do
         span "#{entries.total_count} entries", class: 'cache-count'
       end
       div class: 'cache-toolbar-right' do
-        text_node button_to('Clear All Cache',
+        text_node button_to('Clear All',
                            admin_cache_clear_all_path,
                            method: :post,
                            class: 'cache-clear-btn',
                            data: { confirm: 'This will flush ALL cached data including framework caches. Are you sure?' })
       end
+    end
+
+    # Add entry form — compact inline row
+    div class: 'cache-add-section' do
+      text_node form_tag(admin_cache_create_entry_path, method: :post, class: 'cache-add-form') {
+        safe_join([
+          text_field_tag(:cache_key, nil, placeholder: 'Key', class: 'cache-input cache-input-key'),
+          text_field_tag(:cache_value, nil, placeholder: 'Value', class: 'cache-input cache-input-value'),
+          select_tag(:cache_ttl, options_for_select(TTL_OPTIONS), class: 'cache-input cache-input-ttl'),
+          submit_tag('Add', class: 'cache-add-btn')
+        ])
+      }
     end
 
     if entries.any?
@@ -114,9 +107,13 @@ ActiveAdmin.register_page 'Cache' do
               td class: 'cache-value' do
                 span cached_value
               end
-              td number_to_human_size(entry.byte_size)
-              td entry.created_at ? time_ago_in_words(entry.created_at) + ' ago' : '—'
-              td do
+              td class: 'cache-size' do
+                span number_to_human_size(entry.byte_size)
+              end
+              td class: 'cache-time' do
+                span(entry.created_at ? time_ago_in_words(entry.created_at) + ' ago' : '—')
+              end
+              td class: 'cache-expiry' do
                 if estimated_expiry
                   if estimated_expiry > Time.current
                     span "~#{time_ago_in_words(estimated_expiry)}", class: 'cache-expires'
@@ -127,7 +124,7 @@ ActiveAdmin.register_page 'Cache' do
                   span '—'
                 end
               end
-              td do
+              td class: 'cache-actions' do
                 text_node button_to('Delete',
                                    admin_cache_delete_entry_path(cache_key: display_key),
                                    method: :post,
@@ -144,7 +141,9 @@ ActiveAdmin.register_page 'Cache' do
         text_node paginate(entries)
       end
     else
-      para 'No cache entries found.', class: 'cache-empty'
+      div class: 'cache-empty' do
+        para 'No cache entries.'
+      end
     end
   end
 end
