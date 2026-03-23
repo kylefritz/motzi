@@ -951,6 +951,12 @@ body.admin_activity_feed {
   background-color: $secondary;
   border-bottom-color: $secondary;
 }
+#header ul.tabs > li.has_nested ul li a {
+  &:hover {
+    background-color: lighten($secondary, 35%);
+    color: $secondary;
+  }
+}
 
 // ─── Cache page ───
 
