@@ -1,0 +1,6 @@
+Your Heroku API key (HEROKU_API_KEY) expires in <%= @days_remaining %> days. After that, database backups will stop.
+
+To refresh it, generate a new long-lived token and update the config var:
+
+  heroku authorizations:create --description "motzi-backup" --short
+  heroku config:set HEROKU_API_KEY=<new-token> -a motzibread

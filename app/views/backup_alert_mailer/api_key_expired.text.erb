@@ -1,0 +1,6 @@
+Your Heroku API key (HEROKU_API_KEY) has expired. Database backups are no longer running.
+
+To fix this, generate a new long-lived token and update the config var:
+
+  heroku authorizations:create --description "motzi-backup" --short
+  heroku config:set HEROKU_API_KEY=<new-token> -a motzibread
