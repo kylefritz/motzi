@@ -217,6 +217,11 @@ class ActivityFeed
         lines << commits
         lines << ""
       end
+      memory = memory_metrics_text
+      if memory
+        lines << memory
+        lines << ""
+      end
     end
 
     es = email_summary
@@ -404,6 +409,20 @@ class ActivityFeed
     lines = ["== Code Changes =="]
     commits.reverse_each do |commit|
       lines << "  #{commit.committed_at.strftime('%-m/%-d')} #{commit.short_sha} #{commit.summary}" if commit.current_week
+    end
+    lines.join("\n")
+  end
+
+  def memory_metrics_text
+    summary = DynoMetric.summary_for_period(@week_start, @week_end)
+    return nil if summary.empty?
+
+    lines = ["== Dyno Memory =="]
+    summary.sort_by { |dyno, _| dyno }.each do |dyno, stats|
+      parts = ["avg #{stats[:avg_memory_total]}MB", "max #{stats[:max_memory_total]}MB"]
+      parts << "(quota #{stats[:memory_quota]}MB)" if stats[:memory_quota]
+      r14_label = stats[:total_r14] > 0 ? "#{stats[:total_r14]} R14 events" : "0 R14 events"
+      lines << "  #{dyno}: #{parts.join(' / ')} — #{r14_label}"
     end
     lines.join("\n")
   end
