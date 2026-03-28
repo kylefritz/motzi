@@ -31,7 +31,7 @@ class SendWeeklyMenuJob < ApplicationJob
     ActivityEvent.log(
       action: "weekly_menu_email_sent",
       week_id: menu.week_id,
-      description: "Weekly menu email queued for #{count} subscribers",
+      description: "Weekly menu email queued for #{count} recipients",
       metadata: { menu_id: menu.id, count: count }
     )
 
@@ -47,6 +47,6 @@ class SendWeeklyMenuJob < ApplicationJob
   def self.users_to_email(menu)
     # don't send to same people twice
     already_got_menu = Set[*menu.messages.where(mailer: 'MenuMailer#weekly_menu_email').pluck(:user_id)]
-    User.subscribers.where.not(id: already_got_menu)
+    User.receive_weekly_menu.where.not(id: already_got_menu)
   end
 end

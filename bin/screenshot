@@ -1,87 +1,103 @@
-#!/usr/bin/env bash
-#
-# Take a screenshot of a local dev URL and upload it to S3.
-#
-# Usage:
-#   bin/screenshot <url> [filename]
-#   bin/screenshot /404 error-404
-#   bin/screenshot /menu                    # auto-names as "menu"
-#   bin/screenshot /admin/error_feedbacks   # auto-names as "admin-error_feedbacks"
-#
-# Screenshots are saved locally to ~/Desktop/screenshots/ and uploaded to
-# s3://motzi/public/gh/pr-<NUMBER>/<filename>.png (if on a PR branch)
-# or s3://motzi/public/gh/screenshots/<filename>.png (if not).
-#
-# Outputs the public S3 URL for use in PR descriptions.
-#
-# Requirements: npx playwright, aws cli
+#!/usr/bin/env bun
+/**
+ * Take a screenshot of a local dev URL and upload to S3.
+ *
+ * Usage:
+ *   bin/screenshot [options] <url> [filename]
+ *   bin/screenshot /menu
+ *   bin/screenshot --admin /admin/users
+ *   bin/screenshot --device mobile /menu my-menu
+ *
+ * Options:
+ *   --admin            Sign in as admin first (hits /dev/login_as_admin)
+ *   --device <name>    Viewport: "mobile" (390x844), "desktop" (1280x900), or WxH
+ *
+ * Saves to tmp/screenshots/ locally.
+ */
 
-set -euo pipefail
+import { chromium } from "playwright";
+import { mkdirSync, existsSync, statSync } from "fs";
+import { parseArgs } from "util";
 
-URL="${1:?Usage: bin/screenshot <url-or-path> [filename]}"
-FILENAME="${2:-}"
+const { values, positionals } = parseArgs({
+  args: Bun.argv.slice(2),
+  options: {
+    admin: { type: "boolean", default: false },
+    device: { type: "string" },
+  },
+  allowPositionals: true,
+  strict: true,
+});
 
-# Resolve relative paths to localhost
-if [[ "$URL" == /* ]]; then
-  FULL_URL="http://localhost:3000${URL}"
-else
-  FULL_URL="$URL"
-fi
+const url = positionals[0];
+if (!url) {
+  console.error("Usage: bin/screenshot [--admin] [--device mobile] <url> [filename]");
+  process.exit(1);
+}
 
-# Auto-generate filename from URL path if not provided
-if [[ -z "$FILENAME" ]]; then
-  FILENAME=$(echo "$URL" | sed 's|^https\?://[^/]*||' | sed 's|^/||' | sed 's|/|-|g' | sed 's|[^a-zA-Z0-9_-]||g')
-  [[ -z "$FILENAME" ]] && FILENAME="page"
-fi
+const BASE_URL = "http://localhost:3000";
+const fullUrl = url.startsWith("/") ? `${BASE_URL}${url}` : url;
 
-# Ensure .png extension
-FILENAME="${FILENAME%.png}"
+// Auto-generate filename
+let filename =
+  positionals[1] ||
+  url
+    .replace(/^https?:\/\/[^/]*/, "")
+    .replace(/^\//, "")
+    .replace(/\//g, "-")
+    .replace(/[^a-zA-Z0-9_.-]/g, "") ||
+  "page";
+filename = filename.replace(/\.png$/, "");
+if (values.device) filename += `--${values.device}`;
 
-# Local save directory
-LOCAL_DIR="$HOME/Desktop/screenshots"
-mkdir -p "$LOCAL_DIR"
-LOCAL_PATH="${LOCAL_DIR}/${FILENAME}.png"
+// Resolve viewport
+const PRESETS: Record<string, { width: number; height: number }> = {
+  mobile: { width: 390, height: 844 },
+  "iphone 14": { width: 390, height: 844 },
+  "iphone se": { width: 375, height: 667 },
+  tablet: { width: 768, height: 1024 },
+  desktop: { width: 1280, height: 900 },
+};
 
-# Take screenshot with Playwright
-echo "📸 Taking screenshot of ${FULL_URL}..."
-if ! npx --yes playwright screenshot --full-page "${FULL_URL}" "${LOCAL_PATH}"; then
-  echo "❌ Screenshot failed for ${FULL_URL}"
-  exit 1
-fi
+let viewport = { width: 1280, height: 900 };
+if (values.device) {
+  const preset = PRESETS[values.device.toLowerCase()];
+  if (preset) {
+    viewport = preset;
+  } else if (values.device.includes(",")) {
+    const [w, h] = values.device.split(",").map(Number);
+    viewport = { width: w, height: h };
+  }
+}
 
-if [[ ! -s "$LOCAL_PATH" ]]; then
-  echo "❌ Screenshot file is empty or missing: ${LOCAL_PATH}"
-  exit 1
-fi
+const outputDir = "tmp/screenshots";
+mkdirSync(outputDir, { recursive: true });
+const outputPath = `${outputDir}/${filename}.png`;
 
-echo "   Saved to ${LOCAL_PATH} ($(du -h "$LOCAL_PATH" | cut -f1))"
+const label = values.device ? ` (${values.device})` : "";
+console.log(`  ${url}${label}...`);
 
-# Determine S3 path — organize by PR number if on a branch with a PR
-PR_NUMBER=$(gh pr view --json number --jq .number 2>/dev/null || echo "")
-if [[ -n "$PR_NUMBER" ]]; then
-  S3_KEY="public/gh/pr-${PR_NUMBER}/${FILENAME}.png"
-else
-  S3_KEY="public/gh/screenshots/${FILENAME}.png"
-fi
+const browser = await chromium.launch();
+const context = await browser.newContext({ viewport });
+const page = await context.newPage();
 
-# Upload to S3
-S3_URL="https://motzi.s3.us-east-1.amazonaws.com/${S3_KEY}"
-echo "☁️  Uploading to s3://motzi/${S3_KEY}..."
-if ! aws s3 cp "${LOCAL_PATH}" "s3://motzi/${S3_KEY}"; then
-  echo "❌ S3 upload failed"
-  exit 1
-fi
+try {
+  if (values.admin) {
+    await page.goto(`${BASE_URL}/dev/login_as_admin`);
+    await page.waitForLoadState("networkidle");
+  }
 
-# Verify the upload is publicly accessible
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$S3_URL")
-if [[ "$HTTP_STATUS" != "200" ]]; then
-  echo "❌ Upload succeeded but URL returned HTTP ${HTTP_STATUS}: ${S3_URL}"
-  exit 1
-fi
+  await page.goto(fullUrl);
+  await page.waitForLoadState("networkidle");
+  await page.screenshot({ fullPage: true, path: outputPath });
+} finally {
+  await browser.close();
+}
 
-echo "   ✓ ${S3_URL}"
+if (!existsSync(outputPath) || statSync(outputPath).size === 0) {
+  console.error(`Screenshot file is empty or missing: ${outputPath}`);
+  process.exit(1);
+}
 
-# Output markdown for easy pasting
-echo ""
-echo "Markdown:"
-echo "![${FILENAME}](${S3_URL})"
+const sizeKb = Math.round(statSync(outputPath).size / 1024);
+console.log(`  Saved to ${outputPath} (${sizeKb}K)`);

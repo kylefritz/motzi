@@ -22,9 +22,9 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 20 - item.credits, users(:kyle).credits
   end
 
-  test "subscriber" do
-    refute users(:maya).subscriber?
-    assert users(:kyle).subscriber?
+  test "receive_weekly_menu" do
+    refute users(:maya).receive_weekly_menu?
+    assert users(:kyle).receive_weekly_menu?
   end
 
   test "credit go down with items" do
@@ -64,10 +64,31 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 2, User.owners.count
   end
 
-  test "subscribers" do
-    assert_equal 4, User.subscribers.count, 'kf, adrian, ljf, jess'
-    User.all.update_all(subscriber: false)
-    assert_equal 0, User.subscribers.count
+  test "receive_weekly_menu scope" do
+    assert_equal 4, User.receive_weekly_menu.count, 'kf, adrian, ljf, jess'
+    User.all.update_all(receive_weekly_menu: false)
+    assert_equal 0, User.receive_weekly_menu.count
+  end
+
+  test "receive_havent_ordered_reminder scope gated by receive_weekly_menu" do
+    count = User.receive_havent_ordered_reminder.count
+    assert count > 0, 'some users should receive reminders'
+
+    # turning off weekly menu should also exclude from havent_ordered reminder
+    User.all.update_all(receive_weekly_menu: false)
+    assert_equal 0, User.receive_havent_ordered_reminder.count
+  end
+
+  test "receive_havent_ordered_reminder scope respects its own flag" do
+    User.where(receive_weekly_menu: true).update_all(receive_havent_ordered_reminder: false)
+    assert_equal 0, User.receive_havent_ordered_reminder.count
+  end
+
+  test "receive_day_of_reminder scope" do
+    count = User.receive_day_of_reminder.count
+    assert count > 0
+    User.all.update_all(receive_day_of_reminder: false)
+    assert_equal 0, User.receive_day_of_reminder.count
   end
 
   test "order for menu" do

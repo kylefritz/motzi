@@ -22,7 +22,7 @@ class SendHaventOrderedReminderJob < ApplicationJob
 
     num_reminded = 0
 
-    User.subscribers.find_each do |user|
+    User.receive_havent_ordered_reminder.find_each do |user|
       next if already_reminded.include?(user.id)
       next if already_ordered.include?(user.id)
 
@@ -39,7 +39,7 @@ class SendHaventOrderedReminderJob < ApplicationJob
       ActivityEvent.log(
         action: "havent_ordered_reminder_sent",
         week_id: menu.week_id,
-        description: "Haven't-ordered reminder sent to #{num_reminded} subscribers",
+        description: "Haven't-ordered reminder sent to #{num_reminded} recipients",
         metadata: { menu_id: menu.id, count: num_reminded, job_id: job_id }
       )
     end

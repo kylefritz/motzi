@@ -28,9 +28,11 @@ class ReminderMailerTest < ActionMailer::TestCase
     assert_day_of_email_recorded
   end
 
-  test "day_of email without credits (marketplace)" do
+  test "day_of email without credits" do
     @user = users(:kyle)
-    @user.update(subscriber: false)
+    # Zero out kyle's credits so the email won't show "credits remaining"
+    @user.credit_items.destroy_all
+    assert @user.credits <= 0, 'no credits'
     @order = @user.order_for_menu(@menu)
 
     @email = ReminderMailer.with(user: @user, menu: @menu, pickup_day: @pickup_day, order_items: @order.order_items).day_of_email

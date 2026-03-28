@@ -99,7 +99,12 @@ At the start of each conversation, launch the `heroku-logs-review` skill as a ba
 
 ## Issues
 
-We track work in GitHub Issues (`gh issue list`). When wrapping up a conversation or between tasks, feel free to suggest an open issue that might be worth tackling next.
+We track work in GitHub Issues (`gh issue list`). Use GH issues for feature specs and planning — don't store design docs in the repo. When wrapping up a conversation or between tasks, feel free to suggest an open issue that might be worth tackling next.
+
+## Pull Requests
+
+- Always reference a GitHub issue if one exists (e.g., "Refs #123" or "Closes #123")
+- If the PR completes an issue (or is on its way to), include `Closes #123` in the PR body so the issue auto-closes when the PR lands
 
 ## Before commit
 

@@ -21,7 +21,7 @@ import type {
 
 type AccountInfo = Pick<
   MarketplaceOrderRequest,
-  "email" | "firstName" | "lastName" | "phone" | "optIn"
+  "email" | "firstName" | "lastName" | "phone" | "mailingList"
 >;
 
 type MarketplaceProps = {
@@ -49,7 +49,7 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
     lastName: "",
     email: "",
     phone: "",
-    optIn: false,
+    mailingList: false,
   });
   const [price, setPrice] = useState<number | null>(total.price);
   const [tip, setTip] = useState<string | null>(null);

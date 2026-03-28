@@ -3,7 +3,7 @@ import type { MarketplaceOrderRequest } from "../../types/api";
 
 type AccountInfo = Pick<
   MarketplaceOrderRequest,
-  "firstName" | "lastName" | "email" | "phone" | "optIn"
+  "firstName" | "lastName" | "email" | "phone" | "mailingList"
 >;
 
 type AccountProps = {
@@ -17,19 +17,19 @@ export default function Account({ onChange, disabled }: AccountProps) {
     lastName: "",
     email: "",
     phone: "",
-    optIn: false,
+    mailingList: false,
   });
 
   const handle = (fieldName: keyof AccountInfo) => {
     return (event: React.ChangeEvent<HTMLInputElement>) => {
       const fieldValue =
-        fieldName === "optIn" ? event.target.checked : event.target.value;
+        fieldName === "mailingList" ? event.target.checked : event.target.value;
       const nextAccount = { ...account, [fieldName]: fieldValue };
       setAccount(nextAccount);
       onChange(nextAccount);
     };
   };
-  const { firstName, lastName, email, phone, optIn } = account;
+  const { firstName, lastName, email, phone, mailingList } = account;
   return (
     <>
       <h5>Your info</h5>
@@ -91,13 +91,13 @@ export default function Account({ onChange, disabled }: AccountProps) {
         <input
           type="checkbox"
           className="form-check-input"
-          id="optIn"
-          name="optIn"
-          checked={optIn}
-          onChange={handle("optIn")}
+          id="mailingList"
+          name="mailingList"
+          checked={mailingList}
+          onChange={handle("mailingList")}
           disabled={disabled}
         />
-        <label className="form-check-label" htmlFor="optIn">
+        <label className="form-check-label" htmlFor="mailingList">
           Receive newsletter?
         </label>
       </div>

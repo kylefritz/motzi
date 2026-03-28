@@ -24,7 +24,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     assert_equal order_attrs[:first_name], new_user.first_name
     assert_equal order_attrs[:last_name], new_user.last_name
     assert_equal order_attrs[:phone], new_user.phone
-    refute new_user.subscriber?, "created user isn't a subscriber"
+    refute new_user.receive_weekly_menu?, "created user doesn't receive weekly menu"
 
     new_order = Order.last
     refute_nil new_order.stripe_charge_id
@@ -59,13 +59,13 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     assert_nil data["order"], "an order in menu json would block you from ordering again"
   end
 
-  test "set opt_in" do
+  test "set mailing_list" do
     order_attrs = build_order_attrs
-    order_attrs[:opt_in] = true
+    order_attrs[:mailing_list] = true
     assert_user_created { assert_ordered_emailed(order_attrs) }
 
     new_user = User.unscoped.order("created_at desc").last
-    assert new_user.opt_in?, "shouldn't get marketing emails"
+    assert new_user.mailing_list?, "should be on mailing list"
   end
 
   test "$0 price is ok" do
@@ -106,7 +106,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
       last_name: "Fritz",
       phone: "555-123-4567",
       price: 10.00,
-      opt_in: false,
+      mailing_list: false,
       token: @stripe_helper.generate_card_token
     }
   end

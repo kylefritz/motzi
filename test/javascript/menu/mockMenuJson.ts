@@ -131,7 +131,9 @@ export default function ({
     hashid: "fake_hashid",
     credits: 9,
     breadsPerWeek: 1.0,
-    subscriber: true,
+    receiveWeeklyMenu: true,
+    receiveHaventOrderedReminder: true,
+    receiveDayOfReminder: true,
   };
 
   const orderItems: MenuOrderItem[] = [
