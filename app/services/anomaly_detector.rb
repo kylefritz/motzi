@@ -109,7 +109,7 @@ class AnomalyDetector
   private
 
   def recurring_jobs_summary
-    config = YAML.load_file(Rails.root.join("config/recurring.yml"))
+    config = YAML.load_file(Rails.root.join("config/recurring.yml"), aliases: true)
     jobs = config.fetch("production", {})
     jobs.map { |key, cfg|
       job_class = cfg["class"] || "(inline command)"
