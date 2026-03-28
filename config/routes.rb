@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: { registrations: "registrations" }
   ActiveAdmin.routes(self)
 
   root to: "home#show"
@@ -32,6 +32,16 @@ Rails.application.routes.draw do
     mount Blazer::Engine, at: "/blazer"
     mount MissionControl::Jobs::Engine, at: "/jobs"
   end
+
+  # Error feedback API (used by error pages)
+  namespace :api do
+    resources :feedbacks, only: [:create]
+  end
+
+  # Custom error pages (404/422 are controller-rendered; 500 falls through to public/500.html)
+  match "/404", to: "errors#not_found", via: :all
+  match "/422", to: "errors#unprocessable", via: :all
+  match "/500", to: "errors#internal_server_error", via: :all
 
   # review emails in development
   if Rails.env.development?

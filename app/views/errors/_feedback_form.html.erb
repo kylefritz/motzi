@@ -1,0 +1,81 @@
+<%# app/views/errors/_feedback_form.html.erb %>
+<div id="error-feedback" class="mt-5">
+  <h5 class="text-center" style="text-transform: none; margin-top: 1rem;">Let us know what happened</h5>
+
+  <form id="feedback-form" onsubmit="return submitFeedback(event)">
+    <div class="form-group">
+      <textarea id="feedback-message" class="form-control" rows="3" placeholder="What were you trying to do?" required></textarea>
+    </div>
+    <div class="form-group">
+      <input id="feedback-email" type="email" class="form-control" placeholder="Your email (optional, if you'd like a follow-up)">
+    </div>
+    <div id="turnstile-widget" class="mb-3"></div>
+    <button type="submit" class="btn btn-primary btn-block" id="feedback-submit">Send Feedback</button>
+  </form>
+
+  <div id="feedback-success" class="alert alert-success text-center" style="display: none;">
+    Thanks for reporting this! We've been alerted and are looking into it.
+  </div>
+
+  <div id="feedback-error" class="alert alert-warning text-center" style="display: none;">
+  </div>
+</div>
+
+<% turnstile_site_key = ENV['TURNSTILE_SITE_KEY'] %>
+<% if turnstile_site_key.present? %>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad" async defer></script>
+<% end %>
+
+<script>
+  var turnstileToken = null;
+  var turnstileSiteKey = '<%= turnstile_site_key %>';
+
+  function onTurnstileLoad() {
+    if (turnstileSiteKey) {
+      turnstile.render('#turnstile-widget', {
+        sitekey: turnstileSiteKey,
+        callback: function(token) { turnstileToken = token; }
+      });
+    }
+  }
+
+  function submitFeedback(e) {
+    e.preventDefault();
+    var btn = document.getElementById('feedback-submit');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    var body = {
+      feedback: {
+        source: '<%= page_type %>',
+        message: document.getElementById('feedback-message').value,
+        email: document.getElementById('feedback-email').value,
+        url: window.location.href
+      }
+    };
+    if (turnstileToken) body.turnstile_token = turnstileToken;
+
+    fetch('/api/feedbacks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function(r) {
+      if (r.ok) {
+        document.getElementById('feedback-form').style.display = 'none';
+        document.getElementById('feedback-success').style.display = 'block';
+      } else {
+        return r.json().then(function(data) {
+          throw new Error(data.error || 'Something went wrong sending your feedback.');
+        });
+      }
+    }).catch(function(err) {
+      var msg = (err && err.message) ? err.message : 'Something went wrong sending your feedback. Please try again.';
+      document.getElementById('feedback-error').textContent = msg;
+      document.getElementById('feedback-error').style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Send Feedback';
+    });
+
+    return false;
+  }
+</script>

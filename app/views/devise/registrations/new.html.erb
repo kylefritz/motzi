@@ -11,12 +11,12 @@
 
   <div class="form-group">
     <%= f.label :first_name %><br />
-    <%= f.text_field :first_name, autocomplete: "first_name", autofocus: true, class: "form-control" %>
+    <%= f.text_field :first_name, autocomplete: "given-name", autofocus: true, class: "form-control" %>
   </div>
 
   <div class="form-group">
     <%= f.label :last_name %><br />
-    <%= f.text_field :last_name, autocomplete: "last_name", class: "form-control" %>
+    <%= f.text_field :last_name, autocomplete: "family-name", class: "form-control" %>
   </div>
 
   <div class="form-group">
@@ -26,7 +26,7 @@
 
   <div class="form-group">
     <%= f.label :phone %><br />
-    <%= f.text_field :phone, autocomplete: "phone", class: "form-control" %>
+    <%= f.text_field :phone, autocomplete: "tel", class: "form-control", placeholder: "optional" %>
   </div>
 
   <div class="form-group">
@@ -37,16 +37,19 @@
     <%= f.password_field :password, autocomplete: "new-password", class: "form-control" %>
   </div>
 
-  <div class="form-group">
-    <%= f.label :password_confirmation %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control" %>
-  </div>
-
   <%= f.hidden_field :subscriber, value: true %>
+
+  <% if ENV['TURNSTILE_SITE_KEY'].present? %>
+    <div class="cf-turnstile mt-3" data-sitekey="<%= ENV['TURNSTILE_SITE_KEY'] %>"></div>
+  <% end %>
 
   <div class="actions">
     <%= f.submit "Sign up", class: "btn btn-primary btn-lg btn-block" %>
   </div>
+<% end %>
+
+<% if ENV['TURNSTILE_SITE_KEY'].present? %>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <% end %>
 
 <div class="text-center mt-4">

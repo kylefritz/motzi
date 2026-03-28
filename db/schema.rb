@@ -233,6 +233,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_23_193136) do
     t.index ["user_id"], name: "index_credit_items_on_user_id"
   end
 
+  create_table "feedbacks", force: :cascade do |t|
+    t.string "source", null: false
+    t.text "message", null: false
+    t.string "email"
+    t.string "url"
+    t.string "user_agent"
+    t.datetime "created_at", null: false
+  end
+
   create_table "items", force: :cascade do |t|
     t.string "name"
     t.text "description"
