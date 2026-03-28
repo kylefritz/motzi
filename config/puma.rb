@@ -41,3 +41,8 @@ pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
 
 # Allow puma to be restarted by `rails restart` command.
 plugin :tmp_restart
+
+# Run the Solid Queue supervisor inside of Puma for single-dyno deployments.
+# Set SOLID_QUEUE_IN_PUMA=1 in production to eliminate the worker dyno.
+# In dev, Procfile.dev starts the worker separately via foreman.
+plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
