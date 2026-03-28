@@ -1,5 +1,9 @@
 class Feedback < ApplicationRecord
-  validates :source, presence: true, inclusion: { in: %w[404 422 500 menu general] }
-  validates :message, presence: true
+  SOURCES = %w[404 422 500 menu general].freeze
+
+  validates :source, presence: true, inclusion: { in: SOURCES }
+  validates :message, presence: true, length: { maximum: 5000 }
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
+  validates :url, length: { maximum: 2048 }
+  validates :user_agent, length: { maximum: 512 }
 end

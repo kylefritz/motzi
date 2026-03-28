@@ -1,7 +1,7 @@
-class CreateErrorFeedbacks < ActiveRecord::Migration[7.2]
+class CreateFeedbacks < ActiveRecord::Migration[7.2]
   def change
-    create_table :error_feedbacks do |t|
-      t.string :page_type, null: false
+    create_table :feedbacks do |t|
+      t.string :source, null: false
       t.text :message, null: false
       t.string :email
       t.string :url

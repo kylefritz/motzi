@@ -7,6 +7,7 @@ export default function FeedbackForm() {
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,9 +30,13 @@ export default function FeedbackForm() {
       if (response.ok) {
         setState("success");
       } else {
+        const data = await response.json().catch(() => ({}));
+        setErrorMessage(data.error || "Something went wrong.");
         setState("error");
       }
-    } catch {
+    } catch (err) {
+      console.error("Feedback submission failed:", err);
+      setErrorMessage("Something went wrong.");
       setState("error");
     } finally {
       setSubmitting(false);
@@ -67,7 +72,7 @@ export default function FeedbackForm() {
   if (state === "error") {
     return (
       <div className="alert alert-warning text-center mt-2 mb-3">
-        Something went wrong.{" "}
+        {errorMessage || "Something went wrong."}{" "}
         <a
           href="#"
           onClick={(e) => {

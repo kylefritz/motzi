@@ -2,7 +2,7 @@ ActiveAdmin.register Feedback do
   menu priority: 6, label: "Feedback"
   actions :index, :show, :destroy
 
-  filter :source, as: :select, collection: %w[404 422 500 menu general]
+  filter :source, as: :select, collection: Feedback::SOURCES
   filter :email
   filter :created_at
 

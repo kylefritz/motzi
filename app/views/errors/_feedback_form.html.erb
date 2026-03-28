@@ -64,10 +64,13 @@
         document.getElementById('feedback-form').style.display = 'none';
         document.getElementById('feedback-success').style.display = 'block';
       } else {
-        throw new Error('Failed');
+        return r.json().then(function(data) {
+          throw new Error(data.error || 'Something went wrong sending your feedback.');
+        });
       }
-    }).catch(function() {
-      document.getElementById('feedback-error').textContent = 'Something went wrong sending your feedback. Please try again.';
+    }).catch(function(err) {
+      var msg = (err && err.message) ? err.message : 'Something went wrong sending your feedback. Please try again.';
+      document.getElementById('feedback-error').textContent = msg;
       document.getElementById('feedback-error').style.display = 'block';
       btn.disabled = false;
       btn.textContent = 'Send Feedback';

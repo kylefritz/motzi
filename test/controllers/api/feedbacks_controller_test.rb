@@ -2,6 +2,7 @@ require 'test_helper'
 require 'webmock/minitest'
 
 class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
   TURNSTILE_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
   setup do
@@ -71,6 +72,52 @@ class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
           source: "500",
           message: "Everything broke"
         }
+      }, as: :json
+    end
+
+    assert_response :created
+  end
+
+  test "skips turnstile for menu source when user is authenticated" do
+    user = users(:ljf)
+    sign_in user
+
+    assert_difference 'Feedback.count', 1 do
+      post api_feedbacks_path, params: {
+        feedback: { source: "menu", message: "Love the challah" }
+      }, as: :json
+    end
+
+    assert_response :created
+  end
+
+  test "requires turnstile for menu source when not authenticated" do
+    assert_no_difference 'Feedback.count' do
+      post api_feedbacks_path, params: {
+        feedback: { source: "menu", message: "Spam" }
+      }, as: :json
+    end
+
+    assert_response :forbidden
+  end
+
+  test "requires turnstile for 404 source without token" do
+    assert_no_difference 'Feedback.count' do
+      post api_feedbacks_path, params: {
+        feedback: { source: "404", message: "Missing page" }
+      }, as: :json
+    end
+
+    assert_response :forbidden
+  end
+
+  test "handles turnstile network failure gracefully" do
+    stub_request(:post, TURNSTILE_URL).to_raise(SocketError.new("getaddrinfo: Name or service not known"))
+
+    assert_difference 'Feedback.count', 1 do
+      post api_feedbacks_path, params: {
+        feedback: { source: "404", message: "Page missing" },
+        turnstile_token: "some-token"
       }, as: :json
     end
 

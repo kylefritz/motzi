@@ -1,8 +1,10 @@
 class Api::FeedbacksController < ApplicationController
+  include TurnstileVerifiable
+
   skip_before_action :authenticate_user!
 
   def create
-    unless skip_turnstile? || verify_turnstile
+    unless skip_turnstile? || verify_turnstile_token(params[:turnstile_token])
       return render json: { error: "Verification failed" }, status: :forbidden
     end
 
@@ -10,7 +12,7 @@ class Api::FeedbacksController < ApplicationController
     feedback.user_agent = request.user_agent
 
     if feedback.save
-      FeedbackMailer.with(feedback: feedback).feedback_received.deliver_now
+      FeedbackMailer.with(feedback: feedback).feedback_received.deliver_later
       render json: { success: true }, status: :created
     else
       render json: { error: feedback.errors.full_messages.join(", ") }, status: :unprocessable_entity
@@ -23,26 +25,16 @@ class Api::FeedbacksController < ApplicationController
     params.require(:feedback).permit(:source, :message, :email, :url)
   end
 
-  def verify_turnstile
-    token = params[:turnstile_token]
-    return false if token.blank?
-
-    secret = ENV["TURNSTILE_SECRET_KEY"]
-    return true if secret.blank? # Skip in dev/test if not configured
-
-    response = Net::HTTP.post_form(
-      URI("https://challenges.cloudflare.com/turnstile/v0/siteverify"),
-      { secret: secret, response: token }
-    )
-    JSON.parse(response.body)["success"] == true
-  rescue StandardError
-    false
-  end
-
   # Skip Turnstile for sources that don't include the widget:
-  # - "500" pages (degraded state, minimal dependencies)
-  # - "menu"/"general" (user is already authenticated in the app)
+  # - "500" pages can't reliably load external scripts
+  # - "menu"/"general" are only used by authenticated members
   def skip_turnstile?
-    params[:turnstile_token].blank? && feedback_params[:source].in?(%w[500 menu general])
+    return false if params[:turnstile_token].present?
+
+    source = feedback_params[:source]
+    return true if source == "500"
+    return true if source.in?(%w[menu general]) && current_user.present?
+
+    false
   end
 end
