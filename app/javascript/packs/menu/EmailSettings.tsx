@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import * as Sentry from "@sentry/browser";
+import { getSettingsContext } from "./Contexts";
 import type { MenuUser } from "../../types/api";
 
 type EmailSettingsProps = {
@@ -7,13 +9,13 @@ type EmailSettingsProps = {
   onBack: () => void;
 };
 
-type Preferences = {
-  receiveWeeklyMenu: boolean;
-  receiveHaventOrderedReminder: boolean;
-  receiveDayOfReminder: boolean;
-};
+type Preferences = Pick<
+  MenuUser,
+  "receiveWeeklyMenu" | "receiveHaventOrderedReminder" | "receiveDayOfReminder"
+>;
 
 export default function EmailSettings({ user, onBack }: EmailSettingsProps) {
+  const { onRefresh } = getSettingsContext();
   const [prefs, setPrefs] = useState<Preferences>({
     receiveWeeklyMenu: user.receiveWeeklyMenu,
     receiveHaventOrderedReminder: user.receiveHaventOrderedReminder,
@@ -24,7 +26,14 @@ export default function EmailSettings({ user, onBack }: EmailSettingsProps) {
 
   const toggle = (key: keyof Preferences) => {
     setSaved(false);
-    setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
+    setPrefs((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      // Auto-clear dependent preference when weekly menu is turned off
+      if (key === "receiveWeeklyMenu" && !next.receiveWeeklyMenu) {
+        next.receiveHaventOrderedReminder = false;
+      }
+      return next;
+    });
   };
 
   const handleSave = () => {
@@ -38,9 +47,11 @@ export default function EmailSettings({ user, onBack }: EmailSettingsProps) {
       })
       .then(() => {
         setSaved(true);
+        onRefresh?.();
       })
       .catch((err) => {
         console.error("Failed to save email preferences", err);
+        Sentry.captureException(err);
         window.alert("Couldn't save preferences. Please try again.");
       })
       .finally(() => setSaving(false));

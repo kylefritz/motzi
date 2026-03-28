@@ -24,9 +24,8 @@ class SendDayOfReminderJob < ApplicationJob
 
     num_reminded = 0
 
-    menu.orders.find_each do |order|
+    menu.orders.joins(:user).where(users: { receive_day_of_reminder: true }).find_each do |order|
       next if already_reminded.include?(order.user_id)
-      next unless order.user.receive_day_of_reminder?
 
       order_items_for_day = order.items_for_pickup(pickup_day)
 
