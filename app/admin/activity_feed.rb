@@ -478,8 +478,8 @@ ActiveAdmin.register_page "Activity Feed" do
 
     # Dyno Memory
     memory_summary = DynoMetric.summary_for_period(week_start, week_end)
-    if memory_summary.any?
-      panel "Dyno Memory" do
+    panel "Dyno Memory" do
+      if memory_summary.any?
         table_for memory_summary.sort_by { |d, _| d }.map { |dyno, stats| OpenStruct.new(stats.merge(dyno: dyno)) } do
           column("Dyno") { |s| s.dyno }
           column("Avg") { |s| "#{s.avg_memory_total}MB" }
@@ -511,6 +511,8 @@ ActiveAdmin.register_page "Activity Feed" do
             end
           end
         end
+      else
+        para "No memory data yet. Data will appear after CaptureDynoMetricsJob runs.", class: "empty-state"
       end
     end
 
