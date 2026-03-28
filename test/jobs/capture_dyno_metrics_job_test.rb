@@ -31,6 +31,7 @@ class CaptureDynoMetricsJobTest < ActiveSupport::TestCase
   end
 
   test "perform creates DynoMetric records" do
+    ENV["HEROKU_API_KEY"] ||= "test-key-for-ci"
     stub_heroku_api(SAMPLE_LOGS) do
       assert_difference "DynoMetric.count", 2 do
         CaptureDynoMetricsJob.perform_now
