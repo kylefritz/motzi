@@ -504,12 +504,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_28_171732) do
     t.datetime "last_sign_in_at", precision: nil
     t.inet "current_sign_in_ip"
     t.inet "last_sign_in_ip"
-    t.boolean "receive_weekly_menu", default: false, null: false
+    t.boolean "subscriber", default: false, null: false
     t.decimal "breads_per_week", default: "1.0", null: false
     t.string "phone"
     t.boolean "opt_in", default: false, null: false
-    t.boolean "receive_havent_ordered_reminder", default: true, null: false
-    t.boolean "receive_day_of_reminder", default: true, null: false
     t.index "lower((first_name)::text), lower((last_name)::text)", name: "index_users_on_LOWER_first_name_LOWER_last_name"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
