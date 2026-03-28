@@ -8,6 +8,7 @@ class CreateDynoMetrics < ActiveRecord::Migration[7.2]
       t.float :memory_swap
       t.float :memory_quota
       t.integer :r14_count, default: 0
+      t.text :errors_summary
 
       t.timestamps
     end

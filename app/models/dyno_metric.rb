@@ -13,7 +13,8 @@ class DynoMetric < ApplicationRecord
         max_memory_swap: metrics.map(&:memory_swap).compact.max&.round,
         memory_quota: metrics.last.memory_quota&.round,
         total_r14: metrics.sum(&:r14_count),
-        sample_count: metrics.size
+        sample_count: metrics.size,
+        errors: metrics.filter_map(&:errors_summary).flat_map { |s| s.lines.map(&:strip) }.uniq.first(20)
       }
     end
   end

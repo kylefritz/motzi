@@ -22,7 +22,7 @@ class AnomalyDetector
     (input_tokens * pricing[:input] / 1_000_000) + (output_tokens * pricing[:output] / 1_000_000)
   end
 
-  def initialize(week_id, comparison_weeks: 4, &on_progress)
+  def initialize(week_id, comparison_weeks: 3, &on_progress)
     @week_id = week_id
     @comparison_weeks = comparison_weeks
     @on_progress = on_progress || ->(_msg) {}

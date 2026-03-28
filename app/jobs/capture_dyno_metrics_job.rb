@@ -28,7 +28,8 @@ class CaptureDynoMetricsJob < ApplicationJob
         memory_rss: metrics[:memory_rss],
         memory_swap: metrics[:memory_swap],
         memory_quota: metrics[:memory_quota],
-        r14_count: metrics[:r14_count]
+        r14_count: metrics[:r14_count],
+        errors_summary: metrics[:errors_summary]
       )
     end
 
@@ -72,7 +73,7 @@ class CaptureDynoMetricsJob < ApplicationJob
   # R14 format:
   #   heroku[web.1]: Error R14 (Memory quota exceeded)
   def parse_log_lines(log_content)
-    samples = Hash.new { |h, k| h[k] = {memory_totals: [], memory_rss: [], memory_swaps: [], memory_quotas: [], r14_count: 0} }
+    samples = Hash.new { |h, k| h[k] = {memory_totals: [], memory_rss: [], memory_swaps: [], memory_quotas: [], r14_count: 0, errors: []} }
 
     log_content.each_line do |line|
       if line.include?("sample#memory_total=")
@@ -91,6 +92,14 @@ class CaptureDynoMetricsJob < ApplicationJob
       elsif line.include?("Error R14")
         dyno = line[/heroku\[(\S+)\]/, 1]
         samples[dyno][:r14_count] += 1 if dyno
+      elsif line.match?(/Error|Exception|FATAL|ActionView::Template::Error|ActiveRecord/)
+        # Skip Sentry noise and known non-errors
+        next if line.include?("sentry") || line.include?("Discarding") || line.include?("rate limiting")
+        dyno = line[/app\[(\S+)\]/, 1] || line[/heroku\[(\S+)\]/, 1]
+        next unless dyno
+        # Keep first 500 chars of each error, cap at 20 errors per dyno
+        error_line = line.strip.last(500)
+        samples[dyno][:errors] << error_line if samples[dyno][:errors].size < 20
       end
     end
 
@@ -100,7 +109,8 @@ class CaptureDynoMetricsJob < ApplicationJob
         memory_rss: data[:memory_rss].max,
         memory_swap: data[:memory_swaps].max,
         memory_quota: data[:memory_quotas].last,
-        r14_count: data[:r14_count]
+        r14_count: data[:r14_count],
+        errors_summary: data[:errors].any? ? data[:errors].join("\n") : nil
       }
     end
   end
