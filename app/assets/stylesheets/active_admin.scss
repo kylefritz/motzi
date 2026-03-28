@@ -367,6 +367,30 @@ form fieldset.actions li.cancel a {
     a { color: #888; text-decoration: none; &:hover { color: $primary; } }
     .sep { margin: 0 6px; color: #ccc; }
   }
+
+  .model-pills {
+    display: flex;
+    gap: 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+
+    .model-pill {
+      padding: 4px 10px;
+      font-size: 12px;
+      text-decoration: none;
+      color: #666;
+      border-right: 1px solid #ccc;
+      cursor: pointer;
+      &:last-child { border-right: none; }
+      &:hover { background: #f0f0f0; }
+      &.active {
+        background: $primary;
+        color: #fff;
+        cursor: default;
+      }
+    }
+  }
 }
 
 body.admin_activity_feed {

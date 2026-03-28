@@ -69,19 +69,13 @@ ActiveAdmin.register_page "Activity Feed" do
         end
 
         current_model = AnomalyDetector.model
-        div class: "model-selector" do
+        div class: "model-pills" do
           AnomalyDetector::MODEL_PRICING.each do |model_id, info|
             pricing = "$#{info[:input]}/$#{info[:output]} per 1M tokens"
             if model_id == current_model
-              span info[:label], class: "model-option active", title: pricing
+              span info[:label], class: "model-pill active", title: pricing
             else
-              text_node button_to(
-                info[:label],
-                admin_activity_feed_set_model_path(model: model_id, week_id: week_id),
-                method: :post,
-                class: "model-option",
-                title: pricing
-              )
+              a info[:label], href: admin_activity_feed_set_model_path(model: model_id, week_id: week_id), class: "model-pill", title: pricing, "data-method": :post
             end
           end
         end
