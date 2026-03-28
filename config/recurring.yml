@@ -16,19 +16,19 @@ production:
 
   send_day_of_reminder:
     class: SendDayOfReminderJob
-    schedule: every hour
+    schedule: "5 * * * *"
 
   send_havent_ordered_reminder:
     class: SendHaventOrderedReminderJob
-    schedule: every hour
+    schedule: "15 * * * *"
 
   trim_analytics:
     class: TrimAnalyticsJob
-    schedule: at 4am every day
+    schedule: "30 4 * * *"
 
   analyze_anomalies:
     class: AnalyzeAnomaliesJob
-    schedule: every day at 9pm America/New_York
+    schedule: "10 21 * * * America/New_York"
 
   capture_dyno_metrics:
     class: CaptureDynoMetricsJob
