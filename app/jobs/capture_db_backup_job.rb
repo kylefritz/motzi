@@ -83,7 +83,7 @@ class CaptureDbBackupJob < ApplicationJob
     request = Net::HTTP::Get.new(uri)
     request["Accept"] = "application/vnd.heroku+json; version=3"
     request["Authorization"] = "Bearer #{api_key}"
-    Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+    Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, open_timeout: 10, read_timeout: 30) do |http|
       response = http.request(request)
       decode_body!(response)
     end
