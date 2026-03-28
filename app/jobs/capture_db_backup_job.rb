@@ -22,6 +22,7 @@ class CaptureDbBackupJob < ApplicationJob
     raise "Could not resolve Postgres addon ID" if addon_id.blank?
 
     client = Heroku::Api::Postgres.connect(api_key)
+    client.oauth_client_key = api_key
     result = client.backups.capture(addon_id)
     Rails.logger.info("[CaptureDbBackupJob] Backup initiated: #{result}")
   end
@@ -39,6 +40,8 @@ class CaptureDbBackupJob < ApplicationJob
     unless response.is_a?(Net::HTTPSuccess)
       raise "Heroku API returned HTTP #{response.code} checking authorizations"
     end
+
+    return if response.body.blank?
 
     warn_if_expiring(api_key, JSON.parse(response.body))
   end
@@ -67,11 +70,22 @@ class CaptureDbBackupJob < ApplicationJob
     primary&.dig("addon", "id")
   end
 
+  def decode_body!(response)
+    return response unless response["content-encoding"] == "gzip" && response.body.present?
+
+    response.body = Zlib::GzipReader.new(StringIO.new(response.body)).read
+    response.delete("content-encoding")
+    response
+  end
+
   def heroku_api_get(path, api_key)
     uri = URI("https://api.heroku.com#{path}")
     request = Net::HTTP::Get.new(uri)
     request["Accept"] = "application/vnd.heroku+json; version=3"
     request["Authorization"] = "Bearer #{api_key}"
-    Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http| http.request(request) }
+    Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+      response = http.request(request)
+      decode_body!(response)
+    end
   end
 end
