@@ -10,7 +10,6 @@ ActiveAdmin.register_page "Activity Feed" do
     render plain: text, content_type: "text/plain"
   end
 
-  # Change the Claude model used for anomaly detection
   page_action :set_model, method: :post do
     model = params[:model]
     if AnomalyDetector::MODEL_PRICING.key?(model)

@@ -14,6 +14,7 @@ You are reviewing the activity feed for the current week and comparing it to rec
 - Anything that suggests the system is malfunctioning or a process was missed
 - Whether recent code changes could plausibly explain the behavior you see this week
 - Dyno memory pressure (memory_total approaching or exceeding quota, R14 errors, swap usage growth)
+- Application errors and stack traces in the "Application Errors" section — recurring exceptions, new error types, or error spikes
 
 ## Scheduled jobs
 

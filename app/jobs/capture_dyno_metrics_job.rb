@@ -97,8 +97,7 @@ class CaptureDynoMetricsJob < ApplicationJob
         next if line.include?("sentry") || line.include?("Discarding") || line.include?("rate limiting")
         dyno = line[/app\[(\S+)\]/, 1] || line[/heroku\[(\S+)\]/, 1]
         next unless dyno
-        # Keep first 500 chars of each error, cap at 20 errors per dyno
-        error_line = line.strip.last(500)
+        error_line = line.strip.first(500)
         samples[dyno][:errors] << error_line if samples[dyno][:errors].size < 20
       end
     end

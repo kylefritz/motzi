@@ -3,6 +3,8 @@
 # See also: rake ai:full_prompt, rake ai:analysis, rake ai:history
 class AnomalyDetector
   # Per-token pricing (dollars per million tokens)
+  DEFAULT_MODEL = "claude-sonnet-4-6"
+
   MODEL_PRICING = {
     "claude-opus-4-6"   => { input: 5.0, output: 25.0, label: "Opus 4.6" },
     "claude-sonnet-4-6" => { input: 3.0, output: 15.0, label: "Sonnet 4.6" },
@@ -10,7 +12,7 @@ class AnomalyDetector
   }.freeze
 
   def self.model
-    Setting.anomaly_model.presence || "claude-sonnet-4-6"
+    Setting.anomaly_model.presence || DEFAULT_MODEL
   end
 
   def self.model_label
@@ -18,11 +20,11 @@ class AnomalyDetector
   end
 
   def self.estimate_cost(input_tokens, output_tokens, model_id = nil)
-    pricing = MODEL_PRICING[model_id || model] || MODEL_PRICING["claude-sonnet-4-6"]
+    pricing = MODEL_PRICING[model_id || model] || MODEL_PRICING[DEFAULT_MODEL]
     (input_tokens * pricing[:input] / 1_000_000) + (output_tokens * pricing[:output] / 1_000_000)
   end
 
-  def initialize(week_id, comparison_weeks: 3, &on_progress)
+  def initialize(week_id, comparison_weeks: 4, &on_progress)
     @week_id = week_id
     @comparison_weeks = comparison_weeks
     @on_progress = on_progress || ->(_msg) {}
