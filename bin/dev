@@ -34,7 +34,7 @@ if [ ! -d node_modules ]; then
 fi
 
 # Check pending migrations — run them inline with pg-terminate to avoid stalls
-if bin/rails db:migrate:status 2>&1 | grep -q 'down'; then
+if bin/rails db:migrate:status 2>&1 | grep -qE '^\s+down'; then
   echo "==> Pending migrations detected, running db:prepare..."
   bin/pg-terminate
   bin/rails db:prepare
