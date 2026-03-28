@@ -30,22 +30,4 @@ task release: :environment do
     puts "Error during db:seed: #{e.message}. Rethrowing exception to cancel release."
     raise e # Re-raise the error because we want the release to fail
   end
-
-  # Notify Sentry of the deploy
-  release_version = ENV['HEROKU_RELEASE_VERSION']
-  release = release_version || `git log -1 --format="%h %s"`.strip
-
-  if defined?(Sentry)
-    puts "Notifying Sentry of release and deploy: #{release}"
-
-    begin
-      Sentry.sdk_create_deploy(
-        release: release,
-        environment: Rails.env,
-        url: release_version ? "https://dashboard.heroku.com/apps/#{ENV['HEROKU_APP_NAME']}/activity/releases/#{release_version}" : nil
-      )
-    rescue StandardError => e
-      puts "Error notifying Sentry of release/deploy: #{e.message}"
-    end
-  end
 end
