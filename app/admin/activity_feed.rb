@@ -10,6 +10,19 @@ ActiveAdmin.register_page "Activity Feed" do
     render plain: text, content_type: "text/plain"
   end
 
+  # Change the Claude model used for anomaly detection
+  page_action :set_model, method: :post do
+    model = params[:model]
+    if AnomalyDetector::MODEL_PRICING.key?(model)
+      Setting.anomaly_model = model
+      redirect_to admin_activity_feed_path(week_id: params[:week_id]),
+        notice: "Anomaly model changed to #{AnomalyDetector::MODEL_PRICING[model][:label]}."
+    else
+      redirect_to admin_activity_feed_path(week_id: params[:week_id]),
+        alert: "Unknown model: #{model}"
+    end
+  end
+
   # Analyze with Claude (enqueues background job)
   page_action :analyze, method: :post do
     week_id = params[:week_id] || Time.zone.now.week_id
@@ -56,7 +69,25 @@ ActiveAdmin.register_page "Activity Feed" do
           a "Prompt Preview", href: admin_activity_feed_prompt_preview_path(week_id: week_id), target: "_blank"
         end
 
-        analyze_tooltip = "Sends this week's verbose activity feed plus 4 prior weeks' summaries to Claude (#{AnomalyDetector::MODEL}). Claude compares order counts, email delivery rates, credit purchases, visitor traffic, and job runs against recent patterns to flag missing actions, unusual volumes, timing anomalies, or delivery problems. Results are emailed to the bakery operator."
+        current_model = AnomalyDetector.model
+        div class: "model-selector" do
+          AnomalyDetector::MODEL_PRICING.each do |model_id, info|
+            pricing = "$#{info[:input]}/$#{info[:output]} per 1M tokens"
+            if model_id == current_model
+              span info[:label], class: "model-option active", title: pricing
+            else
+              text_node button_to(
+                info[:label],
+                admin_activity_feed_set_model_path(model: model_id, week_id: week_id),
+                method: :post,
+                class: "model-option",
+                title: pricing
+              )
+            end
+          end
+        end
+
+        analyze_tooltip = "Sends this week's activity feed to Claude (#{AnomalyDetector.model_label}). Results are emailed to the bakery operator."
         div class: "analyze-area" do
           text_node button_to(
             "Analyze with Claude",
@@ -424,7 +455,8 @@ ActiveAdmin.register_page "Activity Feed" do
           div class: "glance-stat" do
             div "Claude Cost", class: "glance-label"
             div "$#{'%.2f' % (week_cost_cents / 100.0)}", class: "glance-num"
-            div "#{analyses.size} report#{'s' if analyses.size != 1} this week", class: "glance-detail"
+            models_used = analyses.pluck(:model_used).uniq.map { |m| AnomalyDetector::MODEL_PRICING.dig(m, :label) || m }.join(", ")
+            div "#{analyses.size} report#{'s' if analyses.size != 1} · #{models_used}", class: "glance-detail"
           end
         end
 
@@ -482,7 +514,7 @@ ActiveAdmin.register_page "Activity Feed" do
             end
 
             div class: "analysis-footer" do
-              cost = analysis.cost || AnomalyDetector.estimate_cost(analysis.input_tokens, analysis.output_tokens)
+              cost = analysis.cost || AnomalyDetector.estimate_cost(analysis.input_tokens, analysis.output_tokens, analysis.model_used)
               span do
                 span "Model", class: "meta-label"
                 text_node(analysis.api_model || analysis.model_used)

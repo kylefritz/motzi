@@ -12,7 +12,7 @@ class AnomalyDetectorIntegrationTest < ActiveSupport::TestCase
         assert analysis.result.present?
         assert_equal menu.week_id, analysis.week_id
         assert_equal "test", analysis.trigger
-        assert_equal "claude-opus-4-6", analysis.model_used
+        assert_equal AnomalyDetector.model, analysis.model_used
       end
     end
   end
