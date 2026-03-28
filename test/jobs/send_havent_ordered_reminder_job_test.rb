@@ -21,7 +21,7 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
 
     assert_equal 3, Setting.reminder_hours, 'reminders should go out between 6-9pm'
 
-    @user_ids = Set[*User.subscribers.pluck(:id)]
+    @user_ids = Set[*User.receive_havent_ordered_reminder.pluck(:id)]
     @user_ids_ordered = Set[*Menu.current.orders.pluck(:user_id)]
     @user_ids_to_remind = @user_ids - @user_ids_ordered
     @num_to_remind = @user_ids_to_remind.size
@@ -50,6 +50,22 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
   test "Doesnt send to users multiple times on same menu" do
     assert_reminders_emailed(@num_to_remind, :sun, '7:00 PM', 'send on sunday night')
     refute_reminders_emailed(:sun, '7:01 PM', 'dont send the second time')
+  end
+
+  test "respects receive_havent_ordered_reminder preference" do
+    users(:kyle).update!(receive_havent_ordered_reminder: false)
+    new_num = @user_ids_to_remind.count { |id| id != users(:kyle).id }
+    assert_commented do
+      assert_reminders_emailed(new_num, :sun, '7:00 PM', 'kyle opted out')
+    end
+  end
+
+  test "receive_havent_ordered_reminder gated by receive_weekly_menu" do
+    users(:kyle).update!(receive_weekly_menu: false)
+    new_num = @user_ids_to_remind.count { |id| id != users(:kyle).id }
+    assert_commented do
+      assert_reminders_emailed(new_num, :sun, '7:00 PM', 'kyle off weekly menu')
+    end
   end
 
   private

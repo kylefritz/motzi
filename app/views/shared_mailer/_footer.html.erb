@@ -3,6 +3,9 @@
     <mj-text font-size="13px" color="#ffffff" align="center" line-height="1.5">
       Thanks!! &mdash; <%= Setting.shop.name %>
     </mj-text>
+    <% if @user.present? %>
+    <%= render partial: "shared_mailer/email_preferences_link", formats: [:html] %>
+    <% end %>
     <% if ENV['REVIEW_APP'].present? || Rails.env.development? %>
     <mj-text font-size="11px" color="#FFECD6" align="center" padding-top="8px">
       This email was sent from the <%= ENV['REVIEW_APP'].present? ? 'review app' : 'local dev' %> &mdash; not production.

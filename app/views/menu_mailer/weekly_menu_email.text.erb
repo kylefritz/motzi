@@ -10,3 +10,5 @@
 This week's menu: <%= current_menu_url(uid: @user.hashid) %>
 
 <%= ordering_deadline_text(@menu) %>.
+
+<%= render partial: 'shared_mailer/email_preferences_link' %>

@@ -39,9 +39,9 @@ class MenuTest < ActiveSupport::TestCase
     end
 
     week3.update!(week_id: Time.zone.now.week_id)
-    assert_email_sent(User.subscribers.count) do
+    assert_email_sent(User.receive_weekly_menu.count) do
       num_emails = week3.publish_to_subscribers!
-      assert_equal num_emails, User.subscribers.count, 'sent emails returned'
+      assert_equal num_emails, User.receive_weekly_menu.count, 'sent emails returned'
     end
 
     assert week3.current?
@@ -304,7 +304,7 @@ class MenuTest < ActiveSupport::TestCase
   test "publish_to_subscribers! still works for regular menu (regression)" do
     week3 = menus(:week3)
     week3.update!(week_id: Time.zone.now.week_id)
-    assert_email_sent(User.subscribers.count) do
+    assert_email_sent(User.receive_weekly_menu.count) do
       week3.publish_to_subscribers!
     end
     assert week3.current?

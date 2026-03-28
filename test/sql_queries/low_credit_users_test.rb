@@ -29,7 +29,7 @@ class LowCreditUsersTest < ActiveSupport::TestCase
   end
 
   test "dont show users who dont get emails" do
-    User.all.update_all(subscriber: false)
+    User.all.update_all(receive_weekly_menu: false)
     assert_equal 0, exec_low_credit_users.size
   end
 

@@ -102,7 +102,9 @@
         "hashid",
         "credits",
         "breadsPerWeek",
-        "subscriber"
+        "receiveWeeklyMenu",
+        "receiveHaventOrderedReminder",
+        "receiveDayOfReminder"
       ],
       "properties": {
         "id": { "type": "integer" },
@@ -117,7 +119,9 @@
           "type": "number",
           "default": 1.0
         },
-        "subscriber": { "type": "boolean" }
+        "receiveWeeklyMenu": { "type": "boolean" },
+        "receiveHaventOrderedReminder": { "type": "boolean" },
+        "receiveDayOfReminder": { "type": "boolean" }
       }
     },
     "order": {

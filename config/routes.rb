@@ -16,6 +16,9 @@ Rails.application.routes.draw do
   # create/update order for a menu
   resources :orders, only: [:create, :update]
 
+  # email preference settings
+  resource :email_preferences, only: [:update]
+
   # sign in
   get '/auth' => redirect('/users/sign_in')
   get '/login' => redirect('/users/sign_in')

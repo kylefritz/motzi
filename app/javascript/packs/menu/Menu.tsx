@@ -23,9 +23,10 @@ type MenuProps = {
   user: MenuUser;
   onCreateOrder: (order: MenuOrderRequest) => Promise<unknown>;
   isHoliday?: boolean;
+  onShowEmailSettings?: () => void;
 };
 
-export default function Menu({ menu, order, user, onCreateOrder, isHoliday }: MenuProps) {
+export default function Menu({ menu, order, user, onCreateOrder, isHoliday, onShowEmailSettings }: MenuProps) {
   const {
     cart,
     addToCart,
@@ -61,7 +62,7 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday }: Me
     // Must buy credits!
     return (
       <>
-        <Subscription user={user} showBuyMoreButton={false} />
+        <Subscription user={user} showBuyMoreButton={false} onShowEmailSettings={onShowEmailSettings} />
         <p className="my-2 text-center">
           Buy credits then trade them for yummy things!
         </p>
@@ -81,7 +82,7 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday }: Me
   const insufficientCredits = !isHoliday && total.credits > userCredits;
   return (
     <>
-      <Subscription user={user} showBuyMoreButton={!isHoliday} />
+      <Subscription user={user} showBuyMoreButton={!isHoliday} onShowEmailSettings={onShowEmailSettings} />
 
       {/* if low, show nag to buy credits*/}
       {!isHoliday && (userCredits < 4 || insufficientCredits) && <BuyCredits user={user} />}

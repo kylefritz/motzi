@@ -3,7 +3,7 @@ class MailerliteSubscriber
 
   # Returns [success, message]
   def self.subscribe(user)
-    return [false, 'User did not opt in'] unless user.opt_in?
+    return [false, 'User did not join mailing list'] unless user.mailing_list?
 
     uri = URI(FORM_URL)
     response = Net::HTTP.post_form(uri, {

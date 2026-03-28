@@ -31,6 +31,19 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     assert_menu_json
   end
 
+  test "bogus hashid renders menu with no user (marketplace)" do
+    get "/menu.json?uid=totally_bogus_hashid"
+    assert_response :success
+    json = JSON.parse(@response.body)
+    assert_nil json['user'], 'bogus hashid should not resolve a user'
+    validate_json_schema :menu, @response.body
+  end
+
+  test "bogus hashid on HTML menu page renders ok" do
+    get "/menu?uid=totally_bogus_hashid&tab=email"
+    assert_response :success
+  end
+
   test "get menu by id" do
     get "/menus/#{menus(:week2).id}.json"
     assert_menu_json

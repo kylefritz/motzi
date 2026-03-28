@@ -37,7 +37,7 @@
     <%= f.password_field :password, autocomplete: "new-password", class: "form-control" %>
   </div>
 
-  <%= f.hidden_field :subscriber, value: true %>
+  <%= f.hidden_field :receive_weekly_menu, value: true %>
 
   <% if ENV['TURNSTILE_SITE_KEY'].present? %>
     <div class="cf-turnstile mt-3" data-sitekey="<%= ENV['TURNSTILE_SITE_KEY'] %>"></div>

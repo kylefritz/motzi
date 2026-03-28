@@ -8,8 +8,14 @@ class SendWeeklyMenuJobTest < ActiveJob::TestCase
   end
 
   test "send weekly menu email" do
-    assert_menu_emailed(User.subscribers.count, :sun, '10:00 AM')
+    assert_menu_emailed(User.receive_weekly_menu.count, :sun, '10:00 AM')
     assert_menu_emailed(0, :sun, '10:01 AM', 'dont email people twice')
+  end
+
+  test "respects receive_weekly_menu preference" do
+    users(:kyle).update!(receive_weekly_menu: false)
+    expected = User.receive_weekly_menu.count
+    assert_menu_emailed(expected, :sun, '10:00 AM')
   end
 
   def assert_menu_emailed(num_emails, day, time, msg=nil)

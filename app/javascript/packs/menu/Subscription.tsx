@@ -22,11 +22,13 @@ export const humanizeBreadsPerWeek = (perWeek: number) => {
 type SubscriptionProps = {
   user: MenuUser;
   showBuyMoreButton?: boolean;
+  onShowEmailSettings?: () => void;
 };
 
 export default function Subscription({
   user,
   showBuyMoreButton = true,
+  onShowEmailSettings,
 }: SubscriptionProps) {
   const [showForm, setShowForm] = useState(false);
   const { showCredits } = getPriceContext();
@@ -44,9 +46,25 @@ export default function Subscription({
                 </a>
               </small>
             </div>
+            {onShowEmailSettings && (
+              <div>
+                <small>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onShowEmailSettings();
+                    }}
+                    className="text-nowrap"
+                  >
+                    Email settings
+                  </a>
+                </small>
+              </div>
+            )}
           </div>
         </div>
-        {user.subscriber && showCredits && (
+        {user.credits > 0 && showCredits && (
           <>
             <div className="col">
               <h5 className="text-center">Credits</h5>

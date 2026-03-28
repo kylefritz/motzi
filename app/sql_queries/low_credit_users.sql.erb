@@ -21,7 +21,7 @@ from users
         and last_orders.last_ordered_at > now() - interval '<%= @ordered_within_days.to_i %> days'
 <% end %>
 where credit_balance < <%= @balance %>
-    and subscriber
+    and receive_weekly_menu
 <% if (owner_ids = User.owners.map(&:id).join(',')).present? %>
     and users.id not in (<%= owner_ids %>)
 <% end %>
