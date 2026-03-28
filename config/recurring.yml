@@ -32,7 +32,7 @@ production:
 
   capture_dyno_metrics:
     class: CaptureDynoMetricsJob
-    schedule: every 4 hours
+    schedule: "3,33 * * * *"
 
   capture_db_backup:
     class: CaptureDbBackupJob
