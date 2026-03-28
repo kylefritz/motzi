@@ -9,21 +9,28 @@
 #   bin/screenshot-pr --device "iPhone 14" /rails/mailers/reminder_mailer/havent_ordered_email
 #
 # Each URL is screenshotted and uploaded to S3 under the PR's folder.
-# A "## Screenshots" section is appended to the PR body with all images.
+# New screenshots are appended to any existing ## Screenshots section.
+# Use --replace to clear existing screenshots first.
 #
 # Options:
-#   --device <name>   Emulate a device (e.g. "iPhone 14", "Pixel 7")
+#   --device <name>    Emulate a device (e.g. "iPhone 14", "Pixel 7")
+#   --replace          Replace existing screenshots instead of appending
 #
 # Requirements: gh cli, npx playwright, aws cli
 
 set -euo pipefail
 
 DEVICE=""
+REPLACE=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --device)
       DEVICE="$2"
       shift 2
+      ;;
+    --replace)
+      REPLACE=true
+      shift
       ;;
     *)
       break
@@ -32,7 +39,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ $# -eq 0 ]]; then
-  echo "Usage: bin/screenshot-pr [--device \"iPhone 14\"] <url> [url2] [url3] ..."
+  echo "Usage: bin/screenshot-pr [--device \"iPhone 14\"] [--replace] <url> [url2] [url3] ..."
   exit 1
 fi
 
@@ -129,16 +136,26 @@ if [[ -z "$MARKDOWN" ]]; then
   exit 1
 fi
 
-# Get current PR body and append screenshots
+# Get current PR body and update screenshots
 CURRENT_BODY=$(gh pr view --json body --jq .body)
 
-# Remove existing screenshots section if present
-CLEAN_BODY=$(echo "$CURRENT_BODY" | sed '/^## Screenshots$/,$d')
+HAS_SCREENSHOTS=$(echo "$CURRENT_BODY" | grep -c '^## Screenshots$' || true)
 
-# Append new screenshots section
-NEW_BODY="${CLEAN_BODY}
+if [[ "$REPLACE" == "true" ]] || [[ "$HAS_SCREENSHOTS" -eq 0 ]]; then
+  # Remove existing section (if any) and start fresh
+  if [[ "$HAS_SCREENSHOTS" -gt 0 ]] && [[ "$REPLACE" == "true" ]]; then
+    echo "⚠️  Replacing existing screenshots section"
+  fi
+  CLEAN_BODY=$(echo "$CURRENT_BODY" | sed '/^## Screenshots$/,$d')
+  NEW_BODY="${CLEAN_BODY}
 ## Screenshots
 ${MARKDOWN}"
+else
+  # Append to existing screenshots section
+  echo "📎 Appending to existing screenshots section"
+  NEW_BODY="${CURRENT_BODY}
+${MARKDOWN}"
+fi
 
 # Update PR
 gh pr edit "$PR_NUMBER" --body "$NEW_BODY"
