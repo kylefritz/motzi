@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_12_055136) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_23_193136) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -96,6 +96,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_12_055136) do
     t.datetime "opened_at", precision: nil
     t.datetime "clicked_at", precision: nil
     t.bigint "pickup_day_id"
+    t.string "job_id"
+    t.string "job_name"
     t.index ["menu_id"], name: "index_ahoy_messages_on_menu_id"
     t.index ["token"], name: "index_ahoy_messages_on_token"
     t.index ["user_type", "user_id"], name: "index_ahoy_messages_on_user_type_and_user_id"
@@ -231,6 +233,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_12_055136) do
     t.index ["user_id"], name: "index_credit_items_on_user_id"
   end
 
+  create_table "feedbacks", force: :cascade do |t|
+    t.string "source", null: false
+    t.text "message", null: false
+    t.string "email"
+    t.string "url"
+    t.string "user_agent"
+    t.datetime "created_at", null: false
+  end
+
   create_table "items", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -327,6 +338,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_12_055136) do
     t.index ["channel"], name: "index_solid_cable_messages_on_channel"
     t.index ["channel_hash"], name: "index_solid_cable_messages_on_channel_hash"
     t.index ["created_at"], name: "index_solid_cable_messages_on_created_at"
+  end
+
+  create_table "solid_cache_entries", force: :cascade do |t|
+    t.binary "key", null: false
+    t.binary "value", null: false
+    t.datetime "created_at", null: false
+    t.bigint "key_hash", null: false
+    t.integer "byte_size", null: false
+    t.index ["byte_size"], name: "index_solid_cache_entries_on_byte_size"
+    t.index ["key_hash", "byte_size"], name: "index_solid_cache_entries_on_key_hash_and_byte_size"
+    t.index ["key_hash"], name: "index_solid_cache_entries_on_key_hash", unique: true
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|

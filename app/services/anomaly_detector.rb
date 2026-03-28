@@ -48,7 +48,8 @@ class AnomalyDetector
   end
 
   def system_prompt
-    prompt = File.read(Rails.root.join("app/prompts/anomaly_detection.txt"))
+    template = File.read(Rails.root.join("app/prompts/anomaly_detection.txt"))
+    prompt = template.gsub("%{recurring_jobs}", recurring_jobs_summary)
     "Current date/time: #{Time.zone.now.strftime('%A, %B %-d, %Y at %-l:%M%P %Z')}\n\n#{prompt}"
   end
 
@@ -93,6 +94,15 @@ class AnomalyDetector
   end
 
   private
+
+  def recurring_jobs_summary
+    config = YAML.load_file(Rails.root.join("config/recurring.yml"))
+    jobs = config.fetch("production", {})
+    jobs.map { |key, cfg|
+      job_class = cfg["class"] || "(inline command)"
+      "- **#{key}**: #{cfg['schedule']} (#{job_class})"
+    }.join("\n")
+  end
 
   def prior_week_ids
     ids = []

@@ -26,7 +26,9 @@
     "SENDGRID_USERNAME":        { "required": false },
     "SENDGRID_PASSWORD":        { "required": false },
     "ANTHROPIC_API_KEY":        { "required": false },
-    "GITHUB_TOKEN":             { "required": false }
+    "GITHUB_TOKEN":             { "required": false },
+    "TURNSTILE_SITE_KEY":       { "required": false },
+    "TURNSTILE_SECRET_KEY":     { "required": false }
   },
   "formation": {
     "web":    { "quantity": 1, "size": "basic" },

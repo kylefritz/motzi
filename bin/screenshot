@@ -44,8 +44,17 @@ LOCAL_PATH="${LOCAL_DIR}/${FILENAME}.png"
 
 # Take screenshot with Playwright
 echo "📸 Taking screenshot of ${FULL_URL}..."
-npx --yes playwright screenshot --full-page "${FULL_URL}" "${LOCAL_PATH}" 2>/dev/null
-echo "   Saved to ${LOCAL_PATH}"
+if ! npx --yes playwright screenshot --full-page "${FULL_URL}" "${LOCAL_PATH}"; then
+  echo "❌ Screenshot failed for ${FULL_URL}"
+  exit 1
+fi
+
+if [[ ! -s "$LOCAL_PATH" ]]; then
+  echo "❌ Screenshot file is empty or missing: ${LOCAL_PATH}"
+  exit 1
+fi
+
+echo "   Saved to ${LOCAL_PATH} ($(du -h "$LOCAL_PATH" | cut -f1))"
 
 # Determine S3 path — organize by PR number if on a branch with a PR
 PR_NUMBER=$(gh pr view --json number --jq .number 2>/dev/null || echo "")
@@ -56,10 +65,21 @@ else
 fi
 
 # Upload to S3
-echo "☁️  Uploading to s3://motzi/${S3_KEY}..."
-aws s3 cp "${LOCAL_PATH}" "s3://motzi/${S3_KEY}" --quiet
 S3_URL="https://motzi.s3.us-east-1.amazonaws.com/${S3_KEY}"
-echo "   ${S3_URL}"
+echo "☁️  Uploading to s3://motzi/${S3_KEY}..."
+if ! aws s3 cp "${LOCAL_PATH}" "s3://motzi/${S3_KEY}"; then
+  echo "❌ S3 upload failed"
+  exit 1
+fi
+
+# Verify the upload is publicly accessible
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$S3_URL")
+if [[ "$HTTP_STATUS" != "200" ]]; then
+  echo "❌ Upload succeeded but URL returned HTTP ${HTTP_STATUS}: ${S3_URL}"
+  exit 1
+fi
+
+echo "   ✓ ${S3_URL}"
 
 # Output markdown for easy pasting
 echo ""

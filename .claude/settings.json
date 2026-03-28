@@ -41,6 +41,13 @@
       }
     ]
   },
+  "sandbox": {
+    "network": {
+      "allowedDomains": ["api.github.com"],
+      "allowAllUnixSockets": true,
+      "allowLocalBinding": true
+    }
+  },
   "mcpServers": {
     "context7": {
       "command": "npx",

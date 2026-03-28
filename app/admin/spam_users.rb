@@ -1,10 +1,18 @@
 ActiveAdmin.register_page 'Spam Users' do
-  menu priority: 11, label: 'Spam'
+  menu parent: 'Advanced', label: 'Spam', priority: 7
+
+  controller do
+    helper_method :spam_cache_key
+
+    def spam_cache_key
+      "spam_scan/#{current_admin_user.id}"
+    end
+  end
 
   # Scan with Claude
   page_action :scan, method: :post do
     results = SpamDetector.new.scan
-    session[:spam_scan] = results.to_json
+    Rails.cache.write(spam_cache_key, results.to_json, expires_in: 1.hour)
     redirect_to admin_spam_users_path,
                 notice: "Claude identified #{results.size} spam accounts."
   end
@@ -16,7 +24,7 @@ ActiveAdmin.register_page 'Spam Users' do
       users = User.where(id: ids).left_joins(:orders).where(orders: { id: nil })
       count = users.count
       users.destroy_all
-      session.delete(:spam_scan)
+      Rails.cache.delete(spam_cache_key)
       redirect_to admin_spam_users_path,
                   notice: "Deleted #{count} spam users."
     else
@@ -33,9 +41,9 @@ ActiveAdmin.register_page 'Spam Users' do
                      .where.not(id: 0)
                      .order(:created_at)
 
-    # Parse scan results from session
+    # Parse scan results from cache
     scan_results = begin
-      JSON.parse(session[:spam_scan] || '[]', symbolize_names: true)
+      JSON.parse(Rails.cache.read(spam_cache_key) || '[]', symbolize_names: true)
     rescue JSON::ParserError
       []
     end

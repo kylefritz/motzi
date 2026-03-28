@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Kill connections to the local dev database.
+# Useful when migrations stall due to advisory locks held by other processes.
+set -euo pipefail
+
+DB_NAME="${DATABASE_NAME:-motzi}"
+
+echo "Terminating connections to ${DB_NAME}..."
+psql -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DB_NAME}' AND pid <> pg_backend_pid()" "$DB_NAME"

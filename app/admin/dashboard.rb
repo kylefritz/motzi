@@ -182,8 +182,11 @@ ActiveAdmin.register_page "Dashboard" do
               h4 "Monitoring", style: "margin: 0 0 6px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #666"
               div style: "display: flex; flex-direction: column; gap: 8px; margin-top: 8px" do
                 a "Jobs Monitor", href: "/jobs", target: "_blank", style: "font-size: 14px"
-                a "Letter Opener", href: "/letter_opener", target: "_blank", style: "font-size: 14px" if Rails.env.development?
-                a "Mailer Previews", href: "/rails/mailers", target: "_blank", style: "font-size: 14px" if Rails.env.development?
+                if Rails.env.development?
+                  a "Letter Opener", href: "/letter_opener", target: "_blank", style: "font-size: 14px"
+                  a "Mailer Previews", href: "/rails/mailers", target: "_blank", style: "font-size: 14px"
+                  a "Routes", href: "/rails/info/routes", target: "_blank", style: "font-size: 14px"
+                end
               end
             end
           end

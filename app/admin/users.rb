@@ -1,4 +1,5 @@
 ActiveAdmin.register User do
+  menu priority: 5
   permit_params :first_name, :last_name, :email, :additional_email, :is_admin, \
     :subscriber, :opt_in, :breads_per_week, :phone, :password
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'

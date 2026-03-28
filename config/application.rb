@@ -28,5 +28,8 @@ module Motzi
     # Keep finished jobs visible for two weeks in Mission Control before
     # recurring Solid Queue cleanup removes them.
     config.solid_queue.clear_finished_jobs_after = 14.days
+
+    # Route errors to ErrorsController instead of static pages
+    config.exceptions_app = self.routes
   end
 end

@@ -1,5 +1,6 @@
 class AnalyzeAnomaliesJob < ApplicationJob
   queue_as :default
+  limits_concurrency to: 1, key: "analyze_anomalies"
 
   def perform(week_id: nil, trigger: 'scheduled', user_id: nil)
     week_id ||= Time.zone.now.week_id

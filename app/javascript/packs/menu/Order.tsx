@@ -1,6 +1,7 @@
 import React from "react";
 import _ from "lodash";
 
+import FeedbackForm from "./FeedbackForm";
 import Subscription from "./Subscription";
 import Cart from "./Cart";
 import type { Menu as MenuType, MenuOrder, MenuUser } from "../../types/api";
@@ -58,6 +59,7 @@ export default function Order({ menu, user, order, onEditOrder }: OrderProps) {
           <Subscription user={user} />
         </div>
       )}
+      <FeedbackForm />
     </>
   );
 }
