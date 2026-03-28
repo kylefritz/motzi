@@ -266,9 +266,7 @@ export default function EmailSettings({ user, onBack }: EmailSettingsProps) {
 
       <div style={styles.card}>
         <h5 style={styles.heading}>Email Settings</h5>
-        <p style={styles.subtitle}>
-          Choose which emails you&rsquo;d like to receive
-        </p>
+        <p style={styles.subtitle}>{user.name}</p>
 
         <ToggleRow
           id="receiveWeeklyMenu"

@@ -15,6 +15,7 @@
 # Options:
 #   --device <name>    Emulate a device (e.g. "iPhone 14", "Pixel 7")
 #   --replace          Replace existing screenshots instead of appending
+#   --admin            Log in as admin first (dev only, hits /dev/login_as_admin)
 #
 # Requirements: gh cli, npx playwright, aws cli
 
@@ -22,6 +23,7 @@ set -euo pipefail
 
 DEVICE=""
 REPLACE=false
+ADMIN=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --device)
@@ -32,6 +34,10 @@ while [[ $# -gt 0 ]]; do
       REPLACE=true
       shift
       ;;
+    --admin)
+      ADMIN=true
+      shift
+      ;;
     *)
       break
       ;;
@@ -39,7 +45,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ $# -eq 0 ]]; then
-  echo "Usage: bin/screenshot-pr [--device \"iPhone 14\"] [--replace] <url> [url2] [url3] ..."
+  echo "Usage: bin/screenshot-pr [--device \"iPhone 14\"] [--replace] [--admin] <url> [url2] [url3] ..."
   exit 1
 fi
 
@@ -53,8 +59,69 @@ fi
 echo "📋 PR #${PR_NUMBER}"
 echo ""
 
+LOCAL_DIR="$HOME/Desktop/screenshots"
+mkdir -p "$LOCAL_DIR"
+
 MARKDOWN=""
 FAILURES=0
+
+# When --admin is set, use a shared browser context so the login session persists
+if [[ "$ADMIN" == "true" ]]; then
+  echo "🔑 Logging in as admin..."
+
+  # Build a Node script that logs in and screenshots all URLs in one context
+  URLS_JSON=$(printf '%s\n' "$@" | jq -R . | jq -s .)
+  DEVICE_WIDTH=1280
+  DEVICE_HEIGHT=900
+  if [[ -n "$DEVICE" ]]; then
+    case "$DEVICE" in
+      "iPhone 14"|"iPhone 13"|"iPhone 12") DEVICE_WIDTH=390; DEVICE_HEIGHT=844 ;;
+      "iPhone 14 Pro Max")                 DEVICE_WIDTH=430; DEVICE_HEIGHT=932 ;;
+      "iPhone SE")                         DEVICE_WIDTH=375; DEVICE_HEIGHT=667 ;;
+      "Pixel 7")                           DEVICE_WIDTH=412; DEVICE_HEIGHT=915 ;;
+    esac
+  fi
+
+  RESULTS=$(node -e "
+    const { chromium } = require('playwright');
+    (async () => {
+      const browser = await chromium.launch();
+      const context = await browser.newContext({ viewport: { width: ${DEVICE_WIDTH}, height: ${DEVICE_HEIGHT} } });
+      const page = await context.newPage();
+      await page.goto('http://localhost:3000/dev/login_as_admin');
+      await page.waitForLoadState('networkidle');
+
+      const urls = ${URLS_JSON};
+      for (const url of urls) {
+        const fullUrl = url.startsWith('/') ? 'http://localhost:3000' + url : url;
+        const filename = url.replace(/^https?:\/\/[^\/]*/, '').replace(/^\//, '').replace(/\//g, '-').replace(/[^a-zA-Z0-9_.-]/g, '');
+        const suffix = '${DEVICE:+--$(echo "${DEVICE}" | tr "[:upper:] " "[:lower:]-")}';
+        const path = '${LOCAL_DIR}/' + (filename || 'page') + suffix + '.png';
+        try {
+          await page.goto(fullUrl);
+          await page.waitForLoadState('networkidle');
+          await page.screenshot({ path, fullPage: true });
+          console.log(JSON.stringify({ ok: true, url, path, filename: (filename || 'page') + suffix }));
+        } catch (e) {
+          console.log(JSON.stringify({ ok: false, url, error: e.message }));
+        }
+      }
+      await browser.close();
+    })();
+  ")
+
+  echo "$RESULTS" | while IFS= read -r line; do
+    OK=$(echo "$line" | jq -r '.ok')
+    URL=$(echo "$line" | jq -r '.url')
+    if [[ "$OK" == "true" ]]; then
+      echo "📸 ${URL}${DEVICE:+ (${DEVICE})}... ✓"
+    else
+      ERROR=$(echo "$line" | jq -r '.error')
+      echo "📸 ${URL}... ❌ ${ERROR}"
+      FAILURES=$((FAILURES + 1))
+    fi
+  done
+fi
 
 for URL in "$@"; do
   # Resolve relative paths
@@ -73,28 +140,27 @@ for URL in "$@"; do
     FILENAME="${FILENAME}--${DEVICE_SLUG}"
   fi
 
-  # Take screenshot
-  LOCAL_DIR="$HOME/Desktop/screenshots"
-  mkdir -p "$LOCAL_DIR"
   LOCAL_PATH="${LOCAL_DIR}/${FILENAME}.png"
-  echo "📸 ${URL}${DEVICE:+ (${DEVICE})}..."
-  SCREENSHOT_CMD=(npx --yes playwright screenshot --full-page -b chromium)
-  if [[ -n "$DEVICE" ]]; then
-    # Use viewport-size instead of --device to avoid WebKit dependency.
-    # Map known devices to their viewport sizes.
-    case "$DEVICE" in
-      "iPhone 14"|"iPhone 13"|"iPhone 12") SCREENSHOT_CMD+=(--viewport-size "390,844") ;;
-      "iPhone 14 Pro Max")                 SCREENSHOT_CMD+=(--viewport-size "430,932") ;;
-      "iPhone SE")                         SCREENSHOT_CMD+=(--viewport-size "375,667") ;;
-      "Pixel 7")                           SCREENSHOT_CMD+=(--viewport-size "412,915") ;;
-      *)                                   SCREENSHOT_CMD+=(--device "$DEVICE") ;;
-    esac
-  fi
-  SCREENSHOT_CMD+=("${FULL_URL}" "${LOCAL_PATH}")
-  if ! "${SCREENSHOT_CMD[@]}"; then
-    echo "   ❌ Screenshot failed"
-    FAILURES=$((FAILURES + 1))
-    continue
+
+  # Take screenshot (skip if --admin already took it)
+  if [[ "$ADMIN" != "true" ]]; then
+    echo "📸 ${URL}${DEVICE:+ (${DEVICE})}..."
+    SCREENSHOT_CMD=(npx --yes playwright screenshot --full-page -b chromium)
+    if [[ -n "$DEVICE" ]]; then
+      case "$DEVICE" in
+        "iPhone 14"|"iPhone 13"|"iPhone 12") SCREENSHOT_CMD+=(--viewport-size "390,844") ;;
+        "iPhone 14 Pro Max")                 SCREENSHOT_CMD+=(--viewport-size "430,932") ;;
+        "iPhone SE")                         SCREENSHOT_CMD+=(--viewport-size "375,667") ;;
+        "Pixel 7")                           SCREENSHOT_CMD+=(--viewport-size "412,915") ;;
+        *)                                   SCREENSHOT_CMD+=(--device "$DEVICE") ;;
+      esac
+    fi
+    SCREENSHOT_CMD+=("${FULL_URL}" "${LOCAL_PATH}")
+    if ! "${SCREENSHOT_CMD[@]}"; then
+      echo "   ❌ Screenshot failed"
+      FAILURES=$((FAILURES + 1))
+      continue
+    fi
   fi
 
   if [[ ! -s "$LOCAL_PATH" ]]; then

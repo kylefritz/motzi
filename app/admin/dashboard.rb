@@ -153,8 +153,8 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       column do
-        panel "New Opt-In - last 2 weeks" do
-          users = User.opt_in.where("created_at > ?", 2.weeks.ago).order('created_at desc').limit(20)
+        panel "New Mailing List - last 2 weeks" do
+          users = User.mailing_list.where("created_at > ?", 2.weeks.ago).order('created_at desc').limit(20)
           table_for users do
             column ("user") { |u| u }
             column ("Created At") { |u| u.created_at }

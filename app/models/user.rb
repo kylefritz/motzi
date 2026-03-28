@@ -20,7 +20,7 @@ class User < ApplicationRecord
 
   # Users who should receive the day-of pickup reminder
   scope :receive_day_of_reminder, -> { not_owners.where(receive_day_of_reminder: true) }
-  scope :opt_in, -> { where(opt_in: true) }
+  scope :mailing_list, -> { where(mailing_list: true) }
   scope :owners, -> {where(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   scope :not_owners, -> {where.not(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   scope :admin, -> {where(is_admin: true)}

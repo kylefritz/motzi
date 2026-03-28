@@ -4,7 +4,7 @@ require 'webmock/minitest'
 class MailerliteSubscriberTest < ActiveSupport::TestCase
   setup do
     @user = users(:kyle)
-    @user.update!(opt_in: true)
+    @user.update!(mailing_list: true)
   end
 
   test "successful subscribe" do
@@ -18,12 +18,12 @@ class MailerliteSubscriberTest < ActiveSupport::TestCase
   end
 
   test "returns false when user did not opt in" do
-    @user.update!(opt_in: false)
+    @user.update!(mailing_list: false)
 
     success, message = MailerliteSubscriber.subscribe(@user)
 
     refute success
-    assert_equal "User did not opt in", message
+    assert_equal "User did not join mailing list", message
   end
 
   test "handles HTTP failure" do

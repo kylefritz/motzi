@@ -2,7 +2,7 @@ ActiveAdmin.register User do
   menu priority: 5
   permit_params :first_name, :last_name, :email, :additional_email, :is_admin, \
     :receive_weekly_menu, :receive_havent_ordered_reminder, :receive_day_of_reminder, \
-    :opt_in, :breads_per_week, :phone, :password
+    :mailing_list, :breads_per_week, :phone, :password
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'
 
   filter :first_name
@@ -10,7 +10,7 @@ ActiveAdmin.register User do
   filter :email
   filter :additional_email
   filter :phone
-  filter :opt_in
+  filter :mailing_list
 
   scope :all, default: true
   scope :receive_weekly_menu
@@ -66,13 +66,15 @@ ActiveAdmin.register User do
       input :additional_email
       input :phone
       input :breads_per_week
-      input :opt_in
+      input :mailing_list
     end
-    inputs 'Danger Zone' do
-      input :password
+    inputs 'Email Preferences' do
       input :receive_weekly_menu
       input :receive_havent_ordered_reminder
       input :receive_day_of_reminder
+    end
+    inputs 'Danger Zone' do
+      input :password
       input :is_admin
     end
     actions

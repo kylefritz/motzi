@@ -48,7 +48,7 @@ export type MarketplaceOrderRequest = MenuOrderRequest & {
   firstName: string;
   lastName: string;
   phone: string;
-  optIn?: boolean;
+  mailingList?: boolean;
   price: number;
   token: string;
 };

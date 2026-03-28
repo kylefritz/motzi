@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_28_173053) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_28_183624) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -241,6 +241,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_28_173053) do
     t.float "memory_swap"
     t.float "memory_quota"
     t.integer "r14_count", default: 0
+    t.text "errors_summary"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["dyno", "recorded_at"], name: "index_dyno_metrics_on_dyno_and_recorded_at"
@@ -506,7 +507,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_28_173053) do
     t.boolean "receive_weekly_menu", default: false, null: false
     t.decimal "breads_per_week", default: "1.0", null: false
     t.string "phone"
-    t.boolean "opt_in", default: false, null: false
+    t.boolean "mailing_list", default: false, null: false
     t.boolean "receive_havent_ordered_reminder", default: true, null: false
     t.boolean "receive_day_of_reminder", default: true, null: false
     t.index "lower((first_name)::text), lower((last_name)::text)", name: "index_users_on_LOWER_first_name_LOWER_last_name"
