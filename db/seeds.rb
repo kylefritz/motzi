@@ -32,14 +32,14 @@ unless User.system
   )
 end
 
+# Review app: create admin user with a random password.
+# Use "Forgot your password?" on the login page to set a new one via Devise.
 if ENV['REVIEW_APP'].present? && !User.find_by(email: 'kyle.p.fritz@gmail.com')
-  password = SecureRandom.hex(16)
   User.create!(
     email: 'kyle.p.fritz@gmail.com',
     first_name: 'Kyle',
     last_name: 'Fritz',
     is_admin: true,
-    password: password,
+    password: SecureRandom.hex(16),
   )
-  Rails.logger.info "Review app admin password: #{password}"
 end
