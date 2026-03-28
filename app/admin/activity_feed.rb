@@ -476,6 +476,44 @@ ActiveAdmin.register_page "Activity Feed" do
 
     # Email panel removed — merged into "At a Glance" above
 
+    # Dyno Memory
+    memory_summary = DynoMetric.summary_for_period(week_start, week_end)
+    if memory_summary.any?
+      panel "Dyno Memory" do
+        table_for memory_summary.sort_by { |d, _| d }.map { |dyno, stats| OpenStruct.new(stats.merge(dyno: dyno)) } do
+          column("Dyno") { |s| s.dyno }
+          column("Avg") { |s| "#{s.avg_memory_total}MB" }
+          column("Max") { |s| "#{s.max_memory_total}MB" }
+          column("Quota") { |s| s.memory_quota ? "#{s.memory_quota}MB" : "—" }
+          column("Usage") { |s|
+            next "—" unless s.memory_quota&.positive?
+            pct = (s.max_memory_total.to_f / s.memory_quota * 100).round
+            color = pct >= 90 ? "red" : pct >= 70 ? "orange" : "green"
+            span "#{pct}%", style: "color: #{color}; font-weight: bold"
+          }
+          column("Swap") { |s| s.max_memory_swap ? "#{s.max_memory_swap}MB" : "—" }
+          column("R14") { |s|
+            if s.total_r14 > 0
+              span s.total_r14, style: "color: red; font-weight: bold"
+            else
+              "0"
+            end
+          }
+          column("Samples") { |s| s.sample_count }
+        end
+        if memory_summary.values.any? { |s| s[:errors].any? }
+          div class: "dyno-errors" do
+            h4 "Application Errors"
+            ul do
+              memory_summary.values.flat_map { |s| s[:errors] }.uniq.first(10).each do |err|
+                li err, style: "font-family: monospace; font-size: 11px; word-break: break-all;"
+              end
+            end
+          end
+        end
+      end
+    end
+
     # Admin events
     admin_events = events.select { |e| e.category == "admin" }
     if admin_events.any?
