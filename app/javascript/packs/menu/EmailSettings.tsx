@@ -14,6 +14,192 @@ type Preferences = Pick<
   "receiveWeeklyMenu" | "receiveHaventOrderedReminder" | "receiveDayOfReminder"
 >;
 
+const styles = {
+  card: {
+    background: "white",
+    borderRadius: 12,
+    padding: "28px 32px",
+    maxWidth: 440,
+    margin: "0 auto",
+    boxShadow: "0 2px 8px rgba(53, 44, 99, 0.08)",
+  } as React.CSSProperties,
+  heading: {
+    fontFamily: "'Oswald', sans-serif",
+    color: "#352C63",
+    fontSize: 22,
+    fontWeight: 400,
+    textAlign: "center" as const,
+    marginBottom: 4,
+  } as React.CSSProperties,
+  subtitle: {
+    textAlign: "center" as const,
+    color: "#999",
+    fontSize: 14,
+    marginBottom: 24,
+  } as React.CSSProperties,
+  row: {
+    display: "flex",
+    alignItems: "flex-start",
+    padding: "14px 0",
+    borderBottom: "1px solid #f0e8da",
+  } as React.CSSProperties,
+  rowLast: {
+    display: "flex",
+    alignItems: "flex-start",
+    padding: "14px 0",
+  } as React.CSSProperties,
+  labelCol: {
+    flex: 1,
+  } as React.CSSProperties,
+  label: {
+    fontWeight: 500,
+    fontSize: 15,
+    color: "#2E2927",
+    marginBottom: 2,
+  } as React.CSSProperties,
+  description: {
+    fontSize: 13,
+    color: "#999",
+    lineHeight: 1.4,
+  } as React.CSSProperties,
+  disabledLabel: {
+    fontWeight: 500,
+    fontSize: 15,
+    color: "#ccc",
+    marginBottom: 2,
+  } as React.CSSProperties,
+  disabledDescription: {
+    fontSize: 13,
+    color: "#ccc",
+    lineHeight: 1.4,
+  } as React.CSSProperties,
+  backLink: {
+    color: "#352C63",
+    fontSize: 14,
+    textDecoration: "none",
+  } as React.CSSProperties,
+  saveBtn: {
+    display: "block",
+    width: "100%",
+    marginTop: 24,
+    padding: "10px 0",
+    background: "#D5482C",
+    color: "white",
+    border: "none",
+    borderRadius: 6,
+    fontSize: 16,
+    fontWeight: 500,
+    cursor: "pointer",
+    letterSpacing: "0.02em",
+  } as React.CSSProperties,
+  saveBtnDisabled: {
+    display: "block",
+    width: "100%",
+    marginTop: 24,
+    padding: "10px 0",
+    background: "#e8a99b",
+    color: "white",
+    border: "none",
+    borderRadius: 6,
+    fontSize: 16,
+    fontWeight: 500,
+    cursor: "not-allowed",
+    letterSpacing: "0.02em",
+  } as React.CSSProperties,
+  savedBtn: {
+    display: "block",
+    width: "100%",
+    marginTop: 24,
+    padding: "10px 0",
+    background: "#352C63",
+    color: "white",
+    border: "none",
+    borderRadius: 6,
+    fontSize: 16,
+    fontWeight: 500,
+    letterSpacing: "0.02em",
+  } as React.CSSProperties,
+  toggle: {
+    width: 44,
+    height: 24,
+    borderRadius: 12,
+    border: "none",
+    cursor: "pointer",
+    position: "relative" as const,
+    transition: "background 0.2s",
+    flexShrink: 0,
+    marginLeft: 12,
+    marginTop: 2,
+    padding: 0,
+  } as React.CSSProperties,
+  toggleKnob: {
+    width: 18,
+    height: 18,
+    borderRadius: "50%",
+    background: "white",
+    position: "absolute" as const,
+    top: 3,
+    transition: "left 0.2s",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+  } as React.CSSProperties,
+};
+
+type ToggleRowProps = {
+  label: string;
+  description: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange: () => void;
+  last?: boolean;
+  id: string;
+};
+
+function ToggleRow({
+  label,
+  description,
+  checked,
+  disabled,
+  onChange,
+  last,
+  id,
+}: ToggleRowProps) {
+  return (
+    <div style={last ? styles.rowLast : styles.row}>
+      <div style={styles.labelCol}>
+        <div style={disabled ? styles.disabledLabel : styles.label}>
+          {label}
+        </div>
+        <div
+          style={disabled ? styles.disabledDescription : styles.description}
+        >
+          {description}
+        </div>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        id={id}
+        aria-checked={checked}
+        aria-label={label}
+        disabled={disabled}
+        onClick={onChange}
+        style={{
+          ...styles.toggle,
+          background: disabled ? "#e0ddd8" : checked ? "#352C63" : "#ccc",
+          cursor: disabled ? "not-allowed" : "pointer",
+        }}
+      >
+        <div
+          style={{
+            ...styles.toggleKnob,
+            left: checked ? 23 : 3,
+          }}
+        />
+      </button>
+    </div>
+  );
+}
+
 export default function EmailSettings({ user, onBack }: EmailSettingsProps) {
   const { onRefresh } = getSettingsContext();
   const [prefs, setPrefs] = useState<Preferences>({
@@ -57,78 +243,68 @@ export default function EmailSettings({ user, onBack }: EmailSettingsProps) {
       .finally(() => setSaving(false));
   };
 
+  const btnStyle = saving
+    ? styles.saveBtnDisabled
+    : saved
+      ? styles.savedBtn
+      : styles.saveBtn;
+
   return (
-    <>
-      <div className="mb-3">
+    <div style={{ paddingTop: 8, paddingBottom: 24 }}>
+      <div className="mb-3 text-center">
         <a
           href="#"
           onClick={(e) => {
             e.preventDefault();
             onBack();
           }}
-          className="text-decoration-none"
+          style={styles.backLink}
         >
           &larr; Back to menu
         </a>
       </div>
 
-      <h5>Email Settings</h5>
+      <div style={styles.card}>
+        <h5 style={styles.heading}>Email Settings</h5>
+        <p style={styles.subtitle}>
+          Choose which emails you&rsquo;d like to receive
+        </p>
 
-      <div className="form-check mb-2">
-        <input
-          type="checkbox"
-          className="form-check-input"
+        <ToggleRow
           id="receiveWeeklyMenu"
+          label="Weekly menu"
+          description="See what's baking each week"
           checked={prefs.receiveWeeklyMenu}
           onChange={() => toggle("receiveWeeklyMenu")}
         />
-        <label className="form-check-label" htmlFor="receiveWeeklyMenu">
-          Weekly menu email
-        </label>
-      </div>
 
-      <div className="form-check mb-2">
-        <input
-          type="checkbox"
-          className="form-check-input"
+        <ToggleRow
           id="receiveHaventOrderedReminder"
+          label="Order reminder"
+          description="A nudge if you haven't ordered yet"
           checked={prefs.receiveHaventOrderedReminder}
           disabled={!prefs.receiveWeeklyMenu}
           onChange={() => toggle("receiveHaventOrderedReminder")}
         />
-        <label
-          className="form-check-label"
-          htmlFor="receiveHaventOrderedReminder"
-        >
-          &ldquo;Haven&rsquo;t ordered&rdquo; reminder
-        </label>
-        {!prefs.receiveWeeklyMenu && (
-          <small className="d-block text-muted">
-            Only available when weekly menu email is on
-          </small>
-        )}
-      </div>
 
-      <div className="form-check mb-3">
-        <input
-          type="checkbox"
-          className="form-check-input"
+        <ToggleRow
           id="receiveDayOfReminder"
+          label="Pickup reminder"
+          description="Don't forget to grab your bread!"
           checked={prefs.receiveDayOfReminder}
           onChange={() => toggle("receiveDayOfReminder")}
+          last
         />
-        <label className="form-check-label" htmlFor="receiveDayOfReminder">
-          Day-of pickup reminder
-        </label>
-      </div>
 
-      <button
-        className="btn btn-primary"
-        onClick={handleSave}
-        disabled={saving}
-      >
-        {saving ? "Saving..." : saved ? "Saved!" : "Save"}
-      </button>
-    </>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          style={btnStyle}
+        >
+          {saving ? "Saving..." : saved ? "Saved!" : "Save Preferences"}
+        </button>
+      </div>
+    </div>
   );
 }

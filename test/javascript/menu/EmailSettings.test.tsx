@@ -1,5 +1,5 @@
 import React from "react";
-import { expect, mock, test, beforeEach } from "bun:test";
+import { expect, mock, test } from "bun:test";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -22,19 +22,16 @@ function renderEmailSettings(userOverrides = {}) {
   return { ...utils, onBack, onRefresh, user };
 }
 
-test("renders all three checkboxes with correct initial state", () => {
+const getToggle = (name: string) =>
+  screen.getByRole("switch", { name });
+
+test("renders all three toggles with correct initial state", () => {
   renderEmailSettings();
 
-  const weeklyMenu = screen.getByLabelText("Weekly menu email");
-  const haventOrdered = screen.getByLabelText(
-    /Haven.t ordered.* reminder/
-  );
-  const dayOf = screen.getByLabelText("Day-of pickup reminder");
-
-  expect(weeklyMenu.checked).toBe(true);
-  expect(haventOrdered.checked).toBe(true);
-  expect(dayOf.checked).toBe(true);
-  expect(haventOrdered.disabled).toBe(false);
+  expect(getToggle("Weekly menu").getAttribute("aria-checked")).toBe("true");
+  expect(getToggle("Order reminder").getAttribute("aria-checked")).toBe("true");
+  expect(getToggle("Pickup reminder").getAttribute("aria-checked")).toBe("true");
+  expect(getToggle("Order reminder").disabled).toBe(false);
 });
 
 test("renders with preferences off", () => {
@@ -44,59 +41,55 @@ test("renders with preferences off", () => {
     receiveDayOfReminder: false,
   });
 
-  expect(screen.getByLabelText("Weekly menu email").checked).toBe(false);
-  expect(screen.getByLabelText(/Haven.t ordered/).checked).toBe(false);
-  expect(screen.getByLabelText("Day-of pickup reminder").checked).toBe(false);
+  expect(getToggle("Weekly menu").getAttribute("aria-checked")).toBe("false");
+  expect(getToggle("Order reminder").getAttribute("aria-checked")).toBe("false");
+  expect(getToggle("Pickup reminder").getAttribute("aria-checked")).toBe("false");
 });
 
-test("toggling off weekly menu auto-clears and disables haven't ordered", async () => {
+test("toggling off weekly menu auto-clears and disables order reminder", async () => {
   renderEmailSettings();
 
-  const weeklyMenu = screen.getByLabelText("Weekly menu email");
-  const haventOrdered = screen.getByLabelText(/Haven.t ordered/);
+  const weeklyMenu = getToggle("Weekly menu");
+  const orderReminder = getToggle("Order reminder");
 
-  // Both start checked
-  expect(weeklyMenu.checked).toBe(true);
-  expect(haventOrdered.checked).toBe(true);
-  expect(haventOrdered.disabled).toBe(false);
+  expect(weeklyMenu.getAttribute("aria-checked")).toBe("true");
+  expect(orderReminder.getAttribute("aria-checked")).toBe("true");
+  expect(orderReminder.disabled).toBe(false);
 
   // Turn off weekly menu
   await userEvent.click(weeklyMenu);
 
-  expect(weeklyMenu.checked).toBe(false);
-  expect(haventOrdered.checked).toBe(false);
-  expect(haventOrdered.disabled).toBe(true);
-  expect(
-    screen.getByText("Only available when weekly menu email is on")
-  ).toBeTruthy();
+  expect(weeklyMenu.getAttribute("aria-checked")).toBe("false");
+  expect(orderReminder.getAttribute("aria-checked")).toBe("false");
+  expect(orderReminder.disabled).toBe(true);
 });
 
-test("toggling weekly menu back on re-enables haven't ordered (but stays unchecked)", async () => {
+test("toggling weekly menu back on re-enables order reminder (but stays off)", async () => {
   renderEmailSettings();
 
-  const weeklyMenu = screen.getByLabelText("Weekly menu email");
-  const haventOrdered = screen.getByLabelText(/Haven.t ordered/);
+  const weeklyMenu = getToggle("Weekly menu");
+  const orderReminder = getToggle("Order reminder");
 
   // Turn off then back on
   await userEvent.click(weeklyMenu);
   await userEvent.click(weeklyMenu);
 
-  expect(weeklyMenu.checked).toBe(true);
-  expect(haventOrdered.checked).toBe(false); // was auto-cleared, stays off
-  expect(haventOrdered.disabled).toBe(false); // re-enabled
+  expect(weeklyMenu.getAttribute("aria-checked")).toBe("true");
+  expect(orderReminder.getAttribute("aria-checked")).toBe("false"); // was auto-cleared, stays off
+  expect(orderReminder.disabled).toBe(false); // re-enabled
 });
 
-test("day-of reminder toggles independently", async () => {
+test("pickup reminder toggles independently", async () => {
   renderEmailSettings();
 
-  const dayOf = screen.getByLabelText("Day-of pickup reminder");
-  expect(dayOf.checked).toBe(true);
+  const pickup = getToggle("Pickup reminder");
+  expect(pickup.getAttribute("aria-checked")).toBe("true");
 
-  await userEvent.click(dayOf);
-  expect(dayOf.checked).toBe(false);
+  await userEvent.click(pickup);
+  expect(pickup.getAttribute("aria-checked")).toBe("false");
 
-  await userEvent.click(dayOf);
-  expect(dayOf.checked).toBe(true);
+  await userEvent.click(pickup);
+  expect(pickup.getAttribute("aria-checked")).toBe("true");
 });
 
 test("back link calls onBack", async () => {
@@ -109,7 +102,7 @@ test("back link calls onBack", async () => {
 test("save button shows correct states", () => {
   renderEmailSettings();
 
-  const button = screen.getByRole("button", { name: "Save" });
+  const button = screen.getByRole("button", { name: "Save Preferences" });
   expect(button).toBeTruthy();
   expect(button.disabled).toBe(false);
 });
