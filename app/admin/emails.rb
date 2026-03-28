@@ -11,6 +11,8 @@ ActiveAdmin.register Ahoy::Message, as: "Email" do
   filter :user_id_equals
   filter :subject
   filter :sent_at
+  filter :job_id
+  filter :job_name
 
   index do
     selectable_column
@@ -31,6 +33,12 @@ ActiveAdmin.register Ahoy::Message, as: "Email" do
     column :opened_at
     column :clicked_at
     column :subject
+    column :job_name
+    column :job_id do |email|
+      if email.job_id
+        link_to email.job_id.first(8), "/jobs/applications/motzi/jobs/#{email.job_id}", title: email.job_id
+      end
+    end
     actions
   end
 end

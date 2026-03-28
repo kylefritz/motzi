@@ -3,88 +3,43 @@ require 'fileutils'
 require 'socket'
 require 'timeout'
 
-# path to your application root.
 APP_ROOT = File.expand_path('..', __dir__)
 
 def system!(*args)
   system(*args) || abort("\n== Command #{args} failed ==")
 end
 
-def service_listening?(host, port, timeout: 1)
-  Timeout.timeout(timeout) do
-    socket = TCPSocket.new(host, port)
-    socket.close
-    true
-  end
+def pg_listening?(host, port)
+  Timeout.timeout(1) { TCPSocket.new(host, port).close; true }
 rescue StandardError
   false
 end
 
-def command_exists?(command)
-  system("command -v #{command} >/dev/null 2>&1")
-end
-
-def system_mise(*args)
-  if command_exists?('mise')
-    system('mise', 'exec', '--', *args)
-  else
-    system(*args)
-  end
-end
-
-def system_mise!(*args)
-  system_mise(*args) || abort("\n== Command #{args} failed ==")
-end
-
-def skip_step?(name)
-  ENV[name] == '1'
-end
-
 FileUtils.chdir APP_ROOT do
-  # This script is a way to setup or update your development environment automatically.
-  # This script is idempotent, so that you can run it at anytime and get an expectable outcome.
-  # Add necessary setup steps to this file.
-
   puts '== Installing dependencies =='
-  if command_exists?('mise')
-    system! 'mise', 'install'
-  end
-
-  system_mise! 'gem', 'install', 'bundler', '--conservative'
-  system_mise('bundle', 'check') || system_mise!('bundle', 'install')
-
-  # Install JavaScript dependencies
-  system_mise! 'bun', 'install'
-
-  # puts "\n== Copying sample files =="
-  # unless File.exist?('config/database.yml')
-  #   FileUtils.cp 'config/database.yml.sample', 'config/database.yml'
-  # end
+  system! 'gem install bundler --conservative'
+  system('bundle check') || system!('bundle install')
+  system! 'bun install'
 
   puts "\n== Checking services =="
   pg_host = ENV.fetch('PGHOST', '127.0.0.1')
-  unless service_listening?(pg_host, 5432)
-    abort("\n== Postgres is not running on #{pg_host}:5432 (start postgres.app) ==")
+  unless pg_listening?(pg_host, 5432)
+    abort "\n== Postgres is not running on #{pg_host}:5432 (start postgres.app) =="
   end
 
   puts "\n== Preparing database =="
-    # Terminate stale connections that may hold advisory locks from interrupted migrations
-  db_name = ENV.fetch('DATABASE_NAME', 'motzi')
-  system_mise 'psql', '-c',
-              "SELECT pg_terminate_backend(pid) FROM pg_stat_activity " \
-              "WHERE datname = '#{db_name}' AND pid <> pg_backend_pid()",
-              db_name
-  db_task = ENV['DB_SETUP'] == '1' ? 'db:setup' : 'db:prepare'
-  system_mise! 'bin/rails', db_task
-  system_mise! 'bin/rails', 'solid_queue:bootstrap'
-
-  unless skip_step?('SKIP_LOG_CLEAR')
-    puts "\n== Removing old logs and tempfiles =="
-    system_mise! 'bin/rails', 'log:clear', 'tmp:clear'
+  pending = `bin/rails db:migrate:status 2>&1`.include?('down')
+  if pending
+    system 'bin/pg-terminate'
+    system! 'bin/rails', 'db:prepare'
+  else
+    puts "   No pending migrations"
   end
+  system! 'bin/rails', 'solid_queue:bootstrap'
 
-  unless skip_step?('SKIP_APP_RESTART')
-    puts "\n== Restarting application server =="
-    system_mise! 'bin/rails', 'restart'
-  end
+  puts "\n== Removing old logs and tempfiles =="
+  system! 'bin/rails', 'log:clear', 'tmp:clear'
+
+  puts "\n== Restarting application server =="
+  system! 'bin/rails', 'restart'
 end

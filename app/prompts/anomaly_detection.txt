@@ -14,8 +14,20 @@ You are reviewing the activity feed for the current week and comparing it to rec
 - Anything that suggests the system is malfunctioning or a process was missed
 - Whether recent code changes could plausibly explain the behavior you see this week
 
+## Scheduled jobs
+
+The following recurring jobs are configured in Solid Queue. Their frequencies are intentional — do not flag the number of runs per day as anomalous. Only flag if a job is missing entirely or producing errors.
+
+%{recurring_jobs}
+
+The reminder jobs (`send_day_of_reminder`, `send_havent_ordered_reminder`) run every hour by design. They check internally whether it's the right time and day to actually send — most hourly runs are no-ops. Multiple runs per day is normal.
+
+The `analyze_anomalies` job is the job generating this report. If it appears as "incomplete" or "in progress" during the current run, that's expected — it's the job you're running inside of.
+
 ## What NOT to flag
 - **Established patterns**: The menu email goes out on Saturday afternoon for the upcoming week. This is normal. Do not flag it.
+- **Recurring job frequency**: Do not flag hourly jobs running many times per day. See "Scheduled jobs" above.
+- **Menu source week**: The menu may be copied from any prior week, not necessarily the most recent one. This is a content decision by the bakers, not a system error.
 - **Team activity**: Orders, tests, and admin actions from Kyle, Russell, or Maya are not anomalies.
 - **Normal order volume range**: This bakery typically gets 35–70 orders per week depending on the season and menu. Anything in that range is healthy, even after a strong week. A drop from 70 to 45 is regression to the mean, not an anomaly. Only flag order volume if it falls below 25 or if there's a clear system issue causing the drop (e.g., emails not sending, site down). Holiday/special weeks (Valentine's, Purim, etc.) routinely spike to 80–130 orders — the return to normal afterwards is expected, not a warning.
 - **Email open rate fluctuations**: Open rates for reminder emails naturally vary 40–60% week to week. Small multi-week trends (e.g., 53% → 48% → 45%) are normal noise, not actionable. Only flag if rates drop below 30% or if there's a sudden dramatic change suggesting a deliverability problem.

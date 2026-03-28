@@ -1,9 +1,12 @@
 class SendDayOfReminderJob < ApplicationJob
   queue_as :default
+  limits_concurrency to: 1, key: "send_day_of_reminder"
 
   def perform(*args)
     return unless Setting.automated_reminder_emails?
     return unless (7..11).include?(Time.zone.now.hour) # 7a-11a
+
+    Rails.logger.info "[SendDayOfReminderJob] Starting job_id=#{job_id}"
 
     PickupDay.for_pickup_at(Time.zone.now).each do |pickup_day|
 
@@ -32,7 +35,9 @@ class SendDayOfReminderJob < ApplicationJob
         ReminderMailer.with(user: order.user,
                             menu: menu,
                             pickup_day: pickup_day,
-                            order_items: order_items_for_day
+                            order_items: order_items_for_day,
+                            job_id: job_id,
+                            job_name: self.class.name
                            ).day_of_email.deliver_now
         num_reminded += 1
       rescue => e
@@ -46,8 +51,23 @@ class SendDayOfReminderJob < ApplicationJob
         action: "day_of_reminder_sent",
         week_id: menu.week_id,
         description: "Day-of reminder sent to #{num_reminded} members for #{pickup_day.name_abbr}",
-        metadata: { menu_id: menu.id, pickup_day_id: pickup_day.id, count: num_reminded }
+        metadata: { menu_id: menu.id, pickup_day_id: pickup_day.id, count: num_reminded, job_id: job_id }
       )
     end
+
+    check_for_duplicates(menu, "ReminderMailer#day_of_email", pickup_day)
+  end
+
+  def check_for_duplicates(menu, mailer, pickup_day)
+    dupes = menu.messages.where(mailer: mailer, pickup_day: pickup_day)
+      .group(:user_id).having("COUNT(*) > 1").count
+    return if dupes.empty?
+
+    Rails.logger.warn "[SendDayOfReminderJob] DUPLICATE SENDS DETECTED: #{dupes.size} users received #{mailer} more than once for menu #{menu.id}, pickup_day #{pickup_day.id} (job_id=#{job_id})"
+    Sentry.capture_message(
+      "Duplicate reminder emails detected",
+      level: :warning,
+      extra: { mailer: mailer, menu_id: menu.id, pickup_day_id: pickup_day.id, duplicate_count: dupes.size, job_id: job_id }
+    ) if defined?(Sentry)
   end
 end

@@ -1,5 +1,6 @@
 class SendWeeklyMenuJob < ApplicationJob
   queue_as :default
+  limits_concurrency to: 1, key: "send_weekly_menu"
 
   def self.users_to_email_count(menu)
     users_to_email(menu).count
