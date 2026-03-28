@@ -6,6 +6,7 @@ class TrimAnalyticsJob < ApplicationJob
     cutoff = 90.days.ago
     events_deleted = Ahoy::Event.where("time < ?", cutoff).delete_all
     visits_deleted = Ahoy::Visit.where("started_at < ?", cutoff).delete_all
-    Rails.logger.info "[TrimAnalyticsJob] Deleted #{events_deleted} events and #{visits_deleted} visits older than #{cutoff.to_date}"
+    dyno_metrics_deleted = DynoMetric.where("recorded_at < ?", cutoff).delete_all
+    Rails.logger.info "[TrimAnalyticsJob] Deleted #{events_deleted} events, #{visits_deleted} visits, and #{dyno_metrics_deleted} dyno metrics older than #{cutoff.to_date}"
   end
 end

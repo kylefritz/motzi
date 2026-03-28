@@ -30,6 +30,10 @@ production:
     class: AnalyzeAnomaliesJob
     schedule: every day at 9pm America/New_York
 
+  capture_dyno_metrics:
+    class: CaptureDynoMetricsJob
+    schedule: every 4 hours
+
   capture_db_backup:
     class: CaptureDbBackupJob
     schedule: every Sunday at 3am America/New_York
