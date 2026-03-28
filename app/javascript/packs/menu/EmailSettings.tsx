@@ -273,7 +273,7 @@ export default function EmailSettings({ user, onBack }: EmailSettingsProps) {
         <ToggleRow
           id="receiveWeeklyMenu"
           label="Weekly menu"
-          description="See what's baking each week"
+          description="The weekly menu email"
           checked={prefs.receiveWeeklyMenu}
           onChange={() => toggle("receiveWeeklyMenu")}
         />
@@ -281,7 +281,7 @@ export default function EmailSettings({ user, onBack }: EmailSettingsProps) {
         <ToggleRow
           id="receiveHaventOrderedReminder"
           label="Order reminder"
-          description="A nudge if you haven't ordered yet"
+          description="Reminder if you haven't ordered yet"
           checked={prefs.receiveHaventOrderedReminder}
           disabled={!prefs.receiveWeeklyMenu}
           onChange={() => toggle("receiveHaventOrderedReminder")}
@@ -290,7 +290,7 @@ export default function EmailSettings({ user, onBack }: EmailSettingsProps) {
         <ToggleRow
           id="receiveDayOfReminder"
           label="Pickup reminder"
-          description="Don't forget to grab your bread!"
+          description="Day-of reminder to pick up your order"
           checked={prefs.receiveDayOfReminder}
           onChange={() => toggle("receiveDayOfReminder")}
           last
