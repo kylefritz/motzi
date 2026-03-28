@@ -74,5 +74,6 @@ class RecurringScheduleTest < ActiveSupport::TestCase
         seen_minutes[min] = name
       end
     end
+    assert seen_minutes.any?, "Expected at least one hourly job with a parsed minute"
   end
 end
