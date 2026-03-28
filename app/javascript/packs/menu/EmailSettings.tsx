@@ -21,7 +21,7 @@ const styles = {
     padding: "28px 32px",
     maxWidth: 440,
     margin: "0 auto",
-    boxShadow: "0 2px 8px rgba(53, 44, 99, 0.08)",
+    boxShadow: "none",
   } as React.CSSProperties,
   heading: {
     fontFamily: "'Oswald', sans-serif",
