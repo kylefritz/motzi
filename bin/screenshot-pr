@@ -1,3 +1,143 @@
-#!/usr/bin/env bash
-# Shortcut for: bin/screenshot --pr [args...]
-exec bin/screenshot --pr "$@"
+#!/usr/bin/env bun
+/**
+ * Take screenshots of multiple URLs, upload to S3, and update PR description.
+ *
+ * Usage:
+ *   bin/screenshot-pr <url> [url2] ...
+ *   bin/screenshot-pr --admin /admin/users /admin/users/1/edit
+ *   bin/screenshot-pr --device mobile /menu /menu?tab=email
+ *   bin/screenshot-pr --replace /menu
+ *
+ * Options:
+ *   --admin     Sign in as admin first
+ *   --device    Viewport: "mobile", "desktop", or WxH
+ *   --replace   Replace existing screenshots section (default: append)
+ *
+ * Screenshots are uploaded to s3://motzi/public/gh/pr-<N>/<nonce>/<filename>.png
+ * with a unique nonce per run to avoid caching issues.
+ */
+
+import { parseArgs } from "util";
+
+const S3_BUCKET = "motzi";
+const S3_REGION = "us-east-1";
+const S3_PUBLIC_BASE = `https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com`;
+
+const { values, positionals } = parseArgs({
+  args: Bun.argv.slice(2),
+  options: {
+    admin: { type: "boolean", default: false },
+    device: { type: "string" },
+    replace: { type: "boolean", default: false },
+  },
+  allowPositionals: true,
+  strict: true,
+});
+
+const urls = positionals;
+if (urls.length === 0) {
+  console.error(
+    "Usage: bin/screenshot-pr [--admin] [--device mobile] [--replace] <url> [url2] ..."
+  );
+  process.exit(1);
+}
+
+// Get PR number
+const prResult = Bun.spawnSync(["gh", "pr", "view", "--json", "number", "--jq", ".number"]);
+const prNumber = prResult.stdout.toString().trim();
+if (!prNumber) {
+  console.error("No PR found for current branch. Push and create a PR first.");
+  process.exit(1);
+}
+
+console.log(`PR #${prNumber}\n`);
+
+const nonce = Math.random().toString(36).substring(2, 10);
+const s3Prefix = `public/gh/pr-${prNumber}/${nonce}`;
+
+function sh(args: string[]): { ok: boolean; stdout: string } {
+  const result = Bun.spawnSync(args, { stdout: "pipe", stderr: "pipe" });
+  return {
+    ok: result.exitCode === 0,
+    stdout: result.stdout.toString().trim(),
+  };
+}
+
+let markdown = "";
+let failures = 0;
+
+for (const url of urls) {
+  const baseName =
+    url
+      .replace(/^https?:\/\/[^/]*/, "")
+      .replace(/^\//, "")
+      .replace(/\//g, "-")
+      .replace(/[^a-zA-Z0-9_.-]/g, "") || "page";
+  const displayName = url.replace(/^\//, "");
+  const deviceSuffix = values.device ? `--${values.device}` : "";
+  const filename = `${baseName}${deviceSuffix}`;
+  const localPath = `tmp/screenshots/${filename}.png`;
+  const s3Key = `${s3Prefix}/${filename}.png`;
+  const s3Url = `${S3_PUBLIC_BASE}/${s3Key}`;
+
+  // Take screenshot via bin/screenshot
+  const args = ["bun", "bin/screenshot"];
+  if (values.admin) args.push("--admin");
+  if (values.device) args.push("--device", values.device);
+  args.push(url, baseName);
+
+  const result = Bun.spawnSync(args, {
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+
+  if (result.exitCode !== 0) {
+    failures++;
+    continue;
+  }
+
+  // Upload to S3
+  const upload = sh(["aws", "s3", "cp", localPath, `s3://${S3_BUCKET}/${s3Key}`]);
+  if (!upload.ok) {
+    console.log(`  S3 upload failed for ${filename}`);
+    failures++;
+    continue;
+  }
+
+  console.log(`  ${s3Url}`);
+  markdown += `### ${displayName}\n![${displayName}](${s3Url})\n\n`;
+}
+
+if (!markdown) {
+  console.error("\nAll screenshots failed.");
+  process.exit(1);
+}
+
+// Update PR body
+const bodyResult = Bun.spawnSync(["gh", "pr", "view", "--json", "body", "--jq", ".body"]);
+const currentBody = bodyResult.stdout.toString().trim();
+const hasScreenshots = currentBody.includes("## Screenshots");
+
+let newBody: string;
+if (values.replace || !hasScreenshots) {
+  if (hasScreenshots && values.replace) {
+    console.log("\nReplacing existing screenshots section");
+  }
+  const cleanBody = currentBody.replace(/\n## Screenshots[\s\S]*$/, "");
+  newBody = `${cleanBody}\n## Screenshots\n\n${markdown}`;
+} else {
+  console.log("\nAppending to existing screenshots section");
+  newBody = `${currentBody}\n\n${markdown}`;
+}
+
+// Write body to temp file to avoid shell escaping issues
+const tmpFile = `/tmp/pr-body-${prNumber}.md`;
+Bun.write(tmpFile, newBody);
+Bun.spawnSync(["gh", "pr", "edit", prNumber, "--body-file", tmpFile]);
+
+const count = urls.length - failures;
+console.log(`\nPR #${prNumber} updated with ${count} screenshot(s)`);
+if (failures > 0) {
+  console.log(`${failures} screenshot(s) failed`);
+  process.exit(1);
+}
