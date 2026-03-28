@@ -477,7 +477,7 @@ ActiveAdmin.register_page "Activity Feed" do
     # Email panel removed — merged into "At a Glance" above
 
     # Dyno Memory
-    memory_summary = DynoMetric.summary_for_period(week_start, week_end)
+    memory_summary = DynoMetric.summary_for_period(week_start, week_start + 7.days)
     panel "Dyno Memory" do
       if memory_summary.any?
         table_for memory_summary.sort_by { |d, _| d }.map { |dyno, stats| OpenStruct.new(stats.merge(dyno: dyno)) } do
