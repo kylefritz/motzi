@@ -40,3 +40,4 @@ test/visual/screenshots/
 /test-results/
 /playwright-report/
 .worktrees/
+.remember/
