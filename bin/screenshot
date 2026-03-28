@@ -60,6 +60,9 @@ const deviceSlug = deviceName
   ? "--" + deviceName.toLowerCase().replace(/ /g, "-")
   : "";
 
+// Cache-bust: include a short timestamp so each run produces unique S3 keys
+const cacheBust = Math.floor(Date.now() / 1000).toString(36);
+
 // -- Helpers --
 
 function resolveUrl(url: string): string {
@@ -72,7 +75,7 @@ function urlToFilename(url: string): string {
     .replace(/^\//, "")
     .replace(/\//g, "-")
     .replace(/[^a-zA-Z0-9_.-]/g, "");
-  return (name || "page") + deviceSlug;
+  return (name || "page") + deviceSlug + "-" + cacheBust;
 }
 
 function sh(cmd: string): string {
