@@ -93,6 +93,10 @@ Feature work uses git worktrees in `.worktrees/`. When setting up a worktree:
 - **Symlink `.env`**: `ln -s ../../.env .env` (worktrees don't get untracked files)
 - **Bundler lockfile**: use `BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update` so bundler writes to the worktree, not the main repo
 
+## Session Start
+
+At the start of each conversation, launch the `heroku-logs-review` skill as a background agent to check for operational issues. Report findings before diving into work.
+
 ## Issues
 
 We track work in GitHub Issues (`gh issue list`). When wrapping up a conversation or between tasks, feel free to suggest an open issue that might be worth tackling next.
