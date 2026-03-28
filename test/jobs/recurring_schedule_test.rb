@@ -1,4 +1,5 @@
 require "test_helper"
+require "fugit"
 
 class RecurringScheduleTest < ActiveSupport::TestCase
   setup do
@@ -28,9 +29,15 @@ class RecurringScheduleTest < ActiveSupport::TestCase
     end
   end
 
-  test "all jobs have a schedule" do
+  test "all schedules parse as Fugit::Cron" do
     @production.each do |name, config|
-      assert config["schedule"].present?, "#{name} is missing a schedule"
+      schedule = config["schedule"]
+      assert schedule.present?, "#{name} is missing a schedule"
+
+      parsed = Fugit.parse(schedule, multi: :fail)
+      assert_instance_of Fugit::Cron, parsed,
+        "#{name} schedule '#{schedule}' did not parse as Fugit::Cron (got #{parsed.class}). " \
+        "Solid Queue will reject this and the worker will crash."
     end
   end
 
@@ -44,29 +51,26 @@ class RecurringScheduleTest < ActiveSupport::TestCase
   end
 
   test "no two jobs share the same minute to avoid resource contention" do
-    # Extract minutes from schedules for hourly+ jobs
     minutes_by_job = {}
 
     @production.each do |name, config|
-      schedule = config["schedule"]
+      parsed = Fugit::Cron.parse(config["schedule"]) || Fugit.parse(config["schedule"], multi: :fail)
+      next unless parsed.is_a?(Fugit::Cron)
 
-      # Parse cron-style (e.g., "3,33 * * * *")
-      if schedule.match?(/^\d/)
-        mins = schedule.split(" ").first.split(",")
-        minutes_by_job[name] = mins
-      # Parse "every hour at :05"
-      elsif (m = schedule.match(/every hour at :(\d+)/))
-        minutes_by_job[name] = [m[1]]
-      # Parse "every day at H:MMam/pm"
-      elsif (m = schedule.match(/at (\d+):(\d+)(am|pm)/))
-        minutes_by_job[name] = [m[2]]
-      end
+      mins = parsed.minutes
+      next unless mins # e.g. weekly jobs with no specific minute constraint
+
+      minutes_by_job[name] = mins.map(&:to_s)
     end
 
-    # Check for collisions among hourly jobs (jobs that run every hour)
-    hourly_jobs = minutes_by_job.select { |name, _| @production[name]["schedule"].include?("every hour") || @production[name]["schedule"].match?(/^\d/) }
+    # Check for collisions among frequently-running jobs (hourly or more)
+    frequent_jobs = minutes_by_job.select do |name, _|
+      schedule = @production[name]["schedule"]
+      schedule.include?("every hour") || schedule.match?(/^[\d,]+\s/)
+    end
+
     seen_minutes = {}
-    hourly_jobs.each do |name, mins|
+    frequent_jobs.each do |name, mins|
       mins.each do |min|
         if seen_minutes[min]
           flunk "Minute :#{min} collision between '#{seen_minutes[min]}' and '#{name}'"
@@ -74,6 +78,6 @@ class RecurringScheduleTest < ActiveSupport::TestCase
         seen_minutes[min] = name
       end
     end
-    assert seen_minutes.any?, "Expected at least one hourly job with a parsed minute"
+    assert seen_minutes.any?, "Expected at least one frequent job with a parsed minute"
   end
 end

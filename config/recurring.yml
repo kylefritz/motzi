@@ -16,11 +16,11 @@ production:
 
   send_day_of_reminder:
     class: SendDayOfReminderJob
-    schedule: every hour at :05
+    schedule: every hour at minute 5
 
   send_havent_ordered_reminder:
     class: SendHaventOrderedReminderJob
-    schedule: every hour at :15
+    schedule: every hour at minute 15
 
   trim_analytics:
     class: TrimAnalyticsJob
