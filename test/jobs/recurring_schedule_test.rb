@@ -3,7 +3,7 @@ require "fugit"
 
 class RecurringScheduleTest < ActiveSupport::TestCase
   setup do
-    @config = YAML.load_file(Rails.root.join("config/recurring.yml"))
+    @config = YAML.load_file(Rails.root.join("config/recurring.yml"), aliases: true)
     @production = @config.fetch("production")
   end
 
