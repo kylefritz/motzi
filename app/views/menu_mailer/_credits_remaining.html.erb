@@ -1,4 +1,4 @@
-<% if @user.subscriber? %>
+<% if @user.credits > 0 %>
 <mj-text font-size="13px" color="#999999" align="center" font-weight="300" padding-top="0" padding-bottom="0">
   You have <span style="font-weight: 500; color: #352C63;"><%= @user.credits %></span> credits remaining
 </mj-text>

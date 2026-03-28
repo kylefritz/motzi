@@ -22,7 +22,7 @@ export default function Order({ menu, user, order, onEditOrder }: OrderProps) {
     stripeChargeAmount,
   } = order;
 
-  const isSubscriptionOrder = _.get(user, "subscriber");
+  const isSubscriptionOrder = !stripeChargeAmount;
   return (
     <>
       <h2 id="menu-name">{name}</h2>

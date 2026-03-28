@@ -12,7 +12,7 @@ kyle:
   encrypted_password: <%= Devise::Encryptor.digest(User, 'robots') %>
   is_admin: true
   phone: 555-123-4567
-  subscriber: true
+  receive_weekly_menu: true
 
 adrian:
   first_name: Adrian
@@ -21,7 +21,7 @@ adrian:
   encrypted_password: <%= Devise::Encryptor.digest(User, 'donuts') %>
   additional_email: null
   is_admin: true
-  subscriber: true
+  receive_weekly_menu: true
 
 ljf:
   first_name: Laura
@@ -30,7 +30,7 @@ ljf:
   encrypted_password: <%= Devise::Encryptor.digest(User, 'sparkles') %>
   additional_email: null
   is_admin: false
-  subscriber: true
+  receive_weekly_menu: true
 
 russell:
   first_name: Russell
@@ -38,7 +38,7 @@ russell:
   email: <%= User::RUSSELL_EMAIL %>
   encrypted_password: <%= Devise::Encryptor.digest(User, 'bread') %>
   is_admin: true
-  subscriber: false
+  receive_weekly_menu: false
 
 maya:
   first_name: Maya
@@ -46,7 +46,7 @@ maya:
   email: <%= User::MAYA_EMAIL %>
   encrypted_password: <%= Devise::Encryptor.digest(User, 'wine') %>
   is_admin: true
-  subscriber: false
+  receive_weekly_menu: false
 
 jess:
   first_name: Jess
@@ -54,5 +54,5 @@ jess:
   email: jess@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, 'dry') %>
   is_admin: false
-  subscriber: true
+  receive_weekly_menu: true
   breads_per_week: 0.5

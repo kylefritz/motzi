@@ -24,7 +24,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     assert_equal order_attrs[:first_name], new_user.first_name
     assert_equal order_attrs[:last_name], new_user.last_name
     assert_equal order_attrs[:phone], new_user.phone
-    refute new_user.subscriber?, "created user isn't a subscriber"
+    refute new_user.receive_weekly_menu?, "created user doesn't receive weekly menu"
 
     new_order = Order.last
     refute_nil new_order.stripe_charge_id

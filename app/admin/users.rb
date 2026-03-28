@@ -1,7 +1,8 @@
 ActiveAdmin.register User do
   menu priority: 5
   permit_params :first_name, :last_name, :email, :additional_email, :is_admin, \
-    :subscriber, :opt_in, :breads_per_week, :phone, :password
+    :receive_weekly_menu, :receive_havent_ordered_reminder, :receive_day_of_reminder, \
+    :opt_in, :breads_per_week, :phone, :password
   config.sort_order = 'LOWER(first_name), LOWER(last_name)'
 
   filter :first_name
@@ -12,8 +13,7 @@ ActiveAdmin.register User do
   filter :opt_in
 
   scope :all, default: true
-  scope :subscribers
-  scope :nonsubscribers
+  scope :receive_weekly_menu
   scope :spam
   scope :owners
   scope :admin
@@ -46,7 +46,7 @@ ActiveAdmin.register User do
       para auto_link user, user.email
       small user.additional_email
     end
-    column :subscriber
+    column :receive_weekly_menu
     column :phone do |user|
       number_to_phone(user.phone)
     end
@@ -70,7 +70,9 @@ ActiveAdmin.register User do
     end
     inputs 'Danger Zone' do
       input :password
-      input :subscriber
+      input :receive_weekly_menu
+      input :receive_havent_ordered_reminder
+      input :receive_day_of_reminder
       input :is_admin
     end
     actions
@@ -119,7 +121,9 @@ ActiveAdmin.register User do
         number_to_phone(user.phone)
       end
       row :breads_per_week
-      row :subscriber
+      row :receive_weekly_menu
+      row :receive_havent_ordered_reminder
+      row :receive_day_of_reminder
       row :is_admin
       row :created_at
       row :updated_at

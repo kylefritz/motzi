@@ -8,8 +8,18 @@ class User < ApplicationRecord
   has_many :order_items, through: :orders
   has_many :visits, class_name: "Ahoy::Visit"
   has_paper_trail
-  scope :subscribers, -> { not_owners.where(subscriber: true) }
-  scope :nonsubscribers, -> { where(subscriber: false) }
+  # Users who receive the weekly menu email
+  scope :receive_weekly_menu, -> { not_owners.where(receive_weekly_menu: true) }
+
+  # Users who should receive the "haven't ordered" reminder.
+  # Gated by receive_weekly_menu because the reminder only makes sense
+  # if the user received the menu email in the first place.
+  scope :receive_havent_ordered_reminder, -> {
+    not_owners.where(receive_weekly_menu: true, receive_havent_ordered_reminder: true)
+  }
+
+  # Users who should receive the day-of pickup reminder
+  scope :receive_day_of_reminder, -> { not_owners.where(receive_day_of_reminder: true) }
   scope :opt_in, -> { where(opt_in: true) }
   scope :owners, -> {where(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
   scope :not_owners, -> {where.not(email: [MAYA_EMAIL, RUSSELL_EMAIL])}

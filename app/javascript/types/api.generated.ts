@@ -100,7 +100,9 @@ export type MenuResponse = {
     hashid: string;
     credits: number;
     breadsPerWeek: number;
-    subscriber: boolean;
+    receiveWeeklyMenu: boolean;
+    receiveHaventOrderedReminder: boolean;
+    receiveDayOfReminder: boolean;
   } | null;
   order: {
     items: Array<{

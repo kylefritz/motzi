@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { getDeadlineContext } from "./Contexts";
 import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
+import EmailSettings from "./EmailSettings";
 import type {
   CreditBundle,
   Menu as MenuType,
@@ -24,6 +25,7 @@ export type LayoutProps = {
   order: MenuOrder | null;
   setIsEditingOrder: React.Dispatch<React.SetStateAction<boolean>>;
   user: MenuUser | null;
+  initialTab?: string;
 };
 
 export default function Layout({
@@ -35,7 +37,12 @@ export default function Layout({
   order,
   setIsEditingOrder,
   user,
+  initialTab,
 }: LayoutProps) {
+  const [showEmailSettings, setShowEmailSettings] = useState(
+    initialTab === "email"
+  );
+
   if (error) {
     return (
       <>
@@ -47,6 +54,15 @@ export default function Layout({
 
   if (!menu) {
     return <h2 className="mt-5">loading...</h2>;
+  }
+
+  if (showEmailSettings && user) {
+    return (
+      <EmailSettings
+        user={user}
+        onBack={() => setShowEmailSettings(false)}
+      />
+    );
   }
 
   const orderingClosed = getDeadlineContext().allClosed(menu);
@@ -79,6 +95,7 @@ export default function Layout({
         menu,
         bundles,
         onCreateOrder: handleCreateOrder,
+        onShowEmailSettings: () => setShowEmailSettings(true),
       }}
     />
   );

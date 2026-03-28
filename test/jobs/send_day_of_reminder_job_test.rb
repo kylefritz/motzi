@@ -45,6 +45,12 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
     refute_reminders_emailed(:tues, '7:01 AM', 'dont send the second time')
   end
 
+  test "respects receive_day_of_reminder preference" do
+    users(:kyle).update!(receive_day_of_reminder: false)
+    # kyle has an order for tues, but opted out of day-of reminders
+    assert_reminders_emailed(1, :tues, '7:00 AM', 'only adrian gets reminded, not kyle')
+  end
+
   test "dont send reminders for pay it forward items" do
     # change all the items to pay it forward
     refute @tues.order_items.empty?

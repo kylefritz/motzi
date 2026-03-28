@@ -53,7 +53,7 @@ ActiveAdmin.register_page "Dashboard" do
             }
           end
 
-          subscribers = compute("Subscribers", User.subscribers)
+          subscribers = compute("Subscribers", User.receive_weekly_menu)
           mp_orders = Order.for_current_menu.marketplace.includes(order_items: :item)
           marketplace = {
             type: "Marketplace",
@@ -142,7 +142,7 @@ ActiveAdmin.register_page "Dashboard" do
 
       column do
         panel "New Users - last 2 weeks" do
-          users = User.unscoped.subscribers.where("created_at > ?", 2.weeks.ago).includes(:credit_items, orders: {order_items: :item}).order('created_at desc').limit(20)
+          users = User.unscoped.receive_weekly_menu.where("created_at > ?", 2.weeks.ago).includes(:credit_items, orders: {order_items: :item}).order('created_at desc').limit(20)
           credits = get_user_credits(users.map(&:id))
           table_for users do
             column ("user") { |u| u }

@@ -22,7 +22,7 @@ class SendHaventOrderedReminderJob < ApplicationJob
 
     num_reminded = 0
 
-    User.subscribers.find_each do |user|
+    User.receive_havent_ordered_reminder.find_each do |user|
       next if already_reminded.include?(user.id)
       next if already_ordered.include?(user.id)
 
