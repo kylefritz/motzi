@@ -217,6 +217,11 @@ class ActivityFeed
         lines << commits
         lines << ""
       end
+      memory = memory_metrics_text
+      if memory
+        lines << memory
+        lines << ""
+      end
     end
 
     es = email_summary
@@ -404,6 +409,27 @@ class ActivityFeed
     lines = ["== Code Changes =="]
     commits.reverse_each do |commit|
       lines << "  #{commit.committed_at.strftime('%-m/%-d')} #{commit.short_sha} #{commit.summary}" if commit.current_week
+    end
+    lines.join("\n")
+  end
+
+  def memory_metrics_text
+    summary = DynoMetric.summary_for_period(@week_start, @week_end)
+    return nil if summary.empty?
+
+    lines = ["== Dyno Memory =="]
+    all_errors = []
+    summary.sort_by { |dyno, _| dyno }.each do |dyno, stats|
+      parts = ["avg #{stats[:avg_memory_total]}MB", "max #{stats[:max_memory_total]}MB"]
+      parts << "(quota #{stats[:memory_quota]}MB)" if stats[:memory_quota]
+      r14_label = stats[:total_r14] > 0 ? "#{stats[:total_r14]} R14 events" : "0 R14 events"
+      lines << "  #{dyno}: #{parts.join(' / ')} — #{r14_label}"
+      all_errors.concat(stats[:errors]) if stats[:errors].any?
+    end
+    if all_errors.any?
+      lines << ""
+      lines << "== Application Errors (from Heroku logs) =="
+      all_errors.uniq.first(10).each { |e| lines << "  #{e}" }
     end
     lines.join("\n")
   end
@@ -680,17 +706,35 @@ class ActivityFeed
         label = MAILER_LABELS[mailer] || mailer
 
         if verbose
-          messages.each do |msg|
+          # Show duplicates (users who got the same email more than once) and a sample of normal sends.
+          # This gives Claude the signal to detect double-sends without listing every individual email.
+          by_user = messages.group_by { |m| m.user_id }
+          duplicates = by_user.select { |_, msgs| msgs.size > 1 }.values.flatten
+          sample = by_user.select { |_, msgs| msgs.size == 1 }.values.flatten.first(10)
+
+          (duplicates + sample).sort_by { |m| m.sent_at || m.created_at }.each do |msg|
             user_name = msg.user&.name || "Unknown"
             parts = ["sent #{msg.sent_at&.strftime('%-m/%d %l:%M%P')&.strip}"]
             parts << "opened #{msg.opened_at.strftime('%-m/%d %l:%M%P').strip}" if msg.opened_at
             parts << "clicked #{msg.clicked_at.strftime('%-m/%d %l:%M%P').strip}" if msg.clicked_at
+            dup_note = by_user[msg.user_id].size > 1 ? " [DUPLICATE — #{by_user[msg.user_id].size}x]" : ""
             events << Event.new(
               timestamp: msg.sent_at || msg.created_at,
               category: "email",
               action: "email_sent",
-              description: "#{label} to #{user_name} (#{parts.join(', ')})",
+              description: "#{label} to #{user_name} (#{parts.join(', ')})#{dup_note}",
               details: { source: "ahoy_message", id: msg.id, mailer: mailer }
+            )
+          end
+
+          omitted = messages.size - duplicates.size - sample.size
+          if omitted > 0
+            events << Event.new(
+              timestamp: messages.last.sent_at || messages.last.created_at,
+              category: "email",
+              action: "email_sent",
+              description: "#{label}: #{omitted} more normal sends omitted (see summary above)",
+              details: { source: "ahoy_messages", mailer: mailer }
             )
           end
         else

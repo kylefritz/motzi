@@ -2,13 +2,26 @@
 # Prompt tuning: use `rake ai:eval` to test against historical weeks.
 # See also: rake ai:full_prompt, rake ai:analysis, rake ai:history
 class AnomalyDetector
-  MODEL = "claude-opus-4-6"
-  # Per-token pricing (dollars per token)
-  INPUT_COST_PER_TOKEN = 5.0 / 1_000_000
-  OUTPUT_COST_PER_TOKEN = 25.0 / 1_000_000
+  # Per-token pricing (dollars per million tokens)
+  DEFAULT_MODEL = "claude-sonnet-4-6"
 
-  def self.estimate_cost(input_tokens, output_tokens)
-    (input_tokens * INPUT_COST_PER_TOKEN) + (output_tokens * OUTPUT_COST_PER_TOKEN)
+  MODEL_PRICING = {
+    "claude-opus-4-6"   => { input: 5.0, output: 25.0, label: "Opus 4.6" },
+    "claude-sonnet-4-6" => { input: 3.0, output: 15.0, label: "Sonnet 4.6" },
+    "claude-haiku-4-5"  => { input: 0.80, output: 4.0, label: "Haiku 4.5" }
+  }.freeze
+
+  def self.model
+    Setting.anomaly_model.presence || DEFAULT_MODEL
+  end
+
+  def self.model_label
+    MODEL_PRICING.dig(model, :label) || model
+  end
+
+  def self.estimate_cost(input_tokens, output_tokens, model_id = nil)
+    pricing = MODEL_PRICING[model_id || model] || MODEL_PRICING[DEFAULT_MODEL]
+    (input_tokens * pricing[:input] / 1_000_000) + (output_tokens * pricing[:output] / 1_000_000)
   end
 
   def initialize(week_id, comparison_weeks: 4, &on_progress)
@@ -25,7 +38,7 @@ class AnomalyDetector
       week_id: @week_id,
       result: result[:text],
       prompt_used: result[:prompt],
-      model_used: MODEL,
+      model_used: self.class.model,
       api_model: result[:model],
       input_tokens: result[:input_tokens],
       output_tokens: result[:output_tokens],
@@ -41,9 +54,9 @@ class AnomalyDetector
   # Run analysis and return results without persisting to the database.
   def run_analysis
     user_message = build_user_message
-    @on_progress.call("Sending to Claude (#{MODEL})…")
+    @on_progress.call("Sending to Claude (#{self.class.model_label})…")
     response = call_claude(user_message)
-    cost = self.class.estimate_cost(response[:input_tokens], response[:output_tokens])
+    cost = self.class.estimate_cost(response[:input_tokens], response[:output_tokens], self.class.model)
     response.merge(prompt: user_message, cost: cost)
   end
 
@@ -121,7 +134,7 @@ class AnomalyDetector
   def call_claude(user_message)
     client = Anthropic::Client.new
     response = client.messages.create(
-      model: MODEL,
+      model: self.class.model,
       max_tokens: 4096,
       system_: system_prompt,
       messages: [{role: "user", content: user_message}]

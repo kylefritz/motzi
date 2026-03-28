@@ -5,6 +5,7 @@ set -euo pipefail
 needs_setup=()
 
 # Check postgres
+echo "==> Checking postgres..."
 pg_host="${PGHOST:-127.0.0.1}"
 if ! ruby -e "require 'socket'; require 'timeout'; Timeout.timeout(1) { TCPSocket.new('$pg_host', 5432).close }" 2>/dev/null; then
   echo "ERROR: Postgres not running on ${pg_host}:5432 (start postgres.app)"
@@ -12,6 +13,7 @@ if ! ruby -e "require 'socket'; require 'timeout'; Timeout.timeout(1) { TCPSocke
 fi
 
 # Check port 3000
+echo "==> Checking port 3000..."
 if lsof -iTCP:3000 -sTCP:LISTEN -t > /dev/null 2>&1; then
   pid=$(lsof -iTCP:3000 -sTCP:LISTEN -t 2>/dev/null | head -1)
   echo "==> Port 3000 in use (pid $pid)"
@@ -26,18 +28,31 @@ if lsof -iTCP:3000 -sTCP:LISTEN -t > /dev/null 2>&1; then
 fi
 
 # Check bundle
+echo "==> Checking bundle..."
 bundle check > /dev/null 2>&1 || needs_setup+=("bundle outdated")
 
 # Check bun
+echo "==> Checking node_modules..."
 if [ ! -d node_modules ]; then
   needs_setup+=("node_modules missing")
 fi
 
-# Check pending migrations — run them inline with pg-terminate to avoid stalls
-if bin/rails db:migrate:status 2>&1 | grep -q 'down'; then
-  echo "==> Pending migrations detected, running db:prepare..."
+# Check pending migrations — use psql directly to avoid slow Rails boot
+echo "==> Checking migrations..."
+db_name="${DATABASE_URL:-motzi}"
+migration_files=$(find db/migrate -name '*.rb' 2>/dev/null | sed 's/.*\///' | sed 's/_.*//' | sort)
+applied=$(psql -d "$db_name" -t -A -c "SELECT version FROM schema_migrations ORDER BY version" 2>/dev/null)
+pending=false
+for version in $migration_files; do
+  if ! echo "$applied" | grep -q "^${version}$"; then
+    pending=true
+    break
+  fi
+done
+if [ "$pending" = true ]; then
+  echo "==> Pending migrations detected, running db:migrate..."
   bin/pg-terminate
-  bin/rails db:prepare
+  bin/rails db:migrate
 fi
 
 if [ ${#needs_setup[@]} -gt 0 ]; then

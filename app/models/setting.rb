@@ -14,6 +14,7 @@ class Setting < RailsSettings::Base
   field :credit_purchase_note, type: :string
   field :signup_form_note, type: :string
   field :accepting_subscribers, default: true, type: :boolean
+  field :anomaly_model, default: "claude-sonnet-4-6", type: :string
 
   def self.pickup_instructions_html
     Menu::MARKDOWN.render(Setting.pickup_instructions || '').html_safe

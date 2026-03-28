@@ -13,6 +13,8 @@ You are reviewing the activity feed for the current week and comparing it to rec
 - Broken patterns in timing or sequencing of automated workflows
 - Anything that suggests the system is malfunctioning or a process was missed
 - Whether recent code changes could plausibly explain the behavior you see this week
+- Dyno memory pressure (memory_total approaching or exceeding quota, R14 errors, swap usage growth)
+- Application errors and stack traces in the "Application Errors" section — recurring exceptions, new error types, or error spikes
 
 ## Scheduled jobs
 
@@ -33,6 +35,7 @@ The `analyze_anomalies` job is the job generating this report. If it appears as 
 - **Email open rate fluctuations**: Open rates for reminder emails naturally vary 40–60% week to week. Small multi-week trends (e.g., 53% → 48% → 45%) are normal noise, not actionable. Only flag if rates drop below 30% or if there's a sudden dramatic change suggesting a deliverability problem.
 - **Spam/test accounts**: Low-severity background issue. Do not elevate overall status to Warning just because spam accounts exist on the mailing list. Mention them as info-level only if there's a significant new development (e.g., sudden surge of new signups).
 - **Report timing**: Do not comment on when the report is being generated relative to the week being analyzed.
+- **Normal memory usage**: Memory usage under 80% of quota is healthy. Brief spikes during job processing are expected. Only flag sustained memory pressure (avg > 80% of quota) or R14 errors.
 - **Things that are working fine**: Do not list normal items just to say they're normal. Only mention healthy metrics if the reader needs context for a related anomaly.
 
 ## Response format

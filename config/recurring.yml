@@ -12,24 +12,28 @@
 production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(finished_before: 16.days.ago, sleep_between_batches: 0.3)"
-    schedule: at 4:15am every day
+    schedule: every day at 4:15am
 
   send_day_of_reminder:
     class: SendDayOfReminderJob
-    schedule: every hour
+    schedule: every hour at :05
 
   send_havent_ordered_reminder:
     class: SendHaventOrderedReminderJob
-    schedule: every hour
+    schedule: every hour at :15
 
   trim_analytics:
     class: TrimAnalyticsJob
-    schedule: at 4am every day
+    schedule: every day at 4:30am
 
   analyze_anomalies:
     class: AnalyzeAnomaliesJob
-    schedule: every day at 9pm America/New_York
+    schedule: every day at 9:21pm America/New_York
+
+  capture_dyno_metrics:
+    class: CaptureDynoMetricsJob
+    schedule: "3,33 * * * *"
 
   capture_db_backup:
     class: CaptureDbBackupJob
-    schedule: every Sunday at 3am America/New_York
+    schedule: every Sunday at 3:07am America/New_York

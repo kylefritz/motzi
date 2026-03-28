@@ -30,7 +30,6 @@ gem 'mjml-rails' # responsive email templates with MJML
 gem 'mrml' # Rust MJML binary (no Node dependency)
 gem 'mutex_m' # stdlib gem (Ruby 3.4 deprecation warning)
 gem 'naturalsort', :require => 'natural_sort_kernel' # implements a natural, human-friendly alphanumeric sort
-gem 'newrelic_rpm' # debugging to new relic
 gem 'octokit', '~> 10.0' # GitHub API for git commit history in anomaly detection
 gem 'olive_branch' # convert snake_case to camelCase for json
 gem 'paper_trail' # audits
@@ -55,7 +54,7 @@ group :development, :test do
   gem 'faker' # fake names
   gem 'json-schema' # make sure json objects have the right schema
   gem 'letter_opener_web' # nice place to preview emails
-  gem 'minitest' # test framework; keep unpinned so Rails can track supported versions
+  gem 'minitest', '~> 5.0' # pinned to 5.x — minitest 6 breaks parallel tests with DRb
 end
 
 group :development do

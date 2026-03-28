@@ -1,5 +1,5 @@
 class SpamDetector
-  MODEL = AnomalyDetector::MODEL
+  MODEL = "claude-haiku-4-5"
 
   def initialize(&on_progress)
     @on_progress = on_progress || ->(_msg) {}

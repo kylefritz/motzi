@@ -10,6 +10,18 @@ ActiveAdmin.register_page "Activity Feed" do
     render plain: text, content_type: "text/plain"
   end
 
+  page_action :set_model, method: :post do
+    model = params[:model]
+    if AnomalyDetector::MODEL_PRICING.key?(model)
+      Setting.anomaly_model = model
+      redirect_to admin_activity_feed_path(week_id: params[:week_id]),
+        notice: "Anomaly model changed to #{AnomalyDetector::MODEL_PRICING[model][:label]}."
+    else
+      redirect_to admin_activity_feed_path(week_id: params[:week_id]),
+        alert: "Unknown model: #{model}"
+    end
+  end
+
   # Analyze with Claude (enqueues background job)
   page_action :analyze, method: :post do
     week_id = params[:week_id] || Time.zone.now.week_id
@@ -56,7 +68,19 @@ ActiveAdmin.register_page "Activity Feed" do
           a "Prompt Preview", href: admin_activity_feed_prompt_preview_path(week_id: week_id), target: "_blank"
         end
 
-        analyze_tooltip = "Sends this week's verbose activity feed plus 4 prior weeks' summaries to Claude (#{AnomalyDetector::MODEL}). Claude compares order counts, email delivery rates, credit purchases, visitor traffic, and job runs against recent patterns to flag missing actions, unusual volumes, timing anomalies, or delivery problems. Results are emailed to the bakery operator."
+        current_model = AnomalyDetector.model
+        div class: "model-pills" do
+          AnomalyDetector::MODEL_PRICING.each do |model_id, info|
+            pricing = "$#{info[:input]}/$#{info[:output]} per 1M tokens"
+            if model_id == current_model
+              span info[:label], class: "model-pill active", title: pricing
+            else
+              a info[:label], href: admin_activity_feed_set_model_path(model: model_id, week_id: week_id), class: "model-pill", title: pricing, "data-method": :post
+            end
+          end
+        end
+
+        analyze_tooltip = "Sends this week's activity feed to Claude (#{AnomalyDetector.model_label}). Results are emailed to the bakery operator."
         div class: "analyze-area" do
           text_node button_to(
             "Analyze with Claude",
@@ -418,6 +442,17 @@ ActiveAdmin.register_page "Activity Feed" do
             end
           end
         end
+        # Claude analysis cost for this week
+        week_cost_cents = analyses.sum(:cost_cents)
+        if week_cost_cents > 0
+          div class: "glance-stat" do
+            div "Claude Cost", class: "glance-label"
+            div "$#{'%.2f' % (week_cost_cents / 100.0)}", class: "glance-num"
+            models_used = analyses.pluck(:model_used).uniq.map { |m| AnomalyDetector::MODEL_PRICING.dig(m, :label) || m }.join(", ")
+            div "#{analyses.size} report#{'s' if analyses.size != 1} · #{models_used}", class: "glance-detail"
+          end
+        end
+
         sorted_stats.each do |row|
           div class: "glance-stat" do
             div row[:label], class: "glance-label"
@@ -440,6 +475,46 @@ ActiveAdmin.register_page "Activity Feed" do
     end
 
     # Email panel removed — merged into "At a Glance" above
+
+    # Dyno Memory
+    memory_summary = DynoMetric.summary_for_period(week_start, week_start + 7.days)
+    panel "Dyno Memory" do
+      if memory_summary.any?
+        table_for memory_summary.sort_by { |d, _| d }.map { |dyno, stats| OpenStruct.new(stats.merge(dyno: dyno)) } do
+          column("Dyno") { |s| s.dyno }
+          column("Avg") { |s| "#{s.avg_memory_total}MB" }
+          column("Max") { |s| "#{s.max_memory_total}MB" }
+          column("Quota") { |s| s.memory_quota ? "#{s.memory_quota}MB" : "—" }
+          column("Usage") { |s|
+            next "—" unless s.memory_quota&.positive?
+            pct = (s.max_memory_total.to_f / s.memory_quota * 100).round
+            color = pct >= 90 ? "red" : pct >= 70 ? "orange" : "green"
+            span "#{pct}%", style: "color: #{color}; font-weight: bold"
+          }
+          column("Swap") { |s| s.max_memory_swap ? "#{s.max_memory_swap}MB" : "—" }
+          column("R14") { |s|
+            if s.total_r14 > 0
+              span s.total_r14, style: "color: red; font-weight: bold"
+            else
+              "0"
+            end
+          }
+          column("Samples") { |s| s.sample_count }
+        end
+        if memory_summary.values.any? { |s| s[:errors].any? }
+          div class: "dyno-errors" do
+            h4 "Application Errors"
+            ul do
+              memory_summary.values.flat_map { |s| s[:errors] }.uniq.first(10).each do |err|
+                li err, style: "font-family: monospace; font-size: 11px; word-break: break-all;"
+              end
+            end
+          end
+        end
+      else
+        para "No memory data yet. Data will appear after CaptureDynoMetricsJob runs.", class: "empty-state"
+      end
+    end
 
     # Admin events
     admin_events = events.select { |e| e.category == "admin" }
@@ -472,7 +547,7 @@ ActiveAdmin.register_page "Activity Feed" do
             end
 
             div class: "analysis-footer" do
-              cost = analysis.cost || AnomalyDetector.estimate_cost(analysis.input_tokens, analysis.output_tokens)
+              cost = analysis.cost || AnomalyDetector.estimate_cost(analysis.input_tokens, analysis.output_tokens, analysis.model_used)
               span do
                 span "Model", class: "meta-label"
                 text_node(analysis.api_model || analysis.model_used)

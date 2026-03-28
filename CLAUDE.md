@@ -93,6 +93,10 @@ Feature work uses git worktrees in `.worktrees/`. When setting up a worktree:
 - **Symlink `.env`**: `ln -s ../../.env .env` (worktrees don't get untracked files)
 - **Bundler lockfile**: use `BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update` so bundler writes to the worktree, not the main repo
 
+## Session Start
+
+At the start of each conversation, launch the `heroku-logs-review` skill as a background agent to check for operational issues. Report findings before diving into work.
+
 ## Issues
 
 We track work in GitHub Issues (`gh issue list`). Use GH issues for feature specs and planning — don't store design docs in the repo. When wrapping up a conversation or between tasks, feel free to suggest an open issue that might be worth tackling next.
@@ -109,4 +113,4 @@ We track work in GitHub Issues (`gh issue list`). Use GH issues for feature spec
 
 ## After push
 
-- Check GitHub Actions status in the background after pushing: `gh run list --branch $(git branch --show-current) --workflow CI --limit 1 --json databaseId --jq '.[0].databaseId' | xargs gh run watch --exit-status`. If anything fails, investigate and fix.
+- Check GitHub Actions status in the background after pushing: `gh run list --branch $(git branch --show-current) --limit 5 --json databaseId,status --jq '.[] | select(.status != "completed") | .databaseId' | xargs -I{} gh run watch {} --exit-status`. If anything fails, investigate and fix.
