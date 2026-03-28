@@ -31,7 +31,7 @@ class SendWeeklyMenuJob < ApplicationJob
     ActivityEvent.log(
       action: "weekly_menu_email_sent",
       week_id: menu.week_id,
-      description: "Weekly menu email queued for #{count} subscribers",
+      description: "Weekly menu email queued for #{count} recipients",
       metadata: { menu_id: menu.id, count: count }
     )
 

@@ -32,6 +32,10 @@ class User < ApplicationRecord
   before_validation do
     self.email = self.email.strip.downcase
   end
+  before_save :clear_dependent_email_preferences
+  def clear_dependent_email_preferences
+    self.receive_havent_ordered_reminder = false unless receive_weekly_menu
+  end
 
   def credits
     SqlQuery.new(:user_credits, user_ids: [self.id]).execute.first["credit_balance"]

@@ -1,1 +1,3 @@
+<% if @user.present? %>
 Manage email preferences: <%= current_menu_url(uid: @user.hashid, tab: 'email') %>
+<% end %>

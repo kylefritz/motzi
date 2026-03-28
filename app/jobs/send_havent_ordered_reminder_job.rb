@@ -39,7 +39,7 @@ class SendHaventOrderedReminderJob < ApplicationJob
       ActivityEvent.log(
         action: "havent_ordered_reminder_sent",
         week_id: menu.week_id,
-        description: "Haven't-ordered reminder sent to #{num_reminded} subscribers",
+        description: "Haven't-ordered reminder sent to #{num_reminded} recipients",
         metadata: { menu_id: menu.id, count: num_reminded, job_id: job_id }
       )
     end
