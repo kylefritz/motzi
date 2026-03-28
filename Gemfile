@@ -30,7 +30,6 @@ gem 'mjml-rails' # responsive email templates with MJML
 gem 'mrml' # Rust MJML binary (no Node dependency)
 gem 'mutex_m' # stdlib gem (Ruby 3.4 deprecation warning)
 gem 'naturalsort', :require => 'natural_sort_kernel' # implements a natural, human-friendly alphanumeric sort
-gem 'newrelic_rpm' # debugging to new relic
 gem 'octokit', '~> 10.0' # GitHub API for git commit history in anomaly detection
 gem 'olive_branch' # convert snake_case to camelCase for json
 gem 'paper_trail' # audits
