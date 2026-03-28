@@ -34,6 +34,15 @@ class EmailPreferencesControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test "rejects update with bogus hashid" do
+    patch email_preferences_path, params: {
+      uid: "totally_bogus_hashid",
+      receive_weekly_menu: false
+    }, as: :json
+
+    assert_response :unauthorized
+  end
+
   test "update preferences with devise login" do
     user = users(:kyle)
     sign_in user
