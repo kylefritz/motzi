@@ -1,87 +1,228 @@
-#!/usr/bin/env bash
-#
-# Take a screenshot of a local dev URL and upload it to S3.
-#
-# Usage:
-#   bin/screenshot <url> [filename]
-#   bin/screenshot /404 error-404
-#   bin/screenshot /menu                    # auto-names as "menu"
-#   bin/screenshot /admin/error_feedbacks   # auto-names as "admin-error_feedbacks"
-#
-# Screenshots are saved locally to ~/Desktop/screenshots/ and uploaded to
-# s3://motzi/public/gh/pr-<NUMBER>/<filename>.png (if on a PR branch)
-# or s3://motzi/public/gh/screenshots/<filename>.png (if not).
-#
-# Outputs the public S3 URL for use in PR descriptions.
-#
-# Requirements: npx playwright, aws cli
+#!/usr/bin/env bun
+//
+// Take screenshots of local dev URLs and optionally attach to a PR.
+//
+// Usage:
+//   bin/screenshot <url> [url2] ...           Screenshot URLs, upload to S3
+//   bin/screenshot --pr <url> [url2] ...      Screenshot and attach to current PR
+//   bin/screenshot --pr --replace <url> ...   Replace existing PR screenshots
+//   bin/screenshot --device "iPhone 14" ...   Emulate a device viewport
+//   bin/screenshot --admin ...                Log in as admin first (shared session)
+//
+// Requirements: playwright (dev dep), aws cli, gh cli (for --pr)
 
-set -euo pipefail
+import { chromium, type Page, type BrowserContext } from "playwright";
+import { execSync } from "child_process";
+import { mkdirSync, statSync } from "fs";
+import { join } from "path";
+import { parseArgs } from "util";
 
-URL="${1:?Usage: bin/screenshot <url-or-path> [filename]}"
-FILENAME="${2:-}"
+const DEVICES: Record<string, { width: number; height: number }> = {
+  "iphone 14": { width: 390, height: 844 },
+  "iphone 13": { width: 390, height: 844 },
+  "iphone 12": { width: 390, height: 844 },
+  "iphone 14 pro max": { width: 430, height: 932 },
+  "iphone se": { width: 375, height: 667 },
+  "pixel 7": { width: 412, height: 915 },
+};
 
-# Resolve relative paths to localhost
-if [[ "$URL" == /* ]]; then
-  FULL_URL="http://localhost:3000${URL}"
-else
-  FULL_URL="$URL"
-fi
+const BASE_URL = "http://localhost:3000";
+const S3_BUCKET = "motzi";
+const S3_REGION = "us-east-1";
+const SCREENSHOT_DIR = join(process.env.HOME!, "Desktop", "screenshots");
 
-# Auto-generate filename from URL path if not provided
-if [[ -z "$FILENAME" ]]; then
-  FILENAME=$(echo "$URL" | sed 's|^https\?://[^/]*||' | sed 's|^/||' | sed 's|/|-|g' | sed 's|[^a-zA-Z0-9_-]||g')
-  [[ -z "$FILENAME" ]] && FILENAME="page"
-fi
+// -- Parse args --
 
-# Ensure .png extension
-FILENAME="${FILENAME%.png}"
+const { values, positionals } = parseArgs({
+  args: process.argv.slice(2),
+  options: {
+    device: { type: "string" },
+    pr: { type: "boolean", default: false },
+    replace: { type: "boolean", default: false },
+    admin: { type: "boolean", default: false },
+  },
+  allowPositionals: true,
+});
 
-# Local save directory
-LOCAL_DIR="$HOME/Desktop/screenshots"
-mkdir -p "$LOCAL_DIR"
-LOCAL_PATH="${LOCAL_DIR}/${FILENAME}.png"
+const urls = positionals;
+if (urls.length === 0) {
+  console.log(
+    "Usage: bin/screenshot [--pr] [--replace] [--admin] [--device <name>] <url> [url2] ..."
+  );
+  process.exit(1);
+}
 
-# Take screenshot with Playwright
-echo "📸 Taking screenshot of ${FULL_URL}..."
-if ! npx --yes playwright screenshot --full-page "${FULL_URL}" "${LOCAL_PATH}"; then
-  echo "❌ Screenshot failed for ${FULL_URL}"
-  exit 1
-fi
+const deviceName = values.device;
+const viewport = deviceName
+  ? DEVICES[deviceName.toLowerCase()] ?? { width: 1280, height: 900 }
+  : { width: 1280, height: 900 };
+const deviceSlug = deviceName
+  ? "--" + deviceName.toLowerCase().replace(/ /g, "-")
+  : "";
 
-if [[ ! -s "$LOCAL_PATH" ]]; then
-  echo "❌ Screenshot file is empty or missing: ${LOCAL_PATH}"
-  exit 1
-fi
+// -- Helpers --
 
-echo "   Saved to ${LOCAL_PATH} ($(du -h "$LOCAL_PATH" | cut -f1))"
+function resolveUrl(url: string): string {
+  return url.startsWith("/") ? BASE_URL + url : url;
+}
 
-# Determine S3 path — organize by PR number if on a branch with a PR
-PR_NUMBER=$(gh pr view --json number --jq .number 2>/dev/null || echo "")
-if [[ -n "$PR_NUMBER" ]]; then
-  S3_KEY="public/gh/pr-${PR_NUMBER}/${FILENAME}.png"
-else
-  S3_KEY="public/gh/screenshots/${FILENAME}.png"
-fi
+function urlToFilename(url: string): string {
+  const name = url
+    .replace(/^https?:\/\/[^/]*/, "")
+    .replace(/^\//, "")
+    .replace(/\//g, "-")
+    .replace(/[^a-zA-Z0-9_.-]/g, "");
+  return (name || "page") + deviceSlug;
+}
 
-# Upload to S3
-S3_URL="https://motzi.s3.us-east-1.amazonaws.com/${S3_KEY}"
-echo "☁️  Uploading to s3://motzi/${S3_KEY}..."
-if ! aws s3 cp "${LOCAL_PATH}" "s3://motzi/${S3_KEY}"; then
-  echo "❌ S3 upload failed"
-  exit 1
-fi
+function sh(cmd: string): string {
+  return execSync(cmd, { encoding: "utf-8" }).trim();
+}
 
-# Verify the upload is publicly accessible
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$S3_URL")
-if [[ "$HTTP_STATUS" != "200" ]]; then
-  echo "❌ Upload succeeded but URL returned HTTP ${HTTP_STATUS}: ${S3_URL}"
-  exit 1
-fi
+function shSafe(cmd: string): string | null {
+  try {
+    return sh(cmd);
+  } catch {
+    return null;
+  }
+}
 
-echo "   ✓ ${S3_URL}"
+// -- Screenshot --
 
-# Output markdown for easy pasting
-echo ""
-echo "Markdown:"
-echo "![${FILENAME}](${S3_URL})"
+type Result = {
+  url: string;
+  filename: string;
+  localPath: string;
+  s3Url?: string;
+};
+
+async function takeScreenshots(): Promise<Result[]> {
+  mkdirSync(SCREENSHOT_DIR, { recursive: true });
+
+  const browser = await chromium.launch();
+  const context = await browser.newContext({ viewport });
+  const page = await context.newPage();
+
+  if (values.admin) {
+    console.log("🔑 Logging in as admin...");
+    await page.goto(`${BASE_URL}/dev/login_as_admin`);
+    await page.waitForLoadState("networkidle");
+  }
+
+  const results: Result[] = [];
+
+  for (const url of urls) {
+    const filename = urlToFilename(url);
+    const localPath = join(SCREENSHOT_DIR, `${filename}.png`);
+    const fullUrl = resolveUrl(url);
+    const label = `${url}${deviceName ? ` (${deviceName})` : ""}`;
+
+    try {
+      await page.goto(fullUrl);
+      await page.waitForLoadState("networkidle");
+      await page.screenshot({ path: localPath, fullPage: true });
+      console.log(`📸 ${label}`);
+      results.push({ url, filename, localPath });
+    } catch (e: any) {
+      console.log(`📸 ${label} ❌ ${e.message}`);
+    }
+  }
+
+  await browser.close();
+  return results;
+}
+
+async function uploadToS3(
+  results: Result[],
+  prNumber?: string
+): Promise<Result[]> {
+  const uploaded: Result[] = [];
+
+  for (const result of results) {
+    const s3Key = prNumber
+      ? `public/gh/pr-${prNumber}/${result.filename}.png`
+      : `public/gh/screenshots/${result.filename}.png`;
+    const s3Url = `https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com/${s3Key}`;
+
+    try {
+      sh(`aws s3 cp "${result.localPath}" "s3://${S3_BUCKET}/${s3Key}"`);
+      const status = sh(
+        `curl -s -o /dev/null -w "%{http_code}" "${s3Url}"`
+      );
+      if (status !== "200") {
+        console.log(`   ❌ Upload succeeded but URL returned HTTP ${status}`);
+        continue;
+      }
+      console.log(`   ✓ ${s3Url}`);
+      uploaded.push({ ...result, s3Url });
+    } catch {
+      console.log(`   ❌ S3 upload failed for ${result.filename}`);
+    }
+  }
+
+  return uploaded;
+}
+
+function updatePrBody(prNumber: string, results: Result[]) {
+  const markdown = results
+    .map((r) => {
+      const displayName = r.url.replace(/^\//, "");
+      return `### ${displayName}\n![${displayName}](${r.s3Url})`;
+    })
+    .join("\n\n");
+
+  const currentBody = sh(`gh pr view ${prNumber} --json body --jq .body`);
+  const hasScreenshots = currentBody.includes("## Screenshots");
+
+  let newBody: string;
+  if (values.replace || !hasScreenshots) {
+    if (hasScreenshots && values.replace) {
+      console.log("⚠️  Replacing existing screenshots section");
+    }
+    const cleanBody = currentBody.replace(/\n## Screenshots[\s\S]*$/, "");
+    newBody = `${cleanBody}\n## Screenshots\n\n${markdown}`;
+  } else {
+    console.log("📎 Appending to existing screenshots section");
+    newBody = `${currentBody}\n\n${markdown}`;
+  }
+
+  // Write body to temp file to avoid shell escaping issues
+  const tmpFile = `/tmp/pr-body-${prNumber}.md`;
+  Bun.write(tmpFile, newBody);
+  sh(`gh pr edit ${prNumber} --body-file "${tmpFile}"`);
+}
+
+// -- Main --
+
+const results = await takeScreenshots();
+if (results.length === 0) {
+  console.log("\n❌ All screenshots failed.");
+  process.exit(1);
+}
+
+let prNumber: string | undefined;
+if (values.pr) {
+  prNumber = shSafe("gh pr view --json number --jq .number");
+  if (!prNumber) {
+    console.log(
+      "❌ No PR found for current branch. Push and create a PR first."
+    );
+    process.exit(1);
+  }
+  console.log(`📋 PR #${prNumber}\n`);
+}
+
+const uploaded = await uploadToS3(results, prNumber);
+
+if (values.pr && prNumber && uploaded.length > 0) {
+  updatePrBody(prNumber, uploaded);
+  console.log(`\n✅ PR #${prNumber} updated with ${uploaded.length} screenshot(s)`);
+} else if (!values.pr && uploaded.length > 0) {
+  console.log("\nMarkdown:");
+  for (const r of uploaded) {
+    console.log(`![${r.filename}](${r.s3Url})`);
+  }
+} else {
+  console.log("\n❌ No screenshots uploaded.");
+  process.exit(1);
+}
