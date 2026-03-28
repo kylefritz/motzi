@@ -7,8 +7,8 @@ system:
 kyle:
   first_name: Kyle
   last_name: Fritz
-  email: kyle.p.fritz@gmail.com
-  additional_email: meghan.l.ames@gmail.com
+  email: <%= User::KYLE_EMAIL %>
+  additional_email: meg@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, 'robots') %>
   is_admin: true
   phone: 555-123-4567
@@ -17,7 +17,7 @@ kyle:
 adrian:
   first_name: Adrian
   last_name: Alday
-  email: adrian.alday@gmail.com
+  email: adrian@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, 'donuts') %>
   additional_email: null
   is_admin: true
@@ -26,14 +26,14 @@ adrian:
 ljf:
   first_name: Laura
   last_name: Flamm
-  email: laura.flamm@gmail.com
+  email: laura@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, 'sparkles') %>
   additional_email: null
   is_admin: false
   subscriber: true
 
-russel:
-  first_name: Russel
+russell:
+  first_name: Russell
   last_name: Trimmer
   email: <%= User::RUSSELL_EMAIL %>
   encrypted_password: <%= Devise::Encryptor.digest(User, 'bread') %>
@@ -51,7 +51,7 @@ maya:
 jess:
   first_name: Jess
   last_name: Smith
-  email: jess@gmail.com
+  email: jess@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, 'dry') %>
   is_admin: false
   subscriber: true
