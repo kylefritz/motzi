@@ -645,8 +645,9 @@ body.admin_activity_feed {
     padding: 6px 10px 4px;
     border-bottom: 2px solid #e8e2da;
     text-align: left;
+    white-space: nowrap;
   }
-  th:first-child { width: 110px; white-space: nowrap; }
+  th:first-child { width: 100px; }
 
   td {
     padding: 6px 10px;
@@ -661,7 +662,6 @@ body.admin_activity_feed {
   }
 
   .cell-item {
-    white-space: nowrap;
     padding: 1px 0;
     line-height: 1.3;
   }

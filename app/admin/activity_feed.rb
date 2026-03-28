@@ -375,7 +375,7 @@ ActiveAdmin.register_page "Activity Feed" do
       end
       if commits.any?
         div class: "commit-list" do
-          commits.each do |commit|
+          commits.reverse_each do |commit|
             div class: "commit-card #{'is-current-week' if commit.current_week}" do
               div class: "commit-meta" do
                 span commit.committed_at.strftime("%a %-m/%-d %l:%M%P").strip, class: "commit-time"

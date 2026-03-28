@@ -5,11 +5,11 @@ class ActivityFeed
   Commit = Struct.new(:sha, :short_sha, :summary, :committed_at, :url, :current_week, keyword_init: true)
 
   RECURRING_JOB_LABELS = {
-    "SendDayOfReminderJob" => "Day-of reminder job",
-    "SendHaventOrderedReminderJob" => "Haven't-ordered reminder job",
-    "SendWeeklyMenuJob" => "Weekly menu email job",
-    "AnalyzeAnomaliesJob" => "Anomaly analysis job",
-    "SolidQueue::RecurringJob" => "Recurring command"
+    "SendDayOfReminderJob" => "Day-of reminder",
+    "SendHaventOrderedReminderJob" => "Haven't-ordered reminder",
+    "SendWeeklyMenuJob" => "Weekly menu email",
+    "AnalyzeAnomaliesJob" => "Anomaly analysis",
+    "SolidQueue::RecurringJob" => "Cleanup (finished jobs)"
   }.freeze
 
   MAILER_LABELS = {
@@ -94,12 +94,13 @@ class ActivityFeed
     grid
   end
 
-  # All unique action names across the week, in display order
+  # Columns shown in the daily grid — only the core metrics.
+  # Admin events (menu_created, menu_copied, etc.) appear in the Admin Events panel instead.
+  GRID_COLUMNS = %w[daily_visits orders_summary credits_summary email_summary recurring_jobs_summary].freeze
+
   def grid_columns
     actions = summary.map(&:action).uniq
-    # Preferred order, then anything else
-    preferred = %w[daily_visits orders_summary credits_summary email_summary recurring_jobs_summary]
-    (preferred & actions) + (actions - preferred)
+    GRID_COLUMNS & actions
   end
 
   GRID_COLUMN_LABELS = {
@@ -107,7 +108,7 @@ class ActivityFeed
     "orders_summary" => "Orders",
     "credits_summary" => "Credits",
     "email_summary" => "Emails",
-    "recurring_jobs_summary" => "Jobs"
+    "recurring_jobs_summary" => "Recurring Jobs"
   }.freeze
 
   def headline_metrics(lookback: 4)
@@ -192,7 +193,7 @@ class ActivityFeed
   def git_commits(limit: 8)
     commits = github_commits
     commits = local_git_commits if commits.empty?
-    commits.first(limit)
+    commits.last(limit)
   end
 
   def to_text(verbose: false, header: true)
@@ -402,7 +403,7 @@ class ActivityFeed
 
     lines = ["== Code Changes =="]
     commits.reverse_each do |commit|
-      lines << "  #{commit.committed_at.strftime('%-m/%-d')} #{commit.short_sha} #{commit.summary}"
+      lines << "  #{commit.committed_at.strftime('%-m/%-d')} #{commit.short_sha} #{commit.summary}" if commit.current_week
     end
     lines.join("\n")
   end
