@@ -21,7 +21,9 @@ bin/rails solid_queue:bootstrap solid_cable:bootstrap
 echo "==> Running migrations..."
 bin/rails db:migrate
 
-echo "==> Downloading menu images from S3..."
-bin/rails s3:download
+if [[ " $* " == *" --images "* ]] || [[ " $* " == *" --images" ]]; then
+  echo "==> Downloading menu images from S3..."
+  bin/rails s3:download
+fi
 
 echo "==> Done. Local database is loaded with prod data."

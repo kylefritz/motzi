@@ -11,9 +11,14 @@ ActiveAdmin.register User do
   filter :additional_email
   filter :phone
   filter :mailing_list
+  filter :receive_weekly_menu
+  filter :receive_havent_ordered_reminder
+  filter :receive_day_of_reminder
 
   scope :all, default: true
   scope :receive_weekly_menu
+  scope :receive_havent_ordered_reminder
+  scope :receive_day_of_reminder
   scope :spam
   scope :owners
   scope :admin
@@ -46,7 +51,9 @@ ActiveAdmin.register User do
       para auto_link user, user.email
       small user.additional_email
     end
-    column :receive_weekly_menu
+    column "Weekly Menu", :receive_weekly_menu
+    column "Havent Ordered Reminder", :receive_havent_ordered_reminder
+    column "Day Of Reminder", :receive_day_of_reminder
     column :phone do |user|
       number_to_phone(user.phone)
     end
@@ -154,6 +161,26 @@ ActiveAdmin.register User do
         column :to
         column :subject
         column :mailer
+      end
+    end
+
+    panel "Version History" do
+      table_for user.versions.order(created_at: :desc) do
+        column :created_at
+        column :event
+        column :whodunnit do |v|
+          if v.whodunnit.present?
+            admin = User.find_by(id: v.whodunnit)
+            admin ? auto_link(admin, admin.name) : v.whodunnit
+          end
+        end
+        column :changes do |v|
+          if v.changeset.present?
+            v.changeset.except("updated_at", "encrypted_password").map do |attr, (old_val, new_val)|
+              "#{attr}: #{old_val.inspect} → #{new_val.inspect}"
+            end.join(", ")
+          end
+        end
       end
     end
 

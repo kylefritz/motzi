@@ -7,8 +7,8 @@ namespace :s3 do
     bucket = "motzi"
     objects = Aws::S3::Client.new.list_objects(bucket: bucket).contents
 
-    # skip the variants; made on demand
-    objects = objects.reject { |o| o.key.starts_with?("variants") }
+    # skip variants (regenerated on demand) and public/ (PR screenshots, not Active Storage)
+    objects = objects.reject { |o| o.key.starts_with?("variants") || o.key.starts_with?("public/") }
 
     puts "Saving s3 objects to local disk"
     bar = ProgressBar.new(objects.count)

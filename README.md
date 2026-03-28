@@ -14,6 +14,12 @@ STRIPE_PUBLISHABLE_KEY=...
 
 Real data from prod: `bin/seed_local`
 
+To also download item images from S3 (requires AWS credentials):
+
+```
+bin/seed_local --images
+```
+
 Start everything: `bin/dev`
 
 Background jobs use Solid Queue. Run workers with:
