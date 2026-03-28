@@ -418,6 +418,16 @@ ActiveAdmin.register_page "Activity Feed" do
             end
           end
         end
+        # Claude analysis cost for this week
+        week_cost_cents = analyses.sum(:cost_cents)
+        if week_cost_cents > 0
+          div class: "glance-stat" do
+            div "Claude Cost", class: "glance-label"
+            div "$#{'%.2f' % (week_cost_cents / 100.0)}", class: "glance-num"
+            div "#{analyses.size} report#{'s' if analyses.size != 1} this week", class: "glance-detail"
+          end
+        end
+
         sorted_stats.each do |row|
           div class: "glance-stat" do
             div row[:label], class: "glance-label"
