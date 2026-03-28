@@ -40,11 +40,12 @@ class CaptureDynoMetricsJob < ApplicationJob
 
   def fetch_recent_logs(api_key)
     session = create_log_session(api_key)
-    logplex_url = session["logplex_url"]
+    logplex_url = session["logplex_url"] || raise("LogSession response missing logplex_url")
 
     uri = URI(logplex_url)
     Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, open_timeout: 10, read_timeout: 30) do |http|
       response = http.request(Net::HTTP::Get.new(uri))
+      raise "Logplex returned #{response.code}" unless response.is_a?(Net::HTTPSuccess)
       response.body || ""
     end
   end
@@ -92,8 +93,7 @@ class CaptureDynoMetricsJob < ApplicationJob
       elsif line.include?("Error R14")
         dyno = line[/heroku\[(\S+)\]/, 1]
         samples[dyno][:r14_count] += 1 if dyno
-      elsif line.match?(/Error|Exception|FATAL|ActionView::Template::Error|ActiveRecord/)
-        # Skip Sentry noise and known non-errors
+      elsif line.match?(/(?:Error|Exception|FATAL)\b/) && !line.include?("sample#")
         next if line.include?("sentry") || line.include?("Discarding") || line.include?("rate limiting")
         dyno = line[/app\[(\S+)\]/, 1] || line[/heroku\[(\S+)\]/, 1]
         next unless dyno

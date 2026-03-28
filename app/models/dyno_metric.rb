@@ -6,9 +6,10 @@ class DynoMetric < ApplicationRecord
   def self.summary_for_period(start_time, end_time)
     records = where(recorded_at: start_time..end_time)
     records.group_by(&:dyno).transform_values do |metrics|
+      totals = metrics.map(&:memory_total).compact
       {
-        avg_memory_total: (metrics.sum(&:memory_total) / metrics.size).round,
-        max_memory_total: metrics.map(&:memory_total).max.round,
+        avg_memory_total: totals.any? ? (totals.sum / totals.size).round : 0,
+        max_memory_total: totals.max&.round || 0,
         max_memory_rss: metrics.map(&:memory_rss).compact.max&.round,
         max_memory_swap: metrics.map(&:memory_swap).compact.max&.round,
         memory_quota: metrics.last.memory_quota&.round,
