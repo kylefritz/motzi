@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_23_193136) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_28_171732) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -231,6 +231,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_23_193136) do
     t.string "stripe_receipt_url"
     t.decimal "stripe_charge_amount", precision: 8, scale: 2
     t.index ["user_id"], name: "index_credit_items_on_user_id"
+  end
+
+  create_table "dyno_metrics", force: :cascade do |t|
+    t.datetime "recorded_at", null: false
+    t.string "dyno", null: false
+    t.float "memory_total"
+    t.float "memory_rss"
+    t.float "memory_swap"
+    t.float "memory_quota"
+    t.integer "r14_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["dyno", "recorded_at"], name: "index_dyno_metrics_on_dyno_and_recorded_at"
+    t.index ["recorded_at"], name: "index_dyno_metrics_on_recorded_at"
   end
 
   create_table "feedbacks", force: :cascade do |t|
