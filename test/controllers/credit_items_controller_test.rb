@@ -1,5 +1,5 @@
-require 'test_helper'
-require 'stripe_mock'
+require "test_helper"
+require "stripe_mock"
 
 class CreditItemsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -21,11 +21,11 @@ class CreditItemsControllerTest < ActionDispatch::IntegrationTest
       price: 10.25,
       credits: 20,
       breads_per_week: 1.0,
-      token: @stripe_helper.generate_card_token,
+      token: @stripe_helper.generate_card_token
     }
 
-    assert_difference 'CreditItem.count', 1, 'order created' do
-      post '/credit_items.json', params: order_attrs, as: :json
+    assert_difference "CreditItem.count", 1, "order created" do
+      post "/credit_items.json", params: order_attrs, as: :json
       assert_response :success
     end
 
@@ -37,5 +37,4 @@ class CreditItemsControllerTest < ActionDispatch::IntegrationTest
     refute_nil new_credit_item.stripe_charge_amount
     assert_equal order_attrs[:price], new_credit_item.stripe_charge_amount
   end
-
 end

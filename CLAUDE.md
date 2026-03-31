@@ -95,7 +95,7 @@ Feature work uses git worktrees in `.worktrees/`. When setting up a worktree:
 
 ## Session Start
 
-At the start of each conversation, launch the `heroku-logs-review` skill as a background agent to check for operational issues. Report findings before diving into work.
+At the start of each conversation, launch the `prod-status` skill as a background agent to check for operational issues. Report findings before diving into work.
 
 ## Issues
 

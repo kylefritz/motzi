@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class SendDayOfReminderJobTest < ActiveJob::TestCase
   include ActiveJob::TestHelper
@@ -14,41 +14,41 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
   end
 
   test "Sends at right time" do
-    refute_reminders_emailed(:tues, '5:00 AM', 'dont send too early')
-    refute_reminders_emailed(:thurs, '5:00 AM', 'dont send too early')
+    refute_reminders_emailed(:tues, "5:00 AM", "dont send too early")
+    refute_reminders_emailed(:thurs, "5:00 AM", "dont send too early")
     assert_commented do
-      assert_reminders_emailed(2, :tues, '7:00 AM', 'send on day1/tues')
+      assert_reminders_emailed(2, :tues, "7:00 AM", "send on day1/tues")
     end
-    assert_reminders_emailed(1, :thurs, '7:00 AM', 'send on day2/thurs; not to jess')
-    refute_reminders_emailed(:tues, '1:00 PM', 'dont send too early')
-    refute_reminders_emailed(:thurs, '1:00 PM', 'dont send too late')
+    assert_reminders_emailed(1, :thurs, "7:00 AM", "send on day2/thurs; not to jess")
+    refute_reminders_emailed(:tues, "1:00 PM", "dont send too early")
+    refute_reminders_emailed(:thurs, "1:00 PM", "dont send too late")
   end
 
   test "dont send on wrong day of week" do
-    refute_reminders_emailed(:mon, '10:00 AM', 'dont send on mon')
-    refute_reminders_emailed(:wed, '10:00 AM', 'dont send on wed')
+    refute_reminders_emailed(:mon, "10:00 AM", "dont send on mon")
+    refute_reminders_emailed(:wed, "10:00 AM", "dont send on wed")
   end
 
   test "includes all users who've ordered" do
     order_item(:jess, items(:classic))
-    assert_reminders_emailed(2, :thurs, '7:00 AM', 'sends to jess too')
+    assert_reminders_emailed(2, :thurs, "7:00 AM", "sends to jess too")
   end
 
   test "orders with no items shouldn't get reminders" do
     @thurs.order_items.destroy_all
-    assert @thurs.order_items.empty?, 'cleared the orders'
-    assert_reminders_emailed(0, :thurs, '7:00 AM', 'shouldnt send since no items')
+    assert @thurs.order_items.empty?, "cleared the orders"
+    assert_reminders_emailed(0, :thurs, "7:00 AM", "shouldnt send since no items")
   end
 
   test "Doesnt send to users multiple times on same menu" do
-      assert_reminders_emailed(2, :tues, '7:00 AM', 'send on day1')
-    refute_reminders_emailed(:tues, '7:01 AM', 'dont send the second time')
+      assert_reminders_emailed(2, :tues, "7:00 AM", "send on day1")
+    refute_reminders_emailed(:tues, "7:01 AM", "dont send the second time")
   end
 
   test "respects receive_day_of_reminder preference" do
     users(:kyle).update!(receive_day_of_reminder: false)
     # kyle has an order for tues, but opted out of day-of reminders
-    assert_reminders_emailed(1, :tues, '7:00 AM', 'only adrian gets reminded, not kyle')
+    assert_reminders_emailed(1, :tues, "7:00 AM", "only adrian gets reminded, not kyle")
   end
 
   test "dont send reminders for pay it forward items" do
@@ -56,7 +56,7 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
     refute @tues.order_items.empty?
     @tues.order_items.update_all(item_id: Item.pay_it_forward.id)
 
-    refute_reminders_emailed(:tues, '7:00 AM', 'no emails should be sent since all items are now pay it forward')
+    refute_reminders_emailed(:tues, "7:00 AM", "no emails should be sent since all items are now pay it forward")
   end
 
   private
@@ -76,7 +76,7 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
       end
     end
     if num_emails > 0
-      assert_match /ReminderMailer#day_of_email/, Ahoy::Message.last.mailer, 'sent by right mailer action'
+      assert_match /ReminderMailer#day_of_email/, Ahoy::Message.last.mailer, "sent by right mailer action"
     end
   end
 end

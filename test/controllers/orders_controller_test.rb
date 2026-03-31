@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class OrdersControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -35,7 +35,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     order[:cart] = []
     before_deadline do
       refute_ordered do
-        post '/orders.json', params: order, as: :json
+        post "/orders.json", params: order, as: :json
       end
     end
     assert_response :unprocessable_content
@@ -48,7 +48,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     ]
     before_deadline do
       assert_ordered do
-        post '/orders.json', params: order, as: :json
+        post "/orders.json", params: order, as: :json
       end
     end
     assert_success_and_validate
@@ -128,9 +128,9 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
     before_deadline do
       refute_ordered do
-        post '/orders.json', params: {
+        post "/orders.json", params: {
           menu_id: non_current_menu.id,
-          cart: [{ item_id: Menu.current.items.first.id, quantity: 1 }]
+          cart: [ { item_id: Menu.current.items.first.id, quantity: 1 } ]
         }, as: :json
       end
     end
@@ -150,9 +150,9 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
     travel_to(holiday_menu.earliest_deadline - 2.hours) do
       assert_ordered do
-        post '/orders.json', params: {
+        post "/orders.json", params: {
           menu_id: holiday_menu.id,
-          cart: [{ item_id: item_id, quantity: 1, pickup_day_id: pickup_day_id }]
+          cart: [ { item_id: item_id, quantity: 1, pickup_day_id: pickup_day_id } ]
         }, as: :json
       end
     end
@@ -177,14 +177,14 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     travel_to(holiday_menu.earliest_deadline - 2.hours) do
       assert_ordered do
         assert_email_sent do
-          post '/orders.json', params: {
+          post "/orders.json", params: {
             menu_id: holiday_menu.id,
             email: "marketplace@example.com",
             first_name: "Market",
             last_name: "Buyer",
             phone: "555-000-1234",
             price: 0,
-            cart: [{ item_id: item_id, quantity: 1, pickup_day_id: pickup_day_id }]
+            cart: [ { item_id: item_id, quantity: 1, pickup_day_id: pickup_day_id } ]
           }, as: :json
         end
       end
@@ -213,7 +213,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
     travel_to(holiday_menu.earliest_deadline - 2.hours) do
       put "/orders/#{holiday_order.id}.json", params: {
-        cart: [{ item_id: new_item_id, quantity: 2, pickup_day_id: pickup_day_id }]
+        cart: [ { item_id: new_item_id, quantity: 2, pickup_day_id: pickup_day_id } ]
       }, as: :json
     end
 
@@ -230,36 +230,36 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   def order_attrs(hashid)
     item_id = Menu.current.items.first.id
     pickup_day_id = Menu.current.pickup_days.first.id
-    {comment: 'test order', cart: [{item_id: item_id, pickup_day_id: pickup_day_id}]}.tap do |attrs|
+    { comment: "test order", cart: [ { item_id: item_id, pickup_day_id: pickup_day_id } ] }.tap do |attrs|
       attrs[:uid] = hashid if hashid
     end
   end
 
-  def different_order_attrs(hashid=nil)
+  def different_order_attrs(hashid = nil)
     item_id = items(:rye).id
     pickup_day1_id = Menu.current.pickup_days.first.id
     pickup_day2_id = Menu.current.pickup_days.second.id
-    {comment: 'different', cart: [
+    { comment: "different", cart: [
       { item_id: item_id, quantity: 3, pickup_day_id: pickup_day1_id },
       { item_id: item_id, quantity: 3, pickup_day_id: pickup_day2_id },
-      { item_id: Item::PAY_IT_FORWARD_ID, quantity: 1 },
-    ]}.tap do |attrs|
+      { item_id: Item::PAY_IT_FORWARD_ID, quantity: 1 }
+    ] }.tap do |attrs|
       attrs[:uid] = hashid if hashid
     end
   end
 
-  def assert_order_placed(hashid=nil)
+  def assert_order_placed(hashid = nil)
     assert_email_sent do
       assert_ordered do
-        post '/orders.json', params: order_attrs(hashid), as: :json
+        post "/orders.json", params: order_attrs(hashid), as: :json
         assert_success_and_validate
       end
     end
   end
 
-  def refute_order_placed(hashid=nil)
+  def refute_order_placed(hashid = nil)
     refute_ordered do
-      post '/orders.json', params: order_attrs(hashid), as: :json
+      post "/orders.json", params: order_attrs(hashid), as: :json
     end
   end
 

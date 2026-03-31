@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class MenuTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
@@ -9,7 +9,7 @@ class MenuTest < ActiveSupport::TestCase
 
   test "items connected to menu through menu_items" do
     week1 = menus(:week1)
-    assert_equal 'week1', week1.name
+    assert_equal "week1", week1.name
     assert_equal 2, week1.items.count
   end
 
@@ -21,7 +21,7 @@ class MenuTest < ActiveSupport::TestCase
     week2 = menus(:week2)
     week2.make_current!
     week2.make_current!
-    assert_equal week2.id, Menu.current.id, 'ok to call twice on same menu'
+    assert_equal week2.id, Menu.current.id, "ok to call twice on same menu"
 
     week1 = menus(:week1)
     week1.make_current!
@@ -31,7 +31,7 @@ class MenuTest < ActiveSupport::TestCase
   test "sending weekly email" do
     week3 = menus(:week3)
 
-    refute week3.current?, 'week 2 starts as the current menu'
+    refute week3.current?, "week 2 starts as the current menu"
 
     week3.update!(week_id: Time.zone.now.prev_week_id)
     assert_raise(StandardError) do
@@ -41,7 +41,7 @@ class MenuTest < ActiveSupport::TestCase
     week3.update!(week_id: Time.zone.now.week_id)
     assert_email_sent(User.receive_weekly_menu.count) do
       num_emails = week3.publish_to_subscribers!
-      assert_equal num_emails, User.receive_weekly_menu.count, 'sent emails returned'
+      assert_equal num_emails, User.receive_weekly_menu.count, "sent emails returned"
     end
 
     assert week3.current?
@@ -76,8 +76,8 @@ class MenuTest < ActiveSupport::TestCase
 
     assert_equal week1.items.count, week3.items.count, "same number of items"
     assert_equal week1.pickup_days.count, week3.pickup_days.count, "same number of pickup_days"
-    assert_equal week1.menu_items.map {|i| i.menu_item_pickup_days.count}.sum,
-                 week3.menu_items.map {|i| i.menu_item_pickup_days.count}.sum, "same sum of menu_item_pickup_days"
+    assert_equal week1.menu_items.map { |i| i.menu_item_pickup_days.count }.sum,
+                 week3.menu_items.map { |i| i.menu_item_pickup_days.count }.sum, "same sum of menu_item_pickup_days"
   end
 
   test "copy_from clears sold-out limits" do
@@ -119,8 +119,8 @@ class MenuTest < ActiveSupport::TestCase
       assert_equal target_week_start + deadline_offset, new_day.order_deadline_at
     end
 
-    assert_equal original.menu_items.map {|i| i.menu_item_pickup_days.count}.sum,
-                 target.menu_items.map {|i| i.menu_item_pickup_days.count}.sum, "same sum of menu_item_pickup_days"
+    assert_equal original.menu_items.map { |i| i.menu_item_pickup_days.count }.sum,
+                 target.menu_items.map { |i| i.menu_item_pickup_days.count }.sum, "same sum of menu_item_pickup_days"
     assert target.menu_items.all? { |mi| mi.menu_item_pickup_days.all? { |mipd| mipd.pickup_day.menu_id == target.id } },
            "menu item pickup days point at target menu pickup days"
   end
@@ -232,7 +232,7 @@ class MenuTest < ActiveSupport::TestCase
     original_menu_id = Setting.menu_id
     holiday.make_current!
     assert_equal holiday.id, Setting.holiday_menu_id
-    assert_equal original_menu_id, Setting.menu_id, 'regular menu_id unchanged'
+    assert_equal original_menu_id, Setting.menu_id, "regular menu_id unchanged"
   ensure
     Setting.holiday_menu_id = nil
   end
@@ -255,7 +255,7 @@ class MenuTest < ActiveSupport::TestCase
   test "current? for regular menu is unaffected by holiday_menu_id" do
     week2 = menus(:week2)
     Setting.holiday_menu_id = menus(:passover_2026).id
-    assert week2.current?, 'regular menu still current'
+    assert week2.current?, "regular menu still current"
   ensure
     Setting.holiday_menu_id = nil
   end
@@ -263,7 +263,7 @@ class MenuTest < ActiveSupport::TestCase
   test "can_publish? for holiday allows months ahead" do
     holiday = menus(:passover_2026)
     # passover deadline is 2026-04-08, today is 2026-02-22
-    assert holiday.can_publish?, 'can publish holiday with future deadline'
+    assert holiday.can_publish?, "can publish holiday with future deadline"
   end
 
   test "can_publish? for holiday rejects after all deadlines passed" do
@@ -274,7 +274,7 @@ class MenuTest < ActiveSupport::TestCase
   end
 
   test "can_publish? for holiday returns false when no pickup days" do
-    holiday = Menu.create!(name: 'Empty Holiday', week_id: '26w20', menu_type: 'holiday')
+    holiday = Menu.create!(name: "Empty Holiday", week_id: "26w20", menu_type: "holiday")
     refute holiday.can_publish?
   end
 
@@ -311,18 +311,18 @@ class MenuTest < ActiveSupport::TestCase
   end
 
   test "two menus can share week_id with different menu_type" do
-    week_id = '26w20'
-    regular = Menu.create!(name: 'Regular 26w20', week_id: week_id, menu_type: 'regular')
-    holiday = Menu.create!(name: 'Holiday 26w20', week_id: week_id, menu_type: 'holiday')
+    week_id = "26w20"
+    regular = Menu.create!(name: "Regular 26w20", week_id: week_id, menu_type: "regular")
+    holiday = Menu.create!(name: "Holiday 26w20", week_id: week_id, menu_type: "holiday")
     assert regular.persisted?
     assert holiday.persisted?
   end
 
   test "two holiday menus for same week_id raises uniqueness error" do
-    week_id = '26w21'
-    Menu.create!(name: 'Holiday A', week_id: week_id, menu_type: 'holiday')
+    week_id = "26w21"
+    Menu.create!(name: "Holiday A", week_id: week_id, menu_type: "holiday")
     assert_raises(ActiveRecord::RecordNotUnique) do
-      Menu.create!(name: 'Holiday B', week_id: week_id, menu_type: 'holiday')
+      Menu.create!(name: "Holiday B", week_id: week_id, menu_type: "holiday")
     end
   end
 end

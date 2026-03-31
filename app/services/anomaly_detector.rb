@@ -27,7 +27,7 @@ class AnomalyDetector
   def initialize(week_id, comparison_weeks: 4, &on_progress)
     @week_id = week_id
     @comparison_weeks = comparison_weeks
-    @on_progress = on_progress || ->(_msg) {}
+    @on_progress = on_progress || ->(_msg) { }
   end
 
   def analyze(trigger:, user: nil)
@@ -137,7 +137,7 @@ class AnomalyDetector
       model: self.class.model,
       max_tokens: 4096,
       system_: system_prompt,
-      messages: [{role: "user", content: user_message}]
+      messages: [ { role: "user", content: user_message } ]
     )
 
     text = response.content.filter_map { |block|

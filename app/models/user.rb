@@ -21,10 +21,10 @@ class User < ApplicationRecord
   # Users who should receive the day-of pickup reminder
   scope :receive_day_of_reminder, -> { not_owners.where(receive_day_of_reminder: true) }
   scope :mailing_list, -> { where(mailing_list: true) }
-  scope :owners, -> {where(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
-  scope :not_owners, -> {where.not(email: [MAYA_EMAIL, RUSSELL_EMAIL])}
-  scope :admin, -> {where(is_admin: true)}
-  scope :spam, -> {where(id: SqlQuery.new(:spam_user_ids).execute.pluck("id"))}
+  scope :owners, -> { where(email: [ MAYA_EMAIL, RUSSELL_EMAIL ]) }
+  scope :not_owners, -> { where.not(email: [ MAYA_EMAIL, RUSSELL_EMAIL ]) }
+  scope :admin, -> { where(is_admin: true) }
+  scope :spam, -> { where(id: SqlQuery.new(:spam_user_ids).execute.pluck("id")) }
   before_validation(on: :create) do
     # if no password, set random passwords on user
     self.password = SecureRandom.base64(16) if self.password.blank?
@@ -38,7 +38,7 @@ class User < ApplicationRecord
   end
 
   def credits
-    SqlQuery.new(:user_credits, user_ids: [self.id]).execute.first["credit_balance"]
+    SqlQuery.new(:user_credits, user_ids: [ self.id ]).execute.first["credit_balance"]
   end
 
   def authenticate(password)
@@ -46,11 +46,11 @@ class User < ApplicationRecord
   end
 
   def name
-    [first_name, last_name].compact.join(' ').presence || email
+    [ first_name, last_name ].compact.join(" ").presence || email
   end
 
   def sort_key
-    [last_name, email].compact.join(' ').downcase
+    [ last_name, email ].compact.join(" ").downcase
   end
 
   def current_order
@@ -59,7 +59,7 @@ class User < ApplicationRecord
 
   def order_for_menu(menu_id)
     # TODO: can an menu have more than one order?
-    menu_orders = orders.subscriber.where(menu_id: menu_id).includes(order_items: [:item])
+    menu_orders = orders.subscriber.where(menu_id: menu_id).includes(order_items: [ :item ])
     if menu_orders.size > 1
       logger.warn "user=#{self.id} has more than 1 order for menu #{menu_id}"
     end
@@ -67,21 +67,21 @@ class User < ApplicationRecord
   end
 
   def email_list
-    [email, additional_email].filter(&:present?).join(', ')
+    [ email, additional_email ].filter(&:present?).join(", ")
   end
 
   #
   # vanity users
   #
-  KYLE_EMAIL = 'kyle.p.fritz@gmail.com'
+  KYLE_EMAIL = "kyle.p.fritz@gmail.com"
   def self.kyle
     User.find_by(email: KYLE_EMAIL)
   end
-  MAYA_EMAIL = 'mayapamela@gmail.com'
+  MAYA_EMAIL = "mayapamela@gmail.com"
   def self.maya
     User.find_by(email: MAYA_EMAIL)
   end
-  RUSSELL_EMAIL = 'trimmer.russell@gmail.com'
+  RUSSELL_EMAIL = "trimmer.russell@gmail.com"
   def self.russell
     User.find_by(email: RUSSELL_EMAIL)
   end

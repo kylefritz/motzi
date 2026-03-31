@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class FeedbackMailerTest < ActionMailer::TestCase
   test "feedback_received with menu source" do

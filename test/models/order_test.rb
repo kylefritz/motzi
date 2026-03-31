@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class OrderTest < ActiveSupport::TestCase
   test "items associate to orders" do
@@ -9,7 +9,7 @@ class OrderTest < ActiveSupport::TestCase
     assert_equal 2, w2.order_items.count
 
     item_names = w2.order_items.map(&:item).map(&:name)
-    assert_includes item_names, items(:donuts).name, 'got donuts'
+    assert_includes item_names, items(:donuts).name, "got donuts"
   end
 
   test "associate orders to users" do
@@ -18,23 +18,23 @@ class OrderTest < ActiveSupport::TestCase
   end
 
   test "with_comments" do
-    assert_difference 'Order.with_comments.size', 1 do
-      Order.create!(comments: 'asd', menu: menus(:week2), user: users(:ljf))
+    assert_difference "Order.with_comments.size", 1 do
+      Order.create!(comments: "asd", menu: menus(:week2), user: users(:ljf))
     end
 
-    assert_difference 'Order.with_comments.size', 0, 'white space' do
-      Order.create!(comments: '   ', menu: menus(:week2), user: users(:ljf))
+    assert_difference "Order.with_comments.size", 0, "white space" do
+      Order.create!(comments: "   ", menu: menus(:week2), user: users(:ljf))
     end
 
-    assert_difference 'Order.with_comments.size', 0, 'empty string' do
-      Order.create!(comments: '', menu: menus(:week2), user: users(:ljf))
+    assert_difference "Order.with_comments.size", 0, "empty string" do
+      Order.create!(comments: "", menu: menus(:week2), user: users(:ljf))
     end
   end
 
   test "item_list" do
     assert_equal "Thu: Donuts; Rye Five Ways", orders(:kyle_week2).item_list
     assert_equal 11, orders(:kyle_week2).retail_price
-    
+
     thu, sat = menus(:week1).pickup_days
 
     orders(:ljf_week1).tap do |o|
@@ -72,7 +72,7 @@ class OrderTest < ActiveSupport::TestCase
     day1, day2 = o.menu.pickup_days
     assert_equal 1, o.items_for_pickup(day1).count
     assert_equal 0, o.items_for_pickup(day2).count
-    
+
     o.order_items.create!(item: items(:classic), quantity: 1, pickup_day: day2)
     o.order_items.create!(item: items(:classic), quantity: 1, pickup_day: day2)
     assert_equal 2, o.items_for_pickup(day2).count

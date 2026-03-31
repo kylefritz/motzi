@@ -4,7 +4,7 @@ class UpdateSkipOnOrder < ActiveRecord::Migration[6.0]
   def change
     Order.where(skip: false).find_each do |order|
       if order.user
-        if order.order_items.any?{|oi| oi.item_id == SKIP_ID}
+        if order.order_items.any? { |oi| oi.item_id == SKIP_ID }
           order.update!(skip: true)
         end
       else

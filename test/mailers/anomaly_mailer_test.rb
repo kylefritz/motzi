@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class AnomalyMailerTest < ActionMailer::TestCase
   test "anomaly_report" do

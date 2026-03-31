@@ -17,7 +17,7 @@ class SendHaventOrderedReminderJob < ApplicationJob
     menu = pickup_day.menu
     return unless menu.current?
 
-    already_reminded = Set[*menu.messages.where(mailer: 'ReminderMailer#havent_ordered_email').pluck(:user_id)]
+    already_reminded = Set[*menu.messages.where(mailer: "ReminderMailer#havent_ordered_email").pluck(:user_id)]
     already_ordered = Set[*menu.orders.pluck(:user_id)]
 
     num_reminded = 0
@@ -44,7 +44,7 @@ class SendHaventOrderedReminderJob < ApplicationJob
       )
     end
 
-    check_for_duplicates(menu, 'ReminderMailer#havent_ordered_email')
+    check_for_duplicates(menu, "ReminderMailer#havent_ordered_email")
   end
 
   def check_for_duplicates(menu, mailer)

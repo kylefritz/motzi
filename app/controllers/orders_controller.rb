@@ -25,7 +25,7 @@ class OrdersController < ApplicationController
   def create
     target_menu = params[:menu_id].present? ? Menu.find(params[:menu_id]) : Menu.current
 
-    unless current_admin_user.present? || target_menu.id.in?([Menu.current.id, Menu.current_holiday&.id].compact)
+    unless current_admin_user.present? || target_menu.id.in?([ Menu.current.id, Menu.current_holiday&.id ].compact)
       return render_validation_failed("this menu is not available for ordering")
     end
 
@@ -72,11 +72,11 @@ class OrdersController < ApplicationController
           end
           charge = Stripe::Charge.create({
             amount: price_cents,
-            currency: 'usd',
+            currency: "usd",
             source: params[:token],
             metadata: {
               user_id: user.id,
-              order_id: order.id,
+              order_id: order.id
             },
             description: "Order ##{order.id} - #{order.item_list}",
             receipt_email: user.email
@@ -90,7 +90,7 @@ class OrdersController < ApplicationController
       end
 
       ahoy.track "order_created"
-      [user, order]
+      [ user, order ]
     end
 
     # send confirmation email
@@ -136,7 +136,7 @@ class OrdersController < ApplicationController
           quantity: cart_item_params[:quantity].presence || 1,
           pickup_day_id: cart_item_params[:pickup_day_id] || order.menu.pickup_days.first.id
         }
-        
+
         order.order_items.create!(filtered_params)
       end
 
@@ -158,10 +158,10 @@ class OrdersController < ApplicationController
   private
 
   def render_ordering_closed
-    return render_validation_failed("ordering for this menu is closed")
+    render_validation_failed("ordering for this menu is closed")
   end
 
   def render_validation_failed(message)
-    return render json: { message: message }, status: :unprocessable_content
+    render json: { message: message }, status: :unprocessable_content
   end
 end

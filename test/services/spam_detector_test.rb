@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class SpamDetectorTest < ActiveSupport::TestCase
   test "parse_spam_ids extracts array from Claude response" do
@@ -27,7 +27,7 @@ class SpamDetectorTest < ActiveSupport::TestCase
   test "build_user_message formats users as markdown table" do
     detector = SpamDetector.new
     user = users(:kyle)
-    candidates = [user]
+    candidates = [ user ]
 
     message = detector.send(:build_user_message, candidates)
 
@@ -49,7 +49,7 @@ class SpamDetectorTest < ActiveSupport::TestCase
     detector = SpamDetector.new
     candidates = detector.send(:load_candidates)
 
-    owner_emails = [User::MAYA_EMAIL, User::RUSSELL_EMAIL].compact
+    owner_emails = [ User::MAYA_EMAIL, User::RUSSELL_EMAIL ].compact
     owner_candidates = candidates.select { |u| u.email.in?(owner_emails) }
     assert_empty owner_candidates, "owners should be excluded"
   end

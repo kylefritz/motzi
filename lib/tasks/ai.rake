@@ -1,5 +1,5 @@
 namespace :ai do
-  task :quiet => :environment do
+  task quiet: :environment do
     ActiveRecord::Base.logger = nil
   end
 
@@ -12,14 +12,14 @@ namespace :ai do
   end
 
   desc "Show activity feed prompt for a week (default: current week). Usage: rake ai:activity_feed_prompt[26w11]"
-  task :activity_feed_prompt, [:week_id] => :quiet do |_t, args|
+  task :activity_feed_prompt, [ :week_id ] => :quiet do |_t, args|
     week_id = args[:week_id] || Time.zone.now.week_id
     feed = ActivityFeed.new(week_id)
     puts feed.to_text(verbose: false)
   end
 
   desc "Show historical analyses and menu data. Usage: rake ai:history"
-  task :history => :quiet do
+  task history: :quiet do
     puts "=== Existing Analyses ==="
     AnomalyAnalysis.order(:created_at).each do |a|
       puts "#{a.week_id} | #{a.overall_status.to_s.ljust(8)} | #{a.trigger.ljust(9)} | #{a.created_at.strftime('%m/%d %H:%M')} | #{a.result.lines.first&.strip&.truncate(80)}"
@@ -35,7 +35,7 @@ namespace :ai do
   end
 
   desc "Show full analysis result for a week. Usage: rake ai:analysis[26w11]"
-  task :analysis, [:week_id] => :quiet do |_t, args|
+  task :analysis, [ :week_id ] => :quiet do |_t, args|
     week_id = args[:week_id] || Time.zone.now.week_id
     analyses = AnomalyAnalysis.for_week(week_id).order(:created_at)
 
@@ -56,14 +56,14 @@ namespace :ai do
   end
 
   desc "Show verbose activity feed for a week. Usage: rake ai:activity_feed_verbose[26w11]"
-  task :activity_feed_verbose, [:week_id] => :quiet do |_t, args|
+  task :activity_feed_verbose, [ :week_id ] => :quiet do |_t, args|
     week_id = args[:week_id] || Time.zone.now.week_id
     feed = ActivityFeed.new(week_id)
     puts feed.to_text(verbose: true)
   end
 
   desc "Show the full prompt that would be sent to Claude. Usage: rake ai:full_prompt[26w11]"
-  task :full_prompt, [:week_id] => :quiet do |_t, args|
+  task :full_prompt, [ :week_id ] => :quiet do |_t, args|
     week_id = args[:week_id] || Time.zone.now.week_id
     detector = AnomalyDetector.new(week_id) { |msg| $stderr.puts msg }
     puts "=== SYSTEM PROMPT ==="
@@ -74,7 +74,7 @@ namespace :ai do
   end
 
   desc "Evaluate anomaly detector against historical weeks. Usage: rake ai:eval or rake ai:eval[26w05]"
-  task :eval, [:week_id] => :quiet do |_t, args|
+  task :eval, [ :week_id ] => :quiet do |_t, args|
     expectations = YAML.load_file(expectations_path)
     FileUtils.mkdir_p(eval_results_dir)
 
@@ -142,7 +142,7 @@ namespace :ai do
   end
 
   desc "Dry run: show prompts that would be sent without calling Claude. Usage: rake ai:eval_dry or rake ai:eval_dry[26w05]"
-  task :eval_dry, [:week_id] => :quiet do |_t, args|
+  task :eval_dry, [ :week_id ] => :quiet do |_t, args|
     expectations = YAML.load_file(expectations_path)
 
     weeks = if args[:week_id]
@@ -170,7 +170,7 @@ namespace :ai do
   end
 
   desc "Show results from most recent eval run. Usage: rake ai:eval_report"
-  task :eval_report => :quiet do
+  task eval_report: :quiet do
     files = Dir.glob(eval_results_dir.join("eval_*.yml")).sort
     if files.empty?
       puts "No eval results found. Run `rake ai:eval` first."
@@ -197,7 +197,7 @@ namespace :ai do
   end
 
   desc "Show weekly metrics for a year. Usage: rake ai:metrics[25] or rake ai:metrics[24]"
-  task :metrics, [:year] => :quiet do |_t, args|
+  task :metrics, [ :year ] => :quiet do |_t, args|
     year_prefix = args[:year] || "25"
     puts "week_id | menu_name                                      | orders | items | emails | opened | visitors | notes"
     puts "--------|------------------------------------------------|--------|-------|--------|--------|----------|------"

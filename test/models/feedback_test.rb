@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class FeedbackTest < ActiveSupport::TestCase
   test "valid with source and message" do

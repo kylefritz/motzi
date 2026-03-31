@@ -3,7 +3,7 @@ ActiveAdmin.register User do
   permit_params :first_name, :last_name, :email, :additional_email, :is_admin, \
     :receive_weekly_menu, :receive_havent_ordered_reminder, :receive_day_of_reminder, \
     :mailing_list, :breads_per_week, :phone, :password
-  config.sort_order = 'LOWER(first_name), LOWER(last_name)'
+  config.sort_order = "LOWER(first_name), LOWER(last_name)"
 
   filter :first_name
   filter :last_name
@@ -25,15 +25,15 @@ ActiveAdmin.register User do
 
   batch_action :destroy
 
-  action_item :order, except: [:index, :new] do
+  action_item :order, except: [ :index, :new ] do
     if params[:id].present?
       user = User.find(params[:id])
       link_to "Order for", current_menu_url(uid: user.hashid, ignoredeadline: true), target: "_blank"
     end
   end
-  action_item :resend_menu, except: [:index, :new] do
+  action_item :resend_menu, except: [ :index, :new ] do
     if params[:id].present?
-      link_to("Resend menu email", resend_menu_admin_user_path(params[:id]), { method: :post, data: {confirm: "Resend menu email?"}})
+      link_to("Resend menu email", resend_menu_admin_user_path(params[:id]), { method: :post, data: { confirm: "Resend menu email?" } })
     end
   end
 
@@ -43,7 +43,7 @@ ActiveAdmin.register User do
     column :first_name do |user|
       span user.first_name
       if user.is_admin?
-        status_tag true, style: 'margin-left: 3px', label: 'admin'
+        status_tag true, style: "margin-left: 3px", label: "admin"
       end
     end
     column :last_name
@@ -61,12 +61,12 @@ ActiveAdmin.register User do
     column :updated_at
     actions do |user|
       item "Order", current_menu_url(uid: user.hashid, ignoredeadline: true), target: "_blank", class: "member_link", title: "Order for this user"
-      item "Resend menu", resend_menu_admin_user_path(user), method: :post, data: {confirm: "Resend menu email?"}, class: "member_link"
+      item "Resend menu", resend_menu_admin_user_path(user), method: :post, data: { confirm: "Resend menu email?" }, class: "member_link"
     end
   end
 
   form do |f|
-    inputs 'Details' do
+    inputs "Details" do
       input :first_name
       input :last_name
       input :email
@@ -75,12 +75,12 @@ ActiveAdmin.register User do
       input :breads_per_week
       input :mailing_list
     end
-    inputs 'Email Preferences' do
+    inputs "Email Preferences" do
       input :receive_weekly_menu
       input :receive_havent_ordered_reminder
       input :receive_day_of_reminder
     end
-    inputs 'Danger Zone' do
+    inputs "Danger Zone" do
       input :password
       input :is_admin
     end
@@ -88,7 +88,6 @@ ActiveAdmin.register User do
   end
 
   show do |user|
-
     panel "Orders" do
       table_for user.orders do
         column "menu" do |order|
@@ -98,16 +97,16 @@ ActiveAdmin.register User do
           auto_link order
         end
         column :items do |order|
-          render partial: 'admin/orders/order', locals: {order: order}
+          render partial: "admin/orders/order", locals: { order: order }
         end
         column :paid do |order|
           if order.stripe_charge_amount.present?
-            a number_to_currency(order.stripe_charge_amount), href: "https://dashboard.stripe.com/payments/#{order.stripe_charge_id}", target: '_blank', title: "via Stripe"
+            a number_to_currency(order.stripe_charge_amount), href: "https://dashboard.stripe.com/payments/#{order.stripe_charge_id}", target: "_blank", title: "via Stripe"
           else
             span "#{order.credits} cr"
           end
           if order.stripe_receipt_url.present?
-            a "Receipt", href: order.stripe_receipt_url, target: '_blank', title: "Stripe Receipt"
+            a "Receipt", href: order.stripe_receipt_url, target: "_blank", title: "Stripe Receipt"
           end
         end
         column :retail_price do |order|
@@ -147,7 +146,7 @@ ActiveAdmin.register User do
         column :good_for_weeks
       end
 
-      render partial: 'admin/credit_items/form'
+      render partial: "admin/credit_items/form"
     end
 
     panel "Emails" do
@@ -194,7 +193,7 @@ ActiveAdmin.register User do
 
     notice = "Menu '#{menu.name}' was emailed to #{user.name}"
     ActiveAdmin::Comment.create(body: notice,
-                                namespace: 'admin',
+                                namespace: "admin",
                                 resource: menu,
                                 author: current_admin_user)
 
@@ -210,13 +209,13 @@ ActiveAdmin.register User do
       end
       super
     end
-  
+
     # modify the destroy action to disallow deleting users who have orders
     def destroy
       if params[:id] == "batch_action"
         users = User.includes(:orders).where(id: params[:collection_selection])
         num_deleted = 0
-  
+
         users.find_each do |user|
           if user.orders.empty?
             user.destroy!
@@ -225,11 +224,11 @@ ActiveAdmin.register User do
         end
         return redirect_to collection_path, notice: "Deleted #{num_deleted} users"
       end
-  
+
       unless resource.orders.empty?
         return redirect_to collection_path, alert: "Only users without orders can be deleted"
       end
-  
+
       resource.destroy!
       redirect_to collection_path, notice: "User '#{resource.name}' deleted"
     end

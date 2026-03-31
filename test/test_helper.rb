@@ -1,7 +1,7 @@
-ENV['RAILS_ENV'] ||= 'test'
-require_relative '../config/environment'
-require 'rails/test_help'
-require_relative 'support/vcr_setup'
+ENV["RAILS_ENV"] ||= "test"
+require_relative "../config/environment"
+require "rails/test_help"
+require_relative "support/vcr_setup"
 
 class ActiveSupport::TestCase
   # Run tests in parallel with specified workers
@@ -40,17 +40,17 @@ class ActiveSupport::TestCase
     JSON::Validator.validate!(schema_path, json, strict: true)
   end
 
-  def assert_el_count(expect_count, css, msg=nil)
+  def assert_el_count(expect_count, css, msg = nil)
     @html = document_root_element.css(css)
     if expect_count != @html.count
-      puts document_root_element.css('#main_content')
+      puts document_root_element.css("#main_content")
       puts "looking for $(#{css})"
     end
     assert_equal expect_count, @html.count, msg
   end
 
-  EMAIL_MODEL_COUNTS = ['ApplicationMailer.deliveries.count', 'Ahoy::Message.count']
-  def assert_email_sent(num_emails=1, msg="emails delivered & audited in ahoy", &block)
+  EMAIL_MODEL_COUNTS = [ "ApplicationMailer.deliveries.count", "Ahoy::Message.count" ]
+  def assert_email_sent(num_emails = 1, msg = "emails delivered & audited in ahoy", &block)
     perform_enqueued_jobs do
       assert_difference(EMAIL_MODEL_COUNTS, num_emails, msg) do
         block.call
@@ -65,19 +65,19 @@ class ActiveSupport::TestCase
     end
   end
 
-  def assert_commented(num=1, &block)
-    assert_difference 'ActiveAdmin::Comment.count', num, "Assert comments created" do
+  def assert_commented(num = 1, &block)
+    assert_difference "ActiveAdmin::Comment.count", num, "Assert comments created" do
         block.call
     end
   end
 
   def assert_ordered(&block)
-    assert_difference 'Order.count', 1, 'order created' do
+    assert_difference "Order.count", 1, "order created" do
       block.call
     end
   end
   def refute_ordered(&block)
-    assert_no_difference 'Order.count' do
+    assert_no_difference "Order.count" do
       block.call
     end
   end
@@ -89,7 +89,7 @@ class ActiveSupport::TestCase
   end
 
   def travel_to_day_time(day, time, &block)
-    days = {sun:   "11-10",
+    days = { sun:   "11-10",
             mon:   "11-11",
             tues:  "11-12",
             wed:   "11-13",

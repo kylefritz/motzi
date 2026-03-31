@@ -202,7 +202,7 @@ class ActivityFeed
 
     if header
       today = Time.zone.today
-      days_elapsed = [(today - @week_start.to_date).to_i, 7].min.clamp(0, 7)
+      days_elapsed = [ (today - @week_start.to_date).to_i, 7 ].min.clamp(0, 7)
       lines << "Activity Feed: #{@week_id} (#{@week_start.strftime('%A %-m/%-d')} — #{week_end.strftime('%A %-m/%-d/%Y')})"
       lines << "Today: #{today.strftime('%A %-m/%-d/%Y')} — #{days_elapsed}/7 days elapsed (#{((days_elapsed / 7.0) * 100).round}% through the week)"
       lines << "=" * 40
@@ -230,14 +230,14 @@ class ActivityFeed
       MAILER_LABELS.each do |mailer, _|
         next unless es[mailer]
         s = es[mailer]
-        parts = ["#{s[:sent]} sent", "#{s[:opened]} opened (#{s[:open_rate]}%)"]
+        parts = [ "#{s[:sent]} sent", "#{s[:opened]} opened (#{s[:open_rate]}%)" ]
         parts << "#{s[:clicked]} clicked" if s[:clicked] > 0
         lines << "#{s[:label]}: #{parts.join(', ')}"
       end
       # Any mailers not in MAILER_LABELS
       es.each do |mailer, s|
         next if MAILER_LABELS.key?(mailer)
-        parts = ["#{s[:sent]} sent", "#{s[:opened]} opened (#{s[:open_rate]}%)"]
+        parts = [ "#{s[:sent]} sent", "#{s[:opened]} opened (#{s[:open_rate]}%)" ]
         parts << "#{s[:clicked]} clicked" if s[:clicked] > 0
         lines << "#{s[:label]}: #{parts.join(', ')}"
       end
@@ -312,7 +312,7 @@ class ActivityFeed
   def comparison_day_index
     return 6 unless current_week?
 
-    [(Time.zone.today - @week_start.to_date).to_i, 6].min
+    [ (Time.zone.today - @week_start.to_date).to_i, 6 ].min
   end
 
   def comparison_label
@@ -406,7 +406,7 @@ class ActivityFeed
     commits = git_commits(limit: 50)
     return nil if commits.empty?
 
-    lines = ["== Code Changes =="]
+    lines = [ "== Code Changes ==" ]
     commits.reverse_each do |commit|
       lines << "  #{commit.committed_at.strftime('%-m/%-d')} #{commit.short_sha} #{commit.summary}" if commit.current_week
     end
@@ -417,10 +417,10 @@ class ActivityFeed
     summary = DynoMetric.summary_for_period(@week_start, @week_end)
     return nil if summary.empty?
 
-    lines = ["== Dyno Memory =="]
+    lines = [ "== Dyno Memory ==" ]
     all_errors = []
     summary.sort_by { |dyno, _| dyno }.each do |dyno, stats|
-      parts = ["avg #{stats[:avg_memory_total]}MB", "max #{stats[:max_memory_total]}MB"]
+      parts = [ "avg #{stats[:avg_memory_total]}MB", "max #{stats[:max_memory_total]}MB" ]
       parts << "(quota #{stats[:memory_quota]}MB)" if stats[:memory_quota]
       r14_label = stats[:total_r14] > 0 ? "#{stats[:total_r14]} R14 events" : "0 R14 events"
       lines << "  #{dyno}: #{parts.join(' / ')} — #{r14_label}"
@@ -494,7 +494,7 @@ class ActivityFeed
   end
 
   def menu_context_text
-    lines = ["== Menu Context =="]
+    lines = [ "== Menu Context ==" ]
     @menus.each do |menu|
       lines << "Menu: #{menu.name}"
       lines << "  Baker's note: #{menu.subscriber_note}" if menu.subscriber_note.present?
@@ -506,7 +506,7 @@ class ActivityFeed
 
   def orders_by_day_text
     today = Time.zone.today
-    lines = ["== Orders by Day =="]
+    lines = [ "== Orders by Day ==" ]
     total_orders = 0
     total_items = 0
     all_orders = []
@@ -658,7 +658,7 @@ class ActivityFeed
         )
       end
     else
-      jobs.group_by { |j| [j.class_name, j.created_at.to_date] }.each do |(class_name, date), day_jobs|
+      jobs.group_by { |j| [ j.class_name, j.created_at.to_date ] }.each do |(class_name, date), day_jobs|
         label = RECURRING_JOB_LABELS[class_name] || class_name
         finished = day_jobs.count(&:finished?)
         failed = day_jobs.size - finished
@@ -714,7 +714,7 @@ class ActivityFeed
 
           (duplicates + sample).sort_by { |m| m.sent_at || m.created_at }.each do |msg|
             user_name = msg.user&.name || "Unknown"
-            parts = ["sent #{msg.sent_at&.strftime('%-m/%d %l:%M%P')&.strip}"]
+            parts = [ "sent #{msg.sent_at&.strftime('%-m/%d %l:%M%P')&.strip}" ]
             parts << "opened #{msg.opened_at.strftime('%-m/%d %l:%M%P').strip}" if msg.opened_at
             parts << "clicked #{msg.clicked_at.strftime('%-m/%d %l:%M%P').strip}" if msg.clicked_at
             dup_note = by_user[msg.user_id].size > 1 ? " [DUPLICATE — #{by_user[msg.user_id].size}x]" : ""

@@ -9,7 +9,6 @@ class SendDayOfReminderJob < ApplicationJob
     Rails.logger.info "[SendDayOfReminderJob] Starting job_id=#{job_id}"
 
     PickupDay.for_pickup_at(Time.zone.now).each do |pickup_day|
-
       next unless pickup_day.menu.current?
 
       send_reminders_for_day(pickup_day)

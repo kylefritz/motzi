@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class Admin::VersionsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -13,11 +13,11 @@ class Admin::VersionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get index" do
-    get '/admin/versions'
+    get "/admin/versions"
     assert_response :success
 
     # 3 changes = signin & 2x menu.make_current!
-    assert_select 'tbody tr', 3, "num_versions=#{PaperTrail::Version.count}"
+    assert_select "tbody tr", 3, "num_versions=#{PaperTrail::Version.count}"
   end
 
   test "get show" do

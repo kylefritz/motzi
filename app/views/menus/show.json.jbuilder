@@ -1,5 +1,5 @@
 json.menu do
-  json.partial! 'menus/menu', menu: @menu
+  json.partial! "menus/menu", menu: @menu
 end
 
 json.user do
@@ -11,7 +11,7 @@ json.user do
 end
 
 json.order do
-  json.partial! 'menus/order', order: @order
+  json.partial! "menus/order", order: @order
 end
 
 json.bundles CreditBundle.all do |b|
@@ -20,12 +20,12 @@ end
 
 json.holiday_menu do
   if @holiday_menu
-    json.partial! 'menus/menu', menu: @holiday_menu
+    json.partial! "menus/menu", menu: @holiday_menu
   else
     json.null!
   end
 end
 
 json.holiday_order do
-  json.partial! 'menus/order', order: @holiday_order
+  json.partial! "menus/order", order: @holiday_order
 end

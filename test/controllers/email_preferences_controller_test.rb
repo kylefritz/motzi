@@ -1,11 +1,11 @@
-require 'test_helper'
+require "test_helper"
 
 class EmailPreferencesControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
   test "update preferences with hashid" do
     user = users(:kyle)
-    assert user.receive_weekly_menu?, 'starts as true'
+    assert user.receive_weekly_menu?, "starts as true"
 
     patch email_preferences_path, params: {
       uid: user.hashid,

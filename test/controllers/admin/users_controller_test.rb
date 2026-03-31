@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -9,7 +9,7 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get index" do
-    get '/admin/users'
+    get "/admin/users"
     assert_response :success
   end
 
@@ -57,7 +57,7 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
 
     assert_difference "User.count", -1 do
       delete "/admin/users/batch_action", params: {
-        collection_selection: [deletable.id, keep.id]
+        collection_selection: [ deletable.id, keep.id ]
       }
     end
 
