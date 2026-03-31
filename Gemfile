@@ -58,6 +58,8 @@ group :development, :test do
 end
 
 group :development do
+  gem 'brakeman' # static security analysis
+  gem 'bundler-audit' # check gems for known vulnerabilities
   gem 'foreman' # run Procfile.dev (Rails + bun watch) locally
   gem 'listen', '~> 3.3' # listen to changes on a file
   gem 'rack-mini-profiler', '~> 4.0' # request profiling UI compatible with modern Rack/Rails
