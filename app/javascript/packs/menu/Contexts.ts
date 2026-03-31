@@ -50,11 +50,7 @@ export function getDeadlineContext() {
     return pastDeadline(orderDeadlineAt);
   };
 
-  const allClosed = ({
-    pickupDays,
-  }: {
-    pickupDays?: MenuPickupDay[];
-  }) => {
+  const allClosed = ({ pickupDays }: { pickupDays?: MenuPickupDay[] }) => {
     if (ctx.ignoreDeadline) {
       return false;
     }
