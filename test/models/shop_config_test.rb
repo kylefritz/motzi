@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class ShopConfigTest < ActiveSupport::TestCase
   test "has config for motzi" do

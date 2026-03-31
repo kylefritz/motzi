@@ -1,5 +1,5 @@
 ActiveAdmin.register_page "Activity Feed" do
-  menu parent: 'Advanced', label: 'Activity', priority: 0
+  menu parent: "Advanced", label: "Activity", priority: 0
 
   # Preview the full prompt that would be sent to Claude
   page_action :prompt_preview, method: :get do
@@ -224,7 +224,7 @@ ActiveAdmin.register_page "Activity Feed" do
                 });
               }
             }];
-            var weekUrls = #{weeks.map { |wid| [wid, admin_activity_feed_path(week_id: wid)] }.to_h.to_json};
+            var weekUrls = #{weeks.map { |wid| [ wid, admin_activity_feed_path(week_id: wid) ] }.to_h.to_json};
             var chart = new Chart(document.getElementById('weekly-trends-chart'), chartConfig);
             chart.canvas.addEventListener('click', function(e) {
               var xAxis = chart.scales.x;

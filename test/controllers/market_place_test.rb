@@ -1,5 +1,5 @@
-require 'test_helper'
-require 'stripe_mock'
+require "test_helper"
+require "stripe_mock"
 
 class MarketPlaceTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -95,10 +95,10 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
 
   private
   def build_order_attrs
-    return {
+    {
       cart: [
-          {item_id: items(:classic).id, price: 5, quantity: 1, pickup_day_id: pickup_days(:w2_d1_thurs).id},
-          {item_id: items(:rye).id, price: 5, quantity: 1, pickup_day_id: pickup_days(:w2_d1_thurs).id}
+          { item_id: items(:classic).id, price: 5, quantity: 1, pickup_day_id: pickup_days(:w2_d1_thurs).id },
+          { item_id: items(:rye).id, price: 5, quantity: 1, pickup_day_id: pickup_days(:w2_d1_thurs).id }
       ],
       comments: nil,
       email: "jeff@jeff.com",
@@ -114,7 +114,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
   def assert_ordered_emailed(order_attrs)
     assert_ordered do
       assert_email_sent do
-        post '/orders.json', params: order_attrs, as: :json
+        post "/orders.json", params: order_attrs, as: :json
         assert_response :success
         json = JSON.load(response.body)
         validate_json_schema :menu, json
@@ -127,7 +127,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     refute_user_created do
       refute_ordered do
         refute_emails_sent do
-          post '/orders.json', params: order_attrs, as: :json
+          post "/orders.json", params: order_attrs, as: :json
           assert_response :unprocessable_content
         end
       end
@@ -135,13 +135,13 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
   end
 
   def assert_user_created(&block)
-    assert_difference 'User.count', 1, 'user created' do
+    assert_difference "User.count", 1, "user created" do
       block.call
     end
   end
 
   def refute_user_created(&block)
-    assert_no_difference 'User.count' do
+    assert_no_difference "User.count" do
       block.call
     end
   end

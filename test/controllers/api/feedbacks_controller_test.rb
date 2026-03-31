@@ -1,5 +1,5 @@
-require 'test_helper'
-require 'webmock/minitest'
+require "test_helper"
+require "webmock/minitest"
 
 class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -17,7 +17,7 @@ class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
   test "creates feedback and sends email" do
     stub_turnstile(success: true)
 
-    assert_difference 'Feedback.count', 1 do
+    assert_difference "Feedback.count", 1 do
       assert_emails 1 do
         post api_feedbacks_path, params: {
           feedback: {
@@ -42,7 +42,7 @@ class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
   test "returns 422 with invalid params" do
     stub_turnstile(success: true)
 
-    assert_no_difference 'Feedback.count' do
+    assert_no_difference "Feedback.count" do
       post api_feedbacks_path, params: {
         feedback: { source: "404", message: "" },
         turnstile_token: "valid-token"
@@ -55,7 +55,7 @@ class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
   test "returns 403 with invalid turnstile token" do
     stub_turnstile(success: false)
 
-    assert_no_difference 'Feedback.count' do
+    assert_no_difference "Feedback.count" do
       post api_feedbacks_path, params: {
         feedback: { source: "404", message: "test" },
         turnstile_token: "invalid"
@@ -66,7 +66,7 @@ class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "skips turnstile for 500 page without token" do
-    assert_difference 'Feedback.count', 1 do
+    assert_difference "Feedback.count", 1 do
       post api_feedbacks_path, params: {
         feedback: {
           source: "500",
@@ -82,7 +82,7 @@ class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
     user = users(:ljf)
     sign_in user
 
-    assert_difference 'Feedback.count', 1 do
+    assert_difference "Feedback.count", 1 do
       post api_feedbacks_path, params: {
         feedback: { source: "menu", message: "Love the challah" }
       }, as: :json
@@ -92,7 +92,7 @@ class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "requires turnstile for menu source when not authenticated" do
-    assert_no_difference 'Feedback.count' do
+    assert_no_difference "Feedback.count" do
       post api_feedbacks_path, params: {
         feedback: { source: "menu", message: "Spam" }
       }, as: :json
@@ -102,7 +102,7 @@ class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "requires turnstile for 404 source without token" do
-    assert_no_difference 'Feedback.count' do
+    assert_no_difference "Feedback.count" do
       post api_feedbacks_path, params: {
         feedback: { source: "404", message: "Missing page" }
       }, as: :json
@@ -114,7 +114,7 @@ class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
   test "handles turnstile network failure gracefully" do
     stub_request(:post, TURNSTILE_URL).to_raise(SocketError.new("getaddrinfo: Name or service not known"))
 
-    assert_difference 'Feedback.count', 1 do
+    assert_difference "Feedback.count", 1 do
       post api_feedbacks_path, params: {
         feedback: { source: "404", message: "Page missing" },
         turnstile_token: "some-token"

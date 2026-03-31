@@ -58,7 +58,7 @@ class CaptureDynoMetricsJob < ApplicationJob
     request["Accept"] = "application/vnd.heroku+json; version=3"
     request["Authorization"] = "Bearer #{api_key}"
     request["Content-Type"] = "application/json"
-    request.body = {lines: 1500}.to_json
+    request.body = { lines: 1500 }.to_json
 
     response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, open_timeout: 10, read_timeout: 30) do |http|
       http.request(request)
@@ -76,7 +76,7 @@ class CaptureDynoMetricsJob < ApplicationJob
   # R14 format:
   #   heroku[web.1]: Error R14 (Memory quota exceeded)
   def parse_log_lines(log_content)
-    samples = Hash.new { |h, k| h[k] = {memory_totals: [], memory_rss: [], memory_swaps: [], memory_quotas: [], r14_count: 0, errors: []} }
+    samples = Hash.new { |h, k| h[k] = { memory_totals: [], memory_rss: [], memory_swaps: [], memory_quotas: [], r14_count: 0, errors: [] } }
 
     log_content.each_line do |line|
       if line.include?("sample#memory_total=")

@@ -1,0 +1,8 @@
+---
+ignore:
+  # bcrypt JRuby-only integer overflow — we run MRI, not affected
+  - GHSA-f27w-vcwj-c954
+  # Bootstrap 4.3.1 XSS — pinned to ~> 4.3.1, upgrade requires UI rework
+  - GHSA-vc8w-jr9v-vj7f
+  # Devise 5.0 confirmable race condition — major version bump, separate PR
+  - GHSA-57hq-95w6-v4fc

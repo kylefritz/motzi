@@ -21,10 +21,9 @@ export default function Payment({
   submitting,
   disabled,
 }: PaymentProps) {
-  const stripePromise = useMemo(
-    () => loadStripe(stripeApiKey || ""),
-    [stripeApiKey]
-  );
+  const stripePromise = useMemo(() => loadStripe(stripeApiKey || ""), [
+    stripeApiKey,
+  ]);
 
   return (
     <div className="checkout">

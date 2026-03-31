@@ -265,7 +265,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
       url: "https://example.com/commit",
       current_week: true
     )
-    feed.define_singleton_method(:local_git_commits) { [commit] }
+    feed.define_singleton_method(:local_git_commits) { [ commit ] }
 
     commits = feed.git_commits
 

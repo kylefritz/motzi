@@ -1,10 +1,10 @@
 ActiveAdmin.register Menu do
   menu priority: 2
   permit_params :name, :menu_note, :subscriber_note, :week_id, :day_of_note, :menu_type
-  includes :pickup_days, menu_items: [:item]
-  config.sort_order = 'LOWER(week_id) desc'
+  includes :pickup_days, menu_items: [ :item ]
+  config.sort_order = "LOWER(week_id) desc"
 
-  actions :all, except: [:destroy]
+  actions :all, except: [ :destroy ]
 
   filter :items
   filter :name
@@ -20,9 +20,9 @@ ActiveAdmin.register Menu do
   scope("holiday menus") { |scope| scope.holiday }
 
   # create big buttons on every menu page
-  action_item :preview, except: [:index, :new] do
+  action_item :preview, except: [ :index, :new ] do
     if params[:id].present?
-      link_to 'Preview Menu', menu_path(params[:id]), target: "_blank"
+      link_to "Preview Menu", menu_path(params[:id]), target: "_blank"
     end
   end
 
@@ -33,15 +33,15 @@ ActiveAdmin.register Menu do
       div auto_link menu
       if menu.current?
         br
-        status_tag true, style: 'margin-left: 3px', label: 'Current'
+        status_tag true, style: "margin-left: 3px", label: "Current"
       end
       if menu.holiday?
         br
-        status_tag 'Holiday', color: 'orange', style: 'margin-left: 3px'
+        status_tag "Holiday", color: "orange", style: "margin-left: 3px"
       end
     end
     column :items do |menu|
-      ul style: 'list-style: 	disc outside none !important; white-space: nowrap' do
+      ul style: "list-style: \tdisc outside none !important; white-space: nowrap" do
         menu.sorted_menu_items.map do |menu_item|
           li menu_item.item.name
         end
@@ -54,7 +54,7 @@ ActiveAdmin.register Menu do
     end
     column :stats do |menu|
       if menu.emailed_at.blank? || menu.emailed_at > 6.weeks.ago
-        render 'admin/menus/sales', {menu: menu}
+        render "admin/menus/sales", { menu: menu }
       else
         span "Sales stats "
         a("in menu details", href: admin_menu_path(menu))
@@ -62,7 +62,7 @@ ActiveAdmin.register Menu do
     end
     column :emailed_at
     column :pickup_days do |menu|
-      ul style: 'list-style: 	disc outside none !important; white-space: nowrap' do
+      ul style: "list-style: \tdisc outside none !important; white-space: nowrap" do
         menu.pickup_days.map do |pickup_day|
           li a(pickup_day.name_abbr, href: admin_pickup_day_path(pickup_day))
         end
@@ -82,27 +82,27 @@ ActiveAdmin.register Menu do
       week_ids = (0..10).map { |i| (Time.zone.now + i.weeks).week_id }
       week_ids.push(menu.week_id) if menu.week_id.present?
       week_ids.uniq.sort.map do |w|
-        t = Time.zone.from_week_id(w).strftime('%a %m/%d')
+        t = Time.zone.from_week_id(w).strftime("%a %m/%d")
         types_taken = taken[w] || []
         suffix = types_taken.any? ? " (has #{types_taken.join(', ')})" : ""
-        ["#{w} starts #{t}#{suffix}", w]
+        [ "#{w} starts #{t}#{suffix}", w ]
       end
     end
 
     inputs do
       input :menu_type, as: :select,
-            collection: [['Regular', 'regular'], ['Holiday', 'holiday']],
+            collection: [ [ "Regular", "regular" ], [ "Holiday", "holiday" ] ],
             include_blank: false
       input :week_id, as: :select, collection: week_options(resource)
       input :name
-      para style: 'margin-left: 20%; padding-left: 8px' do
+      para style: "margin-left: 20%; padding-left: 8px" do
         text_node "You can use "
-        a("markdown", href: "https://wordpress.com/support/markdown-quick-reference/", target:"_blank" )
+        a("markdown", href: "https://wordpress.com/support/markdown-quick-reference/", target: "_blank")
         text_node "to give the notes nice formatting!"
       end
       input :subscriber_note
       input :menu_note
-      input :day_of_note, placeholder: 'Included in reminder emails sent out on pickup day'
+      input :day_of_note, placeholder: "Included in reminder emails sent out on pickup day"
     end
     actions
   end
@@ -112,11 +112,11 @@ ActiveAdmin.register Menu do
       row :week_id do
         span menu.week_id
         if menu.current?
-          status_tag true, style: 'margin-left: 3px', label: 'Current'
+          status_tag true, style: "margin-left: 3px", label: "Current"
         end
       end
       row :sales do
-        render 'admin/menus/sales', {menu: menu}
+        render "admin/menus/sales", { menu: menu }
       end
       row :subscriber_note do
         menu.subscriber_note_html
@@ -128,7 +128,7 @@ ActiveAdmin.register Menu do
         menu.day_of_note_html
       end
       row :menu_items do
-        render 'builder'
+        render "builder"
       end
       row :send_test_email do
         if menu.holiday?
@@ -141,40 +141,40 @@ ActiveAdmin.register Menu do
       row :updated_at
       row :emailed_at do
         if menu.holiday?
-          render 'holiday_open', menu: menu
+          render "holiday_open", menu: menu
         else
-          render 'email', { menu: menu }
+          render "email", { menu: menu }
         end
       end
     end
 
     panel "Pay what you can" do
       # NB: this is an N+1 query but let's leave it for now because it's valuable
-      render 'admin/menus/sales', {menu: menu}
+      render "admin/menus/sales", { menu: menu }
     end
 
     active_admin_comments
 
     panel "Orders" do
-      render 'admin/menus/what_to_bake', {menu: menu}
+      render "admin/menus/what_to_bake", { menu: menu }
     end
 
-    panel "Danger Zone", class: 'danger-zone' do
-      para "Menus without orders can be deleted. To delete a menu that has orders, delete its orders first.", style: 'color: #888; margin-bottom: 12px'
+    panel "Danger Zone", class: "danger-zone" do
+      para "Menus without orders can be deleted. To delete a menu that has orders, delete its orders first.", style: "color: #888; margin-bottom: 12px"
       if menu.current?
-        para "This is the current menu and cannot be deleted.", style: 'color: #888'
+        para "This is the current menu and cannot be deleted.", style: "color: #888"
       elsif menu.orders.any?
         para do
           a "Show #{menu.orders.count} orders",
             href: admin_orders_path(q: { menu_id_eq: menu.id }),
-            class: 'action-disabled'
+            class: "action-disabled"
         end
       else
         para do
           a "Delete Menu", href: delete_menu_admin_menu_path(menu),
             'data-method': :post,
             'data-confirm': "Delete \"#{menu.name}\"? This cannot be undone.",
-            class: 'action-danger'
+            class: "action-danger"
         end
       end
     end
@@ -203,7 +203,7 @@ ActiveAdmin.register Menu do
     num_emails = resource.publish_to_subscribers!
     notice = "Menu '#{resource.name}' was emailed to #{num_emails} subscribers"
     ActiveAdmin::Comment.create(body: notice,
-                                namespace: 'admin',
+                                namespace: "admin",
                                 resource: resource,
                                 author: current_admin_user)
 
@@ -298,7 +298,7 @@ ActiveAdmin.register Menu do
   #
   member_action :menu_builder do
     @menu = resource
-    render 'admin/menus/menu_builder', formats: [:json]
+    render "admin/menus/menu_builder", formats: [ :json ]
   end
 
   member_action :item, method: :post do
@@ -315,7 +315,7 @@ ActiveAdmin.register Menu do
       end
     end
 
-    render 'admin/menus/menu_builder', formats: [:json]
+    render "admin/menus/menu_builder", formats: [ :json ]
   end
 
   # TODO: should use DELETE instead of POST but axios doesn't send body
@@ -325,21 +325,21 @@ ActiveAdmin.register Menu do
     mipd.destroy!
 
     @menu = MenuItem.find(params[:menu_item_id]).menu
-    render 'admin/menus/menu_builder', formats: [:json]
+    render "admin/menus/menu_builder", formats: [ :json ]
   end
 
   member_action :remove_item, method: :post do
     @menu = Menu.find(params[:id])
     MenuItem.where(menu: @menu, item_id: params[:item_id]).destroy_all
 
-    render 'admin/menus/menu_builder', formats: [:json]
+    render "admin/menus/menu_builder", formats: [ :json ]
   end
 
   member_action :remove_items, method: :post do
     @menu = Menu.find(params[:id])
     MenuItem.where(menu: @menu).destroy_all
 
-    render 'admin/menus/menu_builder', formats: [:json]
+    render "admin/menus/menu_builder", formats: [ :json ]
   end
 
   controller do

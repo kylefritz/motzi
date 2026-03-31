@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class PassoverPreorderFlowTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -26,12 +26,12 @@ class PassoverPreorderFlowTest < ActionDispatch::IntegrationTest
 
   test "API returns both menus when holiday menu is active" do
     Setting.holiday_menu_id = @holiday.id
-    get '/menu.json'
+    get "/menu.json"
     assert_response :success
     json = JSON.parse(@response.body)
-    assert_equal menus(:week2).id, json['menu']['id'], 'regular menu present'
-    assert_equal @holiday.id, json['holidayMenu']['id'], 'holiday menu present'
-    assert_nil json['holidayOrder'], 'no order yet'
+    assert_equal menus(:week2).id, json["menu"]["id"], "regular menu present"
+    assert_equal @holiday.id, json["holidayMenu"]["id"], "holiday menu present"
+    assert_nil json["holidayOrder"], "no order yet"
     validate_json_schema :menu, @response.body
   end
 
@@ -42,15 +42,15 @@ class PassoverPreorderFlowTest < ActionDispatch::IntegrationTest
     pickup_day_id = pickup_days(:passover_fri).id
     item_id = items(:almond_cake).id
 
-    assert_difference 'Order.count', 1 do
-      post '/orders.json', params: {
+    assert_difference "Order.count", 1 do
+      post "/orders.json", params: {
         menu_id: @holiday.id,
-        cart: [{ item_id: item_id, quantity: 1, pickup_day_id: pickup_day_id }]
+        cart: [ { item_id: item_id, quantity: 1, pickup_day_id: pickup_day_id } ]
       }
     end
     assert_response :success
     json = JSON.parse(@response.body)
-    assert_not_nil json['holidayOrder']
+    assert_not_nil json["holidayOrder"]
     assert_equal @holiday.id, Order.last.menu_id
     validate_json_schema :menu, @response.body
   end
@@ -64,9 +64,9 @@ class PassoverPreorderFlowTest < ActionDispatch::IntegrationTest
 
     # Travel to before the week2 deadline so ordering is open
     travel_to Time.zone.parse("2019-01-07 12:00") do
-      assert_difference 'Order.count', 1 do
-        post '/orders.json', params: {
-          cart: [{ item_id: item_id, quantity: 1, pickup_day_id: pickup_day_id }]
+      assert_difference "Order.count", 1 do
+        post "/orders.json", params: {
+          cart: [ { item_id: item_id, quantity: 1, pickup_day_id: pickup_day_id } ]
         }
       end
       assert_response :success

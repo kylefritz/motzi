@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class ReminderMailerTest < ActionMailer::TestCase
   include DeadlineHelper
@@ -15,15 +15,15 @@ class ReminderMailerTest < ActionMailer::TestCase
     @email = ReminderMailer.with(user: @user, menu: @menu, pickup_day: @pickup_day, order_items: @order.order_items).day_of_email
     assert_emails(1) { @email.deliver_now }
 
-    assert_equal [@user.email], @email.to
+    assert_equal [ @user.email ], @email.to
     assert_equal "Pick up #{Setting.shop.name} today!", @email.subject
-    assert_includes @email.text_part.body.to_s, 'Reminder to come grab your order today'
-    assert_includes @email.html_part.body.to_s, 'Your order is ready', 'html headline'
-    assert_in_email 'Rye Five', 'item'
-    assert_in_email 'Donuts', 'add-on'
-    assert_in_email 'Bread is at the shop now!', 'day of note'
-    assert_includes @email.html_part.body.to_s, 'credits remaining', 'includes credits in html'
-    assert_includes @email.text_part.body.to_s, 'credits remaining', 'includes credits in text'
+    assert_includes @email.text_part.body.to_s, "Reminder to come grab your order today"
+    assert_includes @email.html_part.body.to_s, "Your order is ready", "html headline"
+    assert_in_email "Rye Five", "item"
+    assert_in_email "Donuts", "add-on"
+    assert_in_email "Bread is at the shop now!", "day of note"
+    assert_includes @email.html_part.body.to_s, "credits remaining", "includes credits in html"
+    assert_includes @email.text_part.body.to_s, "credits remaining", "includes credits in text"
 
     assert_day_of_email_recorded
   end
@@ -32,13 +32,13 @@ class ReminderMailerTest < ActionMailer::TestCase
     @user = users(:kyle)
     # Zero out kyle's credits so the email won't show "credits remaining"
     @user.credit_items.destroy_all
-    assert @user.credits <= 0, 'no credits'
+    assert @user.credits <= 0, "no credits"
     @order = @user.order_for_menu(@menu)
 
     @email = ReminderMailer.with(user: @user, menu: @menu, pickup_day: @pickup_day, order_items: @order.order_items).day_of_email
     assert_emails(1) { @email.deliver_now }
 
-    refute_in_email 'credits remaining', 'doesnt show credits'
+    refute_in_email "credits remaining", "doesnt show credits"
 
     assert_day_of_email_recorded
   end
@@ -47,20 +47,20 @@ class ReminderMailerTest < ActionMailer::TestCase
     @email = ReminderMailer.with(user: @user, menu: @menu).havent_ordered_email
     assert_emails(1) { @email.deliver_now }
 
-    assert_equal [@user.email], @email.to
-    assert_includes @email.subject, 'Make your selection soon'
+    assert_equal [ @user.email ], @email.to
+    assert_includes @email.subject, "Make your selection soon"
     assert_in_email @menu.name
-    assert_includes @email.text_part.body.to_s, ordering_deadline_text(@menu), 'text has deadline'
-    assert_includes @email.html_part.body.to_s, 'order by', 'html has deadline'
+    assert_includes @email.text_part.body.to_s, ordering_deadline_text(@menu), "text has deadline"
+    assert_includes @email.html_part.body.to_s, "order by", "html has deadline"
   end
   private
 
-  def assert_in_email(substring, msg=nil)
+  def assert_in_email(substring, msg = nil)
     assert_includes @email.html_part.body.to_s, substring, msg
     assert_includes @email.text_part.body.to_s, substring, msg
   end
 
-  def refute_in_email(substring, msg=nil)
+  def refute_in_email(substring, msg = nil)
     refute_includes @email.html_part.body.to_s, substring, msg
     refute_includes @email.text_part.body.to_s, substring, msg
   end

@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class AnomalyAnalysisTest < ActiveSupport::TestCase
   test "validates required fields" do

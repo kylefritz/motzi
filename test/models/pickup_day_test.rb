@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class PickupDayTest < ActiveSupport::TestCase
   test "can find pickup day by date" do

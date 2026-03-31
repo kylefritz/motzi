@@ -24,7 +24,7 @@ class ApplicationController < ActionController::Base
     # used by active admin to keep out non-admins
     unless current_user&.is_admin?
       logger.info "redirect_unless_user_is_admin: its NOT ok"
-      return redirect_to '/', alert: 'you must be an admin'
+      redirect_to "/", alert: "you must be an admin"
     end
   end
 
@@ -36,12 +36,12 @@ class ApplicationController < ActionController::Base
 
   def push_gon
     gon.push({
-      stripe_api_key: ENV['STRIPE_PUBLISHABLE_KEY'],
-      js_tracking: Setting.shop.js_tracking,
+      stripe_api_key: ENV["STRIPE_PUBLISHABLE_KEY"],
+      js_tracking: Setting.shop.js_tracking
     })
   end
 
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name, :last_name, :email, :phone, :mailing_list, :receive_weekly_menu])
+    devise_parameter_sanitizer.permit(:sign_up, keys: [ :first_name, :last_name, :email, :phone, :mailing_list, :receive_weekly_menu ])
   end
 end

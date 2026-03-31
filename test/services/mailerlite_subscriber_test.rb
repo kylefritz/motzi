@@ -1,5 +1,5 @@
-require 'test_helper'
-require 'webmock/minitest'
+require "test_helper"
+require "webmock/minitest"
 
 class MailerliteSubscriberTest < ActiveSupport::TestCase
   setup do

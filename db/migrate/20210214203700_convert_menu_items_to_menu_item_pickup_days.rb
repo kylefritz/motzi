@@ -16,7 +16,7 @@ class ConvertMenuItemsToMenuItemPickupDays < ActiveRecord::Migration[6.0]
           limit: mi.day2_limit,
         )
       end
-      
+
       bar.increment!
     end
   end

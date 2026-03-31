@@ -17,25 +17,25 @@ class PickupDay < ApplicationRecord
   end
 
   def day_abbr
-    I18n.t('date.abbr_day_names')[pickup_at.wday]
+    I18n.t("date.abbr_day_names")[pickup_at.wday]
   end
 
   def name
-    pickup_at.strftime('%A %m/%d/%y')
+    pickup_at.strftime("%A %m/%d/%y")
   end
 
   def name_abbr
-    pickup_at.strftime('%a %m/%d')
+    pickup_at.strftime("%a %m/%d")
   end
 
   def deadline_data
     {
-      pickup_day: pickup_at.strftime('%a'),
-      pickup_date: pickup_at.strftime('%b %-d'),
-      pickup_time: pickup_at.strftime('%-l:%M %p').gsub(/:00/, '').gsub(/ AM/i, 'a').gsub(/ PM/i, 'p'),
-      deadline_day: order_deadline_at.strftime('%a'),
-      deadline_date: order_deadline_at.strftime('%b %-d'),
-      deadline_time: order_deadline_at.strftime('%-l:%M %p').gsub(/:00/, '').gsub(/ AM/i, 'a').gsub(/ PM/i, 'p')
+      pickup_day: pickup_at.strftime("%a"),
+      pickup_date: pickup_at.strftime("%b %-d"),
+      pickup_time: pickup_at.strftime("%-l:%M %p").gsub(/:00/, "").gsub(/ AM/i, "a").gsub(/ PM/i, "p"),
+      deadline_day: order_deadline_at.strftime("%a"),
+      deadline_date: order_deadline_at.strftime("%b %-d"),
+      deadline_time: order_deadline_at.strftime("%-l:%M %p").gsub(/:00/, "").gsub(/ AM/i, "a").gsub(/ PM/i, "p")
     }
   end
 
@@ -44,4 +44,3 @@ class PickupDay < ApplicationRecord
     "#{d[:pickup_day]}, #{d[:pickup_date]} pickup after #{d[:pickup_time]} — order by #{d[:deadline_day]}, #{d[:deadline_date]} at #{d[:deadline_time]}"
   end
 end
- 

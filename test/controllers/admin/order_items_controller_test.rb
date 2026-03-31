@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class Admin::OrderItemsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -9,7 +9,7 @@ class Admin::OrderItemsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get index" do
-    get '/admin/order_items'
+    get "/admin/order_items"
     assert_response :success
   end
 

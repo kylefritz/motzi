@@ -57,10 +57,10 @@ class CaptureDynoMetricsJobTest < ActiveSupport::TestCase
   private
 
   def stub_heroku_api(log_content)
-    log_session_response = {"logplex_url" => "https://example.com/logs"}.to_json
+    log_session_response = { "logplex_url" => "https://example.com/logs" }.to_json
 
     session_stub = stub_request(:post, "https://api.heroku.com/apps/motzibread/log-sessions")
-      .to_return(status: 200, body: log_session_response, headers: {"Content-Type" => "application/json"})
+      .to_return(status: 200, body: log_session_response, headers: { "Content-Type" => "application/json" })
 
     logs_stub = stub_request(:get, "https://example.com/logs")
       .to_return(status: 200, body: log_content)

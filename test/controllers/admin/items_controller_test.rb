@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class Admin::ItemsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -9,16 +9,16 @@ class Admin::ItemsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get index" do
-    get '/admin/items'
+    get "/admin/items"
     assert_response :success
   end
 
   test "get items.json" do
-    get '/admin/items.json'
+    get "/admin/items.json"
     assert_response :success
     json  = @response.body
-    assert json =~ /Classic/, 'items serialized'
-    assert json =~ /Pay it forward/, 'items serialized'
+    assert json =~ /Classic/, "items serialized"
+    assert json =~ /Pay it forward/, "items serialized"
     items = JSON.load(json)
 
     validate_json_schema :admin_items, json

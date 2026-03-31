@@ -1,6 +1,10 @@
 import React, { useState, useMemo } from "react";
 
-import { getDeadlineContext, SettingsContext, getSettingsContext } from "./Contexts";
+import {
+  getDeadlineContext,
+  SettingsContext,
+  getSettingsContext,
+} from "./Contexts";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
 import type {
@@ -37,10 +41,13 @@ export default function HolidayMenuTab({
   const holidaySettings = { ...parentSettings, showCredits: false };
 
   // Ensure all items are available as marketplace items for card payment
-  const marketplaceMenu = useMemo(() => ({
-    ...menu,
-    items: menu.items.map((item) => ({ ...item, marketplace: true })),
-  }), [menu]);
+  const marketplaceMenu = useMemo(
+    () => ({
+      ...menu,
+      items: menu.items.map((item) => ({ ...item, marketplace: true })),
+    }),
+    [menu]
+  );
 
   if (order && !isEditingOrder) {
     const handleEditOrder =

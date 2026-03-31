@@ -9,12 +9,12 @@ class SendWeeklyMenuJob < ApplicationJob
   def perform(menu_id = nil)
     # Use the provided menu_id if available, otherwise fall back to current menu
     menu = menu_id ? Menu.find(menu_id) : Menu.current
-    
+
     users = self.class.users_to_email(menu)
     count = users.count
-    
+
     add_comment! menu, "SendWeeklyMenuJob: Starting to queue #{count} emails for menu #{menu.id}"
-    
+
     # email each individual user
     users.find_each do |user|
       begin
@@ -25,7 +25,7 @@ class SendWeeklyMenuJob < ApplicationJob
         Rails.logger.error "Failed to send menu email to user #{user.id}: #{e.message}"
       end
     end
-    
+
     add_comment! menu, "SendWeeklyMenuJob: Completed queueing #{count} emails for menu #{menu.id}"
 
     ActivityEvent.log(
@@ -46,7 +46,7 @@ class SendWeeklyMenuJob < ApplicationJob
 
   def self.users_to_email(menu)
     # don't send to same people twice
-    already_got_menu = Set[*menu.messages.where(mailer: 'MenuMailer#weekly_menu_email').pluck(:user_id)]
+    already_got_menu = Set[*menu.messages.where(mailer: "MenuMailer#weekly_menu_email").pluck(:user_id)]
     User.receive_weekly_menu.where.not(id: already_got_menu)
   end
 end

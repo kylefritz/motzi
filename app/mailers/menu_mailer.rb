@@ -1,5 +1,5 @@
 class MenuMailer < ApplicationMailer
-  track extra: -> { {menu_id: params[:menu].id} }
+  track extra: -> { { menu_id: params[:menu].id } }
   track open: true, click: true
 
   def weekly_menu_email

@@ -8,10 +8,10 @@ json.pickup_days menu.pickup_days do |pickup_day|
   json.debug pickup_day.day_abbr
 end
 
-menu_items = menu.sorted_menu_items(includes: {item: {image_attachment: :blob}, menu_item_pickup_days: :pickup_day})
-                  .map {|mi| [mi, mi.item]}
+menu_items = menu.sorted_menu_items(includes: { item: { image_attachment: :blob }, menu_item_pickup_days: :pickup_day })
+                  .map { |mi| [ mi, mi.item ] }
 if Setting.shop.pay_it_forward && Item.pay_it_forward.present?
-  menu_items.push([MenuItem.new, Item.pay_it_forward])
+  menu_items.push([ MenuItem.new, Item.pay_it_forward ])
 end
 
 def remaining(limit, ordered)
@@ -28,7 +28,6 @@ json.items menu_items.map do |menu_item, item|
 
   json.extract! menu_item, :subscriber, :marketplace
   json.pickup_days menu_item.menu_item_pickup_days do |mi_pd|
-
     json.extract! mi_pd.pickup_day, :id, :pickup_at, :order_deadline_at
     json.debug mi_pd.pickup_day.day_abbr
     json.remaining remaining(mi_pd.limit, (ordered_item_counts[item.id] || {})[mi_pd.pickup_day_id])

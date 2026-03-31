@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class Admin::MenuItemsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -9,7 +9,7 @@ class Admin::MenuItemsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get index" do
-    get '/admin/menu_items'
+    get "/admin/menu_items"
     assert_response :success
   end
 

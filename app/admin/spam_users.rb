@@ -1,5 +1,5 @@
-ActiveAdmin.register_page 'Spam Users' do
-  menu parent: 'Advanced', label: 'Spam', priority: 7
+ActiveAdmin.register_page "Spam Users" do
+  menu parent: "Advanced", label: "Spam", priority: 7
 
   controller do
     helper_method :spam_cache_key
@@ -29,21 +29,21 @@ ActiveAdmin.register_page 'Spam Users' do
                   notice: "Deleted #{count} spam users."
     else
       redirect_to admin_spam_users_path,
-                  alert: 'No users selected.'
+                  alert: "No users selected."
     end
   end
 
-  content title: 'Spam Users' do
+  content title: "Spam Users" do
     # Load candidates
     candidates = User.left_joins(:orders)
                      .where(orders: { id: nil })
-                     .where('sign_in_count <= 1')
+                     .where("sign_in_count <= 1")
                      .where.not(id: 0)
                      .order(:created_at)
 
     # Parse scan results from cache
     scan_results = begin
-      JSON.parse(Rails.cache.read(spam_cache_key) || '[]', symbolize_names: true)
+      JSON.parse(Rails.cache.read(spam_cache_key) || "[]", symbolize_names: true)
     rescue JSON::ParserError
       []
     end
@@ -53,45 +53,45 @@ ActiveAdmin.register_page 'Spam Users' do
     para "#{candidates.count} users with no orders and 0-1 sign-ins. Use Claude to identify likely spam accounts."
 
     if candidates.any?
-      div class: 'spam-toolbar' do
-        div class: 'spam-toolbar-left' do
-          text_node button_to('✦  Scan with Claude',
+      div class: "spam-toolbar" do
+        div class: "spam-toolbar-left" do
+          text_node button_to("✦  Scan with Claude",
                              admin_spam_users_scan_path,
                              method: :post,
-                             form_class: 'spam-scan-form',
-                             class: 'spam-scan-btn')
-          a 'Delete Selected', href: '#', id: 'delete-selected-btn', class: 'spam-delete-btn'
+                             form_class: "spam-scan-form",
+                             class: "spam-scan-btn")
+          a "Delete Selected", href: "#", id: "delete-selected-btn", class: "spam-delete-btn"
         end
-        div class: 'spam-toolbar-right' do
-          span "#{spam_ids.size} flagged", class: 'spam-count' if scan_results.any?
+        div class: "spam-toolbar-right" do
+          span "#{spam_ids.size} flagged", class: "spam-count" if scan_results.any?
           if spam_ids.any?
-            span class: 'select-helpers' do
-              a 'Select flagged', href: '#', id: 'select-flagged'
-              text_node ' · '
-              a 'Select none', href: '#', id: 'select-none'
+            span class: "select-helpers" do
+              a "Select flagged", href: "#", id: "select-flagged"
+              text_node " · "
+              a "Select none", href: "#", id: "select-none"
             end
           end
         end
       end
 
-      form_for :spam, url: admin_spam_users_delete_selected_path, method: :post, html: { id: 'spam-users-form' } do |_f|
-        table class: 'spam-table' do
+      form_for :spam, url: admin_spam_users_delete_selected_path, method: :post, html: { id: "spam-users-form" } do |_f|
+        table class: "spam-table" do
           thead do
             tr do
-              th ''
-              th 'Name'
-              th 'Email'
-              th 'Sign-ins'
-              th 'Created'
-              th 'Claude' if scan_results.any?
+              th ""
+              th "Name"
+              th "Email"
+              th "Sign-ins"
+              th "Created"
+              th "Claude" if scan_results.any?
             end
           end
           tbody do
             candidates.each do |user|
               is_spam = spam_ids.include?(user.id)
-              tr class: is_spam ? 'spam-flagged' : nil do
+              tr class: is_spam ? "spam-flagged" : nil do
                 td do
-                  check_box_tag 'user_ids[]', user.id, is_spam, class: 'spam-check'
+                  check_box_tag "user_ids[]", user.id, is_spam, class: "spam-check"
                 end
                 td do
                   a "#{user.first_name} #{user.last_name}".strip, href: admin_user_path(user)
@@ -100,11 +100,11 @@ ActiveAdmin.register_page 'Spam Users' do
                 td user.sign_in_count
                 td user.created_at.to_date.iso8601
                 if scan_results.any?
-                  td class: 'spam-reason' do
+                  td class: "spam-reason" do
                     if is_spam
-                      span reasons[user.id][:reason], class: 'reason-text'
+                      span reasons[user.id][:reason], class: "reason-text"
                     else
-                      span 'OK', class: 'reason-ok'
+                      span "OK", class: "reason-ok"
                     end
                   end
                 end

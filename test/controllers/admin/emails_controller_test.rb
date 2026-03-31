@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class Admin::EmailsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -11,7 +11,7 @@ class Admin::EmailsControllerTest < ActionDispatch::IntegrationTest
   test "get index" do
     MenuMailer.with(user: users(:kyle), menu: menus(:week2)).weekly_menu_email.deliver_now
 
-    get '/admin/emails'
+    get "/admin/emails"
     assert_response :success
   end
 end

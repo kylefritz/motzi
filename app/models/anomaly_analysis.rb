@@ -13,10 +13,10 @@ class AnomalyAnalysis < ApplicationRecord
 
   before_create :detect_overall_status
 
-  STATUSES = { 'problem' => '🔴', 'warning' => '⚠️', 'healthy' => '✅' }.freeze
+  STATUSES = { "problem" => "🔴", "warning" => "⚠️", "healthy" => "✅" }.freeze
 
   def status_emoji
-    STATUSES[overall_status] || '⚠️'
+    STATUSES[overall_status] || "⚠️"
   end
 
   private
@@ -27,12 +27,12 @@ class AnomalyAnalysis < ApplicationRecord
 
   def parse_status_from_result
     status_line = result[/(?:overall )?status:.*$/i]
-    return 'warning' unless status_line
+    return "warning" unless status_line
 
     case status_line
-    when /problem/i then 'problem'
-    when /warning/i then 'warning'
-    else 'healthy'
+    when /problem/i then "problem"
+    when /warning/i then "warning"
+    else "healthy"
     end
   end
 end

@@ -1,14 +1,14 @@
-require 'test_helper'
+require "test_helper"
 
 class LowCreditUsersTest < ActiveSupport::TestCase
   test "low credit users" do
     rows = exec_low_credit_users
     assert_equal 2, rows.size
-    low_credit_users = [users(:ljf), users(:jess)]
-    user_ids = Set[rows.map {|u| u["user_id"]}]
+    low_credit_users = [ users(:ljf), users(:jess) ]
+    user_ids = Set[rows.map { |u| u["user_id"] }]
     assert_equal Set[low_credit_users.map(&:id)], user_ids
 
-    balances = Set[rows.map {|u| u["credit_balance"]}]
+    balances = Set[rows.map { |u| u["credit_balance"] }]
     assert_equal Set[low_credit_users.map(&:credits)], balances
   end
 
@@ -24,8 +24,8 @@ class LowCreditUsersTest < ActiveSupport::TestCase
         order.order_items.create!(item: items.sample.item, pickup_day: pickup_day)
       end
     end
-    assert_equal 0, kyle.credits, 'now kyle has no credits'
-    assert_equal 3, exec_low_credit_users.size, 'kyle included in low credit users'
+    assert_equal 0, kyle.credits, "now kyle has no credits"
+    assert_equal 3, exec_low_credit_users.size, "kyle included in low credit users"
   end
 
   test "dont show users who dont get emails" do

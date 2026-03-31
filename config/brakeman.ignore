@@ -1,0 +1,14 @@
+{
+  "ignored_warnings": [
+    {
+      "fingerprint": "ec80c7cfb0f1c7d2231af25656b30237ea6df8d9cea5796c80412831c82694de",
+      "note": "Setting.reminder_hours is an admin-controlled integer, not user input"
+    },
+    {
+      "fingerprint": "19ec190c996eca43da675de0907235ecb61b31a18d1b162444c5e6033a901ea4",
+      "note": "Open3.capture2 with array form — no shell injection possible"
+    }
+  ],
+  "updated": "2026-03-31",
+  "brakeman_version": "8.0.4"
+}
