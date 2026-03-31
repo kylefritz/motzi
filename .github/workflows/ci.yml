@@ -11,6 +11,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  scan_ruby:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.10
+          bundler-cache: true
+      - name: Brakeman (security)
+        run: bin/brakeman --no-pager
+      - name: Bundler Audit (gem vulnerabilities)
+        run: bin/bundler-audit
+
   lint:
     runs-on: ubuntu-latest
     env:
@@ -88,7 +101,7 @@ jobs:
           bun-version: latest
 
       - name: Install JS dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
       - name: JS tests
         run: bun run test
