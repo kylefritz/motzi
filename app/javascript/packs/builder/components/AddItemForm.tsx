@@ -47,7 +47,7 @@ export default function AddItemForm({
       alert("Select an item");
       return;
     }
-    api.item.add({ itemId, subscriber, marketplace, pickupDayIds });
+    api.menuItem.add({ itemId, subscriber, marketplace, pickupDayIds });
   };
 
   const not = new Set(rawNot);

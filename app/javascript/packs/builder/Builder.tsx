@@ -35,30 +35,29 @@ export default function MenuBuilder() {
   }
 
   const api: BuilderApi = {
-    item: {
-      add: (item) => {
-        const json = { ...item, menuId };
-        console.log("add item", json);
+    menuItem: {
+      add: (menuItem) => {
+        const json = { ...menuItem, menuId };
+        console.log("add menu item", json);
         return axios
-          .post(`/admin/menus/${menuId}/item.json`, json)
+          .post(`/admin/menus/${menuId}/menu_item.json`, json)
           .then(loadMenu);
       },
 
       remove: (itemId) => {
-        console.log("remove item", itemId);
+        console.log("remove menu item", itemId);
         return axios
-          .post(`/admin/menus/${menuId}/remove_item.json`, { itemId })
+          .post(`/admin/menus/${menuId}/remove_menu_item.json`, { itemId })
           .then(({ data: menu }) => setMenu(menu));
       },
 
       clearAll: () => {
-        console.log("remove all items");
+        console.log("remove all menu items");
         return axios
-          .post(`/admin/menus/${menuId}/remove_items.json`)
+          .post(`/admin/menus/${menuId}/remove_menu_items.json`)
           .then(({ data: menu }) => setMenu(menu));
       },
-    },
-    menuItem: {
+
       update: (menuItemId, json) => {
         console.log("update menu item", json);
         return axios

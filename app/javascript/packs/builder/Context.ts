@@ -34,12 +34,10 @@ type MenuItemPickupDayUpdatePayload = {
 };
 
 export type BuilderApi = {
-  item: {
-    add: (item: MenuItemAddPayload) => Promise<unknown>;
+  menuItem: {
+    add: (payload: MenuItemAddPayload) => Promise<unknown>;
     remove: (itemId: number) => Promise<unknown>;
     clearAll: () => Promise<unknown>;
-  };
-  menuItem: {
     update: (menuItemId: number, json: MenuItemUpdatePayload) => Promise<unknown>;
   };
   pickupDay: {

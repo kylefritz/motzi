@@ -27,7 +27,7 @@ export type AdminMenuBuilderResponse = {
     debug?: string;
     deadlineText?: string;
   }>;
-  items: Array<{
+  menuItems: Array<{
     menuItemId: number;
     itemId: number;
     name: string;

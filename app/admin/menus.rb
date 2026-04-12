@@ -301,7 +301,7 @@ ActiveAdmin.register Menu do
     render 'admin/menus/menu_builder', formats: [:json]
   end
 
-  member_action :item, method: :post do
+  member_action :menu_item, method: :post do
     @menu = Menu.find(params[:id])
     Menu.transaction do
       mi = @menu.menu_items.create!(
@@ -328,14 +328,14 @@ ActiveAdmin.register Menu do
     render 'admin/menus/menu_builder', formats: [:json]
   end
 
-  member_action :remove_item, method: :post do
+  member_action :remove_menu_item, method: :post do
     @menu = Menu.find(params[:id])
     MenuItem.where(menu: @menu, item_id: params[:item_id]).destroy_all
 
     render 'admin/menus/menu_builder', formats: [:json]
   end
 
-  member_action :remove_items, method: :post do
+  member_action :remove_menu_items, method: :post do
     @menu = Menu.find(params[:id])
     MenuItem.where(menu: @menu).destroy_all
 

@@ -9,7 +9,7 @@
     "leadtimeHours",
     "recentMenus",
     "pickupDays",
-    "items"
+    "menuItems"
   ],
   "properties": {
     "id": { "type": "integer" },
@@ -42,7 +42,7 @@
         }
       }
     },
-    "items": {
+    "menuItems": {
       "type": "array",
       "items": {
         "type": "object",

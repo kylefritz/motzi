@@ -31,7 +31,7 @@ export type CartItem = Pick<MenuOrderItem, "itemId" | "quantity" | "pickupDayId"
 
 export type AdminMenu = AdminMenuBuilderResponse;
 export type AdminPickupDay = AdminMenuBuilderResponse["pickupDays"][number];
-export type AdminMenuItem = AdminMenuBuilderResponse["items"][number];
+export type AdminMenuItem = AdminMenuBuilderResponse["menuItems"][number];
 export type AdminMenuItemPickupDay = AdminMenuItem["pickupDays"][number];
 export type AdminItem = AdminItemsResponse["items"][number];
 

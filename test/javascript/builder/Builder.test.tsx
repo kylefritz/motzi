@@ -25,7 +25,7 @@ const menuResponse = {
       deadlineText: "Fri 10am",
     },
   ],
-  items: [
+  menuItems: [
     {
       menuItemId: 10,
       itemId: 100,
@@ -125,7 +125,7 @@ test("edits menu items", async () => {
   window.confirm = confirmSpy;
   await userEvent.click(screen.getByRole("button", { name: /Clear all/i }));
   expect(confirmSpy).toHaveBeenCalled();
-  expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_items.json");
+  expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_menu_items.json");
 
   // Toggle marketplace on an item card.
   const sourdoughCard = screen.getByTestId("menu-item-card-100");
@@ -166,7 +166,7 @@ test("edits menu items", async () => {
   // Remove an item from the menu.
   const removeButton = card.getByTitle("remove from menu");
   await userEvent.click(removeButton);
-  expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_item.json", {
+  expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_menu_item.json", {
     itemId: 100,
   });
 });
@@ -248,7 +248,7 @@ test("adds pickup days and items", async () => {
 
   await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
   const addItemCall = postMock.mock.calls.find(
-    ([url]) => url === "/admin/menus/42/item.json"
+    ([url]) => url === "/admin/menus/42/menu_item.json"
   );
   expect(addItemCall).toBeTruthy();
   expect(addItemCall?.[1]).toMatchObject({
