@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_28_183624) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_12_151138) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -264,6 +264,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_28_183624) do
     t.datetime "updated_at", null: false
     t.decimal "price", precision: 8, scale: 2, default: "5.0", null: false
     t.integer "credits", default: 1, null: false
+    t.datetime "archived_at"
     t.index "lower((name)::text)", name: "index_items_on_LOWER_name"
   end
 
