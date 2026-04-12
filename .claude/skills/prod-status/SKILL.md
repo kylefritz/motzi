@@ -1,9 +1,9 @@
 ---
-name: heroku-logs-review
-description: Review Heroku logs for the motzibread app to surface operational issues (R14 memory errors, service failures, job errors, elevated error rates). Use this at the start of every conversation as instructed in CLAUDE.md, and whenever the user asks about app health, production errors, or Heroku status.
+name: prod-status
+description: Review Heroku logs for the motzibread app to surface operational issues (memory pressure, service failures, job errors, elevated error rates). Use this at the start of every conversation as instructed in CLAUDE.md, and whenever the user asks about app health, production errors, or Heroku status.
 ---
 
-# Heroku Logs Review
+# Production Status Check
 
 Check recent production logs and surface operational issues so the user knows about problems before diving into work.
 
@@ -22,8 +22,9 @@ This needs `dangerouslyDisableSandbox: true` since it hits the Heroku API.
 Focus on problems — don't report things that are working normally.
 
 ### Memory pressure
-- **R14/R15 errors** — dyno exceeded its memory quota. Report which dynos and how frequently.
+- **R15 errors** — dyno hard-killed for exceeding 2x quota. This is critical.
 - **`sample#memory_*` lines** — report current memory usage vs quota per dyno. Flag anything above 80% of quota (usually 512MB). Note the trend if multiple samples show growth.
+- **R14 (soft limit)** — the process goes to swap but keeps running. R14 is a soft warning, not an error. On Heroku's essential tier the process just swaps and continues. Only mention R14 if reporting memory stats anyway; do not elevate status to Warning for R14 alone.
 
 ### Request errors
 - **H12** (request timeout), **H13** (connection closed), **H14** (no web dynos) — these mean users are seeing errors.
@@ -45,13 +46,13 @@ Focus on problems — don't report things that are working normally.
 Keep it concise. If issues are found:
 
 ```
-Heroku logs check: web.1 at 635MB/512MB with R14 errors (6 in last hour), worker.1 healthy at 200MB/512MB
+Prod status: web.1 at 635MB/512MB with H12 timeouts (3 in last hour), worker.1 healthy at 200MB/512MB
 ```
 
 If everything looks healthy:
 
 ```
-Heroku logs check: all clear — web.1 at 310MB/512MB, no errors.
+Prod status: all clear — web.1 at 310MB/512MB, no errors.
 ```
 
 ## Context

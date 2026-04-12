@@ -74,11 +74,15 @@ Screenshots are uploaded to `s3://motzi/public/gh/pr-<NUMBER>/` and embedded in 
 
 ## Deployment
 
-Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgres 15 (essential-1). No Redis — everything runs on Postgres via Solid Queue (jobs), Solid Cable (ActionCable), and Solid Cache.
+Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgres 15 (essential-1), **not** Neon. No Redis — everything runs on Postgres via Solid Queue (jobs), Solid Cable (ActionCable), and Solid Cache. To pull prod data locally: `bin/seed_local` (uses `heroku pg:pull`).
 
 ## Dev Shortcuts
 
 - **Admin login** (dev only): `GET /dev/login_as_admin` — signs in as admin, no password. Useful for Playwright.
+
+## Heroku Memory / R14
+
+R14 is a **soft** memory warning — the dyno exceeded its 512MB quota and went to swap. On Heroku's essential tier this is expected behavior; the process keeps running. Do not treat R14 as an error or escalate it. Only R15 (hard kill, dyno terminated) is a real problem. The worker dyno routinely runs above quota in swap — this is acceptable for our workload.
 
 ## MCP Notes
 
@@ -95,7 +99,7 @@ Feature work uses git worktrees in `.worktrees/`. When setting up a worktree:
 
 ## Session Start
 
-At the start of each conversation, launch the `heroku-logs-review` skill as a background agent to check for operational issues. Report findings before diving into work.
+At the start of each conversation, launch the `prod-status` skill as a background agent to check for operational issues. Report findings before diving into work.
 
 ## Issues
 
