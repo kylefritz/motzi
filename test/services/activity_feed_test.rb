@@ -275,8 +275,9 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
   test "to_text includes dyno memory section when metrics exist" do
     week_id = Time.zone.now.week_id
-    DynoMetric.create!(recorded_at: 1.hour.ago, dyno: "web.1", memory_total: 340, memory_rss: 300, memory_swap: 10, memory_quota: 512, r14_count: 0)
-    DynoMetric.create!(recorded_at: 2.hours.ago, dyno: "web.1", memory_total: 504, memory_rss: 480, memory_swap: 20, memory_quota: 512, r14_count: 2)
+    week_start = Time.zone.from_week_id(week_id)
+    DynoMetric.create!(recorded_at: week_start + 1.hour, dyno: "web.1", memory_total: 340, memory_rss: 300, memory_swap: 10, memory_quota: 512, r14_count: 0)
+    DynoMetric.create!(recorded_at: week_start + 2.hours, dyno: "web.1", memory_total: 504, memory_rss: 480, memory_swap: 20, memory_quota: 512, r14_count: 2)
 
     feed = ActivityFeed.new(week_id)
     text = feed.to_text

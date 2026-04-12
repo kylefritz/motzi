@@ -262,7 +262,7 @@ class MenuTest < ActiveSupport::TestCase
 
   test "can_publish? for holiday allows months ahead" do
     holiday = menus(:passover_2026)
-    # passover deadline is 2026-04-08, today is 2026-02-22
+    # passover deadline is 2026-09-23
     assert holiday.can_publish?, 'can publish holiday with future deadline'
   end
 

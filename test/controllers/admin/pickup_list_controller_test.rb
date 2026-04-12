@@ -21,18 +21,18 @@ class Admin::PickupListControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "pickup list for date with both regular and holiday orders" do
-    get "/admin/pickup_lists/2026-04-10"
+    get "/admin/pickup_lists/2026-09-25"
     assert_response :redirect
     follow_redirect!
     assert_response :success
 
     assert_el_count 1, '#pickup-list'
     # kyle has regular (classic, rye) + holiday (almond cake), ljf has holiday (matzo toffee)
-    assert_el_count 2, '#pickup-list tbody tr', 'kyle and ljf both have orders on Apr 10'
+    assert_el_count 2, '#pickup-list tbody tr', 'kyle and ljf both have orders on Sep 25'
   end
 
   test "pickup list by-item tab shows items from both menus" do
-    get "/admin/pickup_lists/2026-04-10"
+    get "/admin/pickup_lists/2026-09-25"
     follow_redirect!
     assert_response :success
 
