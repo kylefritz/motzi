@@ -7,6 +7,7 @@ import Cart, { useCart, orderCredits } from "./Cart";
 import Title from "./Title";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
+import SkipNote from "./SkipNote";
 import FeedbackForm from "./FeedbackForm";
 import Subscription from "./Subscription";
 import { getDeadlineContext } from "./Contexts";
@@ -93,6 +94,8 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday, onSh
 
       <h5>Menu</h5>
       <Items items={subscriberItems} onAddToCart={addToCart} />
+
+      {!isHoliday && <SkipNote />}
 
       {payItForward && (
         <PayItForward
