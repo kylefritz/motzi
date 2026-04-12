@@ -16,6 +16,12 @@ class MenuMailerTest < ActionMailer::TestCase
     assert_in_both email, 'Another great market yesterday', 'includes bakers note'
     assert_includes email.html_part.body.to_s, 'credits remaining', 'includes credits in html'
     assert_includes email.text_part.body.to_s, 'credits remaining', 'includes credits in text'
+
+    assert_in_both email, 'Manage email preferences', 'includes unsubscribe link in footer'
+
+    # RFC 8058 one-click unsubscribe headers
+    assert_match(/menu\?.*tab=email.*uid=/, email["List-Unsubscribe"].value, 'List-Unsubscribe links to email preferences')
+    assert_equal "List-Unsubscribe=One-Click", email["List-Unsubscribe-Post"].value
   end
 
   private
