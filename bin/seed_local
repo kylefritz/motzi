@@ -13,10 +13,16 @@ echo "==> Dropping local database..."
 dropdb --if-exists "$LOCAL_DB"
 
 echo "==> Pulling $PROD_APP database to $LOCAL_DB..."
-heroku pg:pull DATABASE_URL "$LOCAL_DB" --app "$PROD_APP"
-
-echo "==> Bootstrapping Solid Queue & Cable schemas..."
-bin/rails solid_queue:bootstrap solid_cable:bootstrap
+# pg:pull exits non-zero because pg_restore can't create heroku_ext schema
+# and pg_stat_statements extension locally — this is expected and harmless.
+if ! heroku pg:pull DATABASE_URL "$LOCAL_DB" --app "$PROD_APP" 2>&1; then
+  # Verify the database was actually created despite the exit code
+  if ! psql -d "$LOCAL_DB" -c "SELECT 1" &>/dev/null; then
+    echo "Error: pg:pull failed and database was not created" >&2
+    exit 1
+  fi
+  echo "  (pg_restore warnings above are expected — heroku_ext/pg_stat_statements can't be created locally)"
+fi
 
 echo "==> Running migrations..."
 bin/rails db:migrate
@@ -26,4 +32,12 @@ if [[ " $* " == *" --images "* ]] || [[ " $* " == *" --images" ]]; then
   bin/rails s3:download
 fi
 
+# Freshness check — verify we got recent data
+echo ""
+echo "==> Freshness check..."
+LATEST=$(psql -d "$LOCAL_DB" -t -c "SELECT MAX(created_at)::date FROM anomaly_analyses" 2>/dev/null | tr -d ' ')
+VISITS=$(psql -d "$LOCAL_DB" -t -c "SELECT MAX(started_at)::date FROM ahoy_visits" 2>/dev/null | tr -d ' ')
+echo "  Latest activity report: $LATEST"
+echo "  Latest visit: $VISITS"
+echo ""
 echo "==> Done. Local database is loaded with prod data."
