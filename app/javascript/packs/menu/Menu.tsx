@@ -43,6 +43,7 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday, onSh
   const [comments, setComments] = useState<string | null>(
     _.get(order, "comments", null)
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCreateOrder = () => {
     if (_.isEmpty(cart)) {
@@ -50,11 +51,12 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday, onSh
       return;
     }
 
+    setIsSubmitting(true);
     onCreateOrder({
       comments,
       cart,
       uid: user.hashid,
-    });
+    }).finally(() => setIsSubmitting(false));
   };
 
   // if editing an order, "give back" credits from the order
@@ -128,6 +130,7 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday, onSh
               menuClosed,
               insufficientCredits,
               isEditing: !!order,
+              isSubmitting,
             }}
           />
         </div>
@@ -137,8 +140,11 @@ export default function Menu({ menu, order, user, onCreateOrder, isHoliday, onSh
   );
 }
 
-function buttonText({ isCurrent, menuClosed, insufficientCredits, isEditing }) {
+function buttonText({ isCurrent, menuClosed, insufficientCredits, isEditing, isSubmitting }) {
   const no = (text, title) => ({ disabled: true, title, text });
+  if (isSubmitting) {
+    return no("Submitting…", "Your order is being submitted");
+  }
   if (!isCurrent) {
     return no(
       "Old menu",
