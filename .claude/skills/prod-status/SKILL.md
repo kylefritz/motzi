@@ -55,6 +55,10 @@ If everything looks healthy:
 Prod status: all clear — web.1 at 310MB/512MB, no errors.
 ```
 
+## Also check
+
+After reviewing logs, also run `gh issue list` to surface any open GitHub issues. Include a one-line summary of any issues that look relevant or urgent in your report.
+
 ## Context
 
 The `CaptureDynoMetricsJob` runs every 30 minutes (at :03 and :33) and stores memory snapshots in the `dyno_metrics` table. This skill supplements that with real-time, broader log analysis — it catches errors and events that the job doesn't track.

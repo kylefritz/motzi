@@ -706,18 +706,20 @@ class ActivityFeed
         label = MAILER_LABELS[mailer] || mailer
 
         if verbose
-          # Show duplicates (users who got the same email more than once) and a sample of normal sends.
-          # This gives Claude the signal to detect double-sends without listing every individual email.
-          by_user = messages.group_by { |m| m.user_id }
-          duplicates = by_user.select { |_, msgs| msgs.size > 1 }.values.flatten
-          sample = by_user.select { |_, msgs| msgs.size == 1 }.values.flatten.first(10)
+          # Show duplicates (users who got the same email more than once for the same pickup day)
+          # and a sample of normal sends. Group by [user_id, pickup_day_id] so that legitimate
+          # multi-day reminders (e.g., Thu + Sat) are not flagged as duplicates.
+          by_user_and_day = messages.group_by { |m| [m.user_id, m.pickup_day_id] }
+          duplicates = by_user_and_day.select { |_, msgs| msgs.size > 1 }.values.flatten
+          sample = by_user_and_day.select { |_, msgs| msgs.size == 1 }.values.flatten.first(10)
 
           (duplicates + sample).sort_by { |m| m.sent_at || m.created_at }.each do |msg|
             user_name = msg.user&.name || "Unknown"
             parts = ["sent #{msg.sent_at&.strftime('%-m/%d %l:%M%P')&.strip}"]
             parts << "opened #{msg.opened_at.strftime('%-m/%d %l:%M%P').strip}" if msg.opened_at
             parts << "clicked #{msg.clicked_at.strftime('%-m/%d %l:%M%P').strip}" if msg.clicked_at
-            dup_note = by_user[msg.user_id].size > 1 ? " [DUPLICATE — #{by_user[msg.user_id].size}x]" : ""
+            dup_key = [msg.user_id, msg.pickup_day_id]
+            dup_note = by_user_and_day[dup_key].size > 1 ? " [DUPLICATE — #{by_user_and_day[dup_key].size}x]" : ""
             events << Event.new(
               timestamp: msg.sent_at || msg.created_at,
               category: "email",

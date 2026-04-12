@@ -24,15 +24,23 @@ class SendDayOfReminderJob < ApplicationJob
 
     num_reminded = 0
 
-    menu.orders.joins(:user).where(users: { receive_day_of_reminder: true }).find_each do |order|
-      next if already_reminded.include?(order.user_id)
+    # Iterate distinct users (not orders) to avoid sending duplicates
+    # when a user has multiple orders on the same menu.
+    user_ids = menu.orders.joins(:user)
+      .where(users: { receive_day_of_reminder: true })
+      .distinct.pluck(:user_id)
 
-      order_items_for_day = order.items_for_pickup(pickup_day)
+    User.where(id: user_ids).find_each do |user|
+      next if already_reminded.include?(user.id)
+
+      # Collect items across all of this user's orders for the pickup day
+      order_items_for_day = menu.orders.where(user: user)
+        .flat_map { |order| order.items_for_pickup(pickup_day) }
 
       next if order_items_for_day.empty?
 
       begin
-        ReminderMailer.with(user: order.user,
+        ReminderMailer.with(user: user,
                             menu: menu,
                             pickup_day: pickup_day,
                             order_items: order_items_for_day,
@@ -41,7 +49,7 @@ class SendDayOfReminderJob < ApplicationJob
                            ).day_of_email.deliver_now
         num_reminded += 1
       rescue => e
-        Rails.logger.error "Failed to send reminder email to user #{order.user_id}: #{e.message}"
+        Rails.logger.error "Failed to send reminder email to user #{user.id}: #{e.message}"
       end
     end
 

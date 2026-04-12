@@ -45,6 +45,33 @@ class SendDayOfReminderJobTest < ActiveJob::TestCase
     refute_reminders_emailed(:tues, '7:01 AM', 'dont send the second time')
   end
 
+  test "does not send duplicate emails when user has multiple orders" do
+    # Create a second order for kyle on the same menu
+    second_order = users(:kyle).orders.create!(menu: @menu)
+    second_order.order_items.create!(item: items(:classic), pickup_day: @tues)
+
+    assert_reminders_emailed(2, :tues, '7:00 AM', 'kyle gets one email despite two orders')
+  end
+
+  test "includes items from all orders when user has multiple orders" do
+    # Kyle's first order has pumpkin on tues. Add a second order with classic.
+    second_order = users(:kyle).orders.create!(menu: @menu)
+    second_order.order_items.create!(item: items(:classic), pickup_day: @tues)
+
+    ActionMailer::Base.deliveries.clear
+
+    travel_to_day_time(:tues, '7:00 AM') do
+      SendDayOfReminderJob.perform_now
+    end
+
+    # The email should reference both items (from both orders)
+    email = ActionMailer::Base.deliveries.find { |e| e.to.include?(users(:kyle).email) }
+    assert email, "email should have been delivered to kyle"
+    body = email.text_part&.body.to_s + email.html_part&.body.to_s
+    assert_match(/pumpkin/i, body, "email should include pumpkin from first order")
+    assert_match(/classic/i, body, "email should include classic from second order")
+  end
+
   test "respects receive_day_of_reminder preference" do
     users(:kyle).update!(receive_day_of_reminder: false)
     # kyle has an order for tues, but opted out of day-of reminders
