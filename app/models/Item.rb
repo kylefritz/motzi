@@ -6,6 +6,25 @@ class Item < ApplicationRecord
   has_one_attached :image
   default_scope { order("LOWER(name)") }
 
+  scope :active, -> { where(archived_at: nil) }
+  scope :archived, -> { where.not(archived_at: nil) }
+
+  def archived?
+    archived_at.present?
+  end
+
+  def archive!
+    update!(archived_at: Time.current)
+  end
+
+  def unarchive!
+    update!(archived_at: nil)
+  end
+
+  def deletable?
+    menu_items.none? && order_items.none?
+  end
+
   PAY_IT_FORWARD_ID = -1
   def self.pay_it_forward
     self.find_by(id: PAY_IT_FORWARD_ID)
