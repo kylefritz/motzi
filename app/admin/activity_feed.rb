@@ -546,6 +546,23 @@ ActiveAdmin.register_page "Activity Feed" do
               text_node markdown.render(analysis.result).html_safe
             end
 
+            if analysis.replies.any?
+              div class: "analysis-replies", style: "margin-top: 16px; padding-top: 12px; border-top: 1px solid #eee" do
+                h4 "Replies (#{analysis.replies.size})", style: "margin: 0 0 8px; font-size: 13px; color: #666"
+                analysis.replies.each do |reply|
+                  div class: "analysis-reply", style: "margin-bottom: 10px; padding: 8px 12px; background: #f9f9fb; border-left: 3px solid #352C63; font-size: 13px" do
+                    div style: "font-weight: 500; color: #352C63; margin-bottom: 4px" do
+                      who = reply.author_name.presence || reply.author_email
+                      text_node "#{who} · #{reply.created_at.strftime('%-m/%-d %l:%M%P').strip} · via #{reply.source}"
+                    end
+                    div style: "white-space: pre-wrap; color: #2E2927" do
+                      text_node reply.body
+                    end
+                  end
+                end
+              end
+            end
+
             div class: "analysis-footer" do
               cost = analysis.cost || AnomalyDetector.estimate_cost(analysis.input_tokens, analysis.output_tokens, analysis.model_used)
               span do
