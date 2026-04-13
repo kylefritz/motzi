@@ -76,9 +76,30 @@ mail(
 )
 ```
 
-### 4. Cloudflare Email Worker (`reply-ingress.js`)
+### 4. Cloudflare Email Worker
 
-Lives in a separate repo/directory — deployed to Cloudflare via `wrangler`. Pseudocode:
+Lives in the motzi repo at `cloudflare/workers/reply-ingress/`, following the same pattern as the `corridor` repo (`cloudflare/workers/{firewall,redirect}/`). Deployed via `wrangler deploy` from inside that directory.
+
+Files:
+- `wrangler.toml` — worker name, compatibility date, env vars
+- `src/index.ts` — worker source
+- `cloudflare/workers/CLAUDE.md` — conventions (copy from corridor as a starting point)
+
+`wrangler.toml`:
+```toml
+name = "motzi-reply-ingress"
+main = "src/index.ts"
+compatibility_date = "2024-10-01"
+
+# Secrets set via: wrangler secret put REPLY_WEBHOOK_SECRET
+# Vars set via dashboard or [vars] block:
+[vars]
+MOTZI_URL = "https://motzibread.herokuapp.com"
+```
+
+Cloudflare Email Routing is configured in the dashboard (or via API) — not in wrangler.toml — with a rule: `reply+*@thepuff.co` → worker. thepuff.co is already on Cloudflare in Kyle's account.
+
+Pseudocode for `src/index.ts`:
 
 ```javascript
 export default {
@@ -242,8 +263,12 @@ Show replies in the ActiveAdmin Activity Feed page — a panel under each analys
 
 ## Config / deploy checklist
 
-- [ ] Add `REPLY_WEBHOOK_SECRET` to Heroku env (generated via `SecureRandom.hex(32)`)
-- [ ] Create Cloudflare Email Worker in thepuff.co account, set env vars
-- [ ] Configure Cloudflare Email Routing rule: `reply+*@thepuff.co` → Worker
-- [ ] Verify SPF/DKIM pass for Gmail-originated replies
-- [ ] Smoke test: reply to an analysis, confirm reply appears in admin
+- [ ] Generate secret: `SecureRandom.hex(32)`
+- [ ] Add `REPLY_WEBHOOK_SECRET` to Heroku: `heroku config:set REPLY_WEBHOOK_SECRET=... --app motzibread`
+- [ ] `cd cloudflare/workers/reply-ingress && wrangler deploy`
+- [ ] `wrangler secret put REPLY_WEBHOOK_SECRET` (paste same value)
+- [ ] In Cloudflare dashboard → thepuff.co → Email → Routing:
+  - Enable Email Routing if not already
+  - Add custom address rule: `reply+*@thepuff.co` → send to worker `motzi-reply-ingress`
+- [ ] Verify SPF/DKIM pass for Gmail-originated replies (send test, check worker logs)
+- [ ] Smoke test: reply to an analysis, confirm reply appears in admin Activity Feed
