@@ -35,4 +35,11 @@ class AnomalyMailerTest < ActionMailer::TestCase
     assert_includes html, "View in Admin"
     assert_includes html, "activity_feed"
   end
+
+  test "sets Reply-To with analysis ID for replies" do
+    analysis = anomaly_analyses(:week1_analysis)
+    email = AnomalyMailer.with(analysis: analysis).anomaly_report
+
+    assert_equal ["reply+analysis-#{analysis.id}@thepuff.co"], email.reply_to
+  end
 end

@@ -3,6 +3,7 @@ week1_analysis:
   result: |
     Status: ✅ Healthy
     Everything looks fine this week.
+  overall_status: healthy
   trigger: scheduled
   model_used: claude-sonnet-4-6
   input_tokens: 1000
