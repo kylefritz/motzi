@@ -14,4 +14,4 @@ wrangler deploy
 
 ### reply-ingress
 
-Receives email replies at `reply+*@thepuff.co` via Cloudflare Email Routing. Extracts the analysis ID from the To address, verifies SPF/DKIM, parses the email body, and POSTs to the Motzi `/reply_ingress` endpoint with a shared secret. If Motzi rejects (or the email fails verification), the worker bounces the message back to the sender with an explanation.
+Receives email replies at `motzi-analysis-replies@thepuff.co` via Cloudflare Email Routing. Verifies SPF/DKIM, parses the MIME body, extracts the `In-Reply-To` header (matched against `AnomalyAnalysis#email_message_id`), and POSTs to the Motzi `/reply_ingress` endpoint with a shared secret. If Motzi rejects (or the email fails verification), the worker bounces the message back to the sender with an explanation.

@@ -36,10 +36,30 @@ class AnomalyMailerTest < ActionMailer::TestCase
     assert_includes html, "activity_feed"
   end
 
-  test "sets Reply-To with analysis ID for replies" do
+  test "sets Reply-To to the shared replies address" do
     analysis = anomaly_analyses(:week1_analysis)
     email = AnomalyMailer.with(analysis: analysis).anomaly_report
 
-    assert_equal ["reply+analysis-#{analysis.id}@thepuff.co"], email.reply_to
+    assert_equal ["motzi-analysis-replies@thepuff.co"], email.reply_to
+  end
+
+  test "sets a stable Message-ID and persists it on the analysis" do
+    analysis = anomaly_analyses(:week1_analysis)
+    analysis.update!(email_message_id: nil)
+
+    email = AnomalyMailer.with(analysis: analysis).anomaly_report
+    email.message_id # force header generation
+
+    analysis.reload
+    assert analysis.email_message_id.present?, "expected email_message_id to be stored"
+    assert_equal analysis.email_message_id, "<#{email.message_id}>"
+  end
+
+  test "reuses stored Message-ID on subsequent deliveries" do
+    analysis = anomaly_analyses(:week1_analysis)
+    analysis.update!(email_message_id: "<fixed-id@example.com>")
+
+    email = AnomalyMailer.with(analysis: analysis).anomaly_report
+    assert_equal "fixed-id@example.com", email.message_id
   end
 end

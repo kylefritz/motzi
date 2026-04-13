@@ -6,7 +6,7 @@ interface Env {
 }
 
 interface MotziPayload {
-  analysis_id: string;
+  in_reply_to: string;
   from_email: string;
   from_name?: string;
   body: string;
@@ -26,19 +26,19 @@ export default {
         return;
       }
 
-      // 2. Extract analysis_id from recipient address
-      //    Example: reply+analysis-123@thepuff.co
-      const match = message.to.match(/reply\+analysis-(\d+)@/i);
-      if (!match) {
-        message.setReject(`Unknown recipient: ${message.to}`);
-        return;
-      }
-      const analysisId = match[1];
-
-      // 3. Parse the email using postal-mime
+      // 2. Parse the email using postal-mime
       const raw = new Response(message.raw);
       const rawBuffer = await raw.arrayBuffer();
       const parsed = await PostalMime.parse(rawBuffer);
+
+      // 3. Extract In-Reply-To — this is how we identify which analysis
+      //    the reply belongs to. Our mailer sets a stable Message-ID per
+      //    analysis; the replier's client preserves it in In-Reply-To.
+      const inReplyTo = parsed.inReplyTo?.trim() || "";
+      if (!inReplyTo) {
+        message.setReject("Missing In-Reply-To header — not a reply to a known analysis");
+        return;
+      }
 
       const fromEmail = parsed.from?.address || "";
       const fromName = parsed.from?.name || "";
@@ -51,7 +51,7 @@ export default {
 
       // 4. POST to Motzi
       const payload: MotziPayload = {
-        analysis_id: analysisId,
+        in_reply_to: inReplyTo,
         from_email: fromEmail,
         from_name: fromName,
         body: bodyText,
