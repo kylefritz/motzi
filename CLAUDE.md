@@ -76,6 +76,20 @@ Screenshots are uploaded to `s3://motzi/public/gh/pr-<NUMBER>/` and embedded in 
 
 Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgres 15 (essential-1), **not** Neon. No Redis — everything runs on Postgres via Solid Queue (jobs), Solid Cable (ActionCable), and Solid Cache. To pull prod data locally: `bin/seed_local` (uses `heroku pg:pull`).
 
+## Analysis Replies (email ingress)
+
+The weekly anomaly report emails have a `Reply-To` of `reply+analysis-{id}@thepuff.co`. A Cloudflare Email Worker (`cloudflare/workers/reply-ingress/`) receives replies and POSTs them to `/reply_ingress` on Motzi, where they get stored as `AnalysisReply` records and fed into next week's prompt.
+
+**Required env var on Heroku:** `REPLY_WEBHOOK_SECRET` (shared with the worker)
+
+Generate a new one: `ruby -rsecurerandom -e 'puts SecureRandom.hex(32)'`
+
+Set on Heroku: `heroku config:set REPLY_WEBHOOK_SECRET=... --app motzibread`
+
+Set on worker: `cd cloudflare/workers/reply-ingress && wrangler secret put REPLY_WEBHOOK_SECRET` (paste same value)
+
+Worker deploy: `cd cloudflare/workers/reply-ingress && wrangler deploy`
+
 ## Dev Shortcuts
 
 - **Admin login** (dev only): `GET /dev/login_as_admin` — signs in as admin, no password. Useful for Playwright.
