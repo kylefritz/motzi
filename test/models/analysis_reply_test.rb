@@ -29,20 +29,21 @@ class AnalysisReplyTest < ActiveSupport::TestCase
     assert_includes reply.errors[:author_email], "can't be blank"
   end
 
-  test "enforces unique message_id when present" do
+  test "DB enforces unique message_id when present" do
     AnalysisReply.create!(
       anomaly_analysis: anomaly_analyses(:week1_analysis),
       author_email: "kyle@example.com",
       body: "First",
       message_id: "<abc123@gmail.com>"
     )
-    dup = AnalysisReply.new(
-      anomaly_analysis: anomaly_analyses(:week1_analysis),
-      author_email: "kyle@example.com",
-      body: "Dup",
-      message_id: "<abc123@gmail.com>"
-    )
-    refute dup.valid?
+    assert_raises(ActiveRecord::RecordNotUnique) do
+      AnalysisReply.create!(
+        anomaly_analysis: anomaly_analyses(:week1_analysis),
+        author_email: "kyle@example.com",
+        body: "Dup",
+        message_id: "<abc123@gmail.com>"
+      )
+    end
   end
 
   test "allows multiple replies with null message_id" do
