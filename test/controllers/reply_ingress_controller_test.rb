@@ -37,4 +37,105 @@ class ReplyIngressControllerTest < ActionDispatch::IntegrationTest
     assert_equal "<unique-id-1@gmail.com>", reply.message_id
     assert reply.email?
   end
+
+  test "401 without auth header" do
+    post "/reply_ingress",
+      params: { analysis_id: @analysis.id }.to_json,
+      headers: { "Content-Type" => "application/json" }
+
+    assert_response :unauthorized
+  end
+
+  test "401 with wrong secret" do
+    post "/reply_ingress",
+      params: { analysis_id: @analysis.id }.to_json,
+      headers: { "Authorization" => "Bearer nope", "Content-Type" => "application/json" }
+
+    assert_response :unauthorized
+  end
+
+  test "404 when analysis does not exist" do
+    post "/reply_ingress",
+      params: {
+        analysis_id: 999_999,
+        from_email: @admin.email,
+        body: "hi"
+      }.to_json,
+      headers: auth_headers
+
+    assert_response :not_found
+  end
+
+  test "403 when sender is not an admin" do
+    non_admin = users(:jess)
+    assert_not non_admin.is_admin?, "jess fixture should not be admin"
+
+    assert_no_difference "AnalysisReply.count" do
+      post "/reply_ingress",
+        params: {
+          analysis_id: @analysis.id,
+          from_email: non_admin.email,
+          body: "hi"
+        }.to_json,
+        headers: auth_headers
+    end
+
+    assert_response :forbidden
+  end
+
+  test "403 when sender email is unknown" do
+    assert_no_difference "AnalysisReply.count" do
+      post "/reply_ingress",
+        params: {
+          analysis_id: @analysis.id,
+          from_email: "randomstranger@example.com",
+          body: "hi"
+        }.to_json,
+        headers: auth_headers
+    end
+
+    assert_response :forbidden
+  end
+
+  test "duplicate message_id returns 200 idempotent" do
+    payload = {
+      analysis_id: @analysis.id,
+      from_email: @admin.email,
+      body: "first",
+      message_id: "<dup@example.com>"
+    }
+    post "/reply_ingress", params: payload.to_json, headers: auth_headers
+    assert_response :created
+
+    assert_no_difference "AnalysisReply.count" do
+      post "/reply_ingress", params: payload.to_json, headers: auth_headers
+    end
+
+    assert_response :ok
+    json = JSON.parse(response.body)
+    assert_equal "duplicate", json["status"]
+  end
+
+  test "strips quoted reply history from body" do
+    body_with_quote = <<~BODY
+      Here is my new thought.
+
+      On Sun, Apr 12, 2026 at 9:00 PM Motzi <no-reply@motzi.com> wrote:
+      > old stuff
+      > more old stuff
+    BODY
+
+    post "/reply_ingress",
+      params: {
+        analysis_id: @analysis.id,
+        from_email: @admin.email,
+        body: body_with_quote,
+        message_id: "<strip-test@example.com>"
+      }.to_json,
+      headers: auth_headers
+
+    assert_response :created
+    reply = AnalysisReply.last
+    assert_equal "Here is my new thought.", reply.body
+  end
 end
