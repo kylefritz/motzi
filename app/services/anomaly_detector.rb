@@ -100,6 +100,15 @@ class AnomalyDetector
         parts << ""
         parts << "### #{a.week_id} — #{a.created_at.strftime('%-m/%-d/%Y')} (#{a.trigger})"
         parts << a.result
+
+        if a.replies.any?
+          parts << ""
+          parts << "**Operator replies:**"
+          a.replies.each do |r|
+            who = r.author_name.presence || r.author_email
+            parts << "- #{who} (#{r.created_at.strftime('%-m/%-d')}): #{r.body}"
+          end
+        end
       end
     end
 
@@ -128,7 +137,7 @@ class AnomalyDetector
   end
 
   def recent_analyses
-    AnomalyAnalysis.order(created_at: :desc).limit(6).to_a.reverse
+    AnomalyAnalysis.includes(:replies).order(created_at: :desc).limit(6).to_a.reverse
   end
 
   def call_claude(user_message)

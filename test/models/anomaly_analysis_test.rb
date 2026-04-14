@@ -36,4 +36,21 @@ class AnomalyAnalysisTest < ActiveSupport::TestCase
     assert analysis.persisted?
     assert_nil analysis.user
   end
+
+  test "has many replies ordered by created_at" do
+    analysis = anomaly_analyses(:week1_analysis)
+    first = analysis.replies.create!(author_email: "kyle@example.com", body: "first", created_at: 2.hours.ago)
+    second = analysis.replies.create!(author_email: "kyle@example.com", body: "second", created_at: 1.hour.ago)
+
+    assert_equal [first, second], analysis.replies.to_a
+  end
+
+  test "destroys replies when analysis is destroyed" do
+    analysis = anomaly_analyses(:week1_analysis)
+    analysis.replies.create!(author_email: "kyle@example.com", body: "bye")
+
+    assert_difference "AnalysisReply.count", -1 do
+      analysis.destroy
+    end
+  end
 end

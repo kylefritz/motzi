@@ -35,4 +35,18 @@ class AnomalyMailerTest < ActionMailer::TestCase
     assert_includes html, "View in Admin"
     assert_includes html, "activity_feed"
   end
+
+  test "sets Reply-To to the shared replies address" do
+    analysis = anomaly_analyses(:week1_analysis)
+    email = AnomalyMailer.with(analysis: analysis).anomaly_report
+
+    assert_equal ["motzi-analysis-replies@thepuff.co"], email.reply_to
+  end
+
+  test "sets a deterministic Message-ID derived from the analysis id" do
+    analysis = anomaly_analyses(:week1_analysis)
+    email = AnomalyMailer.with(analysis: analysis).anomaly_report
+
+    assert_equal "analysis-#{analysis.id}@motzibread.herokuapp.com", email.message_id
+  end
 end

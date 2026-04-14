@@ -35,4 +35,23 @@ class AnomalyDetectorIntegrationTest < ActiveSupport::TestCase
     assert_includes prompt, "Whether recent code changes could plausibly explain the behavior you see this week"
     assert_includes prompt, "Treat code changes as supporting evidence, not proof"
   end
+
+  test "build_user_message includes replies alongside prior analyses" do
+    prior_week_id = "19w01"  # matches week1_analysis fixture
+    prior = anomaly_analyses(:week1_analysis)
+    prior.replies.create!(
+      author_email: "kyle@example.com",
+      author_name: "Kyle Fritz",
+      body: "R14 is expected — please stop flagging it.",
+      source: :email
+    )
+
+    detector = AnomalyDetector.new(prior_week_id)
+    message = detector.build_user_message
+
+    assert_includes message, "R14 is expected",
+      "expected reply body to appear in the prompt"
+    assert_includes message, "Operator replies",
+      "expected an Operator replies heading"
+  end
 end

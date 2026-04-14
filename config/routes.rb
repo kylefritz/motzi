@@ -36,6 +36,8 @@ Rails.application.routes.draw do
     mount MissionControl::Jobs::Engine, at: "/jobs"
   end
 
+  post "/reply_ingress", to: "reply_ingress#create"
+
   # Error feedback API (used by error pages)
   namespace :api do
     resources :feedbacks, only: [:create]

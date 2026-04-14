@@ -1,1 +1,11 @@
-# empty — tests create their own records
+week1_analysis:
+  week_id: 19w01
+  result: |
+    Status: ✅ Healthy
+    Everything looks fine this week.
+  overall_status: healthy
+  trigger: scheduled
+  model_used: claude-sonnet-4-6
+  input_tokens: 1000
+  output_tokens: 200
+  cost_cents: 10

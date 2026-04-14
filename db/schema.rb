@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_12_151138) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_13_035352) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -131,6 +131,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_12_151138) do
     t.datetime "started_at", precision: nil
     t.index ["user_id"], name: "index_ahoy_visits_on_user_id"
     t.index ["visit_token"], name: "index_ahoy_visits_on_visit_token", unique: true
+  end
+
+  create_table "analysis_replies", force: :cascade do |t|
+    t.bigint "anomaly_analysis_id", null: false
+    t.bigint "user_id"
+    t.string "author_email", null: false
+    t.string "author_name"
+    t.text "body", null: false
+    t.string "message_id"
+    t.integer "source", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["anomaly_analysis_id"], name: "index_analysis_replies_on_anomaly_analysis_id"
+    t.index ["message_id"], name: "index_analysis_replies_on_message_id", unique: true
+    t.index ["user_id"], name: "index_analysis_replies_on_user_id"
   end
 
   create_table "anomaly_analyses", force: :cascade do |t|
@@ -530,6 +545,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_12_151138) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activity_events", "users"
+  add_foreign_key "analysis_replies", "anomaly_analyses"
+  add_foreign_key "analysis_replies", "users"
   add_foreign_key "anomaly_analyses", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
