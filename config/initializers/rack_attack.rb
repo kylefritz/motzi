@@ -1,9 +1,13 @@
 # Block scanner / bot traffic at the rack layer so it never reaches Rails
 # routing and never shows up in the logs as RoutingError noise.
 class Rack::Attack
+  # Motzi has no legitimate .php / .zip / .sql / .bak endpoints and no WordPress
+  # or Laravel install, so these are all scanner probes.
   SCANNER_PATHS = %r{
-    \.php(\?|/|$)            # anything .php
-    | /wp-(admin|content|login|includes)
+    \.php(\?|/|$)                              # PHP probes
+    | /wp[-_](admin|content|login|includes)    # WordPress paths
+    | /(laravel|telescope)                     # Laravel paths
+    | \.(zip|tar|tar\.gz|tgz|rar|7z|sql|bak|backup)$  # backup archive probes
     | /\.env
     | /\.git
     | /xmlrpc
