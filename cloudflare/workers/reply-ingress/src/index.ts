@@ -15,14 +15,34 @@ interface MotziPayload {
 }
 
 export default {
-  async email(message: ForwardableEmailMessage, env: Env, ctx: ExecutionContext): Promise<void> {
+  async email(
+    message: ForwardableEmailMessage,
+    env: Env,
+    ctx: ExecutionContext,
+  ): Promise<void> {
     try {
-      // Require either SPF or DKIM to pass — forwarding (e.g. custom-domain
-      // relays) often breaks SPF while preserving DKIM, so AND would reject
-      // legitimate replies.
-      const authResults = message.headers.get("Authentication-Results") || "";
-      if (!/spf=pass/i.test(authResults) && !/dkim=pass/i.test(authResults)) {
-        message.setReject("SPF and DKIM verification failed");
+      // Cloudflare stamps its own auth verdict into `ARC-Authentication-Results`
+      // with authserv-id `mx.cloudflare.net`. The plain `Authentication-Results`
+      // header, if present, was added by some upstream hop (e.g. the sender's
+      // own outbound gateway) and can't be trusted here. Prefer CF's header and
+      // only fall back to the generic one so self-hosted test setups keep
+      // working.
+      //
+      // Accept if DMARC, SPF, or DKIM passed — forwarding (e.g. custom-domain
+      // relays) often breaks SPF while preserving DKIM, and DMARC alignment is
+      // itself a stronger signal than either alone.
+      const authResults =
+        message.headers.get("ARC-Authentication-Results") ||
+        message.headers.get("Authentication-Results") ||
+        "";
+      const spfPass = /\bspf=pass\b/i.test(authResults);
+      const dkimPass = /\bdkim=pass\b/i.test(authResults);
+      const dmarcPass = /\bdmarc=pass\b/i.test(authResults);
+      if (!spfPass && !dkimPass && !dmarcPass) {
+        const snippet = authResults.slice(0, 200).replace(/\s+/g, " ");
+        message.setReject(
+          `SPF, DKIM, and DMARC verification failed${snippet ? ` (${snippet})` : ""}`,
+        );
         return;
       }
 
@@ -34,7 +54,9 @@ export default {
       const bodyText = parsed.text || "";
 
       if (!inReplyTo) {
-        message.setReject("Missing In-Reply-To — not a reply to a known analysis");
+        message.setReject(
+          "Missing In-Reply-To — not a reply to a known analysis",
+        );
         return;
       }
       if (!fromEmail || !bodyText) {
@@ -66,7 +88,9 @@ export default {
         try {
           const json = (await response.json()) as { error?: string };
           if (json.error) reason = json.error;
-        } catch { /* non-JSON body */ }
+        } catch {
+          /* non-JSON body */
+        }
         message.setReject(reason);
       }
     } catch (err) {
