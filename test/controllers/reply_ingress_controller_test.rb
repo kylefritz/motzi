@@ -5,7 +5,7 @@ class ReplyIngressControllerTest < ActionDispatch::IntegrationTest
     @secret = "test-secret-123"
     ENV["REPLY_WEBHOOK_SECRET"] = @secret
     @analysis = anomaly_analyses(:week1_analysis)
-    @analysis.update!(email_message_id: "<analysis-#{@analysis.id}-testabc@motzibread.herokuapp.com>")
+    @in_reply_to = "<analysis-#{@analysis.id}@motzibread.herokuapp.com>"
     @admin = users(:kyle)  # kyle fixture is an admin
   end
 
@@ -21,7 +21,7 @@ class ReplyIngressControllerTest < ActionDispatch::IntegrationTest
     assert_difference "AnalysisReply.count", 1 do
       post "/reply_ingress",
         params: {
-          in_reply_to: @analysis.email_message_id,
+          in_reply_to: @in_reply_to,
           from_email: @admin.email,
           from_name: @admin.name,
           body: "R14 isn't an error. Please stop flagging it.",
@@ -41,7 +41,7 @@ class ReplyIngressControllerTest < ActionDispatch::IntegrationTest
 
   test "401 without auth header" do
     post "/reply_ingress",
-      params: { in_reply_to: @analysis.email_message_id }.to_json,
+      params: { in_reply_to: @in_reply_to }.to_json,
       headers: { "Content-Type" => "application/json" }
 
     assert_response :unauthorized
@@ -49,7 +49,7 @@ class ReplyIngressControllerTest < ActionDispatch::IntegrationTest
 
   test "401 with wrong secret" do
     post "/reply_ingress",
-      params: { in_reply_to: @analysis.email_message_id }.to_json,
+      params: { in_reply_to: @in_reply_to }.to_json,
       headers: { "Authorization" => "Bearer nope", "Content-Type" => "application/json" }
 
     assert_response :unauthorized
@@ -74,7 +74,7 @@ class ReplyIngressControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference "AnalysisReply.count" do
       post "/reply_ingress",
         params: {
-          in_reply_to: @analysis.email_message_id,
+          in_reply_to: @in_reply_to,
           from_email: non_admin.email,
           body: "hi"
         }.to_json,
@@ -88,7 +88,7 @@ class ReplyIngressControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference "AnalysisReply.count" do
       post "/reply_ingress",
         params: {
-          in_reply_to: @analysis.email_message_id,
+          in_reply_to: @in_reply_to,
           from_email: "randomstranger@example.com",
           body: "hi"
         }.to_json,
@@ -100,7 +100,7 @@ class ReplyIngressControllerTest < ActionDispatch::IntegrationTest
 
   test "duplicate message_id returns 200 idempotent" do
     payload = {
-      in_reply_to: @analysis.email_message_id,
+      in_reply_to: @in_reply_to,
       from_email: @admin.email,
       body: "first",
       message_id: "<dup@example.com>"
@@ -128,7 +128,7 @@ class ReplyIngressControllerTest < ActionDispatch::IntegrationTest
 
     post "/reply_ingress",
       params: {
-        in_reply_to: @analysis.email_message_id,
+        in_reply_to: @in_reply_to,
         from_email: @admin.email,
         body: body_with_quote,
         message_id: "<strip-test@example.com>"

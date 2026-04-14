@@ -17,43 +17,35 @@ interface MotziPayload {
 export default {
   async email(message: ForwardableEmailMessage, env: Env, ctx: ExecutionContext): Promise<void> {
     try {
-      // 1. Verify SPF and DKIM via Authentication-Results
+      // Require either SPF or DKIM to pass — forwarding (e.g. custom-domain
+      // relays) often breaks SPF while preserving DKIM, so AND would reject
+      // legitimate replies.
       const authResults = message.headers.get("Authentication-Results") || "";
-      const spfPass = /spf=pass/i.test(authResults);
-      const dkimPass = /dkim=pass/i.test(authResults);
-      if (!spfPass || !dkimPass) {
-        message.setReject("SPF or DKIM verification failed");
+      if (!/spf=pass/i.test(authResults) && !/dkim=pass/i.test(authResults)) {
+        message.setReject("SPF and DKIM verification failed");
         return;
       }
 
-      // 2. Parse the email using postal-mime
-      const raw = new Response(message.raw);
-      const rawBuffer = await raw.arrayBuffer();
+      const rawBuffer = await new Response(message.raw).arrayBuffer();
       const parsed = await PostalMime.parse(rawBuffer);
 
-      // 3. Extract In-Reply-To — this is how we identify which analysis
-      //    the reply belongs to. Our mailer sets a stable Message-ID per
-      //    analysis; the replier's client preserves it in In-Reply-To.
       const inReplyTo = parsed.inReplyTo?.trim() || "";
-      if (!inReplyTo) {
-        message.setReject("Missing In-Reply-To header — not a reply to a known analysis");
-        return;
-      }
-
       const fromEmail = parsed.from?.address || "";
-      const fromName = parsed.from?.name || "";
       const bodyText = parsed.text || "";
 
+      if (!inReplyTo) {
+        message.setReject("Missing In-Reply-To — not a reply to a known analysis");
+        return;
+      }
       if (!fromEmail || !bodyText) {
         message.setReject("Missing From address or body");
         return;
       }
 
-      // 4. POST to Motzi
       const payload: MotziPayload = {
         in_reply_to: inReplyTo,
         from_email: fromEmail,
-        from_name: fromName,
+        from_name: parsed.from?.name || "",
         body: bodyText,
         message_id: parsed.messageId,
         subject: parsed.subject,
@@ -73,9 +65,7 @@ export default {
         try {
           const json = (await response.json()) as { error?: string };
           if (json.error) reason = json.error;
-        } catch {
-          // ignore parse errors
-        }
+        } catch { /* non-JSON body */ }
         message.setReject(reason);
       }
     } catch (err) {

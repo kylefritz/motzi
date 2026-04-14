@@ -35,7 +35,7 @@ ActiveAdmin.register_page "Activity Feed" do
     feed = ActivityFeed.new(week_id)
     events = feed.summary
     email_summary = feed.email_summary
-    analyses = AnomalyAnalysis.for_week(week_id).order(created_at: :desc)
+    analyses = AnomalyAnalysis.for_week(week_id).includes(:replies).order(created_at: :desc)
     headline_metrics = feed.headline_metrics
     commits = feed.git_commits
     comparison = feed.comparison_snapshot

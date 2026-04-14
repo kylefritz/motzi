@@ -2,11 +2,11 @@ class ReplyIngressController < ActionController::API
   before_action :authenticate!
 
   def create
-    analysis = find_analysis
+    analysis = AnomalyAnalysis.find_by(id: params[:in_reply_to].to_s[/analysis-(\d+)@/, 1])
     return render json: { error: "Unknown analysis" }, status: :not_found unless analysis
 
     author_email = params[:from_email].to_s.downcase
-    user = User.find_by("LOWER(email) = ?", author_email)
+    user = User.find_by(email: author_email)
 
     unless user&.is_admin?
       return render json: { error: "Sender not authorized" }, status: :forbidden
@@ -34,14 +34,6 @@ class ReplyIngressController < ActionController::API
     return if expected.present? && ActiveSupport::SecurityUtils.secure_compare(token, expected)
 
     render json: { error: "Unauthorized" }, status: :unauthorized
-  end
-
-  def find_analysis
-    if params[:in_reply_to].present?
-      AnomalyAnalysis.find_by(email_message_id: params[:in_reply_to])
-    elsif params[:analysis_id].present?
-      AnomalyAnalysis.find_by(id: params[:analysis_id])
-    end
   end
 
   def strip_quoted(body)

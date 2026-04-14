@@ -43,23 +43,10 @@ class AnomalyMailerTest < ActionMailer::TestCase
     assert_equal ["motzi-analysis-replies@thepuff.co"], email.reply_to
   end
 
-  test "sets a stable Message-ID and persists it on the analysis" do
+  test "sets a deterministic Message-ID derived from the analysis id" do
     analysis = anomaly_analyses(:week1_analysis)
-    analysis.update!(email_message_id: nil)
-
     email = AnomalyMailer.with(analysis: analysis).anomaly_report
-    email.message_id # force header generation
 
-    analysis.reload
-    assert analysis.email_message_id.present?, "expected email_message_id to be stored"
-    assert_equal analysis.email_message_id, "<#{email.message_id}>"
-  end
-
-  test "reuses stored Message-ID on subsequent deliveries" do
-    analysis = anomaly_analyses(:week1_analysis)
-    analysis.update!(email_message_id: "<fixed-id@example.com>")
-
-    email = AnomalyMailer.with(analysis: analysis).anomaly_report
-    assert_equal "fixed-id@example.com", email.message_id
+    assert_equal "analysis-#{analysis.id}@motzibread.herokuapp.com", email.message_id
   end
 end
