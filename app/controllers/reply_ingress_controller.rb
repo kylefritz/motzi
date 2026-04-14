@@ -24,6 +24,8 @@ class ReplyIngressController < ActionController::API
     render json: { id: reply.id }, status: :created
   rescue ActiveRecord::RecordNotUnique
     render json: { status: "duplicate" }, status: :ok
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { error: e.record.errors.full_messages.join(", ") }, status: :unprocessable_entity
   end
 
   private
@@ -31,12 +33,14 @@ class ReplyIngressController < ActionController::API
   def authenticate!
     expected = ENV["REPLY_WEBHOOK_SECRET"].to_s
     token = request.headers["Authorization"].to_s.sub(/^Bearer /, "")
-    return if expected.present? && ActiveSupport::SecurityUtils.secure_compare(token, expected)
+    return if expected.present? &&
+              token.bytesize == expected.bytesize &&
+              ActiveSupport::SecurityUtils.secure_compare(token, expected)
 
     render json: { error: "Unauthorized" }, status: :unauthorized
   end
 
   def strip_quoted(body)
-    body.to_s.split(/\n(On .+ wrote:|>.*|-+Original Message-+)/m).first.to_s.strip
+    body.to_s.split(/^(On .+ wrote:|>.*|-+Original Message-+)/).first.to_s.strip
   end
 end

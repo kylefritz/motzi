@@ -117,6 +117,33 @@ class ReplyIngressControllerTest < ActionDispatch::IntegrationTest
     assert_equal "duplicate", json["status"]
   end
 
+  test "401 (not 500) when Authorization token is a different length than expected" do
+    post "/reply_ingress",
+      params: { in_reply_to: @in_reply_to }.to_json,
+      headers: { "Authorization" => "Bearer x", "Content-Type" => "application/json" }
+
+    assert_response :unauthorized
+  end
+
+  test "422 when reply body is empty after stripping quoted history" do
+    quote_only_body = <<~BODY
+      On Sun, Apr 12, 2026 at 9:00 PM Motzi <no-reply@motzi.com> wrote:
+      > nothing here but the quote
+    BODY
+
+    assert_no_difference "AnalysisReply.count" do
+      post "/reply_ingress",
+        params: {
+          in_reply_to: @in_reply_to,
+          from_email: @admin.email,
+          body: quote_only_body
+        }.to_json,
+        headers: auth_headers
+    end
+
+    assert_response :unprocessable_entity
+  end
+
   test "strips quoted reply history from body" do
     body_with_quote = <<~BODY
       Here is my new thought.

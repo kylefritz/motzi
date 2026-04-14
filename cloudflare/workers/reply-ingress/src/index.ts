@@ -58,6 +58,7 @@ export default {
           Authorization: `Bearer ${env.REPLY_WEBHOOK_SECRET}`,
         },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(10_000),
       });
 
       if (!response.ok) {
