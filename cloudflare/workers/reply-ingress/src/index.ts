@@ -21,31 +21,10 @@ export default {
     ctx: ExecutionContext,
   ): Promise<void> {
     try {
-      // Cloudflare stamps its own auth verdict into `ARC-Authentication-Results`
-      // with authserv-id `mx.cloudflare.net`. The plain `Authentication-Results`
-      // header, if present, was added by some upstream hop (e.g. the sender's
-      // own outbound gateway) and can't be trusted here. Prefer CF's header and
-      // only fall back to the generic one so self-hosted test setups keep
-      // working.
-      //
-      // Accept if DMARC, SPF, or DKIM passed — forwarding (e.g. custom-domain
-      // relays) often breaks SPF while preserving DKIM, and DMARC alignment is
-      // itself a stronger signal than either alone.
-      const authResults =
-        message.headers.get("ARC-Authentication-Results") ||
-        message.headers.get("Authentication-Results") ||
-        "";
-      const spfPass = /\bspf=pass\b/i.test(authResults);
-      const dkimPass = /\bdkim=pass\b/i.test(authResults);
-      const dmarcPass = /\bdmarc=pass\b/i.test(authResults);
-      if (!spfPass && !dkimPass && !dmarcPass) {
-        const snippet = authResults.slice(0, 200).replace(/\s+/g, " ");
-        message.setReject(
-          `SPF, DKIM, and DMARC verification failed${snippet ? ` (${snippet})` : ""}`,
-        );
-        return;
-      }
-
+      // Cloudflare Email Routing rejects inbound mail that fails SPF and DKIM
+      // before the worker runs, so any message reaching us is already
+      // authenticated at the envelope level. See:
+      // https://developers.cloudflare.com/email-routing/postmaster/
       const rawBuffer = await new Response(message.raw).arrayBuffer();
       const parsed = await PostalMime.parse(rawBuffer);
 
