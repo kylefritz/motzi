@@ -697,6 +697,34 @@ class ActivityFeed
     events
   end
 
+  # Two ConfirmationMailer sends to the same user within this window are suspicious —
+  # a user can't realistically re-edit their order that fast. Longer gaps are edits.
+  CONFIRMATION_DUP_WINDOW = 120 # seconds
+
+  def rapid_confirmation_dup_ids(messages)
+    messages.group_by(&:user_id).each_with_object(Set.new) do |(_, user_msgs), set|
+      user_msgs.sort_by { |m| m.sent_at || m.created_at }.each_cons(2) do |a, b|
+        gap = ((b.sent_at || b.created_at) - (a.sent_at || a.created_at)).to_f.abs
+        if gap < CONFIRMATION_DUP_WINDOW
+          set << a.id
+          set << b.id
+        end
+      end
+    end
+  end
+
+  def partition_for_verbose(messages, by_user_and_day, rapid_dup_ids)
+    if rapid_dup_ids
+      dup_msgs = messages.select { |m| rapid_dup_ids.include?(m.id) }
+      sample = (messages - dup_msgs).first(10)
+      [dup_msgs, sample]
+    else
+      dup_msgs = by_user_and_day.select { |_, msgs| msgs.size > 1 }.values.flatten
+      sample = by_user_and_day.select { |_, msgs| msgs.size == 1 }.values.flatten.first(10)
+      [dup_msgs, sample]
+    end
+  end
+
   def email_events(verbose: false)
     events = []
     @menus.each do |menu|
@@ -706,20 +734,38 @@ class ActivityFeed
         label = MAILER_LABELS[mailer] || mailer
 
         if verbose
-          # Show duplicates (users who got the same email more than once for the same pickup day)
-          # and a sample of normal sends. Group by [user_id, pickup_day_id] so that legitimate
-          # multi-day reminders (e.g., Thu + Sat) are not flagged as duplicates.
-          by_user_and_day = messages.group_by { |m| [m.user_id, m.pickup_day_id] }
-          duplicates = by_user_and_day.select { |_, msgs| msgs.size > 1 }.values.flatten
-          sample = by_user_and_day.select { |_, msgs| msgs.size == 1 }.values.flatten.first(10)
+          # Group messages for duplicate detection. Strategy differs by mailer:
+          # - Reminder/menu mailers: group by [user_id, pickup_day_id] so legitimate
+          #   multi-day reminders (Thu + Sat) are not flagged as duplicates.
+          # - ConfirmationMailer#*: order edits intentionally fire a fresh confirmation,
+          #   so multiple sends across the week are expected, not a bug. Only treat as
+          #   a real duplicate if two sends land within CONFIRMATION_DUP_WINDOW of
+          #   each other — that window is too tight for a user to have re-edited.
+          is_confirmation = mailer.start_with?("ConfirmationMailer")
+          rapid_dup_ids = is_confirmation ? rapid_confirmation_dup_ids(messages) : nil
+
+          if is_confirmation
+            by_user_and_day = nil
+          else
+            by_user_and_day = messages.group_by { |m| [m.user_id, m.pickup_day_id] }
+          end
+
+          duplicates, sample = partition_for_verbose(messages, by_user_and_day, rapid_dup_ids)
 
           (duplicates + sample).sort_by { |m| m.sent_at || m.created_at }.each do |msg|
             user_name = msg.user&.name || "Unknown"
             parts = ["sent #{msg.sent_at&.strftime('%-m/%d %l:%M%P')&.strip}"]
             parts << "opened #{msg.opened_at.strftime('%-m/%d %l:%M%P').strip}" if msg.opened_at
             parts << "clicked #{msg.clicked_at.strftime('%-m/%d %l:%M%P').strip}" if msg.clicked_at
-            dup_key = [msg.user_id, msg.pickup_day_id]
-            dup_note = by_user_and_day[dup_key].size > 1 ? " [DUPLICATE — #{by_user_and_day[dup_key].size}x]" : ""
+
+            dup_note =
+              if is_confirmation
+                rapid_dup_ids.include?(msg.id) ? " [RAPID DUPLICATE — sent twice within #{CONFIRMATION_DUP_WINDOW / 60} min]" : ""
+              else
+                dup_key = [msg.user_id, msg.pickup_day_id]
+                by_user_and_day[dup_key].size > 1 ? " [DUPLICATE — #{by_user_and_day[dup_key].size}x]" : ""
+              end
+
             events << Event.new(
               timestamp: msg.sent_at || msg.created_at,
               category: "email",
@@ -727,6 +773,19 @@ class ActivityFeed
               description: "#{label} to #{user_name} (#{parts.join(', ')})#{dup_note}",
               details: { source: "ahoy_message", id: msg.id, mailer: mailer }
             )
+          end
+
+          if is_confirmation
+            edited_users = messages.group_by(&:user_id).select { |_, msgs| msgs.size > 1 }
+            if edited_users.any?
+              events << Event.new(
+                timestamp: messages.last.sent_at || messages.last.created_at,
+                category: "email",
+                action: "email_summary",
+                description: "#{label}: #{edited_users.size} member(s) received >1 confirmation (order edits fire fresh confirmations — this is expected)",
+                details: { source: "ahoy_messages", mailer: mailer, edited_user_count: edited_users.size }
+              )
+            end
           end
 
           omitted = messages.size - duplicates.size - sample.size

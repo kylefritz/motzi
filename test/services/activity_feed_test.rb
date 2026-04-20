@@ -294,4 +294,40 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     assert_no_match(/Dyno Memory/, text)
   end
+
+  test "verbose feed does not tag order confirmations hours apart as DUPLICATE" do
+    # Simulates an order edit: initial send, then a second confirmation 2 days later.
+    travel_to_week_id(@week_id) do
+      first_send = Time.zone.now + 2.days
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: first_send)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: first_send + 2.days)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text(verbose: true)
+    assert_no_match(/DUPLICATE/, text, "order confirmations across an edit must not be tagged as duplicates")
+    assert_match(/received >1 confirmation/, text, "should surface the edit pattern as expected behavior")
+  end
+
+  test "verbose feed tags order confirmations sent within 2 minutes as RAPID DUPLICATE" do
+    travel_to_week_id(@week_id) do
+      first_send = Time.zone.now + 2.days
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: first_send)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: first_send + 30.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text(verbose: true)
+    assert_match(/RAPID DUPLICATE/, text, "sub-minute-gap confirmations are the real bug signal")
+  end
+
+  test "verbose feed still tags reminder emails with DUPLICATE when user/pickup_day collides" do
+    travel_to_week_id(@week_id) do
+      pd = @menu.pickup_days.first
+      sent = Time.zone.now + 2.days
+      Ahoy::Message.create!(mailer: "ReminderMailer#day_of_email", menu: @menu, user: users(:kyle), pickup_day: pd, sent_at: sent)
+      Ahoy::Message.create!(mailer: "ReminderMailer#day_of_email", menu: @menu, user: users(:kyle), pickup_day: pd, sent_at: sent + 1.minute)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text(verbose: true)
+    assert_match(/DUPLICATE — 2x/, text, "reminder duplicates must still be flagged")
+  end
 end
