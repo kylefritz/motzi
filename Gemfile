@@ -41,8 +41,6 @@ gem 'rails', '~> 7.2.0'
 gem 'rails-settings-cached' # site-wide settings
 gem 'redcarpet' # markdown the baker's note in admin
 gem 'sass-rails', '~> 6' # css
-gem 'sentry-rails' # Rails integration for Sentry
-gem 'sentry-ruby' # New Sentry SDK
 gem 'solid_cable', '~> 3.0' # database-backed ActionCable adapter (no Redis)
 gem 'solid_cache' # Postgres-backed Rails cache store (no Redis/Memcached)
 gem 'solid_queue' # database-backed ActiveJob backend (Rails 7.2+)

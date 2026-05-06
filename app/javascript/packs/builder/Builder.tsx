@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import * as Sentry from "@sentry/browser";
 import _ from "lodash";
 
+import { reportException } from "../../lib/errorReporter";
 import BuilderLayout from "./components/BuilderLayout";
 import { ApiContext, BuilderApi } from "./Context";
 import type {
@@ -29,7 +29,7 @@ export default function MenuBuilder() {
       })
       .catch((error) => {
         console.error("cant load menu", error);
-        Sentry.captureException(error);
+        reportException(error, { kind: "builder" });
         setError("We can't load the menu");
       });
   }
@@ -128,7 +128,7 @@ export default function MenuBuilder() {
       })
       .catch((error) => {
         console.error("cant load items", error);
-        Sentry.captureException(error);
+        reportException(error, { kind: "builder" });
         setError("We can't load the  items");
       });
   }, []);

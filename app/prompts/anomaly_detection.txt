@@ -14,7 +14,7 @@ You are reviewing the activity feed for the current week and comparing it to rec
 - Anything that suggests the system is malfunctioning or a process was missed
 - Whether recent code changes could plausibly explain the behavior you see this week
 - Dyno memory pressure (memory_total approaching or exceeding quota, swap usage growth)
-- Application errors and stack traces in the "Application Errors" section — recurring exceptions, new error types, or error spikes
+- Application errors and stack traces in the "Application Errors" sections — recurring exceptions, new error types, or error spikes. Two sources are surfaced: "(from Heroku logs)" is log-scraped (lossy, no stack), while "(N events: server/browser/job)" comes from the persisted error_events table and includes top stack frame, source, count, and event id. Cross-reference both. When flagging a specific error, cite the event id so an operator can open `/admin/error_events/<id>` for the full prompt.
 
 ## Scheduled jobs
 

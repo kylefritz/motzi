@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import * as Sentry from "@sentry/browser";
+import { reportException } from "../../lib/errorReporter";
 import { getSettingsContext } from "./Contexts";
 import type { MenuUser } from "../../types/api";
 
@@ -237,7 +237,7 @@ export default function EmailSettings({ user, onBack }: EmailSettingsProps) {
       })
       .catch((err) => {
         console.error("Failed to save email preferences", err);
-        Sentry.captureException(err);
+        reportException(err, { kind: "email_settings_save" });
         window.alert("Couldn't save preferences. Please try again.");
       })
       .finally(() => setSaving(false));

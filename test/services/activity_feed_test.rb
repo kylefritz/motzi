@@ -295,6 +295,48 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert_no_match(/Dyno Memory/, text)
   end
 
+  test "to_text includes Application Errors section when error events exist" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    3.times do |i|
+      ErrorEvent.create!(
+        fingerprint: "fp-recurring",
+        source: "server",
+        error_class: "RuntimeError",
+        message: "kaboom #{i}",
+        backtrace: "/app/services/foo.rb:42:in `bar'\n/gems/rails/foo.rb:1",
+        url: "/menu",
+        http_method: "GET",
+        environment: Rails.env,
+        occurred_at: week_start + (i + 1).hours
+      )
+    end
+    ErrorEvent.create!(
+      fingerprint: "fp-browser",
+      source: "browser",
+      error_class: "TypeError",
+      message: "Cannot read 'foo' of undefined",
+      environment: Rails.env,
+      occurred_at: week_start + 4.hours
+    )
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_match(/Application Errors \(4 events:/, text)
+    assert_match(/RuntimeError/, text)
+    assert_match(/×3/, text)
+    assert_match(/TypeError/, text)
+    assert_match(%r{/app/services/foo\.rb}, text)
+  end
+
+  test "to_text omits Application Errors section when no error events" do
+    feed = ActivityFeed.new(@week_id)
+    text = feed.to_text
+
+    assert_no_match(/Application Errors \(\d+ events/, text)
+  end
+
   test "verbose feed does not tag order confirmations hours apart as DUPLICATE" do
     # Simulates an order edit: initial send, then a second confirmation 2 days later.
     travel_to_week_id(@week_id) do

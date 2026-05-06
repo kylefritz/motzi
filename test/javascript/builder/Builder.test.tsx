@@ -93,9 +93,10 @@ mock.module("axios", () => ({
   },
 }));
 
-const captureException = mock(() => {});
-mock.module("@sentry/browser", () => ({
-  captureException,
+mock.module("../../app/javascript/lib/errorReporter", () => ({
+  reportException: () => {},
+  reportError: () => {},
+  installGlobalErrorReporter: () => {},
 }));
 
 if (!window.matchMedia) {

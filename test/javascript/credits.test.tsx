@@ -10,11 +10,10 @@ mock.module("axios", () => ({
   },
 }));
 
-const captureException = mock(() => {});
-const configureScope = mock((cb) => cb({ setUser: () => {} }));
-mock.module("@sentry/browser", () => ({
-  captureException,
-  configureScope,
+mock.module("../../app/javascript/lib/errorReporter", () => ({
+  reportException: () => {},
+  reportError: () => {},
+  installGlobalErrorReporter: () => {},
 }));
 
 test("renders credit form", async () => {

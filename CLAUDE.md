@@ -94,6 +94,28 @@ Worker deploy: `cd cloudflare/workers/reply-ingress && wrangler deploy`
 
 - **Admin login** (dev only): `GET /dev/login_as_admin` — signs in as admin, no password. Useful for Playwright.
 
+## Error tracking
+
+We run a self-hosted error tracker (replaced Sentry). Errors land in the
+`error_events` table. Server-side capture is via a `Rails.error.subscribe`
+hook in `config/initializers/error_tracking.rb`; the browser reporter lives
+at `app/javascript/lib/errorReporter.ts` and POSTs to `/error_events`.
+
+Admin UI: `/admin/error_events`. Detail pages also expose `.txt` (LLM-ready
+prompt) and `.json` (structured) formats. To paste an error into an LLM:
+
+```
+curl -s -b cookies.txt https://motzibread.herokuapp.com/admin/error_events/<id>.txt | pbcopy
+```
+
+CSRF: `ApplicationController` calls `skip_before_action :verify_authenticity_token`
+globally, so the JS reporter does not need to thread `X-CSRF-Token`. It still
+forwards a token if a `csrf-token` meta tag is present.
+
+To report a handled exception from a service or job, call
+`Rails.error.report(exception, handled: true, severity: :warning, context: {...})`.
+The subscriber will persist it (severity `:info` is skipped).
+
 ## Heroku Memory / R14
 
 R14 is a **soft** memory warning — the dyno exceeded its 512MB quota and went to swap. On Heroku's essential tier this is expected behavior; the process keeps running. Do not treat R14 as an error or escalate it. Only R15 (hard kill, dyno terminated) is a real problem. The worker dyno routinely runs above quota in swap — this is acceptable for our workload.
