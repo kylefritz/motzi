@@ -17,7 +17,6 @@ class ErrorTrackingSubscriber
         rack_env
       end
 
-    user = current_user_safely
     extra_context = context.except(:rack, "rack").merge(
       handled: handled,
       severity: severity,
@@ -27,7 +26,7 @@ class ErrorTrackingSubscriber
     ErrorEvent.record_server_exception(
       error,
       request: request,
-      user: user,
+      user: Current.user,
       context: extra_context,
       source: classify_source(source, context, request)
     )
@@ -55,12 +54,6 @@ class ErrorTrackingSubscriber
     "server"
   end
 
-  def current_user_safely
-    return nil unless defined?(Current)
-    Current.respond_to?(:user) ? Current.user : nil
-  rescue StandardError
-    nil
-  end
 end
 
 Rails.error.subscribe(ErrorTrackingSubscriber.new) if Rails.error.respond_to?(:subscribe)
