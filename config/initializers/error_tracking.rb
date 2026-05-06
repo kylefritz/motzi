@@ -3,11 +3,9 @@
 # See app/models/error_event.rb and CLAUDE.md for the full design.
 
 class ErrorTrackingSubscriber
-  IGNORED = ErrorEvent::IGNORED_SERVER_EXCEPTIONS.to_set
-
   def report(error, handled:, severity:, context:, source: nil)
     return if severity == :info
-    return if IGNORED.include?(error.class.name)
+    return if ignored.include?(error.class.name)
 
     rack_env = context[:rack] || context["rack"]
     request =
@@ -35,6 +33,12 @@ class ErrorTrackingSubscriber
   end
 
   private
+
+  # Looked up lazily — the ErrorEvent constant isn't available when the
+  # initializer runs in some boot paths (autoloader not yet primed).
+  def ignored
+    @ignored ||= ErrorEvent::IGNORED_SERVER_EXCEPTIONS.to_set
+  end
 
   def current_user_safely
     return nil unless defined?(Current)
