@@ -42,6 +42,11 @@ class ErrorEventsTest < ActionDispatch::IntegrationTest
   end
 
   test "browser ingest rate-limits high-volume posters" do
+    # The test env's :null_store cache doesn't actually count, so swap in a
+    # real in-memory store for this test only.
+    original_cache = Rails.cache
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+
     sign_in users(:kyle)
 
     (ErrorEventsController::RATE_LIMIT + 5).times do |i|
@@ -54,6 +59,8 @@ class ErrorEventsTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :too_many_requests
+  ensure
+    Rails.cache = original_cache if original_cache
   end
 
   test "admin index requires admin and renders" do
