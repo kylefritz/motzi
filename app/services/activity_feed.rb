@@ -432,7 +432,7 @@ class ActivityFeed
         "MAX(error_class) AS error_class",
         "BOOL_OR(resolved_at IS NOT NULL) AS any_resolved"
       )
-      .order("COUNT(*) DESC, MAX(occurred_at) DESC")
+      .order(Arel.sql("COUNT(*) DESC, MAX(occurred_at) DESC"))
       .limit(15)
       .to_a
     return nil if groups.empty?

@@ -35,7 +35,10 @@ class ErrorEventsController < ApplicationController
   def rate_limited?
     key = "error_events:ingest:#{current_user&.id || request.remote_ip}"
     count = Rails.cache.increment(key, 1, expires_in: RATE_WINDOW)
-    count = Rails.cache.write(key, 1, expires_in: RATE_WINDOW) || 1 if count.nil?
+    if count.nil?
+      Rails.cache.write(key, 1, expires_in: RATE_WINDOW)
+      count = 1
+    end
     count.to_i > RATE_LIMIT
   end
 end

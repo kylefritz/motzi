@@ -112,10 +112,9 @@ class ErrorEventsTest < ActionDispatch::IntegrationTest
   end
 
   test "Rails.error.report captures Current.user as the request user" do
-    sign_in users(:kyle)
-
-    # Visit any page so ApplicationController#set_current_user runs.
-    get "/menu"
+    # Simulates the request lifecycle: ApplicationController#set_current_user
+    # would have populated Current.user before the exception is reported.
+    Current.user = users(:kyle)
 
     assert_difference "ErrorEvent.count", 1 do
       Rails.error.report(RuntimeError.new("manual"), handled: true, context: {})
@@ -124,6 +123,8 @@ class ErrorEventsTest < ActionDispatch::IntegrationTest
     ev = ErrorEvent.last
     assert_equal users(:kyle).id, ev.user_id, "should pick up Current.user"
     assert_equal "server", ev.source
+  ensure
+    Current.reset
   end
 
   test "Rails.error.report from job context records source: job" do
