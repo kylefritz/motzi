@@ -36,6 +36,21 @@ Rails.application.routes.draw do
     mount MissionControl::Jobs::Engine, at: "/jobs"
   end
 
+  # admin error tracking — auth is enforced in the controller via
+  # redirect_unless_user_is_admin! so non-admin users see a redirect
+  # rather than a 404 from a route-level constraint.
+  namespace :admin do
+    resources :error_events, only: [:index, :show] do
+      member do
+        post :resolve
+        post :unresolve
+      end
+    end
+  end
+
+  # browser error ingest — accepts a session, posts errors to error_events
+  resources :error_events, only: [:create]
+
   post "/reply_ingress", to: "reply_ingress#create"
 
   # Error feedback API (used by error pages)

@@ -1,0 +1,75 @@
+<% content_for :title, "Error Events" %>
+
+<div class="container my-4">
+  <h1>Error events</h1>
+
+  <%= form_with url: admin_error_events_path, method: :get, local: true, class: "mb-3" do |f| %>
+    <div class="form-row">
+      <div class="form-group col-md-3">
+        <%= f.label :status %>
+        <%= f.select :status, [["Open", "open"], ["Resolved", "resolved"], ["All", "all"]], { selected: @status }, class: "form-control" %>
+      </div>
+      <div class="form-group col-md-3">
+        <%= f.label :source %>
+        <%= f.select :source, [["Any", ""], ["Server", "server"], ["Browser", "browser"], ["Job", "job"]], { selected: @source }, class: "form-control" %>
+      </div>
+      <div class="form-group col-md-4">
+        <%= f.label :q, "Search class or message" %>
+        <%= f.text_field :q, value: @q, class: "form-control" %>
+      </div>
+      <div class="form-group col-md-2 d-flex align-items-end">
+        <%= f.submit "Filter", class: "btn btn-primary" %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @groups.any? %>
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>Last seen</th>
+          <th>Source</th>
+          <th>Class / message</th>
+          <th>Count</th>
+          <th>First seen</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @groups.each do |g| %>
+          <% latest = @latest_events[g.latest_id] %>
+          <tr>
+            <td><%= latest&.occurred_at&.strftime("%Y-%m-%d %H:%M") %></td>
+            <td><%= g.source %></td>
+            <td>
+              <strong><%= g.error_class %></strong>
+              <div class="text-muted small"><%= truncate(g.message.to_s, length: 140) %></div>
+              <% if latest&.resolved? %><span class="badge badge-success">resolved</span><% end %>
+            </td>
+            <td><%= g.event_count %></td>
+            <td><%= g.first_seen&.strftime("%Y-%m-%d") %></td>
+            <td>
+              <% if latest %>
+                <%= link_to "View", admin_error_event_path(latest), class: "btn btn-sm btn-outline-secondary" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <nav>
+      <ul class="pagination">
+        <% if @page > 1 %>
+          <li class="page-item"><%= link_to "Previous", request.params.merge(page: @page - 1), class: "page-link" %></li>
+        <% end %>
+        <li class="page-item disabled"><span class="page-link">Page <%= @page %></span></li>
+        <% if @groups.size == Admin::ErrorEventsController::PER_PAGE %>
+          <li class="page-item"><%= link_to "Next", request.params.merge(page: @page + 1), class: "page-link" %></li>
+        <% end %>
+      </ul>
+    </nav>
+  <% else %>
+    <p class="text-muted">No error events match these filters.</p>
+  <% end %>
+</div>

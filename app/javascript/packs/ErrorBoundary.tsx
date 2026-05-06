@@ -1,5 +1,5 @@
 import React from "react";
-import * as Sentry from "@sentry/browser";
+import { reportError } from "../lib/errorReporter";
 
 type ErrorBoundaryProps = {
   children: React.ReactNode;
@@ -7,7 +7,6 @@ type ErrorBoundaryProps = {
 
 type ErrorBoundaryState = {
   hasError: boolean;
-  eventId: string | null;
   error?: string;
   stack?: string;
 };
@@ -18,41 +17,33 @@ export default class ErrorBoundary extends React.Component<
 > {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, eventId: null };
+    this.state = { hasError: false };
   }
 
   static getDerivedStateFromError(_error: Error): Partial<ErrorBoundaryState> {
-    // Update state so the next render will show the fallback UI.
     return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // You can also log the error to an error reporting service
-    Sentry.withScope((scope) => {
-      scope.setExtras({ componentStack: errorInfo.componentStack });
-      const eventId = Sentry.captureException(error);
-      this.setState({ eventId });
+    reportError({
+      error_class: error.name || "Error",
+      message: error.message || "Unknown error",
+      stack: [error.stack || "", errorInfo.componentStack || ""]
+        .filter(Boolean)
+        .join("\n\nReact component stack:\n"),
+      url: typeof location !== "undefined" ? location.pathname : "",
+      context: { kind: "react_error_boundary" },
     });
     this.setState({ error: error.message, stack: error.stack?.toString() });
   }
 
   render() {
     if (this.state.hasError) {
-      const { eventId, error, stack } = this.state;
-      // render fallback UI
+      const { error, stack } = this.state;
       return (
         <>
           <h2>There was an error in this software :(</h2>
-          <div className="mt-3">
-            <button
-              onClick={() => Sentry.showReportDialog({ eventId })}
-              className="btn-primary btn-lg btn-block"
-              type="button"
-            >
-              Please tell us what happened!
-            </button>
-          </div>
-          <p className="text-center">Then maybe try again or try back later?</p>
+          <p className="text-center">Please try again or try back later.</p>
           <div className="mt-5">
             <code>{error}</code>
           </div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_13_035352) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_06_202929) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -261,6 +261,32 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_13_035352) do
     t.datetime "updated_at", null: false
     t.index ["dyno", "recorded_at"], name: "index_dyno_metrics_on_dyno_and_recorded_at"
     t.index ["recorded_at"], name: "index_dyno_metrics_on_recorded_at"
+  end
+
+  create_table "error_events", force: :cascade do |t|
+    t.string "fingerprint", null: false
+    t.string "source", null: false
+    t.string "error_class"
+    t.text "message"
+    t.text "backtrace"
+    t.string "url"
+    t.string "http_method"
+    t.integer "status_code"
+    t.string "request_id"
+    t.jsonb "request_data", default: {}, null: false
+    t.jsonb "context", default: {}, null: false
+    t.bigint "user_id"
+    t.string "environment"
+    t.string "release"
+    t.datetime "occurred_at", null: false
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["fingerprint", "occurred_at"], name: "index_error_events_on_fingerprint_and_occurred_at"
+    t.index ["occurred_at"], name: "index_error_events_on_occurred_at"
+    t.index ["resolved_at"], name: "index_error_events_on_resolved_at"
+    t.index ["source"], name: "index_error_events_on_source"
+    t.index ["user_id"], name: "index_error_events_on_user_id"
   end
 
   create_table "feedbacks", force: :cascade do |t|
@@ -548,6 +574,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_13_035352) do
   add_foreign_key "analysis_replies", "anomaly_analyses"
   add_foreign_key "analysis_replies", "users"
   add_foreign_key "anomaly_analyses", "users"
+  add_foreign_key "error_events", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

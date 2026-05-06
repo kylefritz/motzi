@@ -24,12 +24,10 @@ mock.module("axios", () => ({
   },
 }));
 
-const setUser = mock(() => {});
-const configureScope = mock((cb) => cb({ setUser }));
-const captureException = mock(() => {});
-mock.module("@sentry/browser", () => ({
-  configureScope,
-  captureException,
+mock.module("../../app/javascript/lib/errorReporter", () => ({
+  reportException: () => {},
+  reportError: () => {},
+  installGlobalErrorReporter: () => {},
 }));
 
 test("loads user and bundles from menu", async () => {
