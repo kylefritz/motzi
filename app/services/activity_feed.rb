@@ -222,6 +222,11 @@ class ActivityFeed
         lines << memory
         lines << ""
       end
+      errors = error_events_text
+      if errors
+        lines << errors
+        lines << ""
+      end
     end
 
     es = email_summary
@@ -409,6 +414,48 @@ class ActivityFeed
     lines = ["== Code Changes =="]
     commits.reverse_each do |commit|
       lines << "  #{commit.committed_at.strftime('%-m/%-d')} #{commit.short_sha} #{commit.summary}" if commit.current_week
+    end
+    lines.join("\n")
+  end
+
+  def error_events_text
+    groups = ErrorEvent
+      .where(occurred_at: @week_start..@week_end)
+      .group(:fingerprint)
+      .select(
+        "fingerprint",
+        "COUNT(*) AS event_count",
+        "MAX(id) AS latest_id",
+        "MAX(occurred_at) AS last_seen",
+        "MIN(occurred_at) AS first_seen",
+        "MAX(source) AS source",
+        "MAX(error_class) AS error_class",
+        "BOOL_OR(resolved_at IS NOT NULL) AS any_resolved"
+      )
+      .order("COUNT(*) DESC, MAX(occurred_at) DESC")
+      .limit(15)
+      .to_a
+    return nil if groups.empty?
+
+    total = ErrorEvent.where(occurred_at: @week_start..@week_end).count
+    by_source = ErrorEvent.where(occurred_at: @week_start..@week_end).group(:source).count
+    source_summary = %w[server browser job].filter_map { |s| "#{by_source[s] || 0} #{s}" }.join(" / ")
+
+    latest_events = ErrorEvent.where(id: groups.map(&:latest_id)).index_by(&:id)
+
+    lines = ["== Application Errors (#{total} events: #{source_summary}) =="]
+    groups.each do |g|
+      latest = latest_events[g.latest_id]
+      message = latest&.message.to_s.lines.first&.strip
+      message = message[0, 160] + "…" if message && message.length > 160
+      top_frame = latest&.backtrace.to_s.lines.find { |l| l.include?("/app/") }&.strip
+      status = g.any_resolved ? " [resolved]" : ""
+      header = "  [#{g.source}] #{g.error_class} ×#{g.event_count} (last #{g.last_seen.strftime('%-m/%d %l:%M%P').strip})#{status}"
+      lines << header
+      lines << "    msg: #{message}" if message.present?
+      lines << "    at:  #{top_frame}" if top_frame.present?
+      lines << "    url: #{latest.http_method} #{latest.url}".rstrip if latest&.url.present?
+      lines << "    id:  #{latest.id} (fingerprint #{g.fingerprint})" if latest
     end
     lines.join("\n")
   end
