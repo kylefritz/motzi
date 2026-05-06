@@ -28,7 +28,7 @@ class ErrorEvent < ApplicationRecord
   scope :resolved, -> { where.not(resolved_at: nil) }
   scope :for_source, ->(s) { where(source: s) if s.present? }
 
-  def self.record_server_exception(exception, request: nil, user: nil, context: {}, status_code: nil)
+  def self.record_server_exception(exception, request: nil, user: nil, context: {}, status_code: nil, source: "server")
     return if IGNORED_SERVER_EXCEPTIONS.include?(exception.class.name)
 
     backtrace = Array(exception.backtrace).first(200).join("\n")
@@ -40,7 +40,7 @@ class ErrorEvent < ApplicationRecord
 
     create!(
       fingerprint: fingerprint,
-      source: "server",
+      source: SOURCES.include?(source) ? source : "server",
       error_class: exception.class.name,
       message: truncate_message(exception.message),
       backtrace: truncate_backtrace(backtrace),

@@ -3,6 +3,8 @@
 # See app/models/error_event.rb and CLAUDE.md for the full design.
 
 class ErrorTrackingSubscriber
+  JOB_SOURCE_PATTERNS = [/active_job/i, /\bjob\b/i, /solid_queue/i].freeze
+
   def report(error, handled:, severity:, context:, source: nil)
     return if severity == :info
     return if ignored.include?(error.class.name)
@@ -26,7 +28,8 @@ class ErrorTrackingSubscriber
       error,
       request: request,
       user: user,
-      context: extra_context
+      context: extra_context,
+      source: classify_source(source, context, request)
     )
   rescue StandardError => e
     Rails.logger.warn("[ErrorTracking] failed to record exception: #{e.class}: #{e.message}")
@@ -38,6 +41,18 @@ class ErrorTrackingSubscriber
   # initializer runs in some boot paths (autoloader not yet primed).
   def ignored
     @ignored ||= ErrorEvent::IGNORED_SERVER_EXCEPTIONS.to_set
+  end
+
+  def classify_source(reporter_source, context, _request)
+    src = reporter_source.to_s
+    return "job" if JOB_SOURCE_PATTERNS.any? { |p| src.match?(p) }
+    if context.is_a?(Hash) &&
+       (context.key?(:job) || context.key?("job") ||
+        context.key?(:job_class) || context.key?("job_class") ||
+        context.key?(:job_id) || context.key?("job_id"))
+      return "job"
+    end
+    "server"
   end
 
   def current_user_safely

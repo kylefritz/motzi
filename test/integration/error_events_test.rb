@@ -111,6 +111,29 @@ class ErrorEventsTest < ActionDispatch::IntegrationTest
     assert(body.key?("claude_prompt") || body.key?("claudePrompt"))
   end
 
+  test "Rails.error.report captures Current.user as the request user" do
+    sign_in users(:kyle)
+
+    # Visit any page so ApplicationController#set_current_user runs.
+    get "/menu"
+
+    assert_difference "ErrorEvent.count", 1 do
+      Rails.error.report(RuntimeError.new("manual"), handled: true, context: {})
+    end
+
+    ev = ErrorEvent.last
+    assert_equal users(:kyle).id, ev.user_id, "should pick up Current.user"
+    assert_equal "server", ev.source
+  end
+
+  test "Rails.error.report from job context records source: job" do
+    assert_difference "ErrorEvent.count", 1 do
+      Rails.error.report(RuntimeError.new("job boom"), handled: true, context: { job_id: "abc-123" })
+    end
+
+    assert_equal "job", ErrorEvent.last.source
+  end
+
   test "admin resolve marks all events with the same fingerprint" do
     sign_in users(:kyle)
     fp = "group-fp"

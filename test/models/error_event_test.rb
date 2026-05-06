@@ -128,6 +128,31 @@ class ErrorEventTest < ActiveSupport::TestCase
     assert_equal 3, ErrorEvent.where(fingerprint: fingerprint).where.not(resolved_at: nil).count
   end
 
+  test "record_server_exception accepts a source override" do
+    e = begin
+      raise "boom"
+    rescue RuntimeError => err
+      err
+    end
+
+    assert_difference "ErrorEvent.count", 1 do
+      ErrorEvent.record_server_exception(e, source: "job", context: { job_id: "abc" })
+    end
+
+    assert_equal "job", ErrorEvent.last.source
+  end
+
+  test "record_server_exception falls back to server for unknown sources" do
+    e = begin
+      raise "boom"
+    rescue RuntimeError => err
+      err
+    end
+
+    ErrorEvent.record_server_exception(e, source: "nonsense")
+    assert_equal "server", ErrorEvent.last.source
+  end
+
   test "extract_path strips query string and falls back gracefully" do
     assert_equal "/menu", ErrorEvent.extract_path("https://example.com/menu?token=x")
     assert_equal "/menu", ErrorEvent.extract_path("/menu")
