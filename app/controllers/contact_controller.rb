@@ -17,6 +17,7 @@ class ContactController < ApplicationController
     @message.user_agent = request.user_agent
 
     if @message.save
+      ContactMailer.notify_bakery(@message).deliver_later
       redirect_to "/contact", notice: "Thanks! We'll be in touch."
     else
       render :show, status: :unprocessable_entity

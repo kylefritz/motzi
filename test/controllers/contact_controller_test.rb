@@ -2,6 +2,7 @@ require 'test_helper'
 
 class ContactControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
+  include ActiveJob::TestHelper
 
   test "show renders for logged-out visitor" do
     get "/contact"
@@ -67,5 +68,21 @@ class ContactControllerTest < ActionDispatch::IntegrationTest
       } }
     end
     assert_redirected_to "/contact"
+  end
+
+  test "create enqueues the bakery notification email" do
+    assert_enqueued_emails 1 do
+      post "/contact", params: { contact_message: {
+        name: "Maya", email: "maya@example.com", message: "Hello!"
+      } }
+    end
+  end
+
+  test "honeypot does NOT enqueue email" do
+    assert_enqueued_emails 0 do
+      post "/contact", params: { contact_message: {
+        name: "Bot", email: "bot@bad.com", message: "spam", website: "http://bad"
+      } }
+    end
   end
 end
