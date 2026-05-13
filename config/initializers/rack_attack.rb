@@ -17,6 +17,11 @@ class Rack::Attack
   blocklist("scanner paths") do |req|
     SCANNER_PATHS.match?(req.path)
   end
+
+  throttle("contact form per ip", limit: 5, period: 1.hour) do |req|
+    req.ip if req.path == "/contact" && req.post?
+  end
 end
 
 Rack::Attack.blocklisted_responder = ->(_req) { [404, { "Content-Type" => "text/plain" }, ["Not Found"]] }
+Rack::Attack.throttled_responder = ->(_req) { [429, { "Content-Type" => "text/plain" }, ["Too Many Requests"]] }
