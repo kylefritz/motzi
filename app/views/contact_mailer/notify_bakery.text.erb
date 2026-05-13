@@ -9,4 +9,4 @@ Message:
 <%= @msg.message %>
 ---
 
-View in admin: <%= ENV.fetch("APP_HOST", "https://motzibread.herokuapp.com") %>/admin/contact_messages/<%= @msg.id %>
+View in admin: <%= admin_contact_message_url(@msg) %>
