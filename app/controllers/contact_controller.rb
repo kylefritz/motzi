@@ -1,6 +1,4 @@
-class ContactController < ApplicationController
-  layout "marketing"
-  skip_before_action :authenticate_user!
+class ContactController < MarketingController
 
   def show
     @feedback = Feedback.new(source: "contact")
