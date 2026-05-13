@@ -14,6 +14,7 @@
   <body class="marketing">
     <%= render "layouts/marketing_header" %>
     <main class="marketing-main">
+      <% if notice %><div class="flash-notice"><%= notice %></div><% end %>
       <%= yield %>
     </main>
     <%= render "layouts/marketing_footer" %>

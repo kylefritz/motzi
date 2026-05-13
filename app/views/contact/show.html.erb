@@ -14,5 +14,43 @@
     <p><strong>Phone:</strong> 443-272-1515 (Tues – Sat)</p>
   </section>
 
-  <%# Form added in Task 9 %>
+  <%= form_with model: @message, url: "/contact", local: true, html: { class: "contact-form" } do |f| %>
+    <% if @message.errors.any? %>
+      <div class="form-errors">
+        <p>Please fix the following:</p>
+        <ul>
+          <% @message.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="field">
+      <%= f.label :name %>
+      <%= f.text_field :name, required: true, autocomplete: "name" %>
+    </div>
+
+    <div class="field">
+      <%= f.label :email %>
+      <%= f.email_field :email, required: true, autocomplete: "email" %>
+    </div>
+
+    <div class="field">
+      <%= f.label :phone, "Phone (optional)" %>
+      <%= f.telephone_field :phone, autocomplete: "tel" %>
+    </div>
+
+    <div class="field">
+      <%= f.label :message %>
+      <%= f.text_area :message, rows: 6, required: true %>
+    </div>
+
+    <div class="hp-field" aria-hidden="true" style="position:absolute;left:-9999px">
+      <label for="contact_message_website">Website (leave blank)</label>
+      <input type="text" name="contact_message[website]" id="contact_message_website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <%= f.submit "Send" %>
+  <% end %>
 </article>
