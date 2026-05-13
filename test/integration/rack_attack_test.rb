@@ -51,7 +51,7 @@ class RackAttackTest < ActionDispatch::IntegrationTest
   test "throttles excessive POST /contact submissions per IP" do
     Rack::Attack.cache.store.clear  # reset throttle counters
 
-    valid_params = { contact_message: { name: "X", email: "x@y.com", message: "hi" } }
+    valid_params = { feedback: { name: "X", email: "x@y.com", message: "hi" } }
 
     # First 5 requests succeed (or 422 — either way, not throttled).
     5.times do

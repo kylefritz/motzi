@@ -25,9 +25,19 @@
           <%= @feedback.message %>
         </mj-text>
 
-        <% if @feedback.email.present? %>
+        <% if @feedback.name.present? %>
         <mj-text padding="20px 0 0 0" font-size="15px" line-height="1.6" color="#2E2927">
+          <strong>Name:</strong> <%= @feedback.name %>
+        </mj-text>
+        <% end %>
+        <% if @feedback.email.present? %>
+        <mj-text padding="<%= @feedback.name.present? ? '4px' : '20px' %> 0 0 0" font-size="15px" line-height="1.6" color="#2E2927">
           <strong>Reply to:</strong> <a href="mailto:<%= @feedback.email %>"><%= @feedback.email %></a>
+        </mj-text>
+        <% end %>
+        <% if @feedback.phone.present? %>
+        <mj-text padding="4px 0 0 0" font-size="15px" line-height="1.6" color="#2E2927">
+          <strong>Phone:</strong> <%= @feedback.phone %>
         </mj-text>
         <% end %>
 

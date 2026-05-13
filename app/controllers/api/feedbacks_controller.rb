@@ -22,7 +22,7 @@ class Api::FeedbacksController < ApplicationController
   private
 
   def feedback_params
-    params.require(:feedback).permit(:source, :message, :email, :url)
+    params.require(:feedback).permit(:source, :message, :email, :url, :name, :phone)
   end
 
   # Skip Turnstile for sources that don't include the widget:

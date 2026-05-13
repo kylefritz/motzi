@@ -139,6 +139,25 @@ class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
     assert_equal "TestBrowser/1.0", Feedback.last.user_agent
   end
 
+  test "permits name and phone params" do
+    stub_turnstile(success: true)
+
+    post api_feedbacks_path, params: {
+      feedback: {
+        source: "contact",
+        message: "Question",
+        name: "Maya",
+        phone: "555-1234"
+      },
+      turnstile_token: "valid-token"
+    }, as: :json
+
+    assert_response :created
+    feedback = Feedback.last
+    assert_equal "Maya", feedback.name
+    assert_equal "555-1234", feedback.phone
+  end
+
   private
 
   def stub_turnstile(success:)

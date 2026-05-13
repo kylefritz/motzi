@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_13_001914) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_13_043737) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -224,17 +224,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_13_001914) do
     t.index ["creator_id"], name: "index_blazer_queries_on_creator_id"
   end
 
-  create_table "contact_messages", force: :cascade do |t|
-    t.string "name", null: false
-    t.string "email", null: false
-    t.string "phone"
-    t.text "message", null: false
-    t.string "ip"
-    t.string "user_agent"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "credit_bundles", force: :cascade do |t|
     t.string "name"
     t.string "description"
@@ -281,6 +270,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_13_001914) do
     t.string "url"
     t.string "user_agent"
     t.datetime "created_at", null: false
+    t.string "name"
+    t.string "phone"
   end
 
   create_table "items", force: :cascade do |t|

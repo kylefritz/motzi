@@ -3,10 +3,10 @@ Feedback: <%= @feedback.source %>
 
 <%= @feedback.message %>
 
-<% if @feedback.email.present? %>
-Reply to: <%= @feedback.email %>
-<% end %>
----
+<% if @feedback.name.present? %>Name: <%= @feedback.name %>
+<% end %><% if @feedback.email.present? %>Reply to: <%= @feedback.email %>
+<% end %><% if @feedback.phone.present? %>Phone: <%= @feedback.phone %>
+<% end %>---
 Source: <%= @feedback.source %>
 <% if @feedback.url.present? %>URL: <%= @feedback.url %><% end %>
 Submitted: <%= @feedback.created_at.strftime("%Y-%m-%d %l:%M%P %Z") %>

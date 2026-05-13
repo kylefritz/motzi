@@ -25,10 +25,27 @@ class FeedbackTest < ActiveSupport::TestCase
   end
 
   test "valid sources" do
-    %w[404 422 500 menu general].each do |src|
+    %w[404 422 500 menu general contact].each do |src|
       feedback = Feedback.new(source: src, message: "test")
       assert feedback.valid?, "#{src} should be valid"
     end
+  end
+
+  test "contact is a valid source" do
+    feedback = Feedback.new(source: "contact", message: "Hello from the contact form")
+    assert feedback.valid?
+  end
+
+  test "name length validation" do
+    feedback = Feedback.new(source: "contact", message: "hi", name: "a" * 256)
+    assert_not feedback.valid?
+    assert feedback.errors[:name].any?
+  end
+
+  test "phone length validation" do
+    feedback = Feedback.new(source: "contact", message: "hi", phone: "1" * 51)
+    assert_not feedback.valid?
+    assert feedback.errors[:phone].any?
   end
 
   test "email format validation" do

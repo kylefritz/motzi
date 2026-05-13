@@ -10,6 +10,7 @@ ActiveAdmin.register Feedback do
     selectable_column
     id_column
     column :source
+    column :name
     column :message do |f|
       truncate(f.message, length: 80)
     end
@@ -25,6 +26,8 @@ ActiveAdmin.register Feedback do
     attributes_table do
       row :id
       row :source
+      row :name
+      row :phone
       row :message
       row :email do |f|
         link_to(f.email, "mailto:#{f.email}") if f.email.present?

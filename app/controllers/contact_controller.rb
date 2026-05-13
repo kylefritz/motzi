@@ -3,21 +3,22 @@ class ContactController < ApplicationController
   skip_before_action :authenticate_user!
 
   def show
-    @message = ContactMessage.new
+    @feedback = Feedback.new(source: "contact")
   end
 
   def create
-    if params.dig(:contact_message, :website).present?
+    if params.dig(:feedback, :website).present?
       redirect_to "/contact", notice: "Thanks! We'll be in touch."
       return
     end
 
-    @message = ContactMessage.new(contact_message_params)
-    @message.ip = request.remote_ip
-    @message.user_agent = request.user_agent
+    @feedback = Feedback.new(feedback_params)
+    @feedback.source = "contact"
+    @feedback.user_agent = request.user_agent
+    @feedback.url = request.referer.presence || request.original_url
 
-    if @message.save
-      ContactMailer.notify_bakery(@message).deliver_later
+    if @feedback.save
+      FeedbackMailer.with(feedback: @feedback).feedback_received.deliver_later
       redirect_to "/contact", notice: "Thanks! We'll be in touch."
     else
       render :show, status: :unprocessable_entity
@@ -26,7 +27,7 @@ class ContactController < ApplicationController
 
   private
 
-  def contact_message_params
-    params.require(:contact_message).permit(:name, :email, :phone, :message)
+  def feedback_params
+    params.require(:feedback).permit(:name, :email, :phone, :message)
   end
 end

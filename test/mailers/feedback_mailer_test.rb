@@ -71,4 +71,57 @@ class FeedbackMailerTest < ActionMailer::TestCase
     assert_includes text, "Everything is broken"
     refute_includes text, "Reply to:"
   end
+
+  test "feedback_received sets reply_to when email present" do
+    feedback = Feedback.create!(
+      source: "contact",
+      message: "Question about subscriptions",
+      email: "maya@example.com",
+      name: "Maya"
+    )
+
+    email = FeedbackMailer.with(feedback: feedback).feedback_received
+
+    assert_emails 1 do
+      email.deliver_now
+    end
+
+    assert_includes email.reply_to, "maya@example.com"
+  end
+
+  test "feedback_received reply_to does not include submitter when email absent" do
+    feedback = Feedback.create!(
+      source: "contact",
+      message: "Anonymous message"
+    )
+
+    email = FeedbackMailer.with(feedback: feedback).feedback_received
+
+    assert_emails 1 do
+      email.deliver_now
+    end
+
+    refute_includes Array(email.reply_to), feedback.email.to_s
+  end
+
+  test "contact feedback with name uses contact subject" do
+    feedback = Feedback.create!(
+      source: "contact",
+      message: "Hi there",
+      name: "Russell"
+    )
+
+    email = FeedbackMailer.with(feedback: feedback).feedback_received
+    assert_equal "Contact form: Russell", email.subject
+  end
+
+  test "contact feedback without name uses generic subject" do
+    feedback = Feedback.create!(
+      source: "contact",
+      message: "Anonymous"
+    )
+
+    email = FeedbackMailer.with(feedback: feedback).feedback_received
+    assert_equal "Feedback from contact", email.subject
+  end
 end
