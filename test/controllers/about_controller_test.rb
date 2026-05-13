@@ -22,4 +22,19 @@ class AboutControllerTest < ActionDispatch::IntegrationTest
     assert_select "h2", text: /Fresh Milling/i
     assert_select "h2", text: /Long Fermentation/i
   end
+
+  test "marketing nav shows holiday menu link only when one is active" do
+    Setting.holiday_menu_id = nil
+    get "/about"
+    assert_select "a.marketing-nav-holiday", count: 0
+
+    holiday = Menu.create!(name: "Holiday Test", week_id: "26w50", menu_type: "holiday")
+    Setting.holiday_menu_id = holiday.id
+
+    get "/about"
+    assert_select "a.marketing-nav-holiday", text: "Holiday Test"
+  ensure
+    Setting.holiday_menu_id = nil
+    holiday&.destroy
+  end
 end
