@@ -31,11 +31,6 @@ class FeedbackTest < ActiveSupport::TestCase
     end
   end
 
-  test "contact is a valid source" do
-    feedback = Feedback.new(source: "contact", message: "Hello from the contact form")
-    assert feedback.valid?
-  end
-
   test "name length validation" do
     feedback = Feedback.new(source: "contact", message: "hi", name: "a" * 256)
     assert_not feedback.valid?

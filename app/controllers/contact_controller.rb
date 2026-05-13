@@ -1,12 +1,11 @@
 class ContactController < MarketingController
-
   def show
     @feedback = Feedback.new(source: "contact")
   end
 
   def create
     if params.dig(:feedback, :website).present?
-      redirect_to "/contact", notice: "Thanks! We'll be in touch."
+      redirect_to contact_path, notice: "Thanks! We'll be in touch."
       return
     end
 
@@ -17,7 +16,7 @@ class ContactController < MarketingController
 
     if @feedback.save
       FeedbackMailer.with(feedback: @feedback).feedback_received.deliver_later
-      redirect_to "/contact", notice: "Thanks! We'll be in touch."
+      redirect_to contact_path, notice: "Thanks! We'll be in touch."
     else
       render :show, status: :unprocessable_entity
     end

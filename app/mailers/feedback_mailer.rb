@@ -6,10 +6,9 @@ class FeedbackMailer < ApplicationMailer
     else
       "Feedback from #{@feedback.source}"
     end
-    reply_to_header = @feedback.email.present? ? { reply_to: @feedback.email } : {}
     mail(to: User.kyle.email_list,
          subject: subject,
-         **reply_to_header) do |format|
+         reply_to: @feedback.email.presence) do |format|
       format.text
       format.mjml
     end
