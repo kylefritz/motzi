@@ -1,2 +1,99 @@
-// Marketing site styles. Filled out in Task 4.
-.marketing { }
+// Marketing site styles. Scoped under .marketing so they don't leak into
+// /menu or /admin (which use application.scss + ActiveAdmin styles).
+
+$marketing-bg: #FFECD6;
+$marketing-text: #2E2927;
+$marketing-accent: #D5482C;
+$marketing-muted: #6B5E4F;
+$marketing-display-font: "Playfair Display", Georgia, serif;
+$marketing-body-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+body.marketing {
+  margin: 0;
+  background: $marketing-bg;
+  color: $marketing-text;
+  font-family: $marketing-body-font;
+  font-size: 17px;
+  line-height: 1.6;
+
+  h1, h2, h3 {
+    font-family: $marketing-display-font;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 0 0 1rem; }
+  h2 { font-size: clamp(1.5rem, 3vw, 2rem); margin: 2rem 0 0.75rem; }
+
+  a { color: $marketing-accent; }
+}
+
+.marketing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba($marketing-text, 0.08);
+
+  .marketing-logo {
+    font-family: $marketing-display-font;
+    font-size: 1.5rem;
+    text-decoration: none;
+    color: $marketing-text;
+  }
+
+  .marketing-nav {
+    display: flex;
+    gap: 1.25rem;
+
+    a {
+      color: $marketing-text;
+      text-decoration: none;
+      font-size: 0.95rem;
+
+      &:hover { color: $marketing-accent; }
+    }
+  }
+}
+
+.marketing-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+.marketing-footer {
+  padding: 3rem 2rem 2rem;
+  background: rgba($marketing-text, 0.03);
+  text-align: center;
+
+  address {
+    font-style: normal;
+    margin-bottom: 1rem;
+  }
+
+  .marketing-footer-nav {
+    display: flex;
+    gap: 1.25rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+
+    a { color: $marketing-text; text-decoration: none; }
+  }
+
+  .marketing-credits, .marketing-copyright {
+    font-size: 0.85rem;
+    color: $marketing-muted;
+    margin: 0.5rem 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .marketing-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .marketing-nav { flex-wrap: wrap; justify-content: center; }
+  .marketing-main { padding: 2rem 1rem; }
+}
