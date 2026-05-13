@@ -4,10 +4,10 @@
     Baltimore, MD 21218
   </address>
   <nav class="marketing-footer-nav">
-    <a href="/menu">Order</a>
-    <a href="/about">Our Process</a>
-    <a href="/subscribe">Subscriptions</a>
-    <a href="/contact">Contact Us</a>
+    <%= link_to "Order", current_menu_path %>
+    <%= link_to "Our Process", about_path %>
+    <%= link_to "Subscriptions", subscribe_path %>
+    <%= link_to "Contact Us", contact_path %>
   </nav>
   <p class="marketing-credits">
     Photography: Nathan Mitchell ·

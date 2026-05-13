@@ -14,7 +14,7 @@
     <p><strong>Phone:</strong> 443-272-1515 (Tues – Sat)</p>
   </section>
 
-  <%= form_with model: @feedback, url: "/contact", local: true, html: { class: "contact-form" } do |f| %>
+  <%= form_with model: @feedback, url: contact_path, local: true, html: { class: "contact-form" } do |f| %>
     <% if @feedback.errors.any? %>
       <div class="form-errors">
         <p>Please fix the following:</p>

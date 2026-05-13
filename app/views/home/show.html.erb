@@ -39,7 +39,7 @@
 <section class="subscriptions-cta">
   <h2>Subscriptions</h2>
   <p>Subscribe today! Our subscriptions are a great way to support your local bakery and pay less per loaf.</p>
-  <p><a href="/subscribe" class="cta-primary">Learn more</a></p>
+  <p><%= link_to "Learn more", subscribe_path, class: "cta-primary" %></p>
 </section>
 
 <section class="your-neighbors">
@@ -48,5 +48,5 @@
     <img src="https://motzi.s3.us-east-1.amazonaws.com/public/marketing/NM_20200702_12_48_55_websize.jpg" alt="Maya and Russell, bakers">
   </div>
   <p>We're <strong>Maya Muñoz and Russell Trimmer</strong>, bakers and owners.</p>
-  <p><a href="/about">About us &rarr;</a></p>
+  <p><%= link_to "About us →", about_path %></p>
 </section>

@@ -4,9 +4,9 @@ Rails.application.routes.draw do
 
   root to: "home#show"
 
-  get  "/about",     to: "about#show"
-  get  "/subscribe", to: "subscribe#show"
-  get  "/contact",   to: "contact#show"
+  get  "/about",     to: "about#show",     as: :about
+  get  "/subscribe", to: "subscribe#show", as: :subscribe
+  get  "/contact",   to: "contact#show",   as: :contact
   post "/contact",   to: "contact#create"
 
   # pay for credit items
