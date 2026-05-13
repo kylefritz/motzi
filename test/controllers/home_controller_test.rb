@@ -3,18 +3,23 @@ require 'test_helper'
 class HomeControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
-  def setup
-    menus(:week2).make_current!
+  test "renders the marketing home for logged-out visitor" do
+    get "/"
+    assert_response :success
+    assert_select "body.marketing"
+    assert_select "h1, h2", text: /Community Bakery/i
+  end
+
+  test "renders the marketing home for logged-in user" do
     sign_in users(:kyle)
+    get "/"
+    assert_response :success
+    assert_select "body.marketing"
   end
 
-  test "get home" do
-    get '/'
-    assert_redirected_to '/menu'
-  end
-
-  test "signout" do
+  test "signout still works" do
+    sign_in users(:kyle)
     get "/signout"
-    assert_redirected_to '/'
+    assert_redirected_to "/"
   end
 end
