@@ -3,7 +3,10 @@ import Anthropic from "@anthropic-ai/sdk";
 import { readFileSync } from "fs";
 import { join } from "path";
 
-const client = new Anthropic();
+// Anthropic SDK throws at construction without ANTHROPIC_API_KEY, so defer
+// until we know the key exists. CI doesn't run these specs (per CLAUDE.md);
+// this lets local `bunx playwright test` skip cleanly when the key is unset.
+const client = process.env.ANTHROPIC_API_KEY ? new Anthropic() : null;
 const prompt = readFileSync(join(__dirname, "email-check-prompt.txt"), "utf-8");
 
 const emails = [
@@ -29,7 +32,7 @@ async function assertEmailLooksGood(screenshot: Buffer, page: any): Promise<stri
     // If header read fails, use original
   }
 
-  const response = await client.messages.create({
+  const response = await client!.messages.create({
     model: "claude-haiku-4-5",
     max_tokens: 256,
     messages: [
@@ -57,6 +60,7 @@ async function assertEmailLooksGood(screenshot: Buffer, page: any): Promise<stri
 
 for (const { mailer, action } of emails) {
   test(`${mailer}/${action}`, async ({ page }, testInfo) => {
+    test.skip(!client, "ANTHROPIC_API_KEY not set — skipping visual review");
     const url = `/rails/mailers/${mailer}/${action}?part=text%2Fhtml`;
     await page.goto(url);
     await page.waitForLoadState("networkidle");
