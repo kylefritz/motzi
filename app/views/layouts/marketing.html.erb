@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= content_for?(:title) ? "#{yield :title} | Motzi" : "Motzi Bread" %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "marketing", media: "all" %>
+    <%= yield :head %>
+  </head>
+  <body class="marketing">
+    <%= render "layouts/marketing_header" %>
+    <main class="marketing-main">
+      <%= yield %>
+    </main>
+    <%= render "layouts/marketing_footer" %>
+  </body>
+</html>
