@@ -14,4 +14,10 @@ class SubscribeControllerTest < ActionDispatch::IntegrationTest
     get "/subscribe"
     assert_response :success
   end
+
+  test "renders subscription details and CTA to sign up" do
+    get "/subscribe"
+    assert_select "h1", text: /Subscriptions/i
+    assert_select "a[href=?]", "/users/sign_up", text: /SUBSCRIBE NOW/i
+  end
 end
