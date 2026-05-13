@@ -6,6 +6,8 @@ ActiveAdmin.register ContactMessage do
   config.filters = false
 
   index do
+    selectable_column
+    id_column
     column :created_at do |msg|
       msg.created_at.strftime("%-m/%-d %l:%M%P")
     end
