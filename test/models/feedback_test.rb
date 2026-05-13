@@ -60,4 +60,16 @@ class FeedbackTest < ActiveSupport::TestCase
     feedback = Feedback.new(source: "404", message: "test")
     assert feedback.valid?
   end
+
+  test "truncates a long user_agent to 512 chars before validating" do
+    feedback = Feedback.new(source: "contact", message: "hi", user_agent: "x" * 1000)
+    assert feedback.valid?
+    assert_equal 512, feedback.user_agent.length
+  end
+
+  test "truncates a long url to 2048 chars before validating" do
+    feedback = Feedback.new(source: "contact", message: "hi", url: "https://example.com/" + ("a" * 3000))
+    assert feedback.valid?
+    assert_equal 2048, feedback.url.length
+  end
 end
