@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   get  "/about",     to: "about#show"
   get  "/subscribe", to: "subscribe#show"
   get  "/contact",   to: "contact#show"
+  post "/contact",   to: "contact#create"
 
   # pay for credit items
   resources :credit_items, only: [:new, :create]
