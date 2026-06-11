@@ -8,6 +8,8 @@
 // ------------------------------------------------------------
 
 $cream:          #FFEED6;
+// Note: terracotta on cream is ~2.9:1 contrast — a conscious choice to stay
+// faithful to the client's Wix design (Marisa Grotte), not an oversight.
 $terracotta:     #D3725F;
 $purple:         #5B4062;
 $heading-dark:   #2F2F2D;
@@ -26,6 +28,10 @@ $font-garamond:  'EB Garamond', Georgia, serif;
 body.marketing {
   margin: 0;
   padding: 0;
+  // The full-bleed -50vw sections below otherwise cause a horizontal
+  // scrollbar on OSes with persistent scrollbars (100vw includes the
+  // scrollbar width).
+  overflow-x: hidden;
   background-color: $cream;
   font-family: $font-garamond;
   font-size: 20px;
@@ -76,6 +82,11 @@ body.marketing {
     &:hover {
       color: darken($terracotta, 12%);
       text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $terracotta;
+      outline-offset: 2px;
     }
   }
 
@@ -245,7 +256,8 @@ body.marketing .flash {
 // Buttons / CTAs
 // ------------------------------------------------------------
 
-body.marketing .cta-primary {
+// Shared button base for .cta-primary and the contact-form submit.
+%cta-primary-base {
   display: inline-block;
   background-color: $purple;
   color: $white;
@@ -266,6 +278,15 @@ body.marketing .cta-primary {
     color: $white;
     text-decoration: none;
   }
+
+  &:focus-visible {
+    outline: 2px solid $white;
+    outline-offset: 3px;
+  }
+}
+
+body.marketing .cta-primary {
+  @extend %cta-primary-base;
 }
 
 body.marketing .cta-row {
@@ -359,6 +380,9 @@ body.marketing .badge-soldout {
 // ------------------------------------------------------------
 
 %full-bleed-section {
+  // CAUTION: this negative-margin escape only works while no ancestor of
+  // .marketing-main (or these sections) sets a transform, filter, or
+  // overflow clip — any of those would re-contain or clip the bleed.
   // Break out of the 960px padding column
   margin-left: calc(-50vw + 50%);
   margin-right: calc(-50vw + 50%);
@@ -510,25 +534,8 @@ body.marketing .contact-form {
 
   input[type="submit"],
   button[type="submit"] {
-    // Reuse cta-primary styles inline (can't @extend across selectors cleanly here)
-    display: inline-block;
-    background-color: $purple;
-    color: $white;
-    font-family: $font-raleway;
-    font-weight: 600;
-    font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 0.75rem 1.75rem;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.15s ease;
+    @extend %cta-primary-base;
     appearance: none;
-
-    &:hover {
-      background-color: darken($purple, 10%);
-    }
   }
 }
 
@@ -541,7 +548,7 @@ body.marketing .contact-form {
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    padding: 1rem 1rem;
+    padding: 1rem;
 
     .marketing-nav {
       justify-content: center;
@@ -555,10 +562,6 @@ body.marketing .contact-form {
 
   body.marketing .marketing-main {
     padding: 2rem 1rem;
-  }
-
-  body.marketing .hero .hero-text h1 {
-    font-size: 28px;
   }
 
   body.marketing .page-hero .lede {
