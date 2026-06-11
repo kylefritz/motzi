@@ -30,6 +30,18 @@ class CaptureDynoMetricsJobTest < ActiveSupport::TestCase
     assert_equal({}, result)
   end
 
+  test "parse_log_lines scrubs invalid UTF-8 so errors_summary can be persisted" do
+    job = CaptureDynoMetricsJob.new
+    # Logplex bodies arrive as binary and can contain invalid bytes (e.g. 0x8f)
+    bad_line = "2026-06-09T01:33:00+00:00 app[worker.1]: Error processing \x8f payload\n".b
+    result = job.send(:parse_log_lines, SAMPLE_LOGS.b + bad_line)
+
+    summary = result["worker.1"][:errors_summary]
+    assert summary.present?, "Expected the error line to be captured"
+    assert summary.valid_encoding?, "errors_summary should be valid UTF-8"
+    assert_includes summary, "Error processing ? payload"
+  end
+
   test "perform creates DynoMetric records" do
     ENV["HEROKU_API_KEY"] ||= "test-key-for-ci"
     stub_heroku_api(SAMPLE_LOGS) do

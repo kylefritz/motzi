@@ -24,7 +24,9 @@ mock.module("axios", () => ({
   },
 }));
 
-mock.module("../../app/javascript/lib/errorReporter", () => ({
+// Three levels up — test/javascript/buy → repo root. The previous 2-up path
+// resolved to a nonexistent file, so this mock silently never intercepted.
+mock.module("../../../app/javascript/lib/errorReporter", () => ({
   reportException: () => {},
   reportError: () => {},
   installGlobalErrorReporter: () => {},

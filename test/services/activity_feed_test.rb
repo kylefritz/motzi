@@ -193,6 +193,70 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert_match(/\d+ unique visitors \(2 visits\)/, day2.description)
   end
 
+  test "same-day email open rates are marked still maturing" do
+    week_start = Time.zone.from_week_id(@week_id)
+    travel_to week_start + 4.days do
+      # mature batch: sent 3 days ago, opens have settled
+      2.times do
+        Ahoy::Message.create!(mailer: "ReminderMailer#havent_ordered_email", menu: @menu,
+          user: users(:kyle), sent_at: week_start + 1.day, opened_at: week_start + 1.day + 2.hours)
+      end
+      # fresh batch: sent 2 hours ago, opens still trickling in
+      2.times do
+        Ahoy::Message.create!(mailer: "ReminderMailer#havent_ordered_email", menu: @menu,
+          user: users(:kyle), sent_at: 2.hours.ago)
+      end
+
+      feed = ActivityFeed.new(@week_id)
+      evts = feed.summary.select do |e|
+        e.action == "email_summary" && e.details[:mailer] == "ReminderMailer#havent_ordered_email"
+      end
+
+      fresh = evts.find { |e| e.details[:date] == Time.zone.today.to_s }
+      mature = evts.find { |e| e.details[:date] == (week_start + 1.day).to_date.to_s }
+
+      assert fresh, "Expected a summary event for today's batch"
+      assert fresh.details[:maturing], "Fresh batch should be flagged maturing"
+      assert_match(/still maturing/, fresh.description)
+      refute mature.details[:maturing], "Settled batch should not be flagged maturing"
+      refute_match(/still maturing/, mature.description)
+    end
+  end
+
+  test "visit events bucket by app time zone, not UTC" do
+    week_start = Time.zone.from_week_id(@week_id)
+    # 9pm ET is already the next day in UTC — must still count toward the ET date
+    day = (week_start + 1.day).to_date
+    late_evening = Time.zone.local(day.year, day.month, day.day, 21, 0)
+    Ahoy::Visit.create!(started_at: late_evening, visitor_token: "night_owl", visit_token: "visit_night")
+
+    feed = ActivityFeed.new(@week_id)
+    evts = feed.summary.select { |e| e.action == "daily_visits" }
+
+    assert_equal 1, evts.size
+    assert_equal day.to_s, evts.first.details[:date]
+  end
+
+  test "in-progress day is marked partial so it isn't read as a full day" do
+    week_start = Time.zone.from_week_id(@week_id)
+    travel_to week_start + 2.days + 21.hours + 21.minutes do # 9:21pm ET mid-week
+      Ahoy::Visit.create!(started_at: 1.hour.ago, visitor_token: "v_today", visit_token: "t_today")
+      Ahoy::Visit.create!(started_at: 2.days.ago, visitor_token: "v_past", visit_token: "t_past")
+
+      feed = ActivityFeed.new(@week_id)
+      evts = feed.summary.select { |e| e.action == "daily_visits" }
+
+      today_evt = evts.find { |e| e.details[:date] == Time.zone.today.to_s }
+      full_evt = evts.find { |e| e.details[:date] == 2.days.ago.to_date.to_s }
+
+      assert today_evt, "Expected a visit event for today"
+      assert today_evt.details[:partial], "Today's bucket should be flagged partial"
+      assert_match(/partial/, today_evt.description)
+      refute full_evt.details[:partial], "Past days should not be flagged partial"
+      refute_match(/partial/, full_evt.description)
+    end
+  end
+
   test "activity events include metadata in verbose mode" do
     travel_to_week_id(@week_id) do
       ActivityEvent.log(

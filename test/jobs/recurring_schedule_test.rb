@@ -50,6 +50,17 @@ class RecurringScheduleTest < ActiveSupport::TestCase
     end
   end
 
+  test "every recurring job class is labeled in the activity feed" do
+    @production.each do |name, config|
+      klass = config["class"]
+      next unless klass
+      assert ActivityFeed::RECURRING_JOB_LABELS.key?(klass),
+        "#{name} (#{klass}) is missing from ActivityFeed::RECURRING_JOB_LABELS — " \
+        "the activity feed filters to labeled classes, so this job would be invisible " \
+        "in the weekly report and falsely flagged as a missing job"
+    end
+  end
+
   test "no two jobs share the same minute to avoid resource contention" do
     minutes_by_job = {}
 
