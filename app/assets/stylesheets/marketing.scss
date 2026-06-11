@@ -1,4 +1,567 @@
-// Marketing layout styles — filled in by a later task.
+// ============================================================
+// Marketing site styles — Wix-faithful port of Marisa Grotte's design
+// ALL rules scoped to body.marketing so nothing leaks into /menu or /admin
+// ============================================================
 
-.marketing {
+// ------------------------------------------------------------
+// Variables
+// ------------------------------------------------------------
+
+$cream:          #FFEED6;
+$terracotta:     #D3725F;
+$purple:         #5B4062;
+$heading-dark:   #2F2F2D;
+$body-text:      #2E2927;
+$warm-gray:      #EDE9E1;
+$white:          #FFFFFF;
+
+$font-raleway:   'Raleway', sans-serif;
+$font-oswald:    'Oswald', sans-serif;
+$font-garamond:  'EB Garamond', Georgia, serif;
+
+// ------------------------------------------------------------
+// Base
+// ------------------------------------------------------------
+
+body.marketing {
+  margin: 0;
+  padding: 0;
+  background-color: $cream;
+  font-family: $font-garamond;
+  font-size: 20px;
+  line-height: 1.6;
+  color: $body-text;
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  h1 {
+    font-family: $font-raleway;
+    font-weight: 600;
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.5;
+    color: $purple;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-family: $font-oswald;
+    font-weight: 500;
+    font-size: clamp(24px, 4vw, 33px);
+    color: $heading-dark;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+  }
+
+  h3 {
+    font-family: $font-raleway;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: $heading-dark;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  a {
+    color: $terracotta;
+    text-decoration: none;
+
+    &:hover {
+      color: darken($terracotta, 12%);
+      text-decoration: underline;
+    }
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  figure {
+    margin: 0 0 1.5rem;
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 4px;
+    }
+
+    figcaption {
+      font-family: $font-garamond;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: rgba($body-text, 0.65);
+      margin-top: 0.4rem;
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// Header
+// ------------------------------------------------------------
+
+body.marketing .marketing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  background-color: $cream;
+  border-bottom: 1px solid rgba($body-text, 0.12);
+
+  .marketing-logo {
+    font-family: $font-raleway;
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: $heading-dark;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+
+    &:hover {
+      color: $purple;
+      text-decoration: none;
+    }
+  }
+
+  .marketing-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    flex-wrap: wrap;
+
+    a {
+      font-family: $font-raleway;
+      font-weight: 600;
+      font-size: 18px;
+      color: $terracotta;
+      text-decoration: none;
+      white-space: nowrap;
+
+      &:hover {
+        color: darken($terracotta, 12%);
+        text-decoration: none;
+      }
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// Main content area
+// ------------------------------------------------------------
+
+body.marketing .marketing-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+// ------------------------------------------------------------
+// Footer
+// ------------------------------------------------------------
+
+body.marketing .marketing-footer {
+  background-color: $warm-gray;
+  text-align: center;
+  padding: 2.5rem 2rem;
+  color: $body-text;
+
+  address {
+    font-style: normal;
+    font-family: $font-garamond;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .marketing-footer-nav {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+
+    a {
+      font-family: $font-raleway;
+      font-weight: 600;
+      font-size: 16px;
+      color: $terracotta;
+      text-decoration: none;
+
+      &:hover {
+        color: darken($terracotta, 12%);
+        text-decoration: none;
+      }
+    }
+  }
+
+  .marketing-credits {
+    font-family: $font-garamond;
+    font-size: 0.85rem;
+    color: rgba($body-text, 0.6);
+    margin-bottom: 0.4rem;
+  }
+
+  .marketing-copyright {
+    font-family: $font-garamond;
+    font-size: 0.85rem;
+    color: rgba($body-text, 0.55);
+    margin: 0;
+  }
+}
+
+// ------------------------------------------------------------
+// Flash messages
+// ------------------------------------------------------------
+
+body.marketing .flash {
+  padding: 0.75rem 1.25rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  font-family: $font-garamond;
+  font-size: 18px;
+
+  &.flash-notice {
+    background-color: rgba($purple, 0.1);
+    color: $purple;
+    border: 1px solid rgba($purple, 0.3);
+  }
+
+  &.flash-alert {
+    background-color: rgba($terracotta, 0.1);
+    color: darken($terracotta, 15%);
+    border: 1px solid rgba($terracotta, 0.3);
+  }
+}
+
+// ------------------------------------------------------------
+// Buttons / CTAs
+// ------------------------------------------------------------
+
+body.marketing .cta-primary {
+  display: inline-block;
+  background-color: $purple;
+  color: $white;
+  font-family: $font-raleway;
+  font-weight: 600;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1.75rem;
+  border-radius: 6px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: darken($purple, 10%);
+    color: $white;
+    text-decoration: none;
+  }
+}
+
+body.marketing .cta-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+// ------------------------------------------------------------
+// Page hero (page-title header block used on inner pages)
+// ------------------------------------------------------------
+
+body.marketing .page-hero {
+  margin-bottom: 2.5rem;
+
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  .lede {
+    font-family: $font-garamond;
+    font-size: 22px;
+    line-height: 1.55;
+    color: rgba($body-text, 0.75);
+    margin: 0;
+  }
+}
+
+// ------------------------------------------------------------
+// Home hero
+// ------------------------------------------------------------
+
+body.marketing .hero {
+  margin-bottom: 2.5rem;
+
+  .hero-image {
+    img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+  }
+
+  .hero-text {
+    padding: 1.5rem 0 0.5rem;
+
+    h1 {
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-tag {
+      font-family: $font-garamond;
+      font-size: 20px;
+      color: rgba($body-text, 0.7);
+      margin: 0;
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// Sold-out badge
+// ------------------------------------------------------------
+
+body.marketing .badge-soldout {
+  display: inline-block;
+  font-family: $font-oswald;
+  font-weight: 500;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $terracotta;
+  border: 2px solid $terracotta;
+  border-radius: 3px;
+  padding: 0.2rem 0.6rem;
+  vertical-align: middle;
+}
+
+// ------------------------------------------------------------
+// Full-bleed colored sections
+//
+// Design choice: these sections use a negative-margin full-bleed
+// trick so they break out of the 960px .marketing-main column
+// while still containing their inner text at the standard width.
+// This achieves better visual fidelity to the Wix site where these
+// sections span the full viewport.
+// ------------------------------------------------------------
+
+%full-bleed-section {
+  // Break out of the 960px padding column
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  padding-left: calc(50vw - 460px);
+  padding-right: calc(50vw - 460px);
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+
+  // Fallback for narrow viewports where 460px calc goes negative
+  @media (max-width: 1000px) {
+    margin-left: -2rem;
+    margin-right: -2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  @media (max-width: 640px) {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+// Find Us — terracotta bg, white text
+body.marketing .find-us {
+  @extend %full-bleed-section;
+  background-color: $terracotta;
+  color: $white;
+
+  h2 {
+    color: $white;
+  }
+
+  a {
+    color: $white;
+    text-decoration: underline;
+
+    &:hover {
+      color: rgba($white, 0.8);
+    }
+  }
+}
+
+// Subscriptions CTA — purple accents on cream
+body.marketing .subscriptions-cta {
+  @extend %full-bleed-section;
+  background-color: $purple;
+  color: $white;
+  text-align: center;
+
+  h2 {
+    color: $white;
+  }
+
+  p {
+    color: rgba($white, 0.9);
+  }
+
+  .cta-primary {
+    background-color: $white;
+    color: $purple;
+
+    &:hover {
+      background-color: rgba($white, 0.88);
+      color: $purple;
+    }
+  }
+}
+
+// Your Neighbors — warm gray bg
+body.marketing .your-neighbors {
+  @extend %full-bleed-section;
+  background-color: $warm-gray;
+
+  h2 {
+    color: $heading-dark;
+  }
+}
+
+// ------------------------------------------------------------
+// Contact form
+// ------------------------------------------------------------
+
+body.marketing .contact-form {
+  max-width: 640px;
+
+  .field {
+    margin-bottom: 1.25rem;
+
+    label {
+      display: block;
+      font-family: $font-raleway;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: $heading-dark;
+      margin-bottom: 0.35rem;
+      letter-spacing: 0.01em;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      display: block;
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      font-family: $font-garamond;
+      font-size: 18px;
+      color: $body-text;
+      background-color: rgba($cream, 0.7);
+      border: 1px solid rgba($body-text, 0.3);
+      border-radius: 4px;
+      line-height: 1.5;
+      appearance: none;
+      transition: border-color 0.15s ease, outline 0.15s ease;
+
+      &:focus {
+        outline: 2px solid $terracotta;
+        outline-offset: 1px;
+        border-color: $terracotta;
+      }
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 140px;
+    }
+  }
+
+  .form-errors {
+    background-color: rgba($terracotta, 0.1);
+    border: 1px solid rgba($terracotta, 0.35);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.95rem;
+    color: darken($terracotta, 15%);
+
+    ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    li {
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  input[type="submit"],
+  button[type="submit"] {
+    // Reuse cta-primary styles inline (can't @extend across selectors cleanly here)
+    display: inline-block;
+    background-color: $purple;
+    color: $white;
+    font-family: $font-raleway;
+    font-weight: 600;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.75rem 1.75rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    appearance: none;
+
+    &:hover {
+      background-color: darken($purple, 10%);
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// Responsive
+// ------------------------------------------------------------
+
+@media (max-width: 640px) {
+  body.marketing .marketing-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1rem;
+
+    .marketing-nav {
+      justify-content: center;
+      gap: 1rem;
+
+      a {
+        font-size: 16px;
+      }
+    }
+  }
+
+  body.marketing .marketing-main {
+    padding: 2rem 1rem;
+  }
+
+  body.marketing .hero .hero-text h1 {
+    font-size: 28px;
+  }
+
+  body.marketing .page-hero .lede {
+    font-size: 19px;
+  }
 }
