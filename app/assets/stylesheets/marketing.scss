@@ -280,7 +280,9 @@ body.marketing .flash {
   }
 
   &:focus-visible {
-    outline: 2px solid $white;
+    // Purple ring: the offset ring draws over the page background, so it
+    // must contrast with cream (a white ring would be invisible there).
+    outline: 2px solid $purple;
     outline-offset: 3px;
   }
 }
@@ -449,6 +451,11 @@ body.marketing .subscriptions-cta {
     &:hover {
       background-color: rgba($white, 0.88);
       color: $purple;
+    }
+
+    &:focus-visible {
+      // On the purple section bg the base purple ring would vanish.
+      outline-color: $white;
     }
   }
 }
