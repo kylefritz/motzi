@@ -6,7 +6,7 @@ class ContactController < MarketingController
   def create
     # Honeypot: pretend success for bots without persisting.
     if params.dig(:contact_message, :website).present?
-      redirect_to "/contact", notice: "Thanks! We'll be in touch shortly."
+      redirect_to "/contact", notice: "Thanks! We'll be in touch shortly. Is it urgent? You can reach us Tues – Sat at 443-272-1515."
       return
     end
 

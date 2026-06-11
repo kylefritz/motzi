@@ -129,15 +129,16 @@ body.marketing .marketing-header {
   border-bottom: 1px solid rgba($body-text, 0.12);
 
   .marketing-logo {
-    font-family: $font-raleway;
-    font-weight: 600;
-    font-size: 1.5rem;
-    color: $heading-dark;
     text-decoration: none;
-    letter-spacing: 0.02em;
+    display: block;
+
+    img {
+      height: 54px;
+      width: auto;
+      display: block;
+    }
 
     &:hover {
-      color: $purple;
       text-decoration: none;
     }
   }
@@ -159,6 +160,12 @@ body.marketing .marketing-header {
       &:hover {
         color: darken($terracotta, 12%);
         text-decoration: none;
+      }
+
+      img {
+        height: 24px;
+        width: 24px;
+        vertical-align: middle;
       }
     }
   }
@@ -209,6 +216,12 @@ body.marketing .marketing-footer {
       &:hover {
         color: darken($terracotta, 12%);
         text-decoration: none;
+      }
+
+      img {
+        height: 24px;
+        width: 24px;
+        vertical-align: middle;
       }
     }
   }
