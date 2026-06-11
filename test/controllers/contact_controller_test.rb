@@ -52,6 +52,15 @@ class ContactControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil msg.ip
   end
 
+  test "create truncates an over-long user agent instead of rejecting" do
+    assert_difference -> { ContactMessage.count }, 1 do
+      post "/contact",
+        params: { contact_message: { name: "X", email: "x@y.com", message: "hi" } },
+        headers: { "User-Agent" => "U" * 600 }
+    end
+    assert_redirected_to "/contact"
+  end
+
   test "create with invalid params re-renders show with 422" do
     assert_no_difference -> { ContactMessage.count } do
       post "/contact", params: { contact_message: { name: "", email: "", message: "" } }
