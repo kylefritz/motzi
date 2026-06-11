@@ -321,6 +321,45 @@ body.marketing .page-hero {
   }
 }
 
+// Split hero variant (Wix "Our Process" header): photo on the left,
+// title + lede on the right over a flour-texture panel. The texture
+// background-image URL is set inline in the ERB so this file stays
+// URL-free.
+body.marketing .page-hero--split {
+  display: flex;
+  align-items: stretch;
+  background-size: cover;
+  background-position: center;
+  border-radius: 6px;
+  overflow: hidden;
+
+  .page-hero-image {
+    flex: 1 1 50%;
+    min-width: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .page-hero-text {
+    flex: 1 1 50%;
+    min-width: 0;
+    align-self: center;
+    padding: 2.5rem 2rem;
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+
+    .page-hero-text {
+      padding: 1.5rem 1.25rem;
+    }
+  }
+}
+
 // ------------------------------------------------------------
 // Home hero
 // ------------------------------------------------------------
