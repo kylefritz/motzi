@@ -1,7 +1,4 @@
-class AboutController < ApplicationController
-  layout "marketing"
-  skip_before_action :authenticate_user!
-
+class AboutController < MarketingController
   def show
   end
 end

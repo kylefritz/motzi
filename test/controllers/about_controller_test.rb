@@ -14,4 +14,14 @@ class AboutControllerTest < ActionDispatch::IntegrationTest
     get "/about"
     assert_response :success
   end
+
+  test "shows admin nav link for admins only" do
+    sign_in users(:kyle) # admin
+    get "/about"
+    assert_select "a[href=?]", "/admin"
+
+    sign_in users(:ljf) # non-admin
+    get "/about"
+    assert_select "a[href=?]", "/admin", count: 0
+  end
 end

@@ -1,7 +1,4 @@
-class SubscribeController < ApplicationController
-  layout "marketing"
-  skip_before_action :authenticate_user!
-
+class SubscribeController < MarketingController
   def show
   end
 end
