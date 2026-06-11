@@ -11,6 +11,13 @@ class OrdersController < ApplicationController
     end
 
     if (existing_user = User.find_by(email: params.fetch(:email).strip.downcase)).present?
+      # Guest checkout may only attach to an existing account for a genuinely
+      # paid marketplace order. Without this, an unauthenticated request could
+      # place a credit-spending order in any member's name just by knowing their
+      # email — draining their credits. A returning member must sign in.
+      unless paid_marketplace_order?
+        raise OrderError.new("Email passed as param — Please use a link from a menu email or sign in to place your order")
+      end
       return existing_user
     end
 
@@ -161,6 +168,14 @@ class OrdersController < ApplicationController
   end
 
   private
+
+  # A real paid marketplace order results in a Stripe charge (price > 0 with a
+  # card token), which sets stripe_charge_id and so is excluded from credit
+  # accounting. A $0 or token-less order would leave stripe_charge_id NULL and
+  # count against the member's credit balance.
+  def paid_marketplace_order?
+    params[:price].to_f > 0 && params[:token].present?
+  end
 
   def render_ordering_closed
     return render_validation_failed("ordering for this menu is closed")
