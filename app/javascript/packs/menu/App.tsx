@@ -17,6 +17,10 @@ import type {
   MarketplaceOrderRequest,
 } from "../../types/api";
 
+// Network blips (no response at all) get retried before we report an error
+// and give up — members on flaky mobile connections see them regularly.
+const MENU_FETCH_RETRY_DELAYS_MS = [500, 1500];
+
 export default function App() {
   const [data, setData] = useState<MenuResponse | null>(null); // expect: menu, user, order
   const [error, setError] = useState<string | undefined>();
@@ -29,16 +33,31 @@ export default function App() {
     let params = { uid };
     const id = _.get(location.pathname.match(/menus\/(.*)/), 1);
     const menuPath = id ? `/menus/${id}.json` : "/menu.json";
-    axios
-      .get<MenuResponse>(menuPath, { params })
-      .then(({ data: newData }) => {
-        setData(newData); // expect: menu, user, order
-      })
-      .catch((err) => {
-        console.error("cant load menu", err);
-        reportException(err, { kind: "menu_fetch" });
-        setError("We can't load the menu");
-      });
+
+    const attempt = (tryIndex: number) => {
+      axios
+        .get<MenuResponse>(menuPath, { params })
+        .then(({ data: newData }) => {
+          setData(newData); // expect: menu, user, order
+        })
+        .catch((err) => {
+          const delay = MENU_FETCH_RETRY_DELAYS_MS[tryIndex];
+          if (!err.response && delay !== undefined) {
+            console.warn("menu fetch failed, retrying", tryIndex + 1, err);
+            setTimeout(() => attempt(tryIndex + 1), delay);
+            return;
+          }
+          console.error("cant load menu", err);
+          reportException(err, {
+            kind: "menu_fetch",
+            attempts: tryIndex + 1,
+            online: navigator.onLine,
+          });
+          setError("We can't load the menu");
+        });
+    };
+
+    attempt(0);
   };
 
   useEffect(fetchMenu, []);
@@ -60,8 +79,8 @@ export default function App() {
         window.scrollTo(0, 0);
       })
       .catch((err) => {
-        const { message } = err.response.data || {};
-        console.error("Couldn't create order", err, err.response.data);
+        const { message } = err.response?.data || {};
+        console.error("Couldn't create order", err, err.response?.data);
         window.alert(`Couldn't create order: ${message || err}`);
         reportException(err, { kind: "create_order" });
       });
@@ -87,8 +106,8 @@ export default function App() {
         window.scrollTo(0, 0);
       })
       .catch((err) => {
-        const { message } = err.response.data || {};
-        console.error("Couldn't create holiday order", err, err.response.data);
+        const { message } = err.response?.data || {};
+        console.error("Couldn't create holiday order", err, err.response?.data);
         window.alert(`Couldn't create holiday order: ${message || err}`);
         reportException(err, { kind: "create_holiday_order" });
       });
