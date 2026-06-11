@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_06_202929) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_11_163000) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -98,7 +98,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_06_202929) do
     t.bigint "pickup_day_id"
     t.string "job_id"
     t.string "job_name"
+    t.bigint "order_id"
     t.index ["menu_id"], name: "index_ahoy_messages_on_menu_id"
+    t.index ["order_id"], name: "index_ahoy_messages_on_order_id"
     t.index ["token"], name: "index_ahoy_messages_on_token"
     t.index ["user_type", "user_id"], name: "index_ahoy_messages_on_user_type_and_user_id"
   end
