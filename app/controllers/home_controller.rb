@@ -1,8 +1,5 @@
-class HomeController < ApplicationController
-  skip_before_action :authenticate_user!
-
+class HomeController < MarketingController
   def show
-    redirect_to '/menu'
   end
 
   def signout

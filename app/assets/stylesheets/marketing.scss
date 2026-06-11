@@ -510,6 +510,76 @@ body.marketing .your-neighbors {
 }
 
 // ------------------------------------------------------------
+// Home page two-column layouts
+// ------------------------------------------------------------
+
+// Shared two-column flex layout used by .find-us-columns and .neighbors-columns
+%two-col-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+
+  figure, > div {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  figure {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+  }
+}
+
+body.marketing .find-us-columns {
+  @extend %two-col-layout;
+  margin-top: 1.5rem;
+
+  figure img {
+    border-radius: 4px;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  ul {
+    padding-left: 1.25rem;
+    margin-bottom: 1rem;
+  }
+}
+
+body.marketing .neighbors-columns {
+  @extend %two-col-layout;
+  margin-top: 1.5rem;
+
+  figure img {
+    border-radius: 4px;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+}
+
+// Follow on Instagram — centered, terracotta link
+body.marketing .follow-ig {
+  text-align: center;
+  padding: 2.5rem 0 1rem;
+
+  h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  a {
+    color: $terracotta;
+    font-family: $font-raleway;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+}
+
+// ------------------------------------------------------------
 // Contact form
 // ------------------------------------------------------------
 
