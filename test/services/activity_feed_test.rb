@@ -193,6 +193,36 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert_match(/\d+ unique visitors \(2 visits\)/, day2.description)
   end
 
+  test "same-day email open rates are marked still maturing" do
+    week_start = Time.zone.from_week_id(@week_id)
+    travel_to week_start + 4.days do
+      # mature batch: sent 3 days ago, opens have settled
+      2.times do
+        Ahoy::Message.create!(mailer: "ReminderMailer#havent_ordered_email", menu: @menu,
+          user: users(:kyle), sent_at: week_start + 1.day, opened_at: week_start + 1.day + 2.hours)
+      end
+      # fresh batch: sent 2 hours ago, opens still trickling in
+      2.times do
+        Ahoy::Message.create!(mailer: "ReminderMailer#havent_ordered_email", menu: @menu,
+          user: users(:kyle), sent_at: 2.hours.ago)
+      end
+
+      feed = ActivityFeed.new(@week_id)
+      evts = feed.summary.select do |e|
+        e.action == "email_summary" && e.details[:mailer] == "ReminderMailer#havent_ordered_email"
+      end
+
+      fresh = evts.find { |e| e.details[:date] == Time.zone.today.to_s }
+      mature = evts.find { |e| e.details[:date] == (week_start + 1.day).to_date.to_s }
+
+      assert fresh, "Expected a summary event for today's batch"
+      assert fresh.details[:maturing], "Fresh batch should be flagged maturing"
+      assert_match(/still maturing/, fresh.description)
+      refute mature.details[:maturing], "Settled batch should not be flagged maturing"
+      refute_match(/still maturing/, mature.description)
+    end
+  end
+
   test "visit events bucket by app time zone, not UTC" do
     week_start = Time.zone.from_week_id(@week_id)
     # 9pm ET is already the next day in UTC — must still count toward the ET date

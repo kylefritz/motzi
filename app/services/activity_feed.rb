@@ -165,7 +165,7 @@ class ActivityFeed
     end
 
     havent_ordered_trend = mailer_open_rate_trend("ReminderMailer#havent_ordered_email", lookback: lookback)
-    if havent_ordered_trend[:current_rate] && havent_ordered_trend[:average_rate] && havent_ordered_trend[:current_rate] < (havent_ordered_trend[:average_rate] - 5)
+    if !havent_ordered_trend[:maturing] && havent_ordered_trend[:current_rate] && havent_ordered_trend[:average_rate] && havent_ordered_trend[:current_rate] < (havent_ordered_trend[:average_rate] - 5)
       items << {
         tone: :warning,
         title: "Haven't-ordered reminder engagement is slipping",
@@ -404,9 +404,14 @@ class ActivityFeed
       (previous.sum.to_f / previous.size).round
     end
 
+    # A rate that includes a send from the last 24h hasn't settled yet —
+    # don't compare it against matured weekly averages.
+    last_sent = @menus.filter_map { |m| m.messages.where(mailer: mailer).maximum(:sent_at) }.max
+
     {
       current_rate: current&.dig(:open_rate),
-      average_rate: average
+      average_rate: average,
+      maturing: last_sent.present? && last_sent > 24.hours.ago
     }
   end
 
@@ -865,12 +870,22 @@ class ActivityFeed
             open_rate = sent_count > 0 ? (opened_count.to_f / sent_count * 100).round : 0
             timestamp = daily_msgs.filter_map(&:sent_at).min || daily_msgs.map(&:created_at).min
 
+            # Opens keep arriving for ~24h after a send; a snapshot taken hours
+            # after the batch reads roughly half the eventual rate.
+            last_sent = daily_msgs.filter_map(&:sent_at).max || daily_msgs.map(&:created_at).max
+            maturing = last_sent > 24.hours.ago
+            description = "#{opened_count}/#{sent_count} #{label.downcase} opened (#{open_rate}%)"
+            if maturing
+              hours_ago = ((Time.current - last_sent) / 1.hour).round
+              description += " — sent #{hours_ago}h ago, open rate still maturing"
+            end
+
             events << Event.new(
               timestamp: timestamp,
               category: "email",
               action: "email_summary",
-              description: "#{opened_count}/#{sent_count} #{label.downcase} opened (#{open_rate}%)",
-              details: { source: "ahoy_messages", mailer: mailer, sent: sent_count, opened: opened_count, open_rate: open_rate, date: date.to_s }
+              description: description,
+              details: { source: "ahoy_messages", mailer: mailer, sent: sent_count, opened: opened_count, open_rate: open_rate, date: date.to_s, maturing: maturing }
             )
           end
         end
