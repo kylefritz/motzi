@@ -14,7 +14,7 @@ jobs:
   scan_ruby:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.3.10
@@ -29,13 +29,13 @@ jobs:
     env:
       RUBOCOP_CACHE_ROOT: tmp/rubocop
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.3.10
           bundler-cache: true
       - name: Prepare RuboCop cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           DEPENDENCIES_HASH: ${{ hashFiles('.ruby-version', '**/.rubocop.yml', 'Gemfile.lock') }}
         with:
@@ -58,7 +58,7 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install PostgreSQL client
         run: sudo apt-get -yqq install libpq-dev
@@ -69,7 +69,7 @@ jobs:
           bundler-cache: true
 
       - name: Set up Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
@@ -93,10 +93,10 @@ jobs:
   test_js:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
