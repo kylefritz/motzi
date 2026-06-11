@@ -28,8 +28,19 @@ class UptimeSchedule
 
     [
       Target.new(name: "menu", url: URI.join(base, "/menu.json").to_s),
-      Target.new(name: "admin", url: URI.join(base, "/admin").to_s)
+      Target.new(name: "admin", url: admin_url(base))
     ]
+  end
+
+  # Prefers the token-guarded /health/admin endpoint, which exercises the
+  # admin's real DB reads server-side (see HealthController). Falls back to
+  # the public /admin redirect when no token is configured so monitoring
+  # degrades instead of disappearing.
+  def self.admin_url(base)
+    token = ENV["UPTIME_PROBE_TOKEN"]
+    return URI.join(base, "/admin").to_s if token.blank?
+
+    URI.join(base, "/health/admin?token=#{CGI.escape(token)}").to_s
   end
 
   def self.due_targets(time = Time.current)

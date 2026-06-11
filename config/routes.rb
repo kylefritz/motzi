@@ -13,6 +13,9 @@ Rails.application.routes.draw do
   # get the menu for the week
   get "/menu", to: "menus#show", as: :current_menu
 
+  # token-guarded uptime probe target (404s unless UPTIME_PROBE_TOKEN matches)
+  get "/health/admin", to: "health#admin"
+
   # create/update order for a menu
   resources :orders, only: [:create, :update]
 

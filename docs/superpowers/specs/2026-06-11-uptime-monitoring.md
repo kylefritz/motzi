@@ -24,11 +24,13 @@ the nightly anomaly report) into a recurring, recorded check.
 | Target | URL | Expectation | Why |
 |--------|-----|-------------|-----|
 | `menu` | `{base}/menu.json` | 200 | Anonymous; exercises Rails + Postgres + menu serialization — what a member hitting the menu actually needs. |
-| `admin` | `{base}/admin` | 302 → `/users/sign_in` | Proves routing/middleware/session stack without storing credentials. |
+| `admin` | `{base}/health/admin?token=…` | 200 | Token-guarded probe-only endpoint (`HealthController`) that runs the admin's real reads server-side: current menu loads, orders readable, error_events readable, ready-job queue not stale. 503 names the failing subcheck; bad/missing token → 404. Falls back to `{base}/admin` (302 → sign-in) when `UPTIME_PROBE_TOKEN` is unset. |
 
 "Up" = HTTP status 200–399. `{base}` comes from `UptimeProbe.url`
 (`UPTIME_PROBE_URL` override; defaults to the public site in production; nil in
-dev/test → the job no-ops).
+dev/test → the job no-ops). An authenticated "log in as a real admin" probe was
+considered and rejected: it needs stored credentials or a prod auth-bypass
+route — a real attack surface — and a brittle sign-in dance in Net::HTTP.
 
 ## Check schedule (all times ET)
 

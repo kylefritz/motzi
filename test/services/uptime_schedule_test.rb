@@ -3,11 +3,14 @@ require "test_helper"
 class UptimeScheduleTest < ActiveSupport::TestCase
   setup do
     @original = ENV["UPTIME_PROBE_URL"]
+    @original_token = ENV["UPTIME_PROBE_TOKEN"]
     ENV["UPTIME_PROBE_URL"] = "https://probe.test"
+    ENV.delete("UPTIME_PROBE_TOKEN")
   end
 
   teardown do
     @original ? ENV["UPTIME_PROBE_URL"] = @original : ENV.delete("UPTIME_PROBE_URL")
+    @original_token ? ENV["UPTIME_PROBE_TOKEN"] = @original_token : ENV.delete("UPTIME_PROBE_TOKEN")
   end
 
   # 2026-06-10 is a Wednesday; times below are ET (the app time zone).
@@ -23,6 +26,12 @@ class UptimeScheduleTest < ActiveSupport::TestCase
     assert_equal %w[menu admin], UptimeSchedule.targets.map(&:name)
     assert_equal "https://probe.test/menu.json", UptimeSchedule.targets.first.url
     assert_equal "https://probe.test/admin", UptimeSchedule.targets.last.url
+  end
+
+  test "admin target uses the token-guarded health endpoint when a token is configured" do
+    ENV["UPTIME_PROBE_TOKEN"] = "probe secret"
+
+    assert_equal "https://probe.test/health/admin?token=probe+secret", UptimeSchedule.targets.last.url
   end
 
   test "targets is empty when no probe url is configured" do
