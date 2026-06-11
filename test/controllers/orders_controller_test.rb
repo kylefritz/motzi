@@ -122,6 +122,42 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  # Guest checkout (email param) must not let an unauthenticated request place a
+  # credit-spending order in an existing member's name — that would drain the
+  # member's credits. A returning member with an existing account must sign in.
+  test "guest email path cannot place an unpaid order for an existing member" do
+    victim = users(:ljf)
+    before_deadline do
+      refute_ordered do
+        post '/orders.json', params: order_attrs(nil).merge(email: victim.email), as: :json
+      end
+    end
+    assert_response :unprocessable_content
+  end
+
+  test "guest email path cannot place a $0 order for an existing member" do
+    victim = users(:ljf)
+    before_deadline do
+      refute_ordered do
+        post '/orders.json', params: order_attrs(nil).merge(email: victim.email, price: 0), as: :json
+      end
+    end
+    assert_response :unprocessable_content
+  end
+
+  test "new guest can still place a marketplace order by email" do
+    before_deadline do
+      assert_ordered do
+        post '/orders.json', params: order_attrs(nil).merge(
+          email: "newguest@example.com",
+          first_name: "New", last_name: "Guest", phone: "555-0000", price: 0
+        ), as: :json
+      end
+    end
+    assert_response :success
+    assert_equal "newguest@example.com", Order.last.user.email
+  end
+
   test "non-admin user cannot order from a non-current non-holiday menu" do
     sign_in users(:jess)
     non_current_menu = menus(:week3)
