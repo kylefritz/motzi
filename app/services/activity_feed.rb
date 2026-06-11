@@ -255,6 +255,7 @@ class ActivityFeed
         lines << "#{s[:label]}: #{parts.join(', ')}"
       end
       lines << deliverability_text
+      lines << rapid_duplicate_summary_text
       lines << ""
     end
 
@@ -436,7 +437,10 @@ class ActivityFeed
   # excluded so triaged errors stop being re-reported week after week. A
   # fingerprint resurfaces only if new, unresolved occurrences arrive.
   def error_events_text
-    scope = ErrorEvent.where(occurred_at: @week_start..@week_end)
+    # Production events only — the local DB also accumulates development
+    # events from eval runs and admin browsing, which must not leak into
+    # the feed (the report is about the production app).
+    scope = ErrorEvent.where(occurred_at: @week_start..@week_end, environment: "production")
     resolved_count = scope.where.not(resolved_at: nil).count
     open_scope = scope.where(resolved_at: nil)
 
@@ -468,6 +472,9 @@ class ActivityFeed
 
     latest_events = ErrorEvent.where(id: groups.map(&:latest_id)).index_by(&:id)
     recurred = ErrorEvent.where(fingerprint: groups.map(&:fingerprint)).where.not(resolved_at: nil).distinct.pluck(:fingerprint).to_set
+    seen_before = ErrorEvent
+      .where(fingerprint: groups.map(&:fingerprint), occurred_at: (@week_start - 4.weeks)...@week_start)
+      .distinct.pluck(:fingerprint).to_set
 
     lines = ["== Application Errors (#{total} events: #{source_summary}) =="]
     groups.each do |g|
@@ -475,7 +482,10 @@ class ActivityFeed
       message = latest&.message.to_s.lines.first&.strip
       message = message[0, 160] + "…" if message && message.length > 160
       top_frame = latest&.backtrace.to_s.lines.find { |l| l.include?("/app/") }&.strip
-      status = recurred.include?(g.fingerprint) ? " [recurred after resolve]" : ""
+      tags = []
+      tags << " [NEW this week — not seen in prior 4 weeks]" unless seen_before.include?(g.fingerprint)
+      tags << " [recurred after resolve]" if recurred.include?(g.fingerprint)
+      status = tags.join
       header = "  [#{g.source}] #{g.error_class} ×#{g.event_count} (last #{g.last_seen.strftime('%-m/%d %l:%M%P').strip})#{status}"
       lines << header
       lines << "    msg: #{message}" if message.present?
@@ -825,15 +835,52 @@ class ActivityFeed
   # a user can't realistically re-edit their order that fast. Longer gaps are edits.
   CONFIRMATION_DUP_WINDOW = 120 # seconds
 
-  def rapid_confirmation_dup_ids(messages)
-    messages.group_by(&:user_id).each_with_object(Set.new) do |(_, user_msgs), set|
+  # Yields sub-2-minute confirmation pairs, skipping team members — admin
+  # self-tests are not member-facing duplicate bugs, so neither the
+  # [RAPID DUPLICATE] tag nor the Email Health counter should count them.
+  def each_rapid_pair(messages)
+    messages.group_by(&:user_id).each do |user_id, user_msgs|
+      next if admin_user_ids.include?(user_id)
+
       user_msgs.sort_by { |m| m.sent_at || m.created_at }.each_cons(2) do |a, b|
         gap = ((b.sent_at || b.created_at) - (a.sent_at || a.created_at)).to_f.abs
-        if gap < CONFIRMATION_DUP_WINDOW
-          set << a.id
-          set << b.id
+        yield(user_id, a, b) if gap < CONFIRMATION_DUP_WINDOW
+      end
+    end
+  end
+
+  def admin_user_ids
+    @admin_user_ids ||= User.admin.pluck(:id).to_set
+  end
+
+  def rapid_confirmation_dup_ids(messages)
+    set = Set.new
+    each_rapid_pair(messages) do |_user_id, a, b|
+      set << a.id
+      set << b.id
+    end
+    set
+  end
+
+  # Explicit count for the Email Health section. A nonzero count is the real
+  # duplicate-send bug (issue #331 class); an explicit zero stops the analysis
+  # from speculating one out of order-edit confirmations.
+  def rapid_duplicate_summary_text
+    pair_count = 0
+    affected_users = Set.new
+    @menus.each do |menu|
+      menu.messages.where("mailer LIKE 'ConfirmationMailer%'").group_by(&:mailer).each_value do |messages|
+        each_rapid_pair(messages) do |user_id, _a, _b|
+          pair_count += 1
+          affected_users << user_id
         end
       end
+    end
+
+    if pair_count.zero?
+      "Rapid duplicate confirmations: 0 this week"
+    else
+      "Rapid duplicate confirmations: #{pair_count} pair#{'s' unless pair_count == 1} within #{CONFIRMATION_DUP_WINDOW / 60} min affecting #{affected_users.size} member#{'s' unless affected_users.size == 1} — real duplicate-send bug (see [RAPID DUPLICATE] events)"
     end
   end
 

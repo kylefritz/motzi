@@ -378,7 +378,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
         backtrace: "/app/services/foo.rb:42:in `bar'\n/gems/rails/foo.rb:1",
         url: "/menu",
         http_method: "GET",
-        environment: Rails.env,
+        environment: "production",
         occurred_at: week_start + (i + 1).hours
       )
     end
@@ -387,7 +387,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
       source: "browser",
       error_class: "TypeError",
       message: "Cannot read 'foo' of undefined",
-      environment: Rails.env,
+      environment: "production",
       occurred_at: week_start + 4.hours
     )
 
@@ -423,12 +423,23 @@ class ActivityFeedTest < ActiveSupport::TestCase
   test "verbose feed tags order confirmations sent within 2 minutes as RAPID DUPLICATE" do
     travel_to_week_id(@week_id) do
       first_send = Time.zone.now + 2.days
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), sent_at: first_send)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), sent_at: first_send + 30.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text(verbose: true)
+    assert_match(/RAPID DUPLICATE/, text, "sub-minute-gap confirmations are the real bug signal")
+  end
+
+  test "verbose feed does not tag admin self-test pairs as RAPID DUPLICATE" do
+    travel_to_week_id(@week_id) do
+      first_send = Time.zone.now + 2.days
       Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: first_send)
       Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: first_send + 30.seconds)
     end
 
     text = ActivityFeed.new(@week_id).to_text(verbose: true)
-    assert_match(/RAPID DUPLICATE/, text, "sub-minute-gap confirmations are the real bug signal")
+    assert_no_match(/RAPID DUPLICATE/, text, "team self-tests are not member-facing duplicate bugs")
   end
 
   test "to_text notes deliverability data is unavailable without SendGrid credentials" do
@@ -467,12 +478,12 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     ErrorEvent.create!(
       fingerprint: "fp-resolved", source: "server", error_class: "ResolvedError",
-      message: "triaged by operator", environment: Rails.env,
+      message: "triaged by operator", environment: "production",
       occurred_at: week_start + 1.hour, resolved_at: Time.current
     )
     ErrorEvent.create!(
       fingerprint: "fp-open", source: "server", error_class: "OpenError",
-      message: "still live", environment: Rails.env, occurred_at: week_start + 2.hours
+      message: "still live", environment: "production", occurred_at: week_start + 2.hours
     )
 
     text = ActivityFeed.new(week_id).to_text
@@ -488,12 +499,12 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     ErrorEvent.create!(
       fingerprint: "fp-recur", source: "server", error_class: "RecurError",
-      message: "old occurrence", environment: Rails.env,
+      message: "old occurrence", environment: "production",
       occurred_at: week_start + 1.hour, resolved_at: Time.current
     )
     ErrorEvent.create!(
       fingerprint: "fp-recur", source: "server", error_class: "RecurError",
-      message: "new occurrence", environment: Rails.env, occurred_at: week_start + 5.hours
+      message: "new occurrence", environment: "production", occurred_at: week_start + 5.hours
     )
 
     text = ActivityFeed.new(week_id).to_text
@@ -509,7 +520,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
     2.times do |i|
       ErrorEvent.create!(
         fingerprint: "fp-quiet", source: "server", error_class: "QuietError",
-        message: "handled", environment: Rails.env,
+        message: "handled", environment: "production",
         occurred_at: week_start + (i + 1).hours, resolved_at: Time.current
       )
     end
@@ -518,6 +529,78 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     assert_no_match(/QuietError/, text)
     assert_match(/2 resolved events excluded/, text)
+  end
+
+  test "to_text tags error fingerprints not seen in prior 4 weeks as NEW" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    ErrorEvent.create!(
+      fingerprint: "fp-brand-new", source: "browser", error_class: "BrandNewError",
+      message: "first appearance", environment: "production", occurred_at: week_start + 1.hour
+    )
+    ErrorEvent.create!(
+      fingerprint: "fp-carryover", source: "browser", error_class: "CarryoverError",
+      message: "old friend", environment: "production", occurred_at: week_start - 2.weeks
+    )
+    ErrorEvent.create!(
+      fingerprint: "fp-carryover", source: "browser", error_class: "CarryoverError",
+      message: "old friend again", environment: "production", occurred_at: week_start + 2.hours
+    )
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_match(/BrandNewError ×1.*\[NEW this week/, text)
+    assert_no_match(/CarryoverError ×1.*\[NEW this week/, text)
+  end
+
+  test "to_text reports zero rapid duplicate confirmations explicitly" do
+    travel_to_week_id(@week_id) do
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: Time.zone.now)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Rapid duplicate confirmations: 0 this week/, text)
+  end
+
+  test "to_text counts rapid duplicate confirmation pairs in email health" do
+    travel_to_week_id(@week_id) do
+      sent = Time.zone.now + 1.day
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), sent_at: sent)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), sent_at: sent + 30.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Rapid duplicate confirmations: 1 pair within 2 min affecting 1 member/, text)
+  end
+
+  test "rapid duplicate counter ignores admin self-test pairs" do
+    travel_to_week_id(@week_id) do
+      sent = Time.zone.now + 1.day
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: sent)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: sent + 30.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Rapid duplicate confirmations: 0 this week/, text)
+  end
+
+  test "error feed excludes non-production events" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    ErrorEvent.create!(
+      fingerprint: "fp-local", source: "server", error_class: "LocalDevError",
+      message: "SIGTERM from a local eval run", environment: "development",
+      occurred_at: week_start + 1.hour
+    )
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_no_match(/LocalDevError/, text)
   end
 
   test "to_text reports zero failed jobs explicitly" do
