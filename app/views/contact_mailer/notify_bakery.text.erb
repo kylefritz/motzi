@@ -1,6 +1,6 @@
 New message from the motzibread.com contact form:
 
-From: <%= @msg.name %> <<%= @msg.email %>>
+From: <%= @msg.name.squish %> <<%= @msg.email %>>
 <% if @msg.phone.present? %>Phone: <%= @msg.phone %>
 <% end %>Sent: <%= @msg.created_at.strftime("%a %b %-d %Y, %l:%M %P") %>
 
