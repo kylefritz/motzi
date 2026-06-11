@@ -15,6 +15,7 @@ class ContactController < MarketingController
     @message.user_agent = request.user_agent&.first(512)
 
     if @message.save
+      ContactMailer.notify_bakery(@message).deliver_later
       redirect_to "/contact", notice: "Thanks! We'll be in touch shortly. Is it urgent? You can reach us Tues – Sat at 443-272-1515."
     else
       render :show, status: :unprocessable_entity
