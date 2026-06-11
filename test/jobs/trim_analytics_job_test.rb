@@ -17,6 +17,16 @@ class TrimAnalyticsJobTest < ActiveJob::TestCase
     assert_equal 1, Ahoy::Event.where(name: "new_event").count, "recent event should be preserved"
   end
 
+  test "trims uptime checks older than 90 days" do
+    old = UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, up: true, checked_at: 91.days.ago)
+    recent = UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, up: true, checked_at: 1.day.ago)
+
+    TrimAnalyticsJob.perform_now
+
+    assert_not UptimeCheck.exists?(old.id), "old uptime check should be deleted"
+    assert UptimeCheck.exists?(recent.id), "recent uptime check should be preserved"
+  end
+
   test "trims dyno metrics older than 90 days" do
     old = DynoMetric.create!(recorded_at: 91.days.ago, dyno: "web.1", memory_total: 300, memory_rss: 280, memory_swap: 0, memory_quota: 512)
     recent = DynoMetric.create!(recorded_at: 1.day.ago, dyno: "web.1", memory_total: 300, memory_rss: 280, memory_swap: 0, memory_quota: 512)

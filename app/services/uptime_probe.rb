@@ -19,7 +19,9 @@ class UptimeProbe
     uri = URI(target)
     started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 5, read_timeout: 10) do |http|
-      http.request(Net::HTTP::Get.new(uri.path.presence || "/"))
+      # request_uri keeps the query string — a configured probe URL like
+      # /health?token=... must be requested verbatim (PR #337 review).
+      http.request(Net::HTTP::Get.new(uri.request_uri))
     end
     latency_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started) * 1000).round
 

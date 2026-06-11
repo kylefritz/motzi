@@ -36,6 +36,15 @@ class UptimeProbeTest < ActiveSupport::TestCase
     assert_match(/timeout/i, result[:error])
   end
 
+  test "preserves the query string of a configured probe url" do
+    stub_request(:get, "https://example.test/health?token=secret").to_return(status: 200)
+
+    result = UptimeProbe.check("https://example.test/health?token=secret")
+
+    assert_equal 200, result[:status]
+    assert_requested :get, "https://example.test/health?token=secret"
+  end
+
   test "uses UPTIME_PROBE_URL when set" do
     ENV["UPTIME_PROBE_URL"] = "https://probe.test/"
     stub_request(:get, "https://probe.test/").to_return(status: 200)
