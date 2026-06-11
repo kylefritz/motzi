@@ -1,9 +1,15 @@
 require "test_helper"
 
 class ActivityFeedTest < ActiveSupport::TestCase
+  include WebMock::API
+
   setup do
     @week_id = "19w01"
     @menu = menus(:week1)
+  end
+
+  teardown do
+    WebMock.reset!
   end
 
   test "summary returns an array of Events" do
@@ -423,6 +429,118 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     text = ActivityFeed.new(@week_id).to_text(verbose: true)
     assert_match(/RAPID DUPLICATE/, text, "sub-minute-gap confirmations are the real bug signal")
+  end
+
+  test "to_text notes deliverability data is unavailable without SendGrid credentials" do
+    travel_to_week_id(@week_id) do
+      Ahoy::Message.create!(mailer: "MenuMailer#weekly_menu_email", menu: @menu, user: users(:kyle), sent_at: Time.zone.now)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Deliverability \(SendGrid\): data unavailable/, text)
+  end
+
+  test "to_text includes SendGrid bounce and spam counts when available" do
+    ENV["SENDGRID_API_KEY"] = "SG.test-key"
+    body = [
+      { date: "2026-01-01", stats: [{ metrics: { requests: 20, delivered: 18, bounces: 2, blocks: 1, spam_reports: 1, invalid_emails: 0 } }] }
+    ].to_json
+    stub_request(:get, "https://api.sendgrid.com/v3/stats")
+      .with(query: hash_including({}))
+      .to_return(status: 200, body: body, headers: { "Content-Type" => "application/json" })
+
+    travel_to_week_id(@week_id) do
+      Ahoy::Message.create!(mailer: "MenuMailer#weekly_menu_email", menu: @menu, user: users(:kyle), sent_at: Time.zone.now)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Deliverability \(SendGrid.*\): 18 delivered, 2 bounces, 1 block, 1 spam report/, text)
+  ensure
+    ENV.delete("SENDGRID_API_KEY")
+  end
+
+  test "to_text excludes fully resolved error fingerprints" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    ErrorEvent.create!(
+      fingerprint: "fp-resolved", source: "server", error_class: "ResolvedError",
+      message: "triaged by operator", environment: Rails.env,
+      occurred_at: week_start + 1.hour, resolved_at: Time.current
+    )
+    ErrorEvent.create!(
+      fingerprint: "fp-open", source: "server", error_class: "OpenError",
+      message: "still live", environment: Rails.env, occurred_at: week_start + 2.hours
+    )
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_match(/OpenError/, text)
+    assert_no_match(/ResolvedError/, text)
+    assert_match(/1 resolved event excluded/, text)
+  end
+
+  test "to_text keeps fingerprints that recur after being resolved" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    ErrorEvent.create!(
+      fingerprint: "fp-recur", source: "server", error_class: "RecurError",
+      message: "old occurrence", environment: Rails.env,
+      occurred_at: week_start + 1.hour, resolved_at: Time.current
+    )
+    ErrorEvent.create!(
+      fingerprint: "fp-recur", source: "server", error_class: "RecurError",
+      message: "new occurrence", environment: Rails.env, occurred_at: week_start + 5.hours
+    )
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_match(/RecurError/, text)
+    assert_match(/recurred after resolve/, text)
+  end
+
+  test "to_text notes when all error events are resolved" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    2.times do |i|
+      ErrorEvent.create!(
+        fingerprint: "fp-quiet", source: "server", error_class: "QuietError",
+        message: "handled", environment: Rails.env,
+        occurred_at: week_start + (i + 1).hours, resolved_at: Time.current
+      )
+    end
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_no_match(/QuietError/, text)
+    assert_match(/2 resolved events excluded/, text)
+  end
+
+  test "to_text reports zero failed jobs explicitly" do
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/0 failed jobs/, text)
+  end
+
+  test "to_text includes failed job details when jobs failed" do
+    travel_to_week_id(@week_id) do
+      job = SolidQueue::Job.create!(queue_name: "default", class_name: "SendWeeklyMenuJob", arguments: "{}")
+      SolidQueue::FailedExecution.create!(
+        job: job,
+        error: { exception_class: "RuntimeError", message: "boom went the bread", backtrace: [] }
+      )
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/1 failed job/, text)
+    assert_match(/SendWeeklyMenuJob/, text)
+    assert_match(/RuntimeError/, text)
+    assert_match(/boom went the bread/, text)
   end
 
   test "verbose feed still tags reminder emails with DUPLICATE when user/pickup_day collides" do

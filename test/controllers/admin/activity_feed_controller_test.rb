@@ -34,6 +34,40 @@ class Admin::ActivityFeedControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to '/admin/activity_feed?week_id=26w01'
   end
 
+  test "post reply creates an admin analysis reply" do
+    analysis = anomaly_analyses(:week1_analysis)
+
+    assert_difference -> { AnalysisReply.count }, 1 do
+      post '/admin/activity_feed/reply', params: { analysis_id: analysis.id, body: "Acknowledged — duplicate email finding is resolved." }
+    end
+
+    reply = AnalysisReply.last
+    assert_equal "admin", reply.source
+    assert_equal analysis, reply.anomaly_analysis
+    assert_equal users(:kyle).email, reply.author_email
+    assert_redirected_to "/admin/activity_feed?week_id=#{analysis.week_id}"
+  end
+
+  test "post reply with blank body does not create a reply" do
+    analysis = anomaly_analyses(:week1_analysis)
+
+    assert_no_difference -> { AnalysisReply.count } do
+      post '/admin/activity_feed/reply', params: { analysis_id: analysis.id, body: "   " }
+    end
+  end
+
+  test "analyses panel renders a quick reply form" do
+    analysis = anomaly_analyses(:week1_analysis)
+
+    get "/admin/activity_feed?week_id=#{analysis.week_id}"
+
+    assert_response :success
+    assert_select "form[action=?]", "/admin/activity_feed/reply" do
+      assert_select "textarea[name=body]"
+      assert_select "input[name=analysis_id][value=?]", analysis.id.to_s
+    end
+  end
+
   test "current week defaults to today and shows today marker" do
     travel_to_week_id("19w01") do
       get '/admin/activity_feed'

@@ -230,6 +230,11 @@ class ActivityFeed
         lines << errors
         lines << ""
       end
+      failed_jobs = failed_jobs_text
+      if failed_jobs
+        lines << failed_jobs
+        lines << ""
+      end
     end
 
     es = email_summary
@@ -249,6 +254,7 @@ class ActivityFeed
         parts << "#{s[:clicked]} clicked" if s[:clicked] > 0
         lines << "#{s[:label]}: #{parts.join(', ')}"
       end
+      lines << deliverability_text
       lines << ""
     end
 
@@ -426,9 +432,15 @@ class ActivityFeed
     lines.join("\n")
   end
 
+  # Operator-resolved events (resolved_at set via /admin/error_events) are
+  # excluded so triaged errors stop being re-reported week after week. A
+  # fingerprint resurfaces only if new, unresolved occurrences arrive.
   def error_events_text
-    groups = ErrorEvent
-      .where(occurred_at: @week_start..@week_end)
+    scope = ErrorEvent.where(occurred_at: @week_start..@week_end)
+    resolved_count = scope.where.not(resolved_at: nil).count
+    open_scope = scope.where(resolved_at: nil)
+
+    groups = open_scope
       .group(:fingerprint)
       .select(
         "fingerprint",
@@ -437,19 +449,25 @@ class ActivityFeed
         "MAX(occurred_at) AS last_seen",
         "MIN(occurred_at) AS first_seen",
         "MAX(source) AS source",
-        "MAX(error_class) AS error_class",
-        "BOOL_OR(resolved_at IS NOT NULL) AS any_resolved"
+        "MAX(error_class) AS error_class"
       )
       .order(Arel.sql("COUNT(*) DESC, MAX(occurred_at) DESC"))
       .limit(15)
       .to_a
-    return nil if groups.empty?
 
-    total = ErrorEvent.where(occurred_at: @week_start..@week_end).count
-    by_source = ErrorEvent.where(occurred_at: @week_start..@week_end).group(:source).count
+    excluded_note = "#{resolved_count} resolved event#{'s' unless resolved_count == 1} excluded"
+    if groups.empty?
+      return nil if resolved_count.zero?
+      return "== Application Errors ==\n  0 unresolved events (#{excluded_note} — operator marked these triaged)"
+    end
+
+    total = open_scope.count
+    by_source = open_scope.group(:source).count
     source_summary = %w[server browser job].filter_map { |s| "#{by_source[s] || 0} #{s}" }.join(" / ")
+    source_summary += "; #{excluded_note}" if resolved_count.positive?
 
     latest_events = ErrorEvent.where(id: groups.map(&:latest_id)).index_by(&:id)
+    recurred = ErrorEvent.where(fingerprint: groups.map(&:fingerprint)).where.not(resolved_at: nil).distinct.pluck(:fingerprint).to_set
 
     lines = ["== Application Errors (#{total} events: #{source_summary}) =="]
     groups.each do |g|
@@ -457,13 +475,54 @@ class ActivityFeed
       message = latest&.message.to_s.lines.first&.strip
       message = message[0, 160] + "…" if message && message.length > 160
       top_frame = latest&.backtrace.to_s.lines.find { |l| l.include?("/app/") }&.strip
-      status = g.any_resolved ? " [resolved]" : ""
+      status = recurred.include?(g.fingerprint) ? " [recurred after resolve]" : ""
       header = "  [#{g.source}] #{g.error_class} ×#{g.event_count} (last #{g.last_seen.strftime('%-m/%d %l:%M%P').strip})#{status}"
       lines << header
       lines << "    msg: #{message}" if message.present?
       lines << "    at:  #{top_frame}" if top_frame.present?
       lines << "    url: #{latest.http_method} #{latest.url}".rstrip if latest&.url.present?
       lines << "    id:  #{latest.id} (fingerprint #{g.fingerprint})" if latest
+    end
+    lines.join("\n")
+  end
+
+  # The one datum that settles deliverability questions: provider-side bounce
+  # and complaint counts. Memoized — to_text runs twice per analysis (summary
+  # + verbose) and shouldn't hit the API twice.
+  def deliverability_text
+    unless defined?(@sendgrid_stats)
+      @sendgrid_stats = SendgridStats.for_period(@week_start.to_date, (@week_end - 1.day).to_date)
+    end
+    stats = @sendgrid_stats
+
+    if stats.nil?
+      "Deliverability (SendGrid): data unavailable (API key missing or request failed)"
+    else
+      counts = [
+        "#{stats[:delivered]} delivered",
+        "#{stats[:bounces]} bounce#{'s' unless stats[:bounces] == 1}",
+        "#{stats[:blocks]} block#{'s' unless stats[:blocks] == 1}",
+        "#{stats[:spam_reports]} spam report#{'s' unless stats[:spam_reports] == 1}"
+      ]
+      "Deliverability (SendGrid, account-wide for this week): #{counts.join(', ')}"
+    end
+  end
+
+  # An explicit count (even "0 failed jobs") so the analysis never has to
+  # speculate about silent job failures it can't verify.
+  def failed_jobs_text
+    return nil unless defined?(SolidQueue::FailedExecution)
+
+    failures = SolidQueue::FailedExecution.includes(:job).where(created_at: @week_start..@week_end).order(:created_at).to_a
+    lines = ["== Failed Jobs (solid_queue_failed_executions) =="]
+    if failures.empty?
+      lines << "  0 failed jobs this week"
+    else
+      lines << "  #{failures.size} failed job#{'s' unless failures.size == 1} this week:"
+      failures.each do |failure|
+        detail = failure.error.present? ? [failure.exception_class, failure.message.to_s.lines.first&.strip].compact.join(": ") : "(no error details)"
+        lines << "  #{failure.created_at.strftime('%-m/%d %l:%M%P').strip} #{failure.job&.class_name}: #{detail}"
+      end
     end
     lines.join("\n")
   end
