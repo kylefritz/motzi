@@ -89,8 +89,12 @@ class Order < ApplicationRecord
   end
 
   def comments_html
-    if self.comments.present?
-      Menu::MARKDOWN.render(self.comments).html_safe
-    end
+    return if comments.blank?
+
+    # Comments are member-supplied free text shown in the admin panel, so the
+    # rendered markdown must be sanitized — Redcarpet's HTML renderer passes raw
+    # tags through, and sanitize also strips dangerous schemes (e.g. javascript:)
+    # from any links the parser generates.
+    ActionController::Base.helpers.sanitize(Menu::MARKDOWN.render(comments))
   end
 end

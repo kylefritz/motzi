@@ -72,12 +72,45 @@ class OrderTest < ActiveSupport::TestCase
     day1, day2 = o.menu.pickup_days
     assert_equal 1, o.items_for_pickup(day1).count
     assert_equal 0, o.items_for_pickup(day2).count
-    
+
     o.order_items.create!(item: items(:classic), quantity: 1, pickup_day: day2)
     o.order_items.create!(item: items(:classic), quantity: 1, pickup_day: day2)
     assert_equal 2, o.items_for_pickup(day2).count
 
     o.order_items.create!(item_id: Item::PAY_IT_FORWARD_ID, quantity: 1, pickup_day: day2)
     assert_equal 2, o.items_for_pickup(day2).count
+  end
+
+  test "comments_html renders markdown formatting" do
+    o = orders(:kyle_week1)
+    o.update!(comments: "**bold** and a [link](https://example.com)")
+    html = o.comments_html
+    assert_includes html, "<strong>bold</strong>"
+    assert_includes html, 'href="https://example.com"'
+  end
+
+  test "comments_html is nil when comments are blank" do
+    assert_nil orders(:adrian_week1).comments_html
+  end
+
+  # Order comments are member-supplied free text rendered into the admin panel
+  # (app/admin/orders.rb, app/admin/dashboard.rb). They must never carry active
+  # HTML into an admin session.
+  test "comments_html strips script tags" do
+    o = orders(:kyle_week1)
+    o.update!(comments: "hi <script>alert(document.cookie)</script>")
+    refute_includes o.comments_html, "<script>"
+  end
+
+  test "comments_html strips inline event handlers" do
+    o = orders(:kyle_week1)
+    o.update!(comments: "<img src=x onerror=alert(1)>")
+    refute_includes o.comments_html, "onerror"
+  end
+
+  test "comments_html strips javascript: links" do
+    o = orders(:kyle_week1)
+    o.update!(comments: "[click me](javascript:alert(document.cookie))")
+    refute_includes o.comments_html, "javascript:"
   end
 end
