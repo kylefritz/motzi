@@ -25,6 +25,12 @@ class ActiveSupport::TestCase
   setup do
     @original_github_token = ENV["GITHUB_TOKEN"]
     ENV["GITHUB_TOKEN"] = nil
+
+    # RailsSettings caches values (e.g. menu_id) in memory, surviving the
+    # transactional fixture rollback. Clearing only in teardown still let the
+    # first test in a worker read a polluted cache, so clear before each test
+    # too (#342).
+    Setting.clear_cache
   end
 
   teardown do
