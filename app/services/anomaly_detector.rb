@@ -24,9 +24,13 @@ class AnomalyDetector
     (input_tokens * pricing[:input] / 1_000_000) + (output_tokens * pricing[:output] / 1_000_000)
   end
 
-  def initialize(week_id, comparison_weeks: 4, &on_progress)
+  # analyses_before: timestamp cutoff for the prior-analyses context. Used by
+  # rake ai:eval so a historical week's prompt only sees analyses that existed
+  # at the time, never reports from its future.
+  def initialize(week_id, comparison_weeks: 4, analyses_before: nil, &on_progress)
     @week_id = week_id
     @comparison_weeks = comparison_weeks
+    @analyses_before = analyses_before
     @on_progress = on_progress || ->(_msg) {}
   end
 
@@ -150,7 +154,9 @@ class AnomalyDetector
   end
 
   def recent_analyses
-    AnomalyAnalysis.includes(:replies).order(created_at: :desc).limit(6).to_a.reverse
+    scope = AnomalyAnalysis.includes(:replies).order(created_at: :desc)
+    scope = scope.where(created_at: ...@analyses_before) if @analyses_before
+    scope.limit(6).to_a.reverse
   end
 
   def call_claude(user_message)

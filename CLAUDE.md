@@ -46,6 +46,21 @@ bunx playwright test --grep "havent_ordered"       # single email
 - `test/visual/email-check-prompt.txt` — Claude's visual QA prompt (edit to tune what it checks)
 - `test/visual/screenshots/` — output (gitignored)
 
+### Anomaly report eval
+
+`rake ai:eval` replays the nightly anomaly report agent against labeled historical weeks (real prod data via `bin/seed_local`) and grades each report on three axes: status accuracy (deterministic parse), required findings caught, and noise violations (false alarms). Findings are judged by Claude Haiku (`ANOMALY_JUDGE_MODEL` to override).
+
+```
+rake ai:eval                # all labeled weeks (~$2.50, ~5 min at EVAL_THREADS=3)
+rake "ai:eval[26w14]"       # one week
+rake ai:eval_report         # re-print last scorecard + failure details
+rake "ai:eval_dry[26w14]"   # show prompt without calling Claude
+```
+
+**Ground truth:** `test/anomaly_expectations.yml` — per week: `expected_status`, `must_flag` (real incidents the report must catch), `must_not_flag` (noise it must not raise as findings). Labels are derived from real history: stored nightly analyses, operator replies, error_events, rapid-duplicate email checks, and incident-fix commits. Update labels when a new real incident happens or a new noise pattern is identified.
+
+**When to run:** after changing `app/prompts/anomaly_detection.txt`, `ActivityFeed#to_text`, `AnomalyDetector`, or the anomaly model setting. Requires `ANTHROPIC_API_KEY` and a seeded local DB.
+
 ## AWS / S3
 
 - **Bucket**: `motzi` in `us-east-1` — used by Active Storage for item images
