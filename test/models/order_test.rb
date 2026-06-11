@@ -31,6 +31,17 @@ class OrderTest < ActiveSupport::TestCase
     end
   end
 
+  test "retail_price and credits use order-time snapshots, not current item pricing" do
+    order = orders(:kyle_week2)
+    assert_equal 11, order.retail_price
+    assert_equal 2, order.credits
+
+    items(:donuts).update!(price: 99, credits: 42)
+
+    assert_equal 11, order.reload.retail_price
+    assert_equal 2, order.reload.credits
+  end
+
   test "item_list" do
     assert_equal "Thu: Donuts; Rye Five Ways", orders(:kyle_week2).item_list
     assert_equal 11, orders(:kyle_week2).retail_price

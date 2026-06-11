@@ -1,9 +1,9 @@
 /* TODO: handle credit expiration? */
 with used_credits as (
-    select user_id, sum(quantity * items.credits) as value
+    /* order_items.credits is the order-time snapshot — never join live items pricing here (#170) */
+    select user_id, sum(quantity * order_items.credits) as value
     from order_items
     join orders on orders.id = order_items.order_id
-    join items on items.id = order_items.item_id
     where orders.stripe_charge_id is null /* subscription orders not marketplace orders */
     group by user_id
 ),

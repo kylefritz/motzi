@@ -22,6 +22,14 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 20 - item.credits, users(:kyle).credits
   end
 
+  test "credit balance is unaffected by later item credit changes" do
+    assert_equal 20, users(:kyle).credits
+
+    items(:pumpkin).update!(credits: 99)
+
+    assert_equal 20, users(:kyle).credits
+  end
+
   test "receive_weekly_menu" do
     refute users(:maya).receive_weekly_menu?
     assert users(:kyle).receive_weekly_menu?

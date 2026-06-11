@@ -1,7 +1,9 @@
 class Item < ApplicationRecord
   has_many :menu_items
   has_many :menus, through: :menu_items
-  has_many :order_items
+  # restrict: order_items are the financial record of what was sold — archive
+  # items instead of deleting (admin's delete_item already checks deletable?)
+  has_many :order_items, dependent: :restrict_with_error
   has_paper_trail
   has_one_attached :image
   default_scope { order("LOWER(name)") }
