@@ -22,6 +22,27 @@ ActiveAdmin.register_page "Activity Feed" do
     end
   end
 
+  # Quick operator reply on an analysis — stored like an email reply and fed
+  # into the next analysis prompt, closing the feedback loop without email.
+  page_action :reply, method: :post do
+    analysis = AnomalyAnalysis.find(params[:analysis_id])
+    body = params[:body].to_s.strip
+
+    if body.blank?
+      redirect_to admin_activity_feed_path(week_id: analysis.week_id), alert: "Reply can't be blank."
+    else
+      analysis.replies.create!(
+        user: current_admin_user,
+        author_email: current_admin_user.email,
+        author_name: current_admin_user.name,
+        body: body,
+        source: :admin
+      )
+      redirect_to admin_activity_feed_path(week_id: analysis.week_id),
+        notice: "Reply saved — it will be included in the next analysis prompt."
+    end
+  end
+
   # Analyze with Claude (enqueues background job)
   page_action :analyze, method: :post do
     week_id = params[:week_id] || Time.zone.now.week_id
@@ -560,6 +581,17 @@ ActiveAdmin.register_page "Activity Feed" do
                     end
                   end
                 end
+              end
+            end
+
+            div class: "analysis-reply-form", style: "margin-top: 12px" do
+              form action: admin_activity_feed_reply_path, method: :post do
+                input type: "hidden", name: "authenticity_token", value: form_authenticity_token
+                input type: "hidden", name: "analysis_id", value: analysis.id
+                textarea name: "body", rows: 2,
+                  placeholder: "Acknowledge or correct a finding — your reply is fed into the next analysis",
+                  style: "width: 100%; box-sizing: border-box; font-size: 13px; padding: 6px 8px"
+                button "Reply", type: "submit", style: "margin-top: 4px"
               end
             end
 
