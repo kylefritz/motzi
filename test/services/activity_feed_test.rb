@@ -574,6 +574,25 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert_not_includes ActivityFeed.new(@week_id).to_text, "== Uptime"
   end
 
+  test "to_text omits the uptime section for weeks before monitoring existed" do
+    week_start = Time.zone.from_week_id(@week_id)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 100, up: true, checked_at: week_start + 3.weeks)
+
+    assert_not_includes ActivityFeed.new(@week_id).to_text, "== Uptime"
+  end
+
+  test "to_text flags a monitored target that recorded zero checks all week" do
+    week_start = Time.zone.from_week_id(@week_id)
+    # admin was monitored before this week, then went completely silent
+    UptimeCheck.create!(target: "admin", url: "https://probe.test/admin", status: 302, latency_ms: 80, up: true, checked_at: week_start - 3.days)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 100, up: true, checked_at: week_start + 1.day)
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/admin: NO CHECKS RECORDED — \d+ expected slots all missed/, text)
+    assert_includes text, "menu: 100.0% up (1/1 checks)"
+  end
+
   test "uptime checks roll up into one daily grid event per day" do
     week_start = Time.zone.from_week_id(@week_id)
     UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 100, up: true, checked_at: week_start + 1.day + 9.hours)

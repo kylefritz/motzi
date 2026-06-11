@@ -542,16 +542,29 @@ class ActivityFeed
   # missed slots.
   def uptime_text
     summary = UptimeCheck.summary_for_period(@week_start, @week_end)
-    return nil if summary.empty?
-
     window_end = [@week_end, Time.current].min
-    lines = ["== Uptime (scheduled probes) =="]
-    summary.sort.each do |target, stats|
-      first_check = UptimeCheck.where(target: target).minimum(:checked_at)
-      window_start = [@week_start, first_check].compact.max
-      expected = UptimeSchedule.expected_checks(target, window_start..window_end)
-      missed = [expected - stats[:checks], 0].max
 
+    # Iterate every target that has EVER recorded a check before this window
+    # ends — not just targets with checks this week. A monitored target with
+    # zero checks all week is the loudest possible signal (the worker or the
+    # whole app was down) and must not silently drop out of the report.
+    first_checks = UptimeCheck.group(:target).minimum(:checked_at)
+      .select { |_target, first| first <= window_end }
+    return nil if first_checks.empty?
+
+    lines = ["== Uptime (scheduled probes) =="]
+    first_checks.sort.each do |target, first_check|
+      stats = summary[target]
+      window_start = [@week_start, first_check].max
+      expected = UptimeSchedule.expected_checks(target, window_start..window_end)
+
+      if stats.nil?
+        next if expected.zero? # nothing was due (e.g. week not started yet)
+        lines << "  #{target}: NO CHECKS RECORDED — #{expected} expected slots all missed (worker or whole app may have been down)"
+        next
+      end
+
+      missed = [expected - stats[:checks], 0].max
       parts = ["#{stats[:pct_up]}% up (#{stats[:up_count]}/#{stats[:checks]} checks)"]
       parts << "#{missed} missed slot#{'s' unless missed == 1}" if missed.positive?
       parts << "avg #{stats[:avg_latency_ms]}ms, max #{stats[:max_latency_ms]}ms" if stats[:avg_latency_ms]
@@ -561,6 +574,8 @@ class ActivityFeed
         lines << "    FAIL #{failure.checked_at.strftime('%-m/%d %l:%M%P').strip}: GET #{failure.url} → #{failure.failure_detail}"
       end
     end
+    return nil if lines.size == 1
+
     lines.join("\n")
   end
 
