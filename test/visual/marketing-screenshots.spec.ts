@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import Anthropic from "@anthropic-ai/sdk";
 import { readFileSync } from "fs";
 import { join } from "path";
@@ -18,7 +19,7 @@ const pages = [
 
 async function reviewMarketingPage(
   screenshot: Buffer,
-  page: any,
+  page: Page,
 ): Promise<string> {
   // If the full-page screenshot exceeds the 8000px API limit, take a
   // viewport-height crop instead (checks the top portion of the page).
@@ -74,13 +75,14 @@ for (const { name, path } of pages) {
     const result = await reviewMarketingPage(screenshot, page);
     console.log(`[${name} @ ${width}px]\n${result}`);
 
-    // Extract STATUS line and assert the page is not broken
+    // Extract STATUS line; a garbled/empty response yields "unknown" and fails.
     const statusMatch = result.match(/STATUS:\s*(ok|warning|broken)/i);
     const status = statusMatch ? statusMatch[1].toLowerCase() : "unknown";
 
+    // Warnings are intentionally non-blocking — they're human-reviewed via console output.
     expect(
-      status,
-      `Visual check failed for ${name} (${testInfo.project.name})\n${result}`,
-    ).not.toBe("broken");
+      ["ok", "warning"],
+      `Visual review of ${name} returned status "${status}"\n${result}`,
+    ).toContain(status);
   });
 }
