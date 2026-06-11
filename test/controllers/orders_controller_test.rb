@@ -129,7 +129,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     victim = users(:ljf)
     before_deadline do
       refute_ordered do
-        post '/orders.json', params: order_attrs(nil).merge(email: victim.email), as: :json
+        post "/orders.json", params: order_attrs(nil).merge(email: victim.email), as: :json
       end
     end
     assert_response :unprocessable_content
@@ -139,7 +139,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     victim = users(:ljf)
     before_deadline do
       refute_ordered do
-        post '/orders.json', params: order_attrs(nil).merge(email: victim.email, price: 0), as: :json
+        post "/orders.json", params: order_attrs(nil).merge(email: victim.email, price: 0), as: :json
       end
     end
     assert_response :unprocessable_content
@@ -148,7 +148,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   test "new guest can still place a marketplace order by email" do
     before_deadline do
       assert_ordered do
-        post '/orders.json', params: order_attrs(nil).merge(
+        post "/orders.json", params: order_attrs(nil).merge(
           email: "newguest@example.com",
           first_name: "New", last_name: "Guest", phone: "555-0000", price: 0
         ), as: :json
