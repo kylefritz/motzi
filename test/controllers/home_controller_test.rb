@@ -23,6 +23,11 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_select "body.marketing"
   end
 
+  test "signing in lands members on the menu, not the marketing home" do
+    post user_session_path, params: { user: { email: users(:kyle).email, password: "robots" } }
+    assert_redirected_to "/menu"
+  end
+
   test "signout still works" do
     sign_in users(:kyle)
     get "/signout"
