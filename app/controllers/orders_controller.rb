@@ -16,7 +16,7 @@ class OrdersController < ApplicationController
       # place a credit-spending order in any member's name just by knowing their
       # email — draining their credits. A returning member must sign in.
       unless paid_marketplace_order?
-        raise OrderError.new("An account with that email already exists — please sign in to place your order")
+        raise OrderError.new("Email passed as param — Please use a link from a menu email or sign in to place your order")
       end
       return existing_user
     end
