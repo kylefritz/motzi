@@ -4,9 +4,11 @@ ActiveAdmin.register ContactMessage do
   actions :index, :show, :destroy
 
   config.filters = false
+  config.sort_order = 'created_at_desc'
 
   index do
-    column :created_at do |msg|
+    selectable_column
+    column :created_at, sortable: :created_at do |msg|
       msg.created_at.strftime("%-m/%-d %l:%M%P")
     end
     column :name
@@ -20,9 +22,12 @@ ActiveAdmin.register ContactMessage do
 
   show do
     attributes_table do
+      row :id
       row :created_at
       row :name
-      row :email
+      row :email do |msg|
+        link_to(msg.email, "mailto:#{msg.email}") if msg.email.present?
+      end
       row :phone
       row :message
       row :ip
