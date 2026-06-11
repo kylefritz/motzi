@@ -39,7 +39,9 @@ class OrdersController < ApplicationController
       # Advisory lock prevents race condition where two simultaneous requests
       # both pass the duplicate check before either commits.
       lock_key = Zlib.crc32("order:#{current_user&.id}:#{@menu.id}")
-      ActiveRecord::Base.connection.execute("SELECT pg_advisory_xact_lock(#{lock_key})")
+      ActiveRecord::Base.connection.execute(
+        ActiveRecord::Base.sanitize_sql_array(["SELECT pg_advisory_xact_lock(?)", lock_key])
+      )
 
       if current_user&.order_for_menu(@menu).present?
         logger.warn "user=#{current_user.email} already placed an order for menu #{@menu.id}. returning current order"

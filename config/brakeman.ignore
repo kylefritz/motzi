@@ -7,8 +7,12 @@
     {
       "fingerprint": "19ec190c996eca43da675de0907235ecb61b31a18d1b162444c5e6033a901ea4",
       "note": "Open3.capture2 with array form — no shell injection possible"
+    },
+    {
+      "fingerprint": "21ab0fe00fdd5899ffc405cff75aadb91b805ee996a614f7e27b08a287e9062d",
+      "note": "Rails 7.2 EOL 2026-08-09 — upgrade tracked separately; don't block CI on the countdown"
     }
   ],
-  "updated": "2026-03-31",
+  "updated": "2026-06-11",
   "brakeman_version": "8.0.4"
 }
