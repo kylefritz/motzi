@@ -9,6 +9,9 @@ class ActivityFeed
     "SendHaventOrderedReminderJob" => "Haven't-ordered reminder",
     "SendWeeklyMenuJob" => "Weekly menu email",
     "AnalyzeAnomaliesJob" => "Anomaly analysis",
+    "TrimAnalyticsJob" => "Analytics trim",
+    "CaptureDynoMetricsJob" => "Dyno metrics capture",
+    "CaptureDbBackupJob" => "DB backup",
     "SolidQueue::RecurringJob" => "Cleanup (finished jobs)"
   }.freeze
 
@@ -727,18 +730,28 @@ class ActivityFeed
     events = []
     visits = Ahoy::Visit.where(started_at: @week_start..@week_end)
 
-    daily = visits.group("started_at::date")
+    # started_at is stored UTC; bucket by the app time zone's date, otherwise
+    # evening visits (8pm+ ET) spill into a tiny next-day UTC bucket.
+    local_date = Arel.sql(
+      ActiveRecord::Base.sanitize_sql(
+        ["(started_at AT TIME ZONE 'UTC' AT TIME ZONE ?)::date", Time.zone.tzinfo.identifier]
+      )
+    )
+    daily = visits.group(local_date)
     daily_visits = daily.count
     daily_unique = daily.distinct.count(:visitor_token)
 
     daily_visits.sort.each do |date, count|
       unique = daily_unique[date] || 0
+      partial = date == Time.zone.today
+      description = "#{unique} unique visitors (#{count} visits)"
+      description += " — partial day, still counting" if partial
       events << Event.new(
-        timestamp: date.to_time.in_time_zone,
+        timestamp: date.in_time_zone,
         category: "traffic",
         action: "daily_visits",
-        description: "#{unique} unique visitors (#{count} visits)",
-        details: { source: "ahoy_visits", date: date.to_s, visits: count, unique: unique }
+        description: description,
+        details: { source: "ahoy_visits", date: date.to_s, visits: count, unique: unique, partial: partial }
       )
     end
     events

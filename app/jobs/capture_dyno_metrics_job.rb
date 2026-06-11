@@ -76,6 +76,9 @@ class CaptureDynoMetricsJob < ApplicationJob
   # R14 format:
   #   heroku[web.1]: Error R14 (Memory quota exceeded)
   def parse_log_lines(log_content)
+    # Logplex bodies arrive as binary and occasionally contain invalid UTF-8;
+    # unscrubbed bytes blow up the DynoMetric insert (PG::CharacterNotInRepertoire).
+    log_content = log_content.dup.force_encoding(Encoding::UTF_8).scrub("?")
     samples = Hash.new { |h, k| h[k] = {memory_totals: [], memory_rss: [], memory_swaps: [], memory_quotas: [], r14_count: 0, errors: []} }
 
     log_content.each_line do |line|
