@@ -29,10 +29,6 @@ class OrdersController < ApplicationController
       return render_validation_failed("this menu is not available for ordering")
     end
 
-    if current_user&.order_for_menu(target_menu).present?
-      logger.warn "user=#{current_user.email} already placed an order for menu #{target_menu.id}. returning current order"
-      return render_current_order
-    end
     @menu = target_menu
 
     if @menu.ordering_closed? && current_admin_user.blank?
@@ -40,6 +36,15 @@ class OrdersController < ApplicationController
     end
 
     @user, @order = Order.transaction do
+      # Advisory lock prevents race condition where two simultaneous requests
+      # both pass the duplicate check before either commits.
+      lock_key = Zlib.crc32("order:#{current_user&.id}:#{@menu.id}")
+      ActiveRecord::Base.connection.execute("SELECT pg_advisory_xact_lock(#{lock_key})")
+
+      if current_user&.order_for_menu(@menu).present?
+        logger.warn "user=#{current_user.email} already placed an order for menu #{@menu.id}. returning current order"
+        return render_current_order
+      end
       user = current_user_or_create_user
       order_params = params.permit(:comments).merge(menu: @menu, user: user)
 

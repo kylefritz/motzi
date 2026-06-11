@@ -1,6 +1,27 @@
 require "test_helper"
 
 class AnomalyDetectorIntegrationTest < ActiveSupport::TestCase
+  include WebMock::API
+
+  test "build_user_message includes uptime probe result when configured" do
+    ENV["UPTIME_PROBE_URL"] = "https://probe.test/"
+    stub_request(:get, "https://probe.test/").to_return(status: 200, body: "ok")
+
+    message = AnomalyDetector.new("19w01").build_user_message
+
+    assert_match(/Uptime Probe/, message)
+    assert_match(/responded 200 in \d+ms/, message)
+  ensure
+    ENV.delete("UPTIME_PROBE_URL")
+    WebMock.reset!
+  end
+
+  test "build_user_message omits uptime probe section when not configured" do
+    message = AnomalyDetector.new("19w01").build_user_message
+
+    assert_no_match(/Uptime Probe/, message)
+  end
+
   test "detects anomaly when orders are missing" do
     menu = menus(:week1)
     travel_to_week_id(menu.week_id) do
@@ -34,5 +55,24 @@ class AnomalyDetectorIntegrationTest < ActiveSupport::TestCase
 
     assert_includes prompt, "Whether recent code changes could plausibly explain the behavior you see this week"
     assert_includes prompt, "Treat code changes as supporting evidence, not proof"
+  end
+
+  test "build_user_message includes replies alongside prior analyses" do
+    prior_week_id = "19w01"  # matches week1_analysis fixture
+    prior = anomaly_analyses(:week1_analysis)
+    prior.replies.create!(
+      author_email: "kyle@example.com",
+      author_name: "Kyle Fritz",
+      body: "R14 is expected — please stop flagging it.",
+      source: :email
+    )
+
+    detector = AnomalyDetector.new(prior_week_id)
+    message = detector.build_user_message
+
+    assert_includes message, "R14 is expected",
+      "expected reply body to appear in the prompt"
+    assert_includes message, "Operator replies",
+      "expected an Operator replies heading"
   end
 end

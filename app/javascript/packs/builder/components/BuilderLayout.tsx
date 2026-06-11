@@ -14,13 +14,16 @@ type BuilderLayoutProps = {
   menu: AdminMenuBuilderResponse;
 };
 
-export default function BuilderLayout({ allItems, menu }: BuilderLayoutProps) {
+export default function BuilderLayout({
+  allItems,
+  menu,
+}: BuilderLayoutProps) {
   const api = useApi();
   const [tab, setTab] = React.useState(0);
   const [pickupDayTab, setPickupDayTab] = React.useState(0);
   const [isClearHover, setIsClearHover] = React.useState(false);
   const { pickupDays, leadtimeHours, recentMenus } = menu;
-  const hasItems = menu.items.length > 0;
+  const hasMenuItems = menu.menuItems.length > 0;
   const pickupDayFilters = [
     { label: "All days", pickupAt: null },
     ...pickupDays.map((pickupDay) => ({
@@ -30,7 +33,9 @@ export default function BuilderLayout({ allItems, menu }: BuilderLayoutProps) {
   ];
   const activePickupAt = pickupDayFilters[pickupDayTab]?.pickupAt || null;
 
-  const filterItemsByPickupDay = (items: AdminMenuBuilderResponse["items"]) => {
+  const filterMenuItemsByPickupDay = (
+    items: AdminMenuBuilderResponse["menuItems"]
+  ) => {
     if (!activePickupAt) {
       return items;
     }
@@ -40,7 +45,7 @@ export default function BuilderLayout({ allItems, menu }: BuilderLayoutProps) {
   };
 
   function handleClearAllItems() {
-    if (!hasItems) {
+    if (!hasMenuItems) {
       return;
     }
     const confirmed = window.confirm(
@@ -49,7 +54,7 @@ export default function BuilderLayout({ allItems, menu }: BuilderLayoutProps) {
     if (!confirmed) {
       return;
     }
-    api.item.clearAll();
+    api.menuItem.clearAll();
   }
   return (
     <Root>
@@ -64,8 +69,8 @@ export default function BuilderLayout({ allItems, menu }: BuilderLayoutProps) {
           size="sm"
           variant="danger"
           onClick={handleClearAllItems}
-          disabled={!hasItems}
-          title={hasItems ? "Remove all items" : "No items to clear"}
+          disabled={!hasMenuItems}
+          title={hasMenuItems ? "Remove all items" : "No items to clear"}
           onMouseEnter={() => setIsClearHover(true)}
           onMouseLeave={() => setIsClearHover(false)}
         >
@@ -125,14 +130,14 @@ export default function BuilderLayout({ allItems, menu }: BuilderLayoutProps) {
       </FilterTabs>
       <TabPanel value={tab} index={0}>
         <MenuItemGrid
-          {...{ menuItems: filterItemsByPickupDay(menu.items), pickupDays }}
+          {...{ menuItems: filterMenuItemsByPickupDay(menu.menuItems), pickupDays }}
         />
       </TabPanel>
       <TabPanel value={tab} index={1}>
         <MenuItemGrid
           {...{
-            menuItems: filterItemsByPickupDay(
-              menu.items.filter((i) => i.subscriber)
+            menuItems: filterMenuItemsByPickupDay(
+              menu.menuItems.filter((i) => i.subscriber)
             ),
             pickupDays,
           }}
@@ -141,8 +146,8 @@ export default function BuilderLayout({ allItems, menu }: BuilderLayoutProps) {
       <TabPanel value={tab} index={2}>
         <MenuItemGrid
           {...{
-            menuItems: filterItemsByPickupDay(
-              menu.items.filter((i) => i.marketplace)
+            menuItems: filterMenuItemsByPickupDay(
+              menu.menuItems.filter((i) => i.marketplace)
             ),
             pickupDays,
           }}
@@ -151,7 +156,7 @@ export default function BuilderLayout({ allItems, menu }: BuilderLayoutProps) {
 
       <AddItemForm
         items={allItems}
-        not={menu.items.map(({ name }) => name)}
+        not={menu.menuItems.map(({ name }) => name)}
         pickupDays={menu.pickupDays}
       />
     </Root>
@@ -230,8 +235,7 @@ const TabButton = styled.button<{ active: boolean }>`
   min-width: 90px;
   padding: 6px 12px;
   border: 0;
-  border-bottom: 3px solid
-    ${({ active }) => (active ? "#3f3a80" : "transparent")};
+  border-bottom: 3px solid ${({ active }) => (active ? "#3f3a80" : "transparent")};
   color: ${({ active }) => (active ? "#222" : "#6b6b6b")};
   background: transparent;
   cursor: pointer;

@@ -9,6 +9,9 @@ class ActivityFeed
     "SendHaventOrderedReminderJob" => "Haven't-ordered reminder",
     "SendWeeklyMenuJob" => "Weekly menu email",
     "AnalyzeAnomaliesJob" => "Anomaly analysis",
+    "TrimAnalyticsJob" => "Analytics trim",
+    "CaptureDynoMetricsJob" => "Dyno metrics capture",
+    "CaptureDbBackupJob" => "DB backup",
     "SolidQueue::RecurringJob" => "Cleanup (finished jobs)"
   }.freeze
 
@@ -162,7 +165,7 @@ class ActivityFeed
     end
 
     havent_ordered_trend = mailer_open_rate_trend("ReminderMailer#havent_ordered_email", lookback: lookback)
-    if havent_ordered_trend[:current_rate] && havent_ordered_trend[:average_rate] && havent_ordered_trend[:current_rate] < (havent_ordered_trend[:average_rate] - 5)
+    if !havent_ordered_trend[:maturing] && havent_ordered_trend[:current_rate] && havent_ordered_trend[:average_rate] && havent_ordered_trend[:current_rate] < (havent_ordered_trend[:average_rate] - 5)
       items << {
         tone: :warning,
         title: "Haven't-ordered reminder engagement is slipping",
@@ -222,6 +225,16 @@ class ActivityFeed
         lines << memory
         lines << ""
       end
+      errors = error_events_text
+      if errors
+        lines << errors
+        lines << ""
+      end
+      failed_jobs = failed_jobs_text
+      if failed_jobs
+        lines << failed_jobs
+        lines << ""
+      end
     end
 
     es = email_summary
@@ -241,6 +254,7 @@ class ActivityFeed
         parts << "#{s[:clicked]} clicked" if s[:clicked] > 0
         lines << "#{s[:label]}: #{parts.join(', ')}"
       end
+      lines << deliverability_text
       lines << ""
     end
 
@@ -396,9 +410,14 @@ class ActivityFeed
       (previous.sum.to_f / previous.size).round
     end
 
+    # A rate that includes a send from the last 24h hasn't settled yet —
+    # don't compare it against matured weekly averages.
+    last_sent = @menus.filter_map { |m| m.messages.where(mailer: mailer).maximum(:sent_at) }.max
+
     {
       current_rate: current&.dig(:open_rate),
-      average_rate: average
+      average_rate: average,
+      maturing: last_sent.present? && last_sent > 24.hours.ago
     }
   end
 
@@ -409,6 +428,101 @@ class ActivityFeed
     lines = [ "== Code Changes ==" ]
     commits.reverse_each do |commit|
       lines << "  #{commit.committed_at.strftime('%-m/%-d')} #{commit.short_sha} #{commit.summary}" if commit.current_week
+    end
+    lines.join("\n")
+  end
+
+  # Operator-resolved events (resolved_at set via /admin/error_events) are
+  # excluded so triaged errors stop being re-reported week after week. A
+  # fingerprint resurfaces only if new, unresolved occurrences arrive.
+  def error_events_text
+    scope = ErrorEvent.where(occurred_at: @week_start..@week_end)
+    resolved_count = scope.where.not(resolved_at: nil).count
+    open_scope = scope.where(resolved_at: nil)
+
+    groups = open_scope
+      .group(:fingerprint)
+      .select(
+        "fingerprint",
+        "COUNT(*) AS event_count",
+        "MAX(id) AS latest_id",
+        "MAX(occurred_at) AS last_seen",
+        "MIN(occurred_at) AS first_seen",
+        "MAX(source) AS source",
+        "MAX(error_class) AS error_class"
+      )
+      .order(Arel.sql("COUNT(*) DESC, MAX(occurred_at) DESC"))
+      .limit(15)
+      .to_a
+
+    excluded_note = "#{resolved_count} resolved event#{'s' unless resolved_count == 1} excluded"
+    if groups.empty?
+      return nil if resolved_count.zero?
+      return "== Application Errors ==\n  0 unresolved events (#{excluded_note} — operator marked these triaged)"
+    end
+
+    total = open_scope.count
+    by_source = open_scope.group(:source).count
+    source_summary = %w[server browser job].filter_map { |s| "#{by_source[s] || 0} #{s}" }.join(" / ")
+    source_summary += "; #{excluded_note}" if resolved_count.positive?
+
+    latest_events = ErrorEvent.where(id: groups.map(&:latest_id)).index_by(&:id)
+    recurred = ErrorEvent.where(fingerprint: groups.map(&:fingerprint)).where.not(resolved_at: nil).distinct.pluck(:fingerprint).to_set
+
+    lines = [ "== Application Errors (#{total} events: #{source_summary}) ==" ]
+    groups.each do |g|
+      latest = latest_events[g.latest_id]
+      message = latest&.message.to_s.lines.first&.strip
+      message = message[0, 160] + "…" if message && message.length > 160
+      top_frame = latest&.backtrace.to_s.lines.find { |l| l.include?("/app/") }&.strip
+      status = recurred.include?(g.fingerprint) ? " [recurred after resolve]" : ""
+      header = "  [#{g.source}] #{g.error_class} ×#{g.event_count} (last #{g.last_seen.strftime('%-m/%d %l:%M%P').strip})#{status}"
+      lines << header
+      lines << "    msg: #{message}" if message.present?
+      lines << "    at:  #{top_frame}" if top_frame.present?
+      lines << "    url: #{latest.http_method} #{latest.url}".rstrip if latest&.url.present?
+      lines << "    id:  #{latest.id} (fingerprint #{g.fingerprint})" if latest
+    end
+    lines.join("\n")
+  end
+
+  # The one datum that settles deliverability questions: provider-side bounce
+  # and complaint counts. Memoized — to_text runs twice per analysis (summary
+  # + verbose) and shouldn't hit the API twice.
+  def deliverability_text
+    unless defined?(@sendgrid_stats)
+      @sendgrid_stats = SendgridStats.for_period(@week_start.to_date, (@week_end - 1.day).to_date)
+    end
+    stats = @sendgrid_stats
+
+    if stats.nil?
+      "Deliverability (SendGrid): data unavailable (API key missing or request failed)"
+    else
+      counts = [
+        "#{stats[:delivered]} delivered",
+        "#{stats[:bounces]} bounce#{'s' unless stats[:bounces] == 1}",
+        "#{stats[:blocks]} block#{'s' unless stats[:blocks] == 1}",
+        "#{stats[:spam_reports]} spam report#{'s' unless stats[:spam_reports] == 1}"
+      ]
+      "Deliverability (SendGrid, account-wide for this week): #{counts.join(', ')}"
+    end
+  end
+
+  # An explicit count (even "0 failed jobs") so the analysis never has to
+  # speculate about silent job failures it can't verify.
+  def failed_jobs_text
+    return nil unless defined?(SolidQueue::FailedExecution)
+
+    failures = SolidQueue::FailedExecution.includes(:job).where(created_at: @week_start..@week_end).order(:created_at).to_a
+    lines = [ "== Failed Jobs (solid_queue_failed_executions) ==" ]
+    if failures.empty?
+      lines << "  0 failed jobs this week"
+    else
+      lines << "  #{failures.size} failed job#{'s' unless failures.size == 1} this week:"
+      failures.each do |failure|
+        detail = failure.error.present? ? [ failure.exception_class, failure.message.to_s.lines.first&.strip ].compact.join(": ") : "(no error details)"
+        lines << "  #{failure.created_at.strftime('%-m/%d %l:%M%P').strip} #{failure.job&.class_name}: #{detail}"
+      end
     end
     lines.join("\n")
   end
@@ -680,21 +794,59 @@ class ActivityFeed
     events = []
     visits = Ahoy::Visit.where(started_at: @week_start..@week_end)
 
-    daily = visits.group("started_at::date")
+    # started_at is stored UTC; bucket by the app time zone's date, otherwise
+    # evening visits (8pm+ ET) spill into a tiny next-day UTC bucket.
+    local_date = Arel.sql(
+      ActiveRecord::Base.sanitize_sql(
+        [ "(started_at AT TIME ZONE 'UTC' AT TIME ZONE ?)::date", Time.zone.tzinfo.identifier ]
+      )
+    )
+    daily = visits.group(local_date)
     daily_visits = daily.count
     daily_unique = daily.distinct.count(:visitor_token)
 
     daily_visits.sort.each do |date, count|
       unique = daily_unique[date] || 0
+      partial = date == Time.zone.today
+      description = "#{unique} unique visitors (#{count} visits)"
+      description += " — partial day, still counting" if partial
       events << Event.new(
-        timestamp: date.to_time.in_time_zone,
+        timestamp: date.in_time_zone,
         category: "traffic",
         action: "daily_visits",
-        description: "#{unique} unique visitors (#{count} visits)",
-        details: { source: "ahoy_visits", date: date.to_s, visits: count, unique: unique }
+        description: description,
+        details: { source: "ahoy_visits", date: date.to_s, visits: count, unique: unique, partial: partial }
       )
     end
     events
+  end
+
+  # Two ConfirmationMailer sends to the same user within this window are suspicious —
+  # a user can't realistically re-edit their order that fast. Longer gaps are edits.
+  CONFIRMATION_DUP_WINDOW = 120 # seconds
+
+  def rapid_confirmation_dup_ids(messages)
+    messages.group_by(&:user_id).each_with_object(Set.new) do |(_, user_msgs), set|
+      user_msgs.sort_by { |m| m.sent_at || m.created_at }.each_cons(2) do |a, b|
+        gap = ((b.sent_at || b.created_at) - (a.sent_at || a.created_at)).to_f.abs
+        if gap < CONFIRMATION_DUP_WINDOW
+          set << a.id
+          set << b.id
+        end
+      end
+    end
+  end
+
+  def partition_for_verbose(messages, by_user_and_day, rapid_dup_ids)
+    if rapid_dup_ids
+      dup_msgs = messages.select { |m| rapid_dup_ids.include?(m.id) }
+      sample = (messages - dup_msgs).first(10)
+      [ dup_msgs, sample ]
+    else
+      dup_msgs = by_user_and_day.select { |_, msgs| msgs.size > 1 }.values.flatten
+      sample = by_user_and_day.select { |_, msgs| msgs.size == 1 }.values.flatten.first(10)
+      [ dup_msgs, sample ]
+    end
   end
 
   def email_events(verbose: false)
@@ -706,18 +858,38 @@ class ActivityFeed
         label = MAILER_LABELS[mailer] || mailer
 
         if verbose
-          # Show duplicates (users who got the same email more than once) and a sample of normal sends.
-          # This gives Claude the signal to detect double-sends without listing every individual email.
-          by_user = messages.group_by { |m| m.user_id }
-          duplicates = by_user.select { |_, msgs| msgs.size > 1 }.values.flatten
-          sample = by_user.select { |_, msgs| msgs.size == 1 }.values.flatten.first(10)
+          # Group messages for duplicate detection. Strategy differs by mailer:
+          # - Reminder/menu mailers: group by [user_id, pickup_day_id] so legitimate
+          #   multi-day reminders (Thu + Sat) are not flagged as duplicates.
+          # - ConfirmationMailer#*: order edits intentionally fire a fresh confirmation,
+          #   so multiple sends across the week are expected, not a bug. Only treat as
+          #   a real duplicate if two sends land within CONFIRMATION_DUP_WINDOW of
+          #   each other — that window is too tight for a user to have re-edited.
+          is_confirmation = mailer.start_with?("ConfirmationMailer")
+          rapid_dup_ids = is_confirmation ? rapid_confirmation_dup_ids(messages) : nil
+
+          if is_confirmation
+            by_user_and_day = nil
+          else
+            by_user_and_day = messages.group_by { |m| [ m.user_id, m.pickup_day_id ] }
+          end
+
+          duplicates, sample = partition_for_verbose(messages, by_user_and_day, rapid_dup_ids)
 
           (duplicates + sample).sort_by { |m| m.sent_at || m.created_at }.each do |msg|
             user_name = msg.user&.name || "Unknown"
             parts = [ "sent #{msg.sent_at&.strftime('%-m/%d %l:%M%P')&.strip}" ]
             parts << "opened #{msg.opened_at.strftime('%-m/%d %l:%M%P').strip}" if msg.opened_at
             parts << "clicked #{msg.clicked_at.strftime('%-m/%d %l:%M%P').strip}" if msg.clicked_at
-            dup_note = by_user[msg.user_id].size > 1 ? " [DUPLICATE — #{by_user[msg.user_id].size}x]" : ""
+
+            dup_note =
+              if is_confirmation
+                rapid_dup_ids.include?(msg.id) ? " [RAPID DUPLICATE — sent twice within #{CONFIRMATION_DUP_WINDOW / 60} min]" : ""
+              else
+                dup_key = [ msg.user_id, msg.pickup_day_id ]
+                by_user_and_day[dup_key].size > 1 ? " [DUPLICATE — #{by_user_and_day[dup_key].size}x]" : ""
+              end
+
             events << Event.new(
               timestamp: msg.sent_at || msg.created_at,
               category: "email",
@@ -725,6 +897,19 @@ class ActivityFeed
               description: "#{label} to #{user_name} (#{parts.join(', ')})#{dup_note}",
               details: { source: "ahoy_message", id: msg.id, mailer: mailer }
             )
+          end
+
+          if is_confirmation
+            edited_users = messages.group_by(&:user_id).select { |_, msgs| msgs.size > 1 }
+            if edited_users.any?
+              events << Event.new(
+                timestamp: messages.last.sent_at || messages.last.created_at,
+                category: "email",
+                action: "email_summary",
+                description: "#{label}: #{edited_users.size} member(s) received >1 confirmation (order edits fire fresh confirmations — this is expected)",
+                details: { source: "ahoy_messages", mailer: mailer, edited_user_count: edited_users.size }
+              )
+            end
           end
 
           omitted = messages.size - duplicates.size - sample.size
@@ -744,12 +929,22 @@ class ActivityFeed
             open_rate = sent_count > 0 ? (opened_count.to_f / sent_count * 100).round : 0
             timestamp = daily_msgs.filter_map(&:sent_at).min || daily_msgs.map(&:created_at).min
 
+            # Opens keep arriving for ~24h after a send; a snapshot taken hours
+            # after the batch reads roughly half the eventual rate.
+            last_sent = daily_msgs.filter_map(&:sent_at).max || daily_msgs.map(&:created_at).max
+            maturing = last_sent > 24.hours.ago
+            description = "#{opened_count}/#{sent_count} #{label.downcase} opened (#{open_rate}%)"
+            if maturing
+              hours_ago = ((Time.current - last_sent) / 1.hour).round
+              description += " — sent #{hours_ago}h ago, open rate still maturing"
+            end
+
             events << Event.new(
               timestamp: timestamp,
               category: "email",
               action: "email_summary",
-              description: "#{opened_count}/#{sent_count} #{label.downcase} opened (#{open_rate}%)",
-              details: { source: "ahoy_messages", mailer: mailer, sent: sent_count, opened: opened_count, open_rate: open_rate, date: date.to_s }
+              description: description,
+              details: { source: "ahoy_messages", mailer: mailer, sent: sent_count, opened: opened_count, open_rate: open_rate, date: date.to_s, maturing: maturing }
             )
           end
         end

@@ -24,12 +24,12 @@ mock.module("axios", () => ({
   },
 }));
 
-const setUser = mock(() => {});
-const configureScope = mock((cb) => cb({ setUser }));
-const captureException = mock(() => {});
-mock.module("@sentry/browser", () => ({
-  configureScope,
-  captureException,
+// Three levels up — test/javascript/buy → repo root. The previous 2-up path
+// resolved to a nonexistent file, so this mock silently never intercepted.
+mock.module("../../../app/javascript/lib/errorReporter", () => ({
+  reportException: () => {},
+  reportError: () => {},
+  installGlobalErrorReporter: () => {},
 }));
 
 test("loads user and bundles from menu", async () => {

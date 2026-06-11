@@ -22,6 +22,27 @@ ActiveAdmin.register_page "Activity Feed" do
     end
   end
 
+  # Quick operator reply on an analysis — stored like an email reply and fed
+  # into the next analysis prompt, closing the feedback loop without email.
+  page_action :reply, method: :post do
+    analysis = AnomalyAnalysis.find(params[:analysis_id])
+    body = params[:body].to_s.strip
+
+    if body.blank?
+      redirect_to admin_activity_feed_path(week_id: analysis.week_id), alert: "Reply can't be blank."
+    else
+      analysis.replies.create!(
+        user: current_admin_user,
+        author_email: current_admin_user.email,
+        author_name: current_admin_user.name,
+        body: body,
+        source: :admin
+      )
+      redirect_to admin_activity_feed_path(week_id: analysis.week_id),
+        notice: "Reply saved — it will be included in the next analysis prompt."
+    end
+  end
+
   # Analyze with Claude (enqueues background job)
   page_action :analyze, method: :post do
     week_id = params[:week_id] || Time.zone.now.week_id
@@ -35,7 +56,7 @@ ActiveAdmin.register_page "Activity Feed" do
     feed = ActivityFeed.new(week_id)
     events = feed.summary
     email_summary = feed.email_summary
-    analyses = AnomalyAnalysis.for_week(week_id).order(created_at: :desc)
+    analyses = AnomalyAnalysis.for_week(week_id).includes(:replies).order(created_at: :desc)
     headline_metrics = feed.headline_metrics
     commits = feed.git_commits
     comparison = feed.comparison_snapshot
@@ -544,6 +565,34 @@ ActiveAdmin.register_page "Activity Feed" do
 
             div class: "analysis-body" do
               text_node markdown.render(analysis.result).html_safe
+            end
+
+            if analysis.replies.any?
+              div class: "analysis-replies", style: "margin-top: 16px; padding-top: 12px; border-top: 1px solid #eee" do
+                h4 "Replies (#{analysis.replies.size})", style: "margin: 0 0 8px; font-size: 13px; color: #666"
+                analysis.replies.each do |reply|
+                  div class: "analysis-reply", style: "margin-bottom: 10px; padding: 8px 12px; background: #f9f9fb; border-left: 3px solid #352C63; font-size: 13px" do
+                    div style: "font-weight: 500; color: #352C63; margin-bottom: 4px" do
+                      who = reply.author_name.presence || reply.author_email
+                      text_node "#{who} · #{reply.created_at.strftime('%-m/%-d %l:%M%P').strip} · via #{reply.source}"
+                    end
+                    div style: "white-space: pre-wrap; color: #2E2927" do
+                      text_node reply.body
+                    end
+                  end
+                end
+              end
+            end
+
+            div class: "analysis-reply-form", style: "margin-top: 12px" do
+              form action: admin_activity_feed_reply_path, method: :post do
+                input type: "hidden", name: "authenticity_token", value: form_authenticity_token
+                input type: "hidden", name: "analysis_id", value: analysis.id
+                textarea name: "body", rows: 2,
+                  placeholder: "Acknowledge or correct a finding — your reply is fed into the next analysis",
+                  style: "width: 100%; box-sizing: border-box; font-size: 13px; padding: 6px 8px"
+                button "Reply", type: "submit", style: "margin-top: 4px"
+              end
             end
 
             div class: "analysis-footer" do

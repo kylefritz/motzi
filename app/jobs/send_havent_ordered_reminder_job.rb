@@ -53,10 +53,11 @@ class SendHaventOrderedReminderJob < ApplicationJob
     return if dupes.empty?
 
     Rails.logger.warn "[SendHaventOrderedReminderJob] DUPLICATE SENDS DETECTED: #{dupes.size} users received #{mailer} more than once for menu #{menu.id} (job_id=#{job_id})"
-    Sentry.capture_message(
-      "Duplicate reminder emails detected",
-      level: :warning,
-      extra: { mailer: mailer, menu_id: menu.id, duplicate_count: dupes.size, job_id: job_id }
-    ) if defined?(Sentry)
+    Rails.error.report(
+      RuntimeError.new("Duplicate reminder emails detected"),
+      handled: true,
+      severity: :warning,
+      context: { mailer: mailer, menu_id: menu.id, duplicate_count: dupes.size, job_id: job_id }
+    )
   end
 end

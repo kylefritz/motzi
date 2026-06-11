@@ -1,9 +1,15 @@
 require "test_helper"
 
 class ActivityFeedTest < ActiveSupport::TestCase
+  include WebMock::API
+
   setup do
     @week_id = "19w01"
     @menu = menus(:week1)
+  end
+
+  teardown do
+    WebMock.reset!
   end
 
   test "summary returns an array of Events" do
@@ -193,6 +199,70 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert_match(/\d+ unique visitors \(2 visits\)/, day2.description)
   end
 
+  test "same-day email open rates are marked still maturing" do
+    week_start = Time.zone.from_week_id(@week_id)
+    travel_to week_start + 4.days do
+      # mature batch: sent 3 days ago, opens have settled
+      2.times do
+        Ahoy::Message.create!(mailer: "ReminderMailer#havent_ordered_email", menu: @menu,
+          user: users(:kyle), sent_at: week_start + 1.day, opened_at: week_start + 1.day + 2.hours)
+      end
+      # fresh batch: sent 2 hours ago, opens still trickling in
+      2.times do
+        Ahoy::Message.create!(mailer: "ReminderMailer#havent_ordered_email", menu: @menu,
+          user: users(:kyle), sent_at: 2.hours.ago)
+      end
+
+      feed = ActivityFeed.new(@week_id)
+      evts = feed.summary.select do |e|
+        e.action == "email_summary" && e.details[:mailer] == "ReminderMailer#havent_ordered_email"
+      end
+
+      fresh = evts.find { |e| e.details[:date] == Time.zone.today.to_s }
+      mature = evts.find { |e| e.details[:date] == (week_start + 1.day).to_date.to_s }
+
+      assert fresh, "Expected a summary event for today's batch"
+      assert fresh.details[:maturing], "Fresh batch should be flagged maturing"
+      assert_match(/still maturing/, fresh.description)
+      refute mature.details[:maturing], "Settled batch should not be flagged maturing"
+      refute_match(/still maturing/, mature.description)
+    end
+  end
+
+  test "visit events bucket by app time zone, not UTC" do
+    week_start = Time.zone.from_week_id(@week_id)
+    # 9pm ET is already the next day in UTC — must still count toward the ET date
+    day = (week_start + 1.day).to_date
+    late_evening = Time.zone.local(day.year, day.month, day.day, 21, 0)
+    Ahoy::Visit.create!(started_at: late_evening, visitor_token: "night_owl", visit_token: "visit_night")
+
+    feed = ActivityFeed.new(@week_id)
+    evts = feed.summary.select { |e| e.action == "daily_visits" }
+
+    assert_equal 1, evts.size
+    assert_equal day.to_s, evts.first.details[:date]
+  end
+
+  test "in-progress day is marked partial so it isn't read as a full day" do
+    week_start = Time.zone.from_week_id(@week_id)
+    travel_to week_start + 2.days + 21.hours + 21.minutes do # 9:21pm ET mid-week
+      Ahoy::Visit.create!(started_at: 1.hour.ago, visitor_token: "v_today", visit_token: "t_today")
+      Ahoy::Visit.create!(started_at: 2.days.ago, visitor_token: "v_past", visit_token: "t_past")
+
+      feed = ActivityFeed.new(@week_id)
+      evts = feed.summary.select { |e| e.action == "daily_visits" }
+
+      today_evt = evts.find { |e| e.details[:date] == Time.zone.today.to_s }
+      full_evt = evts.find { |e| e.details[:date] == 2.days.ago.to_date.to_s }
+
+      assert today_evt, "Expected a visit event for today"
+      assert today_evt.details[:partial], "Today's bucket should be flagged partial"
+      assert_match(/partial/, today_evt.description)
+      refute full_evt.details[:partial], "Past days should not be flagged partial"
+      refute_match(/partial/, full_evt.description)
+    end
+  end
+
   test "activity events include metadata in verbose mode" do
     travel_to_week_id(@week_id) do
       ActivityEvent.log(
@@ -275,8 +345,9 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
   test "to_text includes dyno memory section when metrics exist" do
     week_id = Time.zone.now.week_id
-    DynoMetric.create!(recorded_at: 1.hour.ago, dyno: "web.1", memory_total: 340, memory_rss: 300, memory_swap: 10, memory_quota: 512, r14_count: 0)
-    DynoMetric.create!(recorded_at: 2.hours.ago, dyno: "web.1", memory_total: 504, memory_rss: 480, memory_swap: 20, memory_quota: 512, r14_count: 2)
+    week_start = Time.zone.from_week_id(week_id)
+    DynoMetric.create!(recorded_at: week_start + 1.hour, dyno: "web.1", memory_total: 340, memory_rss: 300, memory_swap: 10, memory_quota: 512, r14_count: 0)
+    DynoMetric.create!(recorded_at: week_start + 2.hours, dyno: "web.1", memory_total: 504, memory_rss: 480, memory_swap: 20, memory_quota: 512, r14_count: 2)
 
     feed = ActivityFeed.new(week_id)
     text = feed.to_text
@@ -292,5 +363,195 @@ class ActivityFeedTest < ActiveSupport::TestCase
     text = feed.to_text
 
     assert_no_match(/Dyno Memory/, text)
+  end
+
+  test "to_text includes Application Errors section when error events exist" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    3.times do |i|
+      ErrorEvent.create!(
+        fingerprint: "fp-recurring",
+        source: "server",
+        error_class: "RuntimeError",
+        message: "kaboom #{i}",
+        backtrace: "/app/services/foo.rb:42:in `bar'\n/gems/rails/foo.rb:1",
+        url: "/menu",
+        http_method: "GET",
+        environment: Rails.env,
+        occurred_at: week_start + (i + 1).hours
+      )
+    end
+    ErrorEvent.create!(
+      fingerprint: "fp-browser",
+      source: "browser",
+      error_class: "TypeError",
+      message: "Cannot read 'foo' of undefined",
+      environment: Rails.env,
+      occurred_at: week_start + 4.hours
+    )
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_match(/Application Errors \(4 events:/, text)
+    assert_match(/RuntimeError/, text)
+    assert_match(/×3/, text)
+    assert_match(/TypeError/, text)
+    assert_match(%r{/app/services/foo\.rb}, text)
+  end
+
+  test "to_text omits Application Errors section when no error events" do
+    feed = ActivityFeed.new(@week_id)
+    text = feed.to_text
+
+    assert_no_match(/Application Errors \(\d+ events/, text)
+  end
+
+  test "verbose feed does not tag order confirmations hours apart as DUPLICATE" do
+    # Simulates an order edit: initial send, then a second confirmation 2 days later.
+    travel_to_week_id(@week_id) do
+      first_send = Time.zone.now + 2.days
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: first_send)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: first_send + 2.days)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text(verbose: true)
+    assert_no_match(/DUPLICATE/, text, "order confirmations across an edit must not be tagged as duplicates")
+    assert_match(/received >1 confirmation/, text, "should surface the edit pattern as expected behavior")
+  end
+
+  test "verbose feed tags order confirmations sent within 2 minutes as RAPID DUPLICATE" do
+    travel_to_week_id(@week_id) do
+      first_send = Time.zone.now + 2.days
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: first_send)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: first_send + 30.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text(verbose: true)
+    assert_match(/RAPID DUPLICATE/, text, "sub-minute-gap confirmations are the real bug signal")
+  end
+
+  test "to_text notes deliverability data is unavailable without SendGrid credentials" do
+    travel_to_week_id(@week_id) do
+      Ahoy::Message.create!(mailer: "MenuMailer#weekly_menu_email", menu: @menu, user: users(:kyle), sent_at: Time.zone.now)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Deliverability \(SendGrid\): data unavailable/, text)
+  end
+
+  test "to_text includes SendGrid bounce and spam counts when available" do
+    ENV["SENDGRID_API_KEY"] = "SG.test-key"
+    body = [
+      { date: "2026-01-01", stats: [ { metrics: { requests: 20, delivered: 18, bounces: 2, blocks: 1, spam_reports: 1, invalid_emails: 0 } } ] }
+    ].to_json
+    stub_request(:get, "https://api.sendgrid.com/v3/stats")
+      .with(query: hash_including({}))
+      .to_return(status: 200, body: body, headers: { "Content-Type" => "application/json" })
+
+    travel_to_week_id(@week_id) do
+      Ahoy::Message.create!(mailer: "MenuMailer#weekly_menu_email", menu: @menu, user: users(:kyle), sent_at: Time.zone.now)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Deliverability \(SendGrid.*\): 18 delivered, 2 bounces, 1 block, 1 spam report/, text)
+  ensure
+    ENV.delete("SENDGRID_API_KEY")
+  end
+
+  test "to_text excludes fully resolved error fingerprints" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    ErrorEvent.create!(
+      fingerprint: "fp-resolved", source: "server", error_class: "ResolvedError",
+      message: "triaged by operator", environment: Rails.env,
+      occurred_at: week_start + 1.hour, resolved_at: Time.current
+    )
+    ErrorEvent.create!(
+      fingerprint: "fp-open", source: "server", error_class: "OpenError",
+      message: "still live", environment: Rails.env, occurred_at: week_start + 2.hours
+    )
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_match(/OpenError/, text)
+    assert_no_match(/ResolvedError/, text)
+    assert_match(/1 resolved event excluded/, text)
+  end
+
+  test "to_text keeps fingerprints that recur after being resolved" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    ErrorEvent.create!(
+      fingerprint: "fp-recur", source: "server", error_class: "RecurError",
+      message: "old occurrence", environment: Rails.env,
+      occurred_at: week_start + 1.hour, resolved_at: Time.current
+    )
+    ErrorEvent.create!(
+      fingerprint: "fp-recur", source: "server", error_class: "RecurError",
+      message: "new occurrence", environment: Rails.env, occurred_at: week_start + 5.hours
+    )
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_match(/RecurError/, text)
+    assert_match(/recurred after resolve/, text)
+  end
+
+  test "to_text notes when all error events are resolved" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    2.times do |i|
+      ErrorEvent.create!(
+        fingerprint: "fp-quiet", source: "server", error_class: "QuietError",
+        message: "handled", environment: Rails.env,
+        occurred_at: week_start + (i + 1).hours, resolved_at: Time.current
+      )
+    end
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_no_match(/QuietError/, text)
+    assert_match(/2 resolved events excluded/, text)
+  end
+
+  test "to_text reports zero failed jobs explicitly" do
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/0 failed jobs/, text)
+  end
+
+  test "to_text includes failed job details when jobs failed" do
+    travel_to_week_id(@week_id) do
+      job = SolidQueue::Job.create!(queue_name: "default", class_name: "SendWeeklyMenuJob", arguments: "{}")
+      SolidQueue::FailedExecution.create!(
+        job: job,
+        error: { exception_class: "RuntimeError", message: "boom went the bread", backtrace: [] }
+      )
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/1 failed job/, text)
+    assert_match(/SendWeeklyMenuJob/, text)
+    assert_match(/RuntimeError/, text)
+    assert_match(/boom went the bread/, text)
+  end
+
+  test "verbose feed still tags reminder emails with DUPLICATE when user/pickup_day collides" do
+    travel_to_week_id(@week_id) do
+      pd = @menu.pickup_days.first
+      sent = Time.zone.now + 2.days
+      Ahoy::Message.create!(mailer: "ReminderMailer#day_of_email", menu: @menu, user: users(:kyle), pickup_day: pd, sent_at: sent)
+      Ahoy::Message.create!(mailer: "ReminderMailer#day_of_email", menu: @menu, user: users(:kyle), pickup_day: pd, sent_at: sent + 1.minute)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text(verbose: true)
+    assert_match(/DUPLICATE — 2x/, text, "reminder duplicates must still be flagged")
   end
 end

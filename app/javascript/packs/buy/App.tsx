@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import * as Sentry from "@sentry/browser";
 import _ from "lodash";
 import queryString from "query-string";
 
@@ -9,7 +8,7 @@ import Payment from "./Payment";
 import PayWhatYouCan from "./PayWhatYouCan";
 import { applyTip } from "./Tip";
 import { getSettingsContext } from "../menu/Contexts";
-import type { User as SentryUser } from "@sentry/browser";
+import { reportException } from "../../lib/errorReporter";
 import type {
   CreditItemResponse,
   CreditBundle,
@@ -65,11 +64,6 @@ export default function Buy({ user: passedUser }: BuyProps) {
             setUser(user);
             setBundles(nextBundles);
             setEnablePayWhatYouCan(nextEnablePayWhatYouCan);
-            const sentryUser: SentryUser = {
-              id: String(user.id),
-              email: user.email,
-            };
-            Sentry.configureScope((scope) => scope.setUser(sentryUser));
           } else {
             setError("We can't load your user account");
           }
@@ -77,7 +71,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
       )
       .catch((error) => {
         console.error("cant load user from menu page", error);
-        Sentry.captureException(error);
+        reportException(error, { kind: "buy_load_user" });
         setError("We can't load your user account");
       });
   }, []);
@@ -130,7 +124,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
           alert: (message?: string) => void;
         };
         alertWindow.alert(`Couldn't buy credits: ${message || error}`);
-        Sentry.captureException(error);
+        reportException(error, { kind: "buy_credits" });
       })
       .then(() => setSubmitting(false));
   };

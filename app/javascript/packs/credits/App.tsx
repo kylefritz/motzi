@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
-import * as Sentry from "@sentry/browser";
 import _ from "lodash";
+import { reportException } from "../../lib/errorReporter";
 import type { AdminCreditItemRequest } from "../../types/api";
 
 export default function App() {
@@ -32,7 +32,7 @@ export default function App() {
       })
       .catch((error) => {
         console.error("couldn't create credit", error);
-        Sentry.captureException(error);
+        reportException(error, { kind: "admin_credit" });
         alert("Couldn't create credit?!");
       });
   };

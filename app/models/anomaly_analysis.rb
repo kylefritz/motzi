@@ -1,5 +1,6 @@
 class AnomalyAnalysis < ApplicationRecord
   belongs_to :user, optional: true
+  has_many :replies, -> { order(:created_at) }, class_name: "AnalysisReply", dependent: :destroy
 
   validates :week_id, :result, :trigger, presence: true
 

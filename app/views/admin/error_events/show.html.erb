@@ -1,0 +1,101 @@
+<% content_for :title, "Error event #{@event.id}" %>
+
+<div class="container my-4">
+  <p><%= link_to "← All errors", admin_error_events_path %></p>
+
+  <div class="d-flex justify-content-between align-items-start">
+    <h1><%= @event.error_class %></h1>
+    <div>
+      <% if @event.resolved? %>
+        <span class="badge badge-success mr-2">Resolved <%= @event.resolved_at&.strftime("%Y-%m-%d %H:%M") %></span>
+        <%= button_to "Reopen group", unresolve_admin_error_event_path(@event), method: :post, class: "btn btn-sm btn-outline-secondary" %>
+      <% else %>
+        <%= button_to "Resolve group", resolve_admin_error_event_path(@event), method: :post, class: "btn btn-sm btn-success" %>
+      <% end %>
+    </div>
+  </div>
+
+  <p class="lead"><%= @event.message %></p>
+
+  <dl class="row">
+    <dt class="col-sm-2">Source</dt><dd class="col-sm-10"><%= @event.source %></dd>
+    <% if @event.url.present? %>
+      <dt class="col-sm-2">URL</dt><dd class="col-sm-10"><%= [@event.http_method, @event.url].compact.join(" ") %></dd>
+    <% end %>
+    <% if @event.status_code %>
+      <dt class="col-sm-2">Status</dt><dd class="col-sm-10"><%= @event.status_code %></dd>
+    <% end %>
+    <dt class="col-sm-2">User</dt>
+    <dd class="col-sm-10">
+      <% if @event.user %>
+        <%= @event.user.email %> (id: <%= @event.user.id %>)
+      <% else %>
+        anonymous
+      <% end %>
+    </dd>
+    <dt class="col-sm-2">Occurred</dt><dd class="col-sm-10"><%= @event.occurred_at&.iso8601 %></dd>
+    <dt class="col-sm-2">Environment</dt><dd class="col-sm-10"><%= @event.environment %><%= " @ #{@event.release[0,12]}" if @event.release.present? %></dd>
+    <% if @event.request_id.present? %>
+      <dt class="col-sm-2">Request ID</dt><dd class="col-sm-10"><%= @event.request_id %></dd>
+    <% end %>
+    <dt class="col-sm-2">Fingerprint</dt><dd class="col-sm-10"><code><%= @event.fingerprint %></code></dd>
+  </dl>
+
+  <h3>Stack trace</h3>
+  <pre style="max-height: 30em; overflow: auto; font-size: 12px;"><%= @event.backtrace %></pre>
+
+  <h3>Request</h3>
+  <pre style="max-height: 20em; overflow: auto; font-size: 12px;"><%= JSON.pretty_generate(@event.request_data || {}) %></pre>
+
+  <h3>Context</h3>
+  <pre style="max-height: 20em; overflow: auto; font-size: 12px;"><%= JSON.pretty_generate(@event.context || {}) %></pre>
+
+  <h3>LLM-ready prompt</h3>
+  <p>
+    <button id="copy-prompt-btn" class="btn btn-primary" type="button" data-target="error-prompt">Copy prompt to clipboard</button>
+    <%= link_to "Open as .txt", admin_error_event_path(@event, format: :txt), class: "btn btn-outline-secondary" %>
+    <%= link_to "Open as .json", admin_error_event_path(@event, format: :json), class: "btn btn-outline-secondary" %>
+  </p>
+  <textarea id="error-prompt" rows="14" class="form-control" readonly><%= @prompt %></textarea>
+
+  <script>
+    (function() {
+      var btn = document.getElementById("copy-prompt-btn");
+      var ta = document.getElementById("error-prompt");
+      if (!btn || !ta) return;
+      btn.addEventListener("click", function() {
+        ta.select();
+        try {
+          navigator.clipboard.writeText(ta.value).then(function() {
+            btn.textContent = "Copied!";
+            setTimeout(function() { btn.textContent = "Copy prompt to clipboard"; }, 1500);
+          });
+        } catch (e) {
+          document.execCommand("copy");
+        }
+      });
+    })();
+  </script>
+
+  <h3 class="mt-4">Recent siblings (same fingerprint)</h3>
+  <% if @siblings.any? %>
+    <table class="table table-sm">
+      <thead>
+        <tr><th>When</th><th>User</th><th>URL</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% @siblings.each do |sib| %>
+          <tr>
+            <td><%= sib.occurred_at&.strftime("%Y-%m-%d %H:%M") %></td>
+            <td><%= sib.user&.email || "anonymous" %></td>
+            <td><%= sib.url %></td>
+            <td><%= sib.status_code %></td>
+            <td><%= link_to "View", admin_error_event_path(sib) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="text-muted">No siblings yet.</p>
+  <% end %>
+</div>

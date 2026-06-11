@@ -46,7 +46,7 @@ export default function MenuItemCard({
         <RightButton
           aria-label="delete"
           title="remove from menu"
-          onClick={() => api.item.remove(itemId)}
+          onClick={() => api.menuItem.remove(itemId)}
         >
           ×
         </RightButton>

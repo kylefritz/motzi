@@ -7,6 +7,7 @@ import Cart, { useCart, orderCredits } from "./Cart";
 import Title from "./Title";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
+import SkipNote from "./SkipNote";
 import FeedbackForm from "./FeedbackForm";
 import Subscription from "./Subscription";
 import { getDeadlineContext } from "./Contexts";
@@ -49,6 +50,7 @@ export default function Menu({
   const [comments, setComments] = useState<string | null>(
     _.get(order, "comments", null)
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCreateOrder = () => {
     if (_.isEmpty(cart)) {
@@ -56,11 +58,12 @@ export default function Menu({
       return;
     }
 
+    setIsSubmitting(true);
     onCreateOrder({
       comments,
       cart,
       uid: user.hashid,
-    });
+    }).finally(() => setIsSubmitting(false));
   };
 
   // if editing an order, "give back" credits from the order
@@ -108,6 +111,8 @@ export default function Menu({
       <h5>Menu</h5>
       <Items items={subscriberItems} onAddToCart={addToCart} />
 
+      {!isHoliday && <SkipNote />}
+
       {payItForward && (
         <PayItForward
           {...payItForward}
@@ -139,6 +144,7 @@ export default function Menu({
               menuClosed,
               insufficientCredits,
               isEditing: !!order,
+              isSubmitting,
             }}
           />
         </div>
@@ -148,8 +154,11 @@ export default function Menu({
   );
 }
 
-function buttonText({ isCurrent, menuClosed, insufficientCredits, isEditing }) {
+function buttonText({ isCurrent, menuClosed, insufficientCredits, isEditing, isSubmitting }) {
   const no = (text, title) => ({ disabled: true, title, text });
+  if (isSubmitting) {
+    return no("Submitting…", "Your order is being submitted");
+  }
   if (!isCurrent) {
     return no(
       "Old menu",

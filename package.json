@@ -5,7 +5,6 @@
     "@rails/actioncable": "^8.1.200",
     "@rails/activestorage": "^7.1.600",
     "@rails/ujs": "^7.1.600",
-    "@sentry/browser": "^5.7.1",
     "@stripe/react-stripe-js": "^2.9.0",
     "@stripe/stripe-js": "^5.5.0",
     "accounting": "^0.4.1",

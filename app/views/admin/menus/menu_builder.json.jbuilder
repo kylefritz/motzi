@@ -14,7 +14,7 @@ json.pickup_days @menu.pickup_days do |pickup_day|
   json.debug pickup_day.day_abbr
 end
 
-json.items @menu.sorted_menu_items.map do |menu_item|
+json.menu_items @menu.sorted_menu_items.map do |menu_item|
   item = menu_item.item
 
   json.menu_item_id menu_item.id

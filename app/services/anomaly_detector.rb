@@ -68,6 +68,19 @@ class AnomalyDetector
 
   def build_user_message
     parts = []
+
+    probe = UptimeProbe.check
+    if probe
+      timestamp = probe[:checked_at].strftime("%-l:%M%P")
+      parts << "## Uptime Probe"
+      parts << if probe[:status]
+        "GET #{probe[:url]} responded #{probe[:status]} in #{probe[:latency_ms]}ms at #{timestamp} — the site was reachable when this report ran."
+      else
+        "GET #{probe[:url]} FAILED at #{timestamp}: #{probe[:error]}"
+      end
+      parts << ""
+    end
+
     @on_progress.call("Building feed for #{@week_id} (verbose)…")
     current_feed = ActivityFeed.new(@week_id)
     current_events = current_feed.verbose_events
@@ -100,6 +113,15 @@ class AnomalyDetector
         parts << ""
         parts << "### #{a.week_id} — #{a.created_at.strftime('%-m/%-d/%Y')} (#{a.trigger})"
         parts << a.result
+
+        if a.replies.any?
+          parts << ""
+          parts << "**Operator replies:**"
+          a.replies.each do |r|
+            who = r.author_name.presence || r.author_email
+            parts << "- #{who} (#{r.created_at.strftime('%-m/%-d')}): #{r.body}"
+          end
+        end
       end
     end
 
@@ -128,7 +150,7 @@ class AnomalyDetector
   end
 
   def recent_analyses
-    AnomalyAnalysis.order(created_at: :desc).limit(6).to_a.reverse
+    AnomalyAnalysis.includes(:replies).order(created_at: :desc).limit(6).to_a.reverse
   end
 
   def call_claude(user_message)
