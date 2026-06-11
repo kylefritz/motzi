@@ -19,8 +19,8 @@ namespace :marketing do
       { url: "https://static.wixstatic.com/media/0e6926_d691f726677c4cc494d88c9d2537c1b5~mv2.jpg" },  # owners photo (NM_20200702_11_41_38-2)
       { url: "https://static.wixstatic.com/media/0e6926_ececf75ee6654d0ba81ad8c1f15f45f1~mv2.jpg" },  # bread photo (NM_20200702_12_48_55)
       # about
-      { url: "https://static.wixstatic.com/media/nsplsh_685133575a6e5933795a30~mv2_d_5906_3937_s_4_2.jpg",  # grain-field hero (5906x3937 original; renders ~2400px wide)
-        fetch: "https://static.wixstatic.com/media/nsplsh_685133575a6e5933795a30~mv2_d_5906_3937_s_4_2.jpg/v1/fill/w_2400,h_1600,al_c,q_85/hero.jpg" },
+      { url: "https://static.wixstatic.com/media/nsplsh_685133575a6e5933795a30~mv2_d_5906_3937_s_4_2.jpg",  # grain-field hero (5906x3937 original; 1920px is plenty)
+        fetch: "https://static.wixstatic.com/media/nsplsh_685133575a6e5933795a30~mv2_d_5906_3937_s_4_2.jpg/v1/fill/w_1920,h_1280,al_c,q_75/hero.jpg" },
       { url: "https://static.wixstatic.com/media/0e6926_01f6d2dd66064697bac0356b585c9d7c~mv2.jpg" },  # milling (NM_20200723_14_12_12)
       { url: "https://static.wixstatic.com/media/0e6926_1311a5b3a98046e89ac6c75f1fdbf9fc~mv2.jpg" },  # Heinz Thomet / harvesting oats
       { url: "https://static.wixstatic.com/media/0e6926_1de8dfb61580466085fe1a216c5d656a~mv2.jpg" },  # shaping (NM_20200702_12_58_37)
