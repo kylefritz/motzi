@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class TrimAnalyticsJobTest < ActiveJob::TestCase
   test "deletes events and visits older than 90 days" do

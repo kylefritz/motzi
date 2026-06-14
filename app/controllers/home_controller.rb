@@ -2,7 +2,7 @@ class HomeController < ApplicationController
   skip_before_action :authenticate_user!
 
   def show
-    redirect_to '/menu'
+    redirect_to "/menu"
   end
 
   def signout

@@ -6,8 +6,8 @@ class Order < ApplicationRecord
   has_paper_trail
   visitable :ahoy_visit
   scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> ''",) }
-  scope :marketplace, -> { where("stripe_charge_amount is not NULL")}
-  scope :subscriber, -> { where("stripe_charge_amount is NULL")}
+  scope :marketplace, -> { where("stripe_charge_amount is not NULL") }
+  scope :subscriber, -> { where("stripe_charge_amount is NULL") }
 
   def self.for_current_menu
     self.for_menu_id(Menu.current.id)
@@ -24,15 +24,15 @@ class Order < ApplicationRecord
   end
 
   def retail_price
-    order_items.map {|oi| oi.item.price * oi.quantity}.sum
+    order_items.map { |oi| oi.item.price * oi.quantity }.sum
   end
 
   def credits
-    order_items.map {|oi| oi.item.credits * oi.quantity}.sum
+    order_items.map { |oi| oi.item.credits * oi.quantity }.sum
   end
 
   def items_for_pickup(pickup_day)
-    order_items.filter {|oi| oi.pickup_day == pickup_day && !oi.pay_it_forward? }
+    order_items.filter { |oi| oi.pickup_day == pickup_day && !oi.pay_it_forward? }
   end
 
   def item_list
@@ -40,12 +40,11 @@ class Order < ApplicationRecord
       return "No items"
     end
     StringIO.new.tap do |s|
-
       prior_day_had_items = false
 
-      pay_it_forwards = order_items.filter {|oi| oi.pay_it_forward? }
+      pay_it_forwards = order_items.filter { |oi| oi.pay_it_forward? }
       pickup_days = PickupDay.where(id: order_items.map(&:pickup_day_id).uniq).sort_by(&:pickup_at)
-      
+
       pickup_days.each do |pickup_day|
         day_items = items_for_pickup(pickup_day)
         next if day_items.empty?
@@ -69,7 +68,6 @@ class Order < ApplicationRecord
 
           s << "#{name}#{is_last ? "" : "; "}"
         end
-
       end
       unless pay_it_forwards.empty?
         num = pay_it_forwards.map(&:quantity).sum

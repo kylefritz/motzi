@@ -27,10 +27,10 @@ pay_it_forward, pickupable_items = order_items.partition { |oi| oi.item.pay_it_f
 pickup_days = order_items.map(&:pickup_day).uniq.sort_by(&:pickup_at)
 
 pickup_days.each do |pickup_day|
-  day_items = pickupable_items.filter {|oi| oi.pickup_day == pickup_day }
+  day_items = pickupable_items.filter { |oi| oi.pickup_day == pickup_day }
   next if day_items.empty?
 
-  for_day(pickup_day, day_items)  
+  for_day(pickup_day, day_items)
 end
 
 if pay_it_forward.any?

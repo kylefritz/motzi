@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class Admin::ActivityFeedControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -10,35 +10,35 @@ class Admin::ActivityFeedControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get index" do
-    get '/admin/activity_feed'
+    get "/admin/activity_feed"
     assert_response :success
-    assert_select '.panel h3', text: 'At a Glance'
-    assert_select '.dense-title', text: 'Code Changes'
+    assert_select ".panel h3", text: "At a Glance"
+    assert_select ".dense-title", text: "Code Changes"
   end
 
   test "get index with week_id" do
-    get '/admin/activity_feed?week_id=26w01'
+    get "/admin/activity_feed?week_id=26w01"
     assert_response :success
   end
 
   test "get prompt_preview" do
-    get '/admin/activity_feed/prompt_preview?week_id=26w01'
+    get "/admin/activity_feed/prompt_preview?week_id=26w01"
     assert_response :success
     assert_match /SYSTEM PROMPT/, @response.body
   end
 
   test "post analyze enqueues job" do
     assert_enqueued_with(job: AnalyzeAnomaliesJob) do
-      post '/admin/activity_feed/analyze', params: { week_id: '26w01' }
+      post "/admin/activity_feed/analyze", params: { week_id: "26w01" }
     end
-    assert_redirected_to '/admin/activity_feed?week_id=26w01'
+    assert_redirected_to "/admin/activity_feed?week_id=26w01"
   end
 
   test "post reply creates an admin analysis reply" do
     analysis = anomaly_analyses(:week1_analysis)
 
     assert_difference -> { AnalysisReply.count }, 1 do
-      post '/admin/activity_feed/reply', params: { analysis_id: analysis.id, body: "Acknowledged — duplicate email finding is resolved." }
+      post "/admin/activity_feed/reply", params: { analysis_id: analysis.id, body: "Acknowledged — duplicate email finding is resolved." }
     end
 
     reply = AnalysisReply.last
@@ -52,7 +52,7 @@ class Admin::ActivityFeedControllerTest < ActionDispatch::IntegrationTest
     analysis = anomaly_analyses(:week1_analysis)
 
     assert_no_difference -> { AnalysisReply.count } do
-      post '/admin/activity_feed/reply', params: { analysis_id: analysis.id, body: "   " }
+      post "/admin/activity_feed/reply", params: { analysis_id: analysis.id, body: "   " }
     end
   end
 
@@ -70,25 +70,25 @@ class Admin::ActivityFeedControllerTest < ActionDispatch::IntegrationTest
 
   test "current week defaults to today and shows today marker" do
     travel_to_week_id("19w01") do
-      get '/admin/activity_feed'
+      get "/admin/activity_feed"
       assert_response :success
 
       # Should default to current week
-      assert_select '.date-range', text: /19w01/
+      assert_select ".date-range", text: /19w01/
 
       # Today row should be marked
-      assert_select 'tr.is-today', 1
-      assert_select '.today-label', text: 'today'
+      assert_select "tr.is-today", 1
+      assert_select ".today-label", text: "today"
     end
   end
 
   test "current week highlights in nav" do
     travel_to_week_id("19w01") do
-      get '/admin/activity_feed'
+      get "/admin/activity_feed"
       assert_response :success
 
       # Current week shown as span (not link) in nav
-      assert_select '.activity-feed-nav span', text: '19w01'
+      assert_select ".activity-feed-nav span", text: "19w01"
     end
   end
 end

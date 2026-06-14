@@ -1,5 +1,5 @@
 class ConfirmationMailer < ApplicationMailer
-  track extra: -> { {menu_id: params[:order].menu_id} if params[:order].present? }
+  track extra: -> { { menu_id: params[:order].menu_id } if params[:order].present? }
   track open: true, click: true
 
   def order_email

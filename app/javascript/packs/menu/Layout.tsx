@@ -58,10 +58,7 @@ export default function Layout({
 
   if (showEmailSettings && user) {
     return (
-      <EmailSettings
-        user={user}
-        onBack={() => setShowEmailSettings(false)}
-      />
+      <EmailSettings user={user} onBack={() => setShowEmailSettings(false)} />
     );
   }
 

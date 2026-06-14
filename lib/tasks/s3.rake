@@ -2,7 +2,7 @@ require "aws-sdk-s3"
 
 namespace :s3 do
   desc "Download images from s3"
-  task :download => :environment do
+  task download: :environment do
     s3 = Aws::S3::Client.new
     bucket = "motzi"
     objects = Aws::S3::Client.new.list_objects(bucket: bucket).contents

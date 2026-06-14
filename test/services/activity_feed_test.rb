@@ -335,7 +335,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
       url: "https://example.com/commit",
       current_week: true
     )
-    feed.define_singleton_method(:local_git_commits) { [commit] }
+    feed.define_singleton_method(:local_git_commits) { [ commit ] }
 
     commits = feed.git_commits
 
@@ -444,7 +444,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
   test "to_text includes SendGrid bounce and spam counts when available" do
     ENV["SENDGRID_API_KEY"] = "SG.test-key"
     body = [
-      { date: "2026-01-01", stats: [{ metrics: { requests: 20, delivered: 18, bounces: 2, blocks: 1, spam_reports: 1, invalid_emails: 0 } }] }
+      { date: "2026-01-01", stats: [ { metrics: { requests: 20, delivered: 18, bounces: 2, blocks: 1, spam_reports: 1, invalid_emails: 0 } } ] }
     ].to_json
     stub_request(:get, "https://api.sendgrid.com/v3/stats")
       .with(query: hash_including({}))

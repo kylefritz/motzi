@@ -9,8 +9,8 @@ class Menu < ApplicationRecord
   default_scope { order("LOWER(week_id) desc") }
 
   # Explicit attribute needed so older migrations can load Menu before the column exists
-  attribute :menu_type, :string, default: 'regular'
-  enum :menu_type, { regular: 'regular', holiday: 'holiday' }
+  attribute :menu_type, :string, default: "regular"
+  enum :menu_type, { regular: "regular", holiday: "holiday" }
 
   def self.current
     Menu.find(Setting.menu_id)
@@ -104,15 +104,15 @@ class Menu < ApplicationRecord
   end
 
   def subscriber_note_html
-    @subscriber_note_html ||= MARKDOWN.render(self.subscriber_note || '').html_safe
+    @subscriber_note_html ||= MARKDOWN.render(self.subscriber_note || "").html_safe
   end
 
   def menu_note_html
-    @menu_note_html ||= MARKDOWN.render(self.menu_note || '').html_safe
+    @menu_note_html ||= MARKDOWN.render(self.menu_note || "").html_safe
   end
 
   def day_of_note_html
-    @day_of_note_html ||= MARKDOWN.render(self.day_of_note || '').html_safe
+    @day_of_note_html ||= MARKDOWN.render(self.day_of_note || "").html_safe
   end
 
   def publish_to_subscribers!
@@ -145,7 +145,7 @@ class Menu < ApplicationRecord
       my_menu_items = my_menu_items.includes(includes)
     end
 
-    my_menu_items.sort_by {|mi| mi.sort_order.nil? ? 1_000 : mi.sort_order}
+    my_menu_items.sort_by { |mi| mi.sort_order.nil? ? 1_000 : mi.sort_order }
   end
 
   def copy_from(original_menu, options = {})

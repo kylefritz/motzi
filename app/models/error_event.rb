@@ -85,7 +85,7 @@ class ErrorEvent < ApplicationRecord
 
   def self.compute_fingerprint(error_class:, backtrace:, url_path:)
     top_app_frame = Array(backtrace).find { |line| line.to_s.include?("/app/") } || Array(backtrace).first || ""
-    Digest::SHA1.hexdigest([error_class, top_app_frame.to_s.split(":").first(2).join(":"), url_path].join("|"))[0, 16]
+    Digest::SHA1.hexdigest([ error_class, top_app_frame.to_s.split(":").first(2).join(":"), url_path ].join("|"))[0, 16]
   end
 
   def self.release_sha

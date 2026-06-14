@@ -1,5 +1,5 @@
 ActiveAdmin.register CreditItem do
-  menu parent: 'Credits', label: 'Items', priority: 2
+  menu parent: "Credits", label: "Items", priority: 2
   permit_params :memo, :good_for_weeks, :quantity, :user, :user_id
   includes :user
 
@@ -17,10 +17,10 @@ ActiveAdmin.register CreditItem do
     column :created_at
     column :price do |credit_item|
       if credit_item.stripe_charge_amount.present?
-        a number_to_currency(credit_item.stripe_charge_amount), href: "https://dashboard.stripe.com/payments/#{credit_item.stripe_charge_id}", target: '_blank', title: "via Stripe #{credit_item.stripe_charge_id}"
+        a number_to_currency(credit_item.stripe_charge_amount), href: "https://dashboard.stripe.com/payments/#{credit_item.stripe_charge_id}", target: "_blank", title: "via Stripe #{credit_item.stripe_charge_id}"
       end
       if credit_item.stripe_receipt_url.present?
-        a "receipt", href: credit_item.stripe_receipt_url, target: '_blank', title: "Stripe receipt"
+        a "receipt", href: credit_item.stripe_receipt_url, target: "_blank", title: "Stripe receipt"
       end
     end
     actions
@@ -44,5 +44,4 @@ ActiveAdmin.register CreditItem do
       end
     end
   end
-
 end

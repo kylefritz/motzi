@@ -19,4 +19,4 @@ class Rack::Attack
   end
 end
 
-Rack::Attack.blocklisted_responder = ->(_req) { [404, { "Content-Type" => "text/plain" }, ["Not Found"]] }
+Rack::Attack.blocklisted_responder = ->(_req) { [ 404, { "Content-Type" => "text/plain" }, [ "Not Found" ] ] }

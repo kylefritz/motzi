@@ -4,7 +4,7 @@ class CreatePickupDays < ActiveRecord::Migration[6.0]
       t.references :menu, null: false
       t.datetime :pickup_at
       t.datetime :order_deadline_at
-      
+
       t.timestamps
     end
   end

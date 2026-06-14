@@ -134,7 +134,12 @@ export default function PickupDaysPanel({
             </InlineEditor>
 
             <LeadtimeActions>
-              <Button type="button" size="sm" variant="secondary" onClick={handleSetDeadline}>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={handleSetDeadline}
+              >
                 Apply lead-time {leadtimeHours} hours
               </Button>
               <small>
@@ -158,7 +163,10 @@ export default function PickupDaysPanel({
 type EditablePickupDayProps = {
   pickupDay: AdminPickupDay;
   onRemove: () => void;
-  onSave: (payload: { pickupAt: string; orderDeadlineAt: string }) => Promise<unknown>;
+  onSave: (payload: {
+    pickupAt: string;
+    orderDeadlineAt: string;
+  }) => Promise<unknown>;
 };
 
 function formatDateTimeLocal(value: string) {
@@ -217,13 +225,26 @@ function EditablePickupDay({
         <CardHeader>
           <CardHeaderText>
             <PickupDayTitle>{pickupLabel}</PickupDayTitle>
-            {orderByLabel && <PickupDayMeta>order by {orderByLabel}</PickupDayMeta>}
+            {orderByLabel && (
+              <PickupDayMeta>order by {orderByLabel}</PickupDayMeta>
+            )}
           </CardHeaderText>
           <ActionRow>
-            <Button type="button" size="xs" variant="secondary" onClick={handleEdit}>
+            <Button
+              type="button"
+              size="xs"
+              variant="secondary"
+              onClick={handleEdit}
+            >
               Edit
             </Button>
-            <Button type="button" size="xs" variant="danger" data-icon="true" onClick={onRemove}>
+            <Button
+              type="button"
+              size="xs"
+              variant="danger"
+              data-icon="true"
+              onClick={onRemove}
+            >
               x
             </Button>
           </ActionRow>
@@ -244,7 +265,9 @@ function EditablePickupDay({
                 />
               </FieldStack>
               <FieldStack>
-                <FieldLabel htmlFor={`pickup_day_${pickupDay.id}_order_deadline_at`}>
+                <FieldLabel
+                  htmlFor={`pickup_day_${pickupDay.id}_order_deadline_at`}
+                >
                   Order deadline at:
                 </FieldLabel>
                 <DateInput
@@ -257,10 +280,20 @@ function EditablePickupDay({
             </InlineEditor>
           </EditPanel>
           <CardFooter>
-            <Button type="button" size="sm" onClick={handleSave} disabled={!isDirty}>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSave}
+              disabled={!isDirty}
+            >
               Save
             </Button>
-            <Button type="button" size="sm" variant="secondary" onClick={handleCancel}>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={handleCancel}
+            >
               Cancel
             </Button>
           </CardFooter>
