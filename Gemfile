@@ -15,7 +15,7 @@ gem "bcrypt", "~> 3.1.7" # for devise
 gem "blazer" # analytics
 gem "bootsnap", ">= 1.4.4", require: false # Reduces boot times through caching; required in config/boot.rb
 gem "bootstrap", "~> 4.3.1" # nice style
-gem "concurrent-ruby", "1.3.4" # pinned for compatibility
+gem "concurrent-ruby", "~> 1.3", ">= 1.3.7" # was pinned to 1.3.4 for the pre-Rails-7.1 logger issue; 1.3.7+ fixes lock CVEs
 gem "devise" # for authentication
 gem "drb" # stdlib gem (Ruby 3.4 deprecation warning)
 gem "gon" # rails variables in javascript
