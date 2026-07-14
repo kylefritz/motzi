@@ -3,13 +3,24 @@
   <head>
     <title><%= content_for?(:title) ? "#{yield :title} | Motzi" : "Motzi Bread" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <% meta_description = content_for?(:description) ? yield(:description) : "Motzi Bread is a community bakery in Baltimore's Harwood neighborhood baking with locally grown grains and freshly milled flour." %>
+    <meta name="description" content="<%= meta_description %>">
+    <meta property="og:site_name" content="Motzi Bread">
+    <meta property="og:title" content="<%= content_for?(:title) ? yield(:title) : "Motzi Bread" %>">
+    <meta property="og:description" content="<%= meta_description %>">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%= request.original_url %>">
+    <meta property="og:image" content="https://motzi.s3.us-east-1.amazonaws.com/public/marketing/0e6926_2bd61b90080c4d7f895840a4ab150e5e_mv2.jpg">
     <%= tag.link(rel: "icon", href: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍞%3C/text%3E%3C/svg%3E") %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Oswald:wght@500&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;600;700&family=Oswald:wght@500&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
     <%= stylesheet_link_tag "marketing", media: "all" %>
+    <%= render "layouts/analytics" %>
+    <script>window.gon = { jsTracking: <%= Setting.shop.js_tracking ? "true" : "false" %> };</script>
+    <%= javascript_include_tag "marketing", defer: true %>
     <%= yield :head %>
   </head>
   <body class="marketing">

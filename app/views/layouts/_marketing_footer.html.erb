@@ -1,19 +1,24 @@
 <footer class="marketing-footer">
-  <address>
-    2801 Guilford Ave<br>
-    Baltimore, MD 21218
-  </address>
-  <nav class="marketing-footer-nav">
-    <a href="/menu">Order</a>
-    <a href="/about">Our Process</a>
-    <a href="/subscribe">Subscriptions</a>
-    <a href="/contact">Contact Us</a>
-    <a href="https://www.instagram.com/motzi.bread" target="_blank" rel="noopener"><img src="https://motzi.s3.us-east-1.amazonaws.com/public/marketing/40898a93cfff4578b1779073137eb1b4.png" alt="Follow Motzi on Instagram"></a>
-  </nav>
-  <p class="marketing-credits">
-    Photography: Nathan Mitchell ·
-    Illustration: Kate Haberer ·
-    Web Design: Marisa Grotte
-  </p>
-  <p class="marketing-copyright">© <%= Time.current.year %> Motzi LLC</p>
+  <div class="marketing-footer-grid">
+    <div class="marketing-footer-left">
+      <a href="/" class="marketing-footer-logo"><img src="https://motzi.s3.us-east-1.amazonaws.com/public/marketing/0e6926_461ca570e24f4af18aff571baa07cea2_mv2.png" alt="Motzi Bread"></a>
+      <nav class="marketing-footer-nav">
+        <a href="/menu">Order</a>
+        <a href="/about">Our Process</a>
+        <a href="/subscribe">Subscriptions</a>
+        <a href="/contact">Contact Us</a>
+      </nav>
+    </div>
+    <address>2801 Guilford Ave Baltimore, MD 21218</address>
+    <a class="marketing-footer-ig" href="https://www.instagram.com/motzi.bread" target="_blank" rel="noopener"><img src="https://motzi.s3.us-east-1.amazonaws.com/public/marketing/40898a93cfff4578b1779073137eb1b4.png" alt="Follow Motzi on Instagram"></a>
+  </div>
+  <div class="marketing-footer-bottom">
+    <p class="marketing-copyright">© <%= Time.current.year %> Motzi LLC</p>
+    <p class="marketing-credits">
+      Photography<br>
+      Nathan Mitchell Photography<br>
+      Illustration Kate Haberer<br>
+      Website Design Marisa Grotte
+    </p>
+  </div>
 </footer>

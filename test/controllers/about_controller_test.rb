@@ -34,18 +34,24 @@ class AboutControllerTest < ActionDispatch::IntegrationTest
     assert_select "img[src*='motzi.s3.us-east-1.amazonaws.com']", minimum: 3
   end
 
-  test "marketing nav shows holiday menu link only when one is active" do
+  test "marketing nav shows holiday menu link only while ordering is open" do
     Setting.holiday_menu_id = nil
     get "/about"
     assert_select "a.marketing-nav-holiday", count: 0
 
-    holiday = Menu.create!(name: "Holiday Test", week_id: "26w50", menu_type: "holiday")
+    holiday = menus(:passover_2026)
     Setting.holiday_menu_id = holiday.id
 
-    get "/about"
-    assert_select "a.marketing-nav-holiday", text: "Holiday Test"
+    travel_to Time.zone.parse("2026-09-01 10:00") do
+      get "/about"
+      assert_select "a.marketing-nav-holiday", text: holiday.name
+    end
+
+    travel_to Time.zone.parse("2026-10-01 10:00") do
+      get "/about"
+      assert_select "a.marketing-nav-holiday", count: 0
+    end
   ensure
     Setting.holiday_menu_id = nil
-    holiday&.destroy
   end
 end

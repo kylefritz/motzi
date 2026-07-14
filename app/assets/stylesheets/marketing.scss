@@ -11,6 +11,7 @@ $cream:          #FFEED6;
 // Note: terracotta on cream is ~2.9:1 contrast — a conscious choice to stay
 // faithful to the client's Wix design (Marisa Grotte), not an oversight.
 $terracotta:     #D3725F;
+$brick:          #A15745; // hero tagline red (Wix samples darker than link terracotta)
 $purple:         #5B4062;
 $heading-dark:   #2F2F2D;
 $body-text:      #2E2927;
@@ -19,7 +20,9 @@ $white:          #FFFFFF;
 
 $font-raleway:   'Raleway', sans-serif;
 $font-oswald:    'Oswald', sans-serif;
-$font-garamond:  'EB Garamond', Georgia, serif;
+// Wix body copy is Avenir LT Light / DIN Next Light; Mulish is the closest
+// Google Fonts stand-in at 300/400.
+$font-body:      'Mulish', 'Avenir Next', Avenir, 'Helvetica Neue', sans-serif;
 
 // ------------------------------------------------------------
 // Base
@@ -33,10 +36,15 @@ body.marketing {
   // scrollbar width).
   overflow-x: hidden;
   background-color: $cream;
-  font-family: $font-garamond;
+  font-family: $font-body;
+  font-weight: 300;
   font-size: 20px;
   line-height: 1.6;
   color: $body-text;
+
+  strong {
+    font-weight: 700;
+  }
 
   *, *::before, *::after {
     box-sizing: border-box;
@@ -53,8 +61,8 @@ body.marketing {
   }
 
   h2 {
-    font-family: $font-oswald;
-    font-weight: 500;
+    font-family: $font-body;
+    font-weight: 600;
     font-size: clamp(24px, 4vw, 33px);
     color: $heading-dark;
     margin-top: 0;
@@ -107,7 +115,7 @@ body.marketing {
     }
 
     figcaption {
-      font-family: $font-garamond;
+      font-family: $font-body;
       font-style: italic;
       font-size: 0.85rem;
       color: rgba($body-text, 0.65);
@@ -172,6 +180,43 @@ body.marketing .marketing-header {
 }
 
 // ------------------------------------------------------------
+// Announcement bar (Wix shows this as a dismissible overlay; we render a
+// solid band under the header so it never covers the nav)
+// ------------------------------------------------------------
+
+body.marketing .marketing-announcement {
+  background-color: $purple;
+  color: $white;
+  text-align: center;
+  padding: 0.6rem 1rem;
+  font-family: $font-oswald;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+
+  p {
+    margin: 0.15rem 0;
+  }
+
+  .marketing-announcement-cta {
+    font-size: 16px;
+  }
+
+  a {
+    color: $white;
+    text-decoration: underline;
+
+    &:hover {
+      color: rgba($white, 0.85);
+    }
+
+    &:focus-visible {
+      outline-color: $white;
+    }
+  }
+}
+
+// ------------------------------------------------------------
 // Main content area
 // ------------------------------------------------------------
 
@@ -185,30 +230,36 @@ body.marketing .marketing-main {
 // Footer
 // ------------------------------------------------------------
 
+// Wix footer: logo + vertical nav on the left, one-line terracotta address
+// centered, IG icon right; credits stacked right-aligned; © bottom-left.
 body.marketing .marketing-footer {
   background-color: $warm-gray;
-  text-align: center;
-  padding: 2.5rem 2rem;
+  padding: 2.5rem 2.5rem 1.5rem;
   color: $body-text;
 
-  address {
-    font-style: normal;
-    font-family: $font-garamond;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-    line-height: 1.6;
+  .marketing-footer-grid {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .marketing-footer-logo img {
+    height: 54px;
+    width: auto;
   }
 
   .marketing-footer-nav {
     display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 1.25rem;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 1.75rem;
 
     a {
-      font-family: $font-raleway;
-      font-weight: 600;
+      font-family: $font-body;
+      font-weight: 400;
       font-size: 16px;
       color: $terracotta;
       text-decoration: none;
@@ -217,27 +268,70 @@ body.marketing .marketing-footer {
         color: darken($terracotta, 12%);
         text-decoration: none;
       }
-
-      img {
-        height: 24px;
-        width: 24px;
-        vertical-align: middle;
-      }
     }
   }
 
+  address {
+    font-style: normal;
+    font-family: $font-oswald;
+    font-weight: 500;
+    font-size: 1.05rem;
+    letter-spacing: 0.03em;
+    color: $terracotta;
+    white-space: nowrap;
+    margin-top: 0.75rem;
+  }
+
+  .marketing-footer-ig img {
+    height: 26px;
+    width: 26px;
+  }
+
+  .marketing-footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 2.5rem auto 0;
+  }
+
   .marketing-credits {
-    font-family: $font-garamond;
-    font-size: 0.85rem;
+    font-family: $font-body;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    text-align: right;
     color: rgba($body-text, 0.6);
-    margin-bottom: 0.4rem;
+    margin: 0;
   }
 
   .marketing-copyright {
-    font-family: $font-garamond;
+    font-family: $font-body;
     font-size: 0.85rem;
     color: rgba($body-text, 0.55);
     margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .marketing-footer-grid,
+    .marketing-footer-bottom {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    address {
+      white-space: normal;
+    }
+
+    .marketing-footer-nav {
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .marketing-credits {
+      text-align: center;
+    }
   }
 }
 
@@ -249,7 +343,7 @@ body.marketing .flash {
   padding: 0.75rem 1.25rem;
   border-radius: 4px;
   margin-bottom: 1.5rem;
-  font-family: $font-garamond;
+  font-family: $font-body;
   font-size: 18px;
 
   &.flash-notice {
@@ -326,7 +420,8 @@ body.marketing .page-hero {
   }
 
   .lede {
-    font-family: $font-garamond;
+    font-family: $font-body;
+    font-weight: 300;
     font-size: 22px;
     line-height: 1.55;
     color: rgba($body-text, 0.75);
@@ -377,31 +472,47 @@ body.marketing .page-hero--split {
 // Home hero
 // ------------------------------------------------------------
 
+// Full-bleed illustration flush under the header with the three-line
+// tagline overlaid in cream highlight boxes (Wix home hero).
 body.marketing .hero {
-  margin-bottom: 2.5rem;
+  position: relative;
+  margin: -3rem calc(-50vw + 50%) 2.5rem;
 
-  .hero-image {
-    img {
-      width: 100%;
-      height: auto;
-      border-radius: 6px;
-      object-fit: cover;
-    }
+  .hero-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
   }
 
   .hero-text {
-    padding: 1.5rem 0 0.5rem;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    text-align: center;
+    padding: 1rem;
 
-    h1 {
-      margin-bottom: 0.5rem;
-    }
-
-    .hero-tag {
-      font-family: $font-garamond;
-      font-size: 20px;
-      color: rgba($body-text, 0.7);
+    h1,
+    .hero-line {
+      font-family: $font-oswald;
+      font-weight: 500;
+      font-size: clamp(15px, 2.4vw, 34px);
+      letter-spacing: 0.28em;
+      line-height: 1.25;
+      color: $brick;
+      background-color: $warm-gray;
+      // extra left padding visually balances the trailing letter-spacing gap
+      padding: 0.1em 0.45em 0.1em 0.75em;
       margin: 0;
     }
+  }
+
+  @media (max-width: 640px) {
+    margin-top: -2rem;
   }
 }
 
@@ -421,6 +532,24 @@ body.marketing .badge-soldout {
   border-radius: 3px;
   padding: 0.2rem 0.6rem;
   vertical-align: middle;
+  // Wix renders this as an angled sticker
+  transform: rotate(-6deg);
+  transform-origin: left bottom;
+  margin: 0.5rem 0;
+}
+
+// ------------------------------------------------------------
+// Per-page section-heading accents (Wix uses accent-colored,
+// non-condensed headings on the inner pages)
+// ------------------------------------------------------------
+
+body.marketing .page-about section h2 {
+  color: $terracotta;
+}
+
+body.marketing .page-subscribe section h2 {
+  color: $purple;
+  text-transform: uppercase;
 }
 
 // ------------------------------------------------------------
@@ -596,20 +725,38 @@ body.marketing .follow-ig {
 // Contact form
 // ------------------------------------------------------------
 
+// Wix contact form: underline-only fields, placeholder labels, name+email
+// side by side, plain-text "Send". Real <label>s stay in the markup but are
+// visually hidden — placeholders carry the visible label like on Wix.
 body.marketing .contact-form {
   max-width: 640px;
+  margin: 0 auto;
+
+  .field-row {
+    display: flex;
+    gap: 2.5rem;
+
+    .field {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
 
   .field {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.6rem;
 
     label {
-      display: block;
-      font-family: $font-raleway;
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: $heading-dark;
-      margin-bottom: 0.35rem;
-      letter-spacing: 0.01em;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
     }
 
     input[type="text"],
@@ -618,27 +765,32 @@ body.marketing .contact-form {
     textarea {
       display: block;
       width: 100%;
-      padding: 0.6rem 0.75rem;
-      font-family: $font-garamond;
-      font-size: 18px;
+      padding: 0.45rem 0.1rem;
+      font-family: $font-body;
+      font-size: 16px;
       color: $body-text;
-      background-color: rgba($cream, 0.7);
-      border: 1px solid rgba($body-text, 0.3);
-      border-radius: 4px;
+      background-color: transparent;
+      border: none;
+      border-bottom: 1px solid rgba($body-text, 0.5);
+      border-radius: 0;
       line-height: 1.5;
       appearance: none;
-      transition: border-color 0.15s ease, outline 0.15s ease;
+      transition: border-color 0.15s ease;
+
+      &::placeholder {
+        color: rgba($body-text, 0.55);
+        opacity: 1;
+      }
 
       &:focus {
-        outline: 2px solid $terracotta;
-        outline-offset: 1px;
-        border-color: $terracotta;
+        outline: none;
+        border-bottom: 2px solid $terracotta;
       }
     }
 
     textarea {
       resize: vertical;
-      min-height: 140px;
+      min-height: 130px;
     }
   }
 
@@ -663,8 +815,26 @@ body.marketing .contact-form {
 
   input[type="submit"],
   button[type="submit"] {
-    @extend %cta-primary-base;
+    display: block;
+    margin: 0.5rem auto 0;
+    padding: 0.25rem 1.25rem;
+    background: none;
+    border: none;
     appearance: none;
+    font-family: $font-body;
+    font-size: 17px;
+    color: $body-text;
+    cursor: pointer;
+
+    &:hover {
+      color: $terracotta;
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $terracotta;
+      outline-offset: 2px;
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 <% content_for :title, "Contact Us" %>
+<% content_for :description, "Get in touch with Motzi Bread — send us a message or visit us at 2801 Guilford Ave, Baltimore, MD 21218." %>
 
 <article class="page-contact">
   <header class="page-hero">
@@ -26,24 +27,26 @@
       </div>
     <% end %>
 
-    <div class="field">
-      <%= f.label :name %>
-      <%= f.text_field :name, required: true, autocomplete: "name" %>
-    </div>
+    <div class="field-row">
+      <div class="field">
+        <%= f.label :name, "Name *" %>
+        <%= f.text_field :name, required: true, autocomplete: "name", placeholder: "Name *" %>
+      </div>
 
-    <div class="field">
-      <%= f.label :email, "Email Address" %>
-      <%= f.email_field :email, required: true, autocomplete: "email" %>
+      <div class="field">
+        <%= f.label :email, "Email Address *" %>
+        <%= f.email_field :email, required: true, autocomplete: "email", placeholder: "Email Address *" %>
+      </div>
     </div>
 
     <div class="field">
       <%= f.label :phone, "Phone (optional)" %>
-      <%= f.telephone_field :phone, autocomplete: "tel" %>
+      <%= f.telephone_field :phone, autocomplete: "tel", placeholder: "Phone (optional)" %>
     </div>
 
     <div class="field">
-      <%= f.label :message %>
-      <%= f.text_area :message, rows: 6, required: true %>
+      <%= f.label :message, "Message *" %>
+      <%= f.text_area :message, rows: 6, required: true, placeholder: "Message" %>
     </div>
 
     <%# Honeypot — humans don't fill this in. Hidden off-screen. %>
