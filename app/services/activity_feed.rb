@@ -552,7 +552,7 @@ class ActivityFeed
   # missed slots.
   def uptime_text
     summary = UptimeCheck.summary_for_period(@week_start, @week_end)
-    window_end = [@week_end, Time.current].min
+    window_end = [ @week_end, Time.current ].min
 
     # Iterate every target that has EVER recorded a check before this window
     # ends — not just targets with checks this week. A monitored target with
@@ -562,10 +562,10 @@ class ActivityFeed
       .select { |_target, first| first <= window_end }
     return nil if first_checks.empty?
 
-    lines = ["== Uptime (scheduled probes) =="]
+    lines = [ "== Uptime (scheduled probes) ==" ]
     first_checks.sort.each do |target, first_check|
       stats = summary[target]
-      window_start = [@week_start, first_check].max
+      window_start = [ @week_start, first_check ].max
       expected = UptimeSchedule.expected_checks(target, window_start..window_end)
 
       if stats.nil?
@@ -574,8 +574,8 @@ class ActivityFeed
         next
       end
 
-      missed = [expected - stats[:checks], 0].max
-      parts = ["#{stats[:pct_up]}% up (#{stats[:up_count]}/#{stats[:checks]} checks)"]
+      missed = [ expected - stats[:checks], 0 ].max
+      parts = [ "#{stats[:pct_up]}% up (#{stats[:up_count]}/#{stats[:checks]} checks)" ]
       parts << "#{missed} missed slot#{'s' unless missed == 1}" if missed.positive?
       parts << "avg #{stats[:avg_latency_ms]}ms, max #{stats[:max_latency_ms]}ms" if stats[:avg_latency_ms]
       lines << "  #{target}: #{parts.join(' — ')}"
