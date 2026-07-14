@@ -7,6 +7,6 @@ class ApplicationJob < ActiveJob::Base
 
   def add_comment!(resource, comment)
     Rails.logger.info comment
-    ActiveAdmin::Comment.create!(body: comment, namespace: 'admin', resource: resource, author: User.system)
+    ActiveAdmin::Comment.create!(body: comment, namespace: "admin", resource: resource, author: User.system)
   end
 end

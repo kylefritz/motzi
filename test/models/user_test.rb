@@ -1,10 +1,10 @@
-require 'test_helper'
+require "test_helper"
 
 class UserTest < ActiveSupport::TestCase
   test "maya's password is wine" do
     maya = users(:maya)
-    assert maya.authenticate('wine')
-    refute maya.authenticate('not-wine')
+    assert maya.authenticate("wine")
+    refute maya.authenticate("not-wine")
     assert maya.is_admin
     assert_equal maya.id, User.maya.id
   end
@@ -16,7 +16,7 @@ class UserTest < ActiveSupport::TestCase
     # buy a multi-credit item
     menu = menus(:week1)
     order = users(:kyle).orders.create!(menu: menu)
-    item = Item.create!(name: 'multi-credit item', credits: 6)
+    item = Item.create!(name: "multi-credit item", credits: 6)
     pickup_day =  menu.pickup_days.first
     order.order_items.create!(item: item, pickup_day: pickup_day)
     assert_equal 20 - item.credits, users(:kyle).credits
@@ -32,7 +32,7 @@ class UserTest < ActiveSupport::TestCase
     menu.make_current!
     pickup_day = menu.pickup_days.first
     kyle = users(:kyle)
-    assert_difference 'kyle.credits', -1, 'added an item' do
+    assert_difference "kyle.credits", -1, "added an item" do
       kyle.current_order.order_items.create!(item: items(:classic), pickup_day: pickup_day)
     end
   end
@@ -43,21 +43,21 @@ class UserTest < ActiveSupport::TestCase
     pickup_day = menu.pickup_days.first
     kyle = users(:kyle)
     kyle.current_order.update(stripe_charge_id: "fake-value")
-    assert_difference 'kyle.credits', 0, 'added an item' do
+    assert_difference "kyle.credits", 0, "added an item" do
       kyle.current_order.order_items.create!(item: items(:classic), pickup_day: pickup_day)
     end
   end
 
   test "current order" do
     menus(:week2).make_current!
-    assert_nil users(:ljf).current_order, 'shouldnt have an order'
-    assert_equal orders(:kyle_week2), users(:kyle).current_order, 'has already ordered'
+    assert_nil users(:ljf).current_order, "shouldnt have an order"
+    assert_equal orders(:kyle_week2), users(:kyle).current_order, "has already ordered"
   end
 
   test "blank name" do
     email = "someone@bread.com"
     user = User.create!(email: email, password: "sadfsfsdf")
-    assert_equal email, user.name, 'email is fallback for name'
+    assert_equal email, user.name, "email is fallback for name"
   end
 
   test "owners" do
@@ -65,14 +65,14 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "receive_weekly_menu scope" do
-    assert_equal 4, User.receive_weekly_menu.count, 'kf, adrian, ljf, jess'
+    assert_equal 4, User.receive_weekly_menu.count, "kf, adrian, ljf, jess"
     User.all.update_all(receive_weekly_menu: false)
     assert_equal 0, User.receive_weekly_menu.count
   end
 
   test "receive_havent_ordered_reminder scope gated by receive_weekly_menu" do
     count = User.receive_havent_ordered_reminder.count
-    assert count > 0, 'some users should receive reminders'
+    assert count > 0, "some users should receive reminders"
 
     # turning off weekly menu should also exclude from havent_ordered reminder
     User.all.update_all(receive_weekly_menu: false)

@@ -3,7 +3,7 @@
 # See app/models/error_event.rb and CLAUDE.md for the full design.
 
 class ErrorTrackingSubscriber
-  JOB_SOURCE_PATTERNS = [/active_job/i, /\bjob\b/i, /solid_queue/i].freeze
+  JOB_SOURCE_PATTERNS = [ /active_job/i, /\bjob\b/i, /solid_queue/i ].freeze
 
   def report(error, handled:, severity:, context:, source: nil)
     return if severity == :info
@@ -53,7 +53,6 @@ class ErrorTrackingSubscriber
     end
     "server"
   end
-
 end
 
 Rails.error.subscribe(ErrorTrackingSubscriber.new) if Rails.error.respond_to?(:subscribe)

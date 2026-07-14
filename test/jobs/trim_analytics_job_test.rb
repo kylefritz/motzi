@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class TrimAnalyticsJobTest < ActiveJob::TestCase
   test "deletes events and visits older than 90 days" do
@@ -15,6 +15,16 @@ class TrimAnalyticsJobTest < ActiveJob::TestCase
 
     assert_equal 0, Ahoy::Event.where(name: "old_event").count, "old event should be deleted"
     assert_equal 1, Ahoy::Event.where(name: "new_event").count, "recent event should be preserved"
+  end
+
+  test "trims uptime checks older than 90 days" do
+    old = UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, up: true, checked_at: 91.days.ago)
+    recent = UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, up: true, checked_at: 1.day.ago)
+
+    TrimAnalyticsJob.perform_now
+
+    assert_not UptimeCheck.exists?(old.id), "old uptime check should be deleted"
+    assert UptimeCheck.exists?(recent.id), "recent uptime check should be preserved"
   end
 
   test "trims dyno metrics older than 90 days" do

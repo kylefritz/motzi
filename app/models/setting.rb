@@ -17,15 +17,15 @@ class Setting < RailsSettings::Base
   field :anomaly_model, default: "claude-sonnet-4-6", type: :string
 
   def self.pickup_instructions_html
-    Menu::MARKDOWN.render(Setting.pickup_instructions || '').html_safe
+    Menu::MARKDOWN.render(Setting.pickup_instructions || "").html_safe
   end
 
   def self.credit_purchase_note_html
-    Menu::MARKDOWN.render(Setting.credit_purchase_note || '').html_safe
+    Menu::MARKDOWN.render(Setting.credit_purchase_note || "").html_safe
   end
 
   def self.signup_form_note_html
-    Menu::MARKDOWN.render(Setting.signup_form_note || '').html_safe
+    Menu::MARKDOWN.render(Setting.signup_form_note || "").html_safe
   end
 
   def self.shop

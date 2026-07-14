@@ -23,7 +23,7 @@ Rails.application.configure do
 
   # Disable serving static files from the `/public` folder by default since
   # Apache or NGINX already handles this.
-  config.public_file_server.enabled = ENV['RAILS_SERVE_STATIC_FILES'].present?
+  config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
 
   # Compress CSS using a preprocessor.
   # config.assets.css_compressor = :sass
@@ -33,7 +33,7 @@ Rails.application.configure do
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # Use HEROKU_APP_NAME (from runtime-dyno-metadata) so review apps get their own domain.
-  app_domain = ENV['HEROKU_APP_NAME'] ? "#{ENV['HEROKU_APP_NAME']}.herokuapp.com" : ShopConfig.shop.app_domain
+  app_domain = ENV["HEROKU_APP_NAME"] ? "#{ENV['HEROKU_APP_NAME']}.herokuapp.com" : ShopConfig.shop.app_domain
   config.asset_host = "https://#{app_domain}"
 
   # Specifies the header that your server uses for sending files.
@@ -67,17 +67,17 @@ Rails.application.configure do
   # Setup the mailer config
   config.action_mailer.default_url_options = { host: app_domain }
   config.action_mailer.perform_caching = false
-  config.action_mailer.perform_deliveries = ENV['SENDGRID_USERNAME'].present?
+  config.action_mailer.perform_deliveries = ENV["SENDGRID_USERNAME"].present?
   # from send grid
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    :user_name => ENV['SENDGRID_USERNAME'],
-    :password => ENV['SENDGRID_PASSWORD'],
-    :domain => ShopConfig.shop.marketing_domain,
-    :address => 'smtp.sendgrid.net',
-    :port => 587,
-    :authentication => :plain,
-    :enable_starttls_auto => true
+    user_name: ENV["SENDGRID_USERNAME"],
+    password: ENV["SENDGRID_PASSWORD"],
+    domain: ShopConfig.shop.marketing_domain,
+    address: "smtp.sendgrid.net",
+    port: 587,
+    authentication: :plain,
+    enable_starttls_auto: true
   }
 
   # Ignore bad email addresses and do not raise email delivery errors.
@@ -112,5 +112,4 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
-
 end

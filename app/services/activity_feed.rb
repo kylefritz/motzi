@@ -41,6 +41,7 @@ class ActivityFeed
     all.concat(email_events(verbose: verbose))
     all.concat(recurring_job_events(verbose: verbose))
     all.concat(visit_events(verbose: verbose))
+    all.concat(uptime_events)
     all.sort_by(&:timestamp)
   end
 
@@ -99,7 +100,7 @@ class ActivityFeed
 
   # Columns shown in the daily grid — only the core metrics.
   # Admin events (menu_created, menu_copied, etc.) appear in the Admin Events panel instead.
-  GRID_COLUMNS = %w[daily_visits orders_summary credits_summary email_summary recurring_jobs_summary].freeze
+  GRID_COLUMNS = %w[daily_visits orders_summary credits_summary email_summary recurring_jobs_summary uptime_summary].freeze
 
   def grid_columns
     actions = summary.map(&:action).uniq
@@ -111,7 +112,8 @@ class ActivityFeed
     "orders_summary" => "Orders",
     "credits_summary" => "Credits",
     "email_summary" => "Emails",
-    "recurring_jobs_summary" => "Recurring Jobs"
+    "recurring_jobs_summary" => "Recurring Jobs",
+    "uptime_summary" => "Uptime"
   }.freeze
 
   def headline_metrics(lookback: 4)
@@ -205,7 +207,7 @@ class ActivityFeed
 
     if header
       today = Time.zone.today
-      days_elapsed = [(today - @week_start.to_date).to_i, 7].min.clamp(0, 7)
+      days_elapsed = [ (today - @week_start.to_date).to_i, 7 ].min.clamp(0, 7)
       lines << "Activity Feed: #{@week_id} (#{@week_start.strftime('%A %-m/%-d')} — #{week_end.strftime('%A %-m/%-d/%Y')})"
       lines << "Today: #{today.strftime('%A %-m/%-d/%Y')} — #{days_elapsed}/7 days elapsed (#{((days_elapsed / 7.0) * 100).round}% through the week)"
       lines << "=" * 40
@@ -235,6 +237,11 @@ class ActivityFeed
         lines << failed_jobs
         lines << ""
       end
+      uptime = uptime_text
+      if uptime
+        lines << uptime
+        lines << ""
+      end
     end
 
     es = email_summary
@@ -243,14 +250,14 @@ class ActivityFeed
       MAILER_LABELS.each do |mailer, _|
         next unless es[mailer]
         s = es[mailer]
-        parts = ["#{s[:sent]} sent", "#{s[:opened]} opened (#{s[:open_rate]}%)"]
+        parts = [ "#{s[:sent]} sent", "#{s[:opened]} opened (#{s[:open_rate]}%)" ]
         parts << "#{s[:clicked]} clicked" if s[:clicked] > 0
         lines << "#{s[:label]}: #{parts.join(', ')}"
       end
       # Any mailers not in MAILER_LABELS
       es.each do |mailer, s|
         next if MAILER_LABELS.key?(mailer)
-        parts = ["#{s[:sent]} sent", "#{s[:opened]} opened (#{s[:open_rate]}%)"]
+        parts = [ "#{s[:sent]} sent", "#{s[:opened]} opened (#{s[:open_rate]}%)" ]
         parts << "#{s[:clicked]} clicked" if s[:clicked] > 0
         lines << "#{s[:label]}: #{parts.join(', ')}"
       end
@@ -327,7 +334,7 @@ class ActivityFeed
   def comparison_day_index
     return 6 unless current_week?
 
-    [(Time.zone.today - @week_start.to_date).to_i, 6].min
+    [ (Time.zone.today - @week_start.to_date).to_i, 6 ].min
   end
 
   def comparison_label
@@ -426,7 +433,7 @@ class ActivityFeed
     commits = git_commits(limit: 50)
     return nil if commits.empty?
 
-    lines = ["== Code Changes =="]
+    lines = [ "== Code Changes ==" ]
     commits.reverse_each do |commit|
       lines << "  #{commit.committed_at.strftime('%-m/%-d')} #{commit.short_sha} #{commit.summary}" if commit.current_week
     end
@@ -476,7 +483,7 @@ class ActivityFeed
       .where(fingerprint: groups.map(&:fingerprint), occurred_at: (@week_start - 4.weeks)...@week_start)
       .distinct.pluck(:fingerprint).to_set
 
-    lines = ["== Application Errors (#{total} events: #{source_summary}) =="]
+    lines = [ "== Application Errors (#{total} events: #{source_summary}) ==" ]
     groups.each do |g|
       latest = latest_events[g.latest_id]
       message = latest&.message.to_s.lines.first&.strip
@@ -524,27 +531,94 @@ class ActivityFeed
     return nil unless defined?(SolidQueue::FailedExecution)
 
     failures = SolidQueue::FailedExecution.includes(:job).where(created_at: @week_start..@week_end).order(:created_at).to_a
-    lines = ["== Failed Jobs (solid_queue_failed_executions) =="]
+    lines = [ "== Failed Jobs (solid_queue_failed_executions) ==" ]
     if failures.empty?
       lines << "  0 failed jobs this week"
     else
       lines << "  #{failures.size} failed job#{'s' unless failures.size == 1} this week:"
       failures.each do |failure|
-        detail = failure.error.present? ? [failure.exception_class, failure.message.to_s.lines.first&.strip].compact.join(": ") : "(no error details)"
+        detail = failure.error.present? ? [ failure.exception_class, failure.message.to_s.lines.first&.strip ].compact.join(": ") : "(no error details)"
         lines << "  #{failure.created_at.strftime('%-m/%d %l:%M%P').strip} #{failure.job&.class_name}: #{detail}"
       end
     end
     lines.join("\n")
   end
 
+  # Scheduled probe results (UptimeCheckJob). Missed slots are reported
+  # because they're the inverse signal: if the whole app was down, the worker
+  # couldn't record its own failures — a gap in the data IS the outage. The
+  # expected-slot window starts at the target's first-ever check so weeks
+  # before the feature shipped (or a mid-week deploy of it) don't read as
+  # missed slots.
+  def uptime_text
+    summary = UptimeCheck.summary_for_period(@week_start, @week_end)
+    window_end = [@week_end, Time.current].min
+
+    # Iterate every target that has EVER recorded a check before this window
+    # ends — not just targets with checks this week. A monitored target with
+    # zero checks all week is the loudest possible signal (the worker or the
+    # whole app was down) and must not silently drop out of the report.
+    first_checks = UptimeCheck.group(:target).minimum(:checked_at)
+      .select { |_target, first| first <= window_end }
+    return nil if first_checks.empty?
+
+    lines = ["== Uptime (scheduled probes) =="]
+    first_checks.sort.each do |target, first_check|
+      stats = summary[target]
+      window_start = [@week_start, first_check].max
+      expected = UptimeSchedule.expected_checks(target, window_start..window_end)
+
+      if stats.nil?
+        next if expected.zero? # nothing was due (e.g. week not started yet)
+        lines << "  #{target}: NO CHECKS RECORDED — #{expected} expected slots all missed (worker or whole app may have been down)"
+        next
+      end
+
+      missed = [expected - stats[:checks], 0].max
+      parts = ["#{stats[:pct_up]}% up (#{stats[:up_count]}/#{stats[:checks]} checks)"]
+      parts << "#{missed} missed slot#{'s' unless missed == 1}" if missed.positive?
+      parts << "avg #{stats[:avg_latency_ms]}ms, max #{stats[:max_latency_ms]}ms" if stats[:avg_latency_ms]
+      lines << "  #{target}: #{parts.join(' — ')}"
+
+      stats[:failures].first(10).each do |failure|
+        lines << "    FAIL #{failure.checked_at.strftime('%-m/%d %l:%M%P').strip}: GET #{failure.url} → #{failure.failure_detail}"
+      end
+    end
+    return nil if lines.size == 1
+
+    lines.join("\n")
+  end
+
+  # One summary event per day (all targets combined) for the daily grid.
+  def uptime_events
+    checks = UptimeCheck.for_period(@week_start..@week_end).order(:checked_at)
+    checks.group_by { |c| c.checked_at.in_time_zone.to_date }.map do |date, rows|
+      up_count = rows.count(&:up)
+      failures = rows.size - up_count
+      pct = (up_count.to_f / rows.size * 100).round
+      description = if failures.zero?
+        "Uptime: 100% (#{rows.size} checks)"
+      else
+        "Uptime: #{pct}% (#{failures} of #{rows.size} checks failed)"
+      end
+      Event.new(
+        timestamp: date.in_time_zone,
+        category: "system",
+        action: "uptime_summary",
+        description: description,
+        details: { source: "uptime_checks", date: date.to_s, checks: rows.size, up: up_count, failures: failures, pct: pct }
+      )
+    end
+  end
+
   def memory_metrics_text
     summary = DynoMetric.summary_for_period(@week_start, @week_end)
     return nil if summary.empty?
 
-    lines = ["== Dyno Memory =="]
+    lines = [ "== Dyno Memory ==" ]
     all_errors = []
     summary.sort_by { |dyno, _| dyno }.each do |dyno, stats|
-      parts = ["avg #{stats[:avg_memory_total]}MB", "max #{stats[:max_memory_total]}MB"]
+      parts = [ "avg #{stats[:avg_memory_total]}MB", "max #{stats[:max_memory_total]}MB" ]
       parts << "(quota #{stats[:memory_quota]}MB)" if stats[:memory_quota]
       r14_label = stats[:total_r14] > 0 ? "#{stats[:total_r14]} R14 events" : "0 R14 events"
       lines << "  #{dyno}: #{parts.join(' / ')} — #{r14_label}"
@@ -618,7 +692,7 @@ class ActivityFeed
   end
 
   def menu_context_text
-    lines = ["== Menu Context =="]
+    lines = [ "== Menu Context ==" ]
     @menus.each do |menu|
       lines << "Menu: #{menu.name}"
       lines << "  Baker's note: #{menu.subscriber_note}" if menu.subscriber_note.present?
@@ -630,7 +704,7 @@ class ActivityFeed
 
   def orders_by_day_text
     today = Time.zone.today
-    lines = ["== Orders by Day =="]
+    lines = [ "== Orders by Day ==" ]
     total_orders = 0
     total_items = 0
     all_orders = []
@@ -782,7 +856,7 @@ class ActivityFeed
         )
       end
     else
-      jobs.group_by { |j| [j.class_name, j.created_at.to_date] }.each do |(class_name, date), day_jobs|
+      jobs.group_by { |j| [ j.class_name, j.created_at.to_date ] }.each do |(class_name, date), day_jobs|
         label = RECURRING_JOB_LABELS[class_name] || class_name
         finished = day_jobs.count(&:finished?)
         failed = day_jobs.size - finished
@@ -808,7 +882,7 @@ class ActivityFeed
     # evening visits (8pm+ ET) spill into a tiny next-day UTC bucket.
     local_date = Arel.sql(
       ActiveRecord::Base.sanitize_sql(
-        ["(started_at AT TIME ZONE 'UTC' AT TIME ZONE ?)::date", Time.zone.tzinfo.identifier]
+        [ "(started_at AT TIME ZONE 'UTC' AT TIME ZONE ?)::date", Time.zone.tzinfo.identifier ]
       )
     )
     daily = visits.group(local_date)
@@ -888,11 +962,11 @@ class ActivityFeed
     if rapid_dup_ids
       dup_msgs = messages.select { |m| rapid_dup_ids.include?(m.id) }
       sample = (messages - dup_msgs).first(10)
-      [dup_msgs, sample]
+      [ dup_msgs, sample ]
     else
       dup_msgs = by_user_and_day.select { |_, msgs| msgs.size > 1 }.values.flatten
       sample = by_user_and_day.select { |_, msgs| msgs.size == 1 }.values.flatten.first(10)
-      [dup_msgs, sample]
+      [ dup_msgs, sample ]
     end
   end
 
@@ -918,14 +992,14 @@ class ActivityFeed
           if is_confirmation
             by_user_and_day = nil
           else
-            by_user_and_day = messages.group_by { |m| [m.user_id, m.pickup_day_id] }
+            by_user_and_day = messages.group_by { |m| [ m.user_id, m.pickup_day_id ] }
           end
 
           duplicates, sample = partition_for_verbose(messages, by_user_and_day, rapid_dup_ids)
 
           (duplicates + sample).sort_by { |m| m.sent_at || m.created_at }.each do |msg|
             user_name = msg.user&.name || "Unknown"
-            parts = ["sent #{msg.sent_at&.strftime('%-m/%d %l:%M%P')&.strip}"]
+            parts = [ "sent #{msg.sent_at&.strftime('%-m/%d %l:%M%P')&.strip}" ]
             parts << "opened #{msg.opened_at.strftime('%-m/%d %l:%M%P').strip}" if msg.opened_at
             parts << "clicked #{msg.clicked_at.strftime('%-m/%d %l:%M%P').strip}" if msg.clicked_at
 
@@ -933,7 +1007,7 @@ class ActivityFeed
               if is_confirmation
                 rapid_dup_ids.include?(msg.id) ? " [RAPID DUPLICATE — sent twice within #{CONFIRMATION_DUP_WINDOW / 60} min]" : ""
               else
-                dup_key = [msg.user_id, msg.pickup_day_id]
+                dup_key = [ msg.user_id, msg.pickup_day_id ]
                 by_user_and_day[dup_key].size > 1 ? " [DUPLICATE — #{by_user_and_day[dup_key].size}x]" : ""
               end
 

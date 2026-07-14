@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class OrderItemTest < ActiveSupport::TestCase
   test "name" do
@@ -11,11 +11,11 @@ class OrderItemTest < ActiveSupport::TestCase
   end
 
   test "scopes" do
-    assert_difference('OrderItem.requires_pickup.count', 2, 'requires_pickup') do
+    assert_difference("OrderItem.requires_pickup.count", 2, "requires_pickup") do
       make_order_item(pickup: pickup_days(:w1_d1_thurs))
       make_order_item(pickup: pickup_days(:w1_d2_sat))
     end
-    assert_difference('OrderItem.requires_pickup.count', 0, 'requires_pickup') do
+    assert_difference("OrderItem.requires_pickup.count", 0, "requires_pickup") do
       make_order_item(item: Item.pay_it_forward)
     end
   end

@@ -11,6 +11,6 @@ class DevController < ApplicationController
   private
 
   def ensure_development!
-    raise ActionController::RoutingError, 'Not Found' unless Rails.env.development?
+    raise ActionController::RoutingError, "Not Found" unless Rails.env.development?
   end
 end

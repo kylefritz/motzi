@@ -4,7 +4,7 @@
 # Accepts either:
 #   - {menu: menu} for single menu (menu must be in locals)
 #   - {menus: [menu1, menu2]} for multiple menus
-menus_list = defined?(menus) ? menus : [menu]
+menus_list = defined?(menus) ? menus : [ menu ]
 
 # Collect all pickup days grouped by calendar date
 days_by_date = {}
@@ -31,10 +31,10 @@ columns do
           counts = counts_by_menu[m.id][pickup_day.id] || {}
 
           if menus_list.size > 1
-            h4 style: 'margin: 12px 0 4px' do
+            h4 style: "margin: 12px 0 4px" do
               text_node m.name
               if m.holiday?
-                status_tag 'Holiday', color: 'orange', class: 'holiday-tag'
+                status_tag "Holiday", color: "orange", class: "holiday-tag"
               end
             end
           end
@@ -42,9 +42,9 @@ columns do
           sorted_keys_without_total = Item.where(id: counts.keys).pluck(:name, :id).sort_by(&:first)
           total_tag = "<strong>TOTAL</strong>".html_safe
           counts[total_tag] = "<strong>#{counts.values.sum}</strong>".html_safe
-          sorted_keys_without_total.push([total_tag, total_tag])
+          sorted_keys_without_total.push([ total_tag, total_tag ])
 
-          table_for sorted_keys_without_total, class: 'mt-0 breads' do
+          table_for sorted_keys_without_total, class: "mt-0 breads" do
             column("Item") { |name, id| name }
             column("Quantity") { |name, id| counts[id] }
           end
