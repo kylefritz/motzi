@@ -335,7 +335,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
       url: "https://example.com/commit",
       current_week: true
     )
-    feed.define_singleton_method(:local_git_commits) { [commit] }
+    feed.define_singleton_method(:local_git_commits) { [ commit ] }
 
     commits = feed.git_commits
 
@@ -444,7 +444,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
   test "to_text includes SendGrid bounce and spam counts when available" do
     ENV["SENDGRID_API_KEY"] = "SG.test-key"
     body = [
-      { date: "2026-01-01", stats: [{ metrics: { requests: 20, delivered: 18, bounces: 2, blocks: 1, spam_reports: 1, invalid_emails: 0 } }] }
+      { date: "2026-01-01", stats: [ { metrics: { requests: 20, delivered: 18, bounces: 2, blocks: 1, spam_reports: 1, invalid_emails: 0 } } ] }
     ].to_json
     stub_request(:get, "https://api.sendgrid.com/v3/stats")
       .with(query: hash_including({}))
@@ -553,5 +553,65 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     text = ActivityFeed.new(@week_id).to_text(verbose: true)
     assert_match(/DUPLICATE — 2x/, text, "reminder duplicates must still be flagged")
+  end
+
+  test "to_text includes an uptime section with per-target stats and failures" do
+    week_start = Time.zone.from_week_id(@week_id)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 100, up: true, checked_at: week_start + 1.day)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 503, latency_ms: 50, up: false, checked_at: week_start + 1.day + 15.minutes)
+    UptimeCheck.create!(target: "admin", url: "https://probe.test/admin", status: 302, latency_ms: 80, up: true, checked_at: week_start + 1.day)
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_includes text, "== Uptime (scheduled probes) =="
+    assert_includes text, "menu: 50.0% up (1/2 checks)"
+    assert_includes text, "admin: 100.0% up (1/1 checks)"
+    assert_match(/FAIL .* GET https:\/\/probe\.test\/menu\.json → HTTP 503/, text)
+    assert_match(/missed slot/, text, "sparse checks in a past week should surface missed slots")
+  end
+
+  test "to_text omits the uptime section when there are no checks" do
+    assert_not_includes ActivityFeed.new(@week_id).to_text, "== Uptime"
+  end
+
+  test "to_text omits the uptime section for weeks before monitoring existed" do
+    week_start = Time.zone.from_week_id(@week_id)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 100, up: true, checked_at: week_start + 3.weeks)
+
+    assert_not_includes ActivityFeed.new(@week_id).to_text, "== Uptime"
+  end
+
+  test "to_text flags a monitored target that recorded zero checks all week" do
+    week_start = Time.zone.from_week_id(@week_id)
+    # admin was monitored before this week, then went completely silent
+    UptimeCheck.create!(target: "admin", url: "https://probe.test/admin", status: 302, latency_ms: 80, up: true, checked_at: week_start - 3.days)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 100, up: true, checked_at: week_start + 1.day)
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/admin: NO CHECKS RECORDED — \d+ expected slots all missed/, text)
+    assert_includes text, "menu: 100.0% up (1/1 checks)"
+  end
+
+  test "uptime checks roll up into one daily grid event per day" do
+    week_start = Time.zone.from_week_id(@week_id)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 100, up: true, checked_at: week_start + 1.day + 9.hours)
+    UptimeCheck.create!(target: "admin", url: "https://probe.test/admin", status: 302, latency_ms: 80, up: true, checked_at: week_start + 1.day + 10.hours)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 500, latency_ms: 60, up: false, checked_at: week_start + 2.days + 9.hours)
+
+    feed = ActivityFeed.new(@week_id)
+    events = feed.summary.select { |e| e.action == "uptime_summary" }
+
+    assert_equal 2, events.size
+    assert_includes feed.grid_columns, "uptime_summary"
+
+    day_one = events.find { |e| e.details[:checks] == 2 }
+    assert_equal "system", day_one.category
+    assert_equal 100, day_one.details[:pct]
+    assert_equal "Uptime: 100% (2 checks)", day_one.description
+
+    day_two = events.find { |e| e.details[:checks] == 1 }
+    assert_equal 0, day_two.details[:pct]
+    assert_equal 1, day_two.details[:failures]
   end
 end

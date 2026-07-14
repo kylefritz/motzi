@@ -1,6 +1,6 @@
 ActiveAdmin.register Ahoy::Message, as: "Email" do
-  menu parent: 'Advanced', label: 'Emails', priority: 2
-  actions :all, except: [:edit, :update] # updating doesn't make sense
+  menu parent: "Advanced", label: "Emails", priority: 2
+  actions :all, except: [ :edit, :update ] # updating doesn't make sense
   includes :menu, :user, :pickup_day
 
   scope :all, default: true

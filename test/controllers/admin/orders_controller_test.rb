@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class Admin::OrdersControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -9,7 +9,7 @@ class Admin::OrdersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get index" do
-    get '/admin/orders'
+    get "/admin/orders"
     assert_response :success
   end
 
@@ -27,15 +27,15 @@ class Admin::OrdersControllerTest < ActionDispatch::IntegrationTest
 
   test "delete order" do
     order = Menu.current.orders.first
-    assert_difference 'Order.count', -1 do
+    assert_difference "Order.count", -1 do
       delete "/admin/orders/#{order.id}"
     end
-    assert_redirected_to '/admin/orders'
+    assert_redirected_to "/admin/orders"
   end
 
   test "item_list view" do
     def render(order_items)
-      OrdersController.render(partial: 'admin/orders/order_items', locals: {order_items: order_items})
+      OrdersController.render(partial: "admin/orders/order_items", locals: { order_items: order_items })
     end
 
     thu, sat = menus(:week1).pickup_days
@@ -60,7 +60,7 @@ class Admin::OrdersControllerTest < ActionDispatch::IntegrationTest
         assert_match /6x/i, html
         assert_match /pumpkin/i, html
       end
-      
+
       o.order_items.create!(item: items(:pay_it_forward), quantity: 2, pickup_day: thu)
 
       render(o.order_items).tap do |html|
@@ -69,5 +69,4 @@ class Admin::OrdersControllerTest < ActionDispatch::IntegrationTest
       end
     end
   end
-
 end

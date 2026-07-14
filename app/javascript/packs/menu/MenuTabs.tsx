@@ -62,7 +62,11 @@ export default function MenuTabs({
 
   return (
     <>
-      <TabBar role="tablist" aria-label="menu selection" onKeyDown={handleKeyDown}>
+      <TabBar
+        role="tablist"
+        aria-label="menu selection"
+        onKeyDown={handleKeyDown}
+      >
         {regularMenu && (
           <TabButton
             ref={regularTabRef}
@@ -135,7 +139,7 @@ const TabButton = styled.button<{ active: boolean }>`
   color: ${({ active }) => (active ? "white" : "#352c63")};
   border: 1.5px solid #352c63;
   border-radius: 4px;
-  font-family: 'Raleway', sans-serif;
+  font-family: "Raleway", sans-serif;
   font-size: 0.95rem;
   font-weight: 500;
   letter-spacing: 0.03em;
@@ -162,7 +166,7 @@ const TabButton = styled.button<{ active: boolean }>`
 
 const HolidayBadge = styled.span`
   flex-shrink: 0;
-  font-family: 'Oswald', sans-serif;
+  font-family: "Oswald", sans-serif;
   font-size: 0.7rem;
   font-weight: 500;
   text-transform: uppercase;

@@ -8,18 +8,18 @@ class CreditItemsController < ApplicationController
     quantity = params[:credits].to_i.clamp(1, CreditBundle::MAX_CREDITS)
     bundle = CreditBundle.find_by(credits: quantity)
     begin
-      description = ["#{quantity}x credits", bundle.try(:name_description)].compact.join(" - ")
+      description = [ "#{quantity}x credits", bundle.try(:name_description) ].compact.join(" - ")
       # make stripe change
       charge = Stripe::Charge.create({
         amount: price_cents,
-        currency: 'usd',
+        currency: "usd",
         source: params[:token],
         metadata: {
           user_id: current_user.id,
           user_name: current_user.name,
           credits: quantity,
           bundle_name: bundle.try(:name),
-          bundle_description: bundle.try(:description),
+          bundle_description: bundle.try(:description)
         },
         description: description,
         receipt_email: current_user.email
@@ -45,7 +45,7 @@ class CreditItemsController < ApplicationController
       logger.warn "Stripe::CardError Status=#{e.http_status} Type=#{e.error.type} Charge ID=#{e.error.charge} \
         Code=#{e.error.code} cecline_code=#{e.error.decline_code} param=#{e.error.param} message=#{e.error.message}"
 
-      render json: {error: e.error.message}.to_json, status: :unprocessable_content
+      render json: { error: e.error.message }.to_json, status: :unprocessable_content
     end
   end
 end

@@ -4,7 +4,7 @@ class ConfirmationMailer < ApplicationMailer
   # observed double-invoked 121ms apart for the same order.
   ORDER_EMAIL_DEDUP_WINDOW = 10.seconds
 
-  track extra: -> { {menu_id: params[:order].menu_id, order_id: params[:order].id} if params[:order].present? }
+  track extra: -> { { menu_id: params[:order].menu_id, order_id: params[:order].id } if params[:order].present? }
   track open: true, click: true
 
   def order_email

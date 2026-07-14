@@ -11,6 +11,13 @@ class OrdersController < ApplicationController
     end
 
     if (existing_user = User.find_by(email: params.fetch(:email).strip.downcase)).present?
+      # Guest checkout may only attach to an existing account for a genuinely
+      # paid marketplace order. Without this, an unauthenticated request could
+      # place a credit-spending order in any member's name just by knowing their
+      # email — draining their credits. A returning member must sign in.
+      unless paid_marketplace_order?
+        raise OrderError.new("Email passed as param — Please use a link from a menu email or sign in to place your order")
+      end
       return existing_user
     end
 
@@ -25,7 +32,7 @@ class OrdersController < ApplicationController
   def create
     target_menu = params[:menu_id].present? ? Menu.find(params[:menu_id]) : Menu.current
 
-    unless current_admin_user.present? || target_menu.id.in?([Menu.current.id, Menu.current_holiday&.id].compact)
+    unless current_admin_user.present? || target_menu.id.in?([ Menu.current.id, Menu.current_holiday&.id ].compact)
       return render_validation_failed("this menu is not available for ordering")
     end
 
@@ -39,7 +46,9 @@ class OrdersController < ApplicationController
       # Advisory lock prevents race condition where two simultaneous requests
       # both pass the duplicate check before either commits.
       lock_key = Zlib.crc32("order:#{current_user&.id}:#{@menu.id}")
-      ActiveRecord::Base.connection.execute("SELECT pg_advisory_xact_lock(#{lock_key})")
+      ActiveRecord::Base.connection.execute(
+        ActiveRecord::Base.sanitize_sql_array([ "SELECT pg_advisory_xact_lock(?)", lock_key ])
+      )
 
       if current_user&.order_for_menu(@menu).present?
         logger.warn "user=#{current_user.email} already placed an order for menu #{@menu.id}. returning current order"
@@ -77,11 +86,11 @@ class OrdersController < ApplicationController
           end
           charge = Stripe::Charge.create({
             amount: price_cents,
-            currency: 'usd',
+            currency: "usd",
             source: params[:token],
             metadata: {
               user_id: user.id,
-              order_id: order.id,
+              order_id: order.id
             },
             description: "Order ##{order.id} - #{order.item_list}",
             receipt_email: user.email
@@ -95,7 +104,7 @@ class OrdersController < ApplicationController
       end
 
       ahoy.track "order_created"
-      [user, order]
+      [ user, order ]
     end
 
     # send confirmation email
@@ -141,7 +150,7 @@ class OrdersController < ApplicationController
           quantity: cart_item_params[:quantity].presence || 1,
           pickup_day_id: cart_item_params[:pickup_day_id] || order.menu.pickup_days.first.id
         }
-        
+
         order.order_items.create!(filtered_params)
       end
 
@@ -162,11 +171,19 @@ class OrdersController < ApplicationController
 
   private
 
+  # A real paid marketplace order results in a Stripe charge (price > 0 with a
+  # card token), which sets stripe_charge_id and so is excluded from credit
+  # accounting. A $0 or token-less order would leave stripe_charge_id NULL and
+  # count against the member's credit balance.
+  def paid_marketplace_order?
+    params[:price].to_f > 0 && params[:token].present?
+  end
+
   def render_ordering_closed
-    return render_validation_failed("ordering for this menu is closed")
+    render_validation_failed("ordering for this menu is closed")
   end
 
   def render_validation_failed(message)
-    return render json: { message: message }, status: :unprocessable_content
+    render json: { message: message }, status: :unprocessable_content
   end
 end

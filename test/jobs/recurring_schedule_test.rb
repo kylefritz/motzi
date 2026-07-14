@@ -22,6 +22,7 @@ class RecurringScheduleTest < ActiveSupport::TestCase
       analyze_anomalies
       capture_dyno_metrics
       capture_db_backup
+      uptime_check
     ]
 
     expected_jobs.each do |job|
@@ -50,10 +51,16 @@ class RecurringScheduleTest < ActiveSupport::TestCase
     end
   end
 
+  # UptimeCheckJob runs ~100×/day — labeling it would drown the recurring-jobs
+  # summary, and uptime has its own "== Uptime ==" feed section (missed slots
+  # are reported there, so the job can't silently disappear).
+  FEED_LABEL_EXEMPT = %w[UptimeCheckJob].freeze
+
   test "every recurring job class is labeled in the activity feed" do
     @production.each do |name, config|
       klass = config["class"]
       next unless klass
+      next if FEED_LABEL_EXEMPT.include?(klass)
       assert ActivityFeed::RECURRING_JOB_LABELS.key?(klass),
         "#{name} (#{klass}) is missing from ActivityFeed::RECURRING_JOB_LABELS — " \
         "the activity feed filters to labeled classes, so this job would be invisible " \

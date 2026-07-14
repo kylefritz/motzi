@@ -121,7 +121,9 @@ function SortOrder({
           value={sortOrder ?? ""}
           onChange={(event) => {
             const { value, valueAsNumber } = event.target;
-            handleChange(value === "" || Number.isNaN(valueAsNumber) ? null : valueAsNumber);
+            handleChange(
+              value === "" || Number.isNaN(valueAsNumber) ? null : valueAsNumber
+            );
           }}
           placeholder="none"
         />

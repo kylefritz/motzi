@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 # Smoke test for the anomaly detection pipeline.
 # For prompt quality testing, use `rake ai:eval` which runs against
