@@ -24,11 +24,11 @@ class Order < ApplicationRecord
   end
 
   def retail_price
-    order_items.map { |oi| oi.item.price * oi.quantity }.sum
+    order_items.map { |oi| oi.price * oi.quantity }.sum
   end
 
   def credits
-    order_items.map { |oi| oi.item.credits * oi.quantity }.sum
+    order_items.map { |oi| oi.credits * oi.quantity }.sum
   end
 
   def items_for_pickup(pickup_day)
