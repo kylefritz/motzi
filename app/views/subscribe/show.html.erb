@@ -21,10 +21,11 @@
     <h2>How It Works</h2>
     <p>Subscribers purchase credits up front and redeem them for loaves using our online preorder platform. Subscribers receive a weekly menu email and preorders are due by 9pm the day before pickup. Credits cannot be used in store.</p>
 
-    <p>1 credit = 1 loaf or several pastries. There are two subscription options:</p>
-    <ul>
-      <li><strong>$182 for 26 credits</strong> ($7.00 per loaf). This is one loaf of bread every week for six months.</li>
-      <li><strong>$98 for 13 credits</strong> ($7.50 per loaf). This is one loaf of bread every other week for six months.</li>
+    <p>1 credit = 1 loaf or several pastries. There are <%= count_in_words(@bundles.size) %> subscription options:</p>
+    <ul class="subscription-options">
+      <% @bundles.each do |bundle| %>
+        <li><%= subscription_option(bundle) %></li>
+      <% end %>
     </ul>
 
     <p>Pickup is from our storefront during regular business hours. Preorders cannot be picked up from the farmers market. Item selection includes occasional subscriber specials. Challah and holiday items are not generally included for purchase with subscriber credits.</p>
