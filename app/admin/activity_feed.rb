@@ -128,7 +128,10 @@ ActiveAdmin.register_page "Activity Feed" do
       item_count = menus.any? ? OrderItem.joins(:order).where(orders: { menu_id: menus.select(:id) }).count : 0
       email_count = menus.any? ? Ahoy::Message.where(menu_id: menus.select(:id)).count : 0
       visitor_count = Ahoy::Visit.where(started_at: ws..we).distinct.count(:visitor_token)
-      { week: wid, orders: order_count, items: item_count, emails: email_count, visitors: visitor_count }
+      uptime_counts = UptimeCheck.for_period(ws..we).group(:up).count
+      uptime_total = uptime_counts.values.sum
+      uptime_pct = uptime_total.positive? ? ((uptime_counts[true] || 0) * 100.0 / uptime_total).round(2) : nil
+      { week: wid, orders: order_count, items: item_count, emails: email_count, visitors: visitor_count, uptime: uptime_pct }
     end
 
     panel "Weekly Trends" do
@@ -190,6 +193,18 @@ ActiveAdmin.register_page "Activity Feed" do
                     fill: true,
                     yAxisID: 'y_emails',
                     pointRadius: 3
+                  },
+                  {
+                    label: 'Uptime %',
+                    data: #{trend_data.map { |d| d[:uptime] }.to_json},
+                    borderColor: '#352C63',
+                    borderWidth: 2,
+                    borderDash: [2, 2],
+                    tension: 0,
+                    fill: false,
+                    spanGaps: false,
+                    yAxisID: 'y_uptime',
+                    pointRadius: 3
                   }
                 ]
               },
@@ -203,6 +218,8 @@ ActiveAdmin.register_page "Activity Feed" do
                 scales: {
                   y_orders: { beginAtZero: true, position: 'left', grid: { color: 'rgba(0,0,0,0.05)' }, title: { display: true, text: 'Orders', color: '#2E7D32' } },
                   y_emails: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Emails / Visitors', color: '#888' } },
+                  // 90–100 window: on a 0–100 axis a dip to 99% would be invisible
+                  y_uptime: { min: 90, max: 100.5, display: false },
                   x: {
                     type: 'category',
                     grid: { display: false },
@@ -346,6 +363,15 @@ ActiveAdmin.register_page "Activity Feed" do
                                 span " #{label}", class: "cell-label"
                                 span " · #{d[:open_rate]}% opened", style: "color: #{rate_color}", class: "cell-dim", title: "Tracking pixel open-rate percent"
                               end
+                            when "uptime_summary"
+                              d = e.details
+                              color = d[:failures].to_i.zero? ? "green" : "red"
+                              next_day = (Date.parse(d[:date]) + 1).to_s
+                              a href: admin_uptime_checks_path(q: { checked_at_gteq: d[:date], checked_at_lteq: next_day }), class: "cell-link" do
+                                span "#{d[:pct]}%", class: "cell-num", style: "color: #{color}"
+                                span " up ", class: "cell-label"
+                                span "(#{d[:checks]} checks)", class: "cell-dim"
+                              end
                             when "recurring_jobs_summary"
                               span e.description, class: "cell-label"
                             else
@@ -401,6 +427,13 @@ ActiveAdmin.register_page "Activity Feed" do
                       span total_runs.to_s, class: "cell-num"
                       span " runs", class: "cell-label"
                       span " (#{incomplete} incomplete)", class: "cell-dim" if incomplete.positive?
+                    when "uptime_summary"
+                      total_checks = all_events.sum { |e| e.details[:checks].to_i }
+                      total_failures = all_events.sum { |e| e.details[:failures].to_i }
+                      pct = total_checks > 0 ? ((total_checks - total_failures).to_f / total_checks * 100).round : 0
+                      span "#{pct}%", class: "cell-num", style: "color: #{total_failures.zero? ? 'green' : 'red'}"
+                      span " up ", class: "cell-label"
+                      span "(#{total_checks} checks)", class: "cell-dim"
                     else
                       span "—", class: "cell-empty"
                     end

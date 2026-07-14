@@ -21,6 +21,18 @@ class Admin::ActivityFeedControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "get index renders the uptime grid column and chart dataset when checks exist" do
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 120, up: true, checked_at: Time.current)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 503, latency_ms: 40, up: false, checked_at: 10.minutes.ago)
+
+    get '/admin/activity_feed'
+
+    assert_response :success
+    assert_select 'th', text: 'Uptime'
+    assert_match 'Uptime %', @response.body # weekly trends chart dataset
+    assert_match admin_uptime_checks_path, @response.body
+  end
+
   test "get prompt_preview" do
     get "/admin/activity_feed/prompt_preview?week_id=26w01"
     assert_response :success

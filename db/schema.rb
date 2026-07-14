@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_06_202929) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_11_120000) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
@@ -527,6 +527,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_06_202929) do
     t.index [ "expires_at" ], name: "index_solid_queue_semaphores_on_expires_at"
     t.index [ "key", "value" ], name: "index_solid_queue_semaphores_on_key_and_value"
     t.index [ "key" ], name: "index_solid_queue_semaphores_on_key", unique: true
+  end
+
+  create_table "uptime_checks", force: :cascade do |t|
+    t.string "target", null: false
+    t.string "url", null: false
+    t.integer "status"
+    t.integer "latency_ms"
+    t.string "error"
+    t.boolean "up", default: false, null: false
+    t.datetime "checked_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["target", "checked_at"], name: "index_uptime_checks_on_target_and_checked_at"
   end
 
   create_table "users", force: :cascade do |t|

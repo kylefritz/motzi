@@ -41,6 +41,7 @@ class ActivityFeed
     all.concat(email_events(verbose: verbose))
     all.concat(recurring_job_events(verbose: verbose))
     all.concat(visit_events(verbose: verbose))
+    all.concat(uptime_events)
     all.sort_by(&:timestamp)
   end
 
@@ -99,7 +100,7 @@ class ActivityFeed
 
   # Columns shown in the daily grid — only the core metrics.
   # Admin events (menu_created, menu_copied, etc.) appear in the Admin Events panel instead.
-  GRID_COLUMNS = %w[daily_visits orders_summary credits_summary email_summary recurring_jobs_summary].freeze
+  GRID_COLUMNS = %w[daily_visits orders_summary credits_summary email_summary recurring_jobs_summary uptime_summary].freeze
 
   def grid_columns
     actions = summary.map(&:action).uniq
@@ -111,7 +112,8 @@ class ActivityFeed
     "orders_summary" => "Orders",
     "credits_summary" => "Credits",
     "email_summary" => "Emails",
-    "recurring_jobs_summary" => "Recurring Jobs"
+    "recurring_jobs_summary" => "Recurring Jobs",
+    "uptime_summary" => "Uptime"
   }.freeze
 
   def headline_metrics(lookback: 4)
@@ -233,6 +235,11 @@ class ActivityFeed
       failed_jobs = failed_jobs_text
       if failed_jobs
         lines << failed_jobs
+        lines << ""
+      end
+      uptime = uptime_text
+      if uptime
+        lines << uptime
         lines << ""
       end
     end
@@ -525,6 +532,73 @@ class ActivityFeed
       end
     end
     lines.join("\n")
+  end
+
+  # Scheduled probe results (UptimeCheckJob). Missed slots are reported
+  # because they're the inverse signal: if the whole app was down, the worker
+  # couldn't record its own failures — a gap in the data IS the outage. The
+  # expected-slot window starts at the target's first-ever check so weeks
+  # before the feature shipped (or a mid-week deploy of it) don't read as
+  # missed slots.
+  def uptime_text
+    summary = UptimeCheck.summary_for_period(@week_start, @week_end)
+    window_end = [@week_end, Time.current].min
+
+    # Iterate every target that has EVER recorded a check before this window
+    # ends — not just targets with checks this week. A monitored target with
+    # zero checks all week is the loudest possible signal (the worker or the
+    # whole app was down) and must not silently drop out of the report.
+    first_checks = UptimeCheck.group(:target).minimum(:checked_at)
+      .select { |_target, first| first <= window_end }
+    return nil if first_checks.empty?
+
+    lines = ["== Uptime (scheduled probes) =="]
+    first_checks.sort.each do |target, first_check|
+      stats = summary[target]
+      window_start = [@week_start, first_check].max
+      expected = UptimeSchedule.expected_checks(target, window_start..window_end)
+
+      if stats.nil?
+        next if expected.zero? # nothing was due (e.g. week not started yet)
+        lines << "  #{target}: NO CHECKS RECORDED — #{expected} expected slots all missed (worker or whole app may have been down)"
+        next
+      end
+
+      missed = [expected - stats[:checks], 0].max
+      parts = ["#{stats[:pct_up]}% up (#{stats[:up_count]}/#{stats[:checks]} checks)"]
+      parts << "#{missed} missed slot#{'s' unless missed == 1}" if missed.positive?
+      parts << "avg #{stats[:avg_latency_ms]}ms, max #{stats[:max_latency_ms]}ms" if stats[:avg_latency_ms]
+      lines << "  #{target}: #{parts.join(' — ')}"
+
+      stats[:failures].first(10).each do |failure|
+        lines << "    FAIL #{failure.checked_at.strftime('%-m/%d %l:%M%P').strip}: GET #{failure.url} → #{failure.failure_detail}"
+      end
+    end
+    return nil if lines.size == 1
+
+    lines.join("\n")
+  end
+
+  # One summary event per day (all targets combined) for the daily grid.
+  def uptime_events
+    checks = UptimeCheck.for_period(@week_start..@week_end).order(:checked_at)
+    checks.group_by { |c| c.checked_at.in_time_zone.to_date }.map do |date, rows|
+      up_count = rows.count(&:up)
+      failures = rows.size - up_count
+      pct = (up_count.to_f / rows.size * 100).round
+      description = if failures.zero?
+        "Uptime: 100% (#{rows.size} checks)"
+      else
+        "Uptime: #{pct}% (#{failures} of #{rows.size} checks failed)"
+      end
+      Event.new(
+        timestamp: date.in_time_zone,
+        category: "system",
+        action: "uptime_summary",
+        description: description,
+        details: { source: "uptime_checks", date: date.to_s, checks: rows.size, up: up_count, failures: failures, pct: pct }
+      )
+    end
   end
 
   def memory_metrics_text
