@@ -90,7 +90,7 @@ namespace :ai do
     puts "Evaluating #{weeks.size} weeks with #{thread_count} threads (model: #{AnomalyDetector.model}, judge: #{AnomalyReportGrader.judge_model})..."
 
     queue = Queue.new
-    weeks.each_with_index { |(week_id, expectation), i| queue << [week_id, expectation, i] }
+    weeks.each_with_index { |(week_id, expectation), i| queue << [ week_id, expectation, i ] }
     mutex = Mutex.new
     results = []
     done = 0

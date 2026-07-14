@@ -64,7 +64,7 @@ class AnomalyReportGrader
       model: self.class.judge_model,
       max_tokens: 1500,
       system_: judge_system_prompt,
-      messages: [{ role: "user", content: judge_user_message }]
+      messages: [ { role: "user", content: judge_user_message } ]
     )
     text = response.content.filter_map { |block| block.text if block.respond_to?(:text) }.join("\n")
     parse_judge_json(text)
@@ -90,7 +90,7 @@ class AnomalyReportGrader
   end
 
   def judge_user_message
-    parts = ["<report>", @report_text, "</report>", ""]
+    parts = [ "<report>", @report_text, "</report>", "" ]
     if @must_flag.any?
       parts << "REQUIRED findings:"
       @must_flag.each_with_index { |item, i| parts << "#{i + 1}. #{item}" }
