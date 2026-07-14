@@ -1,71 +1,229 @@
-# Ground truth for anomaly detector prompt evaluation.
-# expected_status: healthy | warning | problem
-# Adjust these based on your knowledge of what actually happened each week.
+# Ground truth for the anomaly report eval (`rake ai:eval`).
+#
+# Labels reflect what an IDEAL report should say given full knowledge of what
+# actually happened — not what the historical model said. Evidence sources:
+# stored nightly analyses (103 reports, 3/17–6/11/2026), operator replies,
+# error_events first-seen dates, rapid-duplicate checks against ahoy_messages
+# (<120s same-user confirmation pairs), weekly metrics, and incident-fix
+# commits/issues. Mined 2026-06-11.
+#
+# Per week:
+#   expected_status: healthy | warning | problem  (what an ideal report concludes)
+#   must_flag:       real issues the report MUST surface (graded by LLM judge)
+#   must_not_flag:   noise the report must NOT raise as a finding/warning
+#   notes:           evidence and context for humans editing this file
+#
+# Update when a new real incident happens or a new noise pattern is identified.
 
-# --- 2024 known anomalies ---
+# --- Legacy regression weeks (pre-window, kept for true-positive coverage) ---
 
 24w06:
   expected_status: problem
   notes: "16 orders, 0 items, half emails — broken order creation bug"
-
-# --- 2025 known anomalies ---
+  must_flag:
+    - "orders being created with zero items (broken order creation)"
 
 25w17:
   expected_status: warning
   notes: "Email double-sends began — 973 menu emails and 938 reminders vs normal ~500"
-
-25w18:
-  expected_status: warning
-  notes: "Email double-sends continued — 971 menu emails and 1,119 reminders"
+  must_flag:
+    - "menu/reminder emails double-sending (roughly 2x normal volume)"
 
 25w19:
   expected_status: warning
   notes: "Email double-sends worst week — 1,210 menu emails and 1,319 reminders (2.5x normal)"
-
-# --- 2025 healthy weeks ---
-
-25w15:
-  expected_status: healthy
-  notes: "Normal week before the email double-send bug, 59 orders"
+  must_flag:
+    - "menu/reminder emails double-sending (roughly 2.5x normal volume)"
 
 25w20:
   expected_status: healthy
-  notes: "Normal week after email bug resolved, 46 orders"
+  notes: "Normal week after email bug resolved, 46 orders. KNOWN-HARD: comparison weeks are the inflated double-send weeks, so the ~514 sends look like a list collapse unless the model reasons that the prior volume was the bug."
 
-# --- 2026 healthy weeks ---
+# --- Past 6 months (Dec 2025 – June 2026), labeled from real history ---
+
+25w50:
+  expected_status: warning
+  notes: "44 orders, menu 12/11-12/13, 518 haven't-ordered sends. Real bug active: duplicate day-of reminders to multi-pickup users (Sophia Marion 2x on 12/12) — the bug fixed 4/12/2026 by 184dc9. First eval run mislabeled this healthy; the agent correctly flagged it."
+  must_flag:
+    - "duplicate day-of reminder emails sent to the same member"
+
+25w51:
+  expected_status: warning
+  notes: "62 orders (healthy). Real rapid-duplicate bug: user 8281 got 3 confirmations within 0.18s on 12/14 plus a second 3-send burst within 100s; user 3350 a 38.6s pair on 12/15."
+  must_flag:
+    - "rapid duplicate order confirmations (multiple sends within seconds to the same user on 12/14-12/15)"
+
+25w52:
+  expected_status: healthy
+  notes: "Planned holiday closure ('CLOSED - Back Friday 1/16'), 7 orders. Reminder emails still ran (537 haven't-ordered) — normal."
+  must_not_flag:
+    - "near-zero orders during announced holiday closure"
+
+26w01:
+  expected_status: healthy
+  notes: "Closed week (Dec 28–Jan 3), no menu, no reminder sends — intentional pause until 1/16 reopening."
+  must_not_flag:
+    - "zero orders / no menu / paused reminder jobs during announced closure"
+
+26w02:
+  expected_status: healthy
+  notes: "Closed week (Jan 4–10), same intentional pause."
+  must_not_flag:
+    - "zero orders / no menu / paused reminder jobs during announced closure"
 
 26w03:
   expected_status: healthy
-  notes: "Normal week, 55 orders"
+  notes: "Reopening week, menu 1/16-1/17, 55 orders, reminders resumed (516 sends) — clean restart."
 
 26w04:
   expected_status: healthy
-  notes: "Strong week, 80 orders — not anomalous"
+  notes: "80 orders — post-closure reopening surge, within expected holiday/spike band. Day-of sends (82) proportional to orders."
+  must_not_flag:
+    - "reopening order spike (80 orders) as anomalous volume"
 
 26w05:
   expected_status: healthy
-  notes: "45 orders after a strong week — normal regression, not a real anomaly"
+  notes: "56 orders, normal. One 10.7s confirmation pair was user_id 1 (admin testing) — ignore."
+  must_not_flag:
+    - "admin's own test orders/emails as duplicates"
 
 26w06:
   expected_status: healthy
-  notes: "45 orders, steady"
+  notes: "45 orders, normal. One double-click duplicate order submission (user 114, 40.5s gap) — minor UI issue later fixed by c89da11; mention-worthy at most, not warning-level."
 
 26w07:
-  expected_status: healthy
-  notes: "113 orders — Valentine's week, expected spike"
+  expected_status: warning
+  notes: "Valentine's special: 135 orders, 333 items — intentional spike. 139 day-of reminders proportional to order count. Real bug active: duplicate day-of reminders to multi-pickup users (fixed 4/12 by 184dc9) plus double-click confirmation pairs (34–46s, issue #331 class)."
+  must_flag:
+    - "duplicate day-of reminder emails sent to the same member"
+  must_not_flag:
+    - "Valentine's order spike (135 orders) as anomalous volume"
+    - "proportionally elevated day-of reminder volume (139 total) treated as the anomaly itself"
 
 26w08:
   expected_status: healthy
-  notes: "43 orders — normal post-holiday dip"
+  notes: "47 orders, normal week."
 
 26w09:
   expected_status: healthy
-  notes: "50 orders, normal"
+  notes: "55 orders, normal week."
 
 26w10:
-  expected_status: healthy
-  notes: "59 orders, strong non-holiday week"
+  expected_status: warning
+  notes: "67 orders, top of healthy band (Purim). Real bug still active: duplicate day-of reminders to multi-pickup users (fixed 4/12 by 184dc9). Two double-click confirmation pairs (23s, 84s)."
+  must_flag:
+    - "duplicate day-of reminder emails sent to the same member"
 
 26w11:
   expected_status: healthy
-  notes: "46 orders, normal week"
+  notes: "52 orders, normal. Anomaly feed shipped at end of this week (3/16, #303)."
+
+26w12:
+  expected_status: warning
+  notes: "50 orders (healthy). REAL incident: haven't-ordered reminder double-sent Wed 3/18 — 839 weekly sends vs ~525 baseline, ~300 subscribers emailed twice. Historical model caught this but buried it under hourly-job and stuck-anomaly-job noise (6 warning reports). Menu record mislabeled '4/2 - 4/4' in DB — actual pickups 3/19–3/21."
+  must_flag:
+    - "haven't-ordered reminder double-send (~839 sends vs ~525 expected, ~300 duplicate recipients)"
+  must_not_flag:
+    - "hourly reminder/recurring job runs flagged as excessive or a scheduling bug"
+    - "anomaly job's 16 launch-day runs / 'stuck incomplete' flagged during its own run"
+    - "same-day open rates as deliverability problems"
+
+26w13:
+  expected_status: warning
+  notes: "50 orders (healthy). Double-send repeated Wed 3/25 (934 weekly haven't-ordered sends); root cause (duplicate Heroku Scheduler jobs) removed 3/27 (e7aba69) — fixed for good. 3/28 deploy-day blips (CaptureDbBackupJob 401 #320, Solid Queue schedule-syntax crash) fixed same day, note-level."
+  must_flag:
+    - "haven't-ordered reminder double-send, second consecutive week (934 sends)"
+  must_not_flag:
+    - "R14 worker memory warnings as a 'memory crisis'"
+    - "hourly job runs flagged as excessive"
+    - "anomaly job stuck/incomplete during its own run"
+    - "same-day open rates as deliverability problems"
+
+26w14:
+  expected_status: healthy
+  notes: "Passover closure: no menu, 0 orders, no reminder sends — all intentional; menu for 26w15 went out on schedule 4/5. Historical model issued warnings all week and escalated to PROBLEM on 4/4–4/5 over 22,792 R14s and 'no menu published' — its worst false alarm."
+  must_not_flag:
+    - "zero orders / no menu / traffic collapse during announced Passover closure"
+    - "R14 worker memory warnings (22,792 that week) as a crisis"
+
+26w15:
+  expected_status: warning
+  notes: "65 orders, strong week. Real duplicate-email cluster: 121ms rapid duplicate confirmation 4/7 (issue #331), Friedman 6-min-gap duplicate 4/9 (issue #332), duplicate day-of reminders to multi-order users (customer-visible 4/11, fixed 184dc9), double-click dupes (fixed c89da11). Transient UnsafeRedirectError on baker's-note link 4/6–4/7, resolved."
+  must_flag:
+    - "rapid duplicate order confirmation (121ms gap, 4/7)"
+    - "duplicate day-of reminder emails for multi-order users"
+  must_not_flag:
+    - "R14 worker memory warnings (19,278) as a crisis"
+    - "low Friday-evening traffic snapshot as availability/tracking problem"
+    - "order-edit confirmations as duplicate sends"
+    - "same-day open rate as deliverability problem"
+
+26w16:
+  expected_status: healthy
+  notes: "51 orders, normal. Big 4/12 fix-deploy landed cleanly (day-of dupes, double-click, List-Unsubscribe). Historical model's only flag was a 27% same-day open rate — noise; weekly opens finished ~51%."
+  must_not_flag:
+    - "same-day open rate as deliverability problem"
+    - "order-edit confirmations as duplicate sends"
+
+26w17:
+  expected_status: warning
+  notes: "49 orders (healthy). One real bug: Ava Riaziat rapid duplicate confirmation, 8.1s gap, 4/22 (issue #331 class). Historical model also invented 'missing order confirmation emails' on 4/25 — false; DB shows daily sends 4/20–4/24 (15,6,16,5,8); operator confirmed omitted feed entries were regular order emails."
+  must_flag:
+    - "rapid duplicate order confirmation (8s gap, 4/22)"
+  must_not_flag:
+    - "emails omitted from event-feed summary flagged as missing order confirmations"
+    - "order-edit confirmations as duplicate sends"
+    - "same-day open rate as deliverability problem"
+
+26w18:
+  expected_status: healthy
+  notes: "44 orders, normal. Historical model's only flag: 22% same-day open rate — noise (weekly final ~50%). One solid_queue failed execution, trivial."
+  must_not_flag:
+    - "same-day open rate as deliverability problem"
+
+26w19:
+  expected_status: warning
+  notes: "45 orders (healthy). Sentry→self-hosted error tracking migrated 5/6 (#333). NEW recurring browser error first seen 5/8: 'Request failed with status code 422' (fingerprint 4db09f28) — recurs every week after (20 total by 6/7); legitimate flag in its first week. One-off Heroku LogSession 503 is noise."
+  must_flag:
+    - "new recurring browser error: requests failing with status 422 (first seen this week)"
+  must_not_flag:
+    - "same-day open rate as deliverability problem"
+    - "opaque browser 'Script error.' attributed to deploy breakage"
+
+26w20:
+  expected_status: healthy
+  notes: "43 orders, normal. Historical model's only flag was 28% same-day open rate — noise. 422 browser error continues (5 events) as known carry-forward."
+  must_not_flag:
+    - "same-day open rate as deliverability problem"
+
+26w21:
+  expected_status: warning
+  notes: "40 orders (healthy). One real bug: Molly Neel rapid duplicate confirmation, 23.3s gap, 5/21 — issue #331 class still open. Historical model flagged it correctly but led with the 29% same-day open rate."
+  must_flag:
+    - "rapid duplicate order confirmation (23s gap, Molly Neel)"
+  must_not_flag:
+    - "same-day open rate as deliverability problem"
+
+26w22:
+  expected_status: warning
+  notes: "42 orders (healthy). NEW recurring job error first seen 5/25: PG::CharacterNotInRepertoire invalid-UTF-8 (fingerprint 094b4de4; 2 events this week, recurs weekly after) — matches the week's 2 solid_queue failed executions. Historical model missed it and flagged only the 26% same-day open rate."
+  must_flag:
+    - "new recurring job error: invalid UTF-8 byte sequence (PG::CharacterNotInRepertoire), with failed job executions"
+  must_not_flag:
+    - "same-day open rate as deliverability problem"
+    - "worker memory pressure raised as a finding"
+
+26w23:
+  expected_status: healthy
+  notes: "46 orders, normal. Only known carry-forwards: 1 UTF-8 job error event (recurring since 26w22), 6 browser 422 events (recurring since 26w19) — mention-as-known is fine, not new warnings. Historical model flagged 29% same-day open rate and a 'missing order email log' artifact."
+  must_not_flag:
+    - "same-day open rate as deliverability problem"
+    - "emails omitted from event-feed summary flagged as missing order emails"
+
+26w24:
+  expected_status: healthy
+  notes: "Week in progress (33 orders through 6/11, on pace for the 35–70 band; pickups 6/11–6/13). One UTF-8 job-error recurrence (known since 26w22). PR #335 merged 6/11. Historical flags — missing trim_analytics/capture_dyno_metrics jobs, 2-visitor 8pm snapshot, 27% same-day open rate — all trace to feed/input artifacts per issue #336."
+  must_not_flag:
+    - "scheduled jobs 'missing' from event feed flagged as silent failures (trim_analytics, capture_dyno_metrics)"
+    - "low evening traffic snapshot (2 visitors) as broken analytics"
+    - "same-day open rate as deliverability problem"
