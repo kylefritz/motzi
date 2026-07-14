@@ -1,5 +1,5 @@
 class ReminderMailer < ApplicationMailer
-  track extra: -> { {menu: params[:menu], pickup_day: params[:pickup_day], job_id: params[:job_id], job_name: params[:job_name]} }
+  track extra: -> { { menu: params[:menu], pickup_day: params[:pickup_day], job_id: params[:job_id], job_name: params[:job_name] } }
   track open: true, click: true
 
   def day_of_email

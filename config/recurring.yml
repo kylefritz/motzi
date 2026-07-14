@@ -34,6 +34,12 @@ production: &default
     class: CaptureDynoMetricsJob
     schedule: "3,33 * * * *"
 
+  # Enqueues every 5 minutes; UptimeSchedule decides which targets (menu/admin)
+  # are actually due at each slot, so most runs probe one URL or nothing.
+  uptime_check:
+    class: UptimeCheckJob
+    schedule: every 5 minutes
+
   capture_db_backup:
     class: CaptureDbBackupJob
     schedule: every Sunday at 3:07am America/New_York

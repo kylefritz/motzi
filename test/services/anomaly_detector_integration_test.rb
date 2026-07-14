@@ -22,6 +22,21 @@ class AnomalyDetectorIntegrationTest < ActiveSupport::TestCase
     assert_no_match(/Uptime Probe/, message)
   end
 
+  test "build_user_message with analyses_before excludes analyses created after the cutoff" do
+    prior = anomaly_analyses(:week1_analysis)
+    AnomalyAnalysis.create!(
+      week_id: "19w02", trigger: "scheduled",
+      result: "Status: ✅ Healthy\nFUTURE LEAK MARKER",
+      created_at: prior.created_at + 2.weeks
+    )
+
+    message = AnomalyDetector.new("19w01", analyses_before: prior.created_at + 1.day).build_user_message
+
+    assert_includes message, "Everything looks fine this week.",
+      "analyses before the cutoff should still be included"
+    assert_no_match(/FUTURE LEAK MARKER/, message)
+  end
+
   test "detects anomaly when orders are missing" do
     menu = menus(:week1)
     travel_to_week_id(menu.week_id) do

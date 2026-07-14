@@ -15,7 +15,7 @@ class ReviewAppMailInterceptor
   end
 end
 
-if ENV['REVIEW_APP'].present?
+if ENV["REVIEW_APP"].present?
   ActionMailer::Base.register_interceptor(ReviewAppMailInterceptor)
   ReviewAppMailInterceptor.active = true
 end

@@ -46,6 +46,21 @@ bunx playwright test --grep "havent_ordered"       # single email
 - `test/visual/email-check-prompt.txt` — Claude's visual QA prompt (edit to tune what it checks)
 - `test/visual/screenshots/` — output (gitignored)
 
+### Anomaly report eval
+
+`rake ai:eval` replays the nightly anomaly report agent against labeled historical weeks (real prod data via `bin/seed_local`) and grades each report on three axes: status accuracy (deterministic parse), required findings caught, and noise violations (false alarms). Findings are judged by Claude Haiku (`ANOMALY_JUDGE_MODEL` to override).
+
+```
+rake ai:eval                # all labeled weeks (~$2.50, ~5 min at EVAL_THREADS=3)
+rake "ai:eval[26w14]"       # one week
+rake ai:eval_report         # re-print last scorecard + failure details
+rake "ai:eval_dry[26w14]"   # show prompt without calling Claude
+```
+
+**Ground truth:** `test/anomaly_expectations.yml` — per week: `expected_status`, `must_flag` (real incidents the report must catch), `must_not_flag` (noise it must not raise as findings). Labels are derived from real history: stored nightly analyses, operator replies, error_events, rapid-duplicate email checks, and incident-fix commits. Update labels when a new real incident happens or a new noise pattern is identified.
+
+**When to run:** after changing `app/prompts/anomaly_detection.txt`, `ActivityFeed#to_text`, `AnomalyDetector`, or the anomaly model setting. Requires `ANTHROPIC_API_KEY` and a seeded local DB.
+
 ## AWS / S3
 
 - **Bucket**: `motzi` in `us-east-1` — used by Active Storage for item images
@@ -125,6 +140,20 @@ To report a handled exception from a service or job, call
 `Rails.error.report(exception, handled: true, severity: :warning, context: {...})`.
 The subscriber will persist it (severity `:info` is skipped).
 
+## Uptime monitoring
+
+`UptimeCheckJob` (every 5 min via `config/recurring.yml`) probes `/menu.json` and
+the admin on a usage-weighted schedule (`UptimeSchedule`), recording to
+`uptime_checks` (90-day retention). Two consecutive failures report one
+`UptimeCheck::OutageError` to error tracking. Surfaced in `/admin/activity_feed`
+(grid column + chart line + feed text) and `/admin/uptime_checks`.
+
+**Env vars on Heroku:** `UPTIME_PROBE_URL` (optional override; defaults to the
+public site) and `UPTIME_PROBE_TOKEN` — when set, the admin probe hits the
+token-guarded `/health/admin?token=…` (server-side subchecks: menu, orders,
+error_events, queue staleness; 404 without the token) instead of plain `/admin`.
+Generate/set like `REPLY_WEBHOOK_SECRET` below.
+
 ## Heroku Memory / R14
 
 R14 is a **soft** memory warning — the dyno exceeded its 512MB quota and went to swap. On Heroku's essential tier this is expected behavior; the process keeps running. Do not treat R14 as an error or escalate it. Only R15 (hard kill, dyno terminated) is a real problem. The worker dyno routinely runs above quota in swap — this is acceptable for our workload.
@@ -141,6 +170,7 @@ Feature work uses git worktrees in `.worktrees/`. When setting up a worktree:
 
 - **Symlink `.env`**: `ln -s ../../.env .env` (worktrees don't get untracked files)
 - **Bundler lockfile**: use `BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update` so bundler writes to the worktree, not the main repo
+- **Tests**: run with `DISABLE_SPRING=1` (Spring cross-loads apps between worktrees and hangs) and `TEST_DATABASE=motzi_test_<branch>` (concurrent suites sharing `motzi_test` clobber each other's fixtures; run `bin/rails db:test:prepare` once after setting it)
 
 ## Session Start
 

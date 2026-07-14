@@ -177,7 +177,9 @@ function Cart(props: DaysProps & { cart: CartItemType[] }) {
   );
 }
 
-export default function CartWrapper(props: DaysProps & { cart: CartItemType[] }) {
+export default function CartWrapper(
+  props: DaysProps & { cart: CartItemType[] }
+) {
   return (
     <>
       <h5>Your order</h5>
@@ -242,7 +244,11 @@ export function useCart({ order = null, items }: UseCartInput) {
 
   const calcTotal = (cart: CartItemType[]) => cartTotal({ cart, items });
 
-  const addToCart = ({ id: itemId, quantity, pickupDayId }: AddToCartPayload) => {
+  const addToCart = ({
+    id: itemId,
+    quantity,
+    pickupDayId,
+  }: AddToCartPayload) => {
     console.log("addToCart", itemId, "x", quantity, "on", pickupDayId);
     const nextCart = [...cart, { itemId, quantity, pickupDayId }];
     setCart(nextCart);

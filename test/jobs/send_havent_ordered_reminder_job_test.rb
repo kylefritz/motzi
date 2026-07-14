@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
   include ActiveJob::TestHelper
@@ -8,7 +8,7 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
     @menu.make_current!
 
     # this test thinks it's 19w46
-    assert_equal 2, @menu.pickup_days.size, 'two pickup days'
+    assert_equal 2, @menu.pickup_days.size, "two pickup days"
     sun, tues = @menu.pickup_days
     sun.update!(
       order_deadline_at: Time.zone.parse("2019-11-10 9:00 PM EST"), # sunday 9p
@@ -19,7 +19,7 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
       pickup_at: Time.zone.parse("2019-11-13 3:00 PM EST"), # wed 3p
     )
 
-    assert_equal 3, Setting.reminder_hours, 'reminders should go out between 6-9pm'
+    assert_equal 3, Setting.reminder_hours, "reminders should go out between 6-9pm"
 
     @user_ids = Set[*User.receive_havent_ordered_reminder.pluck(:id)]
     @user_ids_ordered = Set[*Menu.current.orders.pluck(:user_id)]
@@ -28,17 +28,17 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
   end
 
   test "dont send on wrong day of week" do
-    refute_reminders_emailed(:mon, '8:00 PM', 'dont send on mon')
-    refute_reminders_emailed(:wed, '8:00 PM', 'dont send on wed')
+    refute_reminders_emailed(:mon, "8:00 PM", "dont send on mon")
+    refute_reminders_emailed(:wed, "8:00 PM", "dont send on wed")
   end
 
   test "Sends to users who havent ordered, at right time" do
-    refute_reminders_emailed(:sun, '5:00 PM', 'dont send too early')
+    refute_reminders_emailed(:sun, "5:00 PM", "dont send too early")
     assert_commented do
-      assert_reminders_emailed(@num_to_remind, :sun, '7:00 PM', 'send on sunday night')
+      assert_reminders_emailed(@num_to_remind, :sun, "7:00 PM", "send on sunday night")
     end
-    just_messaged = Set[*Menu.current.messages.where(mailer: 'ReminderMailer#havent_ordered_email').pluck(:user_id)]
-    assert_equal @user_ids_to_remind, just_messaged, 'we sent messages to who we wanted to'
+    just_messaged = Set[*Menu.current.messages.where(mailer: "ReminderMailer#havent_ordered_email").pluck(:user_id)]
+    assert_equal @user_ids_to_remind, just_messaged, "we sent messages to who we wanted to"
   end
 
   test "day2 works also" do
@@ -48,15 +48,15 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
   end
 
   test "Doesnt send to users multiple times on same menu" do
-    assert_reminders_emailed(@num_to_remind, :sun, '7:00 PM', 'send on sunday night')
-    refute_reminders_emailed(:sun, '7:01 PM', 'dont send the second time')
+    assert_reminders_emailed(@num_to_remind, :sun, "7:00 PM", "send on sunday night")
+    refute_reminders_emailed(:sun, "7:01 PM", "dont send the second time")
   end
 
   test "respects receive_havent_ordered_reminder preference" do
     users(:kyle).update!(receive_havent_ordered_reminder: false)
     new_num = @user_ids_to_remind.count { |id| id != users(:kyle).id }
     assert_commented do
-      assert_reminders_emailed(new_num, :sun, '7:00 PM', 'kyle opted out')
+      assert_reminders_emailed(new_num, :sun, "7:00 PM", "kyle opted out")
     end
   end
 
@@ -64,7 +64,7 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
     users(:kyle).update!(receive_weekly_menu: false)
     new_num = @user_ids_to_remind.count { |id| id != users(:kyle).id }
     assert_commented do
-      assert_reminders_emailed(new_num, :sun, '7:00 PM', 'kyle off weekly menu')
+      assert_reminders_emailed(new_num, :sun, "7:00 PM", "kyle off weekly menu")
     end
   end
 
@@ -80,7 +80,7 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
       end
     end
     if num_emails > 0
-      assert_equal 'ReminderMailer#havent_ordered_email', Ahoy::Message.last.mailer, 'sent by right mailer action'
+      assert_equal "ReminderMailer#havent_ordered_email", Ahoy::Message.last.mailer, "sent by right mailer action"
     end
   end
 end

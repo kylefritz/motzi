@@ -25,7 +25,7 @@ class SendgridStats
     uri = ENDPOINT.dup
     uri.query = URI.encode_www_form(
       start_date: start_date.to_date.iso8601,
-      end_date: [end_date.to_date, Date.current].min.iso8601,
+      end_date: [ end_date.to_date, Date.current ].min.iso8601,
       aggregated_by: "day"
     )
 

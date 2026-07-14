@@ -335,7 +335,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
       url: "https://example.com/commit",
       current_week: true
     )
-    feed.define_singleton_method(:local_git_commits) { [commit] }
+    feed.define_singleton_method(:local_git_commits) { [ commit ] }
 
     commits = feed.git_commits
 
@@ -378,7 +378,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
         backtrace: "/app/services/foo.rb:42:in `bar'\n/gems/rails/foo.rb:1",
         url: "/menu",
         http_method: "GET",
-        environment: Rails.env,
+        environment: "production",
         occurred_at: week_start + (i + 1).hours
       )
     end
@@ -387,7 +387,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
       source: "browser",
       error_class: "TypeError",
       message: "Cannot read 'foo' of undefined",
-      environment: Rails.env,
+      environment: "production",
       occurred_at: week_start + 4.hours
     )
 
@@ -423,12 +423,23 @@ class ActivityFeedTest < ActiveSupport::TestCase
   test "verbose feed tags order confirmations sent within 2 minutes as RAPID DUPLICATE" do
     travel_to_week_id(@week_id) do
       first_send = Time.zone.now + 2.days
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), sent_at: first_send)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), sent_at: first_send + 30.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text(verbose: true)
+    assert_match(/RAPID DUPLICATE/, text, "sub-minute-gap confirmations are the real bug signal")
+  end
+
+  test "verbose feed does not tag admin self-test pairs as RAPID DUPLICATE" do
+    travel_to_week_id(@week_id) do
+      first_send = Time.zone.now + 2.days
       Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: first_send)
       Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: first_send + 30.seconds)
     end
 
     text = ActivityFeed.new(@week_id).to_text(verbose: true)
-    assert_match(/RAPID DUPLICATE/, text, "sub-minute-gap confirmations are the real bug signal")
+    assert_no_match(/RAPID DUPLICATE/, text, "team self-tests are not member-facing duplicate bugs")
   end
 
   test "to_text notes deliverability data is unavailable without SendGrid credentials" do
@@ -444,7 +455,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
   test "to_text includes SendGrid bounce and spam counts when available" do
     ENV["SENDGRID_API_KEY"] = "SG.test-key"
     body = [
-      { date: "2026-01-01", stats: [{ metrics: { requests: 20, delivered: 18, bounces: 2, blocks: 1, spam_reports: 1, invalid_emails: 0 } }] }
+      { date: "2026-01-01", stats: [ { metrics: { requests: 20, delivered: 18, bounces: 2, blocks: 1, spam_reports: 1, invalid_emails: 0 } } ] }
     ].to_json
     stub_request(:get, "https://api.sendgrid.com/v3/stats")
       .with(query: hash_including({}))
@@ -467,12 +478,12 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     ErrorEvent.create!(
       fingerprint: "fp-resolved", source: "server", error_class: "ResolvedError",
-      message: "triaged by operator", environment: Rails.env,
+      message: "triaged by operator", environment: "production",
       occurred_at: week_start + 1.hour, resolved_at: Time.current
     )
     ErrorEvent.create!(
       fingerprint: "fp-open", source: "server", error_class: "OpenError",
-      message: "still live", environment: Rails.env, occurred_at: week_start + 2.hours
+      message: "still live", environment: "production", occurred_at: week_start + 2.hours
     )
 
     text = ActivityFeed.new(week_id).to_text
@@ -488,12 +499,12 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     ErrorEvent.create!(
       fingerprint: "fp-recur", source: "server", error_class: "RecurError",
-      message: "old occurrence", environment: Rails.env,
+      message: "old occurrence", environment: "production",
       occurred_at: week_start + 1.hour, resolved_at: Time.current
     )
     ErrorEvent.create!(
       fingerprint: "fp-recur", source: "server", error_class: "RecurError",
-      message: "new occurrence", environment: Rails.env, occurred_at: week_start + 5.hours
+      message: "new occurrence", environment: "production", occurred_at: week_start + 5.hours
     )
 
     text = ActivityFeed.new(week_id).to_text
@@ -509,7 +520,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
     2.times do |i|
       ErrorEvent.create!(
         fingerprint: "fp-quiet", source: "server", error_class: "QuietError",
-        message: "handled", environment: Rails.env,
+        message: "handled", environment: "production",
         occurred_at: week_start + (i + 1).hours, resolved_at: Time.current
       )
     end
@@ -518,6 +529,78 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     assert_no_match(/QuietError/, text)
     assert_match(/2 resolved events excluded/, text)
+  end
+
+  test "to_text tags error fingerprints not seen in prior 4 weeks as NEW" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    ErrorEvent.create!(
+      fingerprint: "fp-brand-new", source: "browser", error_class: "BrandNewError",
+      message: "first appearance", environment: "production", occurred_at: week_start + 1.hour
+    )
+    ErrorEvent.create!(
+      fingerprint: "fp-carryover", source: "browser", error_class: "CarryoverError",
+      message: "old friend", environment: "production", occurred_at: week_start - 2.weeks
+    )
+    ErrorEvent.create!(
+      fingerprint: "fp-carryover", source: "browser", error_class: "CarryoverError",
+      message: "old friend again", environment: "production", occurred_at: week_start + 2.hours
+    )
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_match(/BrandNewError ×1.*\[NEW this week/, text)
+    assert_no_match(/CarryoverError ×1.*\[NEW this week/, text)
+  end
+
+  test "to_text reports zero rapid duplicate confirmations explicitly" do
+    travel_to_week_id(@week_id) do
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: Time.zone.now)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Rapid duplicate confirmations: 0 this week/, text)
+  end
+
+  test "to_text counts rapid duplicate confirmation pairs in email health" do
+    travel_to_week_id(@week_id) do
+      sent = Time.zone.now + 1.day
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), sent_at: sent)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), sent_at: sent + 30.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Rapid duplicate confirmations: 1 pair within 2 min affecting 1 member/, text)
+  end
+
+  test "rapid duplicate counter ignores admin self-test pairs" do
+    travel_to_week_id(@week_id) do
+      sent = Time.zone.now + 1.day
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: sent)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:kyle), sent_at: sent + 30.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Rapid duplicate confirmations: 0 this week/, text)
+  end
+
+  test "error feed excludes non-production events" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    ErrorEvent.create!(
+      fingerprint: "fp-local", source: "server", error_class: "LocalDevError",
+      message: "SIGTERM from a local eval run", environment: "development",
+      occurred_at: week_start + 1.hour
+    )
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_no_match(/LocalDevError/, text)
   end
 
   test "to_text reports zero failed jobs explicitly" do
@@ -553,5 +636,65 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     text = ActivityFeed.new(@week_id).to_text(verbose: true)
     assert_match(/DUPLICATE — 2x/, text, "reminder duplicates must still be flagged")
+  end
+
+  test "to_text includes an uptime section with per-target stats and failures" do
+    week_start = Time.zone.from_week_id(@week_id)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 100, up: true, checked_at: week_start + 1.day)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 503, latency_ms: 50, up: false, checked_at: week_start + 1.day + 15.minutes)
+    UptimeCheck.create!(target: "admin", url: "https://probe.test/admin", status: 302, latency_ms: 80, up: true, checked_at: week_start + 1.day)
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_includes text, "== Uptime (scheduled probes) =="
+    assert_includes text, "menu: 50.0% up (1/2 checks)"
+    assert_includes text, "admin: 100.0% up (1/1 checks)"
+    assert_match(/FAIL .* GET https:\/\/probe\.test\/menu\.json → HTTP 503/, text)
+    assert_match(/missed slot/, text, "sparse checks in a past week should surface missed slots")
+  end
+
+  test "to_text omits the uptime section when there are no checks" do
+    assert_not_includes ActivityFeed.new(@week_id).to_text, "== Uptime"
+  end
+
+  test "to_text omits the uptime section for weeks before monitoring existed" do
+    week_start = Time.zone.from_week_id(@week_id)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 100, up: true, checked_at: week_start + 3.weeks)
+
+    assert_not_includes ActivityFeed.new(@week_id).to_text, "== Uptime"
+  end
+
+  test "to_text flags a monitored target that recorded zero checks all week" do
+    week_start = Time.zone.from_week_id(@week_id)
+    # admin was monitored before this week, then went completely silent
+    UptimeCheck.create!(target: "admin", url: "https://probe.test/admin", status: 302, latency_ms: 80, up: true, checked_at: week_start - 3.days)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 100, up: true, checked_at: week_start + 1.day)
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/admin: NO CHECKS RECORDED — \d+ expected slots all missed/, text)
+    assert_includes text, "menu: 100.0% up (1/1 checks)"
+  end
+
+  test "uptime checks roll up into one daily grid event per day" do
+    week_start = Time.zone.from_week_id(@week_id)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 100, up: true, checked_at: week_start + 1.day + 9.hours)
+    UptimeCheck.create!(target: "admin", url: "https://probe.test/admin", status: 302, latency_ms: 80, up: true, checked_at: week_start + 1.day + 10.hours)
+    UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 500, latency_ms: 60, up: false, checked_at: week_start + 2.days + 9.hours)
+
+    feed = ActivityFeed.new(@week_id)
+    events = feed.summary.select { |e| e.action == "uptime_summary" }
+
+    assert_equal 2, events.size
+    assert_includes feed.grid_columns, "uptime_summary"
+
+    day_one = events.find { |e| e.details[:checks] == 2 }
+    assert_equal "system", day_one.category
+    assert_equal 100, day_one.details[:pct]
+    assert_equal "Uptime: 100% (2 checks)", day_one.description
+
+    day_two = events.find { |e| e.details[:checks] == 1 }
+    assert_equal 0, day_two.details[:pct]
+    assert_equal 1, day_two.details[:failures]
   end
 end

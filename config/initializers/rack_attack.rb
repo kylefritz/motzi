@@ -25,5 +25,5 @@ class Rack::Attack
   end
 end
 
-Rack::Attack.blocklisted_responder = ->(_req) { [404, { "Content-Type" => "text/plain" }, ["Not Found"]] }
-Rack::Attack.throttled_responder = ->(_req) { [429, { "Content-Type" => "text/plain" }, ["Too Many Requests"]] }
+Rack::Attack.blocklisted_responder = ->(_req) { [ 404, { "Content-Type" => "text/plain" }, [ "Not Found" ] ] }
+Rack::Attack.throttled_responder = ->(_req) { [ 429, { "Content-Type" => "text/plain" }, [ "Too Many Requests" ] ] }

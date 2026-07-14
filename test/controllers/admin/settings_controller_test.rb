@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class Admin::SettingsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -9,7 +9,7 @@ class Admin::SettingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get index" do
-    get '/admin/settings'
+    get "/admin/settings"
     assert_response :success
   end
 

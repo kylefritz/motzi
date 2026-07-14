@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class AnomalyAnalysisTest < ActiveSupport::TestCase
   test "validates required fields" do
@@ -42,7 +42,7 @@ class AnomalyAnalysisTest < ActiveSupport::TestCase
     first = analysis.replies.create!(author_email: "kyle@example.com", body: "first", created_at: 2.hours.ago)
     second = analysis.replies.create!(author_email: "kyle@example.com", body: "second", created_at: 1.hour.ago)
 
-    assert_equal [first, second], analysis.replies.to_a
+    assert_equal [ first, second ], analysis.replies.to_a
   end
 
   test "destroys replies when analysis is destroyed" do

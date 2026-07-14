@@ -10,32 +10,35 @@ Rails.application.routes.draw do
   post "/contact",   to: "contact#create"
 
   # pay for credit items
-  resources :credit_items, only: [:new, :create]
+  resources :credit_items, only: [ :new, :create ]
 
   # preview other menus
-  resources :menus, only: [:show]
+  resources :menus, only: [ :show ]
 
   # get the menu for the week
   get "/menu", to: "menus#show", as: :current_menu
 
+  # token-guarded uptime probe target (404s unless UPTIME_PROBE_TOKEN matches)
+  get "/health/admin", to: "health#admin"
+
   # create/update order for a menu
-  resources :orders, only: [:create, :update]
+  resources :orders, only: [ :create, :update ]
 
   # email preference settings
-  resource :email_preferences, only: [:update]
+  resource :email_preferences, only: [ :update ]
 
   # sign in
-  get '/auth' => redirect('/users/sign_in')
-  get '/login' => redirect('/users/sign_in')
-  get '/signin' => redirect('/users/sign_in')
+  get "/auth" => redirect("/users/sign_in")
+  get "/login" => redirect("/users/sign_in")
+  get "/signin" => redirect("/users/sign_in")
 
   # sign out
-  get '/logout' => redirect('/signout')
-  get '/signout' => 'home#signout'
+  get "/logout" => redirect("/signout")
+  get "/signout" => "home#signout"
 
   # mounted admin-only apps
   authenticate :user, ->(user) { user.is_admin? } do
-    get '/admin/pickup_lists/:date', to: 'admin/pickup_lists#show', as: :admin_pickup_list
+    get "/admin/pickup_lists/:date", to: "admin/pickup_lists#show", as: :admin_pickup_list
 
     mount Blazer::Engine, at: "/blazer"
     mount MissionControl::Jobs::Engine, at: "/jobs"
@@ -45,7 +48,7 @@ Rails.application.routes.draw do
   # redirect_unless_user_is_admin! so non-admin users see a redirect
   # rather than a 404 from a route-level constraint.
   namespace :admin do
-    resources :error_events, only: [:index, :show] do
+    resources :error_events, only: [ :index, :show ] do
       member do
         post :resolve
         post :unresolve
@@ -54,13 +57,13 @@ Rails.application.routes.draw do
   end
 
   # browser error ingest — accepts a session, posts errors to error_events
-  resources :error_events, only: [:create]
+  resources :error_events, only: [ :create ]
 
   post "/reply_ingress", to: "reply_ingress#create"
 
   # Error feedback API (used by error pages)
   namespace :api do
-    resources :feedbacks, only: [:create]
+    resources :feedbacks, only: [ :create ]
   end
 
   # Custom error pages (404/422 are controller-rendered; 500 falls through to public/500.html)

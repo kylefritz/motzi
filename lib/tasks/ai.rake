@@ -1,5 +1,5 @@
 namespace :ai do
-  task :quiet => :environment do
+  task quiet: :environment do
     ActiveRecord::Base.logger = nil
   end
 
@@ -12,14 +12,14 @@ namespace :ai do
   end
 
   desc "Show activity feed prompt for a week (default: current week). Usage: rake ai:activity_feed_prompt[26w11]"
-  task :activity_feed_prompt, [:week_id] => :quiet do |_t, args|
+  task :activity_feed_prompt, [ :week_id ] => :quiet do |_t, args|
     week_id = args[:week_id] || Time.zone.now.week_id
     feed = ActivityFeed.new(week_id)
     puts feed.to_text(verbose: false)
   end
 
   desc "Show historical analyses and menu data. Usage: rake ai:history"
-  task :history => :quiet do
+  task history: :quiet do
     puts "=== Existing Analyses ==="
     AnomalyAnalysis.order(:created_at).each do |a|
       puts "#{a.week_id} | #{a.overall_status.to_s.ljust(8)} | #{a.trigger.ljust(9)} | #{a.created_at.strftime('%m/%d %H:%M')} | #{a.result.lines.first&.strip&.truncate(80)}"
@@ -35,7 +35,7 @@ namespace :ai do
   end
 
   desc "Show full analysis result for a week. Usage: rake ai:analysis[26w11]"
-  task :analysis, [:week_id] => :quiet do |_t, args|
+  task :analysis, [ :week_id ] => :quiet do |_t, args|
     week_id = args[:week_id] || Time.zone.now.week_id
     analyses = AnomalyAnalysis.for_week(week_id).order(:created_at)
 
@@ -56,14 +56,14 @@ namespace :ai do
   end
 
   desc "Show verbose activity feed for a week. Usage: rake ai:activity_feed_verbose[26w11]"
-  task :activity_feed_verbose, [:week_id] => :quiet do |_t, args|
+  task :activity_feed_verbose, [ :week_id ] => :quiet do |_t, args|
     week_id = args[:week_id] || Time.zone.now.week_id
     feed = ActivityFeed.new(week_id)
     puts feed.to_text(verbose: true)
   end
 
   desc "Show the full prompt that would be sent to Claude. Usage: rake ai:full_prompt[26w11]"
-  task :full_prompt, [:week_id] => :quiet do |_t, args|
+  task :full_prompt, [ :week_id ] => :quiet do |_t, args|
     week_id = args[:week_id] || Time.zone.now.week_id
     detector = AnomalyDetector.new(week_id) { |msg| $stderr.puts msg }
     puts "=== SYSTEM PROMPT ==="
@@ -73,8 +73,8 @@ namespace :ai do
     puts detector.build_user_message
   end
 
-  desc "Evaluate anomaly detector against historical weeks. Usage: rake ai:eval or rake ai:eval[26w05]"
-  task :eval, [:week_id] => :quiet do |_t, args|
+  desc "Evaluate anomaly detector against historical weeks. Usage: rake ai:eval or rake ai:eval[26w05]. EVAL_THREADS=3 to change parallelism."
+  task :eval, [ :week_id ] => :quiet do |_t, args|
     expectations = YAML.load_file(expectations_path)
     FileUtils.mkdir_p(eval_results_dir)
 
@@ -86,63 +86,97 @@ namespace :ai do
       expectations
     end
 
+    thread_count = (ENV["EVAL_THREADS"] || 3).to_i.clamp(1, 6)
+    puts "Evaluating #{weeks.size} weeks with #{thread_count} threads (model: #{AnomalyDetector.model}, judge: #{AnomalyReportGrader.judge_model})..."
+
+    queue = Queue.new
+    weeks.each_with_index { |(week_id, expectation), i| queue << [ week_id, expectation, i ] }
+    mutex = Mutex.new
     results = []
-    total_cost = 0.0
+    done = 0
 
-    weeks.each_with_index do |(week_id, expectation), i|
-      expected = expectation["expected_status"]
-      notes = expectation["notes"]
+    workers = thread_count.times.map do
+      Thread.new do
+        loop do
+          week_id, expectation, _i = begin
+            queue.pop(true)
+          rescue ThreadError
+            break
+          end
 
-      puts "\n[#{i + 1}/#{weeks.size}] Evaluating #{week_id} (expected: #{expected})..."
-      puts "  Notes: #{notes}"
-
-      detector = AnomalyDetector.new(week_id) { |msg| puts "  #{msg}" }
-      result = detector.run_analysis
-
-      # Parse status from result text (same logic as AnomalyAnalysis model)
-      status_line = result[:text][/(?:overall )?status:.*$/i]
-      actual_status = if status_line
-        case status_line.downcase
-        when /problem|🔴/ then "problem"
-        when /warning|⚠️/ then "warning"
-        when /healthy|✅/ then "healthy"
-        else "warning"
+          row = ActiveRecord::Base.connection_pool.with_connection do
+            evaluate_week(week_id, expectation)
+          end
+          mutex.synchronize do
+            results << row
+            done += 1
+            print_week_result(row, done, weeks.size)
+          end
         end
-      else
-        "warning"
       end
-
-      passed = actual_status == expected
-      total_cost += result[:cost]
-
-      results << {
-        week_id: week_id,
-        expected: expected,
-        actual: actual_status,
-        passed: passed,
-        cost: result[:cost],
-        tldr: result[:text].lines.first&.strip,
-        full_result: result[:text],
-        input_tokens: result[:input_tokens],
-        output_tokens: result[:output_tokens]
-      }
-
-      icon = passed ? "PASS" : "FAIL"
-      puts "  => #{icon}: got #{actual_status} (expected #{expected}) — $#{'%.4f' % result[:cost]}"
-      puts "  TL;DR: #{result[:text].lines.first&.strip&.truncate(100)}"
     end
+    workers.each(&:join)
 
-    # Save results
+    results.sort_by! { |r| r[:week_id] }
+    total_cost = results.sum { |r| r[:cost].to_f }
+
     timestamp = Time.zone.now.strftime("%Y%m%d_%H%M%S")
     results_file = eval_results_dir.join("eval_#{timestamp}.yml")
     File.write(results_file, results.to_yaml)
 
-    # Print scorecard
     print_scorecard(results, total_cost, results_file)
   end
 
+  # Run the detector on one labeled week and grade the output.
+  # The prompt only sees analyses that existed by the end of that week, so
+  # historical evals can't leak reports from the future.
+  def evaluate_week(week_id, expectation)
+    expected = expectation["expected_status"]
+    must_flag = expectation["must_flag"] || []
+    must_not_flag = expectation["must_not_flag"] || []
+    week_end = Time.zone.from_week_id(week_id) + 7.days
+
+    detector = AnomalyDetector.new(week_id, analyses_before: week_end)
+    result = detector.run_analysis
+    grade = AnomalyReportGrader.new(result[:text], must_flag: must_flag, must_not_flag: must_not_flag).grade
+
+    status_ok = grade[:status] == expected
+    {
+      week_id: week_id,
+      expected: expected,
+      actual: grade[:status],
+      status_ok: status_ok,
+      misses: grade[:misses],
+      violations: grade[:violations],
+      must_flag_detail: grade[:must_flag],
+      must_not_flag_detail: grade[:must_not_flag],
+      passed: status_ok && grade[:misses].empty? && grade[:violations].empty?,
+      cost: result[:cost],
+      notes: expectation["notes"],
+      tldr: result[:text].lines.first&.strip,
+      full_result: result[:text],
+      input_tokens: result[:input_tokens],
+      output_tokens: result[:output_tokens]
+    }
+  rescue StandardError => e
+    {
+      week_id: week_id, expected: expected, actual: "ERROR", status_ok: false,
+      misses: must_flag, violations: [], must_flag_detail: [], must_not_flag_detail: [],
+      passed: false, cost: 0.0, notes: expectation["notes"],
+      tldr: "ERROR: #{e.class}: #{e.message}", full_result: "#{e.class}: #{e.message}\n#{e.backtrace.first(5).join("\n")}",
+      input_tokens: 0, output_tokens: 0
+    }
+  end
+
+  def print_week_result(row, done, total)
+    icon = row[:passed] ? "PASS" : "FAIL"
+    puts "[#{done}/#{total}] #{icon}  #{row[:week_id]}  status: #{row[:actual]} (expected #{row[:expected]})  $#{'%.4f' % row[:cost]}"
+    row[:misses].each { |m| puts "         MISSED: #{m}" }
+    row[:violations].each { |v| puts "         FALSE ALARM: #{v}" }
+  end
+
   desc "Dry run: show prompts that would be sent without calling Claude. Usage: rake ai:eval_dry or rake ai:eval_dry[26w05]"
-  task :eval_dry, [:week_id] => :quiet do |_t, args|
+  task :eval_dry, [ :week_id ] => :quiet do |_t, args|
     expectations = YAML.load_file(expectations_path)
 
     weeks = if args[:week_id]
@@ -170,7 +204,7 @@ namespace :ai do
   end
 
   desc "Show results from most recent eval run. Usage: rake ai:eval_report"
-  task :eval_report => :quiet do
+  task eval_report: :quiet do
     files = Dir.glob(eval_results_dir.join("eval_*.yml")).sort
     if files.empty?
       puts "No eval results found. Run `rake ai:eval` first."
@@ -191,13 +225,19 @@ namespace :ai do
       puts "=" * 60
       failures.each do |r|
         puts "\n--- #{r[:week_id]} (expected: #{r[:expected]}, got: #{r[:actual]}) ---"
+        Array(r[:misses]).each { |m| puts "MISSED: #{m}" }
+        Array(r[:violations]).each do |v|
+          detail = Array(r[:must_not_flag_detail]).find { |d| d[:item] == v }
+          puts "FALSE ALARM: #{v}"
+          puts "  evidence: #{detail[:evidence]}" if detail && detail[:evidence].present?
+        end
         puts r[:full_result]
       end
     end
   end
 
   desc "Show weekly metrics for a year. Usage: rake ai:metrics[25] or rake ai:metrics[24]"
-  task :metrics, [:year] => :quiet do |_t, args|
+  task :metrics, [ :year ] => :quiet do |_t, args|
     year_prefix = args[:year] || "25"
     puts "week_id | menu_name                                      | orders | items | emails | opened | visitors | notes"
     puts "--------|------------------------------------------------|--------|-------|--------|--------|----------|------"
@@ -223,18 +263,31 @@ namespace :ai do
 
   def print_scorecard(results, total_cost, results_file)
     passed = results.count { |r| r[:passed] }
-    failed = results.count { |r| !r[:passed] }
+    status_ok = results.count { |r| r[:status_ok] }
+    total_required = results.sum { |r| Array(r[:must_flag_detail]).size }
+    total_found = results.sum { |r| Array(r[:must_flag_detail]).count { |d| d[:found] } }
+    total_misses = results.sum { |r| Array(r[:misses]).size }
+    total_violations = results.sum { |r| Array(r[:violations]).size }
+    weeks_with_forbidden = results.count { |r| Array(r[:must_not_flag_detail]).any? }
 
-    puts "\n#{'=' * 60}"
+    puts "\n#{'=' * 72}"
     puts "SCORECARD"
-    puts "=" * 60
+    puts "=" * 72
     results.each do |r|
       icon = r[:passed] ? "PASS" : "FAIL"
-      puts "  #{icon}  #{r[:week_id]}  expected=#{r[:expected].ljust(8)}  got=#{r[:actual].ljust(8)}  $#{'%.4f' % r[:cost]}"
+      finding_note = []
+      finding_note << "#{Array(r[:misses]).size} missed" if Array(r[:misses]).any?
+      finding_note << "#{Array(r[:violations]).size} false alarm#{'s' if Array(r[:violations]).size != 1}" if Array(r[:violations]).any?
+      suffix = finding_note.any? ? "  [#{finding_note.join(', ')}]" : ""
+      puts "  #{icon}  #{r[:week_id]}  expected=#{r[:expected].to_s.ljust(8)}  got=#{r[:actual].to_s.ljust(8)}  $#{'%.4f' % r[:cost]}#{suffix}"
     end
-    puts "-" * 60
-    puts "  #{passed}/#{results.size} passed, #{failed} failed — total cost: $#{'%.4f' % total_cost}"
-    puts "  Results saved to: #{results_file}"
-    puts "=" * 60
+    puts "-" * 72
+    puts "  Weeks fully passed:   #{passed}/#{results.size}"
+    puts "  Status accuracy:      #{status_ok}/#{results.size}"
+    puts "  Required findings:    #{total_found}/#{total_required} caught (#{total_misses} missed)" if total_required.positive?
+    puts "  Noise violations:     #{total_violations} false alarm#{'s' if total_violations != 1} across #{weeks_with_forbidden} weeks with forbidden checks"
+    puts "  Total cost:           $#{'%.4f' % total_cost}"
+    puts "  Results saved to:     #{results_file}"
+    puts "=" * 72
   end
 end

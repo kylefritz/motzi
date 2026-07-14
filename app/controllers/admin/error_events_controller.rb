@@ -1,6 +1,6 @@
 class Admin::ErrorEventsController < ApplicationController
   before_action :redirect_unless_user_is_admin!
-  before_action :load_event, only: [:show, :resolve, :unresolve]
+  before_action :load_event, only: [ :show, :resolve, :unresolve ]
 
   PER_PAGE = 30
 
@@ -22,7 +22,7 @@ class Admin::ErrorEventsController < ApplicationController
       scope = scope.where("error_class ILIKE ? OR message ILIKE ?", q, q)
     end
 
-    page = [params[:page].to_i, 1].max
+    page = [ params[:page].to_i, 1 ].max
     offset = (page - 1) * PER_PAGE
 
     @groups = scope

@@ -28,7 +28,7 @@ class RackAttackTest < ActionDispatch::IntegrationTest
     "/files.tgz",
     "/data.rar",
     "/dump.7z",
-    "/backup.backup",
+    "/backup.backup"
   ].each do |path|
     test "blocks scanner path #{path}" do
       get path

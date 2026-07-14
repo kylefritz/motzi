@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class ItemTest < ActiveSupport::TestCase
   test "pay_it_forward?" do
@@ -44,5 +44,12 @@ class ItemTest < ActiveSupport::TestCase
 
   test "deletable? when item has orders" do
     refute items(:classic).deletable?, "classic has order_items"
+  end
+
+  test "cannot destroy an item with order history" do
+    item = items(:classic)
+
+    refute item.destroy, "destroy should fail for an item with order_items"
+    assert Item.exists?(item.id)
   end
 end

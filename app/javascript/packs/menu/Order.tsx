@@ -15,12 +15,7 @@ type OrderProps = {
 
 export default function Order({ menu, user, order, onEditOrder }: OrderProps) {
   const { name } = menu;
-  const {
-    items: cart,
-    comments,
-    stripeReceiptUrl,
-    stripeChargeAmount,
-  } = order;
+  const { items: cart, comments, stripeReceiptUrl, stripeChargeAmount } = order;
 
   const isSubscriptionOrder = !stripeChargeAmount;
   return (

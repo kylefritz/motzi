@@ -24,8 +24,8 @@ class SendgridStatsTest < ActiveSupport::TestCase
   test "sums metrics across days" do
     ENV["SENDGRID_API_KEY"] = "SG.test-key"
     body = [
-      { date: "2026-06-07", stats: [{ metrics: { requests: 10, delivered: 9, bounces: 1, blocks: 0, spam_reports: 0, invalid_emails: 0 } }] },
-      { date: "2026-06-08", stats: [{ metrics: { requests: 5, delivered: 4, bounces: 0, blocks: 1, spam_reports: 1, invalid_emails: 0 } }] }
+      { date: "2026-06-07", stats: [ { metrics: { requests: 10, delivered: 9, bounces: 1, blocks: 0, spam_reports: 0, invalid_emails: 0 } } ] },
+      { date: "2026-06-08", stats: [ { metrics: { requests: 5, delivered: 4, bounces: 0, blocks: 1, spam_reports: 1, invalid_emails: 0 } } ] }
     ].to_json
     stub_request(:get, "https://api.sendgrid.com/v3/stats")
       .with(
@@ -66,7 +66,7 @@ class SendgridStatsTest < ActiveSupport::TestCase
     ENV["SENDGRID_API_KEY"] = "SG.test-key"
     stub_request(:get, "https://api.sendgrid.com/v3/stats")
       .with(query: hash_including({}))
-      .to_return(status: 403, body: { errors: [{ message: "access forbidden" }] }.to_json)
+      .to_return(status: 403, body: { errors: [ { message: "access forbidden" } ] }.to_json)
 
     assert_nil SendgridStats.for_period(Date.new(2026, 6, 7), Date.new(2026, 6, 13))
   end

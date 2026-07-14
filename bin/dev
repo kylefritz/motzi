@@ -13,18 +13,30 @@ if ! ruby -e "require 'socket'; require 'timeout'; Timeout.timeout(1) { TCPSocke
 fi
 
 # Check port 3000
-echo "==> Checking port 3000..."
-if lsof -iTCP:3000 -sTCP:LISTEN -t > /dev/null 2>&1; then
-  pid=$(lsof -iTCP:3000 -sTCP:LISTEN -t 2>/dev/null | head -1)
-  echo "==> Port 3000 in use (pid $pid)"
-  read -rp "==> Kill it? [Y/n] " answer
-  if [[ "${answer:-Y}" =~ ^[Yy]?$ ]]; then
-    kill "$pid" 2>/dev/null && echo "==> Killed $pid" || echo "==> Could not kill $pid"
-    sleep 1
-  else
-    echo "ERROR: Port 3000 in use, can't start"
-    exit 1
-  fi
+web_port=3000
+echo "==> Checking port ${web_port}..."
+if lsof -iTCP:"$web_port" -sTCP:LISTEN -t > /dev/null 2>&1; then
+  pid=$(lsof -iTCP:"$web_port" -sTCP:LISTEN -t 2>/dev/null | head -1)
+  alt_port=3001
+  while lsof -iTCP:"$alt_port" -sTCP:LISTEN -t > /dev/null 2>&1; do
+    alt_port=$((alt_port + 1))
+  done
+  echo "==> Port ${web_port} in use (pid $pid)"
+  read -rp "==> [u]se port ${alt_port} instead (default) / [k]ill $pid / [q]uit? " answer
+  case "${answer:-u}" in
+    [Kk]*)
+      kill "$pid" 2>/dev/null && echo "==> Killed $pid" || echo "==> Could not kill $pid"
+      sleep 1
+      ;;
+    [Qq]*)
+      echo "ERROR: Port ${web_port} in use, can't start"
+      exit 1
+      ;;
+    *)
+      web_port=$alt_port
+      echo "==> Using port ${web_port}"
+      ;;
+  esac
 fi
 
 # Check bundle
@@ -65,4 +77,4 @@ if [ ${#needs_setup[@]} -gt 0 ]; then
   fi
 fi
 
-exec bundle exec foreman start -f Procfile.dev
+exec env WEB_PORT="$web_port" bundle exec foreman start -f Procfile.dev

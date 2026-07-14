@@ -21,7 +21,7 @@ class CreateErrorEvents < ActiveRecord::Migration[7.2]
       t.timestamps
     end
 
-    add_index :error_events, [:fingerprint, :occurred_at]
+    add_index :error_events, [ :fingerprint, :occurred_at ]
     add_index :error_events, :occurred_at
     add_index :error_events, :resolved_at
     add_index :error_events, :source

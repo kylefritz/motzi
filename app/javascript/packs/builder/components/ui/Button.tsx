@@ -64,7 +64,10 @@ const variantStyles = {
   `,
 };
 
-const BaseButton = styled.button<{ $variant: ButtonVariant; $size: ButtonSize }>`
+const BaseButton = styled.button<{
+  $variant: ButtonVariant;
+  $size: ButtonSize;
+}>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
