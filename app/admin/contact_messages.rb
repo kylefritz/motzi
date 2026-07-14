@@ -1,10 +1,10 @@
 ActiveAdmin.register ContactMessage do
-  menu parent: 'Advanced', label: 'Contact Messages', priority: 50
+  menu parent: "Advanced", label: "Contact Messages", priority: 50
 
   actions :index, :show, :destroy
 
   config.filters = false
-  config.sort_order = 'created_at_desc'
+  config.sort_order = "created_at_desc"
 
   index do
     selectable_column

@@ -24,7 +24,7 @@ namespace :marketing do
       { url: "https://static.wixstatic.com/media/0e6926_01f6d2dd66064697bac0356b585c9d7c~mv2.jpg" },  # owners at counter / about hero (NM_20200723_14_12_12)
       { url: "https://static.wixstatic.com/media/0e6926_1311a5b3a98046e89ac6c75f1fdbf9fc~mv2.jpg" },  # Heinz Thomet / harvesting oats
       { url: "https://static.wixstatic.com/media/0e6926_1de8dfb61580466085fe1a216c5d656a~mv2.jpg" },  # flour mill interior (NM_20200702_12_58_37)
-      { url: "https://static.wixstatic.com/media/0e6926_e97ddc3e63db4331946b5d84e1d8e392~mv2.jpg" },  # storefront window papercut art (NM_20200702_12_11_36)
+      { url: "https://static.wixstatic.com/media/0e6926_e97ddc3e63db4331946b5d84e1d8e392~mv2.jpg" }  # storefront window papercut art (NM_20200702_12_11_36)
     ]
 
     s3 = Aws::S3::Resource.new(region: "us-east-1")

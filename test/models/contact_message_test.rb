@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class ContactMessageTest < ActiveSupport::TestCase
   test "valid with name, email, message" do

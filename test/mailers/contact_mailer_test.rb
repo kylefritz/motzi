@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class ContactMailerTest < ActionMailer::TestCase
   test "notify_bakery sends to the configured inbox with submitter as Reply-To" do
@@ -15,8 +15,8 @@ class ContactMailerTest < ActionMailer::TestCase
       email.deliver_now
     end
 
-    assert_equal [ENV.fetch("CONTACT_INBOX", "info@motzibread.com")], email.to
-    assert_equal ["maya@example.com"], email.reply_to
+    assert_equal [ ENV.fetch("CONTACT_INBOX", "info@motzibread.com") ], email.to
+    assert_equal [ "maya@example.com" ], email.reply_to
     assert_match /Maya/, email.subject
     assert_includes email.body.to_s, "Quick question about subscriptions"
     assert_includes email.body.to_s, "555-1212"
