@@ -44,7 +44,7 @@ class ConfirmationMailer < ApplicationMailer
   # same state is dropped. unless_exist makes check-and-claim a single write.
   def duplicate_order_email?(order)
     items = order.order_items.order(:item_id, :pickup_day_id).pluck(:item_id, :quantity, :pickup_day_id)
-    fingerprint = Digest::SHA256.hexdigest([items, order.comments].to_json)
+    fingerprint = Digest::SHA256.hexdigest([ items, order.comments ].to_json)
     key = "confirmation_mailer/order_email/#{order.id}/#{fingerprint}"
 
     !Rails.cache.write(key, true, unless_exist: true, expires_in: ORDER_EMAIL_DEDUP_WINDOW)

@@ -541,7 +541,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_163000) do
     t.datetime "checked_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["target", "checked_at"], name: "index_uptime_checks_on_target_and_checked_at"
+    t.index [ "target", "checked_at" ], name: "index_uptime_checks_on_target_and_checked_at"
   end
 
   create_table "users", force: :cascade do |t|
