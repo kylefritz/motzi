@@ -10,12 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_14_034616) do
   create_schema "heroku_ext"
 
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
-  enable_extension "plpgsql"
 
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
@@ -47,7 +47,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.string "content_type"
     t.text "metadata"
     t.bigint "byte_size", null: false
-    t.string "checksum", null: false
+    t.string "checksum"
     t.datetime "created_at", precision: nil, null: false
     t.string "service_name", null: false
     t.index [ "key" ], name: "index_active_storage_blobs_on_key", unique: true

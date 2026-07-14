@@ -11,6 +11,12 @@ class ErrorEventsController < ApplicationController
     end
 
     payload = params.permit(:error_class, :message, :stack, :url, context: {}).to_h
+    # Clients may nest the payload under error_event (the shape ParamsWrapper
+    # advertises). Top level wins when present: the auto-wrapped copy drops
+    # keys that aren't ErrorEvent columns (stack, context).
+    if payload.empty? && params[:error_event].is_a?(ActionController::Parameters)
+      payload = params[:error_event].permit(:error_class, :message, :stack, :url, context: {}).to_h
+    end
 
     ErrorEvent.record_browser_exception(
       error_class: payload["error_class"].presence || "Error",

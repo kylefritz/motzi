@@ -42,6 +42,9 @@ export default function Layout({
   const [showEmailSettings, setShowEmailSettings] = useState(
     initialTab === "email"
   );
+  // useContext under the hood — must run before the early returns below so
+  // the hook order doesn't change once the menu finishes loading.
+  const deadlineContext = getDeadlineContext();
 
   if (error) {
     return (
@@ -62,7 +65,7 @@ export default function Layout({
     );
   }
 
-  const orderingClosed = getDeadlineContext().allClosed(menu);
+  const orderingClosed = deadlineContext.allClosed(menu);
 
   if (order && !isEditingOrder) {
     const handleEditOrder =
