@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class HomeControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -9,12 +9,12 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get home" do
-    get '/'
-    assert_redirected_to '/menu'
+    get "/"
+    assert_redirected_to "/menu"
   end
 
   test "signout" do
     get "/signout"
-    assert_redirected_to '/'
+    assert_redirected_to "/"
   end
 end

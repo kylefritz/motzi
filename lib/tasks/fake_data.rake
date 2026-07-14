@@ -1,5 +1,5 @@
 def rand_bool
-  [true, false].sample
+  [ true, false ].sample
 end
 
 namespace :fake_data do
@@ -23,7 +23,6 @@ namespace :fake_data do
         u.save!
       end
     end
-
   end
 
   desc "create fake orders for the current menu"
@@ -45,12 +44,10 @@ namespace :fake_data do
 
       Order.transaction do
         Order.create!(user: user, menu: menu, comments: comments).tap do |order|
-
           # pick a random item
           order.order_items.create!(item: items.sample.item)
         end
       end
     end
   end
-
 end

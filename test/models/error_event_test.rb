@@ -4,12 +4,12 @@ class ErrorEventTest < ActiveSupport::TestCase
   test "compute_fingerprint is stable for same inputs" do
     fp1 = ErrorEvent.compute_fingerprint(
       error_class: "RuntimeError",
-      backtrace: ["/app/models/foo.rb:10:in `bar'", "/gems/rails/foo.rb:5"],
+      backtrace: [ "/app/models/foo.rb:10:in `bar'", "/gems/rails/foo.rb:5" ],
       url_path: "/menu"
     )
     fp2 = ErrorEvent.compute_fingerprint(
       error_class: "RuntimeError",
-      backtrace: ["/app/models/foo.rb:10:in `bar'", "/gems/rails/foo.rb:5"],
+      backtrace: [ "/app/models/foo.rb:10:in `bar'", "/gems/rails/foo.rb:5" ],
       url_path: "/menu"
     )
     assert_equal fp1, fp2
@@ -17,8 +17,8 @@ class ErrorEventTest < ActiveSupport::TestCase
   end
 
   test "compute_fingerprint differs for different error class" do
-    fp1 = ErrorEvent.compute_fingerprint(error_class: "RuntimeError", backtrace: ["/app/x.rb:1"], url_path: "/")
-    fp2 = ErrorEvent.compute_fingerprint(error_class: "ArgumentError", backtrace: ["/app/x.rb:1"], url_path: "/")
+    fp1 = ErrorEvent.compute_fingerprint(error_class: "RuntimeError", backtrace: [ "/app/x.rb:1" ], url_path: "/")
+    fp2 = ErrorEvent.compute_fingerprint(error_class: "ArgumentError", backtrace: [ "/app/x.rb:1" ], url_path: "/")
     refute_equal fp1, fp2
   end
 

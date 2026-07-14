@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class AnomalyMailerTest < ActionMailer::TestCase
   test "anomaly_report" do
@@ -40,7 +40,7 @@ class AnomalyMailerTest < ActionMailer::TestCase
     analysis = anomaly_analyses(:week1_analysis)
     email = AnomalyMailer.with(analysis: analysis).anomaly_report
 
-    assert_equal ["motzi-analysis-replies@thepuff.co"], email.reply_to
+    assert_equal [ "motzi-analysis-replies@thepuff.co" ], email.reply_to
   end
 
   test "sets a deterministic Message-ID derived from the analysis id" do

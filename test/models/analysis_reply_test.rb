@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class AnalysisReplyTest < ActiveSupport::TestCase
   test "valid with all required attributes" do

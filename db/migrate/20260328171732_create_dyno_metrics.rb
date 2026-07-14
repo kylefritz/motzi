@@ -14,6 +14,6 @@ class CreateDynoMetrics < ActiveRecord::Migration[7.2]
     end
 
     add_index :dyno_metrics, :recorded_at
-    add_index :dyno_metrics, [:dyno, :recorded_at]
+    add_index :dyno_metrics, [ :dyno, :recorded_at ]
   end
 end

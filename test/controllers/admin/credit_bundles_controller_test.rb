@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class Admin::CreditBundlesControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -8,7 +8,7 @@ class Admin::CreditBundlesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get index" do
-    get '/admin/credit_bundles'
+    get "/admin/credit_bundles"
     assert_response :success
   end
 end

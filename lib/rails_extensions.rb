@@ -1,5 +1,5 @@
-require 'active_support'
-require 'active_support/core_ext/object/json'
+require "active_support"
+require "active_support/core_ext/object/json"
 
 class BigDecimal
   # rails encodes pg decimals to string by default
@@ -20,15 +20,15 @@ class ActiveSupport::TimeWithZone
   def week_id
     effective_yr = (if cweek == 1
       (self + 1.day).end_of_week.year
-    elsif cweek > 51
+                    elsif cweek > 51
       self.beginning_of_week.year
-    else
+                    else
       self.year
     end)
 
     yr = effective_yr.to_s[2..]
-    wk = cweek.to_s.rjust(2, '0')
-    [yr, wk].join('w')
+    wk = cweek.to_s.rjust(2, "0")
+    [ yr, wk ].join("w")
   end
 
   def prev_week_id
@@ -38,9 +38,9 @@ end
 
 class ActiveSupport::TimeZone
   def from_week_id(week_id)
-    yr, num_weeks = week_id.split('w')
+    yr, num_weeks = week_id.split("w")
 
-    week1 = ActiveSupport::TimeZone['America/New_York'].parse("20#{yr}-01-01")
+    week1 = ActiveSupport::TimeZone["America/New_York"].parse("20#{yr}-01-01")
     if week1.cweek == 53
       week1 = week1.beginning_of_week + 7.days
     end

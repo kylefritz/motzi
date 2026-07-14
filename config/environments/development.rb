@@ -20,7 +20,7 @@ Rails.application.configure do
   config.action_controller.enable_fragment_cache_logging = true
   config.cache_store = :solid_cache_store
   config.public_file_server.headers = {
-    'Cache-Control' => "public, max-age=#{2.days.to_i}"
+    "Cache-Control" => "public, max-age=#{2.days.to_i}"
   }
 
   # Use Solid Queue in development so jobs are visible in Mission Control.
@@ -33,7 +33,7 @@ Rails.application.configure do
   config.action_mailer.delivery_method = :letter_opener_web
 
   # point links to localhost
-  config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
 
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
@@ -48,7 +48,7 @@ Rails.application.configure do
 
   # Tell Active Support which deprecation messages to disallow.
   config.active_support.disallowed_deprecation_warnings = []
-  
+
   # Raise an error on page load if there are pending migrations.
   config.active_record.migration_error = :page_load
 

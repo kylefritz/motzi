@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class ErrorsControllerTest < ActionDispatch::IntegrationTest
   test "404 renders not found page" do

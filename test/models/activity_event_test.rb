@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class ActivityEventTest < ActiveSupport::TestCase
   test "ActivityEvent.log creates an event" do
@@ -7,7 +7,7 @@ class ActivityEventTest < ActiveSupport::TestCase
         action: "menu_published",
         week_id: "26w10",
         description: "Menu emailed to 200 subscribers",
-        metadata: {menu_id: 1, count: 200},
+        metadata: { menu_id: 1, count: 200 },
         user: users(:kyle)
       )
     end

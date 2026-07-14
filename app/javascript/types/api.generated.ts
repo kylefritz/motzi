@@ -170,4 +170,3 @@ export type MenuResponse = {
     stripeChargeAmount?: number | null;
   } | null;
 };
-
