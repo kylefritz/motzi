@@ -2,10 +2,10 @@ ActiveAdmin.register Item do
   menu priority: 3
   permit_params :name, :description, :image, :price, :credits
   includes image_attachment: :blob
-  config.sort_order = 'LOWER(name)'
+  config.sort_order = "LOWER(name)"
   config.create_another = true
 
-  actions :all, except: [:destroy]
+  actions :all, except: [ :destroy ]
 
   # The menu builder fetches /admin/items.json — only return active items
   controller do
@@ -24,7 +24,7 @@ ActiveAdmin.register Item do
   filter :description
   filter :price
   filter :credits
-  filter :archived_at, as: :select, collection: [["Active", "active"], ["Archived", "archived"]], label: "Status"
+  filter :archived_at, as: :select, collection: [ [ "Active", "active" ], [ "Archived", "archived" ] ], label: "Status"
 
   scope :all, default: true
   scope :active
@@ -43,7 +43,7 @@ ActiveAdmin.register Item do
     column :image do |item|
       if item.image.attached?
         if item.image.representable?
-          span link_to(image_tag(item.image.representation(resize_to_limit: [100, 100]), alt: item.name), admin_item_path(item))
+          span link_to(image_tag(item.image.representation(resize_to_limit: [ 100, 100 ]), alt: item.name), admin_item_path(item))
         else
           render partial: "not_representable"
         end
@@ -75,7 +75,7 @@ ActiveAdmin.register Item do
       row :image do |item|
         if item.image.attached?
           if item.image.representable?
-            image_tag(item.image.representation(resize_to_limit: [250, 250]), alt: item.name)
+            image_tag(item.image.representation(resize_to_limit: [ 250, 250 ]), alt: item.name)
           else
             render partial: "not_representable"
           end
@@ -126,5 +126,5 @@ ActiveAdmin.register Item do
     end
   end
 
-  form partial: 'form'
+  form partial: "form"
 end

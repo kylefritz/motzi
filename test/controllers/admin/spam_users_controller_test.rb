@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class Admin::SpamUsersControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -8,7 +8,7 @@ class Admin::SpamUsersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "get index" do
-    get '/admin/spam_users'
+    get "/admin/spam_users"
     assert_response :success
   end
 end

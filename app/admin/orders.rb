@@ -2,7 +2,7 @@ include PriceHelper
 ActiveAdmin.register Order do
   menu priority: 4
   permit_params :comments, :menu, :user
-  includes :menu, :user, order_items: [:item, :pickup_day]
+  includes :menu, :user, order_items: [ :item, :pickup_day ]
 
   scope :all, default: true
   scope("current menu") { |scope| scope.where(menu_id: Setting.menu_id) }
@@ -33,18 +33,18 @@ ActiveAdmin.register Order do
     column :menu
     column :user
     column :items do |order|
-      render partial: 'admin/orders/order', locals: {order: order}
+      render partial: "admin/orders/order", locals: { order: order }
     end
     column(:comments, &:comments_html)
     column :created_at
     column :paid do |order|
       if order.stripe_charge_amount.present?
-        a number_to_currency(order.stripe_charge_amount), href: "https://dashboard.stripe.com/payments/#{order.stripe_charge_id}", target: '_blank', title: "via Stripe"
+        a number_to_currency(order.stripe_charge_amount), href: "https://dashboard.stripe.com/payments/#{order.stripe_charge_id}", target: "_blank", title: "via Stripe"
       else
         span "#{order.credits} cr"
       end
       if order.stripe_receipt_url.present?
-        a "Receipt", href: order.stripe_receipt_url, target: '_blank', title: "Stripe Receipt"
+        a "Receipt", href: order.stripe_receipt_url, target: "_blank", title: "Stripe Receipt"
       end
     end
     column :retail_price do |order|
@@ -70,11 +70,11 @@ ActiveAdmin.register Order do
       row :menu
       row :comments
       row :order_items do |order|
-        render partial: 'admin/orders/order', locals: {order: order}
+        render partial: "admin/orders/order", locals: { order: order }
       end
       row :pickup_day
       row :stripe_receipt_url do |order|
-         a order.stripe_receipt_url, href: order.stripe_receipt_url, target: '_blank', title: "Stripe Receipt"
+         a order.stripe_receipt_url, href: order.stripe_receipt_url, target: "_blank", title: "Stripe Receipt"
       end
       row :stripe_charge_amount do |order|
         number_to_currency(order.stripe_charge_amount)

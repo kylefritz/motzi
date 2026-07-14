@@ -26,9 +26,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.bigint "author_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["author_type", "author_id"], name: "index_active_admin_comments_on_author_type_and_author_id"
-    t.index ["namespace"], name: "index_active_admin_comments_on_namespace"
-    t.index ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource_type_and_resource_id"
+    t.index [ "author_type", "author_id" ], name: "index_active_admin_comments_on_author_type_and_author_id"
+    t.index [ "namespace" ], name: "index_active_admin_comments_on_namespace"
+    t.index [ "resource_type", "resource_id" ], name: "index_active_admin_comments_on_resource_type_and_resource_id"
   end
 
   create_table "active_storage_attachments", force: :cascade do |t|
@@ -37,8 +37,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.bigint "record_id", null: false
     t.bigint "blob_id", null: false
     t.datetime "created_at", precision: nil, null: false
-    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
-    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+    t.index [ "blob_id" ], name: "index_active_storage_attachments_on_blob_id"
+    t.index [ "record_type", "record_id", "name", "blob_id" ], name: "index_active_storage_attachments_uniqueness", unique: true
   end
 
   create_table "active_storage_blobs", force: :cascade do |t|
@@ -50,13 +50,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.string "checksum", null: false
     t.datetime "created_at", precision: nil, null: false
     t.string "service_name", null: false
-    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+    t.index [ "key" ], name: "index_active_storage_blobs_on_key", unique: true
   end
 
   create_table "active_storage_variant_records", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
-    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+    t.index [ "blob_id", "variation_digest" ], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
   create_table "activity_events", force: :cascade do |t|
@@ -67,9 +67,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["action"], name: "index_activity_events_on_action"
-    t.index ["user_id"], name: "index_activity_events_on_user_id"
-    t.index ["week_id"], name: "index_activity_events_on_week_id"
+    t.index [ "action" ], name: "index_activity_events_on_action"
+    t.index [ "user_id" ], name: "index_activity_events_on_user_id"
+    t.index [ "week_id" ], name: "index_activity_events_on_week_id"
   end
 
   create_table "ahoy_events", force: :cascade do |t|
@@ -78,10 +78,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.string "name"
     t.jsonb "properties"
     t.datetime "time", precision: nil
-    t.index ["name", "time"], name: "index_ahoy_events_on_name_and_time"
-    t.index ["properties"], name: "index_ahoy_events_on_properties", opclass: :jsonb_path_ops, using: :gin
-    t.index ["user_id"], name: "index_ahoy_events_on_user_id"
-    t.index ["visit_id"], name: "index_ahoy_events_on_visit_id"
+    t.index [ "name", "time" ], name: "index_ahoy_events_on_name_and_time"
+    t.index [ "properties" ], name: "index_ahoy_events_on_properties", opclass: :jsonb_path_ops, using: :gin
+    t.index [ "user_id" ], name: "index_ahoy_events_on_user_id"
+    t.index [ "visit_id" ], name: "index_ahoy_events_on_visit_id"
   end
 
   create_table "ahoy_messages", force: :cascade do |t|
@@ -98,9 +98,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.bigint "pickup_day_id"
     t.string "job_id"
     t.string "job_name"
-    t.index ["menu_id"], name: "index_ahoy_messages_on_menu_id"
-    t.index ["token"], name: "index_ahoy_messages_on_token"
-    t.index ["user_type", "user_id"], name: "index_ahoy_messages_on_user_type_and_user_id"
+    t.bigint "order_id"
+    t.index [ "menu_id" ], name: "index_ahoy_messages_on_menu_id"
+    t.index [ "order_id" ], name: "index_ahoy_messages_on_order_id"
+    t.index [ "token" ], name: "index_ahoy_messages_on_token"
+    t.index [ "user_type", "user_id" ], name: "index_ahoy_messages_on_user_type_and_user_id"
   end
 
   create_table "ahoy_visits", force: :cascade do |t|
@@ -129,8 +131,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.string "os_version"
     t.string "platform"
     t.datetime "started_at", precision: nil
-    t.index ["user_id"], name: "index_ahoy_visits_on_user_id"
-    t.index ["visit_token"], name: "index_ahoy_visits_on_visit_token", unique: true
+    t.index [ "user_id" ], name: "index_ahoy_visits_on_user_id"
+    t.index [ "visit_token" ], name: "index_ahoy_visits_on_visit_token", unique: true
   end
 
   create_table "analysis_replies", force: :cascade do |t|
@@ -143,9 +145,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.integer "source", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["anomaly_analysis_id"], name: "index_analysis_replies_on_anomaly_analysis_id"
-    t.index ["message_id"], name: "index_analysis_replies_on_message_id", unique: true
-    t.index ["user_id"], name: "index_analysis_replies_on_user_id"
+    t.index [ "anomaly_analysis_id" ], name: "index_analysis_replies_on_anomaly_analysis_id"
+    t.index [ "message_id" ], name: "index_analysis_replies_on_message_id", unique: true
+    t.index [ "user_id" ], name: "index_analysis_replies_on_user_id"
   end
 
   create_table "anomaly_analyses", force: :cascade do |t|
@@ -165,8 +167,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.string "api_model"
     t.integer "cost_cents"
     t.string "overall_status"
-    t.index ["user_id"], name: "index_anomaly_analyses_on_user_id"
-    t.index ["week_id"], name: "index_anomaly_analyses_on_week_id"
+    t.index [ "user_id" ], name: "index_anomaly_analyses_on_user_id"
+    t.index [ "week_id" ], name: "index_anomaly_analyses_on_week_id"
   end
 
   create_table "blazer_audits", force: :cascade do |t|
@@ -175,8 +177,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.text "statement"
     t.string "data_source"
     t.datetime "created_at", precision: nil
-    t.index ["query_id"], name: "index_blazer_audits_on_query_id"
-    t.index ["user_id"], name: "index_blazer_audits_on_user_id"
+    t.index [ "query_id" ], name: "index_blazer_audits_on_query_id"
+    t.index [ "user_id" ], name: "index_blazer_audits_on_user_id"
   end
 
   create_table "blazer_checks", force: :cascade do |t|
@@ -191,8 +193,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.datetime "last_run_at", precision: nil
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["creator_id"], name: "index_blazer_checks_on_creator_id"
-    t.index ["query_id"], name: "index_blazer_checks_on_query_id"
+    t.index [ "creator_id" ], name: "index_blazer_checks_on_creator_id"
+    t.index [ "query_id" ], name: "index_blazer_checks_on_query_id"
   end
 
   create_table "blazer_dashboard_queries", force: :cascade do |t|
@@ -201,8 +203,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["dashboard_id"], name: "index_blazer_dashboard_queries_on_dashboard_id"
-    t.index ["query_id"], name: "index_blazer_dashboard_queries_on_query_id"
+    t.index [ "dashboard_id" ], name: "index_blazer_dashboard_queries_on_dashboard_id"
+    t.index [ "query_id" ], name: "index_blazer_dashboard_queries_on_query_id"
   end
 
   create_table "blazer_dashboards", force: :cascade do |t|
@@ -210,7 +212,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.text "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["creator_id"], name: "index_blazer_dashboards_on_creator_id"
+    t.index [ "creator_id" ], name: "index_blazer_dashboards_on_creator_id"
   end
 
   create_table "blazer_queries", force: :cascade do |t|
@@ -221,7 +223,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.string "data_source"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["creator_id"], name: "index_blazer_queries_on_creator_id"
+    t.index [ "creator_id" ], name: "index_blazer_queries_on_creator_id"
   end
 
   create_table "credit_bundles", force: :cascade do |t|
@@ -245,7 +247,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.string "stripe_charge_id"
     t.string "stripe_receipt_url"
     t.decimal "stripe_charge_amount", precision: 8, scale: 2
-    t.index ["user_id"], name: "index_credit_items_on_user_id"
+    t.index [ "user_id" ], name: "index_credit_items_on_user_id"
   end
 
   create_table "dyno_metrics", force: :cascade do |t|
@@ -259,8 +261,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.text "errors_summary"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["dyno", "recorded_at"], name: "index_dyno_metrics_on_dyno_and_recorded_at"
-    t.index ["recorded_at"], name: "index_dyno_metrics_on_recorded_at"
+    t.index [ "dyno", "recorded_at" ], name: "index_dyno_metrics_on_dyno_and_recorded_at"
+    t.index [ "recorded_at" ], name: "index_dyno_metrics_on_recorded_at"
   end
 
   create_table "error_events", force: :cascade do |t|
@@ -282,11 +284,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.datetime "resolved_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["fingerprint", "occurred_at"], name: "index_error_events_on_fingerprint_and_occurred_at"
-    t.index ["occurred_at"], name: "index_error_events_on_occurred_at"
-    t.index ["resolved_at"], name: "index_error_events_on_resolved_at"
-    t.index ["source"], name: "index_error_events_on_source"
-    t.index ["user_id"], name: "index_error_events_on_user_id"
+    t.index [ "fingerprint", "occurred_at" ], name: "index_error_events_on_fingerprint_and_occurred_at"
+    t.index [ "occurred_at" ], name: "index_error_events_on_occurred_at"
+    t.index [ "resolved_at" ], name: "index_error_events_on_resolved_at"
+    t.index [ "source" ], name: "index_error_events_on_source"
+    t.index [ "user_id" ], name: "index_error_events_on_user_id"
   end
 
   create_table "feedbacks", force: :cascade do |t|
@@ -315,9 +317,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.integer "limit"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["menu_item_id", "pickup_day_id"], name: "index_menu_item_pickup_days_on_menu_item_id_and_pickup_day_id", unique: true
-    t.index ["menu_item_id"], name: "index_menu_item_pickup_days_on_menu_item_id"
-    t.index ["pickup_day_id"], name: "index_menu_item_pickup_days_on_pickup_day_id"
+    t.index [ "menu_item_id", "pickup_day_id" ], name: "index_menu_item_pickup_days_on_menu_item_id_and_pickup_day_id", unique: true
+    t.index [ "menu_item_id" ], name: "index_menu_item_pickup_days_on_menu_item_id"
+    t.index [ "pickup_day_id" ], name: "index_menu_item_pickup_days_on_pickup_day_id"
   end
 
   create_table "menu_items", force: :cascade do |t|
@@ -328,8 +330,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.boolean "subscriber", default: true
     t.boolean "marketplace", default: true
     t.integer "sort_order"
-    t.index ["item_id"], name: "index_menu_items_on_item_id"
-    t.index ["menu_id"], name: "index_menu_items_on_menu_id"
+    t.index [ "item_id" ], name: "index_menu_items_on_item_id"
+    t.index [ "menu_id" ], name: "index_menu_items_on_menu_id"
   end
 
   create_table "menus", force: :cascade do |t|
@@ -342,7 +344,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.text "day_of_note"
     t.text "menu_note"
     t.string "menu_type", default: "regular", null: false
-    t.index ["week_id", "menu_type"], name: "index_menus_on_week_id_and_menu_type", unique: true
+    t.index [ "week_id", "menu_type" ], name: "index_menus_on_week_id_and_menu_type", unique: true
   end
 
   create_table "order_items", force: :cascade do |t|
@@ -354,8 +356,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.bigint "pickup_day_id", null: false
     t.integer "credits", null: false
     t.decimal "price", precision: 8, scale: 2, null: false
-    t.index ["item_id"], name: "index_order_items_on_item_id"
-    t.index ["order_id"], name: "index_order_items_on_order_id"
+    t.index [ "item_id" ], name: "index_order_items_on_item_id"
+    t.index [ "order_id" ], name: "index_order_items_on_order_id"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -368,8 +370,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.string "stripe_charge_id"
     t.string "stripe_receipt_url"
     t.decimal "stripe_charge_amount", precision: 8, scale: 2
-    t.index ["menu_id"], name: "index_orders_on_menu_id"
-    t.index ["user_id"], name: "index_orders_on_user_id"
+    t.index [ "menu_id" ], name: "index_orders_on_menu_id"
+    t.index [ "user_id" ], name: "index_orders_on_user_id"
   end
 
   create_table "pickup_days", force: :cascade do |t|
@@ -378,7 +380,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.datetime "order_deadline_at", precision: nil, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["menu_id"], name: "index_pickup_days_on_menu_id"
+    t.index [ "menu_id" ], name: "index_pickup_days_on_menu_id"
   end
 
   create_table "settings", force: :cascade do |t|
@@ -386,7 +388,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.text "value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["var"], name: "index_settings_on_var", unique: true
+    t.index [ "var" ], name: "index_settings_on_var", unique: true
   end
 
   create_table "solid_cable_messages", force: :cascade do |t|
@@ -394,9 +396,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.binary "payload", null: false
     t.datetime "created_at", null: false
     t.bigint "channel_hash", null: false
-    t.index ["channel"], name: "index_solid_cable_messages_on_channel"
-    t.index ["channel_hash"], name: "index_solid_cable_messages_on_channel_hash"
-    t.index ["created_at"], name: "index_solid_cable_messages_on_created_at"
+    t.index [ "channel" ], name: "index_solid_cable_messages_on_channel"
+    t.index [ "channel_hash" ], name: "index_solid_cable_messages_on_channel_hash"
+    t.index [ "created_at" ], name: "index_solid_cable_messages_on_created_at"
   end
 
   create_table "solid_cache_entries", force: :cascade do |t|
@@ -405,9 +407,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.datetime "created_at", null: false
     t.bigint "key_hash", null: false
     t.integer "byte_size", null: false
-    t.index ["byte_size"], name: "index_solid_cache_entries_on_byte_size"
-    t.index ["key_hash", "byte_size"], name: "index_solid_cache_entries_on_key_hash_and_byte_size"
-    t.index ["key_hash"], name: "index_solid_cache_entries_on_key_hash", unique: true
+    t.index [ "byte_size" ], name: "index_solid_cache_entries_on_byte_size"
+    t.index [ "key_hash", "byte_size" ], name: "index_solid_cache_entries_on_key_hash_and_byte_size"
+    t.index [ "key_hash" ], name: "index_solid_cache_entries_on_key_hash", unique: true
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
@@ -417,24 +419,24 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.string "concurrency_key", null: false
     t.datetime "expires_at", null: false
     t.datetime "created_at", null: false
-    t.index ["concurrency_key", "priority", "job_id"], name: "index_solid_queue_blocked_executions_for_release"
-    t.index ["expires_at", "concurrency_key"], name: "index_solid_queue_blocked_executions_for_maintenance"
-    t.index ["job_id"], name: "index_solid_queue_blocked_executions_on_job_id", unique: true
+    t.index [ "concurrency_key", "priority", "job_id" ], name: "index_solid_queue_blocked_executions_for_release"
+    t.index [ "expires_at", "concurrency_key" ], name: "index_solid_queue_blocked_executions_for_maintenance"
+    t.index [ "job_id" ], name: "index_solid_queue_blocked_executions_on_job_id", unique: true
   end
 
   create_table "solid_queue_claimed_executions", force: :cascade do |t|
     t.bigint "job_id", null: false
     t.bigint "process_id"
     t.datetime "created_at", null: false
-    t.index ["job_id"], name: "index_solid_queue_claimed_executions_on_job_id", unique: true
-    t.index ["process_id", "job_id"], name: "index_solid_queue_claimed_executions_on_process_id_and_job_id"
+    t.index [ "job_id" ], name: "index_solid_queue_claimed_executions_on_job_id", unique: true
+    t.index [ "process_id", "job_id" ], name: "index_solid_queue_claimed_executions_on_process_id_and_job_id"
   end
 
   create_table "solid_queue_failed_executions", force: :cascade do |t|
     t.bigint "job_id", null: false
     t.text "error"
     t.datetime "created_at", null: false
-    t.index ["job_id"], name: "index_solid_queue_failed_executions_on_job_id", unique: true
+    t.index [ "job_id" ], name: "index_solid_queue_failed_executions_on_job_id", unique: true
   end
 
   create_table "solid_queue_jobs", force: :cascade do |t|
@@ -448,17 +450,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.string "concurrency_key"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["active_job_id"], name: "index_solid_queue_jobs_on_active_job_id"
-    t.index ["class_name"], name: "index_solid_queue_jobs_on_class_name"
-    t.index ["finished_at"], name: "index_solid_queue_jobs_on_finished_at"
-    t.index ["queue_name", "finished_at"], name: "index_solid_queue_jobs_for_filtering"
-    t.index ["scheduled_at", "finished_at"], name: "index_solid_queue_jobs_for_alerting"
+    t.index [ "active_job_id" ], name: "index_solid_queue_jobs_on_active_job_id"
+    t.index [ "class_name" ], name: "index_solid_queue_jobs_on_class_name"
+    t.index [ "finished_at" ], name: "index_solid_queue_jobs_on_finished_at"
+    t.index [ "queue_name", "finished_at" ], name: "index_solid_queue_jobs_for_filtering"
+    t.index [ "scheduled_at", "finished_at" ], name: "index_solid_queue_jobs_for_alerting"
   end
 
   create_table "solid_queue_pauses", force: :cascade do |t|
     t.string "queue_name", null: false
     t.datetime "created_at", null: false
-    t.index ["queue_name"], name: "index_solid_queue_pauses_on_queue_name", unique: true
+    t.index [ "queue_name" ], name: "index_solid_queue_pauses_on_queue_name", unique: true
   end
 
   create_table "solid_queue_processes", force: :cascade do |t|
@@ -470,9 +472,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.text "metadata"
     t.datetime "created_at", null: false
     t.string "name", null: false
-    t.index ["last_heartbeat_at"], name: "index_solid_queue_processes_on_last_heartbeat_at"
-    t.index ["name", "supervisor_id"], name: "index_solid_queue_processes_on_name_and_supervisor_id", unique: true
-    t.index ["supervisor_id"], name: "index_solid_queue_processes_on_supervisor_id"
+    t.index [ "last_heartbeat_at" ], name: "index_solid_queue_processes_on_last_heartbeat_at"
+    t.index [ "name", "supervisor_id" ], name: "index_solid_queue_processes_on_name_and_supervisor_id", unique: true
+    t.index [ "supervisor_id" ], name: "index_solid_queue_processes_on_supervisor_id"
   end
 
   create_table "solid_queue_ready_executions", force: :cascade do |t|
@@ -480,9 +482,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.string "queue_name", null: false
     t.integer "priority", default: 0, null: false
     t.datetime "created_at", null: false
-    t.index ["job_id"], name: "index_solid_queue_ready_executions_on_job_id", unique: true
-    t.index ["priority", "job_id"], name: "index_solid_queue_poll_all"
-    t.index ["queue_name", "priority", "job_id"], name: "index_solid_queue_poll_by_queue"
+    t.index [ "job_id" ], name: "index_solid_queue_ready_executions_on_job_id", unique: true
+    t.index [ "priority", "job_id" ], name: "index_solid_queue_poll_all"
+    t.index [ "queue_name", "priority", "job_id" ], name: "index_solid_queue_poll_by_queue"
   end
 
   create_table "solid_queue_recurring_executions", force: :cascade do |t|
@@ -490,8 +492,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.string "task_key", null: false
     t.datetime "run_at", null: false
     t.datetime "created_at", null: false
-    t.index ["job_id"], name: "index_solid_queue_recurring_executions_on_job_id", unique: true
-    t.index ["task_key", "run_at"], name: "index_solid_queue_recurring_executions_on_task_key_and_run_at", unique: true
+    t.index [ "job_id" ], name: "index_solid_queue_recurring_executions_on_job_id", unique: true
+    t.index [ "task_key", "run_at" ], name: "index_solid_queue_recurring_executions_on_task_key_and_run_at", unique: true
   end
 
   create_table "solid_queue_recurring_tasks", force: :cascade do |t|
@@ -506,8 +508,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["key"], name: "index_solid_queue_recurring_tasks_on_key", unique: true
-    t.index ["static"], name: "index_solid_queue_recurring_tasks_on_static"
+    t.index [ "key" ], name: "index_solid_queue_recurring_tasks_on_key", unique: true
+    t.index [ "static" ], name: "index_solid_queue_recurring_tasks_on_static"
   end
 
   create_table "solid_queue_scheduled_executions", force: :cascade do |t|
@@ -516,8 +518,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.integer "priority", default: 0, null: false
     t.datetime "scheduled_at", null: false
     t.datetime "created_at", null: false
-    t.index ["job_id"], name: "index_solid_queue_scheduled_executions_on_job_id", unique: true
-    t.index ["scheduled_at", "priority", "job_id"], name: "index_solid_queue_dispatch_all"
+    t.index [ "job_id" ], name: "index_solid_queue_scheduled_executions_on_job_id", unique: true
+    t.index [ "scheduled_at", "priority", "job_id" ], name: "index_solid_queue_dispatch_all"
   end
 
   create_table "solid_queue_semaphores", force: :cascade do |t|
@@ -526,9 +528,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.datetime "expires_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["expires_at"], name: "index_solid_queue_semaphores_on_expires_at"
-    t.index ["key", "value"], name: "index_solid_queue_semaphores_on_key_and_value"
-    t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
+    t.index [ "expires_at" ], name: "index_solid_queue_semaphores_on_expires_at"
+    t.index [ "key", "value" ], name: "index_solid_queue_semaphores_on_key_and_value"
+    t.index [ "key" ], name: "index_solid_queue_semaphores_on_key", unique: true
+  end
+
+  create_table "uptime_checks", force: :cascade do |t|
+    t.string "target", null: false
+    t.string "url", null: false
+    t.integer "status"
+    t.integer "latency_ms"
+    t.string "error"
+    t.boolean "up", default: false, null: false
+    t.datetime "checked_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index [ "target", "checked_at" ], name: "index_uptime_checks_on_target_and_checked_at"
   end
 
   create_table "users", force: :cascade do |t|
@@ -555,8 +570,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.boolean "receive_havent_ordered_reminder", default: true, null: false
     t.boolean "receive_day_of_reminder", default: true, null: false
     t.index "lower((first_name)::text), lower((last_name)::text)", name: "index_users_on_LOWER_first_name_LOWER_last_name"
-    t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index [ "email" ], name: "index_users_on_email", unique: true
+    t.index [ "reset_password_token" ], name: "index_users_on_reset_password_token", unique: true
   end
 
   create_table "versions", force: :cascade do |t|
@@ -567,7 +582,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_180000) do
     t.text "object"
     t.datetime "created_at", precision: nil
     t.text "object_changes"
-    t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
+    t.index [ "item_type", "item_id" ], name: "index_versions_on_item_type_and_item_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

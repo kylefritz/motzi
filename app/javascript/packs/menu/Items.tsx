@@ -244,11 +244,16 @@ export function Item(props: ItemProps) {
 
 type ItemsProps = {
   items: MenuItem[];
-  onAddToCart?: (item: MenuItem & { quantity: number; pickupDayId: number }) => void;
+  onAddToCart?: (
+    item: MenuItem & { quantity: number; pickupDayId: number }
+  ) => void;
   disabled?: boolean;
 };
 
-export default function Items({ items, onAddToCart: handleAddToCart }: ItemsProps) {
+export default function Items({
+  items,
+  onAddToCart: handleAddToCart,
+}: ItemsProps) {
   return (
     <div className="row mt-2">
       {items.map((i) => (

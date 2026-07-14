@@ -1,5 +1,5 @@
 class ErrorEventsController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:create]
+  skip_before_action :authenticate_user!, only: [ :create ]
 
   RATE_LIMIT = 30
   RATE_WINDOW = 60 # seconds

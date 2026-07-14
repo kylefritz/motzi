@@ -114,7 +114,7 @@ ActiveAdmin.setup do |config|
   # will call the method to return the path.
   #
   # Default:
-  config.logout_link_path = '/users/sign_out'
+  config.logout_link_path = "/users/sign_out"
 
   # This setting changes the http method used when rendering the
   # link. For example :get, :delete, :put, etc..
@@ -136,7 +136,7 @@ ActiveAdmin.setup do |config|
   #
   # You can completely disable comments:
   # config.comments = false
-  config.comments_menu = { parent: 'Advanced', label: 'Comments', priority: 2 }
+  config.comments_menu = { parent: "Advanced", label: "Comments", priority: 2 }
   #
   # You can change the name under which comments are registered:
   # config.comments_registration_name = 'AdminComment'
@@ -169,7 +169,7 @@ ActiveAdmin.setup do |config|
   # You can exclude possibly sensitive model attributes from being displayed,
   # added to forms, or exported by default by ActiveAdmin
   #
-  config.filter_attributes = [:encrypted_password, :password, :password_confirmation]
+  config.filter_attributes = [ :encrypted_password, :password, :password_confirmation ]
 
   # == Localize Date/Time Format
   #
@@ -316,9 +316,9 @@ ActiveAdmin.setup do |config|
      :last_name,
      :name,
      :email,
-     :id,
+     :id
   ]
-  config.filter_method_for_large_association = '_starts_with'
+  config.filter_method_for_large_association = "_starts_with"
 
   # == Head
   #

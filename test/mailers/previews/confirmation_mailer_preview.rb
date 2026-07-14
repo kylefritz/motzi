@@ -13,5 +13,4 @@ class ConfirmationMailerPreview < ApplicationMailerPreview
 
     ConfirmationMailer.with(credit_item: credit_item).credit_email
   end
-
 end

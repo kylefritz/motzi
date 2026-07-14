@@ -1,6 +1,6 @@
-require_relative 'boot'
+require_relative "boot"
 
-require 'rails/all'
+require "rails/all"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -17,13 +17,13 @@ module Motzi
     # the framework and any gems in your application.
 
     # OliveBranch converts snake_case to camelCase
-    rails_routes = -> (env) { env['PATH_INFO'].match(/^\/rails/) }
+    rails_routes = ->(env) { env["PATH_INFO"].match(/^\/rails/) }
     config.middleware.use OliveBranch::Middleware, inflection: "camel", exclude_params: rails_routes, exclude_response: rails_routes
 
     # zeitwerk makes ruby file autoloading better?
     config.autoloader = :zeitwerk
 
-    config.time_zone = 'Eastern Time (US & Canada)'
+    config.time_zone = "Eastern Time (US & Canada)"
 
     # Keep finished jobs visible for two weeks in Mission Control before
     # recurring Solid Queue cleanup removes them.

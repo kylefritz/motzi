@@ -15,7 +15,7 @@ class CreditBundle < ApplicationRecord
   end
 
   def name_description
-    [name, description].compact.join(", ")
+    [ name, description ].compact.join(", ")
   end
 
   def description_html

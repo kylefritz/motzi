@@ -24,18 +24,18 @@ ActiveAdmin.register PickupDay do
         text_node "Menu: "
         a menu.name, href: admin_menu_path(menu)
         if menu.holiday?
-          status_tag 'Holiday', color: 'orange', class: 'holiday-tag'
+          status_tag "Holiday", color: "orange", class: "holiday-tag"
         end
       end
     end
 
     tabs do
       tab :orders do
-        table_for rows, id: 'pickup-list' do
+        table_for rows, id: "pickup-list" do
           column("Last Name") { |user, _| user.last_name.presence || user.email }
           column("First Name") { |user, _| user.first_name }
           column("Items") do |user, order_items|
-            render partial: 'admin/orders/order_items', locals: {order_items: order_items, pickup_days: pickup_days}
+            render partial: "admin/orders/order_items", locals: { order_items: order_items, pickup_days: pickup_days }
           end
           column("Sign") { "" }
         end
@@ -47,7 +47,7 @@ ActiveAdmin.register PickupDay do
           order_items.each do |oi|
             item_name = oi.item.name
             items_hash[item_name] ||= []
-            items_hash[item_name].push([user, oi.quantity])
+            items_hash[item_name].push([ user, oi.quantity ])
           end
         end
 
