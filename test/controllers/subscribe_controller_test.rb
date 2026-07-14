@@ -15,11 +15,22 @@ class SubscribeControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "renders subscription details and CTA to sign up" do
+  test "renders weekly-menu framing and CTA to sign up" do
     get "/subscribe"
-    assert_select "h1", text: /Subscription Details/i
+    assert_select "h1", text: /How It Works/i
+    assert_select "h2", text: /Why Buy Credits\?/i
+    assert_select "a.cta-primary[href=?]", "/users/sign_up", text: /SIGN UP NOW/i
+  end
+
+  test "sold-out badge only shows when not accepting subscribers" do
+    get "/subscribe"
+    assert_select ".badge-soldout", count: 0
+
+    Setting.accepting_subscribers = false
+    get "/subscribe"
     assert_select ".badge-soldout", text: /currently\s+sold\s+out/im
-    assert_select "a.cta-primary[href=?]", "/users/sign_up", text: /SUBSCRIBE NOW/i
+  ensure
+    Setting.accepting_subscribers = true
   end
 
   test "renders subscription options from credit bundles so copy can't drift from checkout" do
