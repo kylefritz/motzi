@@ -49,7 +49,7 @@ class ErrorEvent < ApplicationRecord
       status_code: status_code,
       request_id: request&.request_id,
       request_data: build_request_data(request),
-      context: context.is_a?(Hash) ? context : { value: context.to_s },
+      context: sanitize_context(context),
       user_id: user&.id,
       environment: Rails.env,
       release: release_sha,
@@ -75,12 +75,34 @@ class ErrorEvent < ApplicationRecord
       status_code: nil,
       request_id: request&.request_id,
       request_data: build_request_data(request),
-      context: context.is_a?(Hash) ? context : { value: context.to_s },
+      context: sanitize_context(context),
       user_id: user&.id,
       environment: Rails.env,
       release: release_sha,
       occurred_at: Time.current
     )
+  end
+
+  # The error reporter's context can contain live objects — Rails puts the
+  # controller instance in the execution context, and serializing that to
+  # jsonb recurses through request/response/middleware until SystemStackError.
+  # Keep JSON-safe primitives; everything else becomes its class name.
+  def self.sanitize_context(value, depth: 0)
+    return { "value" => sanitize_context(value, depth: 1) } if depth.zero? && !value.is_a?(Hash)
+    return "[too deep]" if depth > 6 && (value.is_a?(Hash) || value.is_a?(Array))
+
+    case value
+    when Hash
+      value.each_with_object({}) { |(k, v), h| h[sanitize_utf8(k.to_s)] = sanitize_context(v, depth: depth + 1) }
+    when Array
+      value.first(50).map { |v| sanitize_context(v, depth: depth + 1) }
+    when String
+      sanitize_utf8(value)[0, MESSAGE_LIMIT]
+    when Numeric, TrueClass, FalseClass, NilClass, Symbol
+      value
+    else
+      "#<#{value.class.name}>"
+    end
   end
 
   def self.compute_fingerprint(error_class:, backtrace:, url_path:)
@@ -94,14 +116,23 @@ class ErrorEvent < ApplicationRecord
 
   def self.truncate_message(str)
     return nil if str.nil?
-    str = str.to_s
+    str = sanitize_utf8(str)
     str.length > MESSAGE_LIMIT ? str[0, MESSAGE_LIMIT] : str
   end
 
   def self.truncate_backtrace(str)
     return nil if str.nil?
-    str = str.to_s
+    str = sanitize_utf8(str)
     str.length > BACKTRACE_LIMIT ? str[0, BACKTRACE_LIMIT] : str
+  end
+
+  # Exception messages can carry binary (ASCII-8BIT) or invalid UTF-8 — e.g.
+  # encoding errors quote the offending bytes. Postgres text columns reject
+  # those, which would make recording the error raise a second error.
+  def self.sanitize_utf8(str)
+    str = str.to_s
+    str = str.dup.force_encoding(Encoding::UTF_8) unless str.encoding == Encoding::UTF_8
+    str.valid_encoding? ? str : str.scrub("\u{FFFD}")
   end
 
   def self.build_request_data(request)
@@ -120,7 +151,10 @@ class ErrorEvent < ApplicationRecord
 
   def self.filtered_params(request)
     params = request.respond_to?(:filtered_parameters) ? request.filtered_parameters : (request.params rescue {})
-    filter = ActionDispatch::Http::ParameterFilter.new(Rails.application.config.filter_parameters)
+    # NB: ActionDispatch::Http::ParameterFilter was removed in Rails 7.1+;
+    # referencing it here used to NameError into the rescue, silently
+    # recording empty params for every event.
+    filter = ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
     filter.filter(params || {})
   rescue StandardError
     {}

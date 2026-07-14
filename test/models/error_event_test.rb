@@ -158,4 +158,30 @@ class ErrorEventTest < ActiveSupport::TestCase
     assert_equal "/menu", ErrorEvent.extract_path("/menu")
     assert_nil ErrorEvent.extract_path(nil)
   end
+
+  test "record_server_exception persists messages with binary or invalid encodings" do
+    e = begin
+      raise "boom — offending bytes: \xC3".b
+    rescue RuntimeError => err
+      err
+    end
+
+    assert_difference "ErrorEvent.count", 1 do
+      ErrorEvent.record_server_exception(e)
+    end
+
+    ev = ErrorEvent.last
+    assert_predicate ev.message, :valid_encoding?
+    assert_equal Encoding::UTF_8, ev.message.encoding
+    assert_match(/boom — offending bytes/, ev.message)
+  end
+
+  test "filtered_params filters sensitive values on the current Rails version" do
+    env = Rack::MockRequest.env_for("/menu?password=hunter2&week=26w14")
+    request = ActionDispatch::Request.new(env)
+
+    filtered = ErrorEvent.filtered_params(request)
+    assert_equal "[FILTERED]", filtered["password"]
+    assert_equal "26w14", filtered["week"]
+  end
 end
