@@ -1,0 +1,869 @@
+// ============================================================
+// Marketing site styles — Wix-faithful port of Marisa Grotte's design
+// ALL rules scoped to body.marketing so nothing leaks into /menu or /admin
+// ============================================================
+
+// ------------------------------------------------------------
+// Variables
+// ------------------------------------------------------------
+
+$cream:          #FFEED6;
+// Note: terracotta on cream is ~2.9:1 contrast — a conscious choice to stay
+// faithful to the client's Wix design (Marisa Grotte), not an oversight.
+$terracotta:     #D3725F;
+$brick:          #A15745; // hero tagline red (Wix samples darker than link terracotta)
+$purple:         #5B4062;
+$heading-dark:   #2F2F2D;
+$body-text:      #2E2927;
+$warm-gray:      #EDE9E1;
+$white:          #FFFFFF;
+
+$font-raleway:   'Raleway', sans-serif;
+$font-oswald:    'Oswald', sans-serif;
+// Wix body copy is Avenir LT Light / DIN Next Light; Mulish is the closest
+// Google Fonts stand-in at 300/400.
+$font-body:      'Mulish', 'Avenir Next', Avenir, 'Helvetica Neue', sans-serif;
+
+// ------------------------------------------------------------
+// Base
+// ------------------------------------------------------------
+
+body.marketing {
+  margin: 0;
+  padding: 0;
+  // The full-bleed -50vw sections below otherwise cause a horizontal
+  // scrollbar on OSes with persistent scrollbars (100vw includes the
+  // scrollbar width).
+  overflow-x: hidden;
+  background-color: $cream;
+  font-family: $font-body;
+  font-weight: 300;
+  font-size: 20px;
+  line-height: 1.6;
+  color: $body-text;
+
+  strong {
+    font-weight: 700;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  h1 {
+    font-family: $font-raleway;
+    font-weight: 600;
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.5;
+    color: $purple;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-family: $font-body;
+    font-weight: 600;
+    font-size: clamp(24px, 4vw, 33px);
+    color: $heading-dark;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+  }
+
+  h3 {
+    font-family: $font-raleway;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: $heading-dark;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  a {
+    color: $terracotta;
+    text-decoration: none;
+
+    &:hover {
+      color: darken($terracotta, 12%);
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $terracotta;
+      outline-offset: 2px;
+    }
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  figure {
+    margin: 0 0 1.5rem;
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 4px;
+    }
+
+    figcaption {
+      font-family: $font-body;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: rgba($body-text, 0.65);
+      margin-top: 0.4rem;
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// Header
+// ------------------------------------------------------------
+
+body.marketing .marketing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  background-color: $cream;
+  border-bottom: 1px solid rgba($body-text, 0.12);
+
+  .marketing-logo {
+    text-decoration: none;
+    display: block;
+
+    img {
+      height: 54px;
+      width: auto;
+      display: block;
+    }
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .marketing-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    flex-wrap: wrap;
+
+    a {
+      font-family: $font-raleway;
+      font-weight: 600;
+      font-size: 18px;
+      color: $terracotta;
+      text-decoration: none;
+      white-space: nowrap;
+
+      &:hover {
+        color: darken($terracotta, 12%);
+        text-decoration: none;
+      }
+
+      img {
+        height: 24px;
+        width: 24px;
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// Announcement bar (Wix shows this as a dismissible overlay; we render a
+// solid band under the header so it never covers the nav)
+// ------------------------------------------------------------
+
+body.marketing .marketing-announcement {
+  background-color: $purple;
+  color: $white;
+  text-align: center;
+  padding: 0.6rem 1rem;
+  font-family: $font-oswald;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+
+  p {
+    margin: 0.15rem 0;
+  }
+
+  .marketing-announcement-cta {
+    font-size: 16px;
+  }
+
+  a {
+    color: $white;
+    text-decoration: underline;
+
+    &:hover {
+      color: rgba($white, 0.85);
+    }
+
+    &:focus-visible {
+      outline-color: $white;
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// Main content area
+// ------------------------------------------------------------
+
+body.marketing .marketing-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+// ------------------------------------------------------------
+// Footer
+// ------------------------------------------------------------
+
+// Wix footer: logo + vertical nav on the left, one-line terracotta address
+// centered, IG icon right; credits stacked right-aligned; © bottom-left.
+body.marketing .marketing-footer {
+  background-color: $warm-gray;
+  padding: 2.5rem 2.5rem 1.5rem;
+  color: $body-text;
+
+  .marketing-footer-grid {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .marketing-footer-logo img {
+    height: 54px;
+    width: auto;
+  }
+
+  .marketing-footer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 1.75rem;
+
+    a {
+      font-family: $font-body;
+      font-weight: 400;
+      font-size: 16px;
+      color: $terracotta;
+      text-decoration: none;
+
+      &:hover {
+        color: darken($terracotta, 12%);
+        text-decoration: none;
+      }
+    }
+  }
+
+  address {
+    font-style: normal;
+    font-family: $font-oswald;
+    font-weight: 500;
+    font-size: 1.05rem;
+    letter-spacing: 0.03em;
+    color: $terracotta;
+    white-space: nowrap;
+    margin-top: 0.75rem;
+  }
+
+  .marketing-footer-ig img {
+    height: 26px;
+    width: 26px;
+  }
+
+  .marketing-footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 2.5rem auto 0;
+  }
+
+  .marketing-credits {
+    font-family: $font-body;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    text-align: right;
+    color: rgba($body-text, 0.6);
+    margin: 0;
+  }
+
+  .marketing-copyright {
+    font-family: $font-body;
+    font-size: 0.85rem;
+    color: rgba($body-text, 0.55);
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .marketing-footer-grid,
+    .marketing-footer-bottom {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    address {
+      white-space: normal;
+    }
+
+    .marketing-footer-nav {
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .marketing-credits {
+      text-align: center;
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// Flash messages
+// ------------------------------------------------------------
+
+body.marketing .flash {
+  padding: 0.75rem 1.25rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  font-family: $font-body;
+  font-size: 18px;
+
+  &.flash-notice {
+    background-color: rgba($purple, 0.1);
+    color: $purple;
+    border: 1px solid rgba($purple, 0.3);
+  }
+
+  &.flash-alert {
+    background-color: rgba($terracotta, 0.1);
+    color: darken($terracotta, 15%);
+    border: 1px solid rgba($terracotta, 0.3);
+  }
+}
+
+// ------------------------------------------------------------
+// Buttons / CTAs
+// ------------------------------------------------------------
+
+// Shared button base for .cta-primary and the contact-form submit.
+%cta-primary-base {
+  display: inline-block;
+  background-color: $purple;
+  color: $white;
+  font-family: $font-raleway;
+  font-weight: 600;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1.75rem;
+  border-radius: 6px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: darken($purple, 10%);
+    color: $white;
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    // Purple ring: the offset ring draws over the page background, so it
+    // must contrast with cream (a white ring would be invisible there).
+    outline: 2px solid $purple;
+    outline-offset: 3px;
+  }
+}
+
+body.marketing .cta-primary {
+  @extend %cta-primary-base;
+}
+
+body.marketing .cta-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+// ------------------------------------------------------------
+// Page hero (page-title header block used on inner pages)
+// ------------------------------------------------------------
+
+body.marketing .page-hero {
+  margin-bottom: 2.5rem;
+
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  .lede {
+    font-family: $font-body;
+    font-weight: 300;
+    font-size: 22px;
+    line-height: 1.55;
+    color: rgba($body-text, 0.75);
+    margin: 0;
+  }
+}
+
+// Split hero variant (Wix "Our Process" header): photo on the left,
+// title + lede on the right over a flour-texture panel. The texture
+// background-image URL is set inline in the ERB so this file stays
+// URL-free.
+body.marketing .page-hero--split {
+  display: flex;
+  align-items: stretch;
+  background-size: cover;
+  background-position: center;
+  border-radius: 6px;
+  overflow: hidden;
+
+  .page-hero-image {
+    flex: 1 1 50%;
+    min-width: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .page-hero-text {
+    flex: 1 1 50%;
+    min-width: 0;
+    align-self: center;
+    padding: 2.5rem 2rem;
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+
+    .page-hero-text {
+      padding: 1.5rem 1.25rem;
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// Home hero
+// ------------------------------------------------------------
+
+// Full-bleed illustration flush under the header with the three-line
+// tagline overlaid in cream highlight boxes (Wix home hero).
+body.marketing .hero {
+  position: relative;
+  margin: -3rem calc(-50vw + 50%) 2.5rem;
+
+  .hero-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .hero-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    text-align: center;
+    padding: 1rem;
+
+    h1,
+    .hero-line {
+      font-family: $font-oswald;
+      font-weight: 500;
+      font-size: clamp(15px, 2.4vw, 34px);
+      letter-spacing: 0.28em;
+      line-height: 1.25;
+      color: $brick;
+      background-color: $warm-gray;
+      // extra left padding visually balances the trailing letter-spacing gap
+      padding: 0.1em 0.45em 0.1em 0.75em;
+      margin: 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    margin-top: -2rem;
+  }
+}
+
+// ------------------------------------------------------------
+// Sold-out badge
+// ------------------------------------------------------------
+
+body.marketing .badge-soldout {
+  display: inline-block;
+  font-family: $font-oswald;
+  font-weight: 500;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $terracotta;
+  border: 2px solid $terracotta;
+  border-radius: 3px;
+  padding: 0.2rem 0.6rem;
+  vertical-align: middle;
+  // Wix renders this as an angled sticker
+  transform: rotate(-6deg);
+  transform-origin: left bottom;
+  margin: 0.5rem 0;
+}
+
+// ------------------------------------------------------------
+// Per-page section-heading accents (Wix uses accent-colored,
+// non-condensed headings on the inner pages)
+// ------------------------------------------------------------
+
+body.marketing .page-about section h2 {
+  color: $terracotta;
+}
+
+body.marketing .page-subscribe section h2 {
+  color: $purple;
+  text-transform: uppercase;
+}
+
+// ------------------------------------------------------------
+// Full-bleed colored sections
+//
+// Design choice: these sections use a negative-margin full-bleed
+// trick so they break out of the 960px .marketing-main column
+// while still containing their inner text at the standard width.
+// This achieves better visual fidelity to the Wix site where these
+// sections span the full viewport.
+// ------------------------------------------------------------
+
+%full-bleed-section {
+  // CAUTION: this negative-margin escape only works while no ancestor of
+  // .marketing-main (or these sections) sets a transform, filter, or
+  // overflow clip — any of those would re-contain or clip the bleed.
+  // Break out of the 960px padding column
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  padding-left: calc(50vw - 460px);
+  padding-right: calc(50vw - 460px);
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+
+  // Fallback for narrow viewports where 460px calc goes negative
+  @media (max-width: 1000px) {
+    margin-left: -2rem;
+    margin-right: -2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  @media (max-width: 640px) {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+// Find Us — terracotta bg, white text
+body.marketing .find-us {
+  @extend %full-bleed-section;
+  background-color: $terracotta;
+  color: $white;
+
+  h2 {
+    color: $white;
+  }
+
+  a {
+    color: $white;
+    text-decoration: underline;
+
+    &:hover {
+      color: rgba($white, 0.8);
+    }
+  }
+}
+
+// Subscriptions CTA — purple accents on cream
+body.marketing .subscriptions-cta {
+  @extend %full-bleed-section;
+  background-color: $purple;
+  color: $white;
+  text-align: center;
+
+  h2 {
+    color: $white;
+  }
+
+  p {
+    color: rgba($white, 0.9);
+  }
+
+  .cta-primary {
+    background-color: $white;
+    color: $purple;
+
+    &:hover {
+      background-color: rgba($white, 0.88);
+      color: $purple;
+    }
+
+    &:focus-visible {
+      // On the purple section bg the base purple ring would vanish.
+      outline-color: $white;
+    }
+  }
+}
+
+// Your Neighbors — warm gray bg
+body.marketing .your-neighbors {
+  @extend %full-bleed-section;
+  background-color: $warm-gray;
+
+  h2 {
+    color: $heading-dark;
+  }
+}
+
+// ------------------------------------------------------------
+// Home page two-column layouts
+// ------------------------------------------------------------
+
+// Shared two-column flex layout used by .find-us-columns and .neighbors-columns
+%two-col-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+
+  figure, > div {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  figure {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+  }
+}
+
+body.marketing .find-us-columns {
+  @extend %two-col-layout;
+  margin-top: 1.5rem;
+
+  figure img {
+    border-radius: 4px;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  ul {
+    padding-left: 1.25rem;
+    margin-bottom: 1rem;
+  }
+}
+
+body.marketing .neighbors-columns {
+  @extend %two-col-layout;
+  margin-top: 1.5rem;
+
+  figure img {
+    border-radius: 4px;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+}
+
+// Follow on Instagram — centered, terracotta link
+body.marketing .follow-ig {
+  text-align: center;
+  padding: 2.5rem 0 1rem;
+
+  h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  a {
+    color: $terracotta;
+    font-family: $font-raleway;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+}
+
+// ------------------------------------------------------------
+// Contact form
+// ------------------------------------------------------------
+
+// Wix contact form: underline-only fields, placeholder labels, name+email
+// side by side, plain-text "Send". Real <label>s stay in the markup but are
+// visually hidden — placeholders carry the visible label like on Wix.
+body.marketing .contact-form {
+  max-width: 640px;
+  margin: 0 auto;
+
+  .field-row {
+    display: flex;
+    gap: 2.5rem;
+
+    .field {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+
+  .field {
+    margin-bottom: 1.6rem;
+
+    label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      display: block;
+      width: 100%;
+      padding: 0.45rem 0.1rem;
+      font-family: $font-body;
+      font-size: 16px;
+      color: $body-text;
+      background-color: transparent;
+      border: none;
+      border-bottom: 1px solid rgba($body-text, 0.5);
+      border-radius: 0;
+      line-height: 1.5;
+      appearance: none;
+      transition: border-color 0.15s ease;
+
+      &::placeholder {
+        color: rgba($body-text, 0.55);
+        opacity: 1;
+      }
+
+      &:focus {
+        outline: none;
+        border-bottom: 2px solid $terracotta;
+      }
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 130px;
+    }
+  }
+
+  .form-errors {
+    background-color: rgba($terracotta, 0.1);
+    border: 1px solid rgba($terracotta, 0.35);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.95rem;
+    color: darken($terracotta, 15%);
+
+    ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    li {
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  input[type="submit"],
+  button[type="submit"] {
+    display: block;
+    margin: 0.5rem auto 0;
+    padding: 0.25rem 1.25rem;
+    background: none;
+    border: none;
+    appearance: none;
+    font-family: $font-body;
+    font-size: 17px;
+    color: $body-text;
+    cursor: pointer;
+
+    &:hover {
+      color: $terracotta;
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $terracotta;
+      outline-offset: 2px;
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// Responsive
+// ------------------------------------------------------------
+
+@media (max-width: 640px) {
+  body.marketing .marketing-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+
+    .marketing-nav {
+      justify-content: center;
+      gap: 1rem;
+
+      a {
+        font-size: 16px;
+      }
+    }
+  }
+
+  body.marketing .marketing-main {
+    padding: 2rem 1rem;
+  }
+
+  body.marketing .page-hero .lede {
+    font-size: 19px;
+  }
+}

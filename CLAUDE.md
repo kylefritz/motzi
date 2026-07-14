@@ -105,6 +105,15 @@ Set on worker: `cd cloudflare/workers/reply-ingress && wrangler secret put REPLY
 
 Worker deploy: `cd cloudflare/workers/reply-ingress && wrangler deploy`
 
+## Contact form
+
+Marketing-site contact form (`/contact`) emails the bakery via `ContactMailer`.
+Submissions are stored in `contact_messages` and triaged at `/admin/contact_messages`.
+
+**Optional env var on Heroku:** `CONTACT_INBOX` — destination inbox (defaults to
+`info@motzibread.com` if unset): `heroku config:set CONTACT_INBOX=... --app motzibread`.
+Spam controls: honeypot field + rack-attack throttle (5/hr/IP on POST /contact).
+
 ## Dev Shortcuts
 
 - **Admin login** (dev only): `GET /dev/login_as_admin` — signs in as admin, no password. Useful for Playwright.
