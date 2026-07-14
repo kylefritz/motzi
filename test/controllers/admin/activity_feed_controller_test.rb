@@ -25,11 +25,11 @@ class Admin::ActivityFeedControllerTest < ActionDispatch::IntegrationTest
     UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 200, latency_ms: 120, up: true, checked_at: Time.current)
     UptimeCheck.create!(target: "menu", url: "https://probe.test/menu.json", status: 503, latency_ms: 40, up: false, checked_at: 10.minutes.ago)
 
-    get '/admin/activity_feed'
+    get "/admin/activity_feed"
 
     assert_response :success
-    assert_select 'th', text: 'Uptime'
-    assert_match 'Uptime %', @response.body # weekly trends chart dataset
+    assert_select "th", text: "Uptime"
+    assert_match "Uptime %", @response.body # weekly trends chart dataset
     assert_match admin_uptime_checks_path, @response.body
   end
 

@@ -1,5 +1,5 @@
 ActiveAdmin.register UptimeCheck do
-  menu parent: 'Advanced', label: 'Uptime', priority: 6
+  menu parent: "Advanced", label: "Uptime", priority: 6
   actions :index
   config.sort_order = "checked_at_desc"
 

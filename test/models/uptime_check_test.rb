@@ -34,7 +34,7 @@ class UptimeCheckTest < ActiveSupport::TestCase
     assert_equal 66.7, menu[:pct_up]
     assert_equal 150, menu[:avg_latency_ms]
     assert_equal 300, menu[:max_latency_ms]
-    assert_equal [503], menu[:failures].map(&:status)
+    assert_equal [ 503 ], menu[:failures].map(&:status)
 
     assert_equal 100.0, summary["admin"][:pct_up]
   end

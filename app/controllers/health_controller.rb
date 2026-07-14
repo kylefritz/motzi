@@ -50,7 +50,7 @@ class HealthController < ApplicationController
         Rails.error.report(e, handled: true, severity: :warning, context: { health_check: name })
         "#{e.class}: #{e.message}".first(200)
       end
-      [name, result]
+      [ name, result ]
     end
   end
 end

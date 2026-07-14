@@ -11,7 +11,7 @@ class CreateUptimeChecks < ActiveRecord::Migration[7.2]
 
       t.timestamps
 
-      t.index [:target, :checked_at]
+      t.index [ :target, :checked_at ]
     end
   end
 end
