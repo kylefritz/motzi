@@ -58,7 +58,7 @@ class AnomalyReportGrader
 
   private
 
-  def call_judge
+  def call_judge(attempt = 1)
     client = Anthropic::Client.new
     response = client.messages.create(
       model: self.class.judge_model,
@@ -68,6 +68,11 @@ class AnomalyReportGrader
     )
     text = response.content.filter_map { |block| block.text if block.respond_to?(:text) }.join("\n")
     parse_judge_json(text)
+  rescue JSON::ParserError, RuntimeError => e
+    raise if attempt > 1
+
+    Rails.logger.warn "[AnomalyReportGrader] judge returned malformed JSON, retrying: #{e.message.truncate(120)}"
+    call_judge(attempt + 1)
   end
 
   def judge_system_prompt
@@ -86,6 +91,8 @@ class AnomalyReportGrader
       {"must_flag": [{"index": 1, "found": true, "evidence": "<short quote from the report>"}],
        "must_not_flag": [{"index": 1, "violated": false, "evidence": ""}]}
       Use 1-based indexes matching the checklists. Include every checklist item exactly once.
+      Keep each evidence quote under 12 words and use single quotes inside it — the
+      response must be valid parseable JSON.
     PROMPT
   end
 

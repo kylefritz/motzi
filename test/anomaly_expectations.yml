@@ -72,8 +72,10 @@
     - "zero orders / no menu / paused reminder jobs during announced closure"
 
 26w03:
-  expected_status: healthy
-  notes: "Reopening week, menu 1/16-1/17, 55 orders, reminders resumed (516 sends) — clean restart."
+  expected_status: warning
+  notes: "Reopening week, menu 1/16-1/17, 55 orders, reminders resumed (516 sends). Real bug active: duplicate day-of reminder to Ruthie Nuhn (multi-pickup class, fixed 4/12 by 184dc9). Agent caught it; originally mislabeled healthy."
+  must_flag:
+    - "duplicate day-of reminder emails sent to the same member"
 
 26w04:
   expected_status: healthy
@@ -89,7 +91,7 @@
 
 26w06:
   expected_status: healthy
-  notes: "45 orders, normal. One double-click duplicate order submission (user 114, 40.5s gap) — minor UI issue later fixed by c89da11; mention-worthy at most, not warning-level."
+  notes: "45 orders, normal. The user-114 rapid pair lands on Sat 2/7 by sent-date but is attached to the 26w07 Valentine's menu — the menu-scoped feed correctly shows zero rapid duplicates for 26w06 (the pair is 26w07's)."
 
 26w07:
   expected_status: warning
@@ -101,8 +103,10 @@
     - "proportionally elevated day-of reminder volume (139 total) treated as the anomaly itself"
 
 26w08:
-  expected_status: healthy
-  notes: "47 orders, normal week."
+  expected_status: warning
+  notes: "47 orders, normal volume. Real member-facing rapid duplicate: Maria Schmidt pair within 2 min (issue #331 class). Agent caught it; originally mislabeled healthy."
+  must_flag:
+    - "rapid duplicate order confirmation (sub-2-minute pair)"
 
 26w09:
   expected_status: healthy
@@ -123,6 +127,9 @@
   notes: "50 orders (healthy). REAL incident: haven't-ordered reminder double-sent Wed 3/18 — 839 weekly sends vs ~525 baseline, ~300 subscribers emailed twice. Historical model caught this but buried it under hourly-job and stuck-anomaly-job noise (6 warning reports). Menu record mislabeled '4/2 - 4/4' in DB — actual pickups 3/19–3/21."
   must_flag:
     - "haven't-ordered reminder double-send (~839 sends vs ~525 expected, ~300 duplicate recipients)"
+  # KNOWN-HARD: this week's prior-analyses context is its own noisy launch-week
+  # reports, so the model tends to carry their hourly-job/stuck-job findings
+  # forward instead of re-deriving. Run-to-run results oscillate.
   must_not_flag:
     - "hourly reminder/recurring job runs flagged as excessive or a scheduling bug"
     - "anomaly job's 16 launch-day runs / 'stuck incomplete' flagged during its own run"
@@ -176,8 +183,10 @@
     - "same-day open rate as deliverability problem"
 
 26w18:
-  expected_status: healthy
-  notes: "44 orders, normal. Historical model's only flag: 22% same-day open rate — noise (weekly final ~50%). One solid_queue failed execution, trivial."
+  expected_status: warning
+  notes: "44 orders, normal volume. FIRST-EVER failed job execution: CaptureDynoMetricsJob failed 4/30 9:33pm (the start of the weekly UTF-8 failure pattern that recurs through 26w24). First occurrence of a new failure class = warning; later recurrences are carry-forwards."
+  must_flag:
+    - "CaptureDynoMetricsJob failed execution (first job failure)"
   must_not_flag:
     - "same-day open rate as deliverability problem"
 

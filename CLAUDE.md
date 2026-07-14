@@ -161,6 +161,7 @@ Feature work uses git worktrees in `.worktrees/`. When setting up a worktree:
 
 - **Symlink `.env`**: `ln -s ../../.env .env` (worktrees don't get untracked files)
 - **Bundler lockfile**: use `BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update` so bundler writes to the worktree, not the main repo
+- **Tests**: run with `DISABLE_SPRING=1` (Spring cross-loads apps between worktrees and hangs) and `TEST_DATABASE=motzi_test_<branch>` (concurrent suites sharing `motzi_test` clobber each other's fixtures; run `bin/rails db:test:prepare` once after setting it)
 
 ## Session Start
 

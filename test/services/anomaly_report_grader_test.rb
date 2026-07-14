@@ -85,6 +85,22 @@ class AnomalyReportGraderTest < ActiveSupport::TestCase
     assert_equal [], grade[:violations]
   end
 
+  test "retries once when the judge returns malformed JSON" do
+    bad = { content: [ { type: "text", text: '{"must_flag": [{"index": 1, "found": true, "evidence": "broken "quote' } ],
+            id: "msg_1", type: "message", role: "assistant", model: "claude-haiku-4-5",
+            stop_reason: "max_tokens", usage: { input_tokens: 400, output_tokens: 40 } }.to_json
+    good = { content: [ { type: "text", text: { must_flag: [ { index: 1, found: true, evidence: "ok" } ], must_not_flag: [] }.to_json } ],
+             id: "msg_2", type: "message", role: "assistant", model: "claude-haiku-4-5",
+             stop_reason: "end_turn", usage: { input_tokens: 400, output_tokens: 40 } }.to_json
+    stub_request(:post, "https://api.anthropic.com/v1/messages")
+      .to_return({ status: 200, headers: { "Content-Type" => "application/json" }, body: bad },
+                 { status: 200, headers: { "Content-Type" => "application/json" }, body: good })
+
+    grade = AnomalyReportGrader.new(REPORT, must_flag: [ "duplicate menu email sends" ]).grade
+
+    assert_equal [], grade[:misses]
+  end
+
   test "skips the judge call entirely when there is nothing to grade" do
     grade = AnomalyReportGrader.new(REPORT).grade
 

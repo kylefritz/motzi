@@ -12,7 +12,9 @@ development:
 
 test:
   <<: *default
-  database: motzi_test
+  # TEST_DATABASE lets each git worktree run tests against its own database —
+  # concurrent suites sharing motzi_test clobber each other's fixtures.
+  database: <%= ENV.fetch("TEST_DATABASE", "motzi_test") %>
   host: localhost
 
 production:
