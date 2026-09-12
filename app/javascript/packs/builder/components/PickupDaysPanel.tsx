@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import styled from "styled-components";
 import moment from "moment";
 import { useApi } from "../Context";
@@ -99,7 +99,11 @@ export default function PickupDaysPanel({
       <List role="list">
         {pickupDays.map((pickupDay) => (
           <PickupDayCard key={pickupDay.id}>
+            {/* Keyed on the saved values so a reload with new data remounts the
+                editor with fresh state. A mount-time reset effect used to do this
+                and could clobber an Edit click that landed before it flushed. */}
             <EditablePickupDay
+              key={`${pickupDay.pickupAt}|${pickupDay.orderDeadlineAt}`}
               pickupDay={pickupDay}
               onRemove={() => handleRemove(pickupDay.id)}
               onSave={(payload) => api.pickupDay.update(pickupDay.id, payload)}
@@ -187,12 +191,6 @@ function EditablePickupDay({
   const [isEditing, setIsEditing] = useState(false);
   const isDirty =
     pickupAtValue !== initialPickupAt || deadlineValue !== initialDeadline;
-
-  useEffect(() => {
-    setPickupAtValue(initialPickupAt);
-    setDeadlineValue(initialDeadline);
-    setIsEditing(false);
-  }, [initialPickupAt, initialDeadline]);
 
   function handleSave(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
