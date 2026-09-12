@@ -12,6 +12,15 @@ class Menu < ApplicationRecord
   attribute :menu_type, :string, default: "regular"
   enum :menu_type, { regular: "regular", holiday: "holiday" }
 
+  validates :week_id, presence: true, uniqueness: { scope: :menu_type }
+  validate :week_id_unchanged_once_locked, on: :update
+
+  # Once a menu has gone out to subscribers or taken orders it belongs to its week
+  # for good. Moving it would drag its orders and pickup days along with it.
+  def week_locked?
+    persisted? && (emailed_at_in_database.present? || orders.exists?)
+  end
+
   def self.current
     Menu.find(Setting.menu_id)
   end
@@ -215,4 +224,11 @@ class Menu < ApplicationRecord
   end
 
   MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
+
+  private
+
+  def week_id_unchanged_once_locked
+    return unless week_id_changed? && week_locked?
+    errors.add(:week_id, "can't be changed after the menu has been emailed or has orders")
+  end
 end

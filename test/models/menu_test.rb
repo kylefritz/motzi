@@ -318,11 +318,39 @@ class MenuTest < ActiveSupport::TestCase
     assert holiday.persisted?
   end
 
-  test "two holiday menus for same week_id raises uniqueness error" do
+  test "menu with a week_id already used by the same menu_type is invalid" do
     week_id = "26w21"
     Menu.create!(name: "Holiday A", week_id: week_id, menu_type: "holiday")
-    assert_raises(ActiveRecord::RecordNotUnique) do
-      Menu.create!(name: "Holiday B", week_id: week_id, menu_type: "holiday")
-    end
+    dup = Menu.new(name: "Holiday B", week_id: week_id, menu_type: "holiday")
+    assert_not dup.valid?
+    assert_includes dup.errors[:week_id], "has already been taken"
+    assert_raises(ActiveRecord::RecordInvalid) { dup.save! }
+  end
+
+  test "menu with blank week_id is invalid" do
+    menu = Menu.new(name: "No week", week_id: "", menu_type: "regular")
+    assert_not menu.valid?
+    assert_includes menu.errors[:week_id], "can't be blank"
+  end
+
+  test "week_id cannot be changed once the menu has been emailed" do
+    menu = menus(:week3)
+    menu.update!(emailed_at: 1.day.ago)
+    menu.week_id = "19w09"
+    assert_not menu.valid?
+    assert_includes menu.errors[:week_id], "can't be changed after the menu has been emailed or has orders"
+  end
+
+  test "week_id cannot be changed once the menu has orders" do
+    menu = menus(:week1) # has orders in fixtures
+    menu.week_id = "19w09"
+    assert_not menu.valid?
+    assert_includes menu.errors[:week_id], "can't be changed after the menu has been emailed or has orders"
+  end
+
+  test "week_id can be changed on a draft menu" do
+    menu = menus(:week3)
+    menu.update!(week_id: "19w09")
+    assert_equal "19w09", menu.reload.week_id
   end
 end
