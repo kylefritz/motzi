@@ -1,19 +1,16 @@
 require "test_helper"
-require "stripe_mock"
 
 class MarketPlaceTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
-  def setup
+  include StripeStubs
+
+  setup do
     menus(:week2).make_current!
     travel_to(Menu.current.earliest_deadline - 2.hours)
-    StripeMock.start
-    @stripe_helper = StripeMock.create_test_helper
+    stub_stripe_charge
   end
 
-  def teardown
-    travel_back
-    StripeMock.stop
-  end
+  teardown { travel_back }
 
   test "new, not logged in user can pay for order" do
     order_attrs = build_order_attrs
@@ -29,6 +26,14 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     new_order = Order.last
     refute_nil new_order.stripe_charge_id
     refute_nil new_order.stripe_charge_amount
+
+    # The charge Stripe was asked for matches the cart total, in cents.
+    assert_requested :post, StripeStubs::STRIPE_CHARGES_URL do |request|
+      posted = Rack::Utils.parse_nested_query(request.body)
+      posted["amount"] == "1000" && posted["currency"] == "usd" &&
+        posted["source"] == stripe_test_token &&
+        posted["receipt_email"] == order_attrs[:email]
+    end
 
     # after second order, no user created
     refute_user_created { assert_ordered_emailed(build_order_attrs) }
@@ -77,6 +82,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     new_order = Order.last
     assert_nil new_order.stripe_charge_id
     assert_equal 0, new_order.stripe_charge_amount
+    assert_not_requested :post, StripeStubs::STRIPE_CHARGES_URL
   end
 
   test "missing stripe token" do
@@ -84,13 +90,14 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     order_attrs[:token] = nil
     refute_order(order_attrs)
     assert_equal "Stripe credit card not submitted", response.parsed_body["message"]
+    assert_not_requested :post, StripeStubs::STRIPE_CHARGES_URL
   end
 
   test "credit card declined" do
-    StripeMock.prepare_card_error(:card_declined)
+    stub_stripe_card_declined
     order_attrs = build_order_attrs
     refute_order(order_attrs)
-    assert_equal "The card was declined", response.parsed_body["message"]
+    assert_equal "Your card was declined.", response.parsed_body["message"]
   end
 
   private
@@ -107,7 +114,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
       phone: "555-123-4567",
       price: 10.00,
       mailing_list: false,
-      token: @stripe_helper.generate_card_token
+      token: stripe_test_token
     }
   end
 

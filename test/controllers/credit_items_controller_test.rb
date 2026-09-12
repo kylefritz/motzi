@@ -1,27 +1,24 @@
 require "test_helper"
-require "stripe_mock"
 
 class CreditItemsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
-  def setup
+  include StripeStubs
+
+  setup do
     sign_in users(:ljf)
     menus(:week2).make_current!
     travel_to(Menu.current.earliest_deadline - 2.hours)
-    StripeMock.start
-    @stripe_helper = StripeMock.create_test_helper
+    stub_stripe_charge
   end
 
-  def teardown
-    travel_back
-    StripeMock.stop
-  end
+  teardown { travel_back }
 
   test "can create credit items from consumer front end" do
     order_attrs = {
       price: 10.25,
       credits: 20,
       breads_per_week: 1.0,
-      token: @stripe_helper.generate_card_token
+      token: stripe_test_token
     }
 
     assert_difference "CreditItem.count", 1, "order created" do
@@ -36,5 +33,24 @@ class CreditItemsControllerTest < ActionDispatch::IntegrationTest
     refute_nil new_credit_item.stripe_charge_id
     refute_nil new_credit_item.stripe_charge_amount
     assert_equal order_attrs[:price], new_credit_item.stripe_charge_amount
+
+    # The charge Stripe was asked for matches what the member paid.
+    assert_requested :post, StripeStubs::STRIPE_CHARGES_URL do |request|
+      posted = Rack::Utils.parse_nested_query(request.body)
+      posted["amount"] == "1025" && posted["source"] == stripe_test_token &&
+        posted["metadata"]["credits"] == "20"
+    end
+  end
+
+  test "declined card creates nothing and returns the decline message" do
+    stub_stripe_card_declined
+    order_attrs = { price: 10.25, credits: 20, breads_per_week: 1.0, token: stripe_test_token }
+
+    assert_no_difference "CreditItem.count" do
+      post "/credit_items.json", params: order_attrs, as: :json
+      assert_response :unprocessable_content
+    end
+
+    assert_equal "Your card was declined.", response.parsed_body["error"]
   end
 end

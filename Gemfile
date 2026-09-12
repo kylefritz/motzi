@@ -46,7 +46,7 @@ gem "solid_cable", "~> 4.0" # database-backed ActionCable adapter (no Redis)
 gem "solid_cache" # Postgres-backed Rails cache store (no Redis/Memcached)
 gem "solid_queue" # database-backed ActiveJob backend (Rails 7.2+)
 gem "sql_query" # load SQL queries from erb templates
-gem "stripe", "~> 13.5" # accept credit cards; capped by stripe-ruby-mock (< 14)
+gem "stripe", "~> 19.6" # accept credit cards; tests stub api.stripe.com with WebMock (test/support/stripe_stubs.rb)
 
 group :development, :test do
   gem "byebug" # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -74,7 +74,6 @@ end
 group :test do
   gem "capybara", ">= 3.26" # Adds support for Capybara system testing and selenium driver
   gem "selenium-webdriver", ">= 4.0.0.rc1"
-  gem "stripe-ruby-mock", "~> 5.0", require: "stripe_mock" # test Stripe code without hitting Stripe's servers
   gem "vcr" # record and replay HTTP interactions for tests
   gem "webmock" # stub HTTP requests in tests
 end
