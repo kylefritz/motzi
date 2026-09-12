@@ -3,6 +3,9 @@ require_relative "../config/environment"
 require "rails/test_help"
 require_relative "support/vcr_setup"
 
+# json-schema still defaults to MultiJson and warns about it; use the stdlib JSON directly.
+JSON::Validator.use_multi_json = false
+
 class ActiveSupport::TestCase
   # Run tests in parallel with specified workers
   parallelize(workers: :number_of_processors)
