@@ -250,9 +250,7 @@ GEM
       reline
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
-    image_processing (1.14.0)
-      mini_magick (>= 4.9.5, < 6)
-      ruby-vips (>= 2.0.17, < 3)
+    image_processing (2.1.0)
     importmap-rails (2.2.3)
       actionpack (>= 6.0.0)
       activesupport (>= 6.0.0)
@@ -328,9 +326,6 @@ GEM
       net-smtp
     marcel (1.1.0)
     matrix (0.4.2)
-    mini_magick (5.2.0)
-      benchmark
-      logger
     mini_mime (1.1.5)
     mini_portile2 (2.8.9)
     minitest (5.27.0)
@@ -685,7 +680,7 @@ DEPENDENCIES
   gon
   hashid-rails
   heroku-api-postgres
-  image_processing (~> 1.2)
+  image_processing (~> 2.1)
   jaro_winkler (~> 1.5.5)
   jbuilder (~> 2.7)
   jsbundling-rails
@@ -712,6 +707,7 @@ DEPENDENCIES
   rcodetools
   redcarpet
   rubocop-rails-omakase
+  ruby-vips
   sass-rails (~> 6)
   selenium-webdriver (>= 4.0.0.rc1)
   solargraph
