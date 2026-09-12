@@ -36,13 +36,13 @@ gem "olive_branch" # convert snake_case to camelCase for json
 gem "paper_trail" # audits
 gem "pg", ">= 0.18", "< 2.0"
 gem "progress_bar"
-gem "puma", "~> 7.0" # web/app server
+gem "puma", "~> 8.0" # web/app server
 gem "rack-attack" # block scanner traffic / rate limit
 gem "rails", "~> 8.1.3"
 gem "rails-settings-cached" # site-wide settings
 gem "redcarpet" # markdown the baker's note in admin
 gem "sass-rails", "~> 6" # css
-gem "solid_cable", "~> 3.0" # database-backed ActionCable adapter (no Redis)
+gem "solid_cable", "~> 4.0" # database-backed ActionCable adapter (no Redis)
 gem "solid_cache" # Postgres-backed Rails cache store (no Redis/Memcached)
 gem "solid_queue" # database-backed ActiveJob backend (Rails 7.2+)
 gem "sql_query" # load SQL queries from erb templates

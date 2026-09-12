@@ -1,6 +1,10 @@
 import React from "react";
 import { afterEach, beforeAll, mock } from "bun:test";
-import { cleanup } from "@testing-library/react";
+import { cleanup, configure } from "@testing-library/react";
+
+// The default 1s waitFor/findBy timeout is enough locally but the builder
+// test's first render regularly exceeds it on GitHub's runners (#364).
+configure({ asyncUtilTimeout: 5000 });
 
 type StripeToken = { token: { id: string } };
 
