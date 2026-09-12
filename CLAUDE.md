@@ -26,6 +26,8 @@ There are three test suites. The first two run in CI; the third is manual.
 | **JS** | `bun test` | React components (menu, cart, builder, credits) via jsdom | ~3s | Yes |
 | **Visual** | `bunx playwright test` | Email template screenshots — mobile (iPhone 14) & desktop | ~20s | No — manual only |
 
+**Local CI**: `bin/ci` (Rails 8.1 local CI, steps in `config/ci.rb`) runs rubocop, bundler-audit, brakeman, the Rails and JS suites, and the typecheck in one go.
+
 ### Visual tests
 
 Playwright screenshots all 6 email templates at mobile and desktop viewports, then sends each screenshot to Claude Haiku for visual QA (checks for overlapping text, broken layout, clipped content). Not in CI because they require a running Rails server with dev data and an `ANTHROPIC_API_KEY`.
