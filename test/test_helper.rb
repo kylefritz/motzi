@@ -2,6 +2,7 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
 require_relative "support/vcr_setup"
+require_relative "support/stripe_stubs"
 
 # json-schema still defaults to MultiJson and warns about it; use the stdlib JSON directly.
 JSON::Validator.use_multi_json = false
