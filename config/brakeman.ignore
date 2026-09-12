@@ -7,8 +7,12 @@
     {
       "fingerprint": "19ec190c996eca43da675de0907235ecb61b31a18d1b162444c5e6033a901ea4",
       "note": "Open3.capture2 with array form — no shell injection possible"
+    },
+    {
+      "fingerprint": "98b26f60d776fd41ee6f088c833725145be9aac2d7c5b33780241c273622db42",
+      "note": "Rails 8.0 EOL 2026-10-07 — date-triggered warning, tracked in #357 (Rails 8.1 upgrade)"
     }
   ],
-  "updated": "2026-07-14",
+  "updated": "2026-09-12",
   "brakeman_version": "8.0.4"
 }
