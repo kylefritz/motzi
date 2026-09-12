@@ -41,7 +41,7 @@ gem "rack-attack" # block scanner traffic / rate limit
 gem "rails", "~> 8.1.3"
 gem "rails-settings-cached" # site-wide settings
 gem "redcarpet" # markdown the baker's note in admin
-gem "ruby-vips", require: false # libvips bindings for image_processing 2.x (no longer a hard dependency); Active Storage requires it lazily when a variant is processed, and CI has no libvips
+gem "ruby-vips", require: false # libvips bindings for image_processing 2.x (no longer a hard dependency); Active Storage requires it when its vips transformer loads
 gem "sass-rails", "~> 6" # css
 gem "solid_cable", "~> 4.0" # database-backed ActionCable adapter (no Redis)
 gem "solid_cache" # Postgres-backed Rails cache store (no Redis/Memcached)

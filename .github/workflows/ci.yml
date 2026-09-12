@@ -60,8 +60,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install PostgreSQL client
-        run: sudo apt-get -yqq install libpq-dev
+      - name: Install PostgreSQL client and libvips
+        # libvips: Active Storage loads its vips transformer under eager_load
+        # (CI=true) and image_processing 2.x raises if the library is missing.
+        # Heroku's stack ships it, so this makes CI match production.
+        run: sudo apt-get -yqq install libpq-dev libvips-dev
 
       - uses: ruby/setup-ruby@v1
         with:
