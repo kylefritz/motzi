@@ -1,0 +1,26 @@
+<%# Keeps the week dropdown in sync with the chosen menu type: a week that already
+    has a menu of that type is disabled, and the selection jumps to the first free week. %>
+<script>
+  (function () {
+    var typeSelect = document.getElementById("menu_menu_type");
+    var weekSelect = document.getElementById("menu_week_id");
+    if (!typeSelect || !weekSelect) return;
+
+    function syncTakenWeeks() {
+      var chosenType = typeSelect.value;
+      var options = Array.prototype.slice.call(weekSelect.options);
+      options.forEach(function (option) {
+        var takenBy = (option.dataset.taken || "").split(",").filter(Boolean);
+        option.disabled = takenBy.indexOf(chosenType) !== -1;
+      });
+
+      var current = weekSelect.options[weekSelect.selectedIndex];
+      if (current && current.disabled) {
+        var firstFree = options.filter(function (o) { return !o.disabled; })[0];
+        if (firstFree) weekSelect.value = firstFree.value;
+      }
+    }
+
+    typeSelect.addEventListener("change", syncTakenWeeks);
+  })();
+</script>

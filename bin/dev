@@ -22,7 +22,7 @@ if lsof -iTCP:"$web_port" -sTCP:LISTEN -t > /dev/null 2>&1; then
     alt_port=$((alt_port + 1))
   done
   echo "==> Port ${web_port} in use (pid $pid)"
-  read -rp "==> [u]se port ${alt_port} instead (default) / [k]ill $pid / [q]uit? " answer
+  read -rp "==> [U]se port ${alt_port} instead (default) / [k]ill $pid / [q]uit? " answer
   case "${answer:-u}" in
     [Kk]*)
       kill "$pid" 2>/dev/null && echo "==> Killed $pid" || echo "==> Could not kill $pid"

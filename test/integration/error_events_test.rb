@@ -41,6 +41,29 @@ class ErrorEventsTest < ActionDispatch::IntegrationTest
     assert_nil ErrorEvent.last.user_id
   end
 
+  test "browser ingest accepts a payload nested under error_event" do
+    # Rails' ParamsWrapper invites this shape (wrap_parameters is on for
+    # JSON), so a client posting {error_event: {...}} must not silently
+    # lose every field to the fallbacks.
+    assert_difference "ErrorEvent.count", 1 do
+      post "/error_events", params: {
+        error_event: {
+          error_class: "TypeError",
+          message: "wrapped payload",
+          stack: "TypeError: wrapped\n    at App (/menu.js:1:1)",
+          url: "/menu",
+          context: { kind: "wrapped" }
+        }
+      }, as: :json
+    end
+
+    assert_response :no_content
+    ev = ErrorEvent.last
+    assert_equal "TypeError", ev.error_class
+    assert_equal "wrapped payload", ev.message
+    assert_equal "wrapped", ev.context["kind"]
+  end
+
   test "browser ingest rate-limits high-volume posters" do
     # The test env's :null_store cache doesn't actually count, so swap in a
     # real in-memory store for this test only.

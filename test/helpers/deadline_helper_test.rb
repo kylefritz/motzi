@@ -5,7 +5,6 @@ class DeadlineHelperTest < ActiveSupport::TestCase
 
   def setup
     @menu = menus(:week1)
-    @menu.update!(week_id: Time.zone.now.week_id)
   end
 
   test "ordering_deadline_text" do

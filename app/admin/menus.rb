@@ -76,24 +76,53 @@ ActiveAdmin.register Menu do
   end
 
   form do |f|
-    def week_options(menu)
-      taken = Menu.where.not(id: menu.id).pluck(:week_id, :menu_type)
-                  .group_by(&:first).transform_values { |pairs| pairs.map(&:last) }
+    # Weeks a menu of each type already exists for, e.g. { "26w38" => ["regular"] }.
+    def weeks_taken(menu)
+      Menu.where.not(id: menu.id).pluck(:week_id, :menu_type)
+          .group_by(&:first).transform_values { |pairs| pairs.map(&:last) }
+    end
+
+    # Each option carries data-taken so the picker script can re-disable options
+    # when the menu type changes; disabled is set server-side for the current type.
+    def week_options(menu, taken)
       week_ids = (0..10).map { |i| (Time.zone.now + i.weeks).week_id }
       week_ids.push(menu.week_id) if menu.week_id.present?
       week_ids.uniq.sort.map do |w|
         t = Time.zone.from_week_id(w).strftime("%a %m/%d")
         types_taken = taken[w] || []
         suffix = types_taken.any? ? " (has #{types_taken.join(', ')})" : ""
-        [ "#{w} starts #{t}#{suffix}", w ]
+        [ "#{w} starts #{t}#{suffix}", w,
+          { disabled: types_taken.include?(menu.menu_type), data: { taken: types_taken.join(",") } } ]
       end
     end
+
+    def default_week_id(menu, taken)
+      return menu.week_id if menu.week_id.present?
+      (0..10).map { |i| (Time.zone.now + i.weeks).week_id }
+             .find { |w| !(taken[w] || []).include?(menu.menu_type) }
+    end
+
+    def week_locked_hint(menu)
+      reasons = []
+      reasons << "was emailed to subscribers on #{menu.emailed_at.strftime('%-m/%-d')}" if menu.emailed_at.present?
+      reasons << "has #{pluralize(menu.orders.count, 'order')}" if menu.orders.exists?
+      "Locked because this menu #{reasons.to_sentence}. To build a menu for a different week, " \
+        "#{link_to('create a new menu', new_admin_menu_path)} and use “Copy from” to pull in these items.".html_safe
+    end
+
+    menu = f.object
+    taken = weeks_taken(menu)
 
     inputs do
       input :menu_type, as: :select,
             collection: [ [ "Regular", "regular" ], [ "Holiday", "holiday" ] ],
             include_blank: false
-      input :week_id, as: :select, collection: week_options(resource)
+      if menu.week_locked?
+        input :week_id, as: :string, input_html: { disabled: true }, hint: week_locked_hint(menu)
+      else
+        input :week_id, as: :select, collection: week_options(menu, taken), include_blank: false,
+              selected: default_week_id(menu, taken)
+      end
       input :name
       para style: "margin-left: 20%; padding-left: 8px" do
         text_node "You can use "
@@ -105,6 +134,7 @@ ActiveAdmin.register Menu do
       input :day_of_note, placeholder: "Included in reminder emails sent out on pickup day"
     end
     actions
+    render "admin/menus/week_picker_script" unless menu.week_locked?
   end
 
   show do |menu|

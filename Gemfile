@@ -25,6 +25,7 @@ gem "image_processing", "~> 1.2" # Use Active Storage variant
 gem "jaro_winkler", "~> 1.5.5" # pinned for compatibility
 gem "jbuilder", "~> 2.7" # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem "jsbundling-rails" # build JS via rails asset pipeline hooks
+gem "json", "~> 2.21", ">= 2.21.2" # json 3.0 (Sep 2026) dropped the positional options hash and breaks ActiveSupport::JSON.decode on Rails 8.1.3; 2.21.2 has the CVE fix
 gem "mission_control-jobs" # job UI for ActiveJob backends
 gem "mjml-rails" # responsive email templates with MJML
 gem "mrml" # Rust MJML binary (no Node dependency)
@@ -37,7 +38,7 @@ gem "pg", ">= 0.18", "< 2.0"
 gem "progress_bar"
 gem "puma", "~> 7.0" # web/app server
 gem "rack-attack" # block scanner traffic / rate limit
-gem "rails", "~> 7.2.0"
+gem "rails", "~> 8.1.3"
 gem "rails-settings-cached" # site-wide settings
 gem "redcarpet" # markdown the baker's note in admin
 gem "sass-rails", "~> 6" # css
@@ -75,6 +76,5 @@ group :test do
   gem "selenium-webdriver", ">= 4.0.0.rc1"
   gem "stripe-ruby-mock", "3.1.0.rc3", require: "stripe_mock" # test Stripe code without hitting Stripe's servers
   gem "vcr" # record and replay HTTP interactions for tests
-  gem "webdrivers" # Easy installation and use of web drivers to run system tests with browsers
   gem "webmock" # stub HTTP requests in tests
 end

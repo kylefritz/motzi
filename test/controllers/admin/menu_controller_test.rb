@@ -33,6 +33,44 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "create menu with a week_id already taken re-renders the form instead of erroring" do
+    taken = menus(:week1)
+    assert_no_difference "Menu.unscoped.count" do
+      post "/admin/menus", params: { menu: { name: "Dup", week_id: taken.week_id, menu_type: taken.menu_type } }
+    end
+    assert_response :success
+    assert_match "has already been taken", response.body
+  end
+
+  test "new menu form disables weeks taken by the same menu type and preselects the first free week" do
+    this_week = Time.zone.now.week_id
+    next_week = (Time.zone.now + 1.week).week_id
+    Menu.create!(name: "taken", week_id: this_week, menu_type: "regular")
+    get "/admin/menus/new"
+    assert_response :success
+    assert_select "select#menu_week_id option[value=?][disabled]", this_week
+    assert_select "select#menu_week_id option[value=?][data-taken=?]", this_week, "regular"
+    assert_select "select#menu_week_id option[value=?][selected]", next_week
+    assert_select "select#menu_week_id option[value='']", count: 0
+  end
+
+  test "edit form locks the week for a menu that has been emailed" do
+    menu = menus(:week3)
+    menu.update!(emailed_at: 1.hour.ago)
+    get "/admin/menus/#{menu.id}/edit"
+    assert_response :success
+    assert_select "select#menu_week_id", count: 0
+    assert_match "create a new menu", response.body
+  end
+
+  test "update refuses to move a menu with orders to another week" do
+    menu = menus(:week1)
+    patch "/admin/menus/#{menu.id}", params: { menu: { week_id: "19w09" } }
+    assert_response :success
+    assert_match "changed after the menu has been emailed or has orders", response.body
+    assert_equal "19w01", menu.reload.week_id
+  end
+
   test "delete menu with no orders" do
     menu = Menu.create!(name: "Empty Menu", week_id: "99w01", menu_type: "regular")
     assert_difference "Menu.unscoped.count", -1 do

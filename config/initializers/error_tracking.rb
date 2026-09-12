@@ -10,14 +10,19 @@ class ErrorTrackingSubscriber
     return if ignored.include?(error.class.name)
 
     rack_env = context[:rack] || context["rack"]
+    controller = context[:controller] || context["controller"]
     request =
       if rack_env.is_a?(Hash)
         ActionDispatch::Request.new(rack_env)
       elsif rack_env.respond_to?(:request_id)
         rack_env
+      elsif controller.respond_to?(:request)
+        # Unhandled controller exceptions arrive with the controller instance
+        # in the execution context (Rails 7+); its request carries url/params.
+        controller.request
       end
 
-    extra_context = context.except(:rack, "rack").merge(
+    extra_context = context.except(:rack, "rack", :controller, "controller").merge(
       handled: handled,
       severity: severity,
       reporter_source: source
@@ -30,8 +35,11 @@ class ErrorTrackingSubscriber
       context: extra_context,
       source: classify_source(source, context, request)
     )
-  rescue StandardError => e
-    Rails.logger.warn("[ErrorTracking] failed to record exception: #{e.class}: #{e.message}")
+  rescue Exception => e # rubocop:disable Lint/RescueException -- telemetry must never take down request handling (2026-07-14: a SystemStackError escaped the StandardError rescue and 500s went unrecorded)
+    begin
+      Rails.logger.warn("[ErrorTracking] failed to record exception: #{e.class}: #{e.message}".scrub("\u{FFFD}"))
+    rescue Exception # rubocop:disable Lint/RescueException, Lint/SuppressedException
+    end
   end
 
   private
