@@ -30,6 +30,31 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 20, users(:kyle).credits
   end
 
+  test "credit_ledger walks purchases and credit orders oldest first with a running balance" do
+    kyle = users(:kyle)
+    credit_items(:kyle).update_columns(created_at: 30.days.ago)
+    orders(:kyle_week1).update_columns(created_at: 20.days.ago)
+    orders(:kyle_week2).update_columns(created_at: 10.days.ago)
+
+    ledger = kyle.credit_ledger
+
+    assert_equal [ 26, -1, -2 ], ledger.first(3).map(&:change)
+    assert_equal [ 26, 25, 23 ], ledger.first(3).map(&:balance)
+    assert_equal credit_items(:kyle), ledger.first.source
+    assert_equal orders(:kyle_week1), ledger.second.source
+    assert_equal kyle.credits, ledger.last.balance
+  end
+
+  test "credit_ledger leaves out orders paid through Stripe" do
+    kyle = users(:kyle)
+    orders(:kyle_week1).update!(stripe_charge_id: "ch_test")
+
+    ledger = kyle.credit_ledger
+
+    assert_not_includes ledger.map(&:source), orders(:kyle_week1)
+    assert_equal kyle.credits, ledger.last.balance
+  end
+
   test "receive_weekly_menu" do
     refute users(:maya).receive_weekly_menu?
     assert users(:kyle).receive_weekly_menu?
