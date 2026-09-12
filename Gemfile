@@ -75,6 +75,5 @@ group :test do
   gem "selenium-webdriver", ">= 4.0.0.rc1"
   gem "stripe-ruby-mock", "3.1.0.rc3", require: "stripe_mock" # test Stripe code without hitting Stripe's servers
   gem "vcr" # record and replay HTTP interactions for tests
-  gem "webdrivers" # Easy installation and use of web drivers to run system tests with browsers
   gem "webmock" # stub HTTP requests in tests
 end
