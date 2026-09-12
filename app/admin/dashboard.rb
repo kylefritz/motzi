@@ -193,7 +193,9 @@ ActiveAdmin.register_page "Dashboard" do
 
         panel "Recently updated content" do
           versions = PaperTrail::Version.order("id desc").limit(20).includes(:item)
-          users = Hash[User.find(versions.map(&:whodunnit)).map { |u| [ u.id.to_s, u ] }]
+          # whodunnit is a free-form string; a console script or a deleted user
+          # won't resolve, and that must not take the dashboard down.
+          users = User.where(id: versions.map(&:whodunnit).compact).index_by { |u| u.id.to_s }
           table_for versions do
             column ("Version") { |v| link_to(v.id, admin_version_path(v.id)) }
             column ("Object") { |v| v.item }

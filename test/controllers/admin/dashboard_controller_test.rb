@@ -98,6 +98,16 @@ class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Market Place", holiday_rows[0].css("td")[0].text.strip
   end
 
+  test "dashboard still renders when a version's whodunnit is not a user id" do
+    # e.g. PaperTrail.request.whodunnit set to a script name in a console session
+    PaperTrail::Version.create!(item_type: "Menu", item_id: menus(:week1).id, event: "update", whodunnit: "repair-script-2026-09-12")
+    PaperTrail::Version.create!(item_type: "Menu", item_id: menus(:week1).id, event: "update", whodunnit: "999999")
+
+    get "/admin/dashboard"
+    assert_response :success
+    assert_match "repair-script-2026-09-12", response.body
+  end
+
   test "dashboard can enqueue queue demo job" do
     assert_enqueued_with(job: QueueDemoJob) do
       post "/admin/dashboard/enqueue_queue_demo"
