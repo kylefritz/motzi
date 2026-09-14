@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_12_192524) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_14_174500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -260,7 +260,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_12_192524) do
     t.datetime "recorded_at", null: false
     t.datetime "updated_at", null: false
     t.index [ "dyno", "recorded_at" ], name: "index_dyno_metrics_on_dyno_and_recorded_at"
-    t.index [ "recorded_at" ], name: "index_dyno_metrics_on_recorded_at"
   end
 
   create_table "error_events", force: :cascade do |t|
