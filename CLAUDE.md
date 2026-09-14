@@ -91,7 +91,7 @@ Screenshots are uploaded to `s3://motzi/public/gh/pr-<NUMBER>/` and embedded in 
 
 ## Deployment
 
-Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgres 15 (essential-1), **not** Neon. No Redis — everything runs on Postgres via Solid Queue (jobs), Solid Cable (ActionCable), and Solid Cache. To pull prod data locally: `bin/seed_local` (uses `heroku pg:pull`).
+Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgres 18 (essential-1), **not** Neon. No Redis — everything runs on Postgres via Solid Queue (jobs), Solid Cable (ActionCable), and Solid Cache. To pull prod data locally: `bin/seed_local` (uses `heroku pg:pull`).
 
 ## Analysis Replies (email ingress)
 
