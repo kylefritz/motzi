@@ -1,4 +1,7 @@
 #!/usr/bin/env ruby
+# Spring cross-loads apps between git worktrees and hangs; skip it there.
+require_relative "../lib/worktree_env"
+ENV["DISABLE_SPRING"] ||= "1" if WorktreeEnv.worktree?
 begin
   load File.expand_path('../spring', __FILE__)
 rescue LoadError => e
