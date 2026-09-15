@@ -93,6 +93,61 @@ jobs:
           bin/rails db:setup
           bin/rails test
 
+  test_system:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install PostgreSQL client and libvips
+        run: sudo apt-get -yqq install libpq-dev libvips-dev
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.10
+          bundler-cache: true
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # axe-core (read from node_modules by the system test) comes from here.
+      - name: Install JS dependencies
+        run: bun install
+
+      - name: Build JS assets
+        run: bun run build
+
+      # ubuntu-latest ships Google Chrome; Selenium Manager fetches the
+      # matching chromedriver.
+      - name: System tests
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          RAILS_ENV: test
+          DISABLE_SPRING: "1"
+          RUBYOPT: "-W:no-deprecated -W:no-experimental"
+        run: |
+          bin/rails db:setup
+          bin/rails test:system
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-test-screenshots
+          path: tmp/screenshots
+          if-no-files-found: ignore
+
   test_js:
     runs-on: ubuntu-latest
     steps:
