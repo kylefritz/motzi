@@ -28,6 +28,15 @@ class ErrorEvent < ApplicationRecord
   scope :resolved, -> { where.not(resolved_at: nil) }
   scope :for_source, ->(s) { where(source: s) if s.present? }
 
+  # The browser reporter tags 4xx responses (card declines, ordering closed)
+  # with context.severity "warning": the server rejected the request on
+  # purpose, the app did not fail. Server-side warnings (e.g. uptime outages)
+  # are still failures, so this only applies to browser events.
+  REJECTED_REQUEST_SQL = "error_events.source = 'browser' AND " \
+    "COALESCE(error_events.context->>'severity', '') IN ('warning', 'info')".freeze
+  scope :rejected_requests, -> { where(REJECTED_REQUEST_SQL) }
+  scope :failures, -> { where.not(REJECTED_REQUEST_SQL) }
+
   def self.record_server_exception(exception, request: nil, user: nil, context: {}, status_code: nil, source: "server")
     return if IGNORED_SERVER_EXCEPTIONS.include?(exception.class.name)
 
