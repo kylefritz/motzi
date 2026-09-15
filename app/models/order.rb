@@ -9,6 +9,20 @@ class Order < ApplicationRecord
   scope :marketplace, -> { where("stripe_charge_amount is not NULL") }
   scope :subscriber, -> { where("stripe_charge_amount is NULL") }
 
+  # Key for the pg_advisory_xact_lock that serializes order creation per
+  # user+menu. Advisory locks are cluster-wide, not per-database, so the
+  # database name is part of the key: parallel test workers use separate
+  # databases (motzi_test-N) with identical fixtures on one Postgres cluster
+  # and would otherwise contend on the same keys (#349). Production has a
+  # single database, so this only shifts every key by a constant.
+  #
+  # crc32 yields 0..2^32-1, which fits the single-bigint lock form without
+  # sign conversion. A collision only makes two unrelated order requests wait
+  # on each other briefly; it never affects correctness.
+  def self.creation_lock_key(user_id:, menu_id:, database: connection.current_database)
+    Zlib.crc32("#{database}:order:#{user_id}:#{menu_id}")
+  end
+
   def self.for_current_menu
     self.for_menu_id(Menu.current.id)
   end
