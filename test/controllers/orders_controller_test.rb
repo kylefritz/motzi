@@ -38,7 +38,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
         post "/orders.json", params: order, as: :json
       end
     end
-    assert_response :unprocessable_content
+    assert_order_error "Add an item to your cart"
   end
 
   test "hashid_user can pay_it_forward" do
@@ -59,7 +59,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     after_deadline do
       refute_order_placed users(:ljf).hashid
     end
-    assert_response :unprocessable_content
+    assert_order_error "ordering for this menu is closed"
   end
 
   test "hashid_user can update their own order" do
@@ -155,6 +155,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
       end
     end
     assert_response :success
+    validate_json_schema :menu, response.body
     assert_equal "newguest@example.com", Order.last.user.email
   end
 
@@ -170,9 +171,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
         }, as: :json
       end
     end
-    assert_response :unprocessable_content
-    json = JSON.parse(response.body)
-    assert_equal "this menu is not available for ordering", json["message"]
+    assert_order_error "this menu is not available for ordering"
   end
 
   test "creating holiday order returns regular menu as primary menu" do
@@ -194,6 +193,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
+    validate_json_schema :menu, response.body
     json = JSON.parse(response.body)
 
     # The primary menu should be the regular menu, not the holiday one
@@ -318,6 +318,12 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   def assert_success_and_validate
     assert_response :success
     validate_response_json_schema
+  end
+
+  def assert_order_error(message)
+    assert_response :unprocessable_content
+    validate_json_schema :order_error, response.body
+    assert_equal message, JSON.parse(response.body)["message"]
   end
 
   def validate_response_json_schema

@@ -60,6 +60,14 @@ export type CreditItemResponse = {
   };
 };
 
+export type ErrorEventRequest = {
+  error_class: string;
+  message: string;
+  stack: string;
+  url: string;
+  context?: Record<string, unknown>;
+};
+
 export type MenuResponse = {
   menu: {
     id: number;
@@ -169,4 +177,8 @@ export type MenuResponse = {
     stripeReceiptUrl?: string | null;
     stripeChargeAmount?: number | null;
   } | null;
+};
+
+export type OrderErrorResponse = {
+  message: string;
 };

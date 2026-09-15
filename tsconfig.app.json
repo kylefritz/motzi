@@ -1,5 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "include": ["app/javascript/**/*", "types/**/*"],
-  "exclude": ["test/javascript/**/*"]
+  "exclude": ["test/javascript/**/*"],
+  // The shared /menu.json mock is checked with the app (via `satisfies MenuResponse`)
+  // so drift from test/schemas/menu.json fails the default typecheck gate.
+  "files": ["test/javascript/menu/mockMenuJson.ts"]
 }

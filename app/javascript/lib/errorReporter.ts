@@ -1,13 +1,10 @@
 // Self-hosted browser error reporter. Posts to /error_events.
 // All failures are swallowed — the reporter must never break the page.
 
-type ReportPayload = {
-  error_class: string;
-  message: string;
-  stack: string;
-  url: string;
-  context?: Record<string, unknown>;
-};
+import type { ErrorEventRequest } from "../types/api";
+
+// Shape is defined by test/schemas/error_event_request.json.
+type ReportPayload = ErrorEventRequest;
 
 const ENDPOINT = "/error_events";
 const DEDUPE_WINDOW_MS = 10_000;
