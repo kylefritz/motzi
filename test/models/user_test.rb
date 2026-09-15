@@ -9,6 +9,24 @@ class UserTest < ActiveSupport::TestCase
     assert_equal maya.id, User.maya.id
   end
 
+  test "previewing_marketing? requires both admin and the preview flag" do
+    kyle = users(:kyle)
+    refute kyle.previewing_marketing?, "admin without the flag"
+    kyle.preview_marketing = true
+    assert kyle.previewing_marketing?
+
+    ljf = users(:ljf)
+    ljf.preview_marketing = true
+    refute ljf.previewing_marketing?, "the flag does nothing for a non-admin"
+  end
+
+  test "toggling the preview flag does not create a PaperTrail version" do
+    kyle = users(:kyle)
+    assert_no_difference -> { kyle.versions.count } do
+      kyle.update!(preview_marketing: true)
+    end
+  end
+
   test "credits remaining" do
     assert_equal(-2, users(:ljf).credits)
     assert_equal 20, users(:kyle).credits

@@ -12,6 +12,17 @@ ActiveAdmin.register_page "Dashboard" do
     redirect_to admin_dashboard_path, notice: "Test emails queued for #{User.kyle&.email}. Check letter_opener."
   end
 
+  # Marketing-site preview: only ever touches the signed-in admin's own flag.
+  page_action :start_marketing_preview, method: :post do
+    current_admin_user.update!(preview_marketing: true)
+    redirect_to "/"
+  end
+
+  page_action :stop_marketing_preview, method: :post do
+    current_admin_user.update!(preview_marketing: false)
+    redirect_to admin_dashboard_path, notice: "Stopped previewing the new site."
+  end
+
   content title: "Hello friend" do
     if defined?(ReviewAppMailInterceptor) && ReviewAppMailInterceptor.active
       div class: "flash flash_alert", style: "margin-bottom: 16px" do
@@ -162,6 +173,27 @@ ActiveAdmin.register_page "Dashboard" do
       end
     end
 
+
+    columns do
+      column do
+        panel "New website", id: "new-website" do
+          homepage_setting = Setting.find_by(var: "homepage")
+          para do
+            strong "Homepage: "
+            text_node Setting.marketing_live? ? "Marketing site (live)" : "Menu (live)"
+          end
+          div style: "display: flex; gap: 12px; align-items: center; flex-wrap: wrap" do
+            if current_active_admin_user.preview_marketing?
+              text_node button_to("Stop preview", "/admin/dashboard/stop_marketing_preview", method: :post)
+            else
+              text_node button_to("Preview new site", "/admin/dashboard/start_marketing_preview", method: :post)
+            end
+            settings_link = homepage_setting ? admin_setting_path(homepage_setting) : admin_settings_path
+            a "Go live: set homepage to “marketing” in Settings", href: settings_link, style: "font-size: 13px"
+          end
+        end
+      end
+    end
 
     columns do
       column do

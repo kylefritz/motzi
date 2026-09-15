@@ -1,8 +1,8 @@
-class HomeController < ApplicationController
-  skip_before_action :authenticate_user!
+class HomeController < MarketingController
+  # Sign-out must work whether or not the marketing site is visible.
+  skip_before_action :require_marketing_visible, only: :signout
 
   def show
-    redirect_to "/menu"
   end
 
   def signout

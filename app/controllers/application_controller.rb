@@ -9,6 +9,10 @@ class ApplicationController < ActionController::Base
 
   protected
 
+  def after_sign_in_path_for(resource)
+    stored_location_for(resource) || "/menu"
+  end
+
   def set_current_user
     Current.user = current_user
   end

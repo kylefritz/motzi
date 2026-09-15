@@ -7,7 +7,8 @@ class User < ApplicationRecord
   has_many :orders, dependent: :destroy
   has_many :order_items, through: :orders
   has_many :visits, class_name: "Ahoy::Visit"
-  has_paper_trail
+  # Toggling marketing preview is UI state, not a content change worth a version.
+  has_paper_trail ignore: [ :preview_marketing ]
   # Users who receive the weekly menu email
   scope :receive_weekly_menu, -> { not_owners.where(receive_weekly_menu: true) }
 
@@ -32,6 +33,12 @@ class User < ApplicationRecord
   before_validation do
     self.email = self.email.strip.downcase
   end
+  # Sticky per-admin "preview the new marketing site" mode. The flag only
+  # counts for admins; a non-admin with it set sees nothing different.
+  def previewing_marketing?
+    is_admin? && preview_marketing?
+  end
+
   before_save :clear_dependent_email_preferences
   def clear_dependent_email_preferences
     self.receive_havent_ordered_reminder = false unless receive_weekly_menu

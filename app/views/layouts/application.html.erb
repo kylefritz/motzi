@@ -8,19 +8,7 @@
   <%= tag.link(rel: "icon", href: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍞%3C/text%3E%3C/svg%3E") %>
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
-  <% if Setting.google_analytics_tracker.present? %>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=<%= Setting.google_analytics_tracker %>"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-    gtag('js', new Date());
-
-    gtag('config', '<%= Setting.google_analytics_tracker %>');
-  </script>
-  <% end %>
+  <%= render "layouts/analytics" %>
   <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
   <%= include_gon(:camel_case => true, :camel_depth => :recursive) %>
   <script src="https://js.stripe.com/v3/"></script>

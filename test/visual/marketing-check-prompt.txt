@@ -1,0 +1,20 @@
+You are reviewing a screenshot of a marketing page on the motzibread.com website
+that we just migrated from Wix to a Rails-based site.
+
+Look for problems that would embarrass us in front of a customer. Specifically:
+- Overlapping text or images
+- Text clipped at viewport edges
+- Broken images (alt text or 404 image icon visible)
+- Misaligned or floating elements that should be flush with their column
+- Typography that looks broken (missing font fallbacks, mismatched sizes)
+- Buttons or links that look unstyled (default-blue underline, default-gray button)
+
+Do NOT flag:
+- Aesthetic preferences (this is a faithful port, not a redesign)
+- Differences from the original Wix site as long as the page is readable
+- Color choices
+
+Reply in this format:
+STATUS: ok | warning | broken
+ISSUES:
+- (one issue per bullet, or "none")

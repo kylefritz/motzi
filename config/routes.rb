@@ -4,6 +4,14 @@ Rails.application.routes.draw do
 
   root to: "home#show"
 
+  get  "/about",     to: "about#show"
+  get  "/subscribe", to: "subscribe#show"
+  get  "/contact",   to: "contact#show"
+  post "/contact",   to: "contact#create"
+
+  # admin-only: leave marketing-site preview mode
+  delete "/marketing_preview", to: "marketing_preview#destroy", as: :marketing_preview
+
   # pay for credit items
   resources :credit_items, only: [ :new, :create ]
 
