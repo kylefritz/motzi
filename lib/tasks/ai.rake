@@ -125,6 +125,74 @@ namespace :ai do
     File.write(results_file, results.to_yaml)
 
     print_scorecard(results, total_cost, results_file)
+    check_baseline!(results, expectations, results_file)
+  end
+
+  # Compare a fresh scorecard to test/anomaly_eval_baseline.yml and exit
+  # non-zero on regressions. See AnomalyEvalBaseline for the noise policy.
+  def check_baseline!(results, expectations, results_file)
+    baseline = AnomalyEvalBaseline.load
+    unless baseline
+      puts "\nNo baseline recorded yet (#{AnomalyEvalBaseline::PATH.relative_path_from(Rails.root)})."
+      puts "If this scorecard looks right, accept it with: rake ai:eval_baseline"
+      return
+    end
+
+    rejudge = lambda do |row|
+      puts "  Re-judging #{row[:week_id]} (findings regressed; checking for judge noise)..."
+      rejudged = rejudge_row(row, expectations[row[:week_id]])
+      results[results.index(row)] = rejudged
+      rejudged
+    end
+
+    comparison = AnomalyEvalBaseline.new(baseline).compare(results, rejudge: rejudge)
+    File.write(results_file, results.to_yaml) if comparison.flaky.any? || comparison.regressed.any?(&:rejudged)
+    puts AnomalyEvalBaseline.format(comparison)
+
+    if comparison.regressed?
+      abort "Anomaly eval regressed against the baseline in #{comparison.regressed.map(&:week_id).join(', ')}. " \
+            "If the new behavior is intended, run `rake ai:eval_baseline` to accept it."
+    end
+  end
+
+  # Second judgment of the same saved report; the agent is not re-run.
+  def rejudge_row(row, expectation)
+    grade = AnomalyReportGrader.new(
+      row[:full_result],
+      must_flag: expectation["must_flag"] || [],
+      must_not_flag: expectation["must_not_flag"] || []
+    ).grade
+    row.merge(
+      misses: grade[:misses],
+      violations: grade[:violations],
+      must_flag_detail: grade[:must_flag],
+      must_not_flag_detail: grade[:must_not_flag],
+      passed: row[:status_ok] && grade[:misses].empty? && grade[:violations].empty?,
+      rejudged: true
+    )
+  rescue StandardError => e
+    puts "  Re-judge failed (#{e.class}: #{e.message.truncate(120)}); keeping the first judgment."
+    row
+  end
+
+  desc "Accept the latest eval scorecard as the regression baseline (no API calls). FILE=tmp/ai_eval/eval_X.yml to pick one."
+  task eval_baseline: :quiet do
+    results_file = ENV["FILE"].presence || Dir.glob(eval_results_dir.join("eval_*.yml")).max
+    abort "No eval results found. Run `rake ai:eval` first (it costs ~$2.50)." unless results_file && File.exist?(results_file)
+
+    results = AnomalyEvalBaseline.load_scorecard(results_file)
+    expectations = YAML.load_file(expectations_path)
+    weeks, skipped = AnomalyEvalBaseline.merge(AnomalyEvalBaseline.load, results, expectations: expectations)
+    AnomalyEvalBaseline.write(weeks, meta: {
+      "recorded_at" => Time.zone.now.iso8601,
+      "source" => File.basename(results_file),
+      "agent_model" => AnomalyDetector.model,
+      "judge_model" => AnomalyReportGrader.judge_model
+    })
+
+    puts "Baseline updated from #{results_file}: #{results.size - skipped.size} week(s) refreshed, #{weeks.size} total."
+    puts "Skipped errored weeks (kept previous entry, if any): #{skipped.join(', ')}" if skipped.any?
+    puts "Commit #{AnomalyEvalBaseline::PATH.relative_path_from(Rails.root)}."
   end
 
   # Run the detector on one labeled week and grade the output.
@@ -212,8 +280,8 @@ namespace :ai do
     end
 
     results_file = files.last
-    results = YAML.load_file(results_file)
-    total_cost = results.sum { |r| r[:cost] }
+    results = AnomalyEvalBaseline.load_scorecard(results_file)
+    total_cost = results.sum { |r| r[:cost].to_f }
 
     print_scorecard(results, total_cost, results_file)
 

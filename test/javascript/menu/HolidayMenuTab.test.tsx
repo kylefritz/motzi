@@ -55,6 +55,7 @@ test("shows USD prices, not credits, in holiday menu", () => {
 });
 
 test("editing resets to confirmation after save", async () => {
+  const user = userEvent.setup();
   const handleCreateOrder = mock(() => Promise.resolve());
   renderHolidayMenuTab({ handleCreateOrder });
 
@@ -62,7 +63,7 @@ test("editing resets to confirmation after save", async () => {
   expect(screen.getByText("We've got your order!")).toBeTruthy();
 
   // Step 2: Click edit to enter editing mode
-  await userEvent.click(
+  await user.click(
     screen.getByRole("button", { name: "Edit Order" })
   );
 

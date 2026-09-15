@@ -1,4 +1,7 @@
-import { mock } from "bun:test";
+import { mock, type Mock } from "bun:test";
+
+// What stripe.createToken resolves with on success.
+export type StripeTokenResult = { token: { id: string }; error?: null };
 
 const elementMock = {
   mount: mock(() => {}),
@@ -11,9 +14,15 @@ const elementsMock = {
   create: mock(() => elementMock),
 };
 
-const stripeMock = {
+type CreateToken = () => Promise<StripeTokenResult | void>;
+
+const stripeMock: {
+  elements: Mock<() => typeof elementsMock>;
+  createToken: Mock<CreateToken>;
+  createSource: Mock<() => Promise<void>>;
+} = {
   elements: mock(() => elementsMock),
-  createToken: mock(() => Promise.resolve()),
+  createToken: mock<CreateToken>(() => Promise.resolve()),
   createSource: mock(() => Promise.resolve()),
 };
 

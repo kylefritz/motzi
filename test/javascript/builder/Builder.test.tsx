@@ -105,16 +105,22 @@ mock.module("../../app/javascript/lib/errorReporter", () => ({
   installGlobalErrorReporter: () => {},
 }));
 
-if (!window.matchMedia) {
-  window.matchMedia = () => ({
+// jsdom has no matchMedia; stub a never-matching MediaQueryList.
+function stubMediaQueryList(media: string): MediaQueryList {
+  return {
     matches: false,
-    media: "",
+    media,
+    onchange: null,
     addListener: () => {},
     removeListener: () => {},
     addEventListener: () => {},
     removeEventListener: () => {},
     dispatchEvent: () => false,
-  });
+  };
+}
+
+if (!window.matchMedia) {
+  window.matchMedia = stubMediaQueryList;
 }
 
 window.history.pushState({}, "", "/admin/menus/42");
@@ -146,19 +152,20 @@ function pickupDayCard(label: string) {
 }
 
 test("edits menu items", async () => {
+  const user = userEvent.setup();
   await renderBuilder();
 
   // Clear all menu items.
   const confirmSpy = mock(() => true);
   window.confirm = confirmSpy;
-  await userEvent.click(screen.getByRole("button", { name: /Clear all/i }));
+  await user.click(screen.getByRole("button", { name: /Clear all/i }));
   expect(confirmSpy).toHaveBeenCalled();
   expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_menu_items.json");
 
   // Toggle marketplace on an item card.
   const card = within(await screen.findByTestId("menu-item-card-100"));
 
-  await userEvent.click(card.getByLabelText("Marketplace"));
+  await user.click(card.getByLabelText("Marketplace"));
   expect(patchMock).toHaveBeenCalledWith("/admin/menu_items/10.json", {
     marketplace: false,
   });
@@ -187,20 +194,21 @@ test("edits menu items", async () => {
     throw new Error("Expected limit input to be present");
   }
   fireEvent.change(limitInput, { target: { value: "12" } });
-  await userEvent.click(card.getByRole("button", { name: "Save" }));
+  await user.click(card.getByRole("button", { name: "Save" }));
   expect(patchMock).toHaveBeenCalledWith(
     "/admin/menu_item_pickup_days/501.json",
     { limit: 12 }
   );
 
   // Remove an item from the menu.
-  await userEvent.click(card.getByTitle("remove from menu"));
+  await user.click(card.getByTitle("remove from menu"));
   expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_menu_item.json", {
     itemId: 100,
   });
 });
 
 test("adds a pickup day", async () => {
+  const user = userEvent.setup();
   await renderBuilder();
 
   fireEvent.change(screen.getByLabelText("Pickup at:"), {
@@ -209,7 +217,7 @@ test("adds a pickup day", async () => {
   fireEvent.change(screen.getByLabelText("Order deadline at:"), {
     target: { value: "2024-01-31T10:00" },
   });
-  await userEvent.click(screen.getByRole("button", { name: "Add pickup day" }));
+  await user.click(screen.getByRole("button", { name: "Add pickup day" }));
 
   expect(postMock).toHaveBeenCalledWith("/admin/pickup_days.json", {
     pickupAt: "2024-02-01T10:00",
@@ -219,6 +227,7 @@ test("adds a pickup day", async () => {
 });
 
 test("removes a pickup day only after confirming", async () => {
+  const user = userEvent.setup();
   await renderBuilder();
 
   const removeButton = pickupDayCard("Wed, Jan 10 at 10a").getByRole("button", {
@@ -227,26 +236,27 @@ test("removes a pickup day only after confirming", async () => {
 
   const declineSpy = mock(() => false);
   window.confirm = declineSpy;
-  await userEvent.click(removeButton);
+  await user.click(removeButton);
   expect(declineSpy).toHaveBeenCalled();
   expect(deleteMock).not.toHaveBeenCalled();
 
   window.confirm = mock(() => true);
-  await userEvent.click(removeButton);
+  await user.click(removeButton);
   expect(deleteMock).toHaveBeenCalledWith("/admin/pickup_days/1.json");
 });
 
 test("edits an existing pickup day", async () => {
+  const user = userEvent.setup();
   await renderBuilder();
 
   const card = pickupDayCard("Wed, Jan 10 at 10a");
-  await userEvent.click(card.getByRole("button", { name: "Edit" }));
+  await user.click(card.getByRole("button", { name: "Edit" }));
 
   const editPickupInput = await card.findByLabelText("Pickup at:");
   const editDeadlineInput = card.getByLabelText("Order deadline at:");
   fireEvent.change(editPickupInput, { target: { value: "2024-01-15T09:00" } });
   fireEvent.change(editDeadlineInput, { target: { value: "2024-01-14T09:00" } });
-  await userEvent.click(card.getByRole("button", { name: "Save" }));
+  await user.click(card.getByRole("button", { name: "Save" }));
 
   expect(patchMock).toHaveBeenCalledWith("/admin/pickup_days/1.json", {
     pickupAt: "2024-01-15T09:00",
@@ -257,20 +267,22 @@ test("edits an existing pickup day", async () => {
 });
 
 test("opens the pickup day editor right after a menu reload", async () => {
+  const user = userEvent.setup();
   // Regression for #376: a mount-time reset effect in EditablePickupDay could
   // flush after this Edit click (the reload renders outside act) and close the
   // editor again. It only lost the race occasionally, so this is a tripwire.
   await renderBuilder();
 
   const card = pickupDayCard("Wed, Jan 10 at 10a");
-  await userEvent.click(card.getByRole("button", { name: "x" }));
+  await user.click(card.getByRole("button", { name: "x" }));
   expect(deleteMock).toHaveBeenCalledWith("/admin/pickup_days/1.json");
 
-  await userEvent.click(card.getByRole("button", { name: "Edit" }));
+  await user.click(card.getByRole("button", { name: "Edit" }));
   expect(await card.findByLabelText("Pickup at:")).toBeTruthy();
 });
 
 test("adds a menu item", async () => {
+  const user = userEvent.setup();
   await renderBuilder();
 
   const addButton = screen.getByRole("button", { name: "Add Item" });
@@ -281,7 +293,7 @@ test("adds a menu item", async () => {
   fireEvent.change(within(addItemForm).getByRole("combobox"), {
     target: { value: "102" },
   });
-  await userEvent.click(addButton);
+  await user.click(addButton);
 
   expect(postMock).toHaveBeenCalledWith(
     "/admin/menus/42/menu_item.json",

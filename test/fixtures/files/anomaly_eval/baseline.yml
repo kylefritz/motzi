@@ -1,0 +1,46 @@
+# Fixture baseline for AnomalyEvalBaselineTest (same shape as test/anomaly_eval_baseline.yml).
+meta:
+  recorded_at: "2026-09-01T00:00:00Z"
+weeks:
+  26w01:
+    expected: healthy
+    actual: healthy
+    status_ok: true
+    must_flag: {}
+    must_not_flag:
+      "near-zero orders during announced holiday closure": clean
+  26w02:
+    expected: warning
+    actual: warning
+    status_ok: true
+    must_flag:
+      "duplicate day-of reminder emails": caught
+    must_not_flag: {}
+  26w03:
+    expected: problem
+    actual: warning
+    status_ok: false
+    must_flag:
+      "orders created with zero items": missed
+      "checkout errors in error_events": caught
+    must_not_flag: {}
+  26w04:
+    expected: warning
+    actual: warning
+    status_ok: true
+    must_flag:
+      "rapid duplicate order confirmations": caught
+    must_not_flag:
+      "R14 memory warnings on worker": clean
+  26w05:
+    expected: healthy
+    actual: healthy
+    status_ok: true
+    must_flag: {}
+    must_not_flag: {}
+  26w06:
+    expected: healthy
+    actual: healthy
+    status_ok: true
+    must_flag: {}
+    must_not_flag: {}

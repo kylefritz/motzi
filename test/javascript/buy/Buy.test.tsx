@@ -5,13 +5,14 @@ import userEvent from "@testing-library/user-event";
 
 import { SettingsContext } from "menu/Contexts";
 import mockMenuJson from "../menu/mockMenuJson";
+import type { CreditPurchaseRequest } from "../../../app/javascript/types/api";
 
 const menuResponse = mockMenuJson();
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const getMock = mock(() => Promise.resolve({ data: menuResponse }));
-const postMock = mock(() =>
+const postMock = mock((_url: string, _data: CreditPurchaseRequest) =>
   Promise.resolve({
     data: { creditItem: { stripeReceiptUrl: "/receipt", id: 1 } },
   })
@@ -61,9 +62,10 @@ test("loads user and bundles from menu", async () => {
 });
 
 test("submits credit purchase with tip and shows receipt", async () => {
+  const user = userEvent.setup();
   window.gon = { stripeApiKey: "test-key" };
 
-  const user = menuResponse.user!;
+  const subscriber = menuResponse.user!;
   const bundles = menuResponse.bundles;
   const onRefresh = mock(() => {});
   const { default: Buy } = await import("buy/App");
@@ -72,15 +74,15 @@ test("submits credit purchase with tip and shows receipt", async () => {
     <SettingsContext.Provider
       value={{ bundles, enablePayWhatYouCan: true, onRefresh }}
     >
-      <Buy user={user} />
+      <Buy user={subscriber} />
     </SettingsContext.Provider>
   );
 
   await act(async () => {
-    await userEvent.click(screen.getByRole("button", { name: /\$46\.00/ }));
+    await user.click(screen.getByRole("button", { name: /\$46\.00/ }));
   });
   await act(async () => {
-    await userEvent.click(screen.getByRole("button", { name: "10%" }));
+    await user.click(screen.getByRole("button", { name: "10%" }));
   });
 
   await act(async () => {
@@ -90,7 +92,7 @@ test("submits credit purchase with tip and shows receipt", async () => {
   });
 
   await act(async () => {
-    await userEvent.click(
+    await user.click(
       screen.getByRole("button", { name: /Charge credit card/ })
     );
     await flushPromises();
@@ -99,7 +101,7 @@ test("submits credit purchase with tip and shows receipt", async () => {
   await waitFor(() => expect(postMock).toHaveBeenCalled());
 
   const payload = postMock.mock.calls[0][1];
-  expect(payload.uid).toBe(user.hashid);
+  expect(payload.uid).toBe(subscriber.hashid);
   expect(payload.credits).toBe(6);
   expect(payload.breadsPerWeek).toBe(0.5);
   expect(payload.token).toBe("test_id");

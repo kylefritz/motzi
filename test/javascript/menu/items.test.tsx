@@ -38,9 +38,10 @@ test("items", () => {
 });
 
 test("day1day2", () => {
-  const renderItem = (props) =>
+  type ItemOverrides = Partial<ReturnType<typeof baseItem>>;
+  const renderItem = (props: ItemOverrides) =>
     render(<Item onChange={() => {}} {...baseItem(props)} />);
-  const expectButtons = (props) =>
+  const expectButtons = (props: ItemOverrides) =>
     expect(renderItem(props).container.querySelectorAll("button"));
 
   expectButtons({
@@ -51,15 +52,18 @@ test("day1day2", () => {
 });
 
 test("remaining deadline", () => {
-  const renderDay = (props) =>
+  const renderDay = ({
+    remaining = 10,
+    orderDeadlineAt = basePickupAt,
+  }: { remaining?: number; orderDeadlineAt?: string }) =>
     render(
       <DayButton
         itemId={1}
         id={1}
         pickupAt={basePickupAt}
-        orderDeadlineAt={basePickupAt}
+        orderDeadlineAt={orderDeadlineAt}
+        remaining={remaining}
         onSetDayId={() => {}}
-        {...props}
       />
     );
 

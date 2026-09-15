@@ -23,7 +23,7 @@ function renderEmailSettings(userOverrides = {}) {
 }
 
 const getToggle = (name: string) =>
-  screen.getByRole("switch", { name });
+  screen.getByRole<HTMLButtonElement>("switch", { name });
 
 test("renders toggles matching user preferences", () => {
   renderEmailSettings({
@@ -38,24 +38,26 @@ test("renders toggles matching user preferences", () => {
 });
 
 test("toggling off weekly menu auto-clears and disables order reminder", async () => {
+  const user = userEvent.setup();
   renderEmailSettings();
 
   const weeklyMenu = getToggle("Weekly menu");
   const orderReminder = getToggle("Order reminder");
 
-  await userEvent.click(weeklyMenu);
+  await user.click(weeklyMenu);
   expect(weeklyMenu.getAttribute("aria-checked")).toBe("false");
   expect(orderReminder.getAttribute("aria-checked")).toBe("false");
   expect(orderReminder.disabled).toBe(true);
 
   // toggling back on re-enables but doesn't re-check
-  await userEvent.click(weeklyMenu);
+  await user.click(weeklyMenu);
   expect(orderReminder.getAttribute("aria-checked")).toBe("false");
   expect(orderReminder.disabled).toBe(false);
 });
 
 test("back link calls onBack", async () => {
+  const user = userEvent.setup();
   const { onBack } = renderEmailSettings();
-  await userEvent.click(screen.getByText(/Back to menu/));
+  await user.click(screen.getByText(/Back to menu/));
   expect(onBack).toHaveBeenCalledTimes(1);
 });
