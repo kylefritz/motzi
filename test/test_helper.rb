@@ -50,6 +50,17 @@ class ActiveSupport::TestCase
     JSON::Validator.validate!(schema_path, json, strict: true)
   end
 
+  # SQL queries run by the block, counted exactly like Rails'
+  # assert_queries_count (skips SCHEMA and query-cache hits). Use it to take a
+  # baseline, then assert_queries_count(baseline) after growing the data, so
+  # guards catch N+1s instead of freezing a magic number.
+  def count_queries(&block)
+    ActiveRecord::Base.lease_connection.materialize_transactions
+    counter = ActiveRecord::Assertions::QueryAssertions::SQLCounter.new
+    ActiveSupport::Notifications.subscribed(counter, "sql.active_record", &block)
+    counter.log.size
+  end
+
   def assert_el_count(expect_count, css, msg = nil)
     @html = document_root_element.css(css)
     if expect_count != @html.count

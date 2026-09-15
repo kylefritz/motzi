@@ -108,6 +108,60 @@ class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_match "repair-script-2026-09-12", response.body
   end
 
+  # Query-count guard (#378 item 9). Every dashboard panel should load in a
+  # fixed number of queries regardless of how many subscribers, orders,
+  # marketplace sales, credit purchases, comments, and new users exist. Take a
+  # baseline with a few of each, add several more, and require the same count.
+  #
+  # The baseline size matters: "Recently updated content" preloads the latest
+  # 20 PaperTrail versions' items with one query per distinct item_type. Three
+  # rounds of activity (8 versions each) fill that window with the same types
+  # the growth step adds, so older fixture/setup versions (e.g. Setting) can't
+  # fall out of the window and change the count.
+  #
+  # DASHBOARD_MAX_QUERIES: measured 41 on 2026-09-14, plus headroom. Raise it
+  # deliberately for a new panel; never to paper over growth.
+  DASHBOARD_MAX_QUERIES = 45
+
+  test "dashboard query count does not grow with orders, users, or credits" do
+    add_dashboard_activity(3)
+
+    get "/admin/dashboard" # warm up
+    assert_response :success
+    baseline = count_queries { get "/admin/dashboard" }
+    assert_operator baseline, :<=, DASHBOARD_MAX_QUERIES
+
+    add_dashboard_activity(6, offset: 3)
+
+    assert_queries_count(baseline) { get "/admin/dashboard" }
+    assert_response :success
+    assert_match "guard note 8", response.body, "growth rows are rendered (Special Requests)"
+  end
+
+  def add_dashboard_activity(count, offset: 0)
+    menu = menus(:week1)
+    pickup_days = menu.pickup_days.to_a
+    in_menu_week = Time.zone.from_week_id(menu.week_id) + 1.day
+    bundle_credits = CreditBundle.pluck(:credits)
+
+    count.times do |n|
+      i = offset + n
+      user = User.create!(first_name: "Guard#{i}", last_name: "Member", email: "guard#{i}@example.com",
+                          receive_weekly_menu: true, mailing_list: i.even?)
+      # "New Credits" panel (recent) and "Credit Sales" (bought during the menu week;
+      # varied quantities so a per-purchase bundle lookup can't hide in the query cache)
+      user.credit_items.create!(quantity: 1, memo: "guard")
+      user.credit_items.create!(quantity: bundle_credits[i % bundle_credits.size], stripe_charge_amount: 20,
+                                created_at: in_menu_week)
+      # "Orders" + "Special Requests" + "What to bake"
+      order = user.orders.create!(menu: menu, comments: "guard note #{i}")
+      pickup_days.each { |pd| order.order_items.create!(item: items(:classic), pickup_day: pd, quantity: 1) }
+      # marketplace rows in "Orders" and "Sales"
+      market = user.orders.create!(menu: menu, stripe_charge_amount: 10)
+      market.order_items.create!(item: items(:rye), pickup_day: pickup_days.last, quantity: 1)
+    end
+  end
+
   test "dashboard can enqueue queue demo job" do
     assert_enqueued_with(job: QueueDemoJob) do
       post "/admin/dashboard/enqueue_queue_demo"

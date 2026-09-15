@@ -9,10 +9,13 @@ mp = {
 rows = [ mp ]
 unless menu.holiday?
   credit_items = CreditItem.for_menu(menu).bought
+  # Same lookup as CreditItem#retail_price (first bundle by sort order with
+  # that many credits), done in memory so it isn't one query per purchase.
+  bundle_prices = CreditBundle.all.each_with_object({}) { |b, h| h[b.credits] ||= b.price }
   rows << {
     type: "Credit Sales",
     qty: credit_items.map(&:quantity).sum,
-    retail: credit_items.map(&:retail_price).sum,
+    retail: credit_items.map { |ci| bundle_prices[ci.quantity] || 0 }.sum,
     paid: credit_items.map(&:stripe_charge_amount).sum
   }
 end

@@ -76,7 +76,9 @@ class User < ApplicationRecord
 
   def order_for_menu(menu_id)
     # TODO: can an menu have more than one order?
-    menu_orders = orders.subscriber.where(menu_id: menu_id).includes(order_items: [ :item ])
+    # menus/_order.json.jbuilder reads order_item.pickup_day for every line;
+    # preload it so /menu.json doesn't run a query per pickup day (#378)
+    menu_orders = orders.subscriber.where(menu_id: menu_id).includes(order_items: [ :item, :pickup_day ])
     if menu_orders.size > 1
       logger.warn "user=#{self.id} has more than 1 order for menu #{menu_id}"
     end
