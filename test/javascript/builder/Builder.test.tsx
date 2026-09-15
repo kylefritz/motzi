@@ -1,6 +1,6 @@
 import React from "react";
-import { expect, mock, test } from "bun:test";
-import { render, screen, waitFor, fireEvent, within } from "@testing-library/react";
+import { beforeEach, expect, mock, test } from "bun:test";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const menuResponse = {
@@ -80,9 +80,15 @@ const getMock = mock((url) => {
   }
   return Promise.reject(new Error(`Unexpected GET ${url}`));
 });
-const postMock = mock(() => Promise.resolve({ data: menuResponse }));
-const patchMock = mock(() => Promise.resolve({ data: menuResponse }));
-const deleteMock = mock(() => Promise.resolve({ data: menuResponse }));
+const postMock = mock((..._args: unknown[]) =>
+  Promise.resolve({ data: menuResponse })
+);
+const patchMock = mock((..._args: unknown[]) =>
+  Promise.resolve({ data: menuResponse })
+);
+const deleteMock = mock((..._args: unknown[]) =>
+  Promise.resolve({ data: menuResponse })
+);
 
 mock.module("axios", () => ({
   default: {
@@ -113,13 +119,34 @@ if (!window.matchMedia) {
 
 window.history.pushState({}, "", "/admin/menus/42");
 
-test("edits menu items", async () => {
+beforeEach(() => {
+  // The axios mocks are module-level, so clear recorded calls between tests
+  // to keep "not called" assertions independent of test order.
+  getMock.mockClear();
+  postMock.mockClear();
+  patchMock.mockClear();
+  deleteMock.mockClear();
+  window.confirm = mock(() => true);
+});
+
+async function renderBuilder() {
   const { default: MenuBuilder } = await import("builder/Builder");
-
   render(<MenuBuilder />);
+  // Builder shows "Loading" until both GETs resolve.
+  await screen.findByRole("heading", { name: "Pickup days" });
+}
 
-  // Wait for the builder to load.
-  await waitFor(() => expect(screen.getByText("Menu Items")).toBeTruthy());
+function pickupDayCard(label: string) {
+  const list = screen.getAllByRole("list")[0];
+  const card = within(list).getByText(label).closest('[role="listitem"]');
+  if (!(card instanceof HTMLElement)) {
+    throw new Error(`Expected pickup day card "${label}" to be present`);
+  }
+  return within(card);
+}
+
+test("edits menu items", async () => {
+  await renderBuilder();
 
   // Clear all menu items.
   const confirmSpy = mock(() => true);
@@ -129,18 +156,18 @@ test("edits menu items", async () => {
   expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_menu_items.json");
 
   // Toggle marketplace on an item card.
-  const sourdoughCard = screen.getByTestId("menu-item-card-100");
-  const card = within(sourdoughCard);
+  const card = within(await screen.findByTestId("menu-item-card-100"));
 
-  const marketplaceCheckbox = card.getByLabelText("Marketplace");
-  await userEvent.click(marketplaceCheckbox);
+  await userEvent.click(card.getByLabelText("Marketplace"));
   expect(patchMock).toHaveBeenCalledWith("/admin/menu_items/10.json", {
     marketplace: false,
   });
 
   // Update sort order.
-  const sortOrderLabel = card.getByText("Sort Order").closest("label");
-  const sortOrderInput = sortOrderLabel?.querySelector("input");
+  const sortOrderInput = card
+    .getByText("Sort Order")
+    .closest("label")
+    ?.querySelector("input");
   if (!sortOrderInput) {
     throw new Error("Expected Sort Order input to be present");
   }
@@ -152,8 +179,10 @@ test("edits menu items", async () => {
   });
 
   // Update per-pickup-day limit.
-  const limitLabel = card.getByText("limit:").closest("label");
-  const limitInput = limitLabel?.querySelector("input");
+  const limitInput = card
+    .getByText("limit:")
+    .closest("label")
+    ?.querySelector("input");
   if (!limitInput) {
     throw new Error("Expected limit input to be present");
   }
@@ -165,108 +194,108 @@ test("edits menu items", async () => {
   );
 
   // Remove an item from the menu.
-  const removeButton = card.getByTitle("remove from menu");
-  await userEvent.click(removeButton);
+  await userEvent.click(card.getByTitle("remove from menu"));
   expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_menu_item.json", {
     itemId: 100,
   });
 });
 
-test("adds pickup days and items", async () => {
-  const { default: MenuBuilder } = await import("builder/Builder");
+test("adds a pickup day", async () => {
+  await renderBuilder();
 
-  render(<MenuBuilder />);
+  fireEvent.change(screen.getByLabelText("Pickup at:"), {
+    target: { value: "2024-02-01T10:00" },
+  });
+  fireEvent.change(screen.getByLabelText("Order deadline at:"), {
+    target: { value: "2024-01-31T10:00" },
+  });
+  await userEvent.click(screen.getByRole("button", { name: "Add pickup day" }));
 
-  // Wait for pickup days section to load.
-  await waitFor(() => expect(screen.getByText("Pickup days")).toBeTruthy());
-
-  // Add a pickup day.
-  const pickupInput = screen.getByLabelText("Pickup at:");
-  const deadlineInput = screen.getByLabelText("Order deadline at:");
-  fireEvent.change(pickupInput, { target: { value: "2024-02-01T10:00" } });
-  fireEvent.change(deadlineInput, { target: { value: "2024-01-31T10:00" } });
-
-  await userEvent.click(
-    screen.getByRole("button", { name: "Add pickup day" })
-  );
   expect(postMock).toHaveBeenCalledWith("/admin/pickup_days.json", {
     pickupAt: "2024-02-01T10:00",
     orderDeadlineAt: "2024-01-31T10:00",
     menuId: "42",
   });
+});
 
-  // Remove a pickup day (confirm before delete).
-  const pickupList = screen.getAllByRole("list")[0];
-  const firstPickupDay = within(pickupList)
-    .getByText("Wed, Jan 10 at 10a")
-    .closest('[role="listitem"]');
-  if (!firstPickupDay) {
-    throw new Error("Expected first pickup day card to be present");
-  }
-  const pickupDayCard = within(firstPickupDay);
-  const removeButton = pickupDayCard.getByRole("button", { name: "x" });
+test("removes a pickup day only after confirming", async () => {
+  await renderBuilder();
 
-  const deleteConfirmSpy = mock(() => false);
-  window.confirm = deleteConfirmSpy;
+  const removeButton = pickupDayCard("Wed, Jan 10 at 10a").getByRole("button", {
+    name: "x",
+  });
+
+  const declineSpy = mock(() => false);
+  window.confirm = declineSpy;
   await userEvent.click(removeButton);
-  expect(deleteConfirmSpy).toHaveBeenCalled();
-  expect(deleteMock).not.toHaveBeenCalledWith("/admin/pickup_days/1.json");
+  expect(declineSpy).toHaveBeenCalled();
+  expect(deleteMock).not.toHaveBeenCalled();
 
   window.confirm = mock(() => true);
   await userEvent.click(removeButton);
   expect(deleteMock).toHaveBeenCalledWith("/admin/pickup_days/1.json");
+});
 
-  // Edit an existing pickup day (re-query after delete re-render).
-  const freshPickupDay = within(screen.getAllByRole("list")[0])
-    .getByText("Wed, Jan 10 at 10a")
-    .closest('[role="listitem"]')!;
-  const pickupDayRow = within(freshPickupDay);
-  await userEvent.click(pickupDayRow.getByRole("button", { name: "Edit" }));
-  const editPickupInput = await waitFor(() => pickupDayRow.getByLabelText("Pickup at:"));
-  const editDeadlineInput = pickupDayRow.getByLabelText("Order deadline at:");
+test("edits an existing pickup day", async () => {
+  await renderBuilder();
+
+  const card = pickupDayCard("Wed, Jan 10 at 10a");
+  await userEvent.click(card.getByRole("button", { name: "Edit" }));
+
+  const editPickupInput = await card.findByLabelText("Pickup at:");
+  const editDeadlineInput = card.getByLabelText("Order deadline at:");
   fireEvent.change(editPickupInput, { target: { value: "2024-01-15T09:00" } });
   fireEvent.change(editDeadlineInput, { target: { value: "2024-01-14T09:00" } });
-  await userEvent.click(pickupDayRow.getByRole("button", { name: "Save" }));
-  await waitFor(() =>
-    expect(patchMock).toHaveBeenCalledWith("/admin/pickup_days/1.json", {
-      pickupAt: "2024-01-15T09:00",
-      orderDeadlineAt: "2024-01-14T09:00",
-    })
-  );
-  await waitFor(() =>
-    expect(pickupDayRow.getByRole("button", { name: "Edit" })).toBeTruthy()
-  );
+  await userEvent.click(card.getByRole("button", { name: "Save" }));
 
-  // Add a menu item.
-  const addItemForm = screen
-    .getByRole("button", { name: "Add Item" })
-    .closest("form");
+  expect(patchMock).toHaveBeenCalledWith("/admin/pickup_days/1.json", {
+    pickupAt: "2024-01-15T09:00",
+    orderDeadlineAt: "2024-01-14T09:00",
+  });
+  // Saving closes the editor once the PATCH resolves.
+  expect(await card.findByRole("button", { name: "Edit" })).toBeTruthy();
+});
+
+test("opens the pickup day editor right after a menu reload", async () => {
+  // Regression for #376: a mount-time reset effect in EditablePickupDay could
+  // flush after this Edit click (the reload renders outside act) and close the
+  // editor again. It only lost the race occasionally, so this is a tripwire.
+  await renderBuilder();
+
+  const card = pickupDayCard("Wed, Jan 10 at 10a");
+  await userEvent.click(card.getByRole("button", { name: "x" }));
+  expect(deleteMock).toHaveBeenCalledWith("/admin/pickup_days/1.json");
+
+  await userEvent.click(card.getByRole("button", { name: "Edit" }));
+  expect(await card.findByLabelText("Pickup at:")).toBeTruthy();
+});
+
+test("adds a menu item", async () => {
+  await renderBuilder();
+
+  const addButton = screen.getByRole("button", { name: "Add Item" });
+  const addItemForm = addButton.closest("form");
   if (!addItemForm) {
     throw new Error("Expected Add Item form to be present");
   }
-  const select = within(addItemForm).getByRole("combobox");
-  fireEvent.change(select, { target: { value: "102" } });
-
-  await userEvent.click(screen.getByRole("button", { name: "Add Item" }));
-  const addItemCall = postMock.mock.calls.find(
-    ([url]) => url === "/admin/menus/42/menu_item.json"
-  );
-  expect(addItemCall).toBeTruthy();
-  expect(addItemCall?.[1]).toMatchObject({
-    itemId: 102,
-    subscriber: true,
-    marketplace: true,
-    pickupDayIds: [1, 2],
+  fireEvent.change(within(addItemForm).getByRole("combobox"), {
+    target: { value: "102" },
   });
+  await userEvent.click(addButton);
+
+  expect(postMock).toHaveBeenCalledWith(
+    "/admin/menus/42/menu_item.json",
+    expect.objectContaining({
+      itemId: 102,
+      subscriber: true,
+      marketplace: true,
+      pickupDayIds: [1, 2],
+    })
+  );
 });
 
 test("copy from menu defaults are wired up", async () => {
-  const { default: MenuBuilder } = await import("builder/Builder");
-
-  render(<MenuBuilder />);
-
-  // Wait for the copy section to render so the form is available.
-  await waitFor(() => expect(screen.getByText("Copy from menu")).toBeTruthy());
+  await renderBuilder();
 
   // Scope queries to the copy-from section to avoid picking up other inputs.
   const copySection = screen.getByText("Copy from menu").closest("section");
@@ -276,23 +305,13 @@ test("copy from menu defaults are wired up", async () => {
   const copyForm = within(copySection);
 
   // The menu selector should exist and be required.
-  const menuSelect = copyForm.getByRole("combobox", { name: "Menu:" });
-  expect(menuSelect).toBeTruthy();
+  expect(copyForm.getByRole("combobox", { name: "Menu:" })).toBeTruthy();
 
   // All note copy checkboxes should be present and default checked.
-  const subscriberCheckbox = copyForm.getByRole("checkbox", {
-    name: "Subscriber",
-  }) as HTMLInputElement;
-  const menuCheckbox = copyForm.getByRole("checkbox", {
-    name: "Menu",
-  }) as HTMLInputElement;
-  const dayOfCheckbox = copyForm.getByRole("checkbox", {
-    name: "Day of",
-  }) as HTMLInputElement;
-
-  expect(subscriberCheckbox.checked).toBe(true);
-  expect(menuCheckbox.checked).toBe(true);
-  expect(dayOfCheckbox.checked).toBe(true);
+  for (const name of ["Subscriber", "Menu", "Day of"]) {
+    const checkbox = copyForm.getByRole("checkbox", { name }) as HTMLInputElement;
+    expect(checkbox.checked).toBe(true);
+  }
 
   // The helper hint should be visible so the behavior is clear to admins.
   expect(

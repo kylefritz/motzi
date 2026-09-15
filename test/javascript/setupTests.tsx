@@ -2,9 +2,10 @@ import React from "react";
 import { afterEach, beforeAll, mock } from "bun:test";
 import { cleanup, configure } from "@testing-library/react";
 
-// The default 1s waitFor/findBy timeout is enough locally but the builder
-// test's first render regularly exceeds it on GitHub's runners (#364).
-configure({ asyncUtilTimeout: 5000 });
+// Give waitFor/findBy headroom on slow CI runners (#364), but keep it below
+// bun's 5s per-test timeout. If they were equal, bun would kill a stuck test
+// before testing-library threw its "Unable to find…" error with the DOM dump.
+configure({ asyncUtilTimeout: 3000 });
 
 type StripeToken = { token: { id: string } };
 
