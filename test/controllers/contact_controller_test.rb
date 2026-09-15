@@ -4,6 +4,11 @@ class ContactControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
   include ActiveJob::TestHelper
 
+  # Form tests run against the live site; gating (including POST) is covered
+  # in MarketingGateTest.
+  setup { Setting.homepage = "marketing" }
+  teardown { Setting.homepage = "menu" }
+
   test "show renders for logged-out visitor" do
     get "/contact"
     assert_response :success

@@ -31,5 +31,6 @@
       <%= yield %>
     </main>
     <%= render "layouts/marketing_footer" %>
+    <%= render "layouts/marketing_preview_pill" if previewing_marketing? %>
   </body>
 </html>

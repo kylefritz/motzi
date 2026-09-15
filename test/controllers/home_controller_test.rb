@@ -5,9 +5,20 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
 
   def setup
     menus(:week2).make_current!
+    Setting.homepage = "menu"
   end
 
-  test "renders the marketing home for logged-out visitor" do
+  def teardown
+    Setting.homepage = "menu"
+  end
+
+  test "redirects to the menu like master while the homepage setting is menu" do
+    get "/"
+    assert_redirected_to "/menu"
+  end
+
+  test "renders the marketing home for logged-out visitor once live" do
+    Setting.homepage = "marketing"
     get "/"
     assert_response :success
     assert_select "body.marketing"
@@ -16,7 +27,8 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_select "a.cta-primary[href=?]", "/subscribe"
   end
 
-  test "renders the marketing home for logged-in user" do
+  test "renders the marketing home for logged-in user once live" do
+    Setting.homepage = "marketing"
     sign_in users(:kyle)
     get "/"
     assert_response :success
@@ -24,6 +36,7 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "signing in lands members on the menu, not the marketing home" do
+    Setting.homepage = "marketing"
     post user_session_path, params: { user: { email: users(:kyle).email, password: "robots" } }
     assert_redirected_to "/menu"
   end
@@ -32,5 +45,6 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:kyle)
     get "/signout"
     assert_redirected_to "/"
+    assert_nil session["warden.user.user.key"]
   end
 end

@@ -3,6 +3,13 @@ require "test_helper"
 class RackAttackTest < ActionDispatch::IntegrationTest
   setup do
     Rack::Attack.enabled = true
+    # POST /contact is gated until the marketing site is live; the throttle
+    # test needs real submissions to reach the controller.
+    Setting.homepage = "marketing"
+  end
+
+  teardown do
+    Setting.homepage = "menu"
   end
 
   [

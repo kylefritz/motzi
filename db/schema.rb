@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_14_174500) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -598,6 +598,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_174500) do
     t.inet "last_sign_in_ip"
     t.boolean "mailing_list", default: false, null: false
     t.string "phone"
+    t.boolean "preview_marketing", default: false, null: false
     t.boolean "receive_day_of_reminder", default: true, null: false
     t.boolean "receive_havent_ordered_reminder", default: true, null: false
     t.boolean "receive_weekly_menu", default: false, null: false

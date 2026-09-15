@@ -1,8 +1,24 @@
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import Anthropic from "@anthropic-ai/sdk";
+import { execSync } from "child_process";
 import { readFileSync } from "fs";
 import { join } from "path";
+
+// Marketing pages redirect to /menu until Setting.homepage is "marketing".
+// Flip it on the local dev server for the run, then restore the old value.
+const railsRunner = (code: string) =>
+  execSync(`bin/rails runner '${code}'`, { encoding: "utf-8" }).trim();
+let originalHomepage = "menu";
+
+test.beforeAll(() => {
+  originalHomepage = railsRunner("print Setting.homepage") || "menu";
+  railsRunner('Setting.homepage = "marketing"');
+});
+
+test.afterAll(() => {
+  railsRunner(`Setting.homepage = "${originalHomepage}"`);
+});
 
 const client = new Anthropic();
 const prompt = readFileSync(

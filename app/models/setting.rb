@@ -15,6 +15,14 @@ class Setting < RailsSettings::Base
   field :signup_form_note, type: :string
   field :accepting_subscribers, default: true, type: :boolean
   field :anomaly_model, default: "claude-sonnet-4-6", type: :string
+  # What "/" serves: "menu" redirects to the weekly menu (pre-#351 behavior);
+  # "marketing" makes the marketing pages public. Flip it in Advanced → Settings.
+  HOMEPAGES = %w[menu marketing].freeze
+  field :homepage, default: "menu", type: :string, validates: { inclusion: { in: HOMEPAGES } }
+
+  def self.marketing_live?
+    homepage == "marketing"
+  end
 
   def self.pickup_instructions_html
     Menu::MARKDOWN.render(Setting.pickup_instructions || "").html_safe

@@ -3,6 +3,11 @@ require "test_helper"
 class SubscribeControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
+  # Page content tests run against the live site; gating is covered in
+  # MarketingGateTest.
+  setup { Setting.homepage = "marketing" }
+  teardown { Setting.homepage = "menu" }
+
   test "renders for logged-out visitor" do
     get "/subscribe"
     assert_response :success
