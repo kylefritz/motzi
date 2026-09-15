@@ -7,6 +7,7 @@ import Menu from "menu/Menu";
 import { SettingsContext } from "menu/Contexts";
 import renderMenu from "./Menu.helpers";
 import mockMenuJson from "./mockMenuJson";
+import type { MenuOrderRequest } from "../../../app/javascript/types/api";
 
 const getCartTotalText = () => {
   const orderHeading = screen.getByText("Your order");
@@ -16,6 +17,7 @@ const getCartTotalText = () => {
 };
 
 test("menu for uid-user, before order", async () => {
+  const user = userEvent.setup();
   const { container } = renderMenu({ order: false });
 
   const itemCards = container.querySelectorAll(".col-6.mb-4");
@@ -26,7 +28,7 @@ test("menu for uid-user, before order", async () => {
 
   // click pay it forward
   const donateBtn = screen.getByRole("button", { name: "Donate Now" });
-  await userEvent.click(donateBtn);
+  await user.click(donateBtn);
   await waitFor(() => expect(getCartTotalText()).toContain("1 credit"));
 });
 
@@ -36,16 +38,17 @@ test("payItForward", () => {
 });
 
 test("menu for uid-user, add item to cart", async () => {
+  const user = userEvent.setup();
   const { container, onCreateOrder } = renderMenu({ order: false });
   expect(screen.getByText("No items")).toBeTruthy();
 
   const firstItem = screen.getByTestId("item-3");
-  await userEvent.click(screen.getByTestId("pickup-day-3-1"));
-  await userEvent.click(screen.getByTestId("add-to-cart-3"));
+  await user.click(screen.getByTestId("pickup-day-3-1"));
+  await user.click(screen.getByTestId("add-to-cart-3"));
 
   await waitFor(() => expect(getCartTotalText()).toContain("1 credit"));
 
-  await userEvent.click(screen.getByRole("button", { name: "Submit Order" }));
+  await user.click(screen.getByRole("button", { name: "Submit Order" }));
 
   await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));
 
@@ -73,35 +76,42 @@ test("menu for uid-user, after order", () => {
 });
 
 test("orderCredits", async () => {
+  const user = userEvent.setup();
   const { container } = renderMenu({ user: { credits: 1 } }); // 3 credits in order
 
   expect(getCartTotalText()).toContain("3 credits");
-  await userEvent.click(screen.getByRole("button", { name: "Donate Now" }));
+  await user.click(screen.getByRole("button", { name: "Donate Now" }));
   await waitFor(() => expect(getCartTotalText()).toContain("4 credits")); // ok
   expect(
-    screen.getByRole("button", { name: "Update Order" }).disabled
+    screen.getByRole<HTMLButtonElement>("button", { name: "Update Order" })
+      .disabled
   ).toBe(false);
 
   const firstItem = screen.getByTestId("item-3");
-  await userEvent.click(screen.getByTestId("pickup-day-3-1"));
-  await userEvent.click(screen.getByTestId("add-to-cart-3"));
+  await user.click(screen.getByTestId("pickup-day-3-1"));
+  await user.click(screen.getByTestId("add-to-cart-3"));
 
   await waitFor(() => expect(getCartTotalText()).toContain("5 credits")); // too many
-  const buyMore = screen.getByRole("button", { name: "Buy more credits :)" });
+  const buyMore = screen.getByRole<HTMLButtonElement>("button", {
+    name: "Buy more credits :)",
+  });
   expect(buyMore.disabled).toBe(true);
 });
 
 test("insufficientCredits, no order", async () => {
+  const user = userEvent.setup();
   const { container } = renderMenu({ user: { credits: 1 }, order: false });
 
-  await userEvent.click(screen.getByRole("button", { name: "Donate Now" }));
+  await user.click(screen.getByRole("button", { name: "Donate Now" }));
 
   const firstItem = screen.getByTestId("item-3");
-  await userEvent.click(screen.getByTestId("pickup-day-3-1"));
-  await userEvent.click(screen.getByTestId("add-to-cart-3"));
+  await user.click(screen.getByTestId("pickup-day-3-1"));
+  await user.click(screen.getByTestId("add-to-cart-3"));
 
   await waitFor(() => expect(getCartTotalText()).toContain("2 credits"));
-  const buyMore = screen.getByRole("button", { name: "Buy more credits :)" });
+  const buyMore = screen.getByRole<HTMLButtonElement>("button", {
+    name: "Buy more credits :)",
+  });
   expect(buyMore.disabled).toBe(true);
 });
 
@@ -133,10 +143,15 @@ test("old menu disables submit", () => {
     <SettingsContext.Provider
       value={{ showCredits: true, bundles: data.bundles }}
     >
-      <Menu {...data} onCreateOrder={mock(() => {})} />
+      <Menu
+        {...data}
+        onCreateOrder={mock((_order: MenuOrderRequest) => Promise.resolve())}
+      />
     </SettingsContext.Provider>
   );
 
-  const submitButton = screen.getByRole("button", { name: "Old menu" });
+  const submitButton = screen.getByRole<HTMLButtonElement>("button", {
+    name: "Old menu",
+  });
   expect(submitButton.disabled).toBe(true);
 });

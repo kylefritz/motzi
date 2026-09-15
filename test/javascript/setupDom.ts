@@ -1,7 +1,9 @@
 import { JSDOM } from "jsdom";
 
+type DomWindow = Window & typeof globalThis;
+
 type GlobalDom = typeof globalThis & {
-  window: Window;
+  window: DomWindow;
   document: Document;
   navigator: Navigator;
   location: Location;
@@ -16,7 +18,7 @@ const dom = new JSDOM("<!doctype html><html><body></body></html>", {
   url: "http://localhost",
 });
 const globalDom = globalThis as unknown as GlobalDom;
-globalDom.window = dom.window as unknown as Window;
+globalDom.window = dom.window as unknown as DomWindow;
 globalDom.document = dom.window.document;
 globalDom.navigator = dom.window.navigator;
 globalDom.location = dom.window.location;

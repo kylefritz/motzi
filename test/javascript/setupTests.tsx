@@ -2,6 +2,7 @@ import React from "react";
 import { afterEach, beforeAll, beforeEach, mock } from "bun:test";
 import { cleanup, configure } from "@testing-library/react";
 import { resetNow } from "./support/clock";
+import type { StripeTokenResult } from "./menu/stripeMock";
 
 // Pin luxon/moment "now" to FIXED_NOW (see support/clock.ts). Set at preload
 // time too, so module-level fixtures computed on import are deterministic.
@@ -20,10 +21,9 @@ afterEach(() => {
 // before testing-library threw its "Unable to find…" error with the DOM dump.
 configure({ asyncUtilTimeout: 3000 });
 
-type StripeToken = { token: { id: string } };
-
-const createToken = mock(() =>
-  Promise.resolve({ token: { id: "test_id" }, error: null })
+const createToken = mock(
+  (): Promise<StripeTokenResult> =>
+    Promise.resolve({ token: { id: "test_id" }, error: null })
 );
 
 const mockStripe = {

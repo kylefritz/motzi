@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 import Quantity from "menu/Quantity";
 
 test("increments and decrements within bounds", async () => {
+  const user = userEvent.setup();
   const onChange = mock(() => {});
   render(<Quantity defaultQuantity={1} onChange={onChange} max={3} />);
 
@@ -16,11 +17,11 @@ test("increments and decrements within bounds", async () => {
   expect(minusButton.disabled).toBe(true);
   expect(plusButton.disabled).toBe(false);
 
-  await userEvent.click(plusButton);
+  await user.click(plusButton);
   expect(onChange).toHaveBeenCalledWith(2);
   expect(minusButton.disabled).toBe(false);
 
-  await userEvent.click(minusButton);
+  await user.click(minusButton);
   expect(onChange).toHaveBeenCalledWith(1);
   expect(minusButton.disabled).toBe(true);
 });

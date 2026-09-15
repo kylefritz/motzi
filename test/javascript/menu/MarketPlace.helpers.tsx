@@ -3,23 +3,27 @@ import { mock } from "bun:test";
 import { render } from "@testing-library/react";
 
 import Marketplace from "menu/Marketplace";
-import mockMenuJson from "./mockMenuJson";
-import stripeMock from "./stripeMock";
+import mockMenuJson, { type MockMenuOptions } from "./mockMenuJson";
+import stripeMock, { type StripeTokenResult } from "./stripeMock";
 import { SettingsContext } from "menu/Contexts";
+import type { MarketplaceOrderRequest } from "../../../app/javascript/types/api";
 
-export default function renderMenu(menuJsonOptions) {
+export default function renderMenu(menuJsonOptions?: MockMenuOptions) {
   window.gon = { stripeApiKey: "no-such-key" };
   window.Stripe = mock(() => stripeMock);
 
-  stripeMock.createToken = mock(() =>
-    Promise.resolve({
-      token: {
-        id: "test_id",
-      },
-    })
+  stripeMock.createToken = mock(
+    (): Promise<StripeTokenResult> =>
+      Promise.resolve({
+        token: {
+          id: "test_id",
+        },
+      })
   );
 
-  const onCreateOrder = mock(() => Promise.resolve());
+  const onCreateOrder = mock((_order: MarketplaceOrderRequest) =>
+    Promise.resolve()
+  );
 
   const utils = render(
     <SettingsContext.Provider value={{}}>

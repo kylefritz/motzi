@@ -13,6 +13,7 @@ const setStripeKey = () => {
 };
 
 test("buy credits", async () => {
+  const user = userEvent.setup();
   setStripeKey();
   window.Stripe = mock(() => stripeMock);
 
@@ -29,7 +30,7 @@ test("buy credits", async () => {
   expect(parseInt(subscriberInfo[1].textContent)).toEqual(subscriber.credits);
 
   await act(async () => {
-    await userEvent.click(screen.getByRole("button", { name: "Buy more" }));
+    await user.click(screen.getByRole("button", { name: "Buy more" }));
   });
 
   const choiceButtons = screen.getAllByRole("button", { name: /credits/ });
@@ -43,7 +44,7 @@ test("buy credits", async () => {
   expect(headings[0].textContent).toEqual("6-Month");
 
   await act(async () => {
-    await userEvent.click(choiceButtons[0]);
+    await user.click(choiceButtons[0]);
   });
 
   expect(screen.getByText("Pay by credit card")).toBeTruthy();
@@ -58,6 +59,7 @@ test("buy credits", async () => {
 });
 
 test("no payWhatYouCan", async () => {
+  const user = userEvent.setup();
   setStripeKey();
   window.Stripe = mock(() => stripeMock);
 
@@ -69,12 +71,12 @@ test("no payWhatYouCan", async () => {
   );
 
   await act(async () => {
-    await userEvent.click(screen.getByRole("button", { name: "Buy more" }));
+    await user.click(screen.getByRole("button", { name: "Buy more" }));
   });
 
   const choiceButtons = screen.getAllByRole("button", { name: /credits/ });
   await act(async () => {
-    await userEvent.click(choiceButtons[0]);
+    await user.click(choiceButtons[0]);
   });
 
   expect(screen.getByText("Pay by credit card")).toBeTruthy();

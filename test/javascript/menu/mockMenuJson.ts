@@ -12,9 +12,9 @@ import type {
   MenuUser,
 } from "../../../app/javascript/types/api";
 
-type MockMenuOptions = {
+export type MockMenuOptions = {
   order?: boolean | MenuOrder;
-  user?: boolean | MenuUser;
+  user?: boolean | Partial<MenuUser>;
   items?: boolean | MenuItem[];
   payItForward?: boolean;
   enablePayWhatYouCan?: boolean;
@@ -203,7 +203,8 @@ export default function ({
   const data = {
     menu,
     bundles,
-    user: withUser === true ? user : withUser || null,
+    // Partial user overrides (e.g. `{ credits: 1 }`) merge over the base user.
+    user: withUser === true ? user : withUser ? { ...user, ...withUser } : null,
     order: withOrder === true ? order : withOrder || null,
     holidayMenu: null,
     holidayOrder: null,
