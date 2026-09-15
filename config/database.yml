@@ -12,9 +12,11 @@ development:
 
 test:
   <<: *default
-  # TEST_DATABASE lets each git worktree run tests against its own database —
-  # concurrent suites sharing motzi_test clobber each other's fixtures.
-  database: <%= ENV.fetch("TEST_DATABASE", "motzi_test") %>
+  # Each git worktree gets its own test database (motzi_test_<worktree dir>) —
+  # concurrent suites sharing motzi_test clobber each other's fixtures. The main
+  # checkout and CI use motzi_test. TEST_DATABASE overrides both. See
+  # lib/worktree_env.rb; parallel workers append _<n>.
+  database: <%= ENV.fetch("TEST_DATABASE") { WorktreeEnv.test_database_name || "motzi_test" } %>
   host: localhost
 
 production:
