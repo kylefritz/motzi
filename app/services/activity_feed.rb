@@ -232,6 +232,11 @@ class ActivityFeed
         lines << errors
         lines << ""
       end
+      rejected = rejected_requests_text
+      if rejected
+        lines << rejected
+        lines << ""
+      end
       failed_jobs = failed_jobs_text
       if failed_jobs
         lines << failed_jobs
@@ -449,7 +454,8 @@ class ActivityFeed
     # the feed (the report is about the production app).
     scope = ErrorEvent.where(occurred_at: @week_start..@week_end, environment: "production")
     resolved_count = scope.where.not(resolved_at: nil).count
-    open_scope = scope.where(resolved_at: nil)
+    # Browser-reported 4xx rejections are listed in rejected_requests_text.
+    open_scope = scope.where(resolved_at: nil).failures
 
     groups = open_scope
       .group(:fingerprint)
@@ -500,6 +506,31 @@ class ActivityFeed
       lines << "    url: #{latest.http_method} #{latest.url}".rstrip if latest&.url.present?
       lines << "    id:  #{latest.id} (fingerprint #{g.fingerprint})" if latest
     end
+    lines.join("\n")
+  end
+
+  # Browser reports of 4xx responses (#363) — the server rejected the request
+  # on purpose, most often a Stripe card decline at checkout. Kept out of
+  # Application Errors so shopper-side validation doesn't read as a growing
+  # failure, but still counted here so a spike stays visible.
+  def rejected_requests_text
+    events = ErrorEvent.rejected_requests
+      .where(occurred_at: @week_start..@week_end, environment: "production", resolved_at: nil)
+      .order(:occurred_at)
+      .to_a
+    return nil if events.empty?
+
+    lines = [ "== Rejected Requests (#{events.size} browser 4xx response#{'s' unless events.size == 1} — validation such as card declines, not app failures) ==" ]
+    events
+      .group_by { |e| [ e.context["kind"], e.context["status"], e.context["message"] ] }
+      .sort_by { |_, group| -group.size }
+      .first(10)
+      .each do |(kind, status, message), group|
+        members = group.filter_map(&:user_id).uniq.size
+        line = "  #{kind || 'request'} #{status} ×#{group.size} (#{members} member#{'s' unless members == 1}, last #{group.last.occurred_at.strftime('%-m/%d %l:%M%P').strip})"
+        line += " — #{message.to_s[0, 160]}" if message.present?
+        lines << line
+      end
     lines.join("\n")
   end
 
@@ -691,13 +722,20 @@ class ActivityFeed
     )
   end
 
+  # Lists every item on each menu so the analysis can check ordered items
+  # against what was actually offered (#363: without the list, the report
+  # claimed on-menu marketplace items were "not on the published menu").
   def menu_context_text
+    ActiveRecord::Associations::Preloader.new(records: @menus, associations: { menu_items: :item }).call
+
     lines = [ "== Menu Context ==" ]
     @menus.each do |menu|
       lines << "Menu: #{menu.name}"
       lines << "  Baker's note: #{menu.subscriber_note}" if menu.subscriber_note.present?
       lines << "  Menu note: #{menu.menu_note}" if menu.menu_note.present?
       lines << "  Day-of note: #{menu.day_of_note}" if menu.day_of_note.present?
+      item_names = menu.sorted_menu_items.filter_map { |mi| mi.item&.name }
+      lines << "  Items (#{item_names.size}): #{item_names.join(', ')}" if item_names.any?
     end
     lines.join("\n")
   end
@@ -905,18 +943,30 @@ class ActivityFeed
     events
   end
 
-  # Two ConfirmationMailer sends to the same user within this window are suspicious —
-  # a user can't realistically re-edit their order that fast. Longer gaps are edits.
+  # Two ConfirmationMailer sends for the same order within this window are
+  # suspicious — a member can't realistically re-edit their order that fast.
+  # Longer gaps are edits.
   CONFIRMATION_DUP_WINDOW = 120 # seconds
 
-  # Yields sub-2-minute confirmation pairs, skipping team members — admin
-  # self-tests are not member-facing duplicate bugs, so neither the
-  # [RAPID DUPLICATE] tag nor the Email Health counter should count them.
+  # Yields sub-2-minute confirmation pairs for the same order. Pairs are keyed
+  # on [user_id, order_id] (#363): a member who places two separate orders a
+  # minute apart (e.g. a card-paid specials order plus a credit order) gets two
+  # legitimate confirmations, not a double send.
+  #
+  # Messages sent before ahoy_messages.order_id existed (#343, 2026-07-13) have
+  # a nil order_id on both sides, so they share a [user_id, nil] group and keep
+  # the old same-user timing check — the labeled legacy duplicate incidents in
+  # test/anomaly_expectations.yml still surface. Credit-purchase confirmations
+  # carry no order either and are grouped the same way.
+  #
+  # Team members are skipped — admin self-tests are not member-facing
+  # duplicate bugs, so neither the [RAPID DUPLICATE] tag nor the Email Health
+  # counter should count them.
   def each_rapid_pair(messages)
-    messages.group_by(&:user_id).each do |user_id, user_msgs|
+    messages.group_by { |m| [ m.user_id, m.order_id ] }.each do |(user_id, _order_id), order_msgs|
       next if admin_user_ids.include?(user_id)
 
-      user_msgs.sort_by { |m| m.sent_at || m.created_at }.each_cons(2) do |a, b|
+      order_msgs.sort_by { |m| m.sent_at || m.created_at }.each_cons(2) do |a, b|
         gap = ((b.sent_at || b.created_at) - (a.sent_at || a.created_at)).to_f.abs
         yield(user_id, a, b) if gap < CONFIRMATION_DUP_WINDOW
       end
@@ -937,8 +987,9 @@ class ActivityFeed
   end
 
   # Explicit count for the Email Health section. A nonzero count is the real
-  # duplicate-send bug (issue #331 class); an explicit zero stops the analysis
-  # from speculating one out of order-edit confirmations.
+  # duplicate-send bug (issue #331 class: the same order confirmed twice); an
+  # explicit zero stops the analysis from speculating one out of order-edit
+  # confirmations or separate orders placed minutes apart.
   def rapid_duplicate_summary_text
     pair_count = 0
     affected_users = Set.new
@@ -952,9 +1003,9 @@ class ActivityFeed
     end
 
     if pair_count.zero?
-      "Rapid duplicate confirmations: 0 this week"
+      "Rapid duplicate confirmations: 0 this week (same order confirmed twice within #{CONFIRMATION_DUP_WINDOW / 60} min; separate orders placed minutes apart are not duplicates)"
     else
-      "Rapid duplicate confirmations: #{pair_count} pair#{'s' unless pair_count == 1} within #{CONFIRMATION_DUP_WINDOW / 60} min affecting #{affected_users.size} member#{'s' unless affected_users.size == 1} — real duplicate-send bug (see [RAPID DUPLICATE] events)"
+      "Rapid duplicate confirmations: #{pair_count} pair#{'s' unless pair_count == 1} for the same order within #{CONFIRMATION_DUP_WINDOW / 60} min affecting #{affected_users.size} member#{'s' unless affected_users.size == 1} — real duplicate-send bug (see [RAPID DUPLICATE] events)"
     end
   end
 
@@ -984,8 +1035,9 @@ class ActivityFeed
           #   multi-day reminders (Thu + Sat) are not flagged as duplicates.
           # - ConfirmationMailer#*: order edits intentionally fire a fresh confirmation,
           #   so multiple sends across the week are expected, not a bug. Only treat as
-          #   a real duplicate if two sends land within CONFIRMATION_DUP_WINDOW of
-          #   each other — that window is too tight for a user to have re-edited.
+          #   a real duplicate if two sends for the same order land within
+          #   CONFIRMATION_DUP_WINDOW of each other — that window is too tight
+          #   for a user to have re-edited. Different orders never pair up.
           is_confirmation = mailer.start_with?("ConfirmationMailer")
           rapid_dup_ids = is_confirmation ? rapid_confirmation_dup_ids(messages) : nil
 
@@ -1005,7 +1057,7 @@ class ActivityFeed
 
             dup_note =
               if is_confirmation
-                rapid_dup_ids.include?(msg.id) ? " [RAPID DUPLICATE — sent twice within #{CONFIRMATION_DUP_WINDOW / 60} min]" : ""
+                rapid_dup_ids.include?(msg.id) ? " [RAPID DUPLICATE — same order confirmed twice within #{CONFIRMATION_DUP_WINDOW / 60} min]" : ""
               else
                 dup_key = [ msg.user_id, msg.pickup_day_id ]
                 by_user_and_day[dup_key].size > 1 ? " [DUPLICATE — #{by_user_and_day[dup_key].size}x]" : ""

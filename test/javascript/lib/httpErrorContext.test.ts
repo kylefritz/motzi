@@ -15,7 +15,26 @@ test("httpErrorContext keeps the server's status and message", () => {
     status: 422,
     message: "ordering for this menu is closed",
     online: expect.any(Boolean),
+    severity: "warning",
   });
+});
+
+test("httpErrorContext reports a 4xx card decline as a warning", () => {
+  const err = axiosError(422, { message: "Your card was declined." });
+
+  expect(httpErrorContext("create_order", err).severity).toBe("warning");
+  expect(httpErrorContext("create_order", axiosError(400, {})).severity).toBe(
+    "warning",
+  );
+});
+
+test("httpErrorContext leaves 5xx and network failures at error severity", () => {
+  expect(
+    httpErrorContext("create_order", axiosError(500, {})).severity,
+  ).toBeUndefined();
+  expect(
+    httpErrorContext("create_order", new Error("Network Error")).severity,
+  ).toBeUndefined();
 });
 
 test("httpErrorContext leaves status and message out for a network failure", () => {
