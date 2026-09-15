@@ -7,17 +7,34 @@ class ErrorEventsTest < ActionDispatch::IntegrationTest
     Rails.cache.clear
   end
 
+  # The browser reporter's payload type (ErrorEventRequest) is generated from
+  # test/schemas/error_event_request.json, so pinning test payloads to the same
+  # schema keeps errorReporter.ts and this controller in agreement.
+  def post_error_event(payload)
+    validate_json_schema :error_event_request, payload.to_json, strict: false
+    post "/error_events", params: payload, as: :json
+  end
+
+  test "error_event_request schema rejects unknown keys and missing fields" do
+    assert_raises(JSON::Schema::ValidationError) do
+      validate_json_schema :error_event_request, { error_class: "E", message: "m", stack: "", url: "/", extra: 1 }.to_json, strict: false
+    end
+    assert_raises(JSON::Schema::ValidationError) do
+      validate_json_schema :error_event_request, { error_class: "E", message: "m" }.to_json, strict: false
+    end
+  end
+
   test "browser ingest creates event for signed-in user" do
     sign_in users(:kyle)
 
     assert_difference "ErrorEvent.count", 1 do
-      post "/error_events", params: {
+      post_error_event(
         error_class: "TypeError",
         message: "Cannot read 'foo' of undefined",
         stack: "TypeError: oops\n    at App (/menu.js:1:1)",
         url: "/menu",
         context: { kind: "react_error_boundary" }
-      }, as: :json
+      )
     end
 
     assert_response :no_content
@@ -29,12 +46,12 @@ class ErrorEventsTest < ActionDispatch::IntegrationTest
 
   test "browser ingest accepts anonymous post and stores nil user" do
     assert_difference "ErrorEvent.count", 1 do
-      post "/error_events", params: {
+      post_error_event(
         error_class: "Error",
         message: "anon error",
         stack: "Error: anon\n    at <anonymous>:1:1",
         url: "/"
-      }, as: :json
+      )
     end
 
     assert_response :no_content

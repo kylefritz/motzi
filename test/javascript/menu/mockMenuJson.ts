@@ -3,6 +3,7 @@ import type {
   CreditBundle,
   Menu,
   MenuItem,
+  MenuItemPickupDay,
   MenuOrder,
   MenuOrderItem,
   MenuPickupDay,
@@ -36,6 +37,10 @@ export default function ({
       orderDeadlineAt,
     },
   ];
+  // Items get their own copies: Cart mutates pickupDay.remaining in place.
+  // 100 is well above the "N left!" threshold so nothing renders as scarce.
+  const itemPickupDays = (): MenuItemPickupDay[] =>
+    pickupDays.map((day) => ({ ...day, remaining: 100 }));
   const menu: Menu = {
     id: 921507399,
     name: "week 5",
@@ -58,7 +63,7 @@ export default function ({
       credits: 1,
       subscriber: true,
       marketplace: true,
-      pickupDays,
+      pickupDays: itemPickupDays(),
     },
     {
       id: 1,
@@ -68,7 +73,7 @@ export default function ({
       image: "bread2-002.webp",
       price: 4.0,
       credits: 2,
-      pickupDays,
+      pickupDays: itemPickupDays(),
       subscriber: true,
       marketplace: true,
     },
@@ -79,7 +84,7 @@ export default function ({
       price: 4.0,
       credits: 1,
       image: null,
-      pickupDays,
+      pickupDays: itemPickupDays(),
       subscriber: true,
       marketplace: false,
     },
@@ -90,7 +95,7 @@ export default function ({
       price: 2.0,
       credits: 1,
       image: null,
-      pickupDays,
+      pickupDays: itemPickupDays(),
       subscriber: false,
       marketplace: true,
     },
@@ -101,7 +106,7 @@ export default function ({
       price: 1.5,
       credits: 1,
       image: null,
-      pickupDays,
+      pickupDays: itemPickupDays(),
       subscriber: false,
       marketplace: true,
     },
@@ -192,14 +197,16 @@ export default function ({
     },
   ];
 
-  const data: MenuResponse = {
+  // `satisfies` (rather than a widening annotation) makes this mock fail
+  // `bun run typecheck` if it drifts from test/schemas/menu.json.
+  const data = {
     menu,
     bundles,
     user: withUser === true ? user : withUser || null,
     order: withOrder === true ? order : withOrder || null,
     holidayMenu: null,
     holidayOrder: null,
-  };
+  } satisfies MenuResponse;
 
   return data;
 }

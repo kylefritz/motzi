@@ -1,0 +1,8 @@
+{
+  "$id": "/order_error.json",
+  "type": "object",
+  "required": ["message"],
+  "properties": {
+    "message": { "type": "string" }
+  }
+}

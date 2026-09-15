@@ -75,6 +75,7 @@ end
 group :test do
   gem "capybara", ">= 3.26" # Adds support for Capybara system testing and selenium driver
   gem "selenium-webdriver", ">= 4.0.0.rc1"
+  gem "simplecov", require: false # coverage report (report-only, no minimum); enabled with COVERAGE=1
   gem "vcr" # record and replay HTTP interactions for tests
   gem "webmock" # stub HTTP requests in tests
 end
