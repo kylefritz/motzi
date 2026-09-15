@@ -162,6 +162,50 @@ class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "new website panel shows the menu as the live homepage with a preview button" do
+    Setting.homepage = "menu"
+    get "/admin/dashboard"
+    assert_response :success
+    assert_select ".panel#new-website" do
+      assert_select "*", text: /Menu \(live\)/
+      assert_select "form[action=?] button", "/admin/dashboard/start_marketing_preview", text: /Preview new site/
+      assert_select "a[href^='/admin/settings']"
+    end
+  ensure
+    Setting.homepage = "menu"
+  end
+
+  test "new website panel shows the marketing site as live" do
+    Setting.homepage = "marketing"
+    get "/admin/dashboard"
+    assert_select ".panel#new-website", text: /Marketing site \(live\)/
+    assert_select ".panel#new-website a[href=?]", "/admin/settings/#{Setting.find_by!(var: 'homepage').id}"
+  ensure
+    Setting.homepage = "menu"
+  end
+
+  test "start preview sets only the current admin's flag and lands on the homepage" do
+    post "/admin/dashboard/start_marketing_preview"
+    assert_redirected_to "/"
+    assert users(:kyle).reload.preview_marketing?
+    refute users(:maya).reload.preview_marketing?
+    refute users(:russell).reload.preview_marketing?
+  end
+
+  test "panel offers stop preview while previewing, and stop clears the flag" do
+    users(:kyle).update!(preview_marketing: true)
+    users(:maya).update!(preview_marketing: true)
+
+    get "/admin/dashboard"
+    assert_select ".panel#new-website form[action=?] button", "/admin/dashboard/stop_marketing_preview", text: /Stop preview/
+    assert_select ".panel#new-website form[action=?]", "/admin/dashboard/start_marketing_preview", count: 0
+
+    post "/admin/dashboard/stop_marketing_preview"
+    assert_redirected_to "/admin/dashboard"
+    refute users(:kyle).reload.preview_marketing?
+    assert users(:maya).reload.preview_marketing?, "another admin's flag is untouched"
+  end
+
   test "dashboard can enqueue queue demo job" do
     assert_enqueued_with(job: QueueDemoJob) do
       post "/admin/dashboard/enqueue_queue_demo"
