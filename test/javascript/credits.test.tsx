@@ -23,6 +23,7 @@ test("renders credit form", async () => {
 });
 
 test("submits credit payload for current user", async () => {
+  const user = userEvent.setup();
   const { default: App } = await import("credits/App");
   window.history.pushState({}, "", "/admin/users/123");
 
@@ -41,11 +42,11 @@ test("submits credit payload for current user", async () => {
     throw new Error("Expected credit form inputs to be present.");
   }
 
-  await userEvent.type(memoInput, "promo");
-  await userEvent.type(quantityInput, "5");
-  await userEvent.type(weeksInput, "12");
+  await user.type(memoInput, "promo");
+  await user.type(quantityInput, "5");
+  await user.type(weeksInput, "12");
 
-  await userEvent.click(screen.getByRole("button", { name: "Add credit" }));
+  await user.click(screen.getByRole("button", { name: "Add credit" }));
 
   expect(postMock).toHaveBeenCalledWith("/admin/credit_items.json", {
     memo: "promo",

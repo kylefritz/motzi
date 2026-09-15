@@ -12,6 +12,7 @@ const getCartTotalText = () => {
 };
 
 test("menu", async () => {
+  const user = userEvent.setup();
   const { container } = renderMenu({ order: false, user: false });
 
   expect(container.querySelectorAll(".col-6.mb-4")).toHaveLength(4);
@@ -19,7 +20,7 @@ test("menu", async () => {
 
   const donateBtn = screen.getByRole("button", { name: "Donate Now" });
   await act(async () => {
-    await userEvent.click(donateBtn);
+    await user.click(donateBtn);
   });
   await waitFor(() => expect(getCartTotalText()).toContain("$5.00"));
 });
@@ -39,30 +40,31 @@ test("payWhatYouCan false", () => {
 });
 
 test("checkout", async () => {
+  const user = userEvent.setup();
   const { onCreateOrder } = renderMenu({
     order: false,
     user: false,
   });
   expect(screen.getByText("No items")).toBeTruthy();
 
-  await userEvent.click(screen.getByTestId("pickup-day-3-1"));
-  await userEvent.click(screen.getByTestId("add-to-cart-3"));
+  await user.click(screen.getByTestId("pickup-day-3-1"));
+  await user.click(screen.getByTestId("add-to-cart-3"));
   await waitFor(() => expect(getCartTotalText()).toContain("$3.00"));
 
-  await userEvent.type(screen.getByLabelText("First Name"), "kyle");
-  await userEvent.type(screen.getByLabelText("Last Name"), "fritz");
-  await userEvent.type(screen.getByLabelText("Email"), "kf@woo.com");
-  await userEvent.type(screen.getByLabelText("Phone"), "555-123-4567");
+  await user.type(screen.getByLabelText("First Name"), "kyle");
+  await user.type(screen.getByLabelText("Last Name"), "fritz");
+  await user.type(screen.getByLabelText("Email"), "kf@woo.com");
+  await user.type(screen.getByLabelText("Phone"), "555-123-4567");
 
   const cardElement = screen.getByTestId("card-element");
-  await userEvent.type(cardElement, "4242");
+  await user.type(cardElement, "4242");
 
-  const submitButton = screen.getByRole("button", {
+  const submitButton = screen.getByRole<HTMLButtonElement>("button", {
     name: "Charge credit card $3.00",
   });
   await waitFor(() => expect(submitButton.disabled).toBe(false));
   await act(async () => {
-    await userEvent.click(submitButton);
+    await user.click(submitButton);
   });
 
   await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));
@@ -89,27 +91,28 @@ test("checkout", async () => {
 });
 
 test("0-price", async () => {
+  const user = userEvent.setup();
   const { onCreateOrder } = renderMenu({
     order: false,
     user: false,
   });
   expect(screen.getByText("No items")).toBeTruthy();
 
-  await userEvent.click(screen.getByTestId("pickup-day-3-1"));
-  await userEvent.click(screen.getByTestId("add-to-cart-3"));
+  await user.click(screen.getByTestId("pickup-day-3-1"));
+  await user.click(screen.getByTestId("add-to-cart-3"));
   await waitFor(() => expect(getCartTotalText()).toContain("$3.00"));
 
-  await userEvent.type(screen.getByLabelText("First Name"), "kyle");
-  await userEvent.type(screen.getByLabelText("Last Name"), "fritz");
-  await userEvent.type(screen.getByLabelText("Email"), "kf@woo.com");
-  await userEvent.type(screen.getByLabelText("Phone"), "555-123-4567");
+  await user.type(screen.getByLabelText("First Name"), "kyle");
+  await user.type(screen.getByLabelText("Last Name"), "fritz");
+  await user.type(screen.getByLabelText("Email"), "kf@woo.com");
+  await user.type(screen.getByLabelText("Phone"), "555-123-4567");
 
   const payWhatYouCan = screen.getByLabelText("Price");
   fireEvent.change(payWhatYouCan, { target: { value: "0" } });
   fireEvent.blur(payWhatYouCan, { target: { value: "0" } });
 
   await act(async () => {
-    await userEvent.click(screen.getByRole("button", { name: "Submit Order" }));
+    await user.click(screen.getByRole("button", { name: "Submit Order" }));
   });
 
   await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));

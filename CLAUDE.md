@@ -8,7 +8,7 @@ Rails commands (`bundle exec rails test`, `bin/rails`, migrations, etc.) need to
 
 ## Conventions
 
-- **Typecheck**: `bun run typecheck` (app only, default gate). `bun run typecheck:test` may fail on legacy test typings.
+- **Typecheck**: `bun run typecheck` (app only, default gate). `bun run typecheck:test` checks the test files too; both are gated in CI.
 - **Database**: Never modify existing migrations. Always create a new one.
 - **JSON APIs**: Responses use camelCase (via `olive_branch` gem). Use `jq` to parse JSON in the shell (not python3).
 - **Complex SQL**: Lives in `app/sql_queries/` using ERB templates with the `sql_query` gem.

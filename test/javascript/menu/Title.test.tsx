@@ -81,7 +81,9 @@ test("Multiple pickup days: schedule wraps for mobile", () => {
     />
   );
 
-  const scheduleContainer = container.querySelector("#deadline > small > div");
+  const scheduleContainer = container.querySelector<HTMLElement>(
+    "#deadline > small > div"
+  );
   expect(scheduleContainer).toBeTruthy();
   expect(scheduleContainer!.style.flexWrap).toBe("wrap");
 });

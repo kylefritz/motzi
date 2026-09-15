@@ -12,4 +12,5 @@ CI.run do
   step "Tests: Rails", "COVERAGE=1 bin/rails test --profile 10"
   step "Tests: JS", "bun run test"
   step "Typecheck", "bun run typecheck"
+  step "Typecheck: tests", "bun run typecheck:test"
 end

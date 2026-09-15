@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 import Tip, { applyTip } from "buy/Tip";
 
 test("Tip interactions", async () => {
+  const user = userEvent.setup();
   const onTip = mock(() => {});
 
   const { container } = render(
@@ -14,7 +15,7 @@ test("Tip interactions", async () => {
   const tipButtons = container.querySelectorAll("button");
   expect(tipButtons).toHaveLength(3);
   expect(tipButtons[0].textContent).toContain("$1");
-  await userEvent.click(tipButtons[0]);
+  await user.click(tipButtons[0]);
   expect(onTip).toHaveBeenCalledTimes(1);
 
   const { container: container2 } = render(
@@ -23,7 +24,7 @@ test("Tip interactions", async () => {
   const tipButtons2 = container2.querySelectorAll("button");
   expect(tipButtons2).toHaveLength(3);
   expect(tipButtons2[0].textContent).toContain("5%");
-  await userEvent.click(tipButtons2[0]);
+  await user.click(tipButtons2[0]);
   expect(onTip).toHaveBeenCalledTimes(2);
 });
 
