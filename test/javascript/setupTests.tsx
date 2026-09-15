@@ -1,6 +1,24 @@
 import React from "react";
-import { afterEach, beforeAll, mock } from "bun:test";
-import { cleanup } from "@testing-library/react";
+import { afterEach, beforeAll, beforeEach, mock } from "bun:test";
+import { cleanup, configure } from "@testing-library/react";
+import { resetNow } from "./support/clock";
+
+// Pin luxon/moment "now" to FIXED_NOW (see support/clock.ts). Set at preload
+// time too, so module-level fixtures computed on import are deterministic.
+// Tests that need a different time use `withNow(...)` or `setNow(...)`; the
+// hooks below restore the fixed time around every test.
+resetNow();
+beforeEach(() => {
+  resetNow();
+});
+afterEach(() => {
+  resetNow();
+});
+
+// Give waitFor/findBy headroom on slow CI runners (#364), but keep it below
+// bun's 5s per-test timeout. If they were equal, bun would kill a stuck test
+// before testing-library threw its "Unable to find…" error with the DOM dump.
+configure({ asyncUtilTimeout: 3000 });
 
 type StripeToken = { token: { id: string } };
 

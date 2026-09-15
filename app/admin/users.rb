@@ -89,7 +89,7 @@ ActiveAdmin.register User do
 
   show do |user|
     panel "Orders" do
-      table_for user.orders do
+      table_for user.orders.includes(:menu, order_items: :item).order(created_at: :desc) do
         column "menu" do |order|
           auto_link order.menu
         end
@@ -137,20 +137,45 @@ ActiveAdmin.register User do
       row :updated_at
     end
 
-    panel "Credit Items" do
+    panel "Credits" do
       h4 "Available credits: #{user.credits}"
-      table_for user.credit_items do
-        column :quantity
-        column :memo
-        column :created_at
-        column :good_for_weeks
+      ledger = user.credit_ledger.reverse
+      shown = params[:ledger] == "all" ? ledger : ledger.first(20)
+      if shown.size < ledger.size
+        para style: "margin: 0 0 8px" do
+          text_node "Showing the #{shown.size} most recent entries. "
+          a "Show all #{ledger.size} entries", href: admin_user_path(user, ledger: "all")
+        end
+      end
+      table_for shown, class: "index_table credit-ledger" do
+        column :when do |entry|
+          entry.at.strftime("%a %-m/%-d/%y %-l:%M%P")
+        end
+        column :change do |entry|
+          entry.change.positive? ? "+#{entry.change}" : entry.change.to_s
+        end
+        column :balance
+        column :details do |entry|
+          case entry.source
+          when CreditItem
+            text_node entry.source.memo.presence || "Credits added"
+            if entry.source.good_for_weeks.present?
+              text_node " · good for #{entry.source.good_for_weeks} weeks"
+            end
+          when Order
+            text_node auto_link(entry.source, "Order ##{entry.source.id}")
+            text_node " · "
+            text_node auto_link(entry.source.menu)
+            text_node " · #{entry.source.item_list}"
+          end
+        end
       end
 
       render partial: "admin/credit_items/form"
     end
 
     panel "Emails" do
-      table_for user.messages do
+      table_for user.messages.order(sent_at: :desc) do
         column "menu" do |email|
           auto_link email.menu
         end

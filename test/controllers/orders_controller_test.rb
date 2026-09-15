@@ -38,7 +38,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
         post "/orders.json", params: order, as: :json
       end
     end
-    assert_response :unprocessable_content
+    assert_order_error "Add an item to your cart"
   end
 
   test "hashid_user can pay_it_forward" do
@@ -59,7 +59,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     after_deadline do
       refute_order_placed users(:ljf).hashid
     end
-    assert_response :unprocessable_content
+    assert_order_error "ordering for this menu is closed"
   end
 
   test "hashid_user can update their own order" do
@@ -96,7 +96,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   test "admin can update any order" do
     sign_in users(:maya)
     before_deadline do
-      put_order Order.last.id, different_order_attrs
+      put_order orders(:kyle_week2).id, different_order_attrs
     end
     assert_response :success
   end
@@ -155,6 +155,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
       end
     end
     assert_response :success
+    validate_json_schema :menu, response.body
     assert_equal "newguest@example.com", Order.last.user.email
   end
 
@@ -170,9 +171,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
         }, as: :json
       end
     end
-    assert_response :unprocessable_content
-    json = JSON.parse(response.body)
-    assert_equal "this menu is not available for ordering", json["message"]
+    assert_order_error "this menu is not available for ordering"
   end
 
   test "creating holiday order returns regular menu as primary menu" do
@@ -194,6 +193,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
+    validate_json_schema :menu, response.body
     json = JSON.parse(response.body)
 
     # The primary menu should be the regular menu, not the holiday one
@@ -261,7 +261,108 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_equal holiday_order.id, json["holidayOrder"]["id"]
   end
 
+  # #341: the cart must only contain what the menu offers
+
+  test "create rejects an item that isn't on the menu" do
+    order = order_attrs(users(:ljf).hashid)
+    order[:cart] = [ { item_id: items(:pumpkin).id, pickup_day_id: pickup_days(:w2_d1_thurs).id } ]
+
+    assert_cart_rejected(/Pumpkin isn't on this menu/) do
+      post "/orders.json", params: order, as: :json
+    end
+  end
+
+  test "create rejects a pickup day from another menu" do
+    order = order_attrs(users(:ljf).hashid)
+    order[:cart] = [ { item_id: items(:rye).id, pickup_day_id: pickup_days(:w1_d1_thurs).id } ]
+
+    assert_cart_rejected(/pickup day that isn't part of this menu/) do
+      post "/orders.json", params: order, as: :json
+    end
+  end
+
+  test "create rejects pay it forward with a pickup day from another menu" do
+    order = order_attrs(users(:ljf).hashid)
+    order[:cart] = [ { item_id: Item::PAY_IT_FORWARD_ID, pickup_day_id: pickup_days(:w1_d1_thurs).id } ]
+
+    assert_cart_rejected(/pickup day that isn't part of this menu/) do
+      post "/orders.json", params: order, as: :json
+    end
+  end
+
+  test "create rejects an item on a pickup day it isn't offered" do
+    menu_item_pickup_days(:w2_donut_sat).destroy!
+    order = order_attrs(users(:ljf).hashid)
+    order[:cart] = [ { item_id: items(:donuts).id, pickup_day_id: pickup_days(:w2_d2_sat).id } ]
+
+    assert_cart_rejected(/Donuts isn't available for Saturday pickup/) do
+      post "/orders.json", params: order, as: :json
+    end
+  end
+
+  test "create rejects an unknown item id" do
+    order = order_attrs(users(:ljf).hashid)
+    order[:cart] = [ { item_id: 0, pickup_day_id: pickup_days(:w2_d1_thurs).id } ]
+
+    assert_cart_rejected(/An item in your cart isn't on this menu/) do
+      post "/orders.json", params: order, as: :json
+    end
+  end
+
+  test "update rejects an item that isn't on the menu and leaves the order alone" do
+    before_deadline { assert_order_placed users(:ljf).hashid }
+    order = users(:ljf).current_order
+    order_items_before = order.order_items.pluck(:item_id, :pickup_day_id, :quantity)
+
+    attrs = order_attrs(users(:ljf).hashid)
+    attrs[:cart] = [ { item_id: items(:pumpkin).id, pickup_day_id: pickup_days(:w2_d1_thurs).id } ]
+    assert_cart_rejected(/Pumpkin isn't on this menu/) { put_order order.id, attrs }
+
+    assert_equal order_items_before, order.reload.order_items.pluck(:item_id, :pickup_day_id, :quantity)
+  end
+
+  test "update rejects a pickup day from another menu and leaves the order alone" do
+    before_deadline { assert_order_placed users(:ljf).hashid }
+    order = users(:ljf).current_order
+    order_items_before = order.order_items.pluck(:item_id, :pickup_day_id, :quantity)
+
+    attrs = order_attrs(users(:ljf).hashid)
+    attrs[:cart] = [ { item_id: items(:rye).id, pickup_day_id: pickup_days(:w1_d2_sat).id } ]
+    assert_cart_rejected(/pickup day that isn't part of this menu/) { put_order order.id, attrs }
+
+    assert_equal order_items_before, order.reload.order_items.pluck(:item_id, :pickup_day_id, :quantity)
+  end
+
+  test "update keeps lines already on the order after the menu drops them" do
+    before_deadline { assert_order_placed users(:ljf).hashid }
+    order = users(:ljf).current_order
+    order_item = order.order_items.sole
+    MenuItemPickupDay.joins(:menu_item)
+                     .where(menu_items: { menu_id: order.menu_id, item_id: order_item.item_id },
+                            pickup_day_id: order_item.pickup_day_id)
+                     .destroy_all
+
+    # resubmitting the same line still works
+    before_deadline do
+      put_order order.id, order_attrs(users(:ljf).hashid).merge(cart: [
+        { item_id: order_item.item_id, quantity: 2, pickup_day_id: order_item.pickup_day_id }
+      ])
+    end
+    assert_success_and_validate
+    assert_equal 2, order.reload.order_items.sole.quantity
+  end
+
   private
+
+  def assert_cart_rejected(message, &block)
+    before_deadline do
+      assert_no_difference -> { Order.count } do
+        assert_no_difference -> { OrderItem.count }, &block
+      end
+    end
+    assert_response :unprocessable_content
+    assert_match message, JSON.parse(response.body)["message"]
+  end
 
   def order_attrs(hashid)
     item_id = Menu.current.items.first.id
@@ -318,6 +419,12 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
   def assert_success_and_validate
     assert_response :success
     validate_response_json_schema
+  end
+
+  def assert_order_error(message)
+    assert_response :unprocessable_content
+    validate_json_schema :order_error, response.body
+    assert_equal message, JSON.parse(response.body)["message"]
   end
 
   def validate_response_json_schema

@@ -45,13 +45,17 @@ jobs:
             rubocop-${{ runner.os }}-${{ env.DEPENDENCIES_HASH }}-
       - name: RuboCop
         run: bundle exec rubocop -f github
+      - name: Schema types up to date (test/schemas -> api.generated.ts)
+        run: |
+          bin/generate_schema_types
+          git diff --exit-code app/javascript/types/api.generated.ts
 
   test_rails:
     runs-on: ubuntu-latest
 
     services:
       postgres:
-        image: postgres:15
+        image: postgres:18
         ports: ["5432:5432"]
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
@@ -60,8 +64,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install PostgreSQL client
-        run: sudo apt-get -yqq install libpq-dev
+      - name: Install PostgreSQL client and libvips
+        # libvips: Active Storage loads its vips transformer under eager_load
+        # (CI=true) and image_processing 2.x raises if the library is missing.
+        # Heroku's stack ships it, so this makes CI match production.
+        run: sudo apt-get -yqq install libpq-dev libvips-dev
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -86,9 +93,83 @@ jobs:
           RAILS_ENV: test
           DISABLE_SPRING: "1"
           RUBYOPT: "-W:no-deprecated -W:no-experimental"
+          COVERAGE: "1" # report-only SimpleCov, no minimum
+        run: |
+          set -o pipefail
+          bin/rails db:setup
+          bin/rails test --profile 10 2>&1 | tee rails-test.log
+
+      - name: Upload Rails test log
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rails-test-log
+          path: rails-test.log
+          if-no-files-found: ignore
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage/
+          include-hidden-files: true
+          if-no-files-found: ignore
+
+  test_system:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install PostgreSQL client and libvips
+        run: sudo apt-get -yqq install libpq-dev libvips-dev
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.10
+          bundler-cache: true
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # axe-core (read from node_modules by the system test) comes from here.
+      - name: Install JS dependencies
+        run: bun install
+
+      - name: Build JS assets
+        run: bun run build
+
+      # ubuntu-latest ships Google Chrome; Selenium Manager fetches the
+      # matching chromedriver.
+      - name: System tests
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          RAILS_ENV: test
+          DISABLE_SPRING: "1"
+          RUBYOPT: "-W:no-deprecated -W:no-experimental"
         run: |
           bin/rails db:setup
-          bin/rails test
+          bin/rails test:system
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-test-screenshots
+          path: tmp/screenshots
+          if-no-files-found: ignore
 
   test_js:
     runs-on: ubuntu-latest
@@ -104,7 +185,17 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: JS tests
-        run: bun run test
+        run: |
+          set -o pipefail
+          bun run test 2>&1 | tee bun-test.log
+
+      - name: Upload JS test log
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: bun-test-log
+          path: bun-test.log
+          if-no-files-found: ignore
 
       - name: Typecheck
         run: bun run typecheck

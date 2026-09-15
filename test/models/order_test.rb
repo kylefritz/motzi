@@ -1,6 +1,40 @@
 require "test_helper"
 
 class OrderTest < ActiveSupport::TestCase
+  test "creation_lock_key differs across databases so parallel test workers don't share advisory locks" do
+    user = users(:kyle)
+    menu = menus(:week1)
+
+    key_a = Order.creation_lock_key(user_id: user.id, menu_id: menu.id, database: "motzi_test-0")
+    key_b = Order.creation_lock_key(user_id: user.id, menu_id: menu.id, database: "motzi_test-1")
+
+    refute_equal key_a, key_b
+  end
+
+  test "creation_lock_key is stable for the same inputs" do
+    user = users(:kyle)
+    menu = menus(:week1)
+
+    assert_equal Order.creation_lock_key(user_id: user.id, menu_id: menu.id, database: "motzi"),
+      Order.creation_lock_key(user_id: user.id, menu_id: menu.id, database: "motzi")
+    refute_equal Order.creation_lock_key(user_id: user.id, menu_id: menu.id, database: "motzi"),
+      Order.creation_lock_key(user_id: user.id, menu_id: menus(:week2).id, database: "motzi")
+  end
+
+  test "creation_lock_key defaults to the current database and fits a bigint advisory lock" do
+    user = users(:kyle)
+    menu = menus(:week1)
+    database = Order.connection.current_database
+
+    key = Order.creation_lock_key(user_id: user.id, menu_id: menu.id)
+
+    assert_equal Order.creation_lock_key(user_id: user.id, menu_id: menu.id, database: database), key
+    assert_nothing_raised do
+      Order.transaction do
+        Order.connection.execute(Order.sanitize_sql_array([ "SELECT pg_advisory_xact_lock(?)", key ]))
+      end
+    end
+  end
   test "items associate to orders" do
     w1 = orders(:kyle_week1)
     assert_equal 1, w1.order_items.count

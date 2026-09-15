@@ -1,0 +1,12 @@
+{
+  "$id": "/error_event_request.json",
+  "type": "object",
+  "required": ["error_class", "message", "stack", "url"],
+  "properties": {
+    "error_class": { "type": "string" },
+    "message": { "type": "string" },
+    "stack": { "type": "string" },
+    "url": { "type": "string" },
+    "context": { "type": "object" }
+  }
+}

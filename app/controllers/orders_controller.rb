@@ -42,10 +42,13 @@ class OrdersController < ApplicationController
       return render_ordering_closed
     end
 
+    # validated up front so a bad cart never creates an order
+    cart_items = order_item_attrs_for_cart(@menu, params.fetch(:cart))
+
     @user, @order = Order.transaction do
       # Advisory lock prevents race condition where two simultaneous requests
       # both pass the duplicate check before either commits.
-      lock_key = Zlib.crc32("order:#{current_user&.id}:#{@menu.id}")
+      lock_key = Order.creation_lock_key(user_id: current_user&.id, menu_id: @menu.id)
       ActiveRecord::Base.connection.execute(
         ActiveRecord::Base.sanitize_sql_array([ "SELECT pg_advisory_xact_lock(?)", lock_key ])
       )
@@ -61,16 +64,7 @@ class OrdersController < ApplicationController
       if params.fetch(:cart).empty?
         raise OrderError.new("Add an item to your cart")
       end
-      params.fetch(:cart).each do |cart_item_params|
-        # Create a clean hash with only permitted attributes and ensure quantity is not null
-        filtered_params = {
-          item_id: cart_item_params[:item_id],
-          quantity: cart_item_params[:quantity].presence || 1,
-          pickup_day_id: cart_item_params[:pickup_day_id] || @menu.pickup_days.first.id
-        }
-
-        order.order_items.create!(filtered_params)
-      end
+      cart_items.each { |attrs| order.order_items.create!(attrs) }
 
       # figure out if we need to charge this person or if we're using credits
       if params[:price].present?
@@ -140,19 +134,15 @@ class OrdersController < ApplicationController
       end
     end
 
+    cart_items = order_item_attrs_for_cart(
+      order.menu, params[:cart],
+      existing: order.order_items.pluck(:item_id, :pickup_day_id).to_set
+    )
+
     Order.transaction do
       order.update!(params.permit(:comments))
       order.order_items.destroy_all
-      params[:cart].each do |cart_item_params|
-        # Create a clean hash with only permitted attributes and ensure quantity is not null
-        filtered_params = {
-          item_id: cart_item_params[:item_id],
-          quantity: cart_item_params[:quantity].presence || 1,
-          pickup_day_id: cart_item_params[:pickup_day_id] || order.menu.pickup_days.first.id
-        }
-
-        order.order_items.create!(filtered_params)
-      end
+      cart_items.each { |attrs| order.order_items.create!(attrs) }
 
       # send confirmation email
       ConfirmationMailer.with(order: order).order_email.deliver_later
@@ -167,6 +157,9 @@ class OrdersController < ApplicationController
       @order = order
     end
     render_current_order
+
+    rescue OrderError => e
+      render_validation_failed(e.message)
   end
 
   private
@@ -177,6 +170,48 @@ class OrdersController < ApplicationController
   # count against the member's credit balance.
   def paid_marketplace_order?
     params[:price].to_f > 0 && params[:token].present?
+  end
+
+  # Turns the submitted cart into order item attributes, rejecting any line the
+  # menu doesn't offer (#341). The item must be on the menu and offered on the
+  # chosen pickup day (menu_item_pickup_days), which must belong to this menu.
+  # Pay it forward isn't a menu item, so it only needs one of the menu's days.
+  #
+  # `existing` holds [item_id, pickup_day_id] pairs already on the order being
+  # edited. They're let through so a bakery trimming the menu after people have
+  # ordered doesn't lock those members out of editing their order.
+  def order_item_attrs_for_cart(menu, cart, existing: Set.new)
+    pickup_days = menu.pickup_days.to_a
+    pickup_day_ids = pickup_days.map(&:id).to_set
+    menu_item_ids = menu.menu_items.pluck(:item_id).to_set
+    offered = MenuItemPickupDay.joins(:menu_item)
+                               .where(menu_items: { menu_id: menu.id })
+                               .pluck("menu_items.item_id", :pickup_day_id)
+                               .to_set
+
+    cart.map do |cart_item_params|
+      item_id = cart_item_params[:item_id].to_i
+      pickup_day_id = (cart_item_params[:pickup_day_id] || pickup_days.first&.id).to_i
+
+      unless existing.include?([ item_id, pickup_day_id ])
+        # only looked up when a line is rejected, so valid carts skip the query
+        item_name = -> { Item.find_by(id: item_id)&.name || "An item in your cart" }
+        if item_id != Item::PAY_IT_FORWARD_ID && !menu_item_ids.include?(item_id)
+          raise OrderError.new("#{item_name.call} isn't on this menu. Please remove it from your cart")
+        elsif !pickup_day_ids.include?(pickup_day_id)
+          raise OrderError.new("#{item_name.call} has a pickup day that isn't part of this menu")
+        elsif item_id != Item::PAY_IT_FORWARD_ID && !offered.include?([ item_id, pickup_day_id ])
+          day = pickup_days.find { |pd| pd.id == pickup_day_id }.day_str
+          raise OrderError.new("#{item_name.call} isn't available for #{day} pickup. Please remove it from your cart")
+        end
+      end
+
+      {
+        item_id: item_id,
+        quantity: cart_item_params[:quantity].presence || 1,
+        pickup_day_id: pickup_day_id
+      }
+    end
   end
 
   def render_ordering_closed

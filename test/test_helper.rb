@@ -1,7 +1,20 @@
 ENV["RAILS_ENV"] ||= "test"
+
+# Coverage is report-only (no minimum). Must start before the app loads.
+if ENV["COVERAGE"]
+  require "simplecov"
+  SimpleCov.start "rails" do
+    enable_coverage :branch
+    # `parallelize` forks workers; SimpleCov's at_fork hook gives each one its
+    # own command name and merges all results into one report at exit.
+    enable_for_subprocesses true
+  end
+end
+
 require_relative "../config/environment"
 require "rails/test_help"
 require_relative "support/vcr_setup"
+require_relative "support/stripe_stubs"
 
 # json-schema still defaults to MultiJson and warns about it; use the stdlib JSON directly.
 JSON::Validator.use_multi_json = false
@@ -41,12 +54,26 @@ class ActiveSupport::TestCase
     Setting.clear_cache
   end
 
-  def validate_json_schema(object_name, json)
+  def validate_json_schema(object_name, json, strict: true)
     schema_directory = "#{Dir.pwd}/test/schemas"
     schema_path = "#{schema_directory}/#{object_name}.json"
     # with the `:strict` option, all properties are condisidered to have `"required": true`
-    # and all objects `"additionalProperties": false`
-    JSON::Validator.validate!(schema_path, json, strict: true)
+    # and all objects `"additionalProperties": false`.
+    # `strict: false` still rejects unknown keys but honors the schema's `required`
+    # list, for payloads with optional fields (e.g. error_event_request).
+    options = strict ? { strict: true } : { noAdditionalProperties: true }
+    JSON::Validator.validate!(schema_path, json, **options)
+  end
+
+  # SQL queries run by the block, counted exactly like Rails'
+  # assert_queries_count (skips SCHEMA and query-cache hits). Use it to take a
+  # baseline, then assert_queries_count(baseline) after growing the data, so
+  # guards catch N+1s instead of freezing a magic number.
+  def count_queries(&block)
+    ActiveRecord::Base.lease_connection.materialize_transactions
+    counter = ActiveRecord::Assertions::QueryAssertions::SQLCounter.new
+    ActiveSupport::Notifications.subscribed(counter, "sql.active_record", &block)
+    counter.log.size
   end
 
   def assert_el_count(expect_count, css, msg = nil)

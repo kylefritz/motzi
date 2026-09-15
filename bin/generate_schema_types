@@ -10,9 +10,11 @@ output_file = File.join(output_dir, "api.generated.ts")
 
 INDENT = "  "
 
+# menu.json -> MenuResponse; error_event_request.json -> ErrorEventRequest
 def type_name_for(file_name)
   base = File.basename(file_name, ".json")
-  base.split("_").map(&:capitalize).join + "Response"
+  name = base.split("_").map(&:capitalize).join
+  base.end_with?("_request") ? name : name + "Response"
 end
 
 def render_type(schema, indent = 0)
@@ -63,5 +65,7 @@ schema_files.each do |schema_path|
 end
 
 Dir.mkdir(output_dir) unless Dir.exist?(output_dir)
-File.write(output_file, generated)
+# Single trailing newline so the output is stable under editors/formatters
+# (CI diffs this file against a fresh run).
+File.write(output_file, generated.rstrip + "\n")
 puts "Wrote #{output_file}"

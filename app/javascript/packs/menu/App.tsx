@@ -3,6 +3,7 @@ import axios from "axios";
 import queryString from "query-string";
 import _ from "lodash";
 import { reportException } from "../../lib/errorReporter";
+import { httpErrorContext } from "../../lib/httpErrorContext";
 
 import { DayContext, SettingsContext } from "./Contexts";
 import Layout from "./Layout";
@@ -82,7 +83,7 @@ export default function App() {
         const { message } = err.response?.data || {};
         console.error("Couldn't create order", err, err.response?.data);
         window.alert(`Couldn't create order: ${message || err}`);
-        reportException(err, { kind: "create_order" });
+        reportException(err, httpErrorContext("create_order", err));
       });
   };
 
@@ -109,7 +110,7 @@ export default function App() {
         const { message } = err.response?.data || {};
         console.error("Couldn't create holiday order", err, err.response?.data);
         window.alert(`Couldn't create holiday order: ${message || err}`);
-        reportException(err, { kind: "create_holiday_order" });
+        reportException(err, httpErrorContext("create_holiday_order", err));
       });
   };
 

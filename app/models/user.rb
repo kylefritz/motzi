@@ -41,6 +41,23 @@ class User < ApplicationRecord
     SqlQuery.new(:user_credits, user_ids: [ self.id ]).execute.first["credit_balance"]
   end
 
+  CreditLedgerEntry = Struct.new(:at, :change, :balance, :source, keyword_init: true)
+
+  # Every credit purchase and every credit-paid order, oldest first, with the
+  # balance after each one. Mirrors the arithmetic in
+  # app/sql_queries/_user_credits.sql.erb so the last balance equals #credits.
+  def credit_ledger
+    purchases = credit_items.map { |ci| { at: ci.created_at, change: ci.quantity, source: ci } }
+    deductions = orders.where(stripe_charge_id: nil).includes(:menu, :order_items)
+                       .map { |o| { at: o.created_at, change: -o.credits, source: o } }
+
+    balance = 0
+    (purchases + deductions).sort_by { |e| [ e[:at], e[:source].class.name, e[:source].id ] }.map do |e|
+      balance += e[:change]
+      CreditLedgerEntry.new(**e, balance: balance)
+    end
+  end
+
   def authenticate(password)
     Devise::Encryptor.compare(User, self.encrypted_password, password)
   end
@@ -59,7 +76,9 @@ class User < ApplicationRecord
 
   def order_for_menu(menu_id)
     # TODO: can an menu have more than one order?
-    menu_orders = orders.subscriber.where(menu_id: menu_id).includes(order_items: [ :item ])
+    # menus/_order.json.jbuilder reads order_item.pickup_day for every line;
+    # preload it so /menu.json doesn't run a query per pickup day (#378)
+    menu_orders = orders.subscriber.where(menu_id: menu_id).includes(order_items: [ :item, :pickup_day ])
     if menu_orders.size > 1
       logger.warn "user=#{self.id} has more than 1 order for menu #{menu_id}"
     end

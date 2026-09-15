@@ -236,3 +236,14 @@
     - "scheduled jobs 'missing' from event feed flagged as silent failures (trim_analytics, capture_dyno_metrics)"
     - "low evening traffic snapshot (2 visitors) as broken analytics"
     - "same-day open rate as deliverability problem"
+
+# --- Reviewed in #363 (nightly reports 26w36–26w37, mined 2026-09-14) ---
+
+26w37:
+  expected_status: warning
+  notes: "Rosh Hashanah specials week (Apple Challah / Apple Caramel Babka card-only). One real bug: on 9/12 creating the 26w38 menu hit the unique (week_id, menu_type) index — PG::UniqueViolation / ActiveRecord::RecordNotUnique 500 — after a menu was moved onto the wrong week on 9/6; fixed by #356. Noise the nightly reports escalated as 'urgent' for four days: (1) '6 pairs / 5 members' rapid duplicate confirmations — 8 members each placed a card-paid specials order and a separate credit order 1–2 min apart; every pair had two distinct order_ids, so two real confirmations, not a double send (feed keys pairs on order_id since #363). (2) 'East Coast Granola', 'Kai Inspire Bread Knife' and 'Speinkorn Special' claimed to be not on the published menu — all are on menu 3836 via menu_items; the feed omitted item names before #363. The 8 browser 'Request failed with status code 422' events on /menu (fingerprint 1fe6a5ff40a7ec89) are Stripe card declines at marketplace checkout (3 shoppers); replayed events predate the 4xx severity tag, so mention-as-customer-decline is fine. Run: rake \"ai:eval[26w37]\"."
+  must_flag:
+    - "menu week collision 500 (RecordNotUnique / unique violation on week_id when creating next week's menu)"
+  must_not_flag:
+    - "separate orders placed minutes apart (card-paid specials order + credit order) flagged as rapid duplicate confirmations or a duplicate-send bug"
+    - "items (East Coast Granola, Kai Inspire Bread Knife, Speinkorn Special) claimed to be missing from the published menu"

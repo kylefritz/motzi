@@ -9,6 +9,10 @@
 #     priority: 2
 #     schedule: at 5am every day
 
+# Schedules without an explicit zone run in config.time_zone (Eastern) as of
+# solid_queue 1.5; before that they ran in the dyno's UTC. So "4:15am" below
+# is 4:15am ET, the quietest part of the night for the bakery.
+
 production: &default
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(finished_before: 16.days.ago, sleep_between_batches: 0.3)"

@@ -4,9 +4,10 @@ import { render } from "@testing-library/react";
 
 import mockMenuJson from "./mockMenuJson";
 import Items, { DayButton, Item } from "menu/Items";
-import { DateTime, Duration } from "luxon";
+import { Duration } from "luxon";
+import { now } from "../support/clock";
 
-const basePickupAt = DateTime.now().plus(Duration.fromISO("PT24H")).toISO();
+const basePickupAt = now().plus(Duration.fromISO("PT24H")).toISO();
 
 const basePickupDay = (id: number, remaining: number = 10) => ({
   id,
@@ -70,9 +71,7 @@ test("remaining deadline", () => {
     renderDay({ remaining: 0 }).container.querySelector("button").disabled
   ).toBe(true);
 
-  const orderDeadlineAt = DateTime.now()
-    .minus(Duration.fromISO("PT1H"))
-    .toISO();
+  const orderDeadlineAt = now().minus(Duration.fromISO("PT1H")).toISO();
   expect(
     renderDay({ orderDeadlineAt }).container.querySelector("button").disabled
   ).toBe(true);

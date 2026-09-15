@@ -21,7 +21,7 @@ gem "drb" # stdlib gem (Ruby 3.4 deprecation warning)
 gem "gon" # rails variables in javascript
 gem "hashid-rails" # lookup models by hashid
 gem "heroku-api-postgres" # Heroku Postgres API for automated backups
-gem "image_processing", "~> 1.2" # Use Active Storage variant
+gem "image_processing", "~> 2.1" # Active Storage variants (item thumbnails in admin)
 gem "jaro_winkler", "~> 1.5.5" # pinned for compatibility
 gem "jbuilder", "~> 2.7" # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem "jsbundling-rails" # build JS via rails asset pipeline hooks
@@ -36,17 +36,18 @@ gem "olive_branch" # convert snake_case to camelCase for json
 gem "paper_trail" # audits
 gem "pg", ">= 0.18", "< 2.0"
 gem "progress_bar"
-gem "puma", "~> 7.0" # web/app server
+gem "puma", "~> 8.0" # web/app server
 gem "rack-attack" # block scanner traffic / rate limit
 gem "rails", "~> 8.1.3"
 gem "rails-settings-cached" # site-wide settings
 gem "redcarpet" # markdown the baker's note in admin
+gem "ruby-vips", require: false # libvips bindings for image_processing 2.x (no longer a hard dependency); Active Storage requires it when its vips transformer loads
 gem "sass-rails", "~> 6" # css
-gem "solid_cable", "~> 3.0" # database-backed ActionCable adapter (no Redis)
+gem "solid_cable", "~> 4.0" # database-backed ActionCable adapter (no Redis)
 gem "solid_cache" # Postgres-backed Rails cache store (no Redis/Memcached)
 gem "solid_queue" # database-backed ActiveJob backend (Rails 7.2+)
 gem "sql_query" # load SQL queries from erb templates
-gem "stripe" # accept credit cards
+gem "stripe", "~> 19.6" # accept credit cards; tests stub api.stripe.com with WebMock (test/support/stripe_stubs.rb)
 
 group :development, :test do
   gem "byebug" # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -74,7 +75,7 @@ end
 group :test do
   gem "capybara", ">= 3.26" # Adds support for Capybara system testing and selenium driver
   gem "selenium-webdriver", ">= 4.0.0.rc1"
-  gem "stripe-ruby-mock", "3.1.0.rc3", require: "stripe_mock" # test Stripe code without hitting Stripe's servers
+  gem "simplecov", require: false # coverage report (report-only, no minimum); enabled with COVERAGE=1
   gem "vcr" # record and replay HTTP interactions for tests
   gem "webmock" # stub HTTP requests in tests
 end

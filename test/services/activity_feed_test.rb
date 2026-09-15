@@ -564,7 +564,37 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert_match(/Rapid duplicate confirmations: 0 this week/, text)
   end
 
-  test "to_text counts rapid duplicate confirmation pairs in email health" do
+  test "to_text counts rapid duplicate confirmation pairs for the same order" do
+    travel_to_week_id(@week_id) do
+      sent = Time.zone.now + 1.day
+      order = orders(:ljf_week1)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent + 30.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Rapid duplicate confirmations: 1 pair for the same order within 2 min affecting 1 member/, text)
+  end
+
+  test "rapid duplicate counter ignores separate orders confirmed minutes apart" do
+    # A card-paid specials order plus a credit order, placed back to back:
+    # two orders, two legitimate confirmations (#363).
+    travel_to_week_id(@week_id) do
+      sent = Time.zone.now + 1.day
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: orders(:ljf_week1), sent_at: sent)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: orders(:ljf_passover), sent_at: sent + 60.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+    verbose = ActivityFeed.new(@week_id).to_text(verbose: true)
+
+    assert_match(/Rapid duplicate confirmations: 0 this week/, text)
+    assert_no_match(/RAPID DUPLICATE/, verbose)
+  end
+
+  test "rapid duplicate counter keeps the timing check for messages without an order_id" do
+    # Messages sent before ahoy_messages.order_id was tracked (#343).
     travel_to_week_id(@week_id) do
       sent = Time.zone.now + 1.day
       Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), sent_at: sent)
@@ -573,7 +603,57 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     text = ActivityFeed.new(@week_id).to_text
 
-    assert_match(/Rapid duplicate confirmations: 1 pair within 2 min affecting 1 member/, text)
+    assert_match(/Rapid duplicate confirmations: 1 pair for the same order within 2 min affecting 1 member/, text)
+  end
+
+  test "verbose feed tags a same-order rapid pair as RAPID DUPLICATE" do
+    travel_to_week_id(@week_id) do
+      sent = Time.zone.now + 1.day
+      order = orders(:ljf_week1)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent + 30.seconds)
+    end
+
+    verbose = ActivityFeed.new(@week_id).to_text(verbose: true)
+
+    assert_match(/RAPID DUPLICATE — same order confirmed twice/, verbose)
+  end
+
+  test "menu context lists each menu's item names" do
+    text = ActivityFeed.new(@week_id).to_text
+    menu_context = text[/== Menu Context ==.*?(?=== Orders by Day ==)/m]
+
+    assert menu_context, "expected a Menu Context section"
+    assert_match(/Menu: week1/, menu_context)
+    assert_match(/Items \(2\): .*Classic/, menu_context)
+    assert_match(/Pumpkin/, menu_context)
+  end
+
+  test "browser 4xx warnings are listed as rejected requests, not application errors" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+
+    2.times do |i|
+      ErrorEvent.create!(
+        fingerprint: "fp-decline", source: "browser", error_class: "AxiosError",
+        message: "Request failed with status code 422", environment: "production",
+        user: users(:ljf), occurred_at: week_start + (i + 1).hours,
+        context: { kind: "create_order", status: 422, message: "Your card was declined.", severity: "warning" }
+      )
+    end
+    ErrorEvent.create!(
+      fingerprint: "fp-outage", source: "server", error_class: "UptimeCheck::OutageError",
+      message: "menu down", environment: "production", occurred_at: week_start + 3.hours,
+      context: { severity: "warning" }
+    )
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_match(/Application Errors \(1 events:/, text)
+    assert_match(/UptimeCheck::OutageError/, text)
+    assert_no_match(/AxiosError/, text)
+    assert_match(/Rejected Requests \(2 browser 4xx responses/, text)
+    assert_match(/create_order 422 ×2 \(1 member, .*\) — Your card was declined\./, text)
   end
 
   test "rapid duplicate counter ignores admin self-test pairs" do

@@ -5,14 +5,18 @@ import type {
   AdminItemsResponse,
   AdminMenuBuilderResponse,
   CreditItemResponse,
+  ErrorEventRequest,
   MenuResponse,
+  OrderErrorResponse,
 } from "./api.generated";
 
 export type {
   AdminItemsResponse,
   AdminMenuBuilderResponse,
   CreditItemResponse,
+  ErrorEventRequest,
   MenuResponse,
+  OrderErrorResponse,
 };
 
 export type Menu = MenuResponse["menu"];

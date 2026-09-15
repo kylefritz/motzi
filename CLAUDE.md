@@ -91,7 +91,7 @@ Screenshots are uploaded to `s3://motzi/public/gh/pr-<NUMBER>/` and embedded in 
 
 ## Deployment
 
-Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgres 15 (essential-1), **not** Neon. No Redis — everything runs on Postgres via Solid Queue (jobs), Solid Cable (ActionCable), and Solid Cache. To pull prod data locally: `bin/seed_local` (uses `heroku pg:pull`).
+Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgres 18 (essential-1), **not** Neon. No Redis — everything runs on Postgres via Solid Queue (jobs), Solid Cable (ActionCable), and Solid Cache. To pull prod data locally: `bin/seed_local` (uses `heroku pg:pull`).
 
 ## Analysis Replies (email ingress)
 
@@ -168,11 +168,11 @@ R14 is a **soft** memory warning — the dyno exceeded its 512MB quota and went 
 
 ## Worktrees
 
-Feature work uses git worktrees in `.worktrees/`. When setting up a worktree:
+Feature work uses git worktrees in `.worktrees/` (or `.claude/worktrees/`). When setting up a worktree:
 
-- **Symlink `.env`**: `ln -s ../../.env .env` (worktrees don't get untracked files)
+- **Symlink `.env`**: `ln -s ../../.env .env` in `.worktrees/<name>`, `ln -s ../../../.env .env` in `.claude/worktrees/<name>` (worktrees don't get untracked files)
 - **Bundler lockfile**: use `BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update` so bundler writes to the worktree, not the main repo
-- **Tests**: run with `DISABLE_SPRING=1` (Spring cross-loads apps between worktrees and hangs) and `TEST_DATABASE=motzi_test_<branch>` (concurrent suites sharing `motzi_test` clobber each other's fixtures; run `bin/rails db:test:prepare` once after setting it)
+- **Tests**: automatic. In a worktree, `bin/rails`/`bin/rake` disable Spring and the test DB defaults to `motzi_test_<worktree dir>` (`lib/worktree_env.rb`; `TEST_DATABASE` still overrides). Run `bin/rails db:test:prepare` once, then `bin/rails test`.
 
 ## Session Start
 
