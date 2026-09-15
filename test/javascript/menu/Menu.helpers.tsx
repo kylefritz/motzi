@@ -8,7 +8,8 @@ import { SettingsContext } from "menu/Contexts";
 
 export default function renderMenu(mockMenuJsonOptions) {
   window.gon = { stripeApiKey: "no-such-key" };
-  const onCreateOrder = mock(() => {});
+  // Menu calls onCreateOrder(...).finally(...), so the mock must return a promise.
+  const onCreateOrder = mock(() => Promise.resolve());
   const data = mockMenuJson(mockMenuJsonOptions);
   const { bundles } = data;
   const utils = render(
