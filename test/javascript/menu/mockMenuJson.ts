@@ -1,4 +1,5 @@
 import { DateTime, Duration } from "luxon";
+import { now } from "../support/clock";
 import type {
   CreditBundle,
   Menu,
@@ -26,10 +27,10 @@ export default function ({
   payItForward = true,
   enablePayWhatYouCan = true,
 }: MockMenuOptions = {}): MenuResponse {
-  const pickupAt = DateTime.now().plus(Duration.fromISO("PT24H")).toISO();
-  const orderDeadlineAt = DateTime.now()
-    .plus(Duration.fromISO("PT12H"))
-    .toISO();
+  // Relative to the fake test clock (FIXED_NOW unless a test overrides it),
+  // so the menu is always open: deadline in 12h, pickup in 24h.
+  const pickupAt = now().plus(Duration.fromISO("PT24H")).toISO();
+  const orderDeadlineAt = now().plus(Duration.fromISO("PT12H")).toISO();
   const pickupDays: MenuPickupDay[] = [
     {
       id: 1,

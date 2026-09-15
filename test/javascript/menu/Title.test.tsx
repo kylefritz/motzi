@@ -1,12 +1,13 @@
 import React from "react";
 import { expect, test } from "bun:test";
 import { render } from "@testing-library/react";
-import { DateTime, Duration } from "luxon";
+import { Duration } from "luxon";
 
 import Title from "menu/Title";
+import { now, withNow } from "../support/clock";
 
 function makeTitle(orderDeadlineAt) {
-  const pickupAt = DateTime.now().plus(Duration.fromISO("PT24H")).toISO();
+  const pickupAt = now().plus(Duration.fromISO("PT24H")).toISO();
 
   return render(
     <Title
@@ -21,40 +22,52 @@ function makeTitle(orderDeadlineAt) {
 }
 
 test("After deadline: ordering close", () => {
-  const orderDeadlineAt = DateTime.now()
-    .plus(Duration.fromISO("PT12H"))
-    .toISO();
+  const orderDeadlineAt = now().plus(Duration.fromISO("PT12H")).toISO();
   const { container } = makeTitle(orderDeadlineAt);
   const deadlineEl = container.querySelector("#deadline");
   expect(deadlineEl).toBeTruthy();
 });
 
 test("Before deadline: small warning", () => {
-  const orderDeadlineAt = DateTime.now()
-    .minus(Duration.fromISO("PT12H"))
-    .toISO();
+  const orderDeadlineAt = now().minus(Duration.fromISO("PT12H")).toISO();
   const { container } = makeTitle(orderDeadlineAt);
   const warningEl = container.querySelector("#past-deadline");
   expect(warningEl).toBeTruthy();
 });
 
+test("Same deadline flips from open to closed as the clock passes it", () => {
+  const orderDeadlineAt = "2026-01-06T21:00:00-05:00";
+
+  withNow("2026-01-06T20:59:00-05:00", () => {
+    const { container, unmount } = makeTitle(orderDeadlineAt);
+    expect(container.querySelector("#past-deadline")).toBeNull();
+    expect(container.querySelector("#deadline")).toBeTruthy();
+    unmount();
+  });
+
+  withNow("2026-01-06T21:01:00-05:00", () => {
+    const { container } = makeTitle(orderDeadlineAt);
+    expect(container.querySelector("#past-deadline")).toBeTruthy();
+  });
+});
+
 test("Multiple pickup days: schedule wraps for mobile", () => {
-  const now = DateTime.now();
+  const current = now();
   const pickupDays = [
     {
       id: 1,
-      pickupAt: now.plus({ days: 1 }).toISO(),
-      orderDeadlineAt: now.plus({ hours: 12 }).toISO(),
+      pickupAt: current.plus({ days: 1 }).toISO(),
+      orderDeadlineAt: current.plus({ hours: 12 }).toISO(),
     },
     {
       id: 2,
-      pickupAt: now.plus({ days: 3 }).toISO(),
-      orderDeadlineAt: now.plus({ days: 2 }).toISO(),
+      pickupAt: current.plus({ days: 3 }).toISO(),
+      orderDeadlineAt: current.plus({ days: 2 }).toISO(),
     },
     {
       id: 3,
-      pickupAt: now.plus({ days: 5 }).toISO(),
-      orderDeadlineAt: now.plus({ days: 4 }).toISO(),
+      pickupAt: current.plus({ days: 5 }).toISO(),
+      orderDeadlineAt: current.plus({ days: 4 }).toISO(),
     },
   ];
 
