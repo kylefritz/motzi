@@ -1,0 +1,152 @@
+# LLM-judged suites: monthly on the 1st, or on demand. Never per PR (cost).
+#
+# - visual: Playwright email screenshots judged by Claude Haiku. Runs here
+#   against a throwaway dev database loaded from the committed test fixtures,
+#   so no production or member data is involved.
+# - reminder: `rake ai:eval` replays real production data (bin/seed_local,
+#   which includes member PII), so it must stay local. On the monthly schedule
+#   this opens (or comments on) a "Monthly LLM eval run" issue with the
+#   commands to run.
+#
+# Required repo secret: ANTHROPIC_API_KEY (visual job only).
+name: LLM evals
+
+on:
+  schedule:
+    - cron: "0 14 1 * *" # 1st of the month, 14:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: llm-evals
+  cancel-in-progress: false
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:18
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    env:
+      RAILS_ENV: development
+      DATABASE_URL: postgres://postgres@localhost/motzi_visual
+      PGHOST: localhost
+      PGUSER: postgres
+      DISABLE_SPRING: "1"
+      RUBYOPT: "-W:no-deprecated -W:no-experimental"
+
+    steps:
+      - name: Require ANTHROPIC_API_KEY
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Add the ANTHROPIC_API_KEY repository secret to run the visual email checks."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v5
+
+      - name: Install PostgreSQL client and libvips
+        run: sudo apt-get -yqq install libpq-dev libvips-dev
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.10
+          bundler-cache: true
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install JS dependencies
+        run: bun install --frozen-lockfile
+
+      # Synthetic data only: the committed test fixtures are enough for every
+      # mailer preview (an order, a credit item, a user, a menu, an analysis).
+      - name: Load fixture data into a throwaway dev database
+        run: |
+          bin/rails db:create db:schema:load
+          bin/rails db:fixtures:load
+          bin/rails runner 'Setting.menu_id = Menu.order(:week_id).last.id'
+
+      - name: Start Rails
+        run: |
+          bin/rails server -p 3000 > rails-server.log 2>&1 &
+          for _ in $(seq 1 60); do
+            curl -sf http://localhost:3000/up > /dev/null && exit 0
+            sleep 2
+          done
+          echo "::error::Rails did not start"
+          cat rails-server.log
+          exit 1
+
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Visual email checks
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: bunx playwright test
+
+      - name: Upload screenshots and server log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-email-screenshots
+          path: |
+            test/visual/screenshots/
+            rails-server.log
+          if-no-files-found: ignore
+
+  reminder:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Open or comment on the monthly eval issue
+        run: |
+          title="Monthly LLM eval run"
+          cat > body.md <<EOF
+          Time for the monthly anomaly report eval. It replays real production data, so it runs **locally only** (never in CI).
+
+          \`\`\`
+          bin/seed_local                # pull prod data into the local dev DB
+          bin/rails ai:eval             # ~\$2.50, ~5 min; exits non-zero on regressions vs test/anomaly_eval_baseline.yml
+          bin/rails ai:eval_report      # failure details, if any
+          \`\`\`
+
+          If the eval shows intended changes (or there is no baseline yet), accept the scorecard and commit it:
+
+          \`\`\`
+          bin/rails ai:eval_baseline
+          git add test/anomaly_eval_baseline.yml
+          \`\`\`
+
+          This month's visual email checks ran in CI: ${RUN_URL}
+
+          Close this issue once the eval has been run.
+          EOF
+
+          existing=$(gh issue list --state open --search "\"$title\" in:title" --json number,title \
+            --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file body.md
+          else
+            gh issue create --title "$title" --body-file body.md
+          fi

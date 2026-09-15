@@ -24,13 +24,15 @@ There are three test suites. The first two run in CI; the third is manual.
 |-------|---------|---------------|-------|-----|
 | **Rails** | `bundle exec rails test` | Models, controllers, mailers, jobs, SQL queries | ~35s | Yes |
 | **JS** | `bun test` | React components (menu, cart, builder, credits) via jsdom | ~3s | Yes |
-| **Visual** | `bunx playwright test` | Email template screenshots — mobile (iPhone 14) & desktop | ~20s | No — manual only |
+| **Visual** | `bunx playwright test` | Email template screenshots — mobile (iPhone 14) & desktop | ~20s | Monthly + on demand (`LLM evals` workflow), never per PR |
 
 **Local CI**: `bin/ci` (Rails 8.1 local CI, steps in `config/ci.rb`) runs rubocop, bundler-audit, brakeman, the Rails and JS suites, and the typecheck in one go.
 
 ### Visual tests
 
-Playwright screenshots all 6 email templates at mobile and desktop viewports, then sends each screenshot to Claude Haiku for visual QA (checks for overlapping text, broken layout, clipped content). Not in CI because they require a running Rails server with dev data and an `ANTHROPIC_API_KEY`.
+Playwright screenshots all 6 email templates at mobile and desktop viewports, then sends each screenshot to Claude Haiku for visual QA (checks for overlapping text, broken layout, clipped content). Each run is 12 Haiku calls, so it never runs per PR.
+
+**Cadence:** the `LLM evals` workflow (`.github/workflows/llm-evals.yml`) runs it on the 1st of each month and on demand (Actions → LLM evals → Run workflow, or `gh workflow run llm-evals.yml`). CI loads the committed test fixtures into a throwaway dev database, so no production data is involved; the mailer previews only need one order, credit item, user, menu and analysis. CI retries a failed test once (a fresh Haiku judgment). Needs the `ANTHROPIC_API_KEY` repo secret.
 
 ```
 bunx playwright test                              # run all (12 tests: 6 emails × 2 viewports)
@@ -38,9 +40,9 @@ bunx playwright test --project mobile             # mobile only
 bunx playwright test --grep "havent_ordered"       # single email
 ```
 
-**When to run:** after changing email templates (`.mjml`), shared mailer partials (`app/views/shared_mailer/`), or the `_head.html.erb` styles.
+**When to run locally:** after changing email templates (`.mjml`), shared mailer partials (`app/views/shared_mailer/`), or the `_head.html.erb` styles.
 
-**Requirements:** Rails on localhost:3000, `ANTHROPIC_API_KEY` in `.env`, Chromium (`bunx playwright install chromium`).
+**Requirements:** Rails on localhost:3000 (`PLAYWRIGHT_BASE_URL` to override), `ANTHROPIC_API_KEY` in `.env`, Chromium (`bunx playwright install chromium`).
 
 **Files:**
 - `playwright.config.ts` — project config (mobile/desktop viewports)
@@ -57,7 +59,14 @@ rake ai:eval                # all labeled weeks (~$2.50, ~5 min at EVAL_THREADS=
 rake "ai:eval[26w14]"       # one week
 rake ai:eval_report         # re-print last scorecard + failure details
 rake "ai:eval_dry[26w14]"   # show prompt without calling Claude
+rake ai:eval_baseline       # accept the latest scorecard as the baseline (no API calls; FILE=... to pick one)
 ```
+
+**Regression gate:** `test/anomaly_eval_baseline.yml` records the last accepted outcome per week: whether the status matched, plus caught/missed for each `must_flag` and clean/violated for each `must_not_flag`. After scoring, `rake ai:eval` prints regressed, improved, flaky and unchanged weeks, and **exits non-zero if anything that was good in the baseline went bad**. Comparison is per item, so a week with a known miss still fails if a different item regresses. Improvements, new weeks and new labels never fail the run.
+- *Noise policy:* status regressions fail immediately. The status is parsed deterministically from the report. Findings verdicts come from the Haiku judge, which can flip on identical text, so a week whose only regressions are findings gets its saved report re-judged once (the agent is not re-run). It fails only if the regression survives; otherwise it's reported as FLAKY. Logic and tests: `AnomalyEvalBaseline`, `test/services/anomaly_eval_baseline_test.rb`.
+- *Accepting changes:* when a regression is intended (e.g. a label or prompt change), or to seed the baseline the first time, run `rake ai:eval_baseline` and commit the YAML. A single-week run only refreshes that week. Errored weeks are never written.
+
+**Cadence: monthly or on demand, local only.** The eval replays real production data (`bin/seed_local`, which includes member PII), so it must never run in GitHub Actions or any other third-party runner, and CI gets no Heroku credentials. On the 1st of each month the `LLM evals` workflow opens (or comments on) a "Monthly LLM eval run" issue with the commands.
 
 **Ground truth:** `test/anomaly_expectations.yml` — per week: `expected_status`, `must_flag` (real incidents the report must catch), `must_not_flag` (noise it must not raise as findings). Labels are derived from real history: stored nightly analyses, operator replies, error_events, rapid-duplicate email checks, and incident-fix commits. Update labels when a new real incident happens or a new noise pattern is identified.
 

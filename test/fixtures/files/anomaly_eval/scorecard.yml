@@ -1,0 +1,92 @@
+# Fixture scorecard for AnomalyEvalBaselineTest, in the shape `rake ai:eval`
+# writes to tmp/ai_eval/eval_*.yml (symbol keys).
+#
+# Against baseline.yml:
+#   26w01 unchanged
+#   26w02 regressed — status dropped to healthy (deterministic)
+#   26w03 improved  — status now correct, zero-items finding now caught
+#   26w04 regressed — judge says the R14 noise is now raised (findings only)
+#   26w05 regressed — agent run errored
+#   26w06 not run
+#   26w07 new       — not in baseline
+---
+- :week_id: 26w01
+  :expected: healthy
+  :actual: healthy
+  :status_ok: true
+  :misses: []
+  :violations: []
+  :must_flag_detail: []
+  :must_not_flag_detail:
+  - :item: near-zero orders during announced holiday closure
+    :violated: false
+    :evidence: ''
+  :passed: true
+  :cost: 0.08
+- :week_id: 26w02
+  :expected: warning
+  :actual: healthy
+  :status_ok: false
+  :misses: []
+  :violations: []
+  :must_flag_detail:
+  - :item: duplicate day-of reminder emails
+    :found: true
+    :evidence: two day-of reminders
+  :must_not_flag_detail: []
+  :passed: false
+  :cost: 0.08
+- :week_id: 26w03
+  :expected: problem
+  :actual: problem
+  :status_ok: true
+  :misses: []
+  :violations: []
+  :must_flag_detail:
+  - :item: orders created with zero items
+    :found: true
+    :evidence: 16 orders with no items
+  - :item: checkout errors in error_events
+    :found: true
+    :evidence: checkout errors
+  :must_not_flag_detail: []
+  :passed: true
+  :cost: 0.08
+- :week_id: 26w04
+  :expected: warning
+  :actual: warning
+  :status_ok: true
+  :misses: []
+  :violations:
+  - R14 memory warnings on worker
+  :must_flag_detail:
+  - :item: rapid duplicate order confirmations
+    :found: true
+    :evidence: 3 confirmations in 0.2s
+  :must_not_flag_detail:
+  - :item: R14 memory warnings on worker
+    :violated: true
+    :evidence: R14 memory events (warning)
+  :passed: false
+  :cost: 0.08
+  :full_result: "Status: Warning\nDuplicate confirmations."
+- :week_id: 26w05
+  :expected: healthy
+  :actual: ERROR
+  :status_ok: false
+  :misses: []
+  :violations: []
+  :must_flag_detail: []
+  :must_not_flag_detail: []
+  :passed: false
+  :cost: 0.0
+- :week_id: 26w07
+  :expected: healthy
+  :actual: healthy
+  :status_ok: true
+  :misses: []
+  :violations: []
+  :must_flag_detail: []
+  :must_not_flag_detail: []
+  :passed: true
+  :cost: 0.08
