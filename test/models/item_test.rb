@@ -7,6 +7,11 @@ class ItemTest < ActiveSupport::TestCase
     refute items(:rye).pay_it_forward?
   end
 
+  test "default name ordering survives joins to tables that also have a name column" do
+    assert_nothing_raised { Item.left_joins(:image_attachment).to_a }
+    assert_nothing_raised { Item.joins(:menus).to_a }
+  end
+
   test "Item.pay_it_forward" do
     assert_equal items(:pay_it_forward), Item.pay_it_forward
   end

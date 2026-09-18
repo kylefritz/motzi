@@ -33,6 +33,16 @@ class Admin::ActivityFeedControllerTest < ActionDispatch::IntegrationTest
     assert_match admin_uptime_checks_path, @response.body
   end
 
+  test "get index renders the dyno memory panel when metrics exist" do
+    DynoMetric.create!(dyno: "web.1", memory_total: 410, memory_quota: 512, memory_swap: 3, r14_count: 2, recorded_at: Time.current)
+
+    get "/admin/activity_feed"
+
+    assert_response :success
+    assert_select "td", text: "web.1"
+    assert_select "td", text: "410MB"
+  end
+
   test "get prompt_preview" do
     get "/admin/activity_feed/prompt_preview?week_id=26w01"
     assert_response :success

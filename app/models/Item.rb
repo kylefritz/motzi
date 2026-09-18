@@ -6,7 +6,7 @@ class Item < ApplicationRecord
   has_many :order_items, dependent: :restrict_with_error
   has_paper_trail
   has_one_attached :image
-  default_scope { order("LOWER(name)") }
+  default_scope { order(Arel.sql("LOWER(items.name)")) }
 
   scope :active, -> { where(archived_at: nil) }
   scope :archived, -> { where.not(archived_at: nil) }
