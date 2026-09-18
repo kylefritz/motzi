@@ -534,26 +534,26 @@ ActiveAdmin.register_page "Activity Feed" do
     memory_summary = DynoMetric.summary_for_period(week_start, week_start + 7.days)
     panel "Dyno Memory" do
       if memory_summary.any?
-        table_for memory_summary.sort_by { |d, _| d }.map { |dyno, stats| OpenStruct.new(stats.merge(dyno: dyno)) } do
-          column("Dyno") { |s| s.dyno }
-          column("Avg") { |s| "#{s.avg_memory_total}MB" }
-          column("Max") { |s| "#{s.max_memory_total}MB" }
-          column("Quota") { |s| s.memory_quota ? "#{s.memory_quota}MB" : "—" }
+        table_for memory_summary.sort_by { |d, _| d }.map { |dyno, stats| stats.merge(dyno: dyno) } do
+          column("Dyno") { |s| s[:dyno] }
+          column("Avg") { |s| "#{s[:avg_memory_total]}MB" }
+          column("Max") { |s| "#{s[:max_memory_total]}MB" }
+          column("Quota") { |s| s[:memory_quota] ? "#{s[:memory_quota]}MB" : "—" }
           column("Usage") { |s|
-            next "—" unless s.memory_quota&.positive?
-            pct = (s.max_memory_total.to_f / s.memory_quota * 100).round
+            next "—" unless s[:memory_quota]&.positive?
+            pct = (s[:max_memory_total].to_f / s[:memory_quota] * 100).round
             color = pct >= 90 ? "red" : pct >= 70 ? "orange" : "green"
             span "#{pct}%", style: "color: #{color}; font-weight: bold"
           }
-          column("Swap") { |s| s.max_memory_swap ? "#{s.max_memory_swap}MB" : "—" }
+          column("Swap") { |s| s[:max_memory_swap] ? "#{s[:max_memory_swap]}MB" : "—" }
           column("R14") { |s|
-            if s.total_r14 > 0
-              span s.total_r14, style: "color: red; font-weight: bold"
+            if s[:total_r14] > 0
+              span s[:total_r14], style: "color: red; font-weight: bold"
             else
               "0"
             end
           }
-          column("Samples") { |s| s.sample_count }
+          column("Samples") { |s| s[:sample_count] }
         end
         if memory_summary.values.any? { |s| s[:errors].any? }
           div class: "dyno-errors" do
