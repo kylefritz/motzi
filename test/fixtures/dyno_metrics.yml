@@ -1,0 +1,48 @@
+# Shapes and magnitudes from production (week of 2026-09-13): web.1 sits
+# near quota, worker.1 runs ~2x quota in swap with steady R14s, and logplex
+# rows carry only error lines. Timestamps land in the current week.
+web_morning:
+  dyno: web.1
+  memory_total: 371
+  memory_rss: 362
+  memory_swap: 9
+  memory_quota: 512
+  r14_count: 0
+  recorded_at: <%= this_week(6.hours) %>
+
+web_evening:
+  dyno: web.1
+  memory_total: 464
+  memory_rss: 383
+  memory_swap: 81
+  memory_quota: 512
+  r14_count: 0
+  recorded_at: <%= this_week(1.hour) %>
+  errors_summary: |
+    2026-09-13T02:26:50.006807+00:00 app[web.1]: [151e278c-0000-0000-0000-000000000001] ActionController::RoutingError (No route matches [POST] "/"):
+    2026-09-13T03:01:13.453561+00:00 app[web.1]: [afa7a4b8-0000-0000-0000-000000000002] ActionController::RoutingError (No route matches [GET] "/.well-known/assetlinks.json"):
+
+worker_morning:
+  dyno: worker.1
+  memory_total: 812
+  memory_rss: 488
+  memory_swap: 324
+  memory_quota: 512
+  r14_count: 48
+  recorded_at: <%= this_week(6.hours) %>
+
+worker_evening:
+  dyno: worker.1
+  memory_total: 1034
+  memory_rss: 489
+  memory_swap: 545
+  memory_quota: 512
+  r14_count: 66
+  recorded_at: <%= this_week(1.hour) %>
+
+logplex:
+  dyno: logplex
+  r14_count: 0
+  recorded_at: <%= this_week(2.hours) %>
+  errors_summary: |
+    2026-09-13T04:10:00.000000+00:00 heroku[logplex]: Error L10 (output buffer overflow): 3 messages dropped since 2026-09-13T04:09:00+00:00.

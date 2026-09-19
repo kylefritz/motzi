@@ -16,6 +16,7 @@ require "rails/test_help"
 require_relative "support/vcr_setup"
 require_relative "support/stripe_stubs"
 require_relative "support/test_db_lock"
+require_relative "support/fixture_helpers"
 
 # Held until the process (and its forked workers) exit.
 TEST_DB_LOCK = TestDbLock.acquire!(ActiveRecord::Base.connection_db_config.database)

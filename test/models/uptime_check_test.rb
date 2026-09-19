@@ -1,6 +1,9 @@
 require "test_helper"
 
 class UptimeCheckTest < ActiveSupport::TestCase
+  # These check aggregation math on known rows; start without the fixtures.
+  setup { UptimeCheck.delete_all }
+
   def probe_result(status: 200, latency_ms: 120, error: nil, checked_at: Time.current)
     { url: "https://probe.test/menu.json", status: status, latency_ms: latency_ms, error: error, checked_at: checked_at }
   end

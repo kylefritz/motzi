@@ -33,14 +33,15 @@ class Admin::ActivityFeedControllerTest < ActionDispatch::IntegrationTest
     assert_match admin_uptime_checks_path, @response.body
   end
 
-  test "get index renders the dyno memory panel when metrics exist" do
-    DynoMetric.create!(dyno: "web.1", memory_total: 410, memory_quota: 512, memory_swap: 3, r14_count: 2, recorded_at: Time.current)
-
+  # Regression for error_events #2312 (OpenStruct NameError in this panel).
+  test "get index renders the dyno memory panel from the fixture metrics" do
     get "/admin/activity_feed"
 
     assert_response :success
-    assert_select "td", text: "web.1"
-    assert_select "td", text: "410MB"
+    assert_select "td", text: "worker.1"
+    assert_select "td", text: "1034MB" # worker.1 max
+    assert_select "td", text: "114" # worker.1 R14s across two samples
+    assert_select ".dyno-errors li", minimum: 1
   end
 
   test "get prompt_preview" do

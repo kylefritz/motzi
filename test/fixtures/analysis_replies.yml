@@ -1,0 +1,17 @@
+# Operator replies to the nightly report, one by email and one from the admin
+# form. Production replies are short acknowledgements like these.
+email_ack:
+  anomaly_analysis: week1_analysis
+  source: email
+  author_email: <%= User::KYLE_EMAIL %>
+  author_name: Kyle
+  message_id: <reply-fixture-1@mail.example.com>
+  body: The worker memory is expected; it runs in swap. Don't flag R14s.
+  user: kyle
+
+admin_ack:
+  anomaly_analysis: week1_analysis
+  source: admin
+  author_email: <%= User::KYLE_EMAIL %>
+  body: Fixed the ambiguous name ordering in #395.
+  user: kyle
