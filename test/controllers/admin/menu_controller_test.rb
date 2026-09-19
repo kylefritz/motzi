@@ -63,6 +63,16 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_match "create a new menu", response.body
   end
 
+  # Regression for error_events #2048, #2214: moving an editable menu onto a
+  # week that already has one raised PG::UniqueViolation (a 500).
+  test "update onto a week already taken re-renders the form instead of erroring" do
+    menu = Menu.create!(name: "Unsent Menu", week_id: "99w02", menu_type: "regular")
+    patch "/admin/menus/#{menu.id}", params: { menu: { week_id: menus(:week1).week_id } }
+    assert_response :success
+    assert_match "has already been taken", response.body
+    assert_equal "99w02", menu.reload.week_id
+  end
+
   test "update refuses to move a menu with orders to another week" do
     menu = menus(:week1)
     patch "/admin/menus/#{menu.id}", params: { menu: { week_id: "19w09" } }
