@@ -1,0 +1,45 @@
+{
+  "meta": { "root": "/home/runner/work/motzi/motzi", "branch_coverage": true },
+  "total": {
+    "lines": { "covered": 85, "total": 120, "percent": 70.83333333333333 },
+    "branches": { "covered": 31, "total": 44, "percent": 70.45454545454545 }
+  },
+  "coverage": {
+    "app/models/order.rb": {
+      "lines_covered_percent": 80.0, "covered_lines": 8, "total_lines": 10,
+      "branches_covered_percent": 80.0, "covered_branches": 4, "total_branches": 5
+    },
+    "app/models/menu.rb": {
+      "lines_covered_percent": 70.0, "covered_lines": 7, "total_lines": 10,
+      "branches_covered_percent": 50.0, "covered_branches": 1, "total_branches": 2
+    },
+    "app/models/user.rb": {
+      "lines_covered_percent": 60.0, "covered_lines": 6, "total_lines": 10,
+      "branches_covered_percent": 100.0, "covered_branches": 0, "total_branches": 0
+    },
+    "app/models/untouched.rb": {
+      "lines_covered_percent": 10.0, "covered_lines": 1, "total_lines": 10,
+      "branches_covered_percent": 100.0, "covered_branches": 0, "total_branches": 0
+    },
+    "app/services/well_tested.rb": {
+      "lines_covered_percent": 75.0, "covered_lines": 3, "total_lines": 4,
+      "branches_covered_percent": 100.0, "covered_branches": 0, "total_branches": 0
+    },
+    "app/services/untested.rb": {
+      "lines_covered_percent": 25.0, "covered_lines": 1, "total_lines": 4,
+      "branches_covered_percent": 100.0, "covered_branches": 0, "total_branches": 0
+    },
+    "lib/half_tested.rb": {
+      "lines_covered_percent": 50.0, "covered_lines": 2, "total_lines": 4,
+      "branches_covered_percent": 100.0, "covered_branches": 0, "total_branches": 0
+    },
+    "/home/runner/work/motzi/motzi/lib/absolute_path.rb": {
+      "lines_covered_percent": 0.0, "covered_lines": 0, "total_lines": 3,
+      "branches_covered_percent": 100.0, "covered_branches": 0, "total_branches": 0
+    },
+    "app/models/only_constants.rb": {
+      "lines_covered_percent": 100.0, "covered_lines": 0, "total_lines": 0,
+      "branches_covered_percent": 100.0, "covered_branches": 0, "total_branches": 0
+    }
+  }
+}

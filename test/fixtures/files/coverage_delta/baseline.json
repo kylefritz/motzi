@@ -1,0 +1,25 @@
+{
+  "meta": { "root": "/home/runner/work/motzi/motzi", "branch_coverage": true },
+  "total": {
+    "lines": { "covered": 80, "total": 100, "percent": 80.0 },
+    "branches": { "covered": 30, "total": 40, "percent": 75.0 }
+  },
+  "coverage": {
+    "app/models/order.rb": {
+      "lines_covered_percent": 90.0, "covered_lines": 9, "total_lines": 10,
+      "branches_covered_percent": 80.0, "covered_branches": 4, "total_branches": 5
+    },
+    "app/models/menu.rb": {
+      "lines_covered_percent": 70.0, "covered_lines": 7, "total_lines": 10,
+      "branches_covered_percent": 100.0, "covered_branches": 2, "total_branches": 2
+    },
+    "app/models/user.rb": {
+      "lines_covered_percent": 50.0, "covered_lines": 5, "total_lines": 10,
+      "branches_covered_percent": 100.0, "covered_branches": 0, "total_branches": 0
+    },
+    "app/models/untouched.rb": {
+      "lines_covered_percent": 100.0, "covered_lines": 10, "total_lines": 10,
+      "branches_covered_percent": 100.0, "covered_branches": 0, "total_branches": 0
+    }
+  }
+}

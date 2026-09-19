@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+# Compare this run's SimpleCov coverage.json against master's and report the
+# PR's changed files whose line/branch coverage dropped, plus overall totals.
+#
+# Report-only, except: exits 1 when the PR adds an app/ or lib/ Ruby file with
+# < 50% line coverage. A missing baseline is never a failure.
+#
+#   bin/coverage_delta --baseline tmp/coverage-baseline/coverage.json [--base HEAD^1] [--head HEAD]
+#
+# In CI the checkout is the PR's merge commit, so HEAD^1 is master and
+# `git diff HEAD^1 HEAD` is exactly the PR's changes. Markdown goes to stdout
+# and, when set, $GITHUB_STEP_SUMMARY.
+require "optparse"
+require_relative "../lib/coverage_delta"
+
+opts = { current: "coverage/coverage.json", base: "HEAD^1", head: "HEAD" }
+OptionParser.new do |o|
+  o.on("--baseline PATH", "master's coverage.json") { |v| opts[:baseline] = v }
+  o.on("--current PATH", "this run's coverage.json (default coverage/coverage.json)") { |v| opts[:current] = v }
+  o.on("--base REF", "git ref to diff from (default HEAD^1)") { |v| opts[:base] = v }
+  o.on("--head REF", "git ref to diff to (default HEAD)") { |v| opts[:head] = v }
+end.parse!
+
+def publish(markdown)
+  puts markdown
+  summary = ENV["GITHUB_STEP_SUMMARY"]
+  File.write(summary, markdown, mode: "a") if summary && !summary.empty?
+end
+
+unless File.exist?(opts[:current])
+  publish("## Coverage delta\n\n_No coverage report at #{opts[:current]}; run the suite with COVERAGE=1._\n")
+  exit 0
+end
+
+baseline = if opts[:baseline] && File.exist?(opts[:baseline])
+  CoverageDelta.load(opts[:baseline])
+else
+  warn "coverage_delta: no baseline coverage found#{" at #{opts[:baseline]}" if opts[:baseline]}; reporting this run only."
+  nil
+end
+
+name_status = IO.popen([ "git", "diff", "--name-status", "--find-renames", opts[:base], opts[:head] ], &:read)
+abort "coverage_delta: git diff #{opts[:base]} #{opts[:head]} failed" unless $?.success?
+
+delta = CoverageDelta.new(
+  baseline: baseline,
+  current: CoverageDelta.load(opts[:current]),
+  changes: CoverageDelta.parse_name_status(name_status)
+)
+publish(delta.to_markdown)
+
+if delta.passed?
+  exit 0
+else
+  warn "coverage_delta: new files below #{CoverageDelta::NEW_FILE_MIN_LINE_PERCENT.round}% line coverage:"
+  delta.failures.each do |f|
+    message = "#{format("%.1f%%", f.line_percent)} line coverage (#{f.covered}/#{f.total}); new app/lib files need #{CoverageDelta::NEW_FILE_MIN_LINE_PERCENT.round}%"
+    warn "  #{f.path}: #{message}"
+    puts "::error file=#{f.path}::#{message}" if ENV["GITHUB_ACTIONS"]
+  end
+  exit 1
+end
