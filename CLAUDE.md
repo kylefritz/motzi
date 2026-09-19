@@ -181,7 +181,7 @@ Feature work uses git worktrees in `.worktrees/` (or `.claude/worktrees/`). When
 
 - **Symlink `.env`**: `ln -s ../../.env .env` in `.worktrees/<name>`, `ln -s ../../../.env .env` in `.claude/worktrees/<name>` (worktrees don't get untracked files)
 - **Bundler lockfile**: use `BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update` so bundler writes to the worktree, not the main repo
-- **Tests**: automatic. In a worktree, `bin/rails`/`bin/rake` disable Spring and the test DB defaults to `motzi_test_<worktree dir>` (`lib/worktree_env.rb`; `TEST_DATABASE` still overrides). Run `bin/rails db:test:prepare` once, then `bin/rails test`.
+- **Tests**: automatic. In a worktree, `bin/rails`/`bin/rake` disable Spring and the test DB defaults to `motzi_test_<worktree dir>` (`lib/worktree_env.rb`; `TEST_DATABASE` still overrides). Run `bin/rails db:test:prepare` once, then `bin/rails test`. Concurrent runs on the same test DB wait for each other (`test/support/test_db_lock.rb`) and print "Another test run is using …"; that's expected, not a hang.
 
 ## Session Start
 
@@ -203,4 +203,4 @@ We track work in GitHub Issues (`gh issue list`). Use GH issues for feature spec
 
 ## After push
 
-- Check GitHub Actions status in the background after pushing: `gh run list --branch $(git branch --show-current) --limit 5 --json databaseId,status --jq '.[] | select(.status != "completed") | .databaseId' | xargs -I{} gh run watch {} --exit-status`. If anything fails, investigate and fix.
+- Check CI in the background after pushing: `gh pr checks --watch --fail-fast` (on a PR branch; exits non-zero if any check fails). Don't pipe it through `tail`/`head`, which replaces its exit status, and don't filter runs by `status != "completed"`, which silently skips a run that already failed. If anything fails, investigate and fix.

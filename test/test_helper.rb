@@ -15,6 +15,10 @@ require_relative "../config/environment"
 require "rails/test_help"
 require_relative "support/vcr_setup"
 require_relative "support/stripe_stubs"
+require_relative "support/test_db_lock"
+
+# Held until the process (and its forked workers) exit.
+TEST_DB_LOCK = TestDbLock.acquire!(ActiveRecord::Base.connection_db_config.database)
 
 # json-schema still defaults to MultiJson and warns about it; use the stdlib JSON directly.
 JSON::Validator.use_multi_json = false
