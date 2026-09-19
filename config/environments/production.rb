@@ -32,8 +32,8 @@ Rails.application.configure do
   config.assets.compile = false
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
-  # Use HEROKU_APP_NAME (from runtime-dyno-metadata) so review apps get their own domain.
-  app_domain = ENV["HEROKU_APP_NAME"] ? "#{ENV['HEROKU_APP_NAME']}.herokuapp.com" : ShopConfig.shop.app_domain
+  # CANONICAL_HOST > HEROKU_APP_NAME (review apps) > shop.yml; see ShopConfig.app_domain.
+  app_domain = ShopConfig.app_domain
   config.asset_host = "https://#{app_domain}"
 
   # Specifies the header that your server uses for sending files.

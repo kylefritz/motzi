@@ -9,8 +9,10 @@ class UptimeProbe
     return ENV["UPTIME_PROBE_URL"] if ENV["UPTIME_PROBE_URL"].present?
     return nil unless Rails.env.production?
 
-    domain = ENV["HEROKU_APP_NAME"] ? "#{ENV['HEROKU_APP_NAME']}.herokuapp.com" : ShopConfig.shop.app_domain
-    "https://#{domain}"
+    # Probe the host members actually hit: after the DNS cutover (CANONICAL_HOST)
+    # the herokuapp.com host only 301s, so probing it would skip DNS/Cloudflare
+    # and record /menu.json as a redirect instead of a real check.
+    "https://#{ShopConfig.app_domain}"
   end
 
   def self.check(target = url)
