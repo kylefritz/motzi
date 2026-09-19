@@ -11,7 +11,7 @@ class Rack::Attack
     | /\.env
     | /\.git
     | /xmlrpc
-    | /sitemap\.(xml|txt)
+    | /sitemap\.txt                            # we only serve /sitemap.xml
   }x
 
   blocklist("scanner paths") do |req|

@@ -24,7 +24,6 @@ class RackAttackTest < ActionDispatch::IntegrationTest
     "/.env",
     "/.git/config",
     "/xmlrpc.php",
-    "/sitemap.xml",
     "/sitemap.txt",
     "/config.zip",
     "/wp-backup.zip",
@@ -48,6 +47,11 @@ class RackAttackTest < ActionDispatch::IntegrationTest
     get "/"
     assert_not_equal 404, response.status, "root should not be blocked"
     refute_equal "Not Found", response.body
+  end
+
+  test "does not block the sitemap" do
+    get "/sitemap.xml"
+    assert_response :success
   end
 
   test "throttles excessive POST /contact submissions per IP" do
