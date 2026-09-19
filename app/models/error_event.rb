@@ -249,6 +249,11 @@ class ErrorEvent < ApplicationRecord
     lines << "```json"
     lines << context_json
     lines << "```"
+    lines << ""
+    lines << "### Regression test"
+    lines << "Before fixing, write a Minitest that reproduces this error and fails. " \
+             "Cite it in a comment or the test name as `error_events ##{id}` so " \
+             "`rake error_events:untested` can tell it's covered."
     lines.join("\n")
   end
 end

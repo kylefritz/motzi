@@ -7,6 +7,7 @@ class ItemTest < ActiveSupport::TestCase
     refute items(:rye).pay_it_forward?
   end
 
+  # Regression for error_events #2218 (PG::AmbiguousColumn on LOWER(name)).
   test "default name ordering survives joins to tables that also have a name column" do
     assert_nothing_raised { Item.left_joins(:image_attachment).to_a }
     assert_nothing_raised { Item.joins(:menus).to_a }

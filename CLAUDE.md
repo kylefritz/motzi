@@ -151,6 +151,13 @@ To report a handled exception from a service or job, call
 `Rails.error.report(exception, handled: true, severity: :warning, context: {...})`.
 The subscriber will persist it (severity `:info` is skipped).
 
+**Regression tests for production errors:** before fixing an error event, write a
+failing test that reproduces it and cite the event in a comment or test name as
+`error_events #<id>` (several: `error_events #2048, #2214`). Resolve the event
+in admin only after that test lands. `heroku run rake error_events:untested --app motzibread`
+lists resolved errors from the last 90 days that no test cites (`RegressionTestIndex`;
+test files ship in the slug, so it reads the deployed release's tests).
+
 ## Uptime monitoring
 
 `UptimeCheckJob` (every 5 min via `config/recurring.yml`) probes `/menu.json` and

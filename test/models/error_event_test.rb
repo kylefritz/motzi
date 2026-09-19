@@ -106,6 +106,8 @@ class ErrorEventTest < ActiveSupport::TestCase
     assert_includes prompt, "### Request"
     assert_includes prompt, "### Context"
     assert_includes prompt, "abcdef123456" # release truncated
+    assert_includes prompt, "### Regression test"
+    assert_includes prompt, "`error_events ##{event.id}`"
   end
 
   test "resolve_group! marks all events with same fingerprint" do

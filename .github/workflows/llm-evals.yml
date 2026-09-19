@@ -138,9 +138,15 @@ jobs:
           git add test/anomaly_eval_baseline.yml
           \`\`\`
 
+          Also check that every production error resolved recently left a regression test behind:
+
+          \`\`\`
+          heroku run rake error_events:untested --app motzibread
+          \`\`\`
+
           This month's visual email checks ran in CI: ${RUN_URL}
 
-          Close this issue once the eval has been run.
+          Close this issue once the eval and the error check have been run.
           EOF
 
           existing=$(gh issue list --state open --search "\"$title\" in:title" --json number,title \
