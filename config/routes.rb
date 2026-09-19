@@ -9,6 +9,9 @@ Rails.application.routes.draw do
   get  "/contact",   to: "contact#show"
   post "/contact",   to: "contact#create"
 
+  get "/robots.txt",  to: "seo#robots",  format: false, defaults: { format: :text }
+  get "/sitemap.xml", to: "seo#sitemap", format: false, defaults: { format: :xml }
+
   # admin-only: leave marketing-site preview mode
   delete "/marketing_preview", to: "marketing_preview#destroy", as: :marketing_preview
 

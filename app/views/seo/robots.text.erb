@@ -1,0 +1,12 @@
+# Marketing pages are crawlable; member, ordering and admin areas are not.
+User-agent: *
+Disallow: /admin
+Disallow: /blazer
+Disallow: /jobs
+Disallow: /menu
+Disallow: /orders
+Disallow: /credit_items
+Disallow: /users
+Disallow: /health
+
+Sitemap: <%= marketing_url("/sitemap.xml") %>
