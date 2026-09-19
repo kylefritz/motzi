@@ -1,0 +1,85 @@
+# Modeled on real production events (Sept 2026), with request data replaced by
+# documentation-range IPs and no member details. Covers each source, open and
+# resolved groups, a repeated fingerprint, and a handled warning.
+open_struct_crash:
+  source: server
+  error_class: NameError
+  message: uninitialized constant OpenStruct
+  fingerprint: d897053095d5859a
+  http_method: GET
+  url: /admin/activity_feed
+  release: 1e5405b0e7b4aa94f7dec4646c99d28745fac8c6
+  environment: production
+  user: kyle
+  occurred_at: <%= this_week(2.hours) %>
+  context: {"handled": false, "severity": "error", "reporter_source": "application.action_dispatch"}
+  request_data: {"ip": "203.0.113.10", "params": {"controller": "admin/activity_feed", "action": "index"}, "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
+  backtrace: |
+    /app/app/admin/activity_feed.rb:537:in `block (4 levels) in <main>'
+    /app/app/admin/activity_feed.rb:537:in `map'
+    /app/app/admin/activity_feed.rb:535:in `block (2 levels) in <main>'
+
+open_struct_crash_repeat:
+  source: server
+  error_class: NameError
+  message: uninitialized constant OpenStruct
+  fingerprint: d897053095d5859a
+  http_method: GET
+  url: /admin/activity_feed
+  release: 1e5405b0e7b4aa94f7dec4646c99d28745fac8c6
+  environment: production
+  user: kyle
+  occurred_at: <%= this_week(1.hour) %>
+  context: {"handled": false, "severity": "error", "reporter_source": "application.action_dispatch"}
+  request_data: {"ip": "203.0.113.10", "params": {"controller": "admin/activity_feed", "action": "index"}, "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
+  backtrace: |
+    /app/app/admin/activity_feed.rb:537:in `block (4 levels) in <main>'
+
+ambiguous_column_resolved:
+  source: server
+  error_class: ActiveRecord::StatementInvalid
+  message: |
+    PG::AmbiguousColumn: ERROR:  column reference "name" is ambiguous
+    LINE 1: ...hments"."record_id" = "items"."id" ORDER BY LOWER(name), "it...
+  fingerprint: c8e78c40982e13b7
+  release: e68a62067bb0bc3bcfb2f4e3448056f1989cbf0e
+  environment: production
+  occurred_at: <%= this_week(1.day) %>
+  resolved_at: <%= this_week(30.minutes) %>
+  context: {"handled": false, "severity": "error", "reporter_source": "application.runner.railties"}
+  backtrace: |
+    /app/vendor/bundle/ruby/3.3.0/gems/activerecord-8.1.3.1/lib/active_record/connection_adapters/postgresql/database_statements.rb:169:in `exec_params'
+
+pruned_job:
+  source: job
+  error_class: SolidQueue::Processes::ProcessPrunedError
+  message: "Process was found dead and pruned (last heartbeat at: 2026-09-16 21:20:39 -0400)"
+  fingerprint: 5b0e5f1c2d3a4e6f
+  environment: production
+  occurred_at: <%= this_week(20.hours) %>
+  context: {"handled": false, "severity": "error", "job_class": "AnalyzeAnomaliesJob", "queue": "default"}
+
+browser_script_error:
+  source: browser
+  error_class: Error
+  message: Script error.
+  fingerprint: 9e266d68e5f6dda1
+  url: /menu
+  environment: production
+  occurred_at: <%= this_week(3.hours) %>
+  context: {"kind": "window.onerror", "colno": 0, "lineno": 0, "filename": ""}
+  request_data: {"ip": "198.51.100.23", "referer": "https://motzibread.herokuapp.com/menu", "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X)", "params": {}}
+
+browser_order_rejected:
+  source: browser
+  error_class: Error
+  message: Request failed with status code 422
+  fingerprint: 602704fd9e1fcb79
+  url: /menu
+  environment: production
+  occurred_at: <%= this_week(4.hours) %>
+  context: {"kind": "create_order", "online": true, "status": 422, "message": "Invalid account.", "severity": "warning"}
+  request_data: {"ip": "198.51.100.40", "referer": "https://motzibread.herokuapp.com/menu", "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", "params": {}}
+  backtrace: |
+    createError@https://motzibread.herokuapp.com/assets/menu.js:2231:30
+    settle@https://motzibread.herokuapp.com/assets/menu.js:2247:29

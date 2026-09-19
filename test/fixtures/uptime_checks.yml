@@ -1,0 +1,35 @@
+# Production mix: the admin probe answers 302 in ~15ms, the menu probe 200 in
+# ~100ms with occasional >1s spikes. One failed menu check so the "down"
+# branches render too.
+menu_up:
+  target: menu
+  url: https://motzibread.herokuapp.com/menu.json
+  status: 200
+  latency_ms: 102
+  up: true
+  checked_at: <%= this_week(15.minutes) %>
+
+menu_slow:
+  target: menu
+  url: https://motzibread.herokuapp.com/menu.json
+  status: 200
+  latency_ms: 1277
+  up: true
+  checked_at: <%= this_week(3.hours) %>
+
+menu_down:
+  target: menu
+  url: https://motzibread.herokuapp.com/menu.json
+  status: 503
+  latency_ms: 30004
+  up: false
+  error: "Net::ReadTimeout with #<TCPSocket:(closed)>"
+  checked_at: <%= this_week(5.hours) %>
+
+admin_up:
+  target: admin
+  url: https://motzibread.herokuapp.com/admin
+  status: 302
+  latency_ms: 15
+  up: true
+  checked_at: <%= this_week(20.minutes) %>

@@ -1,0 +1,27 @@
+# Production comments are mostly job logs written onto menus by the system
+# user (see ApplicationJob#add_comment!), plus admin publish notices.
+_fixture:
+  model_class: ActiveAdmin::Comment
+
+weekly_menu_job:
+  namespace: admin
+  resource: week1 (Menu)
+  author_type: User
+  author_id: <%= User::SYSTEM_ID %>
+  body: "SendWeeklyMenuJob: Completed queueing 549 emails for menu <%= ActiveRecord::FixtureSet.identify(:week1) %>"
+  created_at: <%= this_week(3.days) %>
+
+day_of_reminder_job:
+  namespace: admin
+  resource: week1 (Menu)
+  author_type: User
+  author_id: <%= User::SYSTEM_ID %>
+  body: "Day Of reminder job: sent num_reminded=17"
+  created_at: <%= this_week(1.day) %>
+
+menu_published:
+  namespace: admin
+  resource: week1 (Menu)
+  author: kyle (User)
+  body: "Menu 'week1' was emailed to 549 subscribers"
+  created_at: <%= this_week(3.days) %>

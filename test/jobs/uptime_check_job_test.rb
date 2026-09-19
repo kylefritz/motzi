@@ -6,6 +6,8 @@ class UptimeCheckJobTest < ActiveJob::TestCase
   setup do
     @original = ENV["UPTIME_PROBE_URL"]
     ENV["UPTIME_PROBE_URL"] = "https://probe.test"
+    # Assertions count the checks the job records; start without the fixtures.
+    UptimeCheck.delete_all
   end
 
   teardown do

@@ -42,14 +42,16 @@ class AnomalyAnalysisTest < ActiveSupport::TestCase
     first = analysis.replies.create!(author_email: "kyle@example.com", body: "first", created_at: 2.hours.ago)
     second = analysis.replies.create!(author_email: "kyle@example.com", body: "second", created_at: 1.hour.ago)
 
-    assert_equal [ first, second ], analysis.replies.to_a
+    replies = analysis.replies.to_a
+    assert_equal replies.sort_by(&:created_at), replies
+    assert_operator replies.index(first), :<, replies.index(second)
   end
 
   test "destroys replies when analysis is destroyed" do
     analysis = anomaly_analyses(:week1_analysis)
     analysis.replies.create!(author_email: "kyle@example.com", body: "bye")
 
-    assert_difference "AnalysisReply.count", -1 do
+    assert_difference "AnalysisReply.count", -analysis.replies.count do
       analysis.destroy
     end
   end

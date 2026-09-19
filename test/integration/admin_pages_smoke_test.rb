@@ -5,8 +5,10 @@ require "test_helper"
 # dedicated test for it. New ActiveAdmin resources and pages are picked up
 # automatically from the routes.
 #
-# This only proves each page renders with fixture data. Pages with panels that
-# depend on other data still need focused tests that create it.
+# Pages render with fixture data, and the ops tables (dyno metrics, uptime,
+# error events...) have current-week fixtures (see test/support/fixture_helpers.rb),
+# so dashboards render their populated branches. Index pages must not show
+# ActiveAdmin's empty state, or the test only exercised the empty branch.
 class AdminPagesSmokeTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
@@ -15,6 +17,9 @@ class AdminPagesSmokeTest < ActionDispatch::IntegrationTest
     "admin/activity_feed#prompt_preview" => "renders the LLM prompt; covered in activity_feed_controller_test",
     "admin/menus#menu_builder" => "React mount; covered in menu_controller_test"
   }.freeze
+
+  # Index pages allowed to render ActiveAdmin's empty state.
+  EMPTY_INDEX_OK = {}.freeze
 
   # Non-:id segments, keyed by segment name.
   PARAM_VALUES = {
@@ -25,11 +30,8 @@ class AdminPagesSmokeTest < ActionDispatch::IntegrationTest
   # in with realistic associations so show pages render their populated parts.
   INLINE_RECORDS = {
     ContactMessage => -> { ContactMessage.create!(name: "Pat Baker", email: "pat@example.com", message: "Do you do wholesale?") },
-    Feedback => -> { Feedback.create!(source: "menu", message: "Loved the rye", email: "pat@example.com", url: "/menu") },
     Ahoy::Visit => -> { Ahoy::Visit.create!(user: users(:kyle), started_at: Time.current, visit_token: "smoke-visit", visitor_token: "smoke-visitor", landing_page: "/menu") },
-    Ahoy::Message => -> { Ahoy::Message.create!(user: users(:kyle), mailer: "ConfirmationMailer#order_email", subject: "Your order", to: users(:kyle).email, sent_at: Time.current, menu_id: menus(:week1).id) },
-    ErrorEvent => -> { ErrorEvent.create!(source: "server", error_class: "NameError", message: "uninitialized constant OpenStruct", fingerprint: "smoke", occurred_at: Time.current, url: "/admin/activity_feed", backtrace: "app/admin/activity_feed.rb:537") },
-    ActiveAdmin::Comment => -> { ActiveAdmin::Comment.create!(resource: items(:classic), author: users(:kyle), namespace: "admin", body: "Check the crumb") }
+    Ahoy::Message => -> { Ahoy::Message.create!(user: users(:kyle), mailer: "ConfirmationMailer#order_email", subject: "Your order", to: users(:kyle).email, sent_at: Time.current, menu_id: menus(:week1).id) }
   }.freeze
 
   def self.admin_get_routes
@@ -52,10 +54,17 @@ class AdminPagesSmokeTest < ActionDispatch::IntegrationTest
 
     test "GET #{path_template} (#{key}) renders" do
       path = build_path(key, path_template)
+      seed_inline_record(key) if key.end_with?("#index")
       get path
 
       assert_includes 200..399, response.status,
         "#{path} returned #{response.status}#{error_summary}"
+
+      # An index showing ActiveAdmin's empty state only tested the empty branch.
+      if key.end_with?("#index") && !EMPTY_INDEX_OK.key?(key)
+        assert_select ".blank_slate", false,
+          "#{path} rendered empty; add fixtures (or list it in EMPTY_INDEX_OK with a reason)"
+      end
     end
   end
 
@@ -70,6 +79,13 @@ class AdminPagesSmokeTest < ActionDispatch::IntegrationTest
         PARAM_VALUES.fetch(name) { flunk "#{key}: add a value for :#{name} to PARAM_VALUES or SKIP it" }.call
       end
     end
+  end
+
+  def seed_inline_record(key)
+    model = model_for(key.split("#").first)
+    instance_exec(&INLINE_RECORDS[model]) if INLINE_RECORDS.key?(model) && !model.exists?
+  rescue NameError
+    # A custom page (e.g. admin/cache) rather than a resource.
   end
 
   def record_id_for(key)

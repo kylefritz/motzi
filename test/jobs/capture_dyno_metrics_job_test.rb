@@ -4,6 +4,9 @@ require "webmock/minitest"
 class CaptureDynoMetricsJobTest < ActiveSupport::TestCase
   SAMPLE_LOGS = File.read(Rails.root.join("test/fixtures/files/heroku_memory_logs.txt"))
 
+  # Assertions read back the rows the job writes; start without the fixtures.
+  setup { DynoMetric.delete_all }
+
   test "parse_log_lines extracts memory samples grouped by dyno" do
     job = CaptureDynoMetricsJob.new
     result = job.send(:parse_log_lines, SAMPLE_LOGS)

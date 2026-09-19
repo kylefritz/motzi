@@ -1,6 +1,9 @@
 require "test_helper"
 
 class DynoMetricTest < ActiveSupport::TestCase
+  # These check aggregation math on known rows; start without the fixtures.
+  setup { DynoMetric.delete_all }
+
   test "summary_for_period returns avg and max grouped by dyno" do
     base = 2.hours.ago
     DynoMetric.create!(recorded_at: base, dyno: "web.1", memory_total: 300, memory_rss: 280, memory_swap: 0, memory_quota: 512, r14_count: 0)

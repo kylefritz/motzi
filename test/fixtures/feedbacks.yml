@@ -1,0 +1,15 @@
+# Written by hand (production feedback is member-written text).
+menu_suggestion:
+  source: menu
+  message: Could the menu show which breads are vegan?
+  email: member@example.com
+  url: /menu
+  user_agent: Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X)
+  created_at: <%= this_week(1.day) %>
+
+error_page_report:
+  source: "500"
+  message: Got an error page when I tried to change my pickup day.
+  url: /500
+  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+  created_at: <%= this_week(2.hours) %>

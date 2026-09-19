@@ -366,6 +366,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
   end
 
   test "to_text includes Application Errors section when error events exist" do
+    ErrorEvent.delete_all # counts events; start without the fixtures
     week_id = Time.zone.now.week_id
     week_start = Time.zone.from_week_id(week_id)
 
@@ -473,6 +474,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
   end
 
   test "to_text excludes fully resolved error fingerprints" do
+    ErrorEvent.delete_all # counts events; start without the fixtures
     week_id = Time.zone.now.week_id
     week_start = Time.zone.from_week_id(week_id)
 
@@ -514,6 +516,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
   end
 
   test "to_text notes when all error events are resolved" do
+    ErrorEvent.delete_all # counts events; start without the fixtures
     week_id = Time.zone.now.week_id
     week_start = Time.zone.from_week_id(week_id)
 
@@ -630,6 +633,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
   end
 
   test "browser 4xx warnings are listed as rejected requests, not application errors" do
+    ErrorEvent.delete_all # counts events; start without the fixtures
     week_id = Time.zone.now.week_id
     week_start = Time.zone.from_week_id(week_id)
 
