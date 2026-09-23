@@ -2,6 +2,10 @@ default: &default
   dispatchers:
     - polling_interval: 1
       batch_size: 500
+  # The Heroku worker runs `bin/jobs start --mode async` (Procfile): dispatcher,
+  # scheduler and worker share one process as threads. Fork mode ran four
+  # full Rails processes (~600MB idle), pushing the 512MB dyno past the 2x
+  # R15 kill line at its evening peak. `processes` is ignored in async mode.
   workers:
     - queues: "*"
       threads: 3
