@@ -1,0 +1,58 @@
+name: Security audit
+
+# New advisories land independently of code changes. Check master daily so
+# they surface as an issue, not as a red scan_ruby job on an unrelated PR.
+on:
+  schedule:
+    - cron: "17 13 * * *" # daily, ~9am ET
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ruby/setup-ruby@v1 # ruby-version from .ruby-version
+        with:
+          bundler-cache: true
+      - name: Bundler Audit
+        id: bundler_audit
+        continue-on-error: true
+        shell: bash # -eo pipefail, so tee keeps the exit code
+        run: bin/bundler-audit check --update 2>&1 | tee bundler-audit.txt
+      - name: Brakeman
+        id: brakeman
+        continue-on-error: true
+        shell: bash # -eo pipefail, so tee keeps the exit code
+        run: bin/brakeman --no-pager 2>&1 | tee brakeman.txt
+      - name: Open or update issue
+        if: steps.bundler_audit.outcome == 'failure' || steps.brakeman.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "Daily security audit failed on master: $RUN_URL"
+            echo
+            echo "Fix with \`bundle update --conservative <gems>\` (patch/minor), then confirm \`bin/bundler-audit\` and \`bin/brakeman --no-pager\` are clean. Waive advisories that don't apply in \`config/bundler-audit.yml\`."
+            echo
+            echo "<details><summary>bundler-audit (${{ steps.bundler_audit.outcome }})</summary>"
+            echo; echo '```'; grep -E '^(Name|Version|CVE|GHSA|Advisory|Criticality|Title|Solution):' bundler-audit.txt || tail -20 bundler-audit.txt; echo '```'
+            echo "</details>"
+            echo
+            echo "<details><summary>brakeman (${{ steps.brakeman.outcome }})</summary>"
+            echo; echo '```'; tail -40 brakeman.txt; echo '```'
+            echo "</details>"
+          } > body.md
+          gh label create security-audit --color B60205 --description "Daily security audit failure" --force
+          existing=$(gh issue list --label security-audit --state open --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file body.md
+          else
+            gh issue create --title "Security audit failing on master" --label security-audit --body-file body.md
+          fi
+          exit 1
