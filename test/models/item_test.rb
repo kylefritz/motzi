@@ -21,6 +21,18 @@ class ItemTest < ActiveSupport::TestCase
     assert_nil items(:classic).image_path
   end
 
+  # Admin thumbnails only render a variant URL; the resize runs on first request.
+  # Processing one here catches a missing ruby-vips gem or libvips library.
+  test "image variant processes" do
+    item = items(:classic)
+    item.image.attach(io: file_fixture("bread-corn.jpg").open, filename: "bread-corn.jpg", content_type: "image/jpeg")
+
+    variant = item.image.variant(resize_to_limit: [ 100, 100 ]).processed
+
+    width, height = variant.image.blob.open { |f| Vips::Image.new_from_file(f.path).then { |img| [ img.width, img.height ] } }
+    assert_operator [ width, height ].max, :<=, 100
+  end
+
   test "archive and unarchive" do
     item = items(:classic)
     refute item.archived?
