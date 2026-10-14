@@ -176,6 +176,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
   test "creating holiday order returns regular menu as primary menu" do
     holiday_menu = menus(:passover_2026)
+    travel_to(holiday_menu.earliest_deadline - 1.day)
     holiday_menu.open_for_orders!
 
     sign_in users(:jess)
@@ -205,6 +206,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
   test "creating marketplace holiday order returns it in the holidayOrder slot" do
     holiday_menu = menus(:passover_2026)
+    travel_to(holiday_menu.earliest_deadline - 1.day)
     holiday_menu.open_for_orders!
 
     item_id = holiday_menu.items.first.id
@@ -238,6 +240,7 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
 
   test "updating holiday order keeps it in the holidayOrder slot" do
     holiday_menu = menus(:passover_2026)
+    travel_to(holiday_menu.earliest_deadline - 1.day)
     holiday_menu.open_for_orders!
 
     sign_in users(:kyle)
