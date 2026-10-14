@@ -55,4 +55,73 @@ class AnomalyAnalysisTest < ActiveSupport::TestCase
       analysis.destroy
     end
   end
+
+  # --- email_reason: when does a nightly report get emailed? (#405) ---
+
+  def analysis_at(time, status)
+    AnomalyAnalysis.create!(week_id: time.week_id, result: "Status: #{status}", trigger: "scheduled", created_at: time)
+  end
+
+  def with_clean_history
+    AnalysisReply.delete_all
+    AnomalyAnalysis.delete_all
+    yield
+  end
+
+  test "email_reason: warning is always emailed" do
+    with_clean_history do
+      analysis_at(2.days.ago, "Warning")
+      today = analysis_at(1.hour.ago, "Warning")
+      assert_equal :alert, today.email_reason
+    end
+  end
+
+  test "email_reason: problem is always emailed" do
+    with_clean_history do
+      analysis_at(2.days.ago, "Problem")
+      today = analysis_at(1.hour.ago, "Problem")
+      assert_equal :alert, today.email_reason
+    end
+  end
+
+  test "email_reason: unchanged healthy is skipped" do
+    with_clean_history do
+      analysis_at(2.days.ago, "Healthy")
+      today = analysis_at(1.hour.ago, "Healthy")
+      assert_nil today.email_reason
+    end
+  end
+
+  test "email_reason: recovery to healthy is emailed as a status change" do
+    with_clean_history do
+      analysis_at(2.days.ago, "Warning")
+      today = analysis_at(1.hour.ago, "Healthy")
+      assert_equal :status_changed, today.email_reason
+    end
+  end
+
+  test "email_reason: compares against the most recent earlier analysis only" do
+    with_clean_history do
+      analysis_at(3.days.ago, "Problem")
+      analysis_at(2.days.ago, "Healthy")
+      today = analysis_at(1.hour.ago, "Healthy")
+      analysis_at(1.minute.ago, "Problem") # later rows don't count
+      assert_nil today.email_reason
+    end
+  end
+
+  test "email_reason: first-ever healthy report is emailed" do
+    with_clean_history do
+      today = analysis_at(1.hour.ago, "Healthy")
+      assert_equal :status_changed, today.email_reason
+    end
+  end
+
+  test "email_reason: weekly summary is emailed even when unchanged healthy" do
+    with_clean_history do
+      analysis_at(2.days.ago, "Healthy")
+      today = analysis_at(1.hour.ago, "Healthy")
+      assert_equal :weekly_summary, today.email_reason(weekly_summary: true)
+    end
+  end
 end

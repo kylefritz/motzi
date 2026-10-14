@@ -30,6 +30,8 @@ production: &default
     class: TrimAnalyticsJob
     schedule: every day at 4:30am
 
+  # Stored nightly; emailed only on warning/problem or a status change, plus
+  # Sunday night's run as the weekly summary (AnalyzeAnomaliesJob::WEEKLY_SUMMARY_WDAY).
   analyze_anomalies:
     class: AnalyzeAnomaliesJob
     schedule: every day at 9:21pm America/New_York

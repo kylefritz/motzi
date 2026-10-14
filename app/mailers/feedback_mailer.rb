@@ -1,4 +1,4 @@
-class FeedbackMailer < ApplicationMailer
+class FeedbackMailer < OpsMailer
   def feedback_received
     @feedback = params[:feedback]
     mail(to: User.kyle.email_list,
