@@ -6,6 +6,8 @@ class PassoverPreorderFlowTest < ActionDispatch::IntegrationTest
 
   def setup
     @holiday = menus(:passover_2026)
+    # the fixture's deadlines are fixed dates; order as if they haven't passed
+    travel_to(@holiday.earliest_deadline - 1.day)
     menus(:week2).make_current!
     Setting.holiday_menu_id = nil
   end
