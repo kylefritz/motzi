@@ -54,7 +54,8 @@ class User < ApplicationRecord
   # balance after each one. Mirrors the arithmetic in
   # app/sql_queries/_user_credits.sql.erb so the last balance equals #credits.
   def credit_ledger
-    purchases = credit_items.map { |ci| { at: ci.created_at, change: ci.quantity, source: ci } }
+    # quantity is nullable on old rows; SUM skips NULLs, so count them as 0
+    purchases = credit_items.map { |ci| { at: ci.created_at, change: ci.quantity.to_i, source: ci } }
     deductions = orders.where(stripe_charge_id: nil).includes(:menu, :order_items)
                        .map { |o| { at: o.created_at, change: -o.credits, source: o } }
 

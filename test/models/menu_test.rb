@@ -262,7 +262,7 @@ class MenuTest < ActiveSupport::TestCase
 
   test "can_publish? for holiday allows months ahead" do
     holiday = menus(:passover_2026)
-    # passover deadline is 2026-09-23
+    travel_to(holiday.earliest_deadline - 60.days)
     assert holiday.can_publish?, "can publish holiday with future deadline"
   end
 
@@ -280,6 +280,7 @@ class MenuTest < ActiveSupport::TestCase
 
   test "open_for_orders! makes holiday menu current without sending email" do
     holiday = menus(:passover_2026)
+    travel_to(holiday.earliest_deadline - 1.day)
     assert_no_enqueued_jobs do
       holiday.open_for_orders!
     end

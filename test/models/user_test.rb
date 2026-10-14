@@ -73,6 +73,17 @@ class UserTest < ActiveSupport::TestCase
     assert_equal kyle.credits, ledger.last.balance
   end
 
+  # error_events #2740, #2742: a 2020 credit item with a NULL quantity crashed the admin user page
+  test "credit_ledger counts a credit item with no quantity as zero, like the credits SQL" do
+    kyle = users(:kyle)
+    credit_items(:kyle).update_columns(quantity: nil)
+
+    ledger = kyle.credit_ledger
+
+    assert_equal 0, ledger.find { |e| e.source == credit_items(:kyle) }.change
+    assert_equal kyle.credits, ledger.last.balance
+  end
+
   test "receive_weekly_menu" do
     refute users(:maya).receive_weekly_menu?
     assert users(:kyle).receive_weekly_menu?
