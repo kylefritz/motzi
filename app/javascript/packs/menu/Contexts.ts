@@ -59,7 +59,11 @@ export function getDeadlineContext() {
       return false;
     }
 
+    // A menu still being built may have no pickup days: nothing to order for.
     const lastPickupDay = _.last(pickupDays);
+    if (!lastPickupDay) {
+      return true;
+    }
     return isClosed(lastPickupDay.orderDeadlineAt);
   };
 

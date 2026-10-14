@@ -53,3 +53,32 @@ test("keeps hook order stable when menu loads after the loading state", () => {
     console.error = originalConsoleError;
   }
 });
+
+// error_events #2773, #2784: a menu with no pickup days yet must still render
+test("renders a menu that has no pickup days yet", () => {
+  window.gon = { stripeApiKey: "no-such-key" };
+  window.Stripe = mock(() => stripeMock);
+
+  const { menu, bundles } = mockMenuJson({ user: false, order: false });
+  const emptyMenu = {
+    ...menu,
+    pickupDays: [],
+    items: menu.items.map((item) => ({ ...item, pickupDays: [] })),
+  };
+
+  const { container } = render(
+    <SettingsContext.Provider value={{}}>
+      <Layout
+        bundles={bundles}
+        handleCreateOrder={mock(() => Promise.resolve())}
+        isEditingOrder={false}
+        order={null}
+        setIsEditingOrder={mock(() => {})}
+        user={null}
+        menu={emptyMenu}
+      />
+    </SettingsContext.Provider>
+  );
+
+  expect(container.textContent).toContain(menu.name);
+});
