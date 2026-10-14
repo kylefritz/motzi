@@ -1,4 +1,4 @@
-class BackupAlertMailer < ApplicationMailer
+class BackupAlertMailer < OpsMailer
   def api_key_expired
     mail(to: User.kyle.email_list, subject: "Motzi: Heroku API key has expired") do |format|
       format.text
