@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { reportException } from "../../lib/errorReporter";
-import { getSettingsContext } from "./Contexts";
+import { useSettingsContext } from "./Contexts";
 import type { MenuUser } from "../../types/api";
 
 type EmailSettingsProps = {
@@ -199,7 +199,7 @@ function ToggleRow({
 }
 
 export default function EmailSettings({ user, onBack }: EmailSettingsProps) {
-  const { onRefresh } = getSettingsContext();
+  const { onRefresh } = useSettingsContext();
   const [prefs, setPrefs] = useState<Preferences>({
     receiveWeeklyMenu: user.receiveWeeklyMenu,
     receiveHaventOrderedReminder: user.receiveHaventOrderedReminder,

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { isFinite } from "lodash";
 import Tip from "./Tip";
 
 type PayWhatYouCanProps = {

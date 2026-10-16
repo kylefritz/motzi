@@ -4,7 +4,7 @@ import { useState } from "react";
 import moment from "moment";
 
 import Price from "./Price";
-import { getDeadlineContext, getPriceContext } from "./Contexts";
+import { useDeadlineContext, usePriceContext } from "./Contexts";
 import type {
   CartItem as CartItemType,
   Menu as MenuType,
@@ -87,7 +87,7 @@ type DaysProps = {
 };
 
 function Days({ menu, cart, rmCartItem }: DaysProps) {
-  const { isClosed } = getDeadlineContext();
+  const { isClosed } = useDeadlineContext();
 
   const cartPickupDays = new Set(cart.map(({ pickupDayId }) => pickupDayId));
   const pickupDays = menu.pickupDays.filter(({ id: pickupDayId }) =>
@@ -146,7 +146,7 @@ function Total({
   stripeChargeAmount?: number | null;
 }) {
   const { price, credits } = cartTotal({ cart, items });
-  const { showCredits } = getPriceContext();
+  const { showCredits } = usePriceContext();
   const showPrices = !showCredits;
   return (
     <div>

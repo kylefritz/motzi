@@ -24,7 +24,7 @@ const DayContext = React.createContext<DayContextValue | null>(null);
 const SettingsContext = React.createContext<SettingsContextValue | null>(null);
 export { DayContext, SettingsContext };
 
-export function getSettingsContext(): SettingsContextValue {
+export function useSettingsContext(): SettingsContextValue {
   const ctx = useContext(SettingsContext);
   if (_.isNil(ctx)) {
     console.warn("SettingsContext is nil", ctx);
@@ -32,14 +32,14 @@ export function getSettingsContext(): SettingsContextValue {
   return ctx || ({} as SettingsContextValue);
 }
 
-// like getSettingsContext but just for prices & doesn't warn
-export function getPriceContext() {
+// like useSettingsContext but just for prices & doesn't warn
+export function usePriceContext() {
   const ctx = useContext(SettingsContext);
   const { showCredits = false } = ctx || {};
   return { showCredits };
 }
 
-export function getDeadlineContext() {
+export function useDeadlineContext() {
   const ctx = useContext(DayContext) || ({} as DayContextValue);
 
   const isClosed = (orderDeadlineAt: string) => {

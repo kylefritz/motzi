@@ -37,10 +37,10 @@ test("payItForward", () => {
 
 test("menu for uid-user, add item to cart", async () => {
   const user = userEvent.setup();
-  const { container, onCreateOrder } = renderMenu({ order: false });
+  const { onCreateOrder } = renderMenu({ order: false });
   expect(screen.getByText("No items")).toBeTruthy();
 
-  const firstItem = screen.getByTestId("item-3");
+  screen.getByTestId("item-3");
   await user.click(screen.getByTestId("pickup-day-3-1"));
   await user.click(screen.getByTestId("add-to-cart-3"));
 
@@ -73,7 +73,7 @@ test("menu for uid-user, after order", () => {
 
 test("orderCredits", async () => {
   const user = userEvent.setup();
-  const { container } = renderMenu({ user: { credits: 1 } }); // 3 credits in order
+  renderMenu({ user: { credits: 1 } }); // 3 credits in order
 
   expect(getCartTotalText()).toContain("3 credits");
   await user.click(screen.getByRole("button", { name: "Donate Now" }));
@@ -83,7 +83,7 @@ test("orderCredits", async () => {
       .disabled
   ).toBe(false);
 
-  const firstItem = screen.getByTestId("item-3");
+  screen.getByTestId("item-3");
   await user.click(screen.getByTestId("pickup-day-3-1"));
   await user.click(screen.getByTestId("add-to-cart-3"));
 
@@ -96,11 +96,11 @@ test("orderCredits", async () => {
 
 test("insufficientCredits, no order", async () => {
   const user = userEvent.setup();
-  const { container } = renderMenu({ user: { credits: 1 }, order: false });
+  renderMenu({ user: { credits: 1 }, order: false });
 
   await user.click(screen.getByRole("button", { name: "Donate Now" }));
 
-  const firstItem = screen.getByTestId("item-3");
+  screen.getByTestId("item-3");
   await user.click(screen.getByTestId("pickup-day-3-1"));
   await user.click(screen.getByTestId("add-to-cart-3"));
 

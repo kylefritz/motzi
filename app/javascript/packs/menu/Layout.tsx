@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { getDeadlineContext } from "./Contexts";
+import { useDeadlineContext } from "./Contexts";
 import Menu from "./Menu";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
@@ -44,7 +44,7 @@ export default function Layout({
   );
   // useContext under the hood — must run before the early returns below so
   // the hook order doesn't change once the menu finishes loading.
-  const deadlineContext = getDeadlineContext();
+  const deadlineContext = useDeadlineContext();
 
   if (error) {
     return (

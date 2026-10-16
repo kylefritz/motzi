@@ -12,12 +12,11 @@ import type { StripeTokenPayload } from "../buy/Card";
 import { applyTip } from "../buy/Tip";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
 import FeedbackForm from "./FeedbackForm";
-import { getDeadlineContext } from "./Contexts";
+import { useDeadlineContext } from "./Contexts";
 import type {
   CartItem,
   MarketplaceOrderRequest,
   Menu as MenuType,
-  MenuItem,
 } from "../../types/api";
 
 type AccountInfo = Pick<
@@ -46,6 +45,7 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
   });
   const [price, setPrice] = useState<number | null>(total.price);
   const [tip, setTip] = useState<string | null>(null);
+  const { allClosed } = useDeadlineContext();
 
   const totalPrice = applyTip(price, tip);
   const handleCardToken = ({ token }: StripeTokenPayload) => {
@@ -90,7 +90,7 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
   }
 
   const { menuNote, enablePayWhatYouCan } = menu;
-  const menuClosed = getDeadlineContext().allClosed(menu);
+  const menuClosed = allClosed(menu);
   const disabled = menuClosed || !onCreateOrder;
   const stripeApiKey = window.gon?.stripeApiKey;
   return (

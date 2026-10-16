@@ -1,6 +1,5 @@
 import React from "react";
 import axios from "axios";
-import _ from "lodash";
 import { reportException } from "../../lib/errorReporter";
 import type { AdminCreditItemRequest } from "../../types/api";
 
@@ -24,7 +23,7 @@ export default function App() {
     console.info(credit);
     axios
       .post(`/admin/credit_items.json`, credit)
-      .then(({ data }) => {
+      .then(() => {
         // reload page in browser, skip in test env (jsdom navigation is unimplemented)
         if (process.env.NODE_ENV !== "test") {
           window.location.reload();

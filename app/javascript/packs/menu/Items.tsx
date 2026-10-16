@@ -4,7 +4,7 @@ import moment from "moment";
 
 import Price from "./Price";
 import Quantity from "./Quantity";
-import { getDeadlineContext } from "./Contexts";
+import { useDeadlineContext } from "./Contexts";
 import type { MenuItem, MenuItemPickupDay } from "../../types/api";
 
 function shortDay(day: string) {
@@ -39,7 +39,7 @@ export function DayButton({
   orderingDeadlineText,
 }: DayButtonProps) {
   const day = moment(pickupAt).format("dddd");
-  const isPastDeadline = getDeadlineContext().isClosed(orderDeadlineAt);
+  const isPastDeadline = useDeadlineContext().isClosed(orderDeadlineAt);
 
   if (remaining < 1 || isPastDeadline) {
     const [short, long, title] = isPastDeadline
