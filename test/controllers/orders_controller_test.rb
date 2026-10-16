@@ -355,7 +355,120 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_equal 2, order.reload.order_items.sole.quantity
   end
 
+  # #410: menu_item_pickup_days.limit is enforced on the server.
+  # kyle_week2 already has 1 rye for Thursday.
+
+  test "create rejects a cart that would go over an item's limit" do
+    menu_item_pickup_days(:w2_rye_thurs).update!(limit: 3)
+
+    assert_cart_rejected("Only 2 Rye Five Ways left for Thursday. Please update your cart") do
+      post "/orders.json", params: rye_thursday_order(users(:ljf).hashid, quantity: 3), as: :json
+    end
+  end
+
+  test "create allows a cart that takes the last of an item" do
+    menu_item_pickup_days(:w2_rye_thurs).update!(limit: 3)
+
+    before_deadline do
+      assert_ordered { post "/orders.json", params: rye_thursday_order(users(:ljf).hashid, quantity: 2), as: :json }
+    end
+    assert_success_and_validate
+  end
+
+  test "create sums cart lines for the same item and day against the limit" do
+    menu_item_pickup_days(:w2_rye_thurs).update!(limit: 3)
+    order = rye_thursday_order(users(:ljf).hashid, quantity: 1)
+    order[:cart] << order[:cart].first.merge(quantity: 2)
+
+    assert_cart_rejected(/Only 2 Rye Five Ways left for Thursday/) do
+      post "/orders.json", params: order, as: :json
+    end
+  end
+
+  test "create rejects an item with a limit of 0 as sold out" do
+    menu_item_pickup_days(:w2_rye_thurs).update!(limit: 0)
+
+    assert_cart_rejected("Rye Five Ways is sold out for Thursday. Please remove it from your cart") do
+      post "/orders.json", params: rye_thursday_order(users(:ljf).hashid, quantity: 1), as: :json
+    end
+  end
+
+  test "create treats a nil limit as unlimited" do
+    assert_nil menu_item_pickup_days(:w2_rye_thurs).limit
+
+    before_deadline do
+      assert_ordered { post "/orders.json", params: rye_thursday_order(users(:ljf).hashid, quantity: 50), as: :json }
+    end
+    assert_success_and_validate
+  end
+
+  test "pay it forward is exempt from item limits" do
+    MenuItemPickupDay.joins(:menu_item).where(menu_items: { menu_id: menus(:week2).id }).update_all(limit: 0)
+    order = order_attrs(users(:ljf).hashid)
+    order[:cart] = [ { item_id: Item::PAY_IT_FORWARD_ID, quantity: 5 } ]
+
+    before_deadline do
+      assert_ordered { post "/orders.json", params: order, as: :json }
+    end
+    assert_success_and_validate
+  end
+
+  test "update rejects raising a quantity over the limit and leaves the order alone" do
+    before_deadline do
+      assert_ordered { post "/orders.json", params: rye_thursday_order(users(:ljf).hashid, quantity: 1), as: :json }
+    end
+    order = users(:ljf).current_order
+    menu_item_pickup_days(:w2_rye_thurs).update!(limit: 3)
+
+    assert_cart_rejected("Only 2 Rye Five Ways left for Thursday. Please update your cart") do
+      put_order order.id, rye_thursday_order(users(:ljf).hashid, quantity: 3)
+    end
+    assert_equal 1, order.reload.order_items.sole.quantity
+  end
+
+  test "update doesn't count the order being edited against the limit" do
+    before_deadline do
+      assert_ordered { post "/orders.json", params: rye_thursday_order(users(:ljf).hashid, quantity: 1), as: :json }
+    end
+    order = users(:ljf).current_order
+    menu_item_pickup_days(:w2_rye_thurs).update!(limit: 4)
+
+    before_deadline { put_order order.id, rye_thursday_order(users(:ljf).hashid, quantity: 3) }
+    assert_success_and_validate
+    assert_equal 3, order.reload.order_items.sole.quantity
+  end
+
+  test "update keeps or lowers a quantity even after the item sells out" do
+    order = orders(:kyle_week2)
+    menu_item_pickup_days(:w2_rye_thurs).update!(limit: 0)
+    menu_item_pickup_days(:w2_donut_thurs).update!(limit: 0)
+    thursday = pickup_days(:w2_d1_thurs).id
+
+    before_deadline do
+      put_order order.id, { uid: users(:kyle).hashid, cart: [
+        { item_id: items(:rye).id, quantity: 1, pickup_day_id: thursday }
+      ] }
+    end
+    assert_success_and_validate
+    assert_equal [ [ items(:rye).id, 1 ] ], order.reload.order_items.pluck(:item_id, :quantity)
+
+    before_deadline do
+      put_order order.id, { uid: users(:kyle).hashid, cart: [
+        { item_id: items(:rye).id, quantity: 2, pickup_day_id: thursday }
+      ] }
+    end
+    assert_response :unprocessable_content
+    assert_equal "Rye Five Ways is sold out for Thursday. Please remove it from your cart",
+                 JSON.parse(response.body)["message"]
+  end
+
   private
+
+  def rye_thursday_order(hashid, quantity:)
+    { comment: "rye", uid: hashid, cart: [
+      { item_id: items(:rye).id, quantity: quantity, pickup_day_id: pickup_days(:w2_d1_thurs).id }
+    ] }
+  end
 
   def assert_cart_rejected(message, &block)
     before_deadline do
