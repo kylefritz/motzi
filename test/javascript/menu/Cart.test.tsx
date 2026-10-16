@@ -8,7 +8,12 @@ const sat = 2;
 
 const basePickupAt = "2025-01-01T00:00:00Z";
 const makePickupDays = (satRemaining: number | null) => [
-  { id: thur, remaining: 10, pickupAt: basePickupAt, orderDeadlineAt: basePickupAt },
+  {
+    id: thur,
+    remaining: 10,
+    pickupAt: basePickupAt,
+    orderDeadlineAt: basePickupAt,
+  },
   {
     id: sat,
     remaining: satRemaining ?? 0,
@@ -32,7 +37,12 @@ const buildItem = (overrides = {}) => ({
 
 const items = [
   buildItem({ id: 1, price: 1, credits: 100, pickupDays: makePickupDays(0) }),
-  buildItem({ id: 2, price: 10, credits: 10, pickupDays: makePickupDays(null) }),
+  buildItem({
+    id: 2,
+    price: 10,
+    credits: 10,
+    pickupDays: makePickupDays(null),
+  }),
   buildItem({ id: 3, price: 100, credits: 1, pickupDays: makePickupDays(NaN) }),
 ];
 
@@ -105,9 +115,7 @@ test("remaining", () => {
   });
   expect(result.current.subscriberItems).toHaveLength(items.length - 1); // not pay it forward
   expect(result.current.subscriberItems.map(({ id }) => id)).toStrictEqual([
-    3,
-    1,
-    2,
+    3, 1, 2,
   ]);
   expect(result.current.subscriberItems[1].pickupDays[0].remaining).toBe(9);
 
@@ -130,9 +138,7 @@ test("remaining", () => {
     result.current.addToCart({ id: 3, quantity: 3, pickupDayId: sat });
   });
   expect(result.current.subscriberItems.map(({ id }) => id)).toStrictEqual([
-    3,
-    1,
-    2,
+    3, 1, 2,
   ]);
   expect(result.current.subscriberItems[0].pickupDays[1].remaining).toBe(NaN);
 });
@@ -164,9 +170,7 @@ test("no payItForward", () => {
   expect(yes.current.payItForward).toBeDefined();
   expect(yes.current.payItForward.name).toMatch("PayItForward");
   expect(yes.current.marketplaceItems.map(({ id }) => id)).toStrictEqual([
-    3,
-    1,
-    2,
+    3, 1, 2,
   ]);
 });
 

@@ -144,7 +144,9 @@ const TabButton = styled.button<{ active: boolean }>`
   font-weight: 500;
   letter-spacing: 0.03em;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;

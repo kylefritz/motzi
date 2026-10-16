@@ -12,13 +12,12 @@ export default function renderMenu(menuJsonOptions?: MockMenuOptions) {
   window.gon = { stripeApiKey: "no-such-key" };
   window.Stripe = mock(() => stripeMock);
 
-  stripeMock.createToken = mock(
-    (): Promise<StripeTokenResult> =>
-      Promise.resolve({
-        token: {
-          id: "test_id",
-        },
-      })
+  stripeMock.createToken = mock((): Promise<StripeTokenResult> =>
+    Promise.resolve({
+      token: {
+        id: "test_id",
+      },
+    })
   );
 
   const onCreateOrder = mock((_order: MarketplaceOrderRequest) =>

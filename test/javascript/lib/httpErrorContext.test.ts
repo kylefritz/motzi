@@ -24,16 +24,16 @@ test("httpErrorContext reports a 4xx card decline as a warning", () => {
 
   expect(httpErrorContext("create_order", err).severity).toBe("warning");
   expect(httpErrorContext("create_order", axiosError(400, {})).severity).toBe(
-    "warning",
+    "warning"
   );
 });
 
 test("httpErrorContext leaves 5xx and network failures at error severity", () => {
   expect(
-    httpErrorContext("create_order", axiosError(500, {})).severity,
+    httpErrorContext("create_order", axiosError(500, {})).severity
   ).toBeUndefined();
   expect(
-    httpErrorContext("create_order", new Error("Network Error")).severity,
+    httpErrorContext("create_order", new Error("Network Error")).severity
   ).toBeUndefined();
 });
 
@@ -47,7 +47,10 @@ test("httpErrorContext leaves status and message out for a network failure", () 
 });
 
 test("httpErrorContext tolerates a non-JSON error body", () => {
-  const ctx = httpErrorContext("create_order", axiosError(500, "<html>boom</html>"));
+  const ctx = httpErrorContext(
+    "create_order",
+    axiosError(500, "<html>boom</html>")
+  );
 
   expect(ctx.status).toBe(500);
   expect(ctx.message).toBeUndefined();

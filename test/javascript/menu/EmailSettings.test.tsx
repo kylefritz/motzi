@@ -33,8 +33,12 @@ test("renders toggles matching user preferences", () => {
   });
 
   expect(getToggle("Weekly menu").getAttribute("aria-checked")).toBe("true");
-  expect(getToggle("Order reminder").getAttribute("aria-checked")).toBe("false");
-  expect(getToggle("Pickup reminder").getAttribute("aria-checked")).toBe("true");
+  expect(getToggle("Order reminder").getAttribute("aria-checked")).toBe(
+    "false"
+  );
+  expect(getToggle("Pickup reminder").getAttribute("aria-checked")).toBe(
+    "true"
+  );
 });
 
 test("toggling off weekly menu auto-clears and disables order reminder", async () => {

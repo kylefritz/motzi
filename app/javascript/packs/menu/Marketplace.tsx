@@ -32,16 +32,10 @@ type MarketplaceProps = {
 type StripeTokenPayload = { token: { id: string } };
 
 export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
-  const {
-    cart,
-    addToCart,
-    rmCartItem,
-    total,
-    marketplaceItems,
-    payItForward,
-  } = useCart({
-    items: menu.items,
-  });
+  const { cart, addToCart, rmCartItem, total, marketplaceItems, payItForward } =
+    useCart({
+      items: menu.items,
+    });
   const [submitting, setSubmitting] = useState(false);
   const [comments, setComments] = useState<string | null>(null);
   const [account, setAccount] = useState<AccountInfo>({

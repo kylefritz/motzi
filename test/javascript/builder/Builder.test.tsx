@@ -160,7 +160,9 @@ test("edits menu items", async () => {
   window.confirm = confirmSpy;
   await user.click(screen.getByRole("button", { name: /Clear all/i }));
   expect(confirmSpy).toHaveBeenCalled();
-  expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_menu_items.json");
+  expect(postMock).toHaveBeenCalledWith(
+    "/admin/menus/42/remove_menu_items.json"
+  );
 
   // Toggle marketplace on an item card.
   const card = within(await screen.findByTestId("menu-item-card-100"));
@@ -202,9 +204,12 @@ test("edits menu items", async () => {
 
   // Remove an item from the menu.
   await user.click(card.getByTitle("remove from menu"));
-  expect(postMock).toHaveBeenCalledWith("/admin/menus/42/remove_menu_item.json", {
-    itemId: 100,
-  });
+  expect(postMock).toHaveBeenCalledWith(
+    "/admin/menus/42/remove_menu_item.json",
+    {
+      itemId: 100,
+    }
+  );
 });
 
 test("adds a pickup day", async () => {
@@ -255,7 +260,9 @@ test("edits an existing pickup day", async () => {
   const editPickupInput = await card.findByLabelText("Pickup at:");
   const editDeadlineInput = card.getByLabelText("Order deadline at:");
   fireEvent.change(editPickupInput, { target: { value: "2024-01-15T09:00" } });
-  fireEvent.change(editDeadlineInput, { target: { value: "2024-01-14T09:00" } });
+  fireEvent.change(editDeadlineInput, {
+    target: { value: "2024-01-14T09:00" },
+  });
   await user.click(card.getByRole("button", { name: "Save" }));
 
   expect(patchMock).toHaveBeenCalledWith("/admin/pickup_days/1.json", {
@@ -321,7 +328,9 @@ test("copy from menu defaults are wired up", async () => {
 
   // All note copy checkboxes should be present and default checked.
   for (const name of ["Subscriber", "Menu", "Day of"]) {
-    const checkbox = copyForm.getByRole("checkbox", { name }) as HTMLInputElement;
+    const checkbox = copyForm.getByRole("checkbox", {
+      name,
+    }) as HTMLInputElement;
     expect(checkbox.checked).toBe(true);
   }
 

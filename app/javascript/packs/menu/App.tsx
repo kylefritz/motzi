@@ -26,9 +26,15 @@ export default function App() {
   const [data, setData] = useState<MenuResponse | null>(null); // expect: menu, user, order
   const [error, setError] = useState<string | undefined>();
   const [isEditingOrder, setIsEditingOrder] = useState(false);
-  const { uid, ignoredeadline: ignoreDeadline, tab } = queryString.parse(
-    location.search
-  ) as { uid?: string; ignoredeadline?: string; tab?: string };
+  const {
+    uid,
+    ignoredeadline: ignoreDeadline,
+    tab,
+  } = queryString.parse(location.search) as {
+    uid?: string;
+    ignoredeadline?: string;
+    tab?: string;
+  };
 
   const fetchMenu = () => {
     let params = { uid };

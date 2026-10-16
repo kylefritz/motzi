@@ -244,8 +244,8 @@ export default function EmailSettings({ user, onBack }: EmailSettingsProps) {
   const btnStyle = saving
     ? styles.saveBtnDisabled
     : saved
-    ? styles.savedBtn
-    : styles.saveBtn;
+      ? styles.savedBtn
+      : styles.saveBtn;
 
   return (
     <div style={{ paddingTop: 8, paddingBottom: 24 }}>

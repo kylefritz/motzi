@@ -43,9 +43,8 @@ function Boom({ error }: { error: Error }): React.ReactElement {
 }
 
 async function loadErrorBoundary() {
-  const { default: ErrorBoundary } = await import(
-    "../../app/javascript/packs/ErrorBoundary"
-  );
+  const { default: ErrorBoundary } =
+    await import("../../app/javascript/packs/ErrorBoundary");
   return ErrorBoundary;
 }
 
@@ -58,7 +57,9 @@ test("renders children when nothing throws", async () => {
   );
 
   expect(screen.getByText("all good")).toBeTruthy();
-  expect(screen.queryByText("There was an error in this software :(")).toBeNull();
+  expect(
+    screen.queryByText("There was an error in this software :(")
+  ).toBeNull();
   expect(reportError).not.toHaveBeenCalled();
 });
 
@@ -70,7 +71,9 @@ test("renders the fallback and reports when a child throws", async () => {
     </ErrorBoundary>
   );
 
-  expect(screen.getByText("There was an error in this software :(")).toBeTruthy();
+  expect(
+    screen.getByText("There was an error in this software :(")
+  ).toBeTruthy();
   expect(screen.getByText("Please try again or try back later.")).toBeTruthy();
   expect(screen.getByText("card declined")).toBeTruthy();
 
@@ -96,7 +99,9 @@ test("falls back to generic class and message for bare errors", async () => {
     </ErrorBoundary>
   );
 
-  expect(screen.getByText("There was an error in this software :(")).toBeTruthy();
+  expect(
+    screen.getByText("There was an error in this software :(")
+  ).toBeTruthy();
   expect(reportError).toHaveBeenCalledTimes(1);
   expect(reportError.mock.calls[0][0]).toMatchObject({
     error_class: "Error",

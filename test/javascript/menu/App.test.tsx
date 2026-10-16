@@ -9,9 +9,12 @@ const menuResponse = mockMenuJson();
 const getMock = mock(() => Promise.resolve({ data: menuResponse }));
 
 mock.module("axios", () => ({
-  default: Object.assign(mock(() => Promise.resolve({ data: menuResponse })), {
-    get: getMock,
-  }),
+  default: Object.assign(
+    mock(() => Promise.resolve({ data: menuResponse })),
+    {
+      get: getMock,
+    }
+  ),
 }));
 
 const reportExceptionMock = mock(

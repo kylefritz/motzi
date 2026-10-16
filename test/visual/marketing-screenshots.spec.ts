@@ -23,7 +23,7 @@ test.afterAll(() => {
 const client = new Anthropic();
 const prompt = readFileSync(
   join(__dirname, "marketing-check-prompt.txt"),
-  "utf-8",
+  "utf-8"
 );
 
 const pages = [
@@ -35,7 +35,7 @@ const pages = [
 
 async function reviewMarketingPage(
   screenshot: Buffer,
-  page: Page,
+  page: Page
 ): Promise<string> {
   // If the full-page screenshot exceeds the 8000px API limit, take a
   // viewport-height crop instead (checks the top portion of the page).
@@ -98,7 +98,7 @@ for (const { name, path } of pages) {
     // Warnings are intentionally non-blocking — they're human-reviewed via console output.
     expect(
       ["ok", "warning"],
-      `Visual review of ${name} returned status "${status}"\n${result}`,
+      `Visual review of ${name} returned status "${status}"\n${result}`
     ).toContain(status);
   });
 }

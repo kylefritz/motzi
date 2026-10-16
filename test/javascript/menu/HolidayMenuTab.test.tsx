@@ -63,9 +63,7 @@ test("editing resets to confirmation after save", async () => {
   expect(screen.getByText("We've got your order!")).toBeTruthy();
 
   // Step 2: Click edit to enter editing mode
-  await user.click(
-    screen.getByRole("button", { name: "Edit Order" })
-  );
+  await user.click(screen.getByRole("button", { name: "Edit Order" }));
 
   // Now the marketplace form should be showing (card payment)
   expect(screen.queryByText("We've got your order!")).toBeNull();

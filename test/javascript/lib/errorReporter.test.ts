@@ -25,7 +25,9 @@ function loadReporter(): Promise<Reporter> {
 
 type FetchArgs = [input: string, init: RequestInit];
 const originalFetch = globalThis.fetch;
-let fetchMock: ReturnType<typeof mock<(...args: FetchArgs) => Promise<Response>>>;
+let fetchMock: ReturnType<
+  typeof mock<(...args: FetchArgs) => Promise<Response>>
+>;
 
 function requests() {
   return fetchMock.mock.calls.map(([url, init]) => ({
