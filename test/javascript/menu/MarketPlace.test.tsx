@@ -7,7 +7,7 @@ import renderMenu from "./MarketPlace.helpers";
 const getCartTotalText = () => {
   const orderHeading = screen.getByText("Your order");
   const orderContainer = orderHeading.nextElementSibling;
-  const priceEl = orderContainer.querySelector(".price");
+  const priceEl = orderContainer?.querySelector(".price");
   return priceEl ? priceEl.textContent : "";
 };
 

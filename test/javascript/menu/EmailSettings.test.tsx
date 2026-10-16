@@ -5,10 +5,11 @@ import userEvent from "@testing-library/user-event";
 
 import EmailSettings from "menu/EmailSettings";
 import { SettingsContext } from "menu/Contexts";
-import mockMenuJson from "./mockMenuJson";
+import { mockSubscriberMenuJson } from "./mockMenuJson";
+import type { MenuUser } from "../../../app/javascript/types/api";
 
-function renderEmailSettings(userOverrides = {}) {
-  const data = mockMenuJson();
+function renderEmailSettings(userOverrides: Partial<MenuUser> = {}) {
+  const data = mockSubscriberMenuJson();
   const user = { ...data.user, ...userOverrides };
   const onBack = mock(() => {});
   const onRefresh = mock(() => {});

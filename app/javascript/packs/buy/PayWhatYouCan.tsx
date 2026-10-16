@@ -2,16 +2,26 @@ import React, { useState } from "react";
 import { isFinite } from "lodash";
 import Tip from "./Tip";
 
+type PayWhatYouCanProps = {
+  price: number | null;
+  onPricedChanged: (price: number) => void;
+  tip: string | null;
+  onTip: (tip: string) => void;
+  disabled?: boolean;
+};
+
 export default function PayWhatYouCan({
   price,
   onPricedChanged: handlePriceChanged,
   tip,
   onTip,
   disabled,
-}) {
-  const [tempPrice, setTempPrice] = useState(null);
+}: PayWhatYouCanProps) {
+  const [tempPrice, setTempPrice] = useState<number | null>(null);
 
-  const handleInputChanged = ({ target }) => {
+  const handleInputChanged = ({
+    target,
+  }: React.ChangeEvent<HTMLInputElement>) => {
     const nextPrice = parseFloat(target.value);
     setTempPrice(nextPrice);
 
@@ -20,7 +30,7 @@ export default function PayWhatYouCan({
     }
   };
 
-  const handleBlur = ({ target }) => {
+  const handleBlur = ({ target }: React.FocusEvent<HTMLInputElement>) => {
     handlePriceChanged(parseFloat(target.value));
     setTempPrice(null);
   };

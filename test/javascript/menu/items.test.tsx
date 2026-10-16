@@ -72,14 +72,14 @@ test("remaining deadline", () => {
 
   expect(renderDay({ remaining: 4 }).container.textContent).toMatch("4 left");
   expect(
-    renderDay({ remaining: 4 }).container.querySelector("button").disabled
+    renderDay({ remaining: 4 }).container.querySelector("button")?.disabled
   ).toBe(false);
   expect(
-    renderDay({ remaining: 0 }).container.querySelector("button").disabled
+    renderDay({ remaining: 0 }).container.querySelector("button")?.disabled
   ).toBe(true);
 
   const orderDeadlineAt = now().minus(Duration.fromISO("PT1H")).toISO();
   expect(
-    renderDay({ orderDeadlineAt }).container.querySelector("button").disabled
+    renderDay({ orderDeadlineAt }).container.querySelector("button")?.disabled
   ).toBe(true);
 });

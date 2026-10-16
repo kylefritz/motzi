@@ -9,7 +9,7 @@ export default function App() {
   const quantityRef = React.createRef<HTMLInputElement>();
   const weeksRef = React.createRef<HTMLInputElement>();
   const userId = parseInt(
-    _.get(window.location?.pathname.match(/users\/(.*)/), 1),
+    window.location?.pathname.match(/users\/(.*)/)?.[1] ?? "",
     10
   );
 
@@ -40,7 +40,7 @@ export default function App() {
   return (
     <details>
       <summary>Add credit</summary>
-      <form onSubmit={handleSubmit.bind(this)}>
+      <form onSubmit={handleSubmit}>
         <fieldset>
           <ol>
             <li className="string input optional stringish">

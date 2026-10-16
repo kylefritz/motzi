@@ -5,7 +5,13 @@ import _ from "lodash";
 
 import { getPriceContext } from "./Contexts";
 
-function Format({ price, credits = 1, stripeChargeAmount }) {
+type PriceProps = {
+  price?: number | null;
+  credits?: number;
+  stripeChargeAmount?: number | null;
+};
+
+function Format({ price, credits = 1, stripeChargeAmount }: PriceProps) {
   const { showCredits } = getPriceContext();
 
   if (!_.isNil(stripeChargeAmount)) {
@@ -18,7 +24,7 @@ function Format({ price, credits = 1, stripeChargeAmount }) {
   return accounting.formatMoney(price || 0);
 }
 
-export default function Price(props) {
+export default function Price(props: PriceProps) {
   return (
     <div className="price my-2">
       <Format {...props} />

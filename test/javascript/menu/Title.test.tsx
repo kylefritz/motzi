@@ -6,7 +6,7 @@ import { Duration } from "luxon";
 import Title from "menu/Title";
 import { now, withNow } from "../support/clock";
 
-function makeTitle(orderDeadlineAt) {
+function makeTitle(orderDeadlineAt: string) {
   const pickupAt = now().plus(Duration.fromISO("PT24H")).toISO();
 
   return render(

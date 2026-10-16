@@ -5,6 +5,7 @@ import queryString from "query-string";
 
 import Choice from "./Choice";
 import Payment from "./Payment";
+import type { StripeTokenPayload } from "./Card";
 import PayWhatYouCan from "./PayWhatYouCan";
 import { applyTip } from "./Tip";
 import { getSettingsContext } from "../menu/Contexts";
@@ -20,8 +21,6 @@ import type {
 type BuyProps = {
   user?: MenuUser;
 };
-
-type StripeTokenPayload = { token: { id: string } };
 
 export default function Buy({ user: passedUser }: BuyProps) {
   const {

@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 
 import Subscription, { humanizeBreadsPerWeek } from "menu/Subscription";
 import { SettingsContext } from "menu/Contexts";
-import mockMenuJson from "./mockMenuJson";
+import { mockSubscriberMenuJson } from "./mockMenuJson";
 import stripeMock from "./stripeMock";
 
 const setStripeKey = () => {
@@ -17,7 +17,7 @@ test("buy credits", async () => {
   setStripeKey();
   window.Stripe = mock(() => stripeMock);
 
-  const { user: subscriber, bundles } = mockMenuJson();
+  const { user: subscriber, bundles } = mockSubscriberMenuJson();
 
   const { container } = render(
     <SettingsContext.Provider
@@ -65,7 +65,7 @@ test("no payWhatYouCan", async () => {
   setStripeKey();
   window.Stripe = mock(() => stripeMock);
 
-  const { user: subscriber, bundles } = mockMenuJson();
+  const { user: subscriber, bundles } = mockSubscriberMenuJson();
   render(
     <SettingsContext.Provider
       value={{ bundles, enablePayWhatYouCan: false, showCredits: true }}

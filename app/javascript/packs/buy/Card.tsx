@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { formatMoney } from "accounting";
 
+// A zero-price order skips Stripe and submits with a null token id.
+export type StripeTokenPayload = { token: { id: string | null } };
+
 type CardProps = {
-  onToken: (payload: { token: { id: string | null } }) => void;
+  onToken: (payload: StripeTokenPayload) => void;
   credits?: number;
   price: number | null;
   submitting: boolean;
@@ -33,13 +36,14 @@ export default function Card({
     setCardFilled(complete);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    if (price > 0 && (!stripe || !elements)) {
+    const isCharge = price !== null && price > 0;
+    if (isCharge && (!stripe || !elements)) {
       console.log("Stripe.js hasn't loaded yet.");
       return;
     }
-    if (price > 0) {
+    if (isCharge && stripe && elements) {
       setWaitingOnStripe(true);
       const cardElement = elements.getElement(CardElement);
       if (!cardElement) {
@@ -48,7 +52,7 @@ export default function Card({
       }
       const { token, error } = await stripe.createToken(cardElement);
       if (error) {
-        setErrorMessage(error.message);
+        setErrorMessage(error.message ?? null);
         setWaitingOnStripe(false);
         return;
       }
