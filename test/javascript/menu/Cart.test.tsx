@@ -31,6 +31,7 @@ const buildItem = (overrides = {}) => ({
   image: null,
   subscriber: false,
   marketplace: false,
+  payWhatYouCan: true,
   pickupDays: makePickupDays(0),
   ...overrides,
 });

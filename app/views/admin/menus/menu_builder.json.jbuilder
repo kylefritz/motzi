@@ -23,7 +23,7 @@ json.menu_items @menu.sorted_menu_items.map do |menu_item|
   json.extract! item, :name, :description, :price, :credits
   json.image item.image_path
 
-  json.extract! menu_item, :subscriber, :marketplace, :sort_order
+  json.extract! menu_item, :subscriber, :marketplace, :pay_what_you_can, :sort_order
   json.pickup_days menu_item.menu_item_pickup_days do |mi_pd|
     json.extract! mi_pd, :id, :limit
     json.extract! mi_pd.pickup_day, :pickup_at, :order_deadline_at, :deadline_text

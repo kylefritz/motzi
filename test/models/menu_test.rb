@@ -80,6 +80,17 @@ class MenuTest < ActiveSupport::TestCase
                  week3.menu_items.map { |i| i.menu_item_pickup_days.count }.sum, "same sum of menu_item_pickup_days"
   end
 
+  test "copy_from keeps each item's pay what you can setting" do
+    week1 = menus(:week1)
+    menu_items(:w1_pumpkin).update!(pay_what_you_can: false)
+    target = Menu.create!(name: "week4", week_id: "19w04")
+
+    target.copy_from(week1)
+
+    assert_equal({ items(:classic).id => true, items(:pumpkin).id => false },
+                 target.menu_items.pluck(:item_id, :pay_what_you_can).to_h)
+  end
+
   test "copy_from clears sold-out limits" do
     original = menus(:week1)
     target = Menu.create!(name: "week4", week_id: "19w04")
