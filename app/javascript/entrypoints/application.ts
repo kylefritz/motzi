@@ -1,7 +1,5 @@
-// This file is automatically compiled by esbuild, along with any other files
-// present in this directory. You're encouraged to place your actual application logic in
-// a relevant structure within app/javascript and only use these pack files to reference
-// that code so it'll be compiled.
+// Vite entrypoint (vite_typescript_tag "application"). Every file in this
+// directory is an entrypoint; keep application logic elsewhere in app/javascript.
 
 // self-hosted error reporting — install before any framework code runs
 import { installGlobalErrorReporter } from "../lib/errorReporter";

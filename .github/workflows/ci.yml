@@ -91,7 +91,9 @@ jobs:
         run: bun install
 
       - name: Build JS assets
-        run: bun run build
+        env:
+          RAILS_ENV: test
+        run: bin/vite build
 
       - name: Rails tests
         env:
@@ -173,7 +175,9 @@ jobs:
         run: bun install
 
       - name: Build JS assets
-        run: bun run build
+        env:
+          RAILS_ENV: test
+        run: bin/vite build
 
       # ubuntu-latest ships Google Chrome; Selenium Manager fetches the
       # matching chromedriver.

@@ -7,6 +7,7 @@
     "@rails/ujs": "^7.1.600",
     "@stripe/react-stripe-js": "^2.9.0",
     "@stripe/stripe-js": "^5.5.0",
+    "@vitejs/plugin-react": "^6.1.2",
     "accounting": "^0.4.1",
     "ahoy.js": "^0.3.4",
     "axios": "^0.21.1",
@@ -19,7 +20,9 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "showdown": "^1.9.1",
-    "styled-components": "^5.2.1"
+    "styled-components": "^5.2.1",
+    "vite": "^8.3.4",
+    "vite-plugin-ruby": "^5.2.6"
   },
   "version": "0.1.0",
   "devDependencies": {
@@ -41,7 +44,6 @@
     "@types/styled-components": "^5",
     "axe-core": "^4.13.0",
     "dotenv": "^17.3.1",
-    "esbuild": "^0.20.2",
     "eslint": "^10.2.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -53,14 +55,12 @@
     "typescript-eslint": "^8.71.2"
   },
   "scripts": {
-    "build": "esbuild app/javascript/packs/*.ts app/javascript/packs/*.tsx --bundle --sourcemap --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx --outdir=app/assets/builds --public-path=/assets",
-    "build:watch": "esbuild app/javascript/packs/*.ts app/javascript/packs/*.tsx --bundle --sourcemap --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx --outdir=app/assets/builds --public-path=/assets --watch",
     "test": "bun test",
     "test-watch": "bun test --watch",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "typecheck:test": "IS_REACT_ACT_ENVIRONMENT=false tsc --noEmit -p tsconfig.test.json",
-    "format": "prettier --write \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts postcss.config.js",
-    "format:check": "prettier --check \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts postcss.config.js",
-    "lint": "eslint --max-warnings=0 app/javascript test/javascript"
+    "format": "prettier --write \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts postcss.config.js vite.config.mts",
+    "format:check": "prettier --check \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts postcss.config.js vite.config.mts",
+    "lint": "eslint --max-warnings=0 app/javascript test/javascript vite.config.mts"
   }
 }

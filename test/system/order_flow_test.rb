@@ -1,7 +1,7 @@
 require "application_system_test_case"
 
-# End-to-end: the compiled React bundle (app/assets/builds, built by
-# `bun run build`) driving the real MenusController/OrdersController in
+# End-to-end: the compiled React bundle (public/vite-test, built by
+# `bin/vite build`) driving the real MenusController/OrdersController in
 # headless Chrome. Also runs axe-core accessibility checks (#378 items 4, 12).
 class OrderFlowTest < ApplicationSystemTestCase
   # assert_email_sent wraps perform_enqueued_jobs; system tests don't get it

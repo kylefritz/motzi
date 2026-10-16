@@ -20,7 +20,8 @@
     <%= stylesheet_link_tag "marketing", media: "all" %>
     <%= render "layouts/analytics" %>
     <script>window.gon = { jsTracking: <%= Setting.shop.js_tracking ? "true" : "false" %> };</script>
-    <%= javascript_include_tag "marketing", defer: true %>
+    <%= vite_client_tag %>
+    <%= vite_typescript_tag "marketing" %>
     <%= yield :head %>
   </head>
   <body class="marketing">

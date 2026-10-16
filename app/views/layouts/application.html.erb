@@ -12,7 +12,9 @@
   <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
   <%= include_gon(:camel_case => true, :camel_depth => :recursive) %>
   <script src="https://js.stripe.com/v3/"></script>
-  <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  <%= vite_client_tag %>
+  <%= vite_react_refresh_tag %>
+  <%= vite_typescript_tag 'application' %>
 </head>
 
 <body class="<%= Setting.shop.id%>">
