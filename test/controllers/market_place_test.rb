@@ -1,4 +1,5 @@
 require "test_helper"
+require "minitest/mock"
 
 class MarketPlaceTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -98,6 +99,83 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     order_attrs = build_order_attrs
     refute_order(order_attrs)
     assert_equal "Your card was declined.", response.parsed_body["message"]
+  end
+
+  #
+  # per-item pay what you can (#412). The cart is classic + rye at $5 each.
+  #
+
+  test "paying less than the fixed-price items is rejected" do
+    menu_items(:w2_rye).update!(pay_what_you_can: false)
+    order_attrs = build_order_attrs
+    order_attrs[:price] = 4.99
+    refute_order(order_attrs)
+    assert_equal "The minimum for this order is $5.00 (Rye Five Ways is a fixed price)",
+                 response.parsed_body["message"]
+    assert_not_requested :post, StripeStubs::STRIPE_CHARGES_URL
+  end
+
+  test "a $0 order with a fixed-price item is rejected" do
+    menu_items(:w2_rye).update!(pay_what_you_can: false)
+    order_attrs = build_order_attrs.merge(price: 0, token: nil)
+    refute_order(order_attrs)
+    assert_equal "The minimum for this order is $5.00 (Rye Five Ways is a fixed price)",
+                 response.parsed_body["message"]
+  end
+
+  test "a guest can't skip the minimum by leaving the price off" do
+    menu_items(:w2_rye).update!(pay_what_you_can: false)
+    order_attrs = build_order_attrs.except(:price, :token)
+    refute_order(order_attrs)
+    assert_equal "The minimum for this order is $5.00 (Rye Five Ways is a fixed price)",
+                 response.parsed_body["message"]
+  end
+
+  test "paying exactly the minimum is ok; the pay what you can item goes to $0" do
+    menu_items(:w2_rye).update!(pay_what_you_can: false)
+    order_attrs = build_order_attrs
+    order_attrs[:price] = 5
+    assert_user_created { assert_ordered_emailed(order_attrs) }
+
+    assert_equal 5, Order.last.stripe_charge_amount
+    assert_requested :post, StripeStubs::STRIPE_CHARGES_URL do |request|
+      Rack::Utils.parse_nested_query(request.body)["amount"] == "500"
+    end
+  end
+
+  test "the cap sits above the minimum so a large fixed-price order can be paid" do
+    menu_items(:w2_rye).update!(pay_what_you_can: false)
+    order_attrs = build_order_attrs
+    order_attrs[:cart] = [ { item_id: items(:rye).id, quantity: 60, pickup_day_id: pickup_days(:w2_d1_thurs).id } ]
+    order_attrs[:price] = 300
+    assert_user_created { assert_ordered_emailed(order_attrs) }
+
+    assert_equal 300, Order.last.stripe_charge_amount
+  end
+
+  test "with the shop's pay what you can off, the full price is required" do
+    shop = ActiveSupport::InheritableOptions.new(Setting.shop).tap { |s| s.pay_what_you_can = false }
+    Setting.stub(:shop, -> { shop }) do
+      order_attrs = build_order_attrs
+      order_attrs[:price] = 9.99
+      refute_order(order_attrs)
+      assert_equal "The minimum for this order is $10.00 (Classic and Rye Five Ways are fixed prices)",
+                   response.parsed_body["message"]
+
+      assert_user_created { assert_ordered_emailed(build_order_attrs) }
+      assert_equal 10, Order.last.stripe_charge_amount
+    end
+  end
+
+  test "members paying with credits aren't held to fixed prices" do
+    menu_items(:w2_rye).update!(pay_what_you_can: false)
+    sign_in users(:jess)
+    assert_ordered do
+      post "/orders.json", params: build_order_attrs.except(:email, :first_name, :last_name, :phone, :price, :token),
+                           as: :json
+    end
+    assert_response :success
+    assert_nil Order.last.stripe_charge_amount
   end
 
   private

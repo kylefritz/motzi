@@ -11,6 +11,7 @@ type PaymentProps = {
   onCardToken: (payload: StripeTokenPayload) => void;
   submitting: boolean;
   disabled?: boolean;
+  blockedText?: string | null;
 };
 
 export default function Payment({
@@ -20,6 +21,7 @@ export default function Payment({
   onCardToken,
   submitting,
   disabled,
+  blockedText,
 }: PaymentProps) {
   const stripePromise = useMemo(
     () => loadStripe(stripeApiKey || ""),
@@ -36,6 +38,7 @@ export default function Payment({
             submitting,
             onToken: onCardToken,
             disabled,
+            blockedText,
           }}
         />
       </Elements>

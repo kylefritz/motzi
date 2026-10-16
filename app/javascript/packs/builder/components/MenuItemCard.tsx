@@ -4,6 +4,7 @@ import { shortDay } from "./PickupDaysPanel";
 import { Button } from "./ui/Button";
 import { useApi } from "../Context";
 import { isNil } from "lodash";
+import { formatMoney } from "accounting";
 import type {
   AdminMenuItem,
   AdminMenuItemPickupDay,
@@ -20,6 +21,8 @@ export default function MenuItemCard({
   name,
   subscriber,
   marketplace,
+  payWhatYouCan,
+  price,
   sortOrder,
   pickupDays,
   menuPickupDays,
@@ -74,6 +77,15 @@ export default function MenuItemCard({
         enabled={marketplace}
         onChange={(enable) => handleChangeMenuType("marketplace", enable)}
       />
+
+      <Sub>Pricing</Sub>
+      <PayWhatYouCan
+        price={price}
+        enabled={payWhatYouCan}
+        onChange={(enabled) =>
+          api.menuItem.update(menuItemId, { payWhatYouCan: enabled })
+        }
+      />
     </CardContent>
   );
 }
@@ -98,6 +110,37 @@ function MenuType({
         <LabelText>{name}</LabelText>
       </label>
     </Row>
+  );
+}
+
+function PayWhatYouCan({
+  price,
+  enabled,
+  onChange: handleChange,
+}: {
+  price: number;
+  enabled: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  const amount = formatMoney(price);
+  return (
+    <>
+      <Row>
+        <label>
+          <input
+            type="checkbox"
+            onChange={() => handleChange(!enabled)}
+            checked={enabled}
+          />
+          <LabelText>Pay what you can</LabelText>
+        </label>
+      </Row>
+      <Help>
+        {enabled
+          ? `${amount} is the suggested price. Customers can pay less or more for this item.`
+          : `${amount} is the minimum at checkout. Use when the money is owed to a vendor or the price has to hold.`}
+      </Help>
+    </>
   );
 }
 
@@ -211,6 +254,14 @@ function Limit({ id, limit }: { id: number; limit: number | null }) {
     </label>
   );
 }
+
+const Help = styled.p`
+  margin-top: -6px;
+  margin-bottom: 12px;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: #6b615b;
+`;
 
 const RightButton = styled.button`
   border: 0;

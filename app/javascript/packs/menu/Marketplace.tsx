@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import _ from "lodash";
+import { formatMoney } from "accounting";
 
 import BakersNote from "./BakersNote";
 import Cart, { useCart, type AddToCartPayload } from "./Cart";
@@ -10,9 +11,10 @@ import PayItForward from "./PayItForward";
 import Payment from "../buy/Payment";
 import type { StripeTokenPayload } from "../buy/Card";
 import { applyTip } from "../buy/Tip";
+import { cartPricing, isBelowMinimum } from "../buy/pricing";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
 import FeedbackForm from "./FeedbackForm";
-import { useDeadlineContext } from "./Contexts";
+import { useDeadlineContext, usePriceContext } from "./Contexts";
 import type {
   CartItem,
   MarketplaceOrderRequest,
@@ -46,6 +48,7 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
   const [price, setPrice] = useState<number | null>(total.price);
   const [tip, setTip] = useState<string | null>(null);
   const { allClosed } = useDeadlineContext();
+  const { showCredits } = usePriceContext();
 
   const totalPrice = applyTip(price, tip);
   const handleCardToken = ({ token }: StripeTokenPayload) => {
@@ -90,6 +93,12 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
   }
 
   const { menuNote, enablePayWhatYouCan } = menu;
+  const pricing = cartPricing({
+    cart,
+    items: menu.items,
+    enablePayWhatYouCan,
+  });
+  const belowMinimum = isBelowMinimum(price, pricing.minimum);
   const menuClosed = allClosed(menu);
   const disabled = menuClosed || !onCreateOrder;
   const stripeApiKey = window.gon?.stripeApiKey;
@@ -102,6 +111,7 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
       <h5>Menu</h5>
       <Items
         items={marketplaceItems}
+        showPriceMarkers={enablePayWhatYouCan && !showCredits}
         onAddToCart={handleAddToCart}
         disabled={disabled}
       />
@@ -138,6 +148,7 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
           disabled={disabled}
           tip={tip}
           onTip={setTip}
+          pricing={pricing}
         />
       ) : (
         <br />
@@ -148,6 +159,11 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
         onCardToken={handleCardToken}
         submitting={submitting}
         disabled={disabled}
+        blockedText={
+          !_.isEmpty(cart) && belowMinimum
+            ? `Enter at least ${formatMoney(pricing.minimum)}`
+            : null
+        }
       />
       <FeedbackForm />
     </>

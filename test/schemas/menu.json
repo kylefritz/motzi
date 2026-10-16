@@ -51,6 +51,7 @@
               "credits",
               "subscriber",
               "marketplace",
+              "payWhatYouCan",
               "pickupDays"
             ],
             "properties": {
@@ -68,6 +69,7 @@
               },
               "subscriber": { "type": "boolean" },
               "marketplace": { "type": "boolean" },
+              "payWhatYouCan": { "type": "boolean" },
               "pickupDays": {
                 "type": "array",
                 "items": {
@@ -229,6 +231,7 @@
               "credits",
               "subscriber",
               "marketplace",
+              "payWhatYouCan",
               "pickupDays"
             ],
             "properties": {
@@ -240,6 +243,7 @@
               "image": { "type": ["null", "string"] },
               "subscriber": { "type": "boolean" },
               "marketplace": { "type": "boolean" },
+              "payWhatYouCan": { "type": "boolean" },
               "pickupDays": {
                 "type": "array",
                 "items": {

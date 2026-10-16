@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -335,6 +335,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_120000) do
     t.bigint "item_id"
     t.boolean "marketplace", default: true
     t.bigint "menu_id"
+    t.boolean "pay_what_you_can", default: true, null: false
     t.integer "sort_order"
     t.boolean "subscriber", default: true
     t.datetime "updated_at", null: false

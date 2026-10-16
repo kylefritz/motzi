@@ -4,12 +4,14 @@ type MenuItemAddPayload = {
   itemId: number;
   subscriber: boolean;
   marketplace: boolean;
+  payWhatYouCan: boolean;
   pickupDayIds: number[];
 };
 
 type MenuItemUpdatePayload = {
   subscriber?: boolean;
   marketplace?: boolean;
+  payWhatYouCan?: boolean;
   sortOrder?: number | null;
 };
 

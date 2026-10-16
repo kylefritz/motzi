@@ -64,6 +64,7 @@ export default function mockMenuJson({
       credits: 1,
       subscriber: true,
       marketplace: true,
+      payWhatYouCan: true,
       pickupDays: itemPickupDays(),
     },
     {
@@ -77,6 +78,7 @@ export default function mockMenuJson({
       pickupDays: itemPickupDays(),
       subscriber: true,
       marketplace: true,
+      payWhatYouCan: true,
     },
     {
       id: 2,
@@ -88,6 +90,7 @@ export default function mockMenuJson({
       pickupDays: itemPickupDays(),
       subscriber: true,
       marketplace: false,
+      payWhatYouCan: true,
     },
     {
       id: 4,
@@ -99,6 +102,7 @@ export default function mockMenuJson({
       pickupDays: itemPickupDays(),
       subscriber: false,
       marketplace: true,
+      payWhatYouCan: true,
     },
     {
       id: 5,
@@ -110,6 +114,7 @@ export default function mockMenuJson({
       pickupDays: itemPickupDays(),
       subscriber: false,
       marketplace: true,
+      payWhatYouCan: true,
     },
   ];
 
@@ -123,6 +128,7 @@ export default function mockMenuJson({
       image: null,
       subscriber: false,
       marketplace: false,
+      payWhatYouCan: true,
       pickupDays: [],
     });
   }

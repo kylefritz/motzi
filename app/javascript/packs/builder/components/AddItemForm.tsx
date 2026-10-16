@@ -22,6 +22,7 @@ export default function AddItemForm({
   const api = useApi();
   const [subscriber, setSubscriber] = useState(true);
   const [marketplace, setMarketplace] = useState(true);
+  const [payWhatYouCan, setPayWhatYouCan] = useState(true);
   const [pickupDayIds, setPickupDayIds] = useState(pickupDays.map((d) => d.id));
 
   if (pickupDays.length === 0) {
@@ -47,7 +48,13 @@ export default function AddItemForm({
       alert("Select an item");
       return;
     }
-    api.menuItem.add({ itemId, subscriber, marketplace, pickupDayIds });
+    api.menuItem.add({
+      itemId,
+      subscriber,
+      marketplace,
+      payWhatYouCan,
+      pickupDayIds,
+    });
   };
 
   const not = new Set(rawNot);
@@ -82,6 +89,13 @@ export default function AddItemForm({
               <CheckboxInput
                 checked={subscriber}
                 onChange={(e) => setSubscriber(e.target.checked)}
+              />
+            </label>
+            <label title="Off makes the price a fixed minimum at checkout">
+              Pay what you can
+              <CheckboxInput
+                checked={payWhatYouCan}
+                onChange={(e) => setPayWhatYouCan(e.target.checked)}
               />
             </label>
             {pickupDays.map(({ id, pickupAt }) => {

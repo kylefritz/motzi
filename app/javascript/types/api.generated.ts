@@ -37,6 +37,7 @@ export type AdminMenuBuilderResponse = {
     image?: null | string;
     subscriber: boolean;
     marketplace: boolean;
+    payWhatYouCan: boolean;
     sortOrder: number | null;
     pickupDays: Array<{
       id: number;
@@ -92,6 +93,7 @@ export type MenuResponse = {
       image?: null | string;
       subscriber: boolean;
       marketplace: boolean;
+      payWhatYouCan: boolean;
       pickupDays: Array<{
         id: number;
         pickupAt: string;
@@ -155,6 +157,7 @@ export type MenuResponse = {
       image?: null | string;
       subscriber: boolean;
       marketplace: boolean;
+      payWhatYouCan: boolean;
       pickupDays: Array<{
         id: number;
         pickupAt: string;
