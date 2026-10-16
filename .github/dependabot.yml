@@ -1,0 +1,15 @@
+version: 2
+updates:
+  # Security updates only: a limit of 0 turns off routine version-bump PRs,
+  # while Dependabot security updates still open PRs for advisories.
+  - package-ecosystem: bundler
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      # The Rails component gems always share a version. Listed by name because
+      # an action* pattern would also match action_text-trix, which versions separately.
+      rails-security:
+        applies-to: security-updates
+        patterns: [rails, railties, actioncable, actionmailbox, actionmailer, actionpack, actiontext, actionview, activejob, activemodel, activerecord, activestorage, activesupport]
