@@ -57,6 +57,7 @@ class OrdersController < ApplicationController
         logger.warn "user=#{current_user.email} already placed an order for menu #{@menu.id}. returning current order"
         return render_current_order
       end
+      enforce_item_limits!(@menu, cart_items)
       user = current_user_or_create_user
       order_params = params.permit(:comments).merge(menu: @menu, user: user)
 
@@ -140,6 +141,7 @@ class OrdersController < ApplicationController
     )
 
     Order.transaction do
+      enforce_item_limits!(order.menu, cart_items, order: order)
       order.update!(params.permit(:comments))
       order.order_items.destroy_all
       cart_items.each { |attrs| order.order_items.create!(attrs) }
@@ -211,6 +213,53 @@ class OrdersController < ApplicationController
         quantity: cart_item_params[:quantity].presence || 1,
         pickup_day_id: pickup_day_id
       }
+    end
+  end
+
+  # Rejects a cart that would push an item past its limit for a pickup day
+  # (#410). The limited menu_item_pickup_days rows are locked (in id order, so
+  # concurrent carts can't deadlock) before counting what's already ordered, so
+  # two simultaneous orders can't both take the last one. nil is unlimited and
+  # 0 is sold out; pay it forward isn't a menu item, so it has no limit.
+  #
+  # When editing, `order` isn't counted against the limit, and a line can keep
+  # or lower the quantity it already had even if the item has since sold out
+  # (limits are often dropped to 0 after people have ordered).
+  def enforce_item_limits!(menu, cart_items, order: nil)
+    requested = cart_items.reject { |attrs| attrs[:item_id] == Item::PAY_IT_FORWARD_ID }
+                          .group_by { |attrs| [ attrs[:item_id], attrs[:pickup_day_id] ] }
+                          .transform_values { |lines| lines.sum { |attrs| attrs[:quantity].to_i } }
+    return if requested.empty?
+
+    limits = MenuItemPickupDay.joins(:menu_item)
+                              .where(menu_items: { menu_id: menu.id, item_id: requested.keys.map(&:first) },
+                                     pickup_day_id: requested.keys.map(&:last))
+                              .where.not(limit: nil)
+                              .order(:id)
+                              .lock("FOR UPDATE OF menu_item_pickup_days")
+                              .pluck("menu_items.item_id", :pickup_day_id, :limit)
+                              .to_h { |item_id, pickup_day_id, limit| [ [ item_id, pickup_day_id ], limit ] }
+                              .slice(*requested.keys)
+    return if limits.empty?
+
+    ordered = menu.item_counts
+    previous = order ? order.order_items.group(:item_id, :pickup_day_id).sum(:quantity) : {}
+
+    limits.each do |(item_id, pickup_day_id), limit|
+      quantity = requested[[ item_id, pickup_day_id ]]
+      already_had = previous.fetch([ item_id, pickup_day_id ], 0)
+      next if quantity <= already_had
+
+      ordered_by_others = ordered.dig(item_id, pickup_day_id).to_i - already_had
+      next if ordered_by_others + quantity <= limit
+
+      left = [ limit - ordered_by_others, 0 ].max
+      name = Item.find(item_id).name
+      day = menu.pickup_days.find(pickup_day_id).day_str
+      if left.zero?
+        raise OrderError.new("#{name} is sold out for #{day}. Please remove it from your cart")
+      end
+      raise OrderError.new("Only #{left} #{name} left for #{day}. Please update your cart")
     end
   end
 
