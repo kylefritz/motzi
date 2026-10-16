@@ -51,7 +51,7 @@ test("Order snapshot", () => {
   act(() => {
     result.current.addToCart({ id: 1, quantity: 1, pickupDayId: thur });
   });
-  let midpoint;
+  let midpoint: number | null = null;
   act(() => {
     midpoint = result.current.addToCart({
       id: 2,
@@ -64,7 +64,7 @@ test("Order snapshot", () => {
   act(() => {
     result.current.addToCart({ id: 3, quantity: 1, pickupDayId: sat });
   });
-  let done;
+  let done: number | null = null;
   act(() => {
     done = result.current.addToCart({ id: 3, quantity: 2, pickupDayId: sat });
   });
@@ -85,7 +85,7 @@ test("remove", () => {
     result.current.addToCart({ id: 3, quantity: 3, pickupDayId: sat });
   });
 
-  let totalAfterRm;
+  let totalAfterRm: number | null = null;
   act(() => {
     totalAfterRm = result.current.rmCartItem(3, 2, sat);
   });

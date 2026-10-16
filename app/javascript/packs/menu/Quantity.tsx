@@ -1,7 +1,17 @@
 import React, { useState } from "react";
 import { isInteger } from "lodash";
 
-export default function Quantity({ defaultQuantity = 1, onChange, max }) {
+type QuantityProps = {
+  defaultQuantity?: number;
+  onChange: (quantity: number) => void;
+  max?: number;
+};
+
+export default function Quantity({
+  defaultQuantity = 1,
+  onChange,
+  max,
+}: QuantityProps) {
   const [quantity, setQuantity] = useState(defaultQuantity);
 
   const handlePlus = () => {
@@ -33,7 +43,7 @@ export default function Quantity({ defaultQuantity = 1, onChange, max }) {
         <button
           type="button"
           className="btn btn-primary"
-          disabled={isInteger(max) && quantity >= max}
+          disabled={max !== undefined && isInteger(max) && quantity >= max}
           onClick={handlePlus}
         >
           +

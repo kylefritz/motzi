@@ -108,7 +108,7 @@ function Days({ menu, cart, rmCartItem }: DaysProps) {
         <DaysCart
           {...{
             menu,
-            rmCartItem: canEdit && rmCartItem,
+            rmCartItem: canEdit ? rmCartItem : undefined,
             cart: daysItems,
           }}
         />
@@ -125,7 +125,7 @@ function Days({ menu, cart, rmCartItem }: DaysProps) {
         <DaysCart
           {...{
             menu,
-            rmCartItem: canEdit && rmCartItem,
+            rmCartItem: canEdit ? rmCartItem : undefined,
             cart: payItForward,
           }}
         />
@@ -203,7 +203,7 @@ function cartTotal({
     return { price: null, credits: 0 };
   }
   const menuItemsById = _.keyBy(items, ({ id }) => id);
-  const addBy = (attribute) =>
+  const addBy = (attribute: "price" | "credits") =>
     _.sum(
       cart.map(
         ({ itemId, quantity }) =>
@@ -230,7 +230,7 @@ type UseCartInput = {
   items: MenuItem[];
 };
 
-type AddToCartPayload = {
+export type AddToCartPayload = {
   id: number;
   quantity: number;
   pickupDayId?: number;

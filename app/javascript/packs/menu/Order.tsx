@@ -8,7 +8,8 @@ import type { Menu as MenuType, MenuOrder, MenuUser } from "../../types/api";
 
 type OrderProps = {
   menu: MenuType;
-  user: MenuUser;
+  // Orders are only returned alongside their user, but Layout can't prove it.
+  user: MenuUser | null;
   order: MenuOrder;
   onEditOrder?: (() => void) | null;
 };
@@ -49,7 +50,7 @@ export default function Order({ menu, user, order, onEditOrder }: OrderProps) {
         </div>
       )}
 
-      {isSubscriptionOrder && (
+      {isSubscriptionOrder && user && (
         <div className="mt-5">
           <Subscription user={user} />
         </div>

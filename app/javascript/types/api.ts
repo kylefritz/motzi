@@ -30,11 +30,10 @@ export type MenuOrderItem = MenuOrder["items"][number];
 export type HolidayMenu = NonNullable<MenuResponse["holidayMenu"]>;
 export type HolidayOrder = NonNullable<MenuResponse["holidayOrder"]>;
 
-export type CartItem = Pick<
-  MenuOrderItem,
-  "itemId" | "quantity" | "pickupDayId"
-> &
-  Partial<Pick<MenuOrderItem, "day" | "pickupAt">>;
+// Pay-it-forward items are added without a pickupDayId; the server assigns
+// them to the menu's first pickup day.
+export type CartItem = Pick<MenuOrderItem, "itemId" | "quantity"> &
+  Partial<Pick<MenuOrderItem, "pickupDayId" | "day" | "pickupAt">>;
 
 export type AdminMenu = AdminMenuBuilderResponse;
 export type AdminPickupDay = AdminMenuBuilderResponse["pickupDays"][number];
@@ -57,12 +56,12 @@ export type MarketplaceOrderRequest = MenuOrderRequest & {
   phone: string;
   mailingList?: boolean;
   price: number;
-  token: string;
+  token: string | null;
 };
 
 export type CreditPurchaseRequest = {
   uid?: string | null;
-  token: string;
+  token: string | null;
   price: number;
   credits: number;
   breadsPerWeek: number;

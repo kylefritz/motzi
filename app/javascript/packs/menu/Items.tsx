@@ -7,7 +7,7 @@ import Quantity from "./Quantity";
 import { getDeadlineContext } from "./Contexts";
 import type { MenuItem, MenuItemPickupDay } from "../../types/api";
 
-function shortDay(day) {
+function shortDay(day: string) {
   switch (day) {
     case "Monday":
     case "Tuesday":
@@ -218,11 +218,7 @@ function Ordering(props: OrderingProps) {
   }
 
   return (
-    <DayButtons
-      onSetDayId={onChange ? setPickupDayId : undefined}
-      itemId={itemId}
-      {...props}
-    />
+    <DayButtons onSetDayId={onChange ? setPickupDayId : undefined} {...props} />
   );
 }
 
@@ -235,7 +231,7 @@ export function Item(props: ItemProps) {
   return (
     <div className="col-6 mb-4" data-testid={`item-${id}`}>
       <img
-        src={image}
+        src={image ?? undefined}
         alt={name}
         className="img-fluid"
         style={{ objectFit: "contain" }}

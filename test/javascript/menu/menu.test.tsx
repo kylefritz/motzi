@@ -6,13 +6,13 @@ import userEvent from "@testing-library/user-event";
 import Menu from "menu/Menu";
 import { SettingsContext } from "menu/Contexts";
 import renderMenu from "./Menu.helpers";
-import mockMenuJson from "./mockMenuJson";
+import { mockSubscriberMenuJson } from "./mockMenuJson";
 import type { MenuOrderRequest } from "../../../app/javascript/types/api";
 
 const getCartTotalText = () => {
   const orderHeading = screen.getByText("Your order");
   const orderContainer = orderHeading.nextElementSibling;
-  const priceEl = orderContainer.querySelector(".price");
+  const priceEl = orderContainer?.querySelector(".price");
   return priceEl ? priceEl.textContent : "";
 };
 
@@ -132,7 +132,7 @@ test("must buy more credits", () => {
 });
 
 test("old menu disables submit", () => {
-  const data = mockMenuJson({ order: false });
+  const data = mockSubscriberMenuJson({ order: false });
   data.menu.isCurrent = false;
 
   render(

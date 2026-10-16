@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import _ from "lodash";
 
 import BakersNote from "./BakersNote";
-import Cart, { useCart } from "./Cart";
+import Cart, { useCart, type AddToCartPayload } from "./Cart";
 import Title from "./Title";
 import Account from "./Account";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
 import Payment from "../buy/Payment";
+import type { StripeTokenPayload } from "../buy/Card";
 import { applyTip } from "../buy/Tip";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
 import FeedbackForm from "./FeedbackForm";
@@ -28,8 +29,6 @@ type MarketplaceProps = {
   menu: MenuType;
   onCreateOrder: (order: MarketplaceOrderRequest) => Promise<unknown>;
 };
-
-type StripeTokenPayload = { token: { id: string } };
 
 export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
   const { cart, addToCart, rmCartItem, total, marketplaceItems, payItForward } =
@@ -71,9 +70,7 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
     }).then(() => setSubmitting(false));
   };
 
-  const handleAddToCart = (
-    item: MenuItem & { quantity: number; pickupDayId: number }
-  ) => {
+  const handleAddToCart = (item: AddToCartPayload) => {
     const newCartPrice = addToCart(item);
     setPrice(newCartPrice);
   };
@@ -121,7 +118,7 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
         <div className="col">
           <textarea
             placeholder="Comments & special requests"
-            defaultValue={comments}
+            defaultValue={comments ?? undefined}
             onChange={(e) => setComments(e.target.value)}
             className="form-control"
             disabled={disabled}

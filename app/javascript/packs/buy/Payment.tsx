@@ -2,13 +2,13 @@ import React, { useMemo } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 
-import Card from "./Card";
+import Card, { type StripeTokenPayload } from "./Card";
 
 type PaymentProps = {
   credits?: number;
   price: number | null;
   stripeApiKey?: string;
-  onCardToken: (payload: { token: { id: string | null } }) => void;
+  onCardToken: (payload: StripeTokenPayload) => void;
   submitting: boolean;
   disabled?: boolean;
 };

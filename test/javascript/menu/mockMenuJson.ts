@@ -20,7 +20,7 @@ export type MockMenuOptions = {
   enablePayWhatYouCan?: boolean;
 };
 
-export default function ({
+export default function mockMenuJson({
   order: withOrder = true,
   user: withUser = true,
   items: withItems = true,
@@ -211,4 +211,19 @@ export default function ({
   } satisfies MenuResponse;
 
   return data;
+}
+
+export type SubscriberMockMenuOptions = Omit<MockMenuOptions, "user"> & {
+  user?: true | Partial<MenuUser>;
+};
+
+// Subscriber views (Menu, Subscription, EmailSettings) need a signed-in user.
+export function mockSubscriberMenuJson(
+  options: SubscriberMockMenuOptions = {}
+): MenuResponse & { user: MenuUser } {
+  const data = mockMenuJson(options);
+  if (!data.user) {
+    throw new Error("mockMenuJson returned no user");
+  }
+  return { ...data, user: data.user };
 }

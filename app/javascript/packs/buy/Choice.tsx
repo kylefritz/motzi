@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import _ from "lodash";
 import { formatMoney } from "accounting";
+import type { CreditBundle } from "../../types/api";
 
-function ChoiceText({ description, credits, price }) {
+type ChoiceTextProps = Pick<CreditBundle, "description" | "credits" | "price">;
+
+function ChoiceText({ description, credits, price }: ChoiceTextProps) {
   if (description) {
     return (
       <>
@@ -24,13 +27,22 @@ function ChoiceText({ description, credits, price }) {
   );
 }
 
+type ChoiceProps = Pick<
+  CreditBundle,
+  "description" | "credits" | "price" | "breadsPerWeek"
+> & {
+  onChoose: (
+    choice: Pick<CreditBundle, "credits" | "price" | "breadsPerWeek">
+  ) => void;
+};
+
 export default function Choice({
   description,
   credits,
   price,
   onChoose,
   breadsPerWeek,
-}) {
+}: ChoiceProps) {
   const handleClick = () => {
     onChoose({ credits, price, breadsPerWeek });
   };

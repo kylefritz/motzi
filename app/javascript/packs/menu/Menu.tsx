@@ -127,7 +127,7 @@ export default function Menu({
           <textarea
             style={{ minHeight: 120 }}
             placeholder="We'd love to hear your feedback on previous order or any comments/special requests you may have"
-            defaultValue={comments}
+            defaultValue={comments ?? undefined}
             onChange={(e) => setComments(e.target.value)}
             className="form-control"
             disabled={menuClosed}
@@ -154,14 +154,24 @@ export default function Menu({
   );
 }
 
+type SubmitStatus = {
+  isCurrent: boolean;
+  menuClosed: boolean;
+  insufficientCredits: boolean;
+  isEditing: boolean;
+  isSubmitting: boolean;
+};
+
+type ButtonText = { disabled: boolean; title?: string; text: string };
+
 function buttonText({
   isCurrent,
   menuClosed,
   insufficientCredits,
   isEditing,
   isSubmitting,
-}) {
-  const no = (text, title) => ({ disabled: true, title, text });
+}: SubmitStatus): ButtonText {
+  const no = (text: string, title: string) => ({ disabled: true, title, text });
   if (isSubmitting) {
     return no("Submitting…", "Your order is being submitted");
   }
@@ -181,10 +191,16 @@ function buttonText({
     );
   }
   const text = isEditing ? "Update Order" : "Submit Order";
-  return { disabled: false, title: null, text };
+  return { disabled: false, title: undefined, text };
 }
 
-function SubmitButton({ onClick, status }) {
+function SubmitButton({
+  onClick,
+  status,
+}: {
+  onClick: () => void;
+  status: SubmitStatus;
+}) {
   const { disabled, title, text } = buttonText(status);
   return (
     <button
