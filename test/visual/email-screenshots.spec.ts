@@ -15,7 +15,10 @@ const emails = [
   { mailer: "anomaly_mailer", action: "anomaly_report" },
 ];
 
-async function assertEmailLooksGood(screenshot: Buffer, page: any): Promise<string> {
+async function assertEmailLooksGood(
+  screenshot: Buffer,
+  page: any
+): Promise<string> {
   // If the full-page screenshot exceeds the 8000px API limit, take a
   // viewport-height crop instead (checks the top portion of the email).
   let imageBuffer = screenshot;
@@ -69,7 +72,7 @@ for (const { mailer, action } of emails) {
 
     const result = await assertEmailLooksGood(screenshot, page);
     expect(result, `Visual check failed for ${mailer}/${action}`).toContain(
-      "pass",
+      "pass"
     );
   });
 }

@@ -21,9 +21,8 @@ afterEach(() => {
 // before testing-library threw its "Unable to find…" error with the DOM dump.
 configure({ asyncUtilTimeout: 3000 });
 
-const createToken = mock(
-  (): Promise<StripeTokenResult> =>
-    Promise.resolve({ token: { id: "test_id" }, error: null })
+const createToken = mock((): Promise<StripeTokenResult> =>
+  Promise.resolve({ token: { id: "test_id" }, error: null })
 );
 
 const mockStripe = {
@@ -38,9 +37,9 @@ const Elements: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <div data-testid="stripe-elements">{children}</div>
 );
 
-const CardElement: React.FC<{ onChange?: (event: { complete: boolean }) => void }> = ({
-  onChange,
-}) => (
+const CardElement: React.FC<{
+  onChange?: (event: { complete: boolean }) => void;
+}> = ({ onChange }) => (
   <input
     data-testid="card-element"
     onChange={() => onChange?.({ complete: true })}

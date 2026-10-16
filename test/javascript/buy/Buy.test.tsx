@@ -1,6 +1,12 @@
 import React from "react";
 import { expect, mock, test } from "bun:test";
-import { act, render, screen, waitFor, fireEvent } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { SettingsContext } from "menu/Contexts";

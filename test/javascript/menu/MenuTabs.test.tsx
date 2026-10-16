@@ -14,9 +14,7 @@ const emptyOrder = {
   stripeChargeAmount: null,
 };
 
-function renderMenuTabs({
-  holidayOrder = null,
-}: { holidayOrder?: any } = {}) {
+function renderMenuTabs({ holidayOrder = null }: { holidayOrder?: any } = {}) {
   const data = mockMenuJson({ order: false });
   const holidayData = mockMenuJson({ order: false });
   holidayData.menu.name = "Passover Pre-Order";

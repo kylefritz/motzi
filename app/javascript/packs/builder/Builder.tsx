@@ -12,8 +12,7 @@ import type {
 } from "../../types/api";
 
 const menuId = _.get(location.pathname.match(/menus\/(.*)/), 1) as
-  | string
-  | undefined;
+  string | undefined;
 
 export default function MenuBuilder() {
   const [menu, setMenu] = useState<AdminMenuBuilderResponse | null>(null);

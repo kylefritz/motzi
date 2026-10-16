@@ -18,7 +18,7 @@ export default {
   async email(
     message: ForwardableEmailMessage,
     env: Env,
-    ctx: ExecutionContext,
+    ctx: ExecutionContext
   ): Promise<void> {
     try {
       // Cloudflare Email Routing rejects inbound mail that fails SPF and DKIM
@@ -34,7 +34,7 @@ export default {
 
       if (!inReplyTo) {
         message.setReject(
-          "Missing In-Reply-To — not a reply to a known analysis",
+          "Missing In-Reply-To — not a reply to a known analysis"
         );
         return;
       }

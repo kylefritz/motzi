@@ -22,9 +22,7 @@ test("menu for uid-user, before order", async () => {
 
   const itemCards = container.querySelectorAll(".col-6.mb-4");
   expect(itemCards).toHaveLength(3);
-  expect(
-    screen.getByRole("button", { name: "Submit Order" })
-  ).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Submit Order" })).toBeTruthy();
 
   // click pay it forward
   const donateBtn = screen.getByRole("button", { name: "Donate Now" });
@@ -70,9 +68,7 @@ test("menu for uid-user, after order", () => {
   const { container } = renderMenu();
   expect(getCartTotalText()).toContain("3 credits");
   expect(container.querySelectorAll(".col-6.mb-4")).toHaveLength(3);
-  expect(
-    screen.getByRole("button", { name: "Update Order" })
-  ).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Update Order" })).toBeTruthy();
 });
 
 test("orderCredits", async () => {

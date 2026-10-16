@@ -14,7 +14,10 @@ export type HttpErrorContext = {
 // decline, ordering closed) — tagged severity "warning" so the anomaly feed
 // lists it under Rejected Requests instead of as an application failure.
 // Server-side events use the same context.severity key.
-export function httpErrorContext(kind: string, error: unknown): HttpErrorContext {
+export function httpErrorContext(
+  kind: string,
+  error: unknown
+): HttpErrorContext {
   const response = (error as { response?: { status?: number; data?: unknown } })
     ?.response;
   const data = response?.data;

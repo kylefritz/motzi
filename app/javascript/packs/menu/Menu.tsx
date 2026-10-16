@@ -154,7 +154,13 @@ export default function Menu({
   );
 }
 
-function buttonText({ isCurrent, menuClosed, insufficientCredits, isEditing, isSubmitting }) {
+function buttonText({
+  isCurrent,
+  menuClosed,
+  insufficientCredits,
+  isEditing,
+  isSubmitting,
+}) {
   const no = (text, title) => ({ disabled: true, title, text });
   if (isSubmitting) {
     return no("Submitting…", "Your order is being submitted");

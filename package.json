@@ -37,7 +37,7 @@
     "dotenv": "^17.3.1",
     "esbuild": "^0.20.2",
     "jsdom": "^22.1.0",
-    "prettier": "2.0.4",
+    "prettier": "^3.9.10",
     "react-test-renderer": "^18.3.1",
     "typescript": "^5.5.4"
   },
@@ -47,6 +47,8 @@
     "test": "bun test",
     "test-watch": "bun test --watch",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "typecheck:test": "IS_REACT_ACT_ENVIRONMENT=false tsc --noEmit -p tsconfig.test.json"
+    "typecheck:test": "IS_REACT_ACT_ENVIRONMENT=false tsc --noEmit -p tsconfig.test.json",
+    "format": "prettier --write \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts postcss.config.js",
+    "format:check": "prettier --check \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts postcss.config.js"
   }
 }

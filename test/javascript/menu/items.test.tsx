@@ -55,7 +55,10 @@ test("remaining deadline", () => {
   const renderDay = ({
     remaining = 10,
     orderDeadlineAt = basePickupAt,
-  }: { remaining?: number; orderDeadlineAt?: string }) =>
+  }: {
+    remaining?: number;
+    orderDeadlineAt?: string;
+  }) =>
     render(
       <DayButton
         itemId={1}

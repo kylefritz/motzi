@@ -14,10 +14,7 @@ type BuilderLayoutProps = {
   menu: AdminMenuBuilderResponse;
 };
 
-export default function BuilderLayout({
-  allItems,
-  menu,
-}: BuilderLayoutProps) {
+export default function BuilderLayout({ allItems, menu }: BuilderLayoutProps) {
   const api = useApi();
   const [tab, setTab] = React.useState(0);
   const [pickupDayTab, setPickupDayTab] = React.useState(0);
@@ -130,7 +127,10 @@ export default function BuilderLayout({
       </FilterTabs>
       <TabPanel value={tab} index={0}>
         <MenuItemGrid
-          {...{ menuItems: filterMenuItemsByPickupDay(menu.menuItems), pickupDays }}
+          {...{
+            menuItems: filterMenuItemsByPickupDay(menu.menuItems),
+            pickupDays,
+          }}
         />
       </TabPanel>
       <TabPanel value={tab} index={1}>
@@ -235,7 +235,8 @@ const TabButton = styled.button<{ active: boolean }>`
   min-width: 90px;
   padding: 6px 12px;
   border: 0;
-  border-bottom: 3px solid ${({ active }) => (active ? "#3f3a80" : "transparent")};
+  border-bottom: 3px solid
+    ${({ active }) => (active ? "#3f3a80" : "transparent")};
   color: ${({ active }) => (active ? "#222" : "#6b6b6b")};
   background: transparent;
   cursor: pointer;

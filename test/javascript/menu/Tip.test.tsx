@@ -9,9 +9,7 @@ test("Tip interactions", async () => {
   const user = userEvent.setup();
   const onTip = mock(() => {});
 
-  const { container } = render(
-    <Tip onTip={onTip} tip={undefined} price={5} />
-  );
+  const { container } = render(<Tip onTip={onTip} tip={undefined} price={5} />);
   const tipButtons = container.querySelectorAll("button");
   expect(tipButtons).toHaveLength(3);
   expect(tipButtons[0].textContent).toContain("$1");

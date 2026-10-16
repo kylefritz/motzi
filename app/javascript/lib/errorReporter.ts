@@ -74,7 +74,7 @@ export function reportError(payload: ReportPayload): void {
 
 export function reportException(
   error: unknown,
-  context: Record<string, unknown> = {},
+  context: Record<string, unknown> = {}
 ): void {
   try {
     const e = error as Error & { name?: string };
@@ -126,6 +126,6 @@ export function installGlobalErrorReporter(): void {
         url: location.pathname,
         context: { kind: "unhandledrejection" },
       });
-    },
+    }
   );
 }
