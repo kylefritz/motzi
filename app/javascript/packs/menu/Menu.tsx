@@ -10,7 +10,7 @@ import PayItForward from "./PayItForward";
 import SkipNote from "./SkipNote";
 import FeedbackForm from "./FeedbackForm";
 import Subscription from "./Subscription";
-import { getDeadlineContext } from "./Contexts";
+import { useDeadlineContext } from "./Contexts";
 import type {
   Menu as MenuType,
   MenuOrder,
@@ -35,22 +35,16 @@ export default function Menu({
   isHoliday,
   onShowEmailSettings,
 }: MenuProps) {
-  const {
-    cart,
-    addToCart,
-    rmCartItem,
-    setCart,
-    total,
-    subscriberItems,
-    payItForward,
-  } = useCart({
-    order,
-    items: menu.items,
-  });
+  const { cart, addToCart, rmCartItem, total, subscriberItems, payItForward } =
+    useCart({
+      order,
+      items: menu.items,
+    });
   const [comments, setComments] = useState<string | null>(
     _.get(order, "comments", null)
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { allClosed } = useDeadlineContext();
 
   const handleCreateOrder = () => {
     if (_.isEmpty(cart)) {
@@ -89,7 +83,7 @@ export default function Menu({
   }
 
   const { subscriberNote, isCurrent } = menu;
-  const menuClosed = getDeadlineContext().allClosed(menu);
+  const menuClosed = allClosed(menu);
   const insufficientCredits = !isHoliday && total.credits > userCredits;
   return (
     <>

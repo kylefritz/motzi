@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from "react";
 
 import {
-  getDeadlineContext,
+  useDeadlineContext,
   SettingsContext,
-  getSettingsContext,
+  useSettingsContext,
 } from "./Contexts";
 import Marketplace from "./Marketplace";
 import Order from "./Order";
@@ -34,8 +34,8 @@ export default function HolidayMenuTab({
   user,
 }: HolidayMenuTabProps) {
   const [isEditingOrder, setIsEditingOrder] = useState(false);
-  const orderingClosed = getDeadlineContext().allClosed(menu);
-  const parentSettings = getSettingsContext();
+  const orderingClosed = useDeadlineContext().allClosed(menu);
+  const parentSettings = useSettingsContext();
 
   // Override showCredits to false for holiday menus — show USD pricing
   const holidaySettings = { ...parentSettings, showCredits: false };

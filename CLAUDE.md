@@ -26,7 +26,7 @@ There are three test suites. The first two run in CI; the third is manual.
 | **JS** | `bun test` | React components (menu, cart, builder, credits) via jsdom | ~3s | Yes |
 | **Visual** | `bunx playwright test` | Email template screenshots — mobile (iPhone 14) & desktop | ~20s | Monthly + on demand (`LLM evals` workflow), never per PR |
 
-**Local CI**: `bin/ci` (Rails 8.1 local CI, steps in `config/ci.rb`) runs rubocop, Prettier (`bun run format:check`; fix with `bun run format`), bundler-audit, brakeman, the Rails and JS suites, and the typecheck in one go.
+**Local CI**: `bin/ci` (Rails 8.1 local CI, steps in `config/ci.rb`) runs rubocop, Prettier (`bun run format:check`; fix with `bun run format`), ESLint with react-hooks (`bun run lint`), bundler-audit, brakeman, the Rails and JS suites, and the typecheck in one go.
 
 ### Visual tests
 

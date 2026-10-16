@@ -1,6 +1,6 @@
 import React from "react";
 import { expect, mock, test } from "bun:test";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import HolidayMenuTab from "menu/HolidayMenuTab";

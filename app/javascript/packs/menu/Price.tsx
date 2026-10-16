@@ -1,9 +1,9 @@
-import React, { useContext } from "react";
+import React from "react";
 import accounting from "accounting";
 import pluralize from "pluralize";
 import _ from "lodash";
 
-import { getPriceContext } from "./Contexts";
+import { usePriceContext } from "./Contexts";
 
 type PriceProps = {
   price?: number | null;
@@ -12,7 +12,7 @@ type PriceProps = {
 };
 
 function Format({ price, credits = 1, stripeChargeAmount }: PriceProps) {
-  const { showCredits } = getPriceContext();
+  const { showCredits } = usePriceContext();
 
   if (!_.isNil(stripeChargeAmount)) {
     return accounting.formatMoney(stripeChargeAmount);

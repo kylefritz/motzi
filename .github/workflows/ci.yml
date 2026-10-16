@@ -212,6 +212,9 @@ jobs:
       - name: Prettier
         run: bun run format:check
 
+      - name: ESLint
+        run: bun run lint
+
       - name: JS tests
         run: |
           set -o pipefail

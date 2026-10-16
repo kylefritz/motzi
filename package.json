@@ -24,6 +24,7 @@
   "version": "0.1.0",
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.58.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.0",
@@ -41,10 +42,15 @@
     "axe-core": "^4.13.0",
     "dotenv": "^17.3.1",
     "esbuild": "^0.20.2",
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
     "jsdom": "^22.1.0",
     "prettier": "^3.9.10",
     "react-test-renderer": "^18.3.1",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.71.2"
   },
   "scripts": {
     "build": "esbuild app/javascript/packs/*.ts app/javascript/packs/*.tsx --bundle --sourcemap --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx --outdir=app/assets/builds --public-path=/assets",
@@ -54,6 +60,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "typecheck:test": "IS_REACT_ACT_ENVIRONMENT=false tsc --noEmit -p tsconfig.test.json",
     "format": "prettier --write \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts postcss.config.js",
-    "format:check": "prettier --check \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts postcss.config.js"
+    "format:check": "prettier --check \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts postcss.config.js",
+    "lint": "eslint --max-warnings=0 app/javascript test/javascript"
   }
 }

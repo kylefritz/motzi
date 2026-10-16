@@ -9,12 +9,8 @@ import { DayContext, SettingsContext } from "./Contexts";
 import Layout from "./Layout";
 import MenuTabs from "./MenuTabs";
 import type {
-  CreditBundle,
-  Menu as MenuType,
-  MenuOrder,
   MenuOrderRequest,
   MenuResponse,
-  MenuUser,
   MarketplaceOrderRequest,
 } from "../../types/api";
 
@@ -37,7 +33,7 @@ export default function App() {
   };
 
   const fetchMenu = () => {
-    let params = { uid };
+    const params = { uid };
     const id = _.get(location.pathname.match(/menus\/(.*)/), 1);
     const menuPath = id ? `/menus/${id}.json` : "/menu.json";
 
@@ -67,6 +63,8 @@ export default function App() {
     attempt(0);
   };
 
+  // Load once on mount; later reloads go through fetchMenu (onRefresh) directly.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(fetchMenu, []);
 
   const handleCreateOrder = (

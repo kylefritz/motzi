@@ -3,6 +3,7 @@
 CI.run do
   step "Style: Ruby", "bin/rubocop"
   step "Style: JS/TS", "bun run format:check"
+  step "Lint: JS/TS", "bun run lint"
 
   step "Security: Gem audit", "bin/bundler-audit"
   step "Security: Brakeman code analysis", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"

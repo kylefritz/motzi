@@ -8,7 +8,7 @@ import Payment from "./Payment";
 import type { StripeTokenPayload } from "./Card";
 import PayWhatYouCan from "./PayWhatYouCan";
 import { applyTip } from "./Tip";
-import { getSettingsContext } from "../menu/Contexts";
+import { useSettingsContext } from "../menu/Contexts";
 import { reportException } from "../../lib/errorReporter";
 import type {
   CreditItemResponse,
@@ -27,7 +27,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
     bundles: passedBundles,
     enablePayWhatYouCan: passedEnablePayWhatYouCan,
     onRefresh: onComplete,
-  } = getSettingsContext();
+  } = useSettingsContext();
 
   const [credits, setCredits] = useState<number | null>(null);
   const [price, setPrice] = useState<number | null>(null);
@@ -73,6 +73,9 @@ export default function Buy({ user: passedUser }: BuyProps) {
         reportException(error, { kind: "buy_load_user" });
         setError("We can't load your user account");
       });
+    // Mount-only: re-running on user/bundles would refetch forever when the
+    // menu has no bundles.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChoose = ({

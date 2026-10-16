@@ -1,7 +1,7 @@
 import React from "react";
 import moment from "moment";
 
-import { getDeadlineContext } from "./Contexts";
+import { useDeadlineContext } from "./Contexts";
 import type { MenuPickupDay } from "../../types/api";
 
 function formatTime(m: moment.Moment) {
@@ -58,7 +58,7 @@ type TitleProps = {
 
 export default function Title({ menu }: TitleProps) {
   const { name, pickupDays } = menu;
-  const isClosed = getDeadlineContext().allClosed(menu);
+  const isClosed = useDeadlineContext().allClosed(menu);
 
   return (
     <>
