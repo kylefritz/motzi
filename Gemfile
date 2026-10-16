@@ -24,7 +24,6 @@ gem "heroku-api-postgres" # Heroku Postgres API for automated backups
 gem "image_processing", "~> 2.1" # Active Storage variants (item thumbnails in admin)
 gem "jaro_winkler", "~> 1.5.5" # pinned for compatibility
 gem "jbuilder", "~> 2.7" # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
-gem "jsbundling-rails" # build JS via rails asset pipeline hooks
 gem "json", "~> 2.21", ">= 2.21.2" # json 3.0 (Sep 2026) dropped the positional options hash and breaks ActiveSupport::JSON.decode on Rails 8.1.3; 2.21.2 has the CVE fix
 gem "mission_control-jobs" # job UI for ActiveJob backends
 gem "mjml-rails" # responsive email templates with MJML
@@ -48,6 +47,7 @@ gem "solid_cache" # Postgres-backed Rails cache store (no Redis/Memcached)
 gem "solid_queue" # database-backed ActiveJob backend (Rails 7.2+)
 gem "sql_query" # load SQL queries from erb templates
 gem "stripe", "~> 19.6" # accept credit cards; tests stub api.stripe.com with WebMock (test/support/stripe_stubs.rb)
+gem "vite_rails", "~> 3.11" # build JS with Vite (app/javascript/entrypoints); hooks into assets:precompile
 
 group :development, :test do
   gem "byebug" # Call 'byebug' anywhere in the code to stop execution and get a debugger console

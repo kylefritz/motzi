@@ -46,6 +46,12 @@ export default [
       globals: { ...globals.node },
     },
   },
+  {
+    files: ["vite.config.mts"],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+  },
   // Must come last: turns off stylistic rules that would fight Prettier.
   prettier,
 ];

@@ -21,6 +21,10 @@ require_relative "support/fixture_helpers"
 # Held until the process (and its forked workers) exit.
 TEST_DB_LOCK = TestDbLock.acquire!(ActiveRecord::Base.connection_db_config.database)
 
+# Build Vite assets (if stale) once, before `parallelize` forks; otherwise each
+# worker's first page render would race to auto-build public/vite-test.
+ViteRuby.commands.build || abort("Vite build failed; see the log above")
+
 # json-schema still defaults to MultiJson and warns about it; use the stdlib JSON directly.
 JSON::Validator.use_multi_json = false
 
