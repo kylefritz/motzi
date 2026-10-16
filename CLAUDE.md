@@ -80,6 +80,17 @@ rake ai:eval_baseline       # accept the latest scorecard as the baseline (no AP
 - **Public prefix**: `s3://motzi/public/` is publicly readable. Everything else (Active Storage files) is private.
 - **PR screenshots**: Uploaded to `s3://motzi/public/gh/pr-<NUMBER>/` — see "PR Screenshots" below.
 
+## Design system
+
+The **Motzi Design System** lives in Claude Design (not in this repo): https://claude.ai/design/p/d2b552b1-ff9d-4b5d-8f8d-eca059ebda5d (project id `d2b552b1-ff9d-4b5d-8f8d-eca059ebda5d`). Use it for any UI or email change. Claude can read it with the `DesignSync` tool (`list_files` / `get_file`; run `/design-login` once to authorize). Start with `readme.md` (brand, voice, visual rules), then `tokens/{colors,typography,spacing}.css`, `components/{app,menu,marketing}/*` (each has a `.prompt.md`), and `ui_kits/menu-app/` for the ordering flow. Its `github.md` records which repo files each screen was synced from.
+
+The tokens mirror `app/assets/stylesheets/_shop.scss.erb` (app/Bootstrap variables), `application.scss` and `marketing.scss`. When you change a color, font or spacing value in the SCSS, update the design system too (and vice versa).
+
+Quick reference:
+- **App** (`/menu`, emails): Motzi Purple `#352C63` (headings, primary), Motzi Red `#D5482C` (secondary, credits, CTA in email), Cream `#FFEED6` page (`#FFECD6` in email), Ink `#2E2927` text, white card. Raleway 300 body, uppercase Raleway headings, Oswald 400 uppercase + `0.05rem` tracking for buttons and prices. Single 680px white card on cream; small radii (2–4px); nearly flat shadows.
+- **Marketing** (motzibread.com): dusty Purple `#5B4062`, Terracotta `#D3725F`, Brick `#A15745`, Warm Gray `#EDE9E1`; Mulish 300 body at 20px.
+- **Voice**: warm "we" → "you", short playful microcopy ("3 left!", "We've got your order!"). Almost no icons: prefer words.
+
 ## PR Screenshots
 
 PRs with visual changes should include screenshots in the PR description (not comments).
