@@ -29,8 +29,12 @@ class ConfirmationMailerTest < ActionMailer::TestCase
     assert_equal order.menu_id, message.menu_id
   end
 
+  # The dedup window is wall-clock time from the first send. Rendering the MJML
+  # email has taken over 10s on a loaded CI runner, which let the window expire
+  # between the two sends, so these tests freeze time.
   test "order_email suppresses an identical resend within the dedup window" do
     order = orders(:kyle_week1)
+    freeze_time
 
     with_real_cache do
       assert_emails 1 do
@@ -42,12 +46,26 @@ class ConfirmationMailerTest < ActionMailer::TestCase
 
   test "order_email still sends within the window when the order content changed" do
     order = orders(:kyle_week1)
+    freeze_time
 
     with_real_cache do
       assert_emails 2 do
         ConfirmationMailer.with(order: order).order_email.deliver_now
         order.order_items.first.update!(quantity: 3)
         ConfirmationMailer.with(order: order.reload).order_email.deliver_now
+      end
+    end
+  end
+
+  test "order_email sends again once the dedup window has passed" do
+    order = orders(:kyle_week1)
+    freeze_time
+
+    with_real_cache do
+      assert_emails 2 do
+        ConfirmationMailer.with(order: order).order_email.deliver_now
+        travel ConfirmationMailer::ORDER_EMAIL_DEDUP_WINDOW + 1.second
+        ConfirmationMailer.with(order: order).order_email.deliver_now
       end
     end
   end
