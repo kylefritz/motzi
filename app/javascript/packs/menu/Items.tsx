@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { sortBy, isNumber } from "lodash";
-import moment from "moment";
+import { weekday } from "../../lib/dates";
 
 import Price from "./Price";
 import Quantity from "./Quantity";
@@ -39,7 +39,7 @@ export function DayButton({
   onSetDayId,
   orderingDeadlineText,
 }: DayButtonProps) {
-  const day = moment(pickupAt).format("dddd");
+  const day = weekday(pickupAt);
   const isPastDeadline = useDeadlineContext().isClosed(orderDeadlineAt);
 
   if (remaining < 1 || isPastDeadline) {
@@ -203,7 +203,7 @@ function Ordering(props: OrderingProps) {
     const { remaining, pickupAt } = pickupDays.find(
       ({ id }) => pickupDayId === id
     ) as MenuItemPickupDay;
-    const day = moment(pickupAt).format("dddd");
+    const day = weekday(pickupAt);
 
     return (
       <QuantityAdd

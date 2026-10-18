@@ -29,8 +29,8 @@ export default function mockMenuJson({
 }: MockMenuOptions = {}): MenuResponse {
   // Relative to the fake test clock (FIXED_NOW unless a test overrides it),
   // so the menu is always open: deadline in 12h, pickup in 24h.
-  const pickupAt = now().plus(Duration.fromISO("PT24H")).toISO();
-  const orderDeadlineAt = now().plus(Duration.fromISO("PT12H")).toISO();
+  const pickupAt = now().plus(Duration.fromISO("PT24H")).toISO()!;
+  const orderDeadlineAt = now().plus(Duration.fromISO("PT12H")).toISO()!;
   const pickupDays: MenuPickupDay[] = [
     {
       id: 1,

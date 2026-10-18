@@ -1,11 +1,10 @@
 import React, { useContext } from "react";
-import moment from "moment";
+import { isPast } from "../../lib/dates";
 import _ from "lodash";
 import type { MenuPickupDay, CreditBundle } from "../../types/api";
 
 function pastDeadline(deadline: string) {
-  const now = moment();
-  return now > moment(deadline);
+  return isPast(deadline);
 }
 
 type DayContextValue = {

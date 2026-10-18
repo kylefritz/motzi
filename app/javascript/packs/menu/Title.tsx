@@ -1,14 +1,8 @@
 import React from "react";
-import moment from "moment";
+import { parse, shortDate, shortTime } from "../../lib/dates";
 
 import { useDeadlineContext } from "./Contexts";
 import type { MenuPickupDay } from "../../types/api";
-
-function formatTime(m: moment.Moment) {
-  const minutes = m.minutes();
-  const formatted = minutes === 0 ? m.format("ha") : m.format("h:mma");
-  return formatted.replace("am", "a").replace("pm", "p");
-}
 
 function PickupSchedule({
   pickupDays,
@@ -30,16 +24,16 @@ function PickupSchedule({
       }}
     >
       {pickupDays.map(({ id, pickupAt, orderDeadlineAt }) => {
-        const pickup = moment(pickupAt);
-        const deadline = moment(orderDeadlineAt);
+        const pickup = parse(pickupAt);
+        const deadline = parse(orderDeadlineAt);
         return (
           <div key={id} style={{ flex: "1 1 140px" }}>
-            <span>{pickup.format("ddd, MMM D")}</span>
+            <span>{shortDate(pickup)}</span>
             <br />
-            <span>pickup after {formatTime(pickup)}</span>
+            <span>pickup after {shortTime(pickup)}</span>
             <br />
             <span style={{ fontSize: "0.85em", opacity: 0.7, color: muted }}>
-              order by {deadline.format("ddd, MMM D")} at {formatTime(deadline)}
+              order by {shortDate(deadline)} at {shortTime(deadline)}
             </span>
           </div>
         );

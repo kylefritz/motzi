@@ -9,7 +9,7 @@ type DayProps = {
 };
 
 export default class Day extends React.Component<DayProps> {
-  cbRef: React.RefObject<HTMLInputElement>;
+  cbRef: React.RefObject<HTMLInputElement | null>;
 
   constructor(props: DayProps) {
     super(props);

@@ -1,6 +1,12 @@
 import React, { useRef, useState } from "react";
 import styled from "styled-components";
-import moment from "moment";
+import {
+  parse,
+  shortDate,
+  shortTime,
+  toDateTimeLocal,
+  weekday,
+} from "../../../lib/dates";
 import { useApi } from "../Context";
 import type { AdminPickupDay } from "../../../types/api";
 import { Button } from "./ui/Button";
@@ -8,7 +14,7 @@ import { Panel, PanelBody, PanelHeader } from "./ui/Panel";
 import { ControlInput } from "./ui/FormControls";
 
 export function shortDay(pickupAt: string) {
-  const day = moment(pickupAt).format("dddd");
+  const day = weekday(pickupAt);
   switch (day) {
     case "Monday":
     case "Tuesday":
@@ -24,20 +30,14 @@ export function shortDay(pickupAt: string) {
   return day;
 }
 
-function formatTime(m: moment.Moment) {
-  const minutes = m.minutes();
-  const formatted = minutes === 0 ? m.format("ha") : m.format("h:mma");
-  return formatted.replace("am", "a").replace("pm", "p");
-}
-
 function formatPickupLabel(pickupAt: string) {
-  const m = moment(pickupAt);
-  return `${m.format("ddd, MMM D")} at ${formatTime(m)}`;
+  const dt = parse(pickupAt);
+  return `${shortDate(dt)} at ${shortTime(dt)}`;
 }
 
 function formatDeadlineLabel(orderDeadlineAt: string) {
-  const m = moment(orderDeadlineAt);
-  return `${m.format("ddd, MMM D")} at ${formatTime(m)}`;
+  const dt = parse(orderDeadlineAt);
+  return `${shortDate(dt)} at ${shortTime(dt)}`;
 }
 
 type PickupDaysPanelProps = {
@@ -83,14 +83,14 @@ export default function PickupDaysPanel({
   function handleSetDeadline(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     const pickup = inputPickup.current?.value || "";
-    const deadline = moment(pickup).subtract(
-      moment.duration(leadtimeHours || 27, "hours")
-    );
+    const pickupAt = parse(pickup);
+    if (!pickupAt.isValid) return;
+    const deadline = pickupAt.minus({ hours: leadtimeHours || 27 });
 
+    // Local time, like the pickup input. Rails reads both in Eastern; this
+    // used to write UTC (toISOString), which set deadlines 4-5 hours late.
     if (inputDeadline.current) {
-      inputDeadline.current.value = deadline
-        .toISOString()
-        .replace(/:00.000Z/, "");
+      inputDeadline.current.value = toDateTimeLocal(deadline);
     }
   }
   return (
@@ -174,7 +174,7 @@ type EditablePickupDayProps = {
 };
 
 function formatDateTimeLocal(value: string) {
-  return moment(value).format("YYYY-MM-DDTHH:mm");
+  return toDateTimeLocal(parse(value));
 }
 
 function EditablePickupDay({
