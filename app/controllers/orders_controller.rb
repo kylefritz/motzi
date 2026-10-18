@@ -136,6 +136,7 @@ class OrdersController < ApplicationController
 
       # send confirmation email
       ConfirmationMailer.with(order: order).order_email.deliver_later
+      logger.info "[ConfirmationMailer] enqueued order_email source=order_update order_id=#{order.id} user_id=#{order.user_id}"
 
       ahoy.track "order_updated"
     end

@@ -32,6 +32,19 @@ class StripeCheckout::FulfillmentTest < ActiveSupport::TestCase
     assert_nil Order.find_by(stripe_payment_intent_id: "pi_test_mail")
   end
 
+  test "the [ConfirmationMailer] enqueued log line is written only for a committed order" do
+    logged = capture_log do
+      Order.transaction do
+        create_order!
+        raise ActiveRecord::Rollback
+      end
+    end
+    assert_no_match(/\[ConfirmationMailer\] enqueued/, logged)
+
+    logged = capture_log { Order.transaction { create_order! } }
+    assert_match(/\[ConfirmationMailer\] enqueued order_email source=order_create order_id=\d+ user_id=#{users(:kyle).id}/, logged)
+  end
+
   test "no credits email when the credit purchase rolls back" do
     assert_no_enqueued_emails do
       CreditItem.transaction do
@@ -40,5 +53,17 @@ class StripeCheckout::FulfillmentTest < ActiveSupport::TestCase
         raise ActiveRecord::Rollback
       end
     end
+  end
+
+  private
+
+  def capture_log
+    io = StringIO.new
+    original = Rails.logger
+    Rails.logger = ActiveSupport::Logger.new(io)
+    yield
+    io.string
+  ensure
+    Rails.logger = original
   end
 end

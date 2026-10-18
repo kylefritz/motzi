@@ -21,17 +21,18 @@ class StripeCheckout
 
     # Creates the order and its items, then emails the confirmation. payment
     # is nil for a member spending credits.
-    def create_order!(menu:, user:, comments:, cart_items:, payment:)
+    def create_order!(menu:, user:, comments:, cart_items:, payment:, source: "order_create")
       order = Order.new(menu:, user:, comments:)
       cart_items.each { |attrs| order.order_items.build(attrs) }
       order.assign_attributes(payment.record_attrs) if payment
       order.save!
-      deliver_after_commit(ConfirmationMailer.with(order:).order_email)
+      deliver_after_commit(ConfirmationMailer.with(order:).order_email,
+                           "order_email source=#{source} order_id=#{order.id} user_id=#{order.user_id}")
       order
     end
 
     # Adds the credits, turns on the weekly menu, then emails the receipt.
-    def add_credits!(user:, quantity:, description:, payment:, breads_per_week:)
+    def add_credits!(user:, quantity:, description:, payment:, breads_per_week:, source: "credit_purchase")
       credit_item = user.credit_items.create!(
         **payment.record_attrs,
         memo: "#{description}. Paid via Stripe $#{payment.amount.to_s('F')}.",
@@ -39,16 +40,21 @@ class StripeCheckout
         good_for_weeks: 42
       )
       user.update(breads_per_week: breads_per_week.to_f, receive_weekly_menu: true)
-      deliver_after_commit(ConfirmationMailer.with(credit_item:).credit_email)
+      deliver_after_commit(ConfirmationMailer.with(credit_item:).credit_email,
+                           "credit_email source=#{source} credit_item_id=#{credit_item.id} user_id=#{user.id}")
       credit_item
     end
 
     # Mail only once the record is committed. Solid Queue shares the app's
     # database, so a job enqueued in a transaction that rolls back (say the
     # webhook recorded this payment first) is rolled back with it, but that
-    # stops holding if the queue ever moves to its own database.
-    def deliver_after_commit(mail)
-      ActiveRecord.after_all_transactions_commit { mail.deliver_later }
+    # stops holding if the queue ever moves to its own database. The
+    # "enqueued" log line (#423) is written only when the job really is.
+    def deliver_after_commit(mail, log_details)
+      ActiveRecord.after_all_transactions_commit do
+        mail.deliver_later
+        Rails.logger.info "[ConfirmationMailer] enqueued #{log_details}"
+      end
     end
 
     def credits_description(quantity)
@@ -70,7 +76,7 @@ class StripeCheckout
                    mailing_list: metadata["mailing_list"] == "true"
                  )
           create_order!(menu:, user:, comments: StripeCheckout.read_metadata(metadata, "comments").presence,
-                        cart_items:, payment:)
+                        cart_items:, payment:, source: "stripe_webhook")
         end
       end
     end
@@ -80,7 +86,7 @@ class StripeCheckout
         quantity = metadata["purchase_credits"].to_i
         add_credits!(user: User.find(metadata["purchase_user_id"]), quantity:,
                      description: credits_description(quantity), payment:,
-                     breads_per_week: metadata["breads_per_week"])
+                     breads_per_week: metadata["breads_per_week"], source: "stripe_webhook")
       end
     end
 
