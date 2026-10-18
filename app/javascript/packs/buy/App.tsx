@@ -5,7 +5,7 @@ import queryString from "query-string";
 
 import Choice from "./Choice";
 import Payment from "./Payment";
-import { isRequiresAction } from "./Card";
+import { isPending, isRequiresAction } from "./Card";
 import PayWhatYouCan from "./PayWhatYouCan";
 import { applyTip } from "./Tip";
 import { useSettingsContext } from "../menu/Contexts";
@@ -17,8 +17,14 @@ import type {
   MenuResponse,
   MenuUser,
   PaymentSubmission,
+  PendingResponse,
   RequiresActionResponse,
 } from "../../types/api";
+
+// What a member may pay for credits (CreditItemsController#credits_price_cents,
+// CreditBundle::MAX_PRICE)
+const CREDITS_MIN_PRICE = 1;
+const CREDITS_MAX_PRICE = 500;
 
 type BuyProps = {
   user?: MenuUser;
@@ -112,13 +118,13 @@ export default function Buy({ user: passedUser }: BuyProps) {
 
     // send the stripe payment to rails to complete purchase
     return axios
-      .post<CreditItemResponse | RequiresActionResponse>(
+      .post<CreditItemResponse | RequiresActionResponse | PendingResponse>(
         "/credit_items.json",
         data
       )
       .then(({ data }) => {
-        if (isRequiresAction(data)) {
-          return data;
+        if (isRequiresAction(data) || isPending(data)) {
+          return data; // Card finishes 3D Secure or says it's processing
         }
         const { creditItem } = data;
         console.log("bought credits", data);
@@ -128,15 +134,19 @@ export default function Buy({ user: passedUser }: BuyProps) {
         if (onComplete) {
           onComplete();
         }
+        return data;
       })
       .catch((error) => {
         const { message } = error.response?.data || {};
         console.error("Can't buy credits", error, message);
+        reportException(error, { kind: "buy_credits" });
+        if (payment.paymentIntentId) {
+          throw error; // Card retries it; the member has already paid
+        }
         const alertWindow = window as Window & {
           alert: (message?: string) => void;
         };
         alertWindow.alert(`Couldn't buy credits: ${message || error}`);
-        reportException(error, { kind: "buy_credits" });
       })
       .finally(() => setSubmitting(false));
   };
@@ -210,7 +220,8 @@ export default function Buy({ user: passedUser }: BuyProps) {
             stripeApiKey={stripeApiKey}
             onPay={handlePay}
             submitting={submitting}
-            disabled={submitting}
+            minPrice={CREDITS_MIN_PRICE}
+            maxPrice={CREDITS_MAX_PRICE}
           />
         </>
       )}

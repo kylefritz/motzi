@@ -4,7 +4,7 @@ import queryString from "query-string";
 import _ from "lodash";
 import { reportException } from "../../lib/errorReporter";
 import { httpErrorContext } from "../../lib/httpErrorContext";
-import { isRequiresAction } from "../buy/Card";
+import { isPending, isRequiresAction } from "../buy/Card";
 
 import { DayContext, SettingsContext } from "./Contexts";
 import Layout from "./Layout";
@@ -18,6 +18,11 @@ import type {
 // Network blips (no response at all) get retried before we report an error
 // and give up — members on flaky mobile connections see them regularly.
 const MENU_FETCH_RETRY_DELAYS_MS = [500, 1500];
+
+// The post-back after 3D Secure: the card has been charged, so a failure is
+// retried by Card instead of being shown as "couldn't create order".
+const isPaidPostBack = (order: MenuOrderRequest | MarketplaceOrderRequest) =>
+  "paymentIntentId" in order && !!order.paymentIntentId;
 
 export default function App() {
   const [data, setData] = useState<MenuResponse | null>(null); // expect: menu, user, order
@@ -79,19 +84,23 @@ export default function App() {
 
     return axios({ method, url, data: order })
       .then(({ data: newData }) => {
-        if (isRequiresAction(newData)) {
-          return newData; // the card needs 3D Secure; Card finishes it
+        if (isRequiresAction(newData) || isPending(newData)) {
+          return newData; // Card finishes 3D Secure or says it's processing
         }
         setData(newData); // expect: menu, user, order
         setIsEditingOrder(false);
         console.log("save_order success", newData);
         window.scrollTo(0, 0);
+        return newData;
       })
       .catch((err) => {
         const { message } = err.response?.data || {};
         console.error("Couldn't create order", err, err.response?.data);
-        window.alert(`Couldn't create order: ${message || err}`);
         reportException(err, httpErrorContext("create_order", err));
+        if (isPaidPostBack(order)) {
+          throw err; // Card retries it; the customer has already paid
+        }
+        window.alert(`Couldn't create order: ${message || err}`);
       });
   };
 
@@ -110,18 +119,22 @@ export default function App() {
 
     return axios({ method, url, data: orderWithMenu })
       .then(({ data: newData }) => {
-        if (isRequiresAction(newData)) {
-          return newData; // the card needs 3D Secure; Card finishes it
+        if (isRequiresAction(newData) || isPending(newData)) {
+          return newData; // Card finishes 3D Secure or says it's processing
         }
         setData(newData);
         console.log("save_holiday_order success", newData);
         window.scrollTo(0, 0);
+        return newData;
       })
       .catch((err) => {
         const { message } = err.response?.data || {};
         console.error("Couldn't create holiday order", err, err.response?.data);
-        window.alert(`Couldn't create holiday order: ${message || err}`);
         reportException(err, httpErrorContext("create_holiday_order", err));
+        if (isPaidPostBack(order)) {
+          throw err; // Card retries it; the customer has already paid
+        }
+        window.alert(`Couldn't create holiday order: ${message || err}`);
       });
   };
 

@@ -10,7 +10,7 @@ import Items from "./Items";
 import PayItForward from "./PayItForward";
 import Payment from "../buy/Payment";
 import { applyTip } from "../buy/Tip";
-import { cartPricing, isBelowMinimum } from "../buy/pricing";
+import { cartPricing, isBelowMinimum, MAX_ABOVE_MINIMUM } from "../buy/pricing";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
 import FeedbackForm from "./FeedbackForm";
 import { useDeadlineContext, usePriceContext } from "./Contexts";
@@ -165,6 +165,7 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
         stripeApiKey={stripeApiKey}
         onPay={handlePay}
         canPay={canPay}
+        maxPrice={pricing.minimum + MAX_ABOVE_MINIMUM}
         submitting={submitting}
         disabled={disabled}
         blockedText={

@@ -63,6 +63,13 @@ export type RequiresActionResponse = {
   clientSecret: string;
 };
 
+// The server's reply when the payment is still processing; the order (or
+// credits) is recorded once it succeeds.
+export type PendingResponse = {
+  pending: true;
+  message: string;
+};
+
 export type MarketplaceOrderRequest = MenuOrderRequest &
   PaymentSubmission & {
     email: string;

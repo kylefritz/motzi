@@ -18,6 +18,11 @@ export function recordElementsOptions(options: unknown) {
   elementsOptions.current = options;
 }
 
+// paymentFailed on the Express Checkout Element's confirm event
+export const expressCheckout: { paymentFailed: Mock<() => void> } = {
+  paymentFailed: mock(() => {}),
+};
+
 type SubmitResult = { error?: { message: string } };
 
 export const elementsMock: {
@@ -46,6 +51,7 @@ const stripeMock: {
 
 // Back to the default (successful) results, with fresh call logs.
 export function resetStripeMock() {
+  expressCheckout.paymentFailed = mock(() => {});
   elementsMock.submit = mock(() => Promise.resolve({}));
   stripeMock.createConfirmationToken = mock(() =>
     Promise.resolve({ confirmationToken: { id: "ctoken_test" } })

@@ -1,9 +1,10 @@
-import { expect, mock, test } from "bun:test";
+import { afterEach, expect, mock, test } from "bun:test";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import renderMenu from "./MarketPlace.helpers";
-import stripeMock from "./stripeMock";
+import stripeMock, { elementsOptions, expressCheckout } from "./stripeMock";
+import { PAYMENT_RECEIVED_MESSAGE, resumeRetry } from "buy/Card";
 
 const getCartTotalText = () => {
   const orderHeading = screen.getByText("Your order");
@@ -230,4 +231,147 @@ test("below Stripe's 50 cent minimum the card can't be charged", async () => {
   });
   expect(button.disabled).toBe(true);
   expect(screen.queryByTestId("express-checkout")).toBeNull();
+});
+
+// Fills the cart and card, then clicks pay; onCreateOrder answers each post.
+async function payByCard(answers: Array<() => Promise<unknown>>) {
+  const user = userEvent.setup();
+  const { onCreateOrder } = renderMenu({ order: false, user: false });
+  answers.forEach((answer) => onCreateOrder.mockImplementationOnce(answer));
+  await fillCart(user);
+  await user.type(screen.getByTestId("payment-element"), "4242");
+  await act(async () => {
+    await user.click(
+      screen.getByRole("button", { name: "Charge credit card $3.00" })
+    );
+  });
+  return { user, onCreateOrder };
+}
+
+const defaultRetryDelays = [...resumeRetry.delaysMs];
+afterEach(() => {
+  resumeRetry.delaysMs = defaultRetryDelays;
+});
+
+const requiresAction = () =>
+  Promise.resolve({ requiresAction: true, clientSecret: "pi_secret" });
+const serverError = () => Promise.reject(new Error("Request failed with 500"));
+
+test("after 3D Secure a failed post-back is retried with the same payment intent", async () => {
+  resumeRetry.delaysMs = [0, 0, 0];
+  const { onCreateOrder } = await payByCard([
+    requiresAction,
+    serverError,
+    serverError,
+    () => Promise.resolve({ order: { id: 1 } }),
+  ]);
+
+  await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(4));
+  const posts = onCreateOrder.mock.calls.map(([order]) => order);
+  expect(posts.slice(1).map((order) => order.paymentIntentId)).toEqual([
+    "pi_test_3ds",
+    "pi_test_3ds",
+    "pi_test_3ds",
+  ]);
+  expect(stripeMock.createConfirmationToken).toHaveBeenCalledTimes(1);
+});
+
+test("if the post-back after 3D Secure keeps failing, the customer is told they've paid, not asked to pay again", async () => {
+  resumeRetry.delaysMs = [0, 0, 0];
+  const { onCreateOrder } = await payByCard([
+    requiresAction,
+    serverError,
+    serverError,
+    serverError,
+    serverError,
+  ]);
+
+  expect(await screen.findByText(PAYMENT_RECEIVED_MESSAGE)).toBeTruthy();
+  expect(onCreateOrder).toHaveBeenCalledTimes(5);
+  expect(
+    screen.queryByRole("button", { name: /Charge credit card/ })
+  ).toBeNull();
+  expect(screen.queryByTestId("express-checkout")).toBeNull();
+});
+
+test("a payment still processing shows the server's message instead of the pay button", async () => {
+  await payByCard([
+    () =>
+      Promise.resolve({
+        pending: true,
+        message: "Your payment is processing.",
+      }),
+  ]);
+  expect(await screen.findByText("Your payment is processing.")).toBeTruthy();
+  expect(
+    screen.queryByRole("button", { name: /Charge credit card/ })
+  ).toBeNull();
+});
+
+test("the wallet button is hidden while a card payment is in flight", async () => {
+  let finish: (value: unknown) => void = () => {};
+  const user = userEvent.setup();
+  const { onCreateOrder } = renderMenu({ order: false, user: false });
+  onCreateOrder.mockImplementationOnce(
+    () => new Promise((resolve) => (finish = resolve))
+  );
+  await fillCart(user);
+  await user.type(screen.getByTestId("payment-element"), "4242");
+  expect(screen.getByTestId("express-checkout")).toBeTruthy();
+
+  await act(async () => {
+    await user.click(
+      screen.getByRole("button", { name: "Charge credit card $3.00" })
+    );
+  });
+  await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));
+  expect(screen.queryByTestId("express-checkout")).toBeNull();
+
+  await act(async () => finish({ order: { id: 1 } }));
+  await waitFor(() =>
+    expect(screen.getByTestId("express-checkout")).toBeTruthy()
+  );
+});
+
+test("the wallet sheet is only failed while it's open (its details were rejected)", async () => {
+  const user = userEvent.setup();
+  const { onCreateOrder } = renderMenu({ order: false, user: false });
+  await fillCart(user);
+
+  // a server-side failure happens after the sheet has closed
+  onCreateOrder.mockImplementationOnce(() => Promise.resolve(undefined));
+  await act(async () => {
+    await user.click(screen.getByTestId("express-checkout"));
+  });
+  await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));
+  expect(expressCheckout.paymentFailed).not.toHaveBeenCalled();
+
+  stripeMock.createConfirmationToken.mockClear();
+  const { elementsMock } = await import("./stripeMock");
+  elementsMock.submit.mockImplementation(() =>
+    Promise.resolve({ error: { message: "Missing billing details" } })
+  );
+  await act(async () => {
+    await user.click(screen.getByTestId("express-checkout"));
+  });
+  await waitFor(() =>
+    expect(expressCheckout.paymentFailed).toHaveBeenCalledTimes(1)
+  );
+});
+
+test("clearing the price doesn't break the card form", async () => {
+  const user = userEvent.setup();
+  renderMenu({ order: false, user: false });
+  await fillCart(user);
+
+  const payWhatYouCan = screen.getByLabelText("Price");
+  fireEvent.change(payWhatYouCan, { target: { value: "" } });
+  fireEvent.blur(payWhatYouCan, { target: { value: "" } });
+
+  expect(screen.getByTestId("payment-element")).toBeTruthy();
+  const amount = (elementsOptions.current as { amount: number }).amount;
+  expect(Number.isInteger(amount) && amount >= 50).toBe(true);
+  expect(
+    screen.getByRole<HTMLButtonElement>("button", { name: /Enter/ }).disabled
+  ).toBe(true);
 });

@@ -2,17 +2,12 @@ import React, { useMemo } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 
-import Card, { NoCharge, type PayProps } from "./Card";
+import Card, { MINIMUM_CARD_PAYMENT, NoCharge, type PayProps } from "./Card";
 
 type PaymentProps = PayProps & {
   price: number | null;
   stripeApiKey?: string;
 };
-
-// Smallest amount Elements will take; Card won't pay less than Stripe's
-// minimum, so this only stands in while the cart is empty or the price is
-// still being typed.
-const MIN_ELEMENTS_AMOUNT_CENTS = 50;
 
 export default function Payment({
   price,
@@ -37,10 +32,15 @@ export default function Payment({
   // card or wallet for this amount (kept current as the price or tip
   // changes), and the server creates the PaymentIntent (StripeCheckout).
   // Card only, which covers Apple Pay and Google Pay, so nothing redirects.
-  const amount = Math.max(
-    Math.round((price ?? 0) * 100),
-    MIN_ELEMENTS_AMOUNT_CENTS
-  );
+  // Elements needs a positive whole number of cents. Card won't pay outside
+  // [minPrice, maxPrice], so clamping only matters while the cart is empty or
+  // the price is being typed (cleared, the price is NaN).
+  const min = Math.max(cardProps.minPrice ?? 0, MINIMUM_CARD_PAYMENT);
+  const shown =
+    price !== null && Number.isFinite(price)
+      ? Math.min(Math.max(price, min), cardProps.maxPrice ?? Infinity)
+      : min;
+  const amount = Math.round(shown * 100);
   return (
     <div className="checkout">
       <Elements
@@ -50,6 +50,15 @@ export default function Payment({
           amount,
           currency: "usd",
           paymentMethodTypes: ["card"],
+          // Stripe draws the fields in its own iframes, so they're styled
+          // here rather than in our CSS (Motzi purple, ink text, small radii)
+          appearance: {
+            variables: {
+              colorPrimary: "#352C63",
+              colorText: "#2E2927",
+              borderRadius: "4px",
+            },
+          },
         }}
       >
         <Card price={price} {...cardProps} />

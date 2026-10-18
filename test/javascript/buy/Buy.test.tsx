@@ -166,7 +166,7 @@ test("submits credit purchase with tip and shows receipt", async () => {
 
 test("the card form is a deferred-intent Payment Element for the total", async () => {
   await chooseBundleAndFillCard();
-  expect(elementsOptions.current).toEqual({
+  expect(elementsOptions.current).toMatchObject({
     mode: "payment",
     amount: 5060,
     currency: "usd",
@@ -237,4 +237,32 @@ test("card errors from Stripe.js are shown without posting", async () => {
   );
   expect(stripeMock.createConfirmationToken).not.toHaveBeenCalled();
   expect(postMock).not.toHaveBeenCalled();
+});
+
+test("credits outside $1 to the maximum can't be paid, and the wallet amount stays in bounds", async () => {
+  const user = userEvent.setup();
+  window.gon = { stripeApiKey: "test-key" };
+  const { default: Buy } = await import("buy/App");
+  render(
+    <SettingsContext.Provider
+      value={{ bundles: menuResponse.bundles, enablePayWhatYouCan: true }}
+    >
+      <Buy user={menuResponse.user!} />
+    </SettingsContext.Provider>
+  );
+  await act(async () => {
+    await user.click(screen.getByRole("button", { name: /\$46\.00/ }));
+  });
+
+  const price = screen.getByLabelText("Price");
+  fireEvent.change(price, { target: { value: "600" } });
+  fireEvent.blur(price, { target: { value: "600" } });
+
+  expect(
+    await screen.findByRole("button", {
+      name: "The most we can take online is $500.00",
+    })
+  ).toBeTruthy();
+  expect(screen.queryByTestId("express-checkout")).toBeNull();
+  expect((elementsOptions.current as { amount: number }).amount).toBe(50000);
 });

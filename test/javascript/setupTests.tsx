@@ -4,6 +4,7 @@ import { cleanup, configure } from "@testing-library/react";
 import { resetNow } from "./support/clock";
 import stripeMock, {
   elementsMock,
+  expressCheckout,
   recordElementsOptions,
   resetStripeMock,
 } from "./menu/stripeMock";
@@ -60,7 +61,7 @@ const ExpressCheckoutElement: React.FC<{
       let resolved = false;
       onClick?.({ resolve: () => (resolved = true) });
       if (resolved) {
-        onConfirm?.({ paymentFailed: () => {} });
+        onConfirm?.({ paymentFailed: () => expressCheckout.paymentFailed() });
       }
     }}
   >
