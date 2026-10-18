@@ -3,16 +3,19 @@
 #
 # The browser collects the card (or Apple Pay / Google Pay) with the Payment
 # Element and Express Checkout Element and sends us a ConfirmationToken. We
-# create and confirm the PaymentIntent here, for an amount we computed, so the
-# browser never decides what gets charged.
+# create and confirm the PaymentIntent here, for an amount the server computed
+# and bounds-checked; the amount the browser hands Elements is only what the
+# card form and wallet sheet display.
 #
 # Most cards succeed straight away. A card that needs 3D Secure comes back
 # requires_action: we raise RequiresAction, the controller records nothing and
 # hands the client secret to the browser, Stripe.js runs the challenge, and the
-# browser posts again with the PaymentIntent id. #pay! then checks that intent
-# is paid, for this amount, for this purchase.
+# browser posts again with the PaymentIntent id. By then the money has moved,
+# so that second post doesn't re-run the checkout: .paid_intent! checks the
+# intent is ours, paid, not refunded and the requester's, and
+# Fulfillment.record! records the purchase its metadata describes.
 #
-# Either way the purchase is described in the intent's metadata, so the
+# The purchase is described in the intent's metadata either way, so the
 # payment_intent.succeeded webhook (StripeWebhooksController) can record it
 # if the browser never comes back. A unique index on stripe_payment_intent_id
 # keeps the two paths from recording it twice.
@@ -22,22 +25,30 @@ class StripeCheckout
   # Stripe's smallest USD charge
   MINIMUM_CENTS = 50
 
-  # Stripe metadata values are capped at 500 characters
+  # Stripe allows 50 metadata keys of up to 500 characters each
   METADATA_VALUE_LIMIT = 500
+  METADATA_KEY_LIMIT = 50
 
   # Shown when Stripe rejects a request outright; nothing was charged.
   FAILED_MESSAGE = "Something went wrong with your payment. Please try again.".freeze
+  # Shown when the payment hasn't settled yet; the webhook records it once it has.
+  PENDING_MESSAGE = "Your payment is processing. We'll email your confirmation as soon as it goes through.".freeze
+  REJECTED_MESSAGE = "We couldn't confirm your payment. Please try again.".freeze
 
   # A message safe to show the customer
   class PaymentError < StandardError; end
 
+  # The payment is still processing; nothing is recorded until it succeeds.
+  class Pending < StandardError
+    def initialize(msg = PENDING_MESSAGE) = super
+  end
+
   # The card needs the customer to authenticate (3D Secure) in the browser.
   class RequiresAction < StandardError
-    attr_reader :client_secret, :payment_intent_id
+    attr_reader :client_secret
 
     def initialize(payment_intent)
       @client_secret = payment_intent.client_secret
-      @payment_intent_id = payment_intent.id
       super("payment #{payment_intent.id} requires action")
     end
   end
@@ -57,6 +68,11 @@ class StripeCheckout
       )
     end
 
+    # A $0 pay-what-you-can order: no charge, but still a marketplace order.
+    def self.free
+      new(payment_intent_id: nil, charge_id: nil, receipt_url: nil, amount: BigDecimal("0"))
+    end
+
     def record_attrs
       {
         stripe_payment_intent_id: payment_intent_id,
@@ -67,11 +83,16 @@ class StripeCheckout
     end
   end
 
+  # Dollars (a param, possibly blank or junk) as whole cents, rounded the same
+  # way OrderPricing compares against the minimum.
+  def self.to_cents(amount)
+    (BigDecimal(amount.to_s, exception: false) || BigDecimal("0")).mult(100, 0).round.to_i
+  end
+
   # kind: "order" or "credits"
   # amount_cents: what to charge, computed by the server
-  # purchase: what is being bought ({ menu_id:, cart: } or { user_id:, credits: }).
-  #   It is stored in the metadata and fingerprinted, so a confirmed intent
-  #   can only be used for the purchase it was created for.
+  # purchase: what is being bought ({ menu_id:, cart: } or { user_id:, credits: }),
+  #   stored in the metadata as purchase_*
   # metadata: anything else the webhook needs to record the purchase
   def initialize(kind:, amount_cents:, email:, description:, purchase:, metadata: {})
     raise ArgumentError, "unknown kind #{kind}" unless KINDS.include?(kind)
@@ -84,52 +105,16 @@ class StripeCheckout
     @metadata = metadata.transform_keys(&:to_s)
   end
 
-  # Charges a ConfirmationToken, or verifies a PaymentIntent the browser has
-  # finished authenticating. Returns a Payment, or raises RequiresAction,
-  # PaymentError or Stripe::CardError.
-  def pay!(confirmation_token_id: nil, payment_intent_id: nil)
-    if payment_intent_id.present?
-      verify!(Stripe::PaymentIntent.retrieve({ id: payment_intent_id, expand: [ "latest_charge" ] }))
-    elsif confirmation_token_id.present?
-      confirm!(confirmation_token_id)
-    else
-      raise PaymentError, "Stripe credit card not submitted"
-    end
-  end
-
-  def digest
-    self.class.digest(kind: @kind, amount_cents: @amount_cents, purchase: @purchase)
-  end
-
-  def self.digest(kind:, amount_cents:, purchase:)
-    canonical = purchase.to_h.transform_keys(&:to_s).transform_values(&:to_s).sort.to_json
-    Digest::SHA256.hexdigest([ kind, amount_cents.to_i, canonical ].join("|"))[0, 32]
-  end
-
-  # Cart lines as "item_id:pickup_day_id:quantity,..." so a cart fits in
-  # Stripe metadata.
-  def self.encode_cart(cart_items)
-    cart_items.map { |attrs| [ attrs[:item_id], attrs[:pickup_day_id], attrs[:quantity] ].map(&:to_i).join(":") }.join(",")
-  end
-
-  def self.decode_cart(encoded)
-    encoded.to_s.split(",").map do |line|
-      item_id, pickup_day_id, quantity = line.split(":").map(&:to_i)
-      { item_id:, pickup_day_id:, quantity: }
-    end
-  end
-
-  # Joins a value that #metadata split across key, key_2, key_3...
-  def self.read_metadata(metadata, key)
-    metadata = metadata.to_h.transform_keys(&:to_s)
-    [ metadata[key], *(2..).lazy.map { |n| metadata["#{key}_#{n}"] }.take_while(&:present?) ].join
-  end
-
-  private
-
-  def confirm!(confirmation_token_id)
+  # Creates and confirms the PaymentIntent for a ConfirmationToken. Returns a
+  # Payment, or raises RequiresAction, Pending, PaymentError or
+  # Stripe::CardError.
+  def charge!(confirmation_token_id)
+    raise PaymentError, "Stripe credit card not submitted" if confirmation_token_id.blank?
     if @amount_cents < MINIMUM_CENTS
       raise PaymentError, "Card payments must be at least $#{format('%.2f', MINIMUM_CENTS / 100.0)}"
+    end
+    if metadata.size > METADATA_KEY_LIMIT
+      raise PaymentError, "This order is too large to pay for online. Please get in touch and we'll sort it out."
     end
 
     intent = Stripe::PaymentIntent.create(
@@ -154,38 +139,71 @@ class StripeCheckout
     case intent.status
     when "succeeded" then Payment.from_intent(intent)
     when "requires_action" then raise RequiresAction.new(intent)
+    when "processing" then raise Pending
     else raise PaymentError, "Your payment didn't go through. Please try another card."
     end
   end
 
-  def verify!(intent)
-    intent_metadata = intent.metadata.to_h.transform_keys(&:to_s)
-    mismatch =
-      if intent.status != "succeeded" then "status #{intent.status}"
-      elsif intent_metadata["kind"] != @kind then "kind #{intent_metadata["kind"]}"
-      elsif intent.amount != @amount_cents then "amount #{intent.amount} != #{@amount_cents}"
-      elsif intent.currency != "usd" then "currency #{intent.currency}"
-      elsif intent_metadata["digest"] != digest then "purchase digest"
-      elsif intent_metadata["email"].to_s.downcase != @email then "email"
+  # The PaymentIntent the browser posts back after 3D Secure, if it is a
+  # paid, unrefunded `kind` intent and the block accepts its metadata as the
+  # requester's. Raises Pending while it's still processing, PaymentError
+  # otherwise.
+  def self.paid_intent!(payment_intent_id, kind:)
+    intent = Stripe::PaymentIntent.retrieve({ id: payment_intent_id.to_s, expand: [ "latest_charge" ] })
+    metadata = intent.metadata.to_h.transform_keys(&:to_s)
+    problem =
+      if metadata["kind"] != kind then "kind #{metadata['kind'].inspect}"
+      elsif !yield(metadata) then "requester"
+      elsif intent.status == "processing" then raise Pending
+      elsif intent.status != "succeeded" then "status #{intent.status}"
+      elsif refunded?(intent) then "refunded"
       end
+    return intent unless problem
 
-    if mismatch
-      Rails.logger.warn "StripeCheckout: payment intent #{intent.id} rejected (#{mismatch})"
-      raise PaymentError, "We couldn't confirm your payment. Please try again."
-    end
-
-    Payment.from_intent(intent)
+    Rails.logger.warn "StripeCheckout: payment intent #{intent.id} rejected (#{problem})"
+    raise PaymentError, REJECTED_MESSAGE
   end
 
-  def metadata
-    entries = { "kind" => @kind, "digest" => digest, "email" => @email }
-    @purchase.each { |key, value| entries["purchase_#{key}"] = value }
-    entries.merge!(@metadata.compact.transform_values(&:to_s))
+  # A refunded payment mustn't be recorded (again) as a purchase.
+  def self.refunded?(intent)
+    charge = intent.latest_charge
+    return false unless charge.respond_to?(:refunded)
 
-    # Values over Stripe's limit are split across key, key_2, key_3...
-    entries.each_with_object({}) do |(key, value), split|
-      chunks = value.scan(/.{1,#{METADATA_VALUE_LIMIT}}/m).presence || [ "" ]
-      chunks.each_with_index { |chunk, i| split[i.zero? ? key : "#{key}_#{i + 1}"] = chunk }
+    charge.refunded || charge.amount_refunded.to_i.positive?
+  end
+
+  # Cart lines as "item_id:pickup_day_id:quantity,..." so a cart fits in
+  # Stripe metadata.
+  def self.encode_cart(cart_items)
+    cart_items.map { |attrs| [ attrs[:item_id], attrs[:pickup_day_id], attrs[:quantity] ].map(&:to_i).join(":") }.join(",")
+  end
+
+  def self.decode_cart(encoded)
+    encoded.to_s.split(",").map do |line|
+      item_id, pickup_day_id, quantity = line.split(":").map(&:to_i)
+      { item_id:, pickup_day_id:, quantity: }
+    end
+  end
+
+  # Joins a value that #metadata split across key, key_2, key_3...
+  def self.read_metadata(metadata, key)
+    metadata = metadata.to_h.transform_keys(&:to_s)
+    [ metadata[key], *(2..).lazy.map { |n| metadata["#{key}_#{n}"] }.take_while { |chunk| !chunk.nil? } ].join
+  end
+
+  private
+
+  def metadata
+    @split_metadata ||= begin
+      entries = { "kind" => @kind, "email" => @email }
+      @purchase.each { |key, value| entries["purchase_#{key}"] = value }
+      entries.merge!(@metadata.compact.transform_values(&:to_s))
+
+      # Values over Stripe's limit are split across key, key_2, key_3...
+      entries.each_with_object({}) do |(key, value), split|
+        chunks = value.scan(/.{1,#{METADATA_VALUE_LIMIT}}/m).presence || [ "" ]
+        chunks.each_with_index { |chunk, i| split[i.zero? ? key : "#{key}_#{i + 1}"] = chunk }
+      end
     end
   end
 end

@@ -3,6 +3,7 @@ class OrdersController < ApplicationController
 
   include UserHashidable
   include RenderCurrentOrder
+  include StripeCheckoutResponses
 
   def current_user_or_create_user
     if !params.include?(:email)
@@ -25,6 +26,10 @@ class OrdersController < ApplicationController
   end
 
   def create
+    # Finishing a card payment after 3D Secure: the money has moved, so the
+    # order is recorded from the payment, without re-running checkout.
+    return record_paid_order if params[:payment_intent_id].present?
+
     target_menu = params[:menu_id].present? ? Menu.find(params[:menu_id]) : Menu.current
 
     unless current_admin_user.present? || target_menu.id.in?([ Menu.current.id, Menu.current_holiday&.id ].compact)
@@ -57,23 +62,15 @@ class OrdersController < ApplicationController
       if params.fetch(:cart).empty?
         raise OrderError.new("Add an item to your cart")
       end
-      # A customer finishing 3D Secure has already paid, so the limits they
-      # passed before paying aren't checked again.
-      enforce_item_limits!(@menu, cart_items) if params[:payment_intent_id].blank?
+      enforce_item_limits!(@menu, cart_items)
       user = current_user_or_create_user
 
       # figure out if we need to charge this person or if we're using credits
       if params[:price].present?
         # pay what you can: the customer sets the price, which
         # enforce_minimum_price! has already checked covers fixed-price items
-        price = params[:price].to_f.clamp(0, pricing.maximum.to_f)
-        payment = price > 0 ? charge_for_order!(user, cart_items, price) : free_payment
-      end
-
-      existing = payment&.payment_intent_id && Order.find_by(stripe_payment_intent_id: payment.payment_intent_id)
-      if existing
-        logger.warn "payment #{payment.payment_intent_id} already recorded as order #{existing.id}"
-        next [ existing.user, existing ]
+        price_cents = StripeCheckout.to_cents(price_param.clamp(0, pricing.maximum))
+        payment = price_cents.positive? ? charge_for_order!(user, cart_items, price_cents) : StripeCheckout::Payment.free
       end
 
       order = StripeCheckout::Fulfillment.create_order!(
@@ -85,29 +82,13 @@ class OrdersController < ApplicationController
 
     render_order(@order, @user)
 
-    rescue OrderError, StripeCheckout::PaymentError => e
+    rescue OrderError => e
       render_validation_failed(e.message)
-    rescue StripeCheckout::RequiresAction => e
-      # nothing was saved; the browser authenticates the card and posts again
-      # with the payment intent id
-      render json: { requires_action: true, client_secret: e.client_secret }
     rescue ActiveRecord::RecordNotUnique => e
       # the payment_intent.succeeded webhook recorded this payment first
       existing = @payment_intent_id && Order.find_by(stripe_payment_intent_id: @payment_intent_id)
       raise e unless existing
       render_order(existing, existing.user)
-    rescue Stripe::InvalidRequestError, Stripe::IdempotencyError => e
-      # Stripe refused the request (an expired or reused confirmation token, an
-      # unknown payment intent...), so nothing was charged.
-      Rails.error.report(e, handled: true, severity: :warning,
-                           context: { controller: controller_name, request_id: e.request_id, code: e.code })
-      render_validation_failed(StripeCheckout::FAILED_MESSAGE)
-    rescue Stripe::CardError => e
-      # https://stripe.com/docs/api/errors/handling
-      logger.warn "Stripe::CardError Status=#{e.http_status} Type=#{e.error.type} RequestId=#{e.request_id} \
-        Code=#{e.error.code} decline_code=#{e.error.decline_code} param=#{e.error.param} message=#{e.error.message}"
-
-      render_validation_failed(e.error.message)
   end
 
   def update
@@ -141,13 +122,7 @@ class OrdersController < ApplicationController
       ahoy.track "order_updated"
     end
 
-    # Place order in the correct response slot (regular vs holiday)
-    if order.menu.holiday?
-      @holiday_order = order
-    else
-      @order = order
-    end
-    render_current_order
+    render_order(order, current_user)
 
     rescue OrderError => e
       render_validation_failed(e.message)
@@ -160,42 +135,59 @@ class OrdersController < ApplicationController
   # accounting. A $0 or card-less order would leave stripe_charge_id NULL and
   # count against the member's credit balance.
   def paid_marketplace_order?
-    params[:price].to_f > 0 && (params[:confirmation_token_id].present? || params[:payment_intent_id].present?)
+    price_param.positive? && params[:confirmation_token_id].present?
+  end
+
+  # The 3D Secure leg: record the order the verified payment paid for. The
+  # payment must be for the email checking out (or the signed-in member).
+  def record_paid_order
+    requester_email = (params[:email].presence || current_user&.email).to_s.strip.downcase
+    intent = StripeCheckout.paid_intent!(params[:payment_intent_id], kind: "order") do |metadata|
+      requester_email.present? && metadata["email"] == requester_email
+    end
+    order = StripeCheckout::Fulfillment.record!(intent, source: "order_create")
+    raise StripeCheckout::PaymentError, StripeCheckout::REJECTED_MESSAGE unless order
+
+    ahoy.track "order_created" if order.previously_new_record?
+    render_order(order, order.user)
   end
 
   # Charges the card for a marketplace or holiday order (or verifies the
   # payment the browser just authenticated). Everything the
   # payment_intent.succeeded webhook needs to place the order goes in the
   # metadata, in case the browser never comes back.
-  def charge_for_order!(user, cart_items, price)
+  def charge_for_order!(user, cart_items, price_cents)
     item_list = Order.new(menu: @menu).tap { |o| cart_items.each { |attrs| o.order_items.build(attrs) } }.item_list
     checkout = StripeCheckout.new(
       kind: "order",
-      amount_cents: (price * 100).round,
+      amount_cents: price_cents,
       email: user.email,
       description: "#{@menu.name} - #{item_list}",
       purchase: { menu_id: @menu.id, cart: StripeCheckout.encode_cart(cart_items) },
       metadata: {
-        user_id: user.id,
+        # a guest created by this request rolls back if 3D Secure is needed,
+        # so only an existing account is recorded by id
+        user_id: (user.id unless user.previously_new_record?),
         first_name: user.first_name,
         last_name: user.last_name,
         phone: user.phone,
         mailing_list: user.mailing_list?,
-        comments: params[:comments]
+        # capped so the metadata stays within Stripe's key limit; the order
+        # itself keeps the full comment
+        comments: params[:comments].to_s.truncate(COMMENTS_METADATA_LIMIT).presence
       }
     )
-    checkout.pay!(confirmation_token_id: params[:confirmation_token_id],
-                  payment_intent_id: params[:payment_intent_id]).tap do |payment|
+    checkout.charge!(params[:confirmation_token_id]).tap do |payment|
       @payment_intent_id = payment.payment_intent_id
     end
   end
 
-  # A $0 pay-what-you-can order: no charge, but still a marketplace order.
-  def free_payment
-    StripeCheckout::Payment.new(payment_intent_id: nil, charge_id: nil, receipt_url: nil, amount: 0)
-  end
+  COMMENTS_METADATA_LIMIT = 1_500
 
-  # Place order in the correct response slot (regular vs holiday)
+  # Place order in the correct response slot (regular vs holiday). The
+  # account (its hashid signs you in, and its credit balance) is only shown
+  # to its owner: the signed-in member, or a guest this request created. A
+  # guest paying with an existing member's email just gets their order.
   def render_order(order, user)
     if order.menu.holiday?
       @holiday_order = order
@@ -203,7 +195,8 @@ class OrdersController < ApplicationController
     else
       @order = order
     end
-    render_current_order(nil, user)
+    @user = (user if user == current_user || user&.previously_new_record?)
+    render_current_order(nil, @user)
   end
 
   # A card-paid order must cover its fixed-price items (#412). A guest
@@ -212,7 +205,7 @@ class OrdersController < ApplicationController
   def enforce_minimum_price!(pricing)
     return unless params[:price].present? || params.include?(:email)
 
-    if pricing.below_minimum?(params[:price].to_f)
+    if pricing.below_minimum?(price_param)
       raise OrderError.new(pricing.minimum_message)
     end
   end

@@ -87,8 +87,7 @@ class StripeWebhooksControllerTest < ActionDispatch::IntegrationTest
     # The webhook commits its order (on its own connection) while the
     # browser's request is between charging the card and saving the order,
     # so the browser's insert hits the unique index.
-    webhook = PG.connect(**ActiveRecord::Base.connection_db_config.configuration_hash
-                                 .slice(:host, :port, :user, :password).merge(dbname: ActiveRecord::Base.connection.current_database))
+    webhook = separate_connection
     create_order = StripeCheckout::Fulfillment.method(:create_order!)
     racing_create_order = lambda do |**kwargs|
       webhook.exec_params(<<~SQL, [ kwargs[:menu].id, users(:kyle).id ])
@@ -111,6 +110,64 @@ class StripeWebhooksControllerTest < ActionDispatch::IntegrationTest
   ensure
     webhook&.exec("DELETE FROM orders WHERE stripe_payment_intent_id = 'pi_test_race'")
     webhook&.close
+  end
+
+  test "doesn't ask Stripe for a payment it already recorded" do
+    intent = order_intent
+    StripeCheckout::Fulfillment.record!(Stripe::PaymentIntent.construct_from(intent))
+    payload, signature = signed_stripe_event(intent)
+
+    assert_no_difference "Order.count" do
+      post_event(payload, signature)
+    end
+    assert_response :ok
+    assert_not_requested :get, %r{\A#{StripeStubs::STRIPE_PAYMENT_INTENTS_URL}/}
+  end
+
+  test "doesn't record a refunded payment" do
+    intent = order_intent
+    intent[:latest_charge] = intent[:latest_charge].merge(refunded: true, amount_refunded: 1000)
+    stub_payment_intent_retrieve(intent, latest_charge: intent[:latest_charge])
+
+    assert_no_difference "Order.count" do
+      post_event(*signed_stripe_event(intent))
+    end
+    assert_response :ok
+  end
+
+  # The 3D Secure leg for a new guest races the webhook creating the same
+  # guest: if the webhook commits first, the browser's insert hits the unique
+  # email index (or Devise's uniqueness check), and must return the webhook's
+  # order instead of failing a paid customer.
+  [ :unique_index, :uniqueness_validation ].each do |variant|
+    test "a new guest's 3D Secure post-back that loses the race to the webhook returns its order (#{variant})" do
+      stub_payment_intent_create(status: "requires_action", id: "pi_test_guest_race")
+      post "/orders.json", params: guest_attrs, as: :json
+      assert_equal true, response.parsed_body["requiresAction"]
+      stub_payment_intent_retrieve
+
+      webhook = separate_connection
+      create_guest = User.method(:create_guest!)
+      racing = lambda do |attrs|
+        webhook_commits_guest_and_order(webhook, "pi_test_guest_race")
+        raise ActiveRecord::RecordNotUnique, "duplicate key value violates unique constraint" if variant == :unique_index
+
+        create_guest.call(attrs)
+      end
+      User.stub(:create_guest!, racing) do
+        post "/orders.json", params: guest_attrs.except(:confirmation_token_id).merge(payment_intent_id: "pi_test_guest_race"),
+                             as: :json
+      end
+
+      assert_response :success
+      webhook_order = Order.find_by!(stripe_payment_intent_id: "pi_test_guest_race")
+      assert_equal webhook_order.id, response.parsed_body["order"]["id"]
+      assert_equal 1, Order.where(stripe_payment_intent_id: "pi_test_guest_race").count
+    ensure
+      webhook&.exec_params("DELETE FROM orders WHERE stripe_payment_intent_id = $1", [ "pi_test_guest_race" ])
+      webhook&.exec_params("DELETE FROM users WHERE email = $1", [ "racer@example.com" ])
+      webhook&.close
+    end
   end
 
   test "adds credits a browser never came back for" do
@@ -149,6 +206,32 @@ class StripeWebhooksControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  # A second Postgres session, committing on its own like the webhook's
+  # request would.
+  def separate_connection
+    PG.connect(**ActiveRecord::Base.connection_db_config.configuration_hash
+                 .slice(:host, :port, :user, :password).merge(dbname: ActiveRecord::Base.connection.current_database))
+  end
+
+  def webhook_commits_guest_and_order(conn, pi_id)
+    user_id = conn.exec_params(<<~SQL, [ "racer@example.com" ]).first["id"]
+      INSERT INTO users (email, encrypted_password, first_name, created_at, updated_at)
+      VALUES ($1, 'x', 'Race', now(), now()) RETURNING id
+    SQL
+    conn.exec_params(<<~SQL, [ menus(:week2).id, user_id, pi_id ])
+      INSERT INTO orders (menu_id, user_id, stripe_payment_intent_id, stripe_charge_id, stripe_charge_amount, created_at, updated_at)
+      VALUES ($1, $2, $3, 'ch_race', 10, now(), now())
+    SQL
+  end
+
+  def guest_attrs
+    {
+      cart: [ { item_id: items(:classic).id, quantity: 1, pickup_day_id: pickup_days(:w2_d1_thurs).id } ],
+      email: "racer@example.com", first_name: "Race", last_name: "Er", phone: "555-0102",
+      price: 10, confirmation_token_id: stripe_confirmation_token
+    }
+  end
 
   def post_event(payload, signature)
     post "/stripe/webhooks", params: payload, headers: { "Stripe-Signature" => signature, "Content-Type" => "application/json" }

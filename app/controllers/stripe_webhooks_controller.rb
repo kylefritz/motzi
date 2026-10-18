@@ -17,10 +17,17 @@ class StripeWebhooksController < ActionController::API
     event = Stripe::Webhook.construct_event(request.raw_post, request.headers["Stripe-Signature"].to_s, secret)
 
     if event.type == "payment_intent.succeeded"
-      # Re-read the intent so the charge (and its receipt) comes expanded.
-      intent = Stripe::PaymentIntent.retrieve({ id: event.data.object.id, expand: [ "latest_charge" ] })
-      record = StripeCheckout::Fulfillment.record!(intent)
-      logger.info "stripe webhook #{event.id}: payment #{intent.id} is #{record ? "#{record.class.name} #{record.id}" : "not ours"}"
+      intent_id = event.data.object.id
+      if StripeCheckout::Fulfillment.recorded?(intent_id)
+        logger.info "stripe webhook #{event.id}: payment #{intent_id} already recorded"
+      else
+        # Only the event type and the intent id are read from the event, so
+        # the endpoint's API version doesn't matter: the intent is re-read at
+        # the gem's version, with the charge (and its receipt) expanded.
+        intent = Stripe::PaymentIntent.retrieve({ id: intent_id, expand: [ "latest_charge" ] })
+        record = StripeCheckout::Fulfillment.record!(intent)
+        logger.info "stripe webhook #{event.id}: payment #{intent.id} is #{record ? "#{record.class.name} #{record.id}" : "not recorded (not ours, or refunded)"}"
+      end
     end
 
     head :ok

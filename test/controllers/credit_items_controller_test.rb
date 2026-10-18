@@ -1,4 +1,5 @@
 require "test_helper"
+require "minitest/mock"
 
 class CreditItemsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -84,14 +85,9 @@ class CreditItemsControllerTest < ActionDispatch::IntegrationTest
     stub_payment_intent_retrieve
     resume = order_attrs.except(:confirmation_token_id).merge(payment_intent_id: "pi_test_credits")
 
-    # paying for more credits than were bought is rejected
-    assert_no_difference "CreditItem.count" do
-      post "/credit_items.json", params: resume.merge(credits: 26), as: :json
-    end
-    assert_response :unprocessable_content
-
+    # the credits come from the payment, whatever is posted back
     assert_difference "CreditItem.count", 1 do
-      post "/credit_items.json", params: resume, as: :json
+      post "/credit_items.json", params: resume.merge(credits: 26, price: 1), as: :json
       assert_response :success
     end
     assert_equal "pi_test_credits", CreditItem.last.stripe_payment_intent_id
@@ -102,6 +98,38 @@ class CreditItemsControllerTest < ActionDispatch::IntegrationTest
       post "/credit_items.json", params: resume, as: :json
       assert_response :success
     end
+  end
+
+  test "the price must be $1 to the maximum, and a bundle's price when pay what you can is off" do
+    [ 0.5, CreditBundle::MAX_PRICE + 1 ].each do |price|
+      assert_no_difference "CreditItem.count" do
+        post "/credit_items.json", params: { price: price, credits: 20, confirmation_token_id: stripe_confirmation_token }, as: :json
+      end
+      assert_response :unprocessable_content
+      assert_equal "Credit purchases must be between $1.00 and $#{CreditBundle::MAX_PRICE}.00", response.parsed_body["message"]
+    end
+
+    bundle = CreditBundle.first
+    shop = ActiveSupport::InheritableOptions.new(Setting.shop).tap { |s| s.pay_what_you_can = false }
+    Setting.stub(:shop, -> { shop }) do
+      post "/credit_items.json", params: { price: 1, credits: bundle.credits, confirmation_token_id: stripe_confirmation_token },
+                                 as: :json
+      assert_response :unprocessable_content
+      assert_equal "Please choose one of the credit bundles", response.parsed_body["message"]
+
+      post "/credit_items.json", params: { price: bundle.price, credits: bundle.credits, confirmation_token_id: stripe_confirmation_token },
+                                 as: :json
+      assert_response :success
+    end
+    assert_requested :post, StripeStubs::STRIPE_PAYMENT_INTENTS_URL, times: 1
+  end
+
+  test "a page loaded before PaymentIntents (posting a card token) is asked to reload" do
+    assert_no_difference "CreditItem.count" do
+      post "/credit_items.json", params: { price: 46, credits: 6, breads_per_week: 0.5, token: "tok_visa" }, as: :json
+    end
+    assert_response :unprocessable_content
+    assert_equal "Please reload the page and try again.", response.parsed_body["message"]
   end
 
   test "another member can't claim a payment intent" do

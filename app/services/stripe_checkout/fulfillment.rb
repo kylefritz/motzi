@@ -9,14 +9,36 @@ class StripeCheckout
   module Fulfillment
     module_function
 
-    # Records the purchase an intent's metadata describes, unless it already
-    # was. Returns the Order or CreditItem, or nil for an intent we didn't make.
-    def record!(intent)
+    # Records the purchase a paid intent's metadata describes, unless it
+    # already was. Returns the Order or CreditItem, or nil for an intent we
+    # didn't make or one that has been refunded.
+    def record!(intent, source: "stripe_webhook")
       metadata = intent.metadata.to_h.transform_keys(&:to_s)
-      case metadata["kind"]
-      when "order" then record_order!(intent, metadata)
-      when "credits" then record_credits!(intent, metadata)
+      model = MODELS[metadata["kind"]]
+      return unless model
+
+      existing = model.find_by(stripe_payment_intent_id: intent.id)
+      return existing if existing
+
+      if StripeCheckout.refunded?(intent)
+        Rails.logger.warn "StripeCheckout: not recording refunded payment intent #{intent.id}"
+        return
       end
+
+      payment = StripeCheckout::Payment.from_intent(intent)
+      begin
+        model == Order ? record_order!(payment, metadata, source) : record_credits!(payment, metadata, source)
+      rescue ActiveRecord::RecordNotUnique
+        # The other path (browser or webhook) recorded it while we were working.
+        model.find_by(stripe_payment_intent_id: intent.id) || raise
+      end
+    end
+
+    MODELS = { "order" => Order, "credits" => CreditItem }.freeze
+
+    # Whether the browser or the webhook already recorded this intent.
+    def recorded?(payment_intent_id)
+      MODELS.values.any? { |model| model.exists?(stripe_payment_intent_id: payment_intent_id) }
     end
 
     # Creates the order and its items, then emails the confirmation. payment
@@ -62,45 +84,35 @@ class StripeCheckout
       [ "#{quantity}x credits", bundle.try(:name_description) ].compact.join(" - ")
     end
 
-    def record_order!(intent, metadata)
-      existing_or_create(Order, intent) do |payment|
-        menu = Menu.find(StripeCheckout.read_metadata(metadata, "purchase_menu_id"))
-        cart_items = StripeCheckout.decode_cart(StripeCheckout.read_metadata(metadata, "purchase_cart"))
-        Order.transaction do
-          user = User.find_by(id: metadata["user_id"]) || User.find_by(email: metadata["email"]) ||
-                 User.create_guest!(
-                   email: metadata["email"],
-                   first_name: metadata["first_name"],
-                   last_name: metadata["last_name"],
-                   phone: metadata["phone"],
-                   mailing_list: metadata["mailing_list"] == "true"
-                 )
-          create_order!(menu:, user:, comments: StripeCheckout.read_metadata(metadata, "comments").presence,
-                        cart_items:, payment:, source: "stripe_webhook")
-        end
+    def record_order!(payment, metadata, source)
+      menu = Menu.find(StripeCheckout.read_metadata(metadata, "purchase_menu_id"))
+      cart_items = StripeCheckout.decode_cart(StripeCheckout.read_metadata(metadata, "purchase_cart"))
+      Order.transaction do
+        user = User.find_by(id: metadata["user_id"].presence) || find_or_create_guest!(metadata)
+        create_order!(menu:, user:, comments: StripeCheckout.read_metadata(metadata, "comments").presence,
+                      cart_items:, payment:, source:)
       end
     end
 
-    def record_credits!(intent, metadata)
-      existing_or_create(CreditItem, intent) do |payment|
-        quantity = metadata["purchase_credits"].to_i
-        add_credits!(user: User.find(metadata["purchase_user_id"]), quantity:,
-                     description: credits_description(quantity), payment:,
-                     breads_per_week: metadata["breads_per_week"], source: "stripe_webhook")
-      end
+    def record_credits!(payment, metadata, source)
+      quantity = metadata["purchase_credits"].to_i
+      add_credits!(user: User.find(metadata["purchase_user_id"]), quantity:,
+                   description: credits_description(quantity), payment:,
+                   breads_per_week: metadata["breads_per_week"], source:)
     end
 
-    def existing_or_create(model, intent)
-      existing = model.find_by(stripe_payment_intent_id: intent.id)
-      return existing if existing
-
-      payment = StripeCheckout::Payment.from_intent(intent)
-      begin
-        yield payment
-      rescue ActiveRecord::RecordNotUnique
-        # The browser recorded it (or created the guest) while we were working.
-        model.find_by(stripe_payment_intent_id: intent.id) || raise
+    # The guest the intent was paid for. The browser and the webhook can race
+    # to create them, so losing that race (the unique email index, or
+    # Devise's uniqueness validation if the other side committed first) means
+    # they exist now. The savepoint keeps the surrounding transaction usable.
+    def find_or_create_guest!(metadata)
+      email = metadata["email"].to_s.strip.downcase
+      User.find_by(email:) || User.transaction(requires_new: true) do
+        User.create_guest!(email:, first_name: metadata["first_name"], last_name: metadata["last_name"],
+                           phone: metadata["phone"], mailing_list: metadata["mailing_list"] == "true")
       end
+    rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
+      User.find_by(email:) || raise
     end
   end
 end

@@ -27,4 +27,14 @@ class CanonicalHostRedirectTest < ActiveSupport::TestCase
     status, = call(host: "motzibread.herokuapp.com", path: "/health/admin")
     assert_equal 200, status
   end
+
+  test "exempts webhooks, which don't follow redirects" do
+    %w[/stripe/webhooks /reply_ingress].each do |path|
+      status, = call(host: "motzibread.herokuapp.com", path: path)
+      assert_equal 200, status, path
+    end
+
+    status, = call(host: "motzibread.herokuapp.com", path: "/stripe/webhooks-not")
+    assert_equal 301, status
+  end
 end

@@ -1,17 +1,21 @@
 class CreditItemsController < ApplicationController
   include UserHashidable
+  include StripeCheckoutResponses
   before_action :require_hashid_user_or_devise_user!
 
   def create
-    price = params[:price].to_f.clamp(1, CreditBundle::MAX_PRICE)
+    # Finishing a card payment after 3D Secure: the money has moved, so the
+    # credits are added from the payment, without re-running checkout.
+    return record_paid_credits if params[:payment_intent_id].present?
+
     quantity = params[:credits].to_i.clamp(1, CreditBundle::MAX_CREDITS)
+    price_cents = credits_price_cents(quantity)
     bundle = CreditBundle.find_by(credits: quantity)
     description = StripeCheckout::Fulfillment.credits_description(quantity)
 
-    # charge the card, or verify the payment the browser just authenticated
     payment = StripeCheckout.new(
       kind: "credits",
-      amount_cents: (price * 100).round,
+      amount_cents: price_cents,
       email: current_user.email,
       description: description,
       purchase: { user_id: current_user.id, credits: quantity },
@@ -21,37 +25,52 @@ class CreditItemsController < ApplicationController
         bundle_description: bundle.try(:description),
         breads_per_week: params[:breads_per_week].to_f
       }
-    ).pay!(confirmation_token_id: params[:confirmation_token_id], payment_intent_id: params[:payment_intent_id])
+    ).charge!(params[:confirmation_token_id])
 
     # add credit_item for user, unless the payment_intent.succeeded webhook
     # already did
     @credit_item = begin
-      CreditItem.find_by(stripe_payment_intent_id: payment.payment_intent_id) ||
-        StripeCheckout::Fulfillment.add_credits!(user: current_user, quantity: quantity, description: description,
-                                                 payment: payment, breads_per_week: params[:breads_per_week])
+      StripeCheckout::Fulfillment.add_credits!(user: current_user, quantity: quantity, description: description,
+                                               payment: payment, breads_per_week: params[:breads_per_week])
     rescue ActiveRecord::RecordNotUnique
       CreditItem.find_by!(stripe_payment_intent_id: payment.payment_intent_id)
     end
 
     # return a reasonable response object
     render "show", format: :json
-  rescue StripeCheckout::RequiresAction => e
-    # nothing was saved; the browser authenticates the card and posts again
-    # with the payment intent id
-    render json: { requires_action: true, client_secret: e.client_secret }
-  rescue StripeCheckout::PaymentError => e
-    render json: { message: e.message }, status: :unprocessable_content
-  rescue Stripe::InvalidRequestError, Stripe::IdempotencyError => e
-    # Stripe refused the request (an expired or reused confirmation token, an
-    # unknown payment intent...), so nothing was charged.
-    Rails.error.report(e, handled: true, severity: :warning,
-                         context: { controller: controller_name, request_id: e.request_id, code: e.code })
-    render json: { message: StripeCheckout::FAILED_MESSAGE }, status: :unprocessable_content
-  rescue Stripe::CardError => e
-    # https://stripe.com/docs/api/errors/handling
-    logger.warn "Stripe::CardError Status=#{e.http_status} Type=#{e.error.type} RequestId=#{e.request_id} \
-      Code=#{e.error.code} decline_code=#{e.error.decline_code} param=#{e.error.param} message=#{e.error.message}"
+  end
 
-    render json: { message: e.error.message }, status: :unprocessable_content
+  private
+
+  # What to charge, in cents. With pay what you can on, a member may pay any
+  # amount from $1 to CreditBundle::MAX_PRICE (the card form uses the same
+  # bounds); with it off, a bundle's price exactly.
+  def credits_price_cents(quantity)
+    price_cents = StripeCheckout.to_cents(price_param)
+
+    unless Setting.shop.pay_what_you_can
+      bundle_cents = CreditBundle.find_by(credits: quantity)&.price&.then { |price| StripeCheckout.to_cents(price) }
+      raise StripeCheckout::PaymentError, "Please choose one of the credit bundles" unless bundle_cents == price_cents
+
+      return price_cents
+    end
+
+    unless price_cents.between?(100, CreditBundle::MAX_PRICE * 100)
+      raise StripeCheckout::PaymentError, "Credit purchases must be between $1.00 and $#{CreditBundle::MAX_PRICE}.00"
+    end
+
+    price_cents
+  end
+
+  # The 3D Secure leg: add the credits the verified payment paid for, which
+  # must have been bought by this member.
+  def record_paid_credits
+    intent = StripeCheckout.paid_intent!(params[:payment_intent_id], kind: "credits") do |metadata|
+      metadata["purchase_user_id"] == current_user.id.to_s
+    end
+    @credit_item = StripeCheckout::Fulfillment.record!(intent, source: "credit_purchase")
+    raise StripeCheckout::PaymentError, StripeCheckout::REJECTED_MESSAGE unless @credit_item
+
+    render "show", format: :json
   end
 end

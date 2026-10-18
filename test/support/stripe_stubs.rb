@@ -16,7 +16,9 @@ module StripeStubs
 
   # The stripe gem refuses to build a request without a key. Nothing reaches
   # Stripe (WebMock blocks real connections), so any test-shaped key will do.
-  Stripe.api_key = "sk_test_stubbed_by_webmock" if Stripe.api_key.blank?
+  # Always this one, never a key from .env, so a real key can't show up in a
+  # WebMock failure message.
+  Stripe.api_key = "sk_test_stubbed_by_webmock"
 
   # Forget stubs and the request log between tests so assert_requested only
   # sees the current test. (webmock/minitest does this via a `teardown`
