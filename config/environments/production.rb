@@ -24,6 +24,9 @@ Rails.application.configure do
   # Disable serving static files from the `/public` folder by default since
   # Apache or NGINX already handles this.
   config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
+  # Vite tags are <script type="module" crossorigin>, which browsers fetch in
+  # CORS mode. Allow it so pages on a host other than asset_host still load JS.
+  config.public_file_server.headers = { "access-control-allow-origin" => "*" }
 
   # Compress CSS using a preprocessor.
   # config.assets.css_compressor = :sass

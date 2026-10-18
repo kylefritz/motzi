@@ -1,7 +1,7 @@
-// Run by adding <%= javascript_include_tag 'buy' %> to an erb page
+// Run by adding <%= vite_typescript_tag "buy.tsx" %> to an erb page
 
-import ErrorBoundary from "./ErrorBoundary";
-import App from "./buy/App";
+import ErrorBoundary from "../packs/ErrorBoundary";
+import App from "../packs/buy/App";
 
 import React from "react";
 import { createRoot } from "react-dom/client";

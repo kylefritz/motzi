@@ -9,6 +9,22 @@ class GonFooter < ActiveAdmin::Component
   end
 end
 
+# Vite entrypoints (app/javascript/entrypoints) can't go through
+# register_javascript, which uses Sprockets. Add them to every admin page's
+# head instead; the React refresh preamble has to precede the builder/credits
+# islands rendered inside admin forms.
+module ViteAdminHead
+  def build_active_admin_head
+    super
+    within head do
+      text_node helpers.vite_client_tag
+      text_node helpers.vite_react_refresh_tag
+      text_node helpers.vite_typescript_tag("admin_cable")
+    end
+  end
+end
+ActiveAdmin::Views::Pages::Base.prepend(ViteAdminHead)
+
 ActiveAdmin.setup do |config|
   # == Site Title
   #
@@ -227,7 +243,8 @@ ActiveAdmin.setup do |config|
   #
   # To load a javascript file:
   #   config.register_javascript 'my_javascript.js'
-  config.register_javascript "admin_cable.js"
+  #
+  # Vite entrypoints are added to the head by ViteAdminHead (top of file).
 
   # == CSV options
   #

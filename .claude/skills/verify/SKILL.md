@@ -7,8 +7,8 @@ description: Drive Motzi's running dev server end-to-end to verify changes — l
 
 ## Handle
 
-- `bin/dev` runs foreman: Rails web + `bun run build:watch` + Solid Queue worker. If port 3000 is busy it offers an alternate port — check `lsof -iTCP:3001 -sTCP:LISTEN` before starting another server.
-- For a throwaway server: `bun run build` (populates `app/assets/builds`), then `DISABLE_SPRING=1 bin/rails server -p <port>`. Worktrees need `bun install` first (no shared node_modules).
+- `bin/dev` runs foreman: Rails web + Vite dev server (`bin/vite dev`, port 3046, React HMR) + Solid Queue worker. If port 3000 is busy it offers an alternate port — check `lsof -iTCP:3001 -sTCP:LISTEN` before starting another server.
+- For a throwaway server: `DISABLE_SPRING=1 bin/rails server -p <port>` alone works; without a Vite dev server, vite_rails builds `public/vite-dev` on the first request (and again when sources change). Worktrees need `bun install` first (no shared node_modules).
 - Auth: `GET /dev/login_as_admin` signs in as admin — works for both curl cookie jars (`curl -c jar -L`) and Playwright.
 - Admin pages need `-H "Accept: text/html"` with curl or they 302.
 
