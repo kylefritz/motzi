@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_18_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -253,9 +253,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120000) do
     t.integer "quantity"
     t.decimal "stripe_charge_amount", precision: 8, scale: 2
     t.string "stripe_charge_id"
+    t.string "stripe_payment_intent_id"
     t.string "stripe_receipt_url"
     t.datetime "updated_at", null: false
     t.bigint "user_id"
+    t.index [ "stripe_payment_intent_id" ], name: "index_credit_items_on_stripe_payment_intent_id", unique: true, where: "(stripe_payment_intent_id IS NOT NULL)"
     t.index [ "user_id" ], name: "index_credit_items_on_user_id"
   end
 
@@ -376,10 +378,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_120000) do
     t.bigint "menu_id"
     t.decimal "stripe_charge_amount", precision: 8, scale: 2
     t.string "stripe_charge_id"
+    t.string "stripe_payment_intent_id"
     t.string "stripe_receipt_url"
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.index [ "menu_id" ], name: "index_orders_on_menu_id"
+    t.index [ "stripe_payment_intent_id" ], name: "index_orders_on_stripe_payment_intent_id", unique: true, where: "(stripe_payment_intent_id IS NOT NULL)"
     t.index [ "user_id" ], name: "index_orders_on_user_id"
   end
 

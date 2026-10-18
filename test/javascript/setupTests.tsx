@@ -2,7 +2,11 @@ import React from "react";
 import { afterEach, beforeAll, beforeEach, mock } from "bun:test";
 import { cleanup, configure } from "@testing-library/react";
 import { resetNow } from "./support/clock";
-import type { StripeTokenResult } from "./menu/stripeMock";
+import stripeMock, {
+  elementsMock,
+  recordElementsOptions,
+  resetStripeMock,
+} from "./menu/stripeMock";
 
 // Pin luxon "now" to FIXED_NOW (see support/clock.ts). Set at preload
 // time too, so module-level fixtures computed on import are deterministic.
@@ -21,44 +25,64 @@ afterEach(() => {
 // before testing-library threw its "Unable to find…" error with the DOM dump.
 configure({ asyncUtilTimeout: 3000 });
 
-const createToken = mock((): Promise<StripeTokenResult> =>
-  Promise.resolve({ token: { id: "test_id" }, error: null })
-);
+// Stripe Elements render cross-origin iframes, so they're stood in for by
+// plain inputs. useStripe/useElements hand out the shared mocks in
+// stripeMock.ts, which also keeps the last <Elements> options.
 
-const mockStripe = {
-  createToken,
+const Elements: React.FC<{ children?: React.ReactNode; options?: unknown }> = ({
+  children,
+  options,
+}) => {
+  recordElementsOptions(options);
+  return <div data-testid="stripe-elements">{children}</div>;
 };
 
-const mockElements = {
-  getElement: mock(() => ({})),
-};
-
-const Elements: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
-  <div data-testid="stripe-elements">{children}</div>
-);
-
-const CardElement: React.FC<{
+const PaymentElement: React.FC<{
   onChange?: (event: { complete: boolean }) => void;
 }> = ({ onChange }) => (
   <input
-    data-testid="card-element"
+    data-testid="payment-element"
+    aria-label="Card details"
     onChange={() => onChange?.({ complete: true })}
   />
 );
 
-const PaymentRequestButtonElement: React.FC = () => null;
+// Clicking it plays the wallet flow: onClick must resolve before the sheet
+// "opens", then the customer authorizes and onConfirm runs.
+const ExpressCheckoutElement: React.FC<{
+  onClick?: (event: { resolve: () => void }) => void;
+  onConfirm?: (event: { paymentFailed: () => void }) => void;
+}> = ({ onClick, onConfirm }) => (
+  <button
+    type="button"
+    data-testid="express-checkout"
+    onClick={() => {
+      let resolved = false;
+      onClick?.({ resolve: () => (resolved = true) });
+      if (resolved) {
+        onConfirm?.({ paymentFailed: () => {} });
+      }
+    }}
+  >
+    Express checkout
+  </button>
+);
 
 mock.module("@stripe/react-stripe-js", () => ({
   Elements,
-  useStripe: () => mockStripe,
-  useElements: () => mockElements,
-  CardElement,
-  PaymentRequestButtonElement,
+  useStripe: () => stripeMock,
+  useElements: () => elementsMock,
+  PaymentElement,
+  ExpressCheckoutElement,
 }));
 
 mock.module("@stripe/stripe-js", () => ({
-  loadStripe: mock(() => Promise.resolve(mockStripe)),
+  loadStripe: mock(() => Promise.resolve(stripeMock)),
 }));
+
+beforeEach(() => {
+  resetStripeMock();
+});
 
 beforeAll(() => {
   window.alert = mock(() => {});

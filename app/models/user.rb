@@ -116,4 +116,15 @@ class User < ApplicationRecord
   def self.system
     User.find_by(id: SYSTEM_ID)
   end
+
+  # A guest checking out from the marketplace, by card or a $0 order. Opting
+  # into the mailing list subscribes them in MailerLite.
+  def self.create_guest!(attrs)
+    create!(attrs).tap do |user|
+      if user.mailing_list?
+        _, message = MailerliteSubscriber.subscribe(user)
+        ActiveAdmin::Comment.create!(body: message, namespace: "admin", resource: user, author: User.system)
+      end
+    end
+  end
 end

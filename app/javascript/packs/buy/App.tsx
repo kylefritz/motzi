@@ -5,7 +5,7 @@ import queryString from "query-string";
 
 import Choice from "./Choice";
 import Payment from "./Payment";
-import type { StripeTokenPayload } from "./Card";
+import { isRequiresAction } from "./Card";
 import PayWhatYouCan from "./PayWhatYouCan";
 import { applyTip } from "./Tip";
 import { useSettingsContext } from "../menu/Contexts";
@@ -16,6 +16,8 @@ import type {
   CreditPurchaseRequest,
   MenuResponse,
   MenuUser,
+  PaymentSubmission,
+  RequiresActionResponse,
 } from "../../types/api";
 
 type BuyProps = {
@@ -95,21 +97,29 @@ export default function Buy({ user: passedUser }: BuyProps) {
     }
   };
   const totalPrice = applyTip(price, tip);
-  const handleCardToken = ({ token }: StripeTokenPayload) => {
+  // Resolves with the server's response so a card that needs 3D Secure can
+  // finish it and pay again (see Card).
+  const handlePay = (payment: PaymentSubmission) => {
     const data: CreditPurchaseRequest = {
       uid: user?.hashid || null,
-      token: token.id,
+      ...payment,
       price: typeof totalPrice === "number" ? totalPrice : 0,
       credits: credits || 0,
       breadsPerWeek: breadsPerWeek || 0,
     };
-    console.log("got card token", data);
+    console.log("got card payment", data);
     setSubmitting(true);
 
-    // send stripe token to rails to complete purchase
-    axios
-      .post<CreditItemResponse>("/credit_items.json", data)
+    // send the stripe payment to rails to complete purchase
+    return axios
+      .post<CreditItemResponse | RequiresActionResponse>(
+        "/credit_items.json",
+        data
+      )
       .then(({ data }) => {
+        if (isRequiresAction(data)) {
+          return data;
+        }
         const { creditItem } = data;
         console.log("bought credits", data);
 
@@ -120,7 +130,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
         }
       })
       .catch((error) => {
-        const { message } = error.response.data || {};
+        const { message } = error.response?.data || {};
         console.error("Can't buy credits", error, message);
         const alertWindow = window as Window & {
           alert: (message?: string) => void;
@@ -128,7 +138,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
         alertWindow.alert(`Couldn't buy credits: ${message || error}`);
         reportException(error, { kind: "buy_credits" });
       })
-      .then(() => setSubmitting(false));
+      .finally(() => setSubmitting(false));
   };
 
   if (receipt) {
@@ -198,7 +208,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
             credits={credits}
             price={totalPrice}
             stripeApiKey={stripeApiKey}
-            onCardToken={handleCardToken}
+            onPay={handlePay}
             submitting={submitting}
             disabled={submitting}
           />

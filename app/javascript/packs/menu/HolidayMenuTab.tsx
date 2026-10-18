@@ -67,8 +67,12 @@ export default function HolidayMenuTab({
     );
   }
 
+  // passes the response on so a card needing 3D Secure can finish paying
   const handleSave = (o: MenuOrderRequest | MarketplaceOrderRequest) =>
-    handleCreateOrder(o).then(() => setIsEditingOrder(false));
+    handleCreateOrder(o).then((result) => {
+      setIsEditingOrder(false);
+      return result;
+    });
 
   // Holiday orders always require card payment — use Marketplace for all users
   return (

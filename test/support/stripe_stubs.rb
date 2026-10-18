@@ -1,6 +1,8 @@
 require "webmock/minitest"
 
-# WebMock stubs for the only Stripe call the app makes: POST /v1/charges.
+# WebMock stubs for the Stripe calls the app makes: creating and confirming a
+# PaymentIntent (POST /v1/payment_intents) and reading one back
+# (GET /v1/payment_intents/:id), plus signed webhook payloads.
 #
 # This replaced stripe-ruby-mock, which capped the stripe gem at < 14 and
 # lagged the real API. Stubbing at the HTTP layer exercises the real stripe
@@ -8,8 +10,9 @@ require "webmock/minitest"
 # shaped like Stripe's documented ones. VCR is hooked into WebMock, but it
 # hands explicitly stubbed requests to WebMock rather than raising.
 module StripeStubs
-  STRIPE_CHARGES_URL = "https://api.stripe.com/v1/charges".freeze
+  STRIPE_PAYMENT_INTENTS_URL = "https://api.stripe.com/v1/payment_intents".freeze
   JSON_HEADERS = { "Content-Type" => "application/json" }.freeze
+  WEBHOOK_SECRET = "whsec_test_stubbed".freeze
 
   # The stripe gem refuses to build a request without a key. Nothing reaches
   # Stripe (WebMock blocks real connections), so any test-shaped key will do.
@@ -22,43 +25,75 @@ module StripeStubs
     base.teardown { WebMock.reset! }
   end
 
-  # What Stripe.js hands the browser; the server only passes it through to
-  # Stripe::Charge.create as `source`.
-  def stripe_test_token
-    "tok_visa"
+  # What stripe.createConfirmationToken hands the browser; the server passes
+  # it to Stripe when it creates the PaymentIntent.
+  def stripe_confirmation_token
+    "ctoken_test_visa"
   end
 
-  # A successful charge. Echoes back the amount, currency, description and
-  # metadata that were posted so assertions can check what the app sent.
-  def stub_stripe_charge(id: "ch_test_#{SecureRandom.hex(8)}",
-                         receipt_url: "https://pay.stripe.com/receipts/test_receipt")
-    stub_request(:post, STRIPE_CHARGES_URL).to_return do |request|
+  # Creating (and confirming) a PaymentIntent. Echoes back the amount,
+  # description and metadata that were posted so assertions can check what the
+  # app sent; the last one is kept in #created_payment_intent so a test can
+  # finish a 3D Secure payment with #stub_payment_intent_retrieve.
+  # Each request gets a new intent id unless `id` is given.
+  def stub_payment_intent_create(status: "succeeded", id: nil)
+    stub_request(:post, STRIPE_PAYMENT_INTENTS_URL).to_return do |request|
       posted = Rack::Utils.parse_nested_query(request.body)
-      {
-        status: 200,
-        headers: JSON_HEADERS,
-        body: {
-          id: id,
-          object: "charge",
-          status: "succeeded",
-          paid: true,
-          captured: true,
-          amount: posted["amount"].to_i,
-          currency: posted["currency"] || "usd",
-          description: posted["description"],
-          receipt_email: posted["receipt_email"],
-          receipt_url: receipt_url,
-          metadata: posted["metadata"] || {}
-        }.to_json
-      }
+      @created_payment_intent = payment_intent_json(
+        id: id || "pi_test_#{SecureRandom.hex(8)}", status: status, amount: posted["amount"].to_i, metadata: posted["metadata"] || {},
+        description: posted["description"], receipt_email: posted["receipt_email"]
+      )
+      { status: 200, headers: JSON_HEADERS, body: @created_payment_intent.to_json }
     end
   end
 
+  def created_payment_intent
+    @created_payment_intent or raise "no PaymentIntent was created"
+  end
+
+  # Reading a PaymentIntent back, by default the one the app just created,
+  # now paid (the customer finished 3D Secure).
+  def stub_payment_intent_retrieve(intent = created_payment_intent, status: "succeeded", **overrides)
+    intent = intent.merge(payment_intent_json(**intent.slice(:id, :amount, :metadata), status: status)).merge(overrides)
+    stub_request(:get, %r{\A#{STRIPE_PAYMENT_INTENTS_URL}/#{intent[:id]}(\?|\z)})
+      .to_return(status: 200, headers: JSON_HEADERS, body: intent.to_json)
+    intent
+  end
+
+  def payment_intent_json(id:, status:, amount:, metadata:, description: nil, receipt_email: nil)
+    paid = status == "succeeded"
+    {
+      id: id,
+      object: "payment_intent",
+      status: status,
+      amount: amount,
+      currency: "usd",
+      client_secret: "#{id}_secret_test",
+      description: description,
+      receipt_email: receipt_email,
+      metadata: metadata,
+      latest_charge: paid ? charge_json(id: "ch_test_#{id.delete_prefix('pi_test_')}", amount: amount) : nil,
+      next_action: status == "requires_action" ? { type: "use_stripe_sdk" } : nil
+    }
+  end
+
+  def charge_json(id:, amount:)
+    {
+      id: id,
+      object: "charge",
+      status: "succeeded",
+      paid: true,
+      amount: amount,
+      currency: "usd",
+      receipt_url: "https://pay.stripe.com/receipts/test_receipt"
+    }
+  end
+
   # A declined card, shaped like Stripe's real 402 so the stripe gem raises
-  # Stripe::CardError with error.code / decline_code / charge populated the
-  # way the controllers log them.
+  # Stripe::CardError with error.code / decline_code populated the way the
+  # controllers log them.
   def stub_stripe_card_declined(message: "Your card was declined.", decline_code: "generic_decline")
-    stub_request(:post, STRIPE_CHARGES_URL).to_return(
+    stub_request(:post, STRIPE_PAYMENT_INTENTS_URL).to_return(
       status: 402,
       headers: JSON_HEADERS,
       body: {
@@ -67,10 +102,19 @@ module StripeStubs
           code: "card_declined",
           decline_code: decline_code,
           message: message,
-          charge: "ch_declined_test",
+          payment_intent: { id: "pi_declined_test", object: "payment_intent", status: "requires_payment_method" },
           param: nil
         }
       }.to_json
     )
+  end
+
+  # A payment_intent.succeeded event and the Stripe-Signature header Stripe
+  # would send with it.
+  def signed_stripe_event(intent, type: "payment_intent.succeeded", secret: WEBHOOK_SECRET)
+    payload = { id: "evt_test_#{SecureRandom.hex(6)}", object: "event", type: type, data: { object: intent } }.to_json
+    timestamp = Time.now.to_i
+    signature = Stripe::Webhook::Signature.compute_signature(Time.at(timestamp), payload, secret)
+    [ payload, "t=#{timestamp},v1=#{signature}" ]
   end
 end

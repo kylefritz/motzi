@@ -4,6 +4,7 @@ import queryString from "query-string";
 import _ from "lodash";
 import { reportException } from "../../lib/errorReporter";
 import { httpErrorContext } from "../../lib/httpErrorContext";
+import { isRequiresAction } from "../buy/Card";
 
 import { DayContext, SettingsContext } from "./Contexts";
 import Layout from "./Layout";
@@ -78,6 +79,9 @@ export default function App() {
 
     return axios({ method, url, data: order })
       .then(({ data: newData }) => {
+        if (isRequiresAction(newData)) {
+          return newData; // the card needs 3D Secure; Card finishes it
+        }
         setData(newData); // expect: menu, user, order
         setIsEditingOrder(false);
         console.log("save_order success", newData);
@@ -106,6 +110,9 @@ export default function App() {
 
     return axios({ method, url, data: orderWithMenu })
       .then(({ data: newData }) => {
+        if (isRequiresAction(newData)) {
+          return newData; // the card needs 3D Secure; Card finishes it
+        }
         setData(newData);
         console.log("save_holiday_order success", newData);
         window.scrollTo(0, 0);

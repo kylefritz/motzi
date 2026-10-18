@@ -4,48 +4,48 @@ class CreditItemsController < ApplicationController
 
   def create
     price = params[:price].to_f.clamp(1, CreditBundle::MAX_PRICE)
-    price_cents = (price * 100).to_i
     quantity = params[:credits].to_i.clamp(1, CreditBundle::MAX_CREDITS)
     bundle = CreditBundle.find_by(credits: quantity)
-    begin
-      description = [ "#{quantity}x credits", bundle.try(:name_description) ].compact.join(" - ")
-      # make stripe change
-      charge = Stripe::Charge.create({
-        amount: price_cents,
-        currency: "usd",
-        source: params[:token],
-        metadata: {
-          user_id: current_user.id,
-          user_name: current_user.name,
-          credits: quantity,
-          bundle_name: bundle.try(:name),
-          bundle_description: bundle.try(:description)
-        },
-        description: description,
-        receipt_email: current_user.email
-      })
+    description = StripeCheckout::Fulfillment.credits_description(quantity)
 
-      # add credit_item for user
-      @credit_item = current_user.credit_items.create!(stripe_charge_id: charge.id,
-                                                       stripe_receipt_url: charge.try(:receipt_url),
-                                                       stripe_charge_amount: price,
-                                                       memo: "#{description}. Paid via Stripe $#{price}.",
-                                                       quantity: quantity,
-                                                       good_for_weeks: 42)
+    # charge the card, or verify the payment the browser just authenticated
+    payment = StripeCheckout.new(
+      kind: "credits",
+      amount_cents: (price * 100).round,
+      email: current_user.email,
+      description: description,
+      purchase: { user_id: current_user.id, credits: quantity },
+      metadata: {
+        user_name: current_user.name,
+        bundle_name: bundle.try(:name),
+        bundle_description: bundle.try(:description),
+        breads_per_week: params[:breads_per_week].to_f
+      }
+    ).pay!(confirmation_token_id: params[:confirmation_token_id], payment_intent_id: params[:payment_intent_id])
 
-      # enable weekly menu emails & update bread_per_week
-      current_user.update(breads_per_week: params[:breads_per_week].to_f, receive_weekly_menu: true)
-
-      ConfirmationMailer.with(credit_item: @credit_item).credit_email.deliver_later
-
-      # return a reasonable response object
-      render "show", format: :json
-    rescue Stripe::CardError => e
-      # https://stripe.com/docs/api/errors/handling
-      logger.warn "Stripe::CardError Status=#{e.http_status} Type=#{e.error.type} Charge ID=#{e.error.charge} \
-        Code=#{e.error.code} cecline_code=#{e.error.decline_code} param=#{e.error.param} message=#{e.error.message}"
-
-      render json: { error: e.error.message }.to_json, status: :unprocessable_content
+    # add credit_item for user, unless the payment_intent.succeeded webhook
+    # already did
+    @credit_item = begin
+      CreditItem.find_by(stripe_payment_intent_id: payment.payment_intent_id) ||
+        StripeCheckout::Fulfillment.add_credits!(user: current_user, quantity: quantity, description: description,
+                                                 payment: payment, breads_per_week: params[:breads_per_week])
+    rescue ActiveRecord::RecordNotUnique
+      CreditItem.find_by!(stripe_payment_intent_id: payment.payment_intent_id)
     end
+
+    # return a reasonable response object
+    render "show", format: :json
+  rescue StripeCheckout::RequiresAction => e
+    # nothing was saved; the browser authenticates the card and posts again
+    # with the payment intent id
+    render json: { requires_action: true, client_secret: e.client_secret }
+  rescue StripeCheckout::PaymentError => e
+    render json: { message: e.message }, status: :unprocessable_content
+  rescue Stripe::CardError => e
+    # https://stripe.com/docs/api/errors/handling
+    logger.warn "Stripe::CardError Status=#{e.http_status} Type=#{e.error.type} RequestId=#{e.request_id} \
+      Code=#{e.error.code} decline_code=#{e.error.decline_code} param=#{e.error.param} message=#{e.error.message}"
+
+    render json: { message: e.error.message }, status: :unprocessable_content
   end
 end

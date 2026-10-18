@@ -21,12 +21,7 @@ class OrdersController < ApplicationController
       return existing_user
     end
 
-    user = User.create!(params.permit(:first_name, :last_name, :email, :phone, :mailing_list))
-    if user.mailing_list?
-      _, message = MailerliteSubscriber.subscribe(user)
-      ActiveAdmin::Comment.create!(body: message, namespace: "admin", resource: user, author: User.system)
-    end
-    user
+    User.create_guest!(params.permit(:first_name, :last_name, :email, :phone, :mailing_list))
   end
 
   def create
@@ -59,67 +54,51 @@ class OrdersController < ApplicationController
         logger.warn "user=#{current_user.email} already placed an order for menu #{@menu.id}. returning current order"
         return render_current_order
       end
-      enforce_item_limits!(@menu, cart_items)
-      user = current_user_or_create_user
-      order_params = params.permit(:comments).merge(menu: @menu, user: user)
-
-      order = Order.create!(order_params)
       if params.fetch(:cart).empty?
         raise OrderError.new("Add an item to your cart")
       end
-      cart_items.each { |attrs| order.order_items.create!(attrs) }
+      # A customer finishing 3D Secure has already paid, so the limits they
+      # passed before paying aren't checked again.
+      enforce_item_limits!(@menu, cart_items) if params[:payment_intent_id].blank?
+      user = current_user_or_create_user
 
       # figure out if we need to charge this person or if we're using credits
       if params[:price].present?
-
         # pay what you can: the customer sets the price, which
         # enforce_minimum_price! has already checked covers fixed-price items
         price = params[:price].to_f.clamp(0, pricing.maximum.to_f)
-        price_cents = (price * 100).round
-
-        # make stripe change
-        if price > 0
-          if params[:token].blank?
-            raise OrderError.new("Stripe credit card not submitted")
-          end
-          charge = Stripe::Charge.create({
-            amount: price_cents,
-            currency: "usd",
-            source: params[:token],
-            metadata: {
-              user_id: user.id,
-              order_id: order.id
-            },
-            description: "Order ##{order.id} - #{order.item_list}",
-            receipt_email: user.email
-          })
-        end
-        order.update!(
-          stripe_charge_id: charge.try(:id),
-          stripe_receipt_url: charge.try(:receipt_url),
-          stripe_charge_amount: price,
-        )
+        payment = price > 0 ? charge_for_order!(user, cart_items, price) : free_payment
       end
 
+      existing = payment&.payment_intent_id && Order.find_by(stripe_payment_intent_id: payment.payment_intent_id)
+      if existing
+        logger.warn "payment #{payment.payment_intent_id} already recorded as order #{existing.id}"
+        next [ existing.user, existing ]
+      end
+
+      order = StripeCheckout::Fulfillment.create_order!(
+        menu: @menu, user: user, comments: params[:comments], cart_items: cart_items, payment: payment
+      )
       ahoy.track "order_created"
       [ user, order ]
     end
 
-    # send confirmation email
-    ConfirmationMailer.with(order: @order).order_email.deliver_later
+    render_order(@order, @user)
 
-    # Place order in the correct response slot (regular vs holiday)
-    if @menu.holiday?
-      @holiday_order = @order
-      @order = nil
-    end
-    render_current_order(nil, @user)
-
-    rescue OrderError => e
+    rescue OrderError, StripeCheckout::PaymentError => e
       render_validation_failed(e.message)
+    rescue StripeCheckout::RequiresAction => e
+      # nothing was saved; the browser authenticates the card and posts again
+      # with the payment intent id
+      render json: { requires_action: true, client_secret: e.client_secret }
+    rescue ActiveRecord::RecordNotUnique => e
+      # the payment_intent.succeeded webhook recorded this payment first
+      existing = @payment_intent_id && Order.find_by(stripe_payment_intent_id: @payment_intent_id)
+      raise e unless existing
+      render_order(existing, existing.user)
     rescue Stripe::CardError => e
       # https://stripe.com/docs/api/errors/handling
-      logger.warn "Stripe::CardError Status=#{e.http_status} Type=#{e.error.type} Charge ID=#{e.error.charge} \
+      logger.warn "Stripe::CardError Status=#{e.http_status} Type=#{e.error.type} RequestId=#{e.request_id} \
         Code=#{e.error.code} decline_code=#{e.error.decline_code} param=#{e.error.param} message=#{e.error.message}"
 
       render_validation_failed(e.error.message)
@@ -170,11 +149,54 @@ class OrdersController < ApplicationController
   private
 
   # A real paid marketplace order results in a Stripe charge (price > 0 with a
-  # card token), which sets stripe_charge_id and so is excluded from credit
-  # accounting. A $0 or token-less order would leave stripe_charge_id NULL and
+  # card payment), which sets stripe_charge_id and so is excluded from credit
+  # accounting. A $0 or card-less order would leave stripe_charge_id NULL and
   # count against the member's credit balance.
   def paid_marketplace_order?
-    params[:price].to_f > 0 && params[:token].present?
+    params[:price].to_f > 0 && (params[:confirmation_token_id].present? || params[:payment_intent_id].present?)
+  end
+
+  # Charges the card for a marketplace or holiday order (or verifies the
+  # payment the browser just authenticated). Everything the
+  # payment_intent.succeeded webhook needs to place the order goes in the
+  # metadata, in case the browser never comes back.
+  def charge_for_order!(user, cart_items, price)
+    item_list = Order.new(menu: @menu).tap { |o| cart_items.each { |attrs| o.order_items.build(attrs) } }.item_list
+    checkout = StripeCheckout.new(
+      kind: "order",
+      amount_cents: (price * 100).round,
+      email: user.email,
+      description: "#{@menu.name} - #{item_list}",
+      purchase: { menu_id: @menu.id, cart: StripeCheckout.encode_cart(cart_items) },
+      metadata: {
+        user_id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        phone: user.phone,
+        mailing_list: user.mailing_list?,
+        comments: params[:comments]
+      }
+    )
+    checkout.pay!(confirmation_token_id: params[:confirmation_token_id],
+                  payment_intent_id: params[:payment_intent_id]).tap do |payment|
+      @payment_intent_id = payment.payment_intent_id
+    end
+  end
+
+  # A $0 pay-what-you-can order: no charge, but still a marketplace order.
+  def free_payment
+    StripeCheckout::Payment.new(payment_intent_id: nil, charge_id: nil, receipt_url: nil, amount: 0)
+  end
+
+  # Place order in the correct response slot (regular vs holiday)
+  def render_order(order, user)
+    if order.menu.holiday?
+      @holiday_order = order
+      @order = nil
+    else
+      @order = order
+    end
+    render_current_order(nil, user)
   end
 
   # A card-paid order must cover its fixed-price items (#412). A guest

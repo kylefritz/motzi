@@ -49,19 +49,32 @@ export type MenuOrderRequest = {
   cart: CartItem[];
 };
 
-export type MarketplaceOrderRequest = MenuOrderRequest & {
-  email: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  mailingList?: boolean;
-  price: number;
-  token: string | null;
+// How a card payment reaches the server (#412): a ConfirmationToken from
+// Stripe.js, or, after 3D Secure, the PaymentIntent the server created for
+// it. Empty for a $0 order.
+export type PaymentSubmission = {
+  confirmationTokenId?: string;
+  paymentIntentId?: string;
 };
 
-export type CreditPurchaseRequest = {
+// The server's reply when a card needs 3D Secure; nothing was saved yet.
+export type RequiresActionResponse = {
+  requiresAction: true;
+  clientSecret: string;
+};
+
+export type MarketplaceOrderRequest = MenuOrderRequest &
+  PaymentSubmission & {
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    mailingList?: boolean;
+    price: number;
+  };
+
+export type CreditPurchaseRequest = PaymentSubmission & {
   uid?: string | null;
-  token: string | null;
   price: number;
   credits: number;
   breadsPerWeek: number;

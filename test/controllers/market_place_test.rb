@@ -8,7 +8,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
   setup do
     menus(:week2).make_current!
     travel_to(Menu.current.earliest_deadline - 2.hours)
-    stub_stripe_charge
+    stub_payment_intent_create
   end
 
   teardown { travel_back }
@@ -27,13 +27,15 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     new_order = Order.last
     refute_nil new_order.stripe_charge_id
     refute_nil new_order.stripe_charge_amount
+    assert_equal created_payment_intent[:id], new_order.stripe_payment_intent_id
+    assert_equal "https://pay.stripe.com/receipts/test_receipt", new_order.stripe_receipt_url
 
     # The charge Stripe was asked for matches the cart total, in cents.
-    assert_requested :post, StripeStubs::STRIPE_CHARGES_URL do |request|
+    assert_requested :post, StripeStubs::STRIPE_PAYMENT_INTENTS_URL do |request|
       posted = Rack::Utils.parse_nested_query(request.body)
       posted["amount"] == "1000" && posted["currency"] == "usd" &&
-        posted["source"] == stripe_test_token &&
-        posted["receipt_email"] == order_attrs[:email]
+        posted["confirmation_token"] == stripe_confirmation_token && posted["confirm"] == "true" &&
+        posted["receipt_email"] == order_attrs[:email] && posted["metadata"]["kind"] == "order"
     end
 
     # after second order, no user created
@@ -77,21 +79,21 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
   test "$0 price is ok" do
     order_attrs = build_order_attrs
     order_attrs[:price] = 0
-    order_attrs[:token] = nil
+    order_attrs[:confirmation_token_id] = nil
     assert_user_created { assert_ordered_emailed(order_attrs) }
 
     new_order = Order.last
     assert_nil new_order.stripe_charge_id
     assert_equal 0, new_order.stripe_charge_amount
-    assert_not_requested :post, StripeStubs::STRIPE_CHARGES_URL
+    assert_not_requested :post, StripeStubs::STRIPE_PAYMENT_INTENTS_URL
   end
 
-  test "missing stripe token" do
+  test "missing card payment" do
     order_attrs = build_order_attrs
-    order_attrs[:token] = nil
+    order_attrs[:confirmation_token_id] = nil
     refute_order(order_attrs)
     assert_equal "Stripe credit card not submitted", response.parsed_body["message"]
-    assert_not_requested :post, StripeStubs::STRIPE_CHARGES_URL
+    assert_not_requested :post, StripeStubs::STRIPE_PAYMENT_INTENTS_URL
   end
 
   test "credit card declined" do
@@ -99,6 +101,102 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     order_attrs = build_order_attrs
     refute_order(order_attrs)
     assert_equal "Your card was declined.", response.parsed_body["message"]
+  end
+
+  test "below Stripe's 50 cent minimum is rejected before calling Stripe" do
+    order_attrs = build_order_attrs.merge(price: 0.25)
+    refute_order(order_attrs)
+    assert_equal "Card payments must be at least $0.50", response.parsed_body["message"]
+    assert_not_requested :post, StripeStubs::STRIPE_PAYMENT_INTENTS_URL
+  end
+
+  #
+  # PaymentIntents and 3D Secure (#412)
+  #
+
+  test "the payment intent is idempotent on the confirmation token and describes the purchase" do
+    assert_user_created { assert_ordered_emailed(build_order_attrs) }
+
+    assert_requested :post, StripeStubs::STRIPE_PAYMENT_INTENTS_URL,
+                     headers: { "Idempotency-Key" => "motzi-order-#{stripe_confirmation_token}" } do |request|
+      posted = Rack::Utils.parse_nested_query(request.body)
+      metadata = posted["metadata"]
+      posted["payment_method_types"] == { "0" => "card" } &&
+        metadata["purchase_menu_id"] == menus(:week2).id.to_s &&
+        StripeCheckout.decode_cart(metadata["purchase_cart"]).map { |l| l[:item_id] } == [ items(:classic).id, items(:rye).id ] &&
+        metadata["email"] == "jeff@jeff.com" && metadata["digest"].present?
+    end
+  end
+
+  test "a card that needs 3D Secure saves nothing and returns the client secret" do
+    stub_payment_intent_create(status: "requires_action", id: "pi_test_3ds")
+
+    refute_user_created do
+      refute_ordered do
+        refute_emails_sent do
+          post "/orders.json", params: build_order_attrs, as: :json
+        end
+      end
+    end
+
+    assert_response :success
+    assert_equal true, response.parsed_body["requiresAction"]
+    assert_equal "pi_test_3ds_secret_test", response.parsed_body["clientSecret"]
+  end
+
+  test "posting back a paid payment intent after 3D Secure places the order" do
+    stub_payment_intent_create(status: "requires_action", id: "pi_test_3ds")
+    post "/orders.json", params: build_order_attrs, as: :json
+    stub_payment_intent_retrieve
+
+    order_attrs = build_order_attrs.except(:confirmation_token_id).merge(payment_intent_id: "pi_test_3ds")
+    assert_user_created { assert_ordered_emailed(order_attrs) }
+
+    order = Order.last
+    assert_equal "pi_test_3ds", order.stripe_payment_intent_id
+    assert_equal "ch_test_3ds", order.stripe_charge_id
+    assert_equal 10, order.stripe_charge_amount
+    assert_equal "jeff@jeff.com", order.user.email
+    assert_requested :post, StripeStubs::STRIPE_PAYMENT_INTENTS_URL, times: 1
+  end
+
+  test "a paid payment intent can't be posted back for a different amount, cart, kind or email" do
+    stub_payment_intent_create(status: "requires_action", id: "pi_test_3ds")
+    post "/orders.json", params: build_order_attrs, as: :json
+    stub_payment_intent_retrieve
+    resume = build_order_attrs.except(:confirmation_token_id).merge(payment_intent_id: "pi_test_3ds")
+
+    tampered = [
+      resume.merge(price: 9),
+      resume.merge(cart: [ resume[:cart].first.merge(quantity: 3) ]),
+      resume.merge(email: "someone.else@example.com")
+    ]
+    tampered.each do |attrs|
+      refute_order(attrs)
+      assert_equal "We couldn't confirm your payment. Please try again.", response.parsed_body["message"]
+    end
+
+    # a credit purchase's payment can't pay for an order
+    stub_payment_intent_retrieve(metadata: created_payment_intent[:metadata].merge("kind" => "credits"))
+    refute_order(resume)
+
+    # nor can one that isn't paid yet
+    stub_payment_intent_retrieve(status: "requires_action")
+    refute_order(resume)
+  end
+
+  test "posting back a payment the webhook already recorded returns that order" do
+    stub_payment_intent_create(status: "requires_action", id: "pi_test_3ds")
+    post "/orders.json", params: build_order_attrs, as: :json
+    intent = stub_payment_intent_retrieve
+    recorded = StripeCheckout::Fulfillment.record!(Stripe::PaymentIntent.construct_from(intent))
+
+    assert_no_difference [ "Order.count", "User.count" ] do
+      post "/orders.json", params: build_order_attrs.except(:confirmation_token_id).merge(payment_intent_id: "pi_test_3ds"),
+                           as: :json
+    end
+    assert_response :success
+    assert_equal recorded.id, response.parsed_body["order"]["id"]
   end
 
   #
@@ -112,12 +210,12 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     refute_order(order_attrs)
     assert_equal "The minimum for this order is $5.00 (Rye Five Ways is a fixed price)",
                  response.parsed_body["message"]
-    assert_not_requested :post, StripeStubs::STRIPE_CHARGES_URL
+    assert_not_requested :post, StripeStubs::STRIPE_PAYMENT_INTENTS_URL
   end
 
   test "a $0 order with a fixed-price item is rejected" do
     menu_items(:w2_rye).update!(pay_what_you_can: false)
-    order_attrs = build_order_attrs.merge(price: 0, token: nil)
+    order_attrs = build_order_attrs.merge(price: 0, confirmation_token_id: nil)
     refute_order(order_attrs)
     assert_equal "The minimum for this order is $5.00 (Rye Five Ways is a fixed price)",
                  response.parsed_body["message"]
@@ -125,7 +223,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
 
   test "a guest can't skip the minimum by leaving the price off" do
     menu_items(:w2_rye).update!(pay_what_you_can: false)
-    order_attrs = build_order_attrs.except(:price, :token)
+    order_attrs = build_order_attrs.except(:price, :confirmation_token_id)
     refute_order(order_attrs)
     assert_equal "The minimum for this order is $5.00 (Rye Five Ways is a fixed price)",
                  response.parsed_body["message"]
@@ -138,7 +236,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     assert_user_created { assert_ordered_emailed(order_attrs) }
 
     assert_equal 5, Order.last.stripe_charge_amount
-    assert_requested :post, StripeStubs::STRIPE_CHARGES_URL do |request|
+    assert_requested :post, StripeStubs::STRIPE_PAYMENT_INTENTS_URL do |request|
       Rack::Utils.parse_nested_query(request.body)["amount"] == "500"
     end
   end
@@ -171,7 +269,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     menu_items(:w2_rye).update!(pay_what_you_can: false)
     sign_in users(:jess)
     assert_ordered do
-      post "/orders.json", params: build_order_attrs.except(:email, :first_name, :last_name, :phone, :price, :token),
+      post "/orders.json", params: build_order_attrs.except(:email, :first_name, :last_name, :phone, :price, :confirmation_token_id),
                            as: :json
     end
     assert_response :success
@@ -192,7 +290,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
       phone: "555-123-4567",
       price: 10.00,
       mailing_list: false,
-      token: stripe_test_token
+      confirmation_token_id: stripe_confirmation_token
     }
   end
 
