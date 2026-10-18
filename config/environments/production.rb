@@ -35,7 +35,7 @@ Rails.application.configure do
   config.assets.compile = false
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
-  # CANONICAL_HOST > HEROKU_APP_NAME (review apps) > shop.yml; see ShopConfig.app_domain.
+  # CANONICAL_HOST > HEROKU_APP_DEFAULT_DOMAIN_NAME > HEROKU_APP_NAME > shop.yml; see ShopConfig.app_domain.
   app_domain = ShopConfig.app_domain
   config.asset_host = "https://#{app_domain}"
 

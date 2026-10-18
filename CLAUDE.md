@@ -198,6 +198,7 @@ R14 is a **soft** memory warning — the dyno exceeded its 512MB quota and went 
 Feature work uses git worktrees in `.worktrees/` (or `.claude/worktrees/`). When setting up a worktree:
 
 - **Symlink `.env`**: `ln -s ../../.env .env` in `.worktrees/<name>`, `ln -s ../../../.env .env` in `.claude/worktrees/<name>` (worktrees don't get untracked files)
+- **JS deps**: run `bun install` first. `bin/rails test` builds the JS with Vite before forking, and without `node_modules` it stalls instead of failing
 - **Bundler lockfile**: use `BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update` so bundler writes to the worktree, not the main repo
 - **Tests**: automatic. In a worktree, `bin/rails`/`bin/rake` disable Spring and the test DB defaults to `motzi_test_<worktree dir>` (`lib/worktree_env.rb`; `TEST_DATABASE` still overrides). Run `bin/rails db:test:prepare` once, then `bin/rails test`. Concurrent runs on the same test DB wait for each other (`test/support/test_db_lock.rb`) and print "Another test run is using …"; that's expected, not a hang.
 
