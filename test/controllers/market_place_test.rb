@@ -199,6 +199,22 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     assert_equal recorded.id, response.parsed_body["order"]["id"]
   end
 
+  test "a request Stripe rejects is reported and shown as a friendly error" do
+    %w[invalid_request_error idempotency_error].each do |type|
+      stub_stripe_request_rejected(type: type)
+      assert_difference "ErrorEvent.count", 1 do
+        refute_order(build_order_attrs)
+      end
+      assert_equal "Something went wrong with your payment. Please try again.", response.parsed_body["message"]
+    end
+  end
+
+  test "an unknown payment intent posted back is a friendly error" do
+    stub_stripe_request_rejected(method: :get, url: %r{\A#{StripeStubs::STRIPE_PAYMENT_INTENTS_URL}/pi_unknown})
+    refute_order(build_order_attrs.except(:confirmation_token_id).merge(payment_intent_id: "pi_unknown"))
+    assert_equal "Something went wrong with your payment. Please try again.", response.parsed_body["message"]
+  end
+
   #
   # per-item pay what you can (#412). The cart is classic + rye at $5 each.
   #

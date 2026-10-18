@@ -41,6 +41,12 @@ class CreditItemsController < ApplicationController
     render json: { requires_action: true, client_secret: e.client_secret }
   rescue StripeCheckout::PaymentError => e
     render json: { message: e.message }, status: :unprocessable_content
+  rescue Stripe::InvalidRequestError, Stripe::IdempotencyError => e
+    # Stripe refused the request (an expired or reused confirmation token, an
+    # unknown payment intent...), so nothing was charged.
+    Rails.error.report(e, handled: true, severity: :warning,
+                         context: { controller: controller_name, request_id: e.request_id, code: e.code })
+    render json: { message: StripeCheckout::FAILED_MESSAGE }, status: :unprocessable_content
   rescue Stripe::CardError => e
     # https://stripe.com/docs/api/errors/handling
     logger.warn "Stripe::CardError Status=#{e.http_status} Type=#{e.error.type} RequestId=#{e.request_id} \

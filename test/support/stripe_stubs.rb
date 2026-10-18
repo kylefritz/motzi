@@ -109,6 +109,23 @@ module StripeStubs
     )
   end
 
+  # Stripe rejecting the request itself (nothing is charged): an
+  # invalid_request_error (e.g. an expired or already used ConfirmationToken)
+  # or an idempotency_error (the same key reused with different parameters).
+  def stub_stripe_request_rejected(type: "invalid_request_error", method: :post, url: STRIPE_PAYMENT_INTENTS_URL)
+    stub_request(method, url).to_return(
+      status: 400,
+      headers: JSON_HEADERS,
+      body: {
+        error: {
+          type: type,
+          code: type == "invalid_request_error" ? "resource_missing" : nil,
+          message: "Stripe rejected the request (#{type})"
+        }
+      }.to_json
+    )
+  end
+
   # A payment_intent.succeeded event and the Stripe-Signature header Stripe
   # would send with it.
   def signed_stripe_event(intent, type: "payment_intent.succeeded", secret: WEBHOOK_SECRET)

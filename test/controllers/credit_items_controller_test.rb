@@ -56,6 +56,20 @@ class CreditItemsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Your card was declined.", response.parsed_body["message"]
   end
 
+  test "a request Stripe rejects is reported and shown as a friendly error" do
+    order_attrs = { price: 10.25, credits: 20, breads_per_week: 1.0, confirmation_token_id: stripe_confirmation_token }
+    %w[invalid_request_error idempotency_error].each do |type|
+      stub_stripe_request_rejected(type: type)
+      assert_no_difference "CreditItem.count" do
+        assert_difference "ErrorEvent.count", 1 do
+          post "/credit_items.json", params: order_attrs, as: :json
+        end
+      end
+      assert_response :unprocessable_content
+      assert_equal "Something went wrong with your payment. Please try again.", response.parsed_body["message"]
+    end
+  end
+
   test "a card that needs 3D Secure adds credits once the payment intent is posted back" do
     stub_payment_intent_create(status: "requires_action", id: "pi_test_credits")
     order_attrs = { price: 46, credits: 6, breads_per_week: 0.5, confirmation_token_id: stripe_confirmation_token }

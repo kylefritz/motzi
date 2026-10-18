@@ -25,6 +25,9 @@ class StripeCheckout
   # Stripe metadata values are capped at 500 characters
   METADATA_VALUE_LIMIT = 500
 
+  # Shown when Stripe rejects a request outright; nothing was charged.
+  FAILED_MESSAGE = "Something went wrong with your payment. Please try again.".freeze
+
   # A message safe to show the customer
   class PaymentError < StandardError; end
 

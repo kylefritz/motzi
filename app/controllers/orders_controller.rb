@@ -96,6 +96,12 @@ class OrdersController < ApplicationController
       existing = @payment_intent_id && Order.find_by(stripe_payment_intent_id: @payment_intent_id)
       raise e unless existing
       render_order(existing, existing.user)
+    rescue Stripe::InvalidRequestError, Stripe::IdempotencyError => e
+      # Stripe refused the request (an expired or reused confirmation token, an
+      # unknown payment intent...), so nothing was charged.
+      Rails.error.report(e, handled: true, severity: :warning,
+                           context: { controller: controller_name, request_id: e.request_id, code: e.code })
+      render_validation_failed(StripeCheckout::FAILED_MESSAGE)
     rescue Stripe::CardError => e
       # https://stripe.com/docs/api/errors/handling
       logger.warn "Stripe::CardError Status=#{e.http_status} Type=#{e.error.type} RequestId=#{e.request_id} \

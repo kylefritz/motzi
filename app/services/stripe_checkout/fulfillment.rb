@@ -26,7 +26,7 @@ class StripeCheckout
       cart_items.each { |attrs| order.order_items.build(attrs) }
       order.assign_attributes(payment.record_attrs) if payment
       order.save!
-      ConfirmationMailer.with(order:).order_email.deliver_later
+      deliver_after_commit(ConfirmationMailer.with(order:).order_email)
       order
     end
 
@@ -39,8 +39,16 @@ class StripeCheckout
         good_for_weeks: 42
       )
       user.update(breads_per_week: breads_per_week.to_f, receive_weekly_menu: true)
-      ConfirmationMailer.with(credit_item:).credit_email.deliver_later
+      deliver_after_commit(ConfirmationMailer.with(credit_item:).credit_email)
       credit_item
+    end
+
+    # Mail only once the record is committed. Solid Queue shares the app's
+    # database, so a job enqueued in a transaction that rolls back (say the
+    # webhook recorded this payment first) is rolled back with it, but that
+    # stops holding if the queue ever moves to its own database.
+    def deliver_after_commit(mail)
+      ActiveRecord.after_all_transactions_commit { mail.deliver_later }
     end
 
     def credits_description(quantity)
