@@ -11,6 +11,9 @@ type CardProps = {
   price: number | null;
   submitting: boolean;
   disabled?: boolean;
+  // when set, the order can't be paid as is (e.g. below its minimum); shown
+  // on the disabled pay button
+  blockedText?: string | null;
 };
 
 export default function Card({
@@ -19,6 +22,7 @@ export default function Card({
   price,
   submitting,
   disabled,
+  blockedText,
 }: CardProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -38,6 +42,9 @@ export default function Card({
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
+    if (blockedText) {
+      return;
+    }
     const isCharge = price !== null && price > 0;
     if (isCharge && (!stripe || !elements)) {
       console.log("Stripe.js hasn't loaded yet.");
@@ -66,7 +73,12 @@ export default function Card({
   const isNullPrice = price === null;
   if (isZeroPrice) {
     return (
-      <Button spinner={submitting} text="Submit Order" onClick={handleSubmit} />
+      <Button
+        disabled={!!blockedText}
+        spinner={submitting}
+        text={blockedText || "Submit Order"}
+        onClick={handleSubmit}
+      />
     );
   }
   return (
@@ -81,15 +93,17 @@ export default function Card({
         </div>
       )}
       <Button
-        disabled={!cardFilled || isNullPrice}
+        disabled={!cardFilled || isNullPrice || !!blockedText}
         spinner={submitting || waitingOnStripe}
         text={
-          isNullPrice
-            ? "Select an item"
-            : [
-                `Charge credit card ${formatMoney(price)}`,
-                credits ? ` for ${credits} credits` : "",
-              ].join("")
+          blockedText
+            ? blockedText
+            : isNullPrice
+              ? "Select an item"
+              : [
+                  `Charge credit card ${formatMoney(price)}`,
+                  credits ? ` for ${credits} credits` : "",
+                ].join("")
         }
       />
     </form>

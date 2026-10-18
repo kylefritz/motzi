@@ -55,6 +55,7 @@
           "credits",
           "subscriber",
           "marketplace",
+          "payWhatYouCan",
           "sortOrder",
           "pickupDays"
         ],
@@ -74,6 +75,7 @@
           },
           "subscriber": { "type": "boolean" },
           "marketplace": { "type": "boolean" },
+          "payWhatYouCan": { "type": "boolean" },
           "sortOrder": { "type": ["integer", "null"] },
           "pickupDays": {
             "type": "array",

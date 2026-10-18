@@ -212,6 +212,33 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     validate_json_schema :admin_menu_builder, @response.body
   end
 
+  test "builder adds an item as fixed price and toggles it back" do
+    menu = menus(:week3)
+    post "/admin/menus/#{menu.id}/menu_item.json", params: {
+      item_id: items(:donuts).id, subscriber: true, marketplace: true,
+      pay_what_you_can: false, pickup_day_ids: menu.pickup_days.pluck(:id)
+    }, as: :json
+    assert_response :success
+    validate_json_schema :admin_menu_builder, @response.body
+    menu_item = menu.menu_items.find_by!(item: items(:donuts))
+    refute menu_item.pay_what_you_can
+    added = JSON.parse(@response.body)["menuItems"].find { |mi| mi["menuItemId"] == menu_item.id }
+    assert_equal false, added["payWhatYouCan"]
+
+    patch "/admin/menu_items/#{menu_item.id}.json", params: { payWhatYouCan: true }, as: :json
+    assert menu_item.reload.pay_what_you_can
+  end
+
+  test "builder adds items as pay what you can by default" do
+    menu = menus(:week3)
+    post "/admin/menus/#{menu.id}/menu_item.json", params: {
+      item_id: items(:donuts).id, subscriber: true, marketplace: true,
+      pickup_day_ids: menu.pickup_days.pluck(:id)
+    }, as: :json
+    assert_response :success
+    assert menu.menu_items.find_by!(item: items(:donuts)).pay_what_you_can
+  end
+
   test "open_for_orders sets current holiday menu" do
     menu = menus(:passover_2026)
     travel_to(Time.zone.parse("2026-04-01 10:00")) do

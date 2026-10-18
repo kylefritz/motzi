@@ -337,7 +337,8 @@ ActiveAdmin.register Menu do
       mi = @menu.menu_items.create!(
         item_id: params[:item_id],
         subscriber: params[:subscriber],
-        marketplace: params[:marketplace]
+        marketplace: params[:marketplace],
+        pay_what_you_can: params.fetch(:pay_what_you_can, true)
       )
 
       params[:pickup_day_ids].each do |pickup_day_id|

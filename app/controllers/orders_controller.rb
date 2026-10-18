@@ -44,6 +44,8 @@ class OrdersController < ApplicationController
 
     # validated up front so a bad cart never creates an order
     cart_items = order_item_attrs_for_cart(@menu, params.fetch(:cart))
+    pricing = OrderPricing.new(menu: @menu, cart_items: cart_items)
+    enforce_minimum_price!(pricing)
 
     @user, @order = Order.transaction do
       # Advisory lock prevents race condition where two simultaneous requests
@@ -70,9 +72,10 @@ class OrdersController < ApplicationController
       # figure out if we need to charge this person or if we're using credits
       if params[:price].present?
 
-        # we let the customer set the price so ok to trust customer input
-        price = params[:price].to_f.clamp(0, 250)
-        price_cents = (price * 100).to_i
+        # pay what you can: the customer sets the price, which
+        # enforce_minimum_price! has already checked covers fixed-price items
+        price = params[:price].to_f.clamp(0, pricing.maximum.to_f)
+        price_cents = (price * 100).round
 
         # make stripe change
         if price > 0
@@ -172,6 +175,17 @@ class OrdersController < ApplicationController
   # count against the member's credit balance.
   def paid_marketplace_order?
     params[:price].to_f > 0 && params[:token].present?
+  end
+
+  # A card-paid order must cover its fixed-price items (#412). A guest
+  # checking out by email always pays by card, so leaving the price off
+  # counts as $0 rather than skipping the check.
+  def enforce_minimum_price!(pricing)
+    return unless params[:price].present? || params.include?(:email)
+
+    if pricing.below_minimum?(params[:price].to_f)
+      raise OrderError.new(pricing.minimum_message)
+    end
   end
 
   # Turns the submitted cart into order item attributes, rejecting any line the

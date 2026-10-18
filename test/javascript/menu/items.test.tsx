@@ -25,6 +25,7 @@ const baseItem = (overrides = {}) => ({
   image: null,
   subscriber: true,
   marketplace: true,
+  payWhatYouCan: true,
   pickupDays: [basePickupDay(1)],
   ...overrides,
 });

@@ -170,6 +170,7 @@ class Menu < ApplicationRecord
         item_id: original_mi.item_id,
         subscriber: original_mi.subscriber,
         marketplace: original_mi.marketplace,
+        pay_what_you_can: original_mi.pay_what_you_can,
         sort_order: sort_offset + index,
       )
 

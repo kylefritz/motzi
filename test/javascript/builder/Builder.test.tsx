@@ -36,6 +36,7 @@ const menuResponse = {
       image: null,
       subscriber: true,
       marketplace: true,
+      payWhatYouCan: true,
       sortOrder: 1,
       pickupDays: [
         {
@@ -57,6 +58,7 @@ const menuResponse = {
       image: null,
       subscriber: false,
       marketplace: true,
+      payWhatYouCan: true,
       sortOrder: null,
       pickupDays: [],
     },
@@ -170,6 +172,13 @@ test("edits menu items", async () => {
   await user.click(card.getByLabelText("Marketplace"));
   expect(patchMock).toHaveBeenCalledWith("/admin/menu_items/10.json", {
     marketplace: false,
+  });
+
+  // Turn off pay what you can: the price becomes a fixed minimum.
+  expect(card.getByText(/\$5.00 is the suggested price/)).toBeTruthy();
+  await user.click(card.getByLabelText("Pay what you can"));
+  expect(patchMock).toHaveBeenCalledWith("/admin/menu_items/10.json", {
+    payWhatYouCan: false,
   });
 
   // Update sort order.
