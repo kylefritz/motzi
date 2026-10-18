@@ -37,6 +37,7 @@ class CreditItemsController < ApplicationController
       current_user.update(breads_per_week: params[:breads_per_week].to_f, receive_weekly_menu: true)
 
       ConfirmationMailer.with(credit_item: @credit_item).credit_email.deliver_later
+      logger.info "[ConfirmationMailer] enqueued credit_email source=credit_purchase credit_item_id=#{@credit_item.id} user_id=#{current_user.id}"
 
       # return a reasonable response object
       render "show", format: :json
