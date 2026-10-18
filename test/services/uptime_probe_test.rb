@@ -5,12 +5,12 @@ class UptimeProbeTest < ActiveSupport::TestCase
   include WebMock::API
 
   setup do
-    @original_env = ENV.to_h.slice("UPTIME_PROBE_URL", "CANONICAL_HOST", "HEROKU_APP_NAME")
+    @original_env = ENV.to_h.slice("UPTIME_PROBE_URL", "CANONICAL_HOST", "HEROKU_APP_NAME", "HEROKU_APP_DEFAULT_DOMAIN_NAME")
     @original_env.each_key { |key| ENV.delete(key) }
   end
 
   teardown do
-    %w[UPTIME_PROBE_URL CANONICAL_HOST HEROKU_APP_NAME].each { |key| ENV.delete(key) }
+    %w[UPTIME_PROBE_URL CANONICAL_HOST HEROKU_APP_NAME HEROKU_APP_DEFAULT_DOMAIN_NAME].each { |key| ENV.delete(key) }
     @original_env.each { |key, value| ENV[key] = value }
     WebMock.reset!
   end

@@ -45,6 +45,17 @@ class ShopConfigTest < ActiveSupport::TestCase
                  ShopConfig.app_domain("CANONICAL_HOST" => "", "HEROKU_APP_NAME" => "motzibread-pr-9")
   end
 
+  test "app_domain prefers the heroku default domain over the app name" do
+    # New Heroku apps get a hashed host, so "<name>.herokuapp.com" doesn't resolve
+    # and review apps loaded their JS from prod instead of themselves.
+    env = { "HEROKU_APP_DEFAULT_DOMAIN_NAME" => "motzi-pr-9-28d850dcb0dd.herokuapp.com",
+            "HEROKU_APP_NAME" => "motzi-pr-9" }
+    assert_equal "motzi-pr-9-28d850dcb0dd.herokuapp.com", ShopConfig.app_domain(env)
+    assert_equal "motzibread.com", ShopConfig.app_domain(env.merge("CANONICAL_HOST" => "motzibread.com"))
+    assert_equal "motzi-pr-9.herokuapp.com",
+                 ShopConfig.app_domain(env.merge("HEROKU_APP_DEFAULT_DOMAIN_NAME" => ""))
+  end
+
   test "app_domain falls back to shop.yml" do
     assert_equal ShopConfig.shop.app_domain, ShopConfig.app_domain({})
     assert_equal ShopConfig.shop.app_domain, ShopConfig.app_domain("HEROKU_APP_NAME" => "")
