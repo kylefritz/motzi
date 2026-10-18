@@ -4,7 +4,7 @@ import { cleanup, configure } from "@testing-library/react";
 import { resetNow } from "./support/clock";
 import type { StripeTokenResult } from "./menu/stripeMock";
 
-// Pin luxon/moment "now" to FIXED_NOW (see support/clock.ts). Set at preload
+// Pin luxon "now" to FIXED_NOW (see support/clock.ts). Set at preload
 // time too, so module-level fixtures computed on import are deterministic.
 // Tests that need a different time use `withNow(...)` or `setNow(...)`; the
 // hooks below restore the fixed time around every test.

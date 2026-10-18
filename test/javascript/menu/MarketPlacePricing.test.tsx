@@ -9,8 +9,8 @@ import type { MenuItem } from "../../../app/javascript/types/api";
 const pickupDays = () => [
   {
     id: 1,
-    pickupAt: now().plus({ hours: 24 }).toISO() as string,
-    orderDeadlineAt: now().plus({ hours: 12 }).toISO() as string,
+    pickupAt: now().plus({ hours: 24 }).toISO()!,
+    orderDeadlineAt: now().plus({ hours: 12 }).toISO()!,
     remaining: 100,
   },
 ];

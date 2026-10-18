@@ -15,8 +15,8 @@ class OrderFlowTest < ApplicationSystemTestCase
   setup do
     menus(:week2).make_current!
 
-    # The browser checks deadlines against its own clock (moment() in
-    # Contexts.ts), and travel_to only fakes Ruby's clock, so time travel
+    # The browser checks deadlines against its own clock (luxon, in
+    # lib/dates.ts), and travel_to only fakes Ruby's clock, so time travel
     # would leave Chrome and Puma disagreeing about whether ordering is open.
     # Instead, move week2's pickup days into the real near future.
     now = Time.current

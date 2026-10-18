@@ -7,7 +7,7 @@ import Title from "menu/Title";
 import { now, withNow } from "../support/clock";
 
 function makeTitle(orderDeadlineAt: string) {
-  const pickupAt = now().plus(Duration.fromISO("PT24H")).toISO();
+  const pickupAt = now().plus(Duration.fromISO("PT24H")).toISO()!;
 
   return render(
     <Title
@@ -22,14 +22,14 @@ function makeTitle(orderDeadlineAt: string) {
 }
 
 test("After deadline: ordering close", () => {
-  const orderDeadlineAt = now().plus(Duration.fromISO("PT12H")).toISO();
+  const orderDeadlineAt = now().plus(Duration.fromISO("PT12H")).toISO()!;
   const { container } = makeTitle(orderDeadlineAt);
   const deadlineEl = container.querySelector("#deadline");
   expect(deadlineEl).toBeTruthy();
 });
 
 test("Before deadline: small warning", () => {
-  const orderDeadlineAt = now().minus(Duration.fromISO("PT12H")).toISO();
+  const orderDeadlineAt = now().minus(Duration.fromISO("PT12H")).toISO()!;
   const { container } = makeTitle(orderDeadlineAt);
   const warningEl = container.querySelector("#past-deadline");
   expect(warningEl).toBeTruthy();
@@ -56,18 +56,18 @@ test("Multiple pickup days: schedule wraps for mobile", () => {
   const pickupDays = [
     {
       id: 1,
-      pickupAt: current.plus({ days: 1 }).toISO(),
-      orderDeadlineAt: current.plus({ hours: 12 }).toISO(),
+      pickupAt: current.plus({ days: 1 }).toISO()!,
+      orderDeadlineAt: current.plus({ hours: 12 }).toISO()!,
     },
     {
       id: 2,
-      pickupAt: current.plus({ days: 3 }).toISO(),
-      orderDeadlineAt: current.plus({ days: 2 }).toISO(),
+      pickupAt: current.plus({ days: 3 }).toISO()!,
+      orderDeadlineAt: current.plus({ days: 2 }).toISO()!,
     },
     {
       id: 3,
-      pickupAt: current.plus({ days: 5 }).toISO(),
-      orderDeadlineAt: current.plus({ days: 4 }).toISO(),
+      pickupAt: current.plus({ days: 5 }).toISO()!,
+      orderDeadlineAt: current.plus({ days: 4 }).toISO()!,
     },
   ];
 

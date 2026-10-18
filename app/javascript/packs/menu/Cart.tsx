@@ -1,7 +1,7 @@
 import React from "react";
 import _ from "lodash";
 import { useState } from "react";
-import moment from "moment";
+import { weekday } from "../../lib/dates";
 
 import Price from "./Price";
 import { useDeadlineContext, usePriceContext } from "./Contexts";
@@ -99,7 +99,7 @@ function Days({ menu, cart, rmCartItem }: DaysProps) {
   );
 
   const sections = pickupDays.map(({ id, pickupAt, orderDeadlineAt }) => {
-    const day = moment(pickupAt).format("dddd");
+    const day = weekday(pickupAt);
     const daysItems = items.filter(({ pickupDayId }) => pickupDayId === id);
     const canEdit = !isClosed(orderDeadlineAt);
     return (
