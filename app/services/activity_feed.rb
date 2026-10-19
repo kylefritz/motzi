@@ -962,15 +962,35 @@ class ActivityFeed
   # Team members are skipped — admin self-tests are not member-facing
   # duplicate bugs, so neither the [RAPID DUPLICATE] tag nor the Email Health
   # counter should count them.
+  #
+  # A pair with an edit between the two sends is a quick edit, not a double
+  # send (#424: a member added an item 15s after ordering and got two correct
+  # confirmations).
   def each_rapid_pair(messages)
-    messages.group_by { |m| [ m.user_id, m.order_id ] }.each do |(user_id, _order_id), order_msgs|
+    messages.group_by { |m| [ m.user_id, m.order_id ] }.each do |(user_id, order_id), order_msgs|
       next if admin_user_ids.include?(user_id)
 
       order_msgs.sort_by { |m| m.sent_at || m.created_at }.each_cons(2) do |a, b|
-        gap = ((b.sent_at || b.created_at) - (a.sent_at || a.created_at)).to_f.abs
-        yield(user_id, a, b) if gap < CONFIRMATION_DUP_WINDOW
+        a_at = a.sent_at || a.created_at
+        b_at = b.sent_at || b.created_at
+        next unless (b_at - a_at).to_f.abs < CONFIRMATION_DUP_WINDOW
+        next if edited_between?(user_id, order_id, a_at, b_at)
+
+        yield(user_id, a, b)
       end
     end
+  end
+
+  # True when the member edited the order after the first confirmation went
+  # out: an `order_updated` event from OrdersController#update, or the order's
+  # items being rewritten. Messages without an order_id only have the event to
+  # go on.
+  def edited_between?(user_id, order_id, from, to)
+    return true if Ahoy::Event.where(name: "order_updated", user_id: user_id)
+      .where("time > ? AND time < ?", from, to).exists?
+
+    order_id.present? && OrderItem.where(order_id: order_id)
+      .where("created_at > ? AND created_at < ?", from, to).exists?
   end
 
   def admin_user_ids
