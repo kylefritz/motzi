@@ -84,6 +84,17 @@ class UserTest < ActiveSupport::TestCase
     assert_equal kyle.credits, ledger.last.balance
   end
 
+  test "credit_ledger says who created each entry, or nil when whodunnit isn't a user" do
+    adrian = users(:adrian)
+    by_russell = PaperTrail.request(whodunnit: users(:russell).id.to_s) { adrian.credit_items.create!(quantity: -2) }
+    by_console = PaperTrail.request(whodunnit: "kyle@console") { adrian.credit_items.create!(quantity: 3) }
+
+    ledger = adrian.credit_ledger
+
+    assert_equal users(:russell), ledger.find { |e| e.source == by_russell }.by
+    assert_nil ledger.find { |e| e.source == by_console }.by
+  end
+
   test "receive_weekly_menu" do
     refute users(:maya).receive_weekly_menu?
     assert users(:kyle).receive_weekly_menu?

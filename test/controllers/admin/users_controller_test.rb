@@ -67,6 +67,45 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_includes week1_links, "/admin/menus/#{menus(:week1).id}"
   end
 
+  test "credit history says who recorded each change, and a deduction without a memo reads as removed" do
+    user = users(:adrian)
+    PaperTrail.request(whodunnit: users(:russell).id.to_s) { user.credit_items.create!(quantity: -2) }
+    PaperTrail.request(whodunnit: user.id.to_s) { user.credit_items.create!(quantity: 6, memo: "6x credits") }
+
+    get "/admin/users/#{user.id}"
+    assert_response :success
+
+    rows = admin_panel("Credits").css("table.credit-ledger tbody tr").map { |tr| tr.css("td").map { |td| td.text.strip } }
+    assert_includes rows, rows.find { |r| r[1] == "-2" }
+    removed = rows.find { |r| r[1] == "-2" }
+    assert_equal "Credits removed", removed[3]
+    assert_equal "Russell", removed[4]
+    assert_equal "Customer", rows.find { |r| r[1] == "+6" }[4]
+  end
+
+  test "orders panel shows the credits each credit-paid order used" do
+    get "/admin/users/#{users(:kyle).id}"
+    assert_response :success
+
+    panel = admin_panel("Orders")
+    headers = panel.css("thead th").map { |th| th.text.strip }
+    col = headers.index("Credits used")
+    assert col, "Credits used column: #{headers.inspect}"
+    row = panel.css("tbody tr").find { |tr| tr.css("a[href='/admin/orders/#{orders(:kyle_week1).id}']").any? }
+    assert_equal orders(:kyle_week1).credits.to_s, row.css("td")[col].text.strip
+  end
+
+  test "user details summarize the account and drop breads per week" do
+    get "/admin/users/#{users(:kyle).id}"
+    assert_response :success
+
+    details = admin_panel("User Details")
+    assert_includes details.text, users(:kyle).credits.to_s
+    assert_includes details.text, "Weekly menu"
+    assert_match(/member since/i, details.text)
+    assert_not_includes response.body, "Breads Per Week"
+  end
+
   test "show caps the credit history at 20 entries with a link to the full history" do
     user = users(:adrian)
     25.times { |i| user.credit_items.create!(quantity: 1, memo: "top-up #{i}") }
