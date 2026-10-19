@@ -174,9 +174,6 @@ ActiveAdmin.register User do
           case entry.source
           when CreditItem
             text_node entry.source.memo.presence || (entry.change.negative? ? "Credits removed" : "Credits added")
-            if entry.source.good_for_weeks.to_i.positive?
-              text_node " · good for #{entry.source.good_for_weeks} weeks"
-            end
           when Order
             text_node auto_link(entry.source, "Order ##{entry.source.id}")
             text_node " · "

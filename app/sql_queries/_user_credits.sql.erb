@@ -1,4 +1,3 @@
-/* TODO: handle credit expiration? */
 with used_credits as (
     /* order_items.credits is the order-time snapshot — never join live items pricing here (#170) */
     select user_id, sum(quantity * order_items.credits) as value

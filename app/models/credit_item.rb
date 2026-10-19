@@ -1,4 +1,8 @@
 class CreditItem < ApplicationRecord
+  # Credits don't expire. good_for_weeks was recorded but never enforced; it's
+  # ignored here so a follow-up migration can drop it while this code runs.
+  self.ignored_columns += [ "good_for_weeks" ]
+
   belongs_to :user
   has_paper_trail
   scope :bought, -> { where("stripe_charge_amount is not null") }

@@ -58,8 +58,7 @@ class StripeCheckout
       credit_item = user.credit_items.create!(
         **payment.record_attrs,
         memo: "#{description}. Paid via Stripe $#{payment.amount.to_s('F')}.",
-        quantity: quantity,
-        good_for_weeks: 42
+        quantity: quantity
       )
       user.update(breads_per_week: breads_per_week.to_f, receive_weekly_menu: true)
       deliver_after_commit(ConfirmationMailer.with(credit_item:).credit_email,
