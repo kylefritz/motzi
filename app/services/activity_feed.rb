@@ -974,21 +974,19 @@ class ActivityFeed
         a_at = a.sent_at || a.created_at
         b_at = b.sent_at || b.created_at
         next unless (b_at - a_at).to_f.abs < CONFIRMATION_DUP_WINDOW
-        next if edited_between?(user_id, order_id, a_at, b_at)
+        next if edited_between?(order_id, a_at, b_at)
 
         yield(user_id, a, b)
       end
     end
   end
 
-  # True when the member edited the order after the first confirmation went
-  # out: an `order_updated` event from OrdersController#update, or the order's
-  # items being rewritten. Messages without an order_id only have the event to
-  # go on.
-  def edited_between?(user_id, order_id, from, to)
-    return true if Ahoy::Event.where(name: "order_updated", user_id: user_id)
-      .where("time > ? AND time < ?", from, to).exists?
-
+  # True when the order's items were rewritten after the first confirmation
+  # went out. OrdersController#update always rewrites them, so this catches
+  # every edit, and it's scoped to the order: an edit to another order, or by
+  # another member, can't hide a real duplicate. Credit confirmations (no
+  # order_id) can't be edits.
+  def edited_between?(order_id, from, to)
     order_id.present? && OrderItem.where(order_id: order_id)
       .where("created_at > ? AND created_at < ?", from, to).exists?
   end

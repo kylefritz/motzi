@@ -620,24 +620,8 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert_match(/RAPID DUPLICATE — same order confirmed twice/, verbose)
   end
 
-  test "rapid pair with an order_updated event between the sends is an edit, not a duplicate" do
-    # #424: member placed an order, then added an item 15s later.
-    travel_to_week_id(@week_id) do
-      sent = Time.zone.now + 1.day
-      order = orders(:ljf_week1)
-      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent)
-      track_order_updated(users(:ljf), sent + 14.seconds)
-      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent + 15.seconds)
-    end
-
-    text = ActivityFeed.new(@week_id).to_text
-    verbose = ActivityFeed.new(@week_id).to_text(verbose: true)
-
-    assert_match(/Rapid duplicate confirmations: 0 this week/, text)
-    assert_no_match(/RAPID DUPLICATE/, verbose)
-  end
-
   test "rapid pair with the order's items rewritten between the sends is an edit, not a duplicate" do
+    # #424: member placed an order, then added an item 15s later.
     travel_to_week_id(@week_id) do
       sent = Time.zone.now + 1.day
       order = orders(:ljf_week1)
@@ -670,12 +654,14 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert_match(/RAPID DUPLICATE — same order confirmed twice/, verbose)
   end
 
-  test "an edit by a different member does not hide a rapid duplicate" do
+  test "an edit to the member's other order does not hide a rapid duplicate" do
+    # Codex on #434: a user-wide edit signal let order B's edit mask order A's duplicate.
     travel_to_week_id(@week_id) do
       sent = Time.zone.now + 1.day
       order = orders(:ljf_week1)
       Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent)
-      track_order_updated(users(:kyle), sent + 10.seconds)
+      orders(:ljf_passover).order_items.first.update_columns(created_at: sent + 10.seconds)
+      track_order_updated(users(:ljf), sent + 10.seconds)
       Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent + 30.seconds)
     end
 
