@@ -42,24 +42,13 @@ async function addToCart(
   await user.click(screen.getByTestId(`add-to-cart-${itemId}`));
 }
 
-test("item cards are marked pay what you can or fixed price", () => {
+test("item cards carry no pay what you can or fixed price badges", () => {
   renderMenu({ order: false, user: false, items: mixedItems() });
 
   const classic = screen.getByTestId("item-1");
   const pizza = screen.getByTestId("item-2");
-  expect(classic.textContent).toContain("Pay what you can");
-  expect(pizza.textContent).toContain("Fixed price");
-});
-
-test("no markers when the shop has pay what you can off", () => {
-  renderMenu({
-    order: false,
-    user: false,
-    items: mixedItems(),
-    enablePayWhatYouCan: false,
-  });
-  expect(screen.queryByText("Fixed price")).toBeNull();
-  expect(screen.queryByText("Pay what you can")).toBeNull();
+  expect(classic.textContent).not.toContain("Pay what you can");
+  expect(pizza.textContent).not.toContain("Fixed price");
 });
 
 test("an all pay-what-you-can cart shows no breakdown", async () => {
