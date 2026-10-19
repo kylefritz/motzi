@@ -1,4 +1,5 @@
-# Helpers available inside fixture ERB.
+# Helpers available inside fixture ERB. config/initializers/fixture_helpers.rb
+# includes them whenever fixtures load (tests and `bin/rails db:fixtures:load`).
 #
 # Admin dashboards (activity feed, uptime, error events) default to the
 # current week, so ops fixtures have to land in it or those pages only ever
@@ -12,5 +13,3 @@ module FixtureHelpers
     [ Time.zone.now - ago, week_start ].max.to_fs(:db)
   end
 end
-
-ActiveRecord::FixtureSet.context_class.include(FixtureHelpers)
