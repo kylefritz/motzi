@@ -1,8 +1,9 @@
 require "webmock/minitest"
 
 # WebMock stubs for the Stripe calls the app makes: creating and confirming a
-# PaymentIntent (POST /v1/payment_intents) and reading one back
-# (GET /v1/payment_intents/:id), plus signed webhook payloads.
+# PaymentIntent (POST /v1/payment_intents), reading one back
+# (GET /v1/payment_intents/:id) and naming its order on it
+# (POST /v1/payment_intents/:id), plus signed webhook payloads.
 #
 # This replaced stripe-ruby-mock, which capped the stripe gem at < 14 and
 # lagged the real API. Stubbing at the HTTP layer exercises the real stripe
@@ -39,6 +40,7 @@ module StripeStubs
   # finish a 3D Secure payment with #stub_payment_intent_retrieve.
   # Each request gets a new intent id unless `id` is given.
   def stub_payment_intent_create(status: "succeeded", id: nil)
+    stub_payment_intent_update
     stub_request(:post, STRIPE_PAYMENT_INTENTS_URL).to_return do |request|
       posted = Rack::Utils.parse_nested_query(request.body)
       @created_payment_intent = payment_intent_json(
@@ -57,9 +59,24 @@ module StripeStubs
   # now paid (the customer finished 3D Secure).
   def stub_payment_intent_retrieve(intent = created_payment_intent, status: "succeeded", **overrides)
     intent = intent.merge(payment_intent_json(**intent.slice(:id, :amount, :metadata), status: status)).merge(overrides)
+    stub_payment_intent_update
     stub_request(:get, %r{\A#{STRIPE_PAYMENT_INTENTS_URL}/#{intent[:id]}(\?|\z)})
       .to_return(status: 200, headers: JSON_HEADERS, body: intent.to_json)
     intent
+  end
+
+  # Updating a PaymentIntent (LinkStripePaymentJob naming its order or credit
+  # item). Echoes back the description and metadata that were posted. The
+  # create and retrieve stubs set this up too, since every paid intent that
+  # gets recorded is then updated.
+  def stub_payment_intent_update(id = %r{[^/?]+})
+    stub_request(:post, %r{\A#{STRIPE_PAYMENT_INTENTS_URL}/#{id}\z}).to_return do |request|
+      posted = Rack::Utils.parse_nested_query(request.body)
+      intent_id = request.uri.path.split("/").last
+      body = payment_intent_json(id: intent_id, status: "succeeded", amount: 1000, metadata: posted["metadata"] || {},
+                                 description: posted["description"])
+      { status: 200, headers: JSON_HEADERS, body: body.to_json }
+    end
   end
 
   def payment_intent_json(id:, status:, amount:, metadata:, description: nil, receipt_email: nil)

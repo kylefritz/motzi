@@ -99,7 +99,10 @@ class StripeWebhooksControllerTest < ActionDispatch::IntegrationTest
 
     StripeCheckout::Fulfillment.stub(:create_order!, racing_create_order) do
       assert_no_difference "User.count" do
-        post "/orders.json", params: browser_order_attrs, as: :json
+        # the losing browser request mustn't link the webhook's order again
+        assert_no_enqueued_jobs only: LinkStripePaymentJob do
+          post "/orders.json", params: browser_order_attrs, as: :json
+        end
       end
     end
 

@@ -50,6 +50,7 @@ class StripeCheckout
       order.save!
       deliver_after_commit(ConfirmationMailer.with(order:).order_email,
                            "order_email source=#{source} order_id=#{order.id} user_id=#{order.user_id}")
+      link_payment_after_commit(order)
       order
     end
 
@@ -63,6 +64,7 @@ class StripeCheckout
       user.update(breads_per_week: breads_per_week.to_f, receive_weekly_menu: true)
       deliver_after_commit(ConfirmationMailer.with(credit_item:).credit_email,
                            "credit_email source=#{source} credit_item_id=#{credit_item.id} user_id=#{user.id}")
+      link_payment_after_commit(credit_item)
       credit_item
     end
 
@@ -76,6 +78,15 @@ class StripeCheckout
         mail.deliver_later
         Rails.logger.info "[ConfirmationMailer] enqueued #{log_details}"
       end
+    end
+
+    # Names the record on its PaymentIntent (#427), once it's committed for
+    # the same reason as deliver_after_commit. Only the browser or the webhook
+    # gets here for a given intent; the other finds the existing record.
+    def link_payment_after_commit(record)
+      return if record.stripe_payment_intent_id.blank?
+
+      ActiveRecord.after_all_transactions_commit { LinkStripePaymentJob.perform_later(record) }
     end
 
     def credits_description(quantity)
