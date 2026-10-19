@@ -90,6 +90,5 @@ export type CreditPurchaseRequest = PaymentSubmission & {
 export type AdminCreditItemRequest = {
   memo: string;
   quantity: number;
-  goodForWeeks: number;
   userId: number;
 };

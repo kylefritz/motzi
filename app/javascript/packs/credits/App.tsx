@@ -6,7 +6,6 @@ import type { AdminCreditItemRequest } from "../../types/api";
 export default function App() {
   const memoRef = React.createRef<HTMLInputElement>();
   const quantityRef = React.createRef<HTMLInputElement>();
-  const weeksRef = React.createRef<HTMLInputElement>();
   const userId = parseInt(
     window.location?.pathname.match(/users\/(.*)/)?.[1] ?? "",
     10
@@ -17,7 +16,6 @@ export default function App() {
     const credit: AdminCreditItemRequest = {
       memo: memoRef.current?.value || "",
       quantity: Number(quantityRef.current?.value || 0),
-      goodForWeeks: Number(weeksRef.current?.value || 0),
       userId,
     };
     console.info(credit);
@@ -54,13 +52,6 @@ export default function App() {
                 Quantity
               </label>
               <input step="any" type="number" ref={quantityRef} />
-            </li>
-
-            <li className="number input optional numeric stringish">
-              <label htmlFor="credit_entry_good_for_weeks" className="label">
-                Good for weeks
-              </label>
-              <input step="any" type="number" ref={weeksRef} />
             </li>
           </ol>
         </fieldset>

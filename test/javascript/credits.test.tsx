@@ -35,23 +35,24 @@ test("submits credit payload for current user", async () => {
   const quantityInput = screen
     .getByText("Quantity")
     .parentElement?.querySelector("input");
-  const weeksInput = screen
-    .getByText("Good for weeks")
-    .parentElement?.querySelector("input");
-  if (!memoInput || !quantityInput || !weeksInput) {
+  if (!memoInput || !quantityInput) {
     throw new Error("Expected credit form inputs to be present.");
   }
 
   await user.type(memoInput, "promo");
   await user.type(quantityInput, "5");
-  await user.type(weeksInput, "12");
 
   await user.click(screen.getByRole("button", { name: "Add credit" }));
 
   expect(postMock).toHaveBeenCalledWith("/admin/credit_items.json", {
     memo: "promo",
     quantity: 5,
-    goodForWeeks: 12,
     userId: 123,
   });
+});
+
+test("the admin credit form has no expiry field", async () => {
+  const { default: App } = await import("credits/App");
+  render(<App />);
+  expect(screen.queryByText(/good for weeks/i)).toBeNull();
 });

@@ -146,7 +146,6 @@ class ActivityFeedTest < ActiveSupport::TestCase
       quantity: 6,
       stripe_charge_amount: 4800,
       memo: "test purchase",
-      good_for_weeks: 7,
       created_at: week_start + 1.hour
     )
 
@@ -166,7 +165,6 @@ class ActivityFeedTest < ActiveSupport::TestCase
       quantity: 6,
       stripe_charge_amount: 4800,
       memo: "test purchase",
-      good_for_weeks: 7,
       created_at: week_start + 1.hour
     )
 
