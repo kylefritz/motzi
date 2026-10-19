@@ -62,7 +62,7 @@ test("an all pay-what-you-can cart shows no breakdown", async () => {
   expect(screen.queryByTestId("price-breakdown")).toBeNull();
 });
 
-test("mixed cart shows the breakdown and blocks paying under the minimum", async () => {
+test("mixed cart looks like any cart until the price dips under the fixed total", async () => {
   const user = userEvent.setup();
   const originalAlert = window.alert;
   const alertSpy = mock(() => {});
@@ -80,13 +80,9 @@ test("mixed cart shows the breakdown and blocks paying under the minimum", async
   const priceInput = screen.getByLabelText<HTMLInputElement>("Price");
   await waitFor(() => expect(priceInput.value).toBe("38"));
 
-  const breakdown = screen.getByTestId("price-breakdown");
-  expect(breakdown.textContent).toContain("1 × Pizza");
-  expect(breakdown.textContent).toContain("Fixed total$30.00");
-  expect(breakdown.textContent).toContain("Suggested$8.00");
-  expect(
-    screen.getByText(/\$30\.00 covers the fixed-price items/)
-  ).toBeTruthy();
+  // no breakdown or pricing labels: the cart looks like it did before #419
+  expect(screen.queryByTestId("price-breakdown")).toBeNull();
+  expect(screen.queryByText(/fixed price|fixed total/i)).toBeNull();
   expect(screen.queryByTestId("below-minimum")).toBeNull();
 
   // under the minimum: inline message and a disabled pay button
@@ -94,7 +90,7 @@ test("mixed cart shows the breakdown and blocks paying under the minimum", async
   fireEvent.blur(priceInput, { target: { value: "20" } });
 
   const message = await screen.findByTestId("below-minimum");
-  expect(message.textContent).toContain("That's under $30.00");
+  expect(message.textContent).toContain("at least $30.00");
   const payButton = screen.getByRole<HTMLButtonElement>("button", {
     name: "Enter at least $30.00",
   });
@@ -111,7 +107,7 @@ test("mixed cart shows the breakdown and blocks paying under the minimum", async
 
   // the shortcut pays exactly the minimum and clears the message
   await act(async () => {
-    await user.click(screen.getByRole("button", { name: "Pay $30.00" }));
+    await user.click(screen.getByRole("button", { name: "Change to $30.00" }));
   });
   await waitFor(() => expect(priceInput.value).toBe("30"));
   expect(screen.queryByTestId("below-minimum")).toBeNull();
