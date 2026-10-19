@@ -57,9 +57,12 @@ export default function PayWhatYouCan({
     <>
       <p>
         <small>
-          Our prices are suggestions. We want everyone to be able to eat good
-          bread, so if money's tight, pay what you can. If you're able to pay a
-          little more, it helps us keep the oven on for the whole neighborhood.
+          These are suggested prices based on our costs. We want everyone to
+          have access to healthy food, regardless of ability to pay. If you are
+          out of work or otherwise in a challenging financial situation please
+          pay what you can or nothing at all. If you have the means to pay more
+          we would welcome your support in providing for the community and
+          ensuring our continued stability as a small business.
         </small>
       </p>
       <div
