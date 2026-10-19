@@ -2,7 +2,7 @@ ActiveAdmin.register User do
   menu priority: 5
   permit_params :first_name, :last_name, :email, :additional_email, :is_admin, \
     :receive_weekly_menu, :receive_havent_ordered_reminder, :receive_day_of_reminder, \
-    :mailing_list, :breads_per_week, :phone, :password
+    :mailing_list, :phone, :password
   config.sort_order = "LOWER(first_name), LOWER(last_name)"
 
   filter :first_name
@@ -72,7 +72,6 @@ ActiveAdmin.register User do
       input :email
       input :additional_email
       input :phone
-      input :breads_per_week
       input :mailing_list
     end
     inputs "Email Preferences" do
@@ -88,6 +87,37 @@ ActiveAdmin.register User do
   end
 
   show do |user|
+    panel "User Details" do
+      attributes_table_for user do
+        row :name do
+          strong user.name
+          status_tag "admin", class: "yes", style: "margin-left: 6px" if user.is_admin?
+        end
+        row :email do
+          div user.email
+          div small(user.additional_email) if user.additional_email.present?
+        end
+        row(:phone) { number_to_phone(user.phone) }
+        row("Credits") { strong user.credits }
+        row "Emails" do
+          {
+            "Weekly menu" => user.receive_weekly_menu?,
+            "Haven't ordered reminder" => user.receive_havent_ordered_reminder?,
+            "Day-of reminder" => user.receive_day_of_reminder?,
+            "Mailing list" => user.mailing_list?
+          }.map do |label, on|
+            content_tag(:span, label, class: "status_tag #{on ? "yes" : "no"}", title: on ? "on" : "off", style: "margin-right: 4px")
+          end.then { |tags| safe_join(tags) }
+        end
+        row "Orders" do
+          last = user.orders.maximum(:created_at)
+          text_node pluralize(user.orders.count, "order")
+          text_node " · last #{time_ago_in_words(last)} ago" if last
+        end
+        row("Member since") { user.created_at.strftime("%b %-d, %Y") }
+      end
+    end
+
     panel "Orders" do
       table_for user.orders.includes(:menu, order_items: :item).order(created_at: :desc) do
         column "menu" do |order|
@@ -103,11 +133,14 @@ ActiveAdmin.register User do
           if order.stripe_charge_amount.present?
             a number_to_currency(order.stripe_charge_amount), href: "https://dashboard.stripe.com/payments/#{order.stripe_charge_id}", target: "_blank", title: "via Stripe"
           else
-            span "#{order.credits} cr"
+            span "credits"
           end
           if order.stripe_receipt_url.present?
             a "Receipt", href: order.stripe_receipt_url, target: "_blank", title: "Stripe Receipt"
           end
+        end
+        column "Credits used" do |order|
+          order.credits unless order.stripe_charge_amount.present?
         end
         column :retail_price do |order|
           if order.stripe_charge_amount.present?
@@ -117,24 +150,6 @@ ActiveAdmin.register User do
         end
         column :comments
       end
-    end
-
-    attributes_table do
-      row :name
-      row :email do |user|
-        div strong user.email
-        small user.additional_email
-      end
-      row :phone do |user|
-        number_to_phone(user.phone)
-      end
-      row :breads_per_week
-      row :receive_weekly_menu
-      row :receive_havent_ordered_reminder
-      row :receive_day_of_reminder
-      row :is_admin
-      row :created_at
-      row :updated_at
     end
 
     panel "Credits" do
@@ -158,12 +173,21 @@ ActiveAdmin.register User do
         column :details do |entry|
           case entry.source
           when CreditItem
-            text_node entry.source.memo.presence || "Credits added"
+            text_node entry.source.memo.presence || (entry.change.negative? ? "Credits removed" : "Credits added")
           when Order
             text_node auto_link(entry.source, "Order ##{entry.source.id}")
             text_node " · "
             text_node auto_link(entry.source.menu)
             text_node " · #{entry.source.item_list}"
+          end
+        end
+        column :by do |entry|
+          if entry.by.nil?
+            span(entry.source.try(:stripe_charge_id).present? ? "Stripe" : "—", class: "empty")
+          elsif entry.by == user
+            text_node "Customer"
+          else
+            auto_link(entry.by, entry.by.first_name.presence || entry.by.name)
           end
         end
       end
