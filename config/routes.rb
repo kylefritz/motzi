@@ -67,6 +67,9 @@ Rails.application.routes.draw do
 
   post "/reply_ingress", to: "reply_ingress#create"
 
+  # Stripe payment_intent.succeeded (#412)
+  post "/stripe/webhooks", to: "stripe_webhooks#create"
+
   # Error feedback API (used by error pages)
   namespace :api do
     resources :feedbacks, only: [ :create ]

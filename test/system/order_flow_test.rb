@@ -57,11 +57,13 @@ class OrderFlowTest < ApplicationSystemTestCase
     assert_includes email.to, member.email
   end
 
-  # Stripe Elements renders the card field in a cross-origin iframe from
-  # js.stripe.com and tokenizes in the browser, which WebMock (server-side)
-  # can't stub. So the card-charge path stays covered by
-  # OrdersControllerTest; here we drive the guest checkout at a $0
-  # pay-what-you-can price, which submits without a card.
+  # The Payment Element renders the card field in a cross-origin iframe from
+  # js.stripe.com and creates the ConfirmationToken in the browser, which
+  # WebMock (server-side) can't stub. So the card path (PaymentIntents, 3D
+  # Secure, the webhook) stays covered by MarketPlaceTest,
+  # CreditItemsControllerTest and StripeWebhooksControllerTest; here we drive
+  # the guest checkout at a $0 pay-what-you-can price, which submits without
+  # a card or Stripe Elements.
   test "guest checks out from the marketplace at a pay-what-you-can price" do
     rye = items(:rye)
     pickup_day = pickup_days(:w2_d2_sat)
@@ -95,7 +97,7 @@ class OrderFlowTest < ApplicationSystemTestCase
     assert_equal [ [ rye.id, pickup_day.id ] ], order.order_items.map { |oi| [ oi.item_id, oi.pickup_day_id ] }
     assert_equal 0, order.stripe_charge_amount
     assert_nil order.stripe_charge_id
-    assert_not_requested :post, StripeStubs::STRIPE_CHARGES_URL
+    assert_not_requested :post, StripeStubs::STRIPE_PAYMENT_INTENTS_URL
   end
 
   private

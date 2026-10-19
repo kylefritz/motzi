@@ -44,7 +44,7 @@ test("shows card payment form when no order exists", () => {
   renderHolidayMenuTab({ order: false });
   expect(screen.queryByText("We've got your order!")).toBeNull();
   // Holiday menu uses Marketplace with card payment
-  expect(screen.getByTestId("card-element")).toBeTruthy();
+  expect(screen.getByTestId("payment-element")).toBeTruthy();
 });
 
 test("shows USD prices, not credits, in holiday menu", () => {
@@ -67,5 +67,5 @@ test("editing resets to confirmation after save", async () => {
 
   // Now the marketplace form should be showing (card payment)
   expect(screen.queryByText("We've got your order!")).toBeNull();
-  expect(screen.getByTestId("card-element")).toBeTruthy();
+  expect(screen.getByTestId("payment-element")).toBeTruthy();
 });

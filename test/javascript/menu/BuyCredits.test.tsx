@@ -51,7 +51,7 @@ test("buy credits", async () => {
 
   expect(screen.getByText("Pay by credit card")).toBeTruthy();
   expect(screen.getByLabelText("Price")).toBeTruthy();
-  expect(screen.getByTestId("card-element")).toBeTruthy();
+  expect(screen.getByTestId("payment-element")).toBeTruthy();
 
   expect(
     screen.getByRole("button", {
@@ -85,7 +85,7 @@ test("no payWhatYouCan", async () => {
 
   expect(screen.getByText("Pay by credit card")).toBeTruthy();
   expect(screen.queryByLabelText("Price")).toBeNull();
-  expect(screen.getByTestId("card-element")).toBeTruthy();
+  expect(screen.getByTestId("payment-element")).toBeTruthy();
 });
 
 test("humanizeBreadsPerWeek", () => {

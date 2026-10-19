@@ -1,9 +1,11 @@
 # 301s any request whose host doesn't match the canonical host (e.g.
 # motzibread.herokuapp.com after the DNS cutover to motzibread.com).
 # Health checks are exempt so Heroku/uptime probes keep hitting the dyno
-# directly.
+# directly, and so are the machine-to-machine POSTs (the Stripe webhook and
+# the reply-ingress worker): they don't follow a 301, so redirecting them
+# would silently drop every delivery.
 class CanonicalHostRedirect
-  EXEMPT_PATHS = %r{\A/health}
+  EXEMPT_PATHS = %r{\A/(health|stripe/webhooks\z|reply_ingress\z)}
 
   def initialize(app, host)
     @app = app

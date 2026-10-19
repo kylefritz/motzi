@@ -9,9 +9,8 @@ import Account from "./Account";
 import Items from "./Items";
 import PayItForward from "./PayItForward";
 import Payment from "../buy/Payment";
-import type { StripeTokenPayload } from "../buy/Card";
 import { applyTip } from "../buy/Tip";
-import { cartPricing, isBelowMinimum } from "../buy/pricing";
+import { cartPricing, isBelowMinimum, MAX_ABOVE_MINIMUM } from "../buy/pricing";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
 import FeedbackForm from "./FeedbackForm";
 import { useDeadlineContext, usePriceContext } from "./Contexts";
@@ -19,6 +18,7 @@ import type {
   CartItem,
   MarketplaceOrderRequest,
   Menu as MenuType,
+  PaymentSubmission,
 } from "../../types/api";
 
 type AccountInfo = Pick<
@@ -51,26 +51,33 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
   const { showCredits } = usePriceContext();
 
   const totalPrice = applyTip(price, tip);
-  const handleCardToken = ({ token }: StripeTokenPayload) => {
+  const canPay = () => {
     if (_.isEmpty(account.email)) {
-      return alert("Enter email!");
+      alert("Enter email!");
+      return false;
     }
     if (!/\S+@\S+\.\S+/.test(account.email)) {
-      return alert("Invalid email");
+      alert("Invalid email");
+      return false;
     }
+    return true;
+  };
 
-    console.log("handleCardToken", { token, price: totalPrice });
+  // Resolves with the server's response so a card that needs 3D Secure can
+  // finish it and pay again (see buy/Card).
+  const handlePay = (payment: PaymentSubmission) => {
+    console.log("handlePay", { payment, price: totalPrice });
     setSubmitting(true);
 
-    // send stripe token to rails to complete purchase
+    // send the stripe payment to rails to complete purchase
     const finalPrice = typeof totalPrice === "number" ? totalPrice : 0;
-    onCreateOrder({
+    return onCreateOrder({
       ...account,
       comments,
       cart,
       price: finalPrice,
-      token: token.id,
-    }).then(() => setSubmitting(false));
+      ...payment,
+    }).finally(() => setSubmitting(false));
   };
 
   const handleAddToCart = (item: AddToCartPayload) => {
@@ -156,7 +163,9 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
       <Payment
         price={_.isEmpty(cart) ? null : totalPrice}
         stripeApiKey={stripeApiKey}
-        onCardToken={handleCardToken}
+        onPay={handlePay}
+        canPay={canPay}
+        maxPrice={pricing.minimum + MAX_ABOVE_MINIMUM}
         submitting={submitting}
         disabled={disabled}
         blockedText={
