@@ -108,6 +108,23 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "an admin ordering for a member through their uid link is recorded as the admin" do
+    sign_in users(:maya)
+    before_deadline do
+      assert_order_placed users(:ljf).hashid
+    end
+    order = Order.last
+    assert_equal users(:ljf), order.user
+    assert_equal users(:maya).id.to_s, order.versions.find_by(event: "create").whodunnit
+  end
+
+  test "a member ordering through their own uid link is recorded as the member" do
+    before_deadline do
+      assert_order_placed users(:ljf).hashid
+    end
+    assert_equal users(:ljf).id.to_s, Order.last.versions.find_by(event: "create").whodunnit
+  end
+
   test "signed in user can create order" do
     sign_in users(:ljf)
     before_deadline do

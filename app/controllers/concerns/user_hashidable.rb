@@ -20,6 +20,12 @@ module UserHashidable
       end
     end
 
+    # An admin acting through a member's ?uid= link ("Order for" in the admin)
+    # is the one making the change, so record them as whodunnit, not the member.
+    def user_for_paper_trail
+      (current_admin_user || current_user)&.id
+    end
+
     def require_hashid_user_or_devise_user!
       if hashid_user
         logger.info "found user {#{hashid_user.name}} for hashid=#{hashid}"
