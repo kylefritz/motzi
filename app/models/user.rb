@@ -48,7 +48,11 @@ class User < ApplicationRecord
     SqlQuery.new(:user_credits, user_ids: [ self.id ]).execute.first["credit_balance"]
   end
 
-  CreditLedgerEntry = Struct.new(:at, :change, :balance, :source, keyword_init: true)
+  # by: the user whose request created the entry (PaperTrail's whodunnit), so
+  # an admin's adjustment reads differently from the member's own purchase.
+  # nil when nobody was signed in (Stripe's webhook, a console script, or rows
+  # older than the version history).
+  CreditLedgerEntry = Struct.new(:at, :change, :balance, :source, :by, keyword_init: true)
 
   # Every credit purchase and every credit-paid order, oldest first, with the
   # balance after each one. Mirrors the arithmetic in
@@ -56,13 +60,15 @@ class User < ApplicationRecord
   def credit_ledger
     # quantity is nullable on old rows; SUM skips NULLs, so count them as 0
     purchases = credit_items.map { |ci| { at: ci.created_at, change: ci.quantity.to_i, source: ci } }
-    deductions = orders.where(stripe_charge_id: nil).includes(:menu, :order_items)
+    deductions = orders.where(stripe_charge_id: nil).includes(:menu, order_items: :item)
                        .map { |o| { at: o.created_at, change: -o.credits, source: o } }
+    entries = purchases + deductions
+    creators = record_creators(entries.map { |e| e[:source] })
 
     balance = 0
-    (purchases + deductions).sort_by { |e| [ e[:at], e[:source].class.name, e[:source].id ] }.map do |e|
+    entries.sort_by { |e| [ e[:at], e[:source].class.name, e[:source].id ] }.map do |e|
       balance += e[:change]
-      CreditLedgerEntry.new(**e, balance: balance)
+      CreditLedgerEntry.new(**e, balance: balance, by: creators[[ e[:source].class.name, e[:source].id ]])
     end
   end
 
@@ -130,6 +136,23 @@ class User < ApplicationRecord
           ActiveAdmin::Comment.create!(body: message, namespace: "admin", resource: user, author: User.system)
         end
       end
+    end
+  end
+
+  private
+
+  # { [class name, id] => User } for whoever created each record, from its
+  # PaperTrail create version. whodunnit is a free-form string, so one that
+  # doesn't resolve to a user is left out.
+  def record_creators(records)
+    return {} if records.empty?
+
+    by_type = records.group_by { |r| r.class.name }
+    versions = by_type.map { |type, rs| PaperTrail::Version.where(event: "create", item_type: type, item_id: rs.map(&:id)) }
+                      .reduce(:or).pluck(:item_type, :item_id, :whodunnit)
+    users = User.where(id: versions.map(&:last).grep(/\A\d+\z/)).index_by { |u| u.id.to_s }
+    versions.each_with_object({}) do |(type, id, whodunnit), creators|
+      creators[[ type, id ]] = users[whodunnit] if users[whodunnit]
     end
   end
 end
