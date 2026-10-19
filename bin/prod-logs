@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+# Production logs from the log drain (30 days, cloudflare/workers/log-drain),
+# in the `heroku logs` format. Heroku itself only keeps the last 1,500 lines.
+#
+#   bin/prod-logs                         # last 30 minutes
+#   bin/prod-logs --since 6h              # 30m, 6h, 2d, or an ISO time
+#   bin/prod-logs --since 2026-10-19T20:00Z --until 2026-10-19T21:00Z
+#   bin/prod-logs --since 1d -q status=500
+#
+# Reads LOG_DRAIN_URL and LOG_DRAIN_READ_TOKEN from the environment, or from
+# `heroku config` on motzibread. Without them it falls back to `heroku logs -n 1500`.
+require "net/http"
+require "optparse"
+require "uri"
+
+APP = "motzibread"
+opts = { since: "30m" }
+OptionParser.new do |o|
+  o.banner = "Usage: bin/prod-logs [--since 30m] [--until TIME] [-q TEXT]"
+  o.on("--since TIME", "30m, 6h, 2d or an ISO time (default 30m)") { |v| opts[:since] = v }
+  o.on("--until TIME", "same formats; default now") { |v| opts[:until] = v }
+  o.on("-q", "--query TEXT", "only lines containing TEXT (case-insensitive)") { |v| opts[:q] = v }
+end.parse!
+
+def heroku_config(name)
+  value = `heroku config:get #{name} --app #{APP} 2>/dev/null`.strip
+  value.empty? ? nil : value
+end
+
+url = ENV["LOG_DRAIN_URL"] || heroku_config("LOG_DRAIN_URL")
+token = ENV["LOG_DRAIN_READ_TOKEN"] || heroku_config("LOG_DRAIN_READ_TOKEN")
+
+unless url && token
+  warn "LOG_DRAIN_URL / LOG_DRAIN_READ_TOKEN not set; falling back to heroku logs -n 1500 (--since/--until ignored)"
+  logs = IO.popen([ "heroku", "logs", "--app", APP, "-n", "1500" ], &:read)
+  logs = logs.each_line.select { |line| line.downcase.include?(opts[:q].downcase) }.join if opts[:q]
+  $stdout.write(logs)
+  exit
+end
+
+params = opts.compact
+cursor = nil
+loop do
+  uri = URI("#{url}/logs")
+  uri.query = URI.encode_www_form(cursor ? params.merge(cursor: cursor) : params)
+  request = Net::HTTP::Get.new(uri)
+  request["Authorization"] = "Bearer #{token}"
+  response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https", read_timeout: 60) { |http| http.request(request) }
+  abort "Log drain returned #{response.code}: #{response.body}" unless response.is_a?(Net::HTTPSuccess)
+
+  $stdout.write(response.body)
+  cursor = response["X-Next-Cursor"]
+  break if cursor.nil? || cursor.empty?
+end

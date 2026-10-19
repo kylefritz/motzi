@@ -1,0 +1,29 @@
+name = "thepuff-log-drain"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+# Served only at logs.thepuff.co: /<app>/drain (Heroku HTTPS log drain) and
+# /<app>/logs (authenticated reads). No workers.dev URL.
+workers_dev = false
+preview_urls = false
+routes = [{ pattern = "logs.thepuff.co", custom_domain = true }]
+
+[vars]
+APPS = "motzi"
+
+[[r2_buckets]]
+binding = "LOGS"
+bucket_name = "thepuff-logs"
+
+[[durable_objects.bindings]]
+name = "LOG_BUFFER"
+class_name = "LogBuffer"
+
+# SQLite-backed so it runs on the Workers free plan.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["LogBuffer"]
+
+# Secrets — set via `wrangler secret put <NAME>`:
+# - DRAIN_TOKEN  password in the Heroku drain URL (basic auth)
+# - READ_TOKEN   bearer token for GET /<app>/logs

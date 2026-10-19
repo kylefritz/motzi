@@ -5,15 +5,13 @@ class CaptureDynoMetricsJob < ApplicationJob
            wait: :polynomially_longer, attempts: 3
 
   APP_NAME = "motzibread"
+  # Matches the schedule (:03 and :33), so each run sees every sample once.
+  WINDOW = 30.minutes
 
   def perform
-    api_key = ENV["HEROKU_API_KEY"]
-    if api_key.blank?
-      Rails.logger.warn("[CaptureDynoMetricsJob] HEROKU_API_KEY not set — skipping")
-      return
-    end
+    log_content = recent_logs
+    return if log_content.nil?
 
-    log_content = fetch_recent_logs(api_key)
     metrics_by_dyno = parse_log_lines(log_content)
 
     if metrics_by_dyno.empty?
@@ -39,6 +37,19 @@ class CaptureDynoMetricsJob < ApplicationJob
   end
 
   private
+
+  # The log drain has the whole window. Heroku's log session only has the last
+  # 1,500 lines, which can be just a few minutes when it's busy.
+  def recent_logs
+    return LogDrain.fetch(since: WINDOW.ago) if LogDrain.configured?
+
+    api_key = ENV["HEROKU_API_KEY"]
+    if api_key.blank?
+      Rails.logger.warn("[CaptureDynoMetricsJob] Neither LOG_DRAIN_URL nor HEROKU_API_KEY is set — skipping")
+      return
+    end
+    fetch_recent_logs(api_key)
+  end
 
   def fetch_recent_logs(api_key)
     session = create_log_session(api_key)
