@@ -36,9 +36,17 @@ class Item < ApplicationRecord
     self.id == PAY_IT_FORWARD_ID
   end
 
+  # A PDF upload is shown as a picture of its first page, this big at most.
+  MENU_IMAGE_SIZE = { resize_to_limit: [ 1200, 1200 ] }.freeze
+
   def image_path
-    if self.image.attached?
-      Rails.application.routes.url_helpers.rails_blob_path(self.image, only_path: true)
+    return unless image.attached?
+
+    url_helpers = Rails.application.routes.url_helpers
+    if image.image? || !image.previewable?
+      url_helpers.rails_blob_path(image, only_path: true)
+    else
+      url_helpers.rails_representation_path(image.representation(MENU_IMAGE_SIZE), only_path: true)
     end
   end
 end
