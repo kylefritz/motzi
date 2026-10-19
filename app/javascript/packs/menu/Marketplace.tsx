@@ -13,7 +13,7 @@ import { applyTip } from "../buy/Tip";
 import { cartPricing, isBelowMinimum, MAX_ABOVE_MINIMUM } from "../buy/pricing";
 import PayWhatYouCan from "../buy/PayWhatYouCan";
 import FeedbackForm from "./FeedbackForm";
-import { useDeadlineContext, usePriceContext } from "./Contexts";
+import { useDeadlineContext } from "./Contexts";
 import type {
   CartItem,
   MarketplaceOrderRequest,
@@ -48,7 +48,6 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
   const [price, setPrice] = useState<number | null>(total.price);
   const [tip, setTip] = useState<string | null>(null);
   const { allClosed } = useDeadlineContext();
-  const { showCredits } = usePriceContext();
 
   const totalPrice = applyTip(price, tip);
   const canPay = () => {
@@ -118,7 +117,6 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
       <h5>Menu</h5>
       <Items
         items={marketplaceItems}
-        showPriceMarkers={enablePayWhatYouCan && !showCredits}
         onAddToCart={handleAddToCart}
         disabled={disabled}
       />

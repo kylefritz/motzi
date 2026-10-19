@@ -5,7 +5,6 @@ import { weekday } from "../../lib/dates";
 import Price from "./Price";
 import Quantity from "./Quantity";
 import { useDeadlineContext } from "./Contexts";
-import { FixedPriceTag, PayWhatYouCanTag } from "../buy/PriceTags";
 import type { MenuItem, MenuItemPickupDay } from "../../types/api";
 
 function shortDay(day: string) {
@@ -224,14 +223,11 @@ function Ordering(props: OrderingProps) {
 }
 
 type ItemProps = MenuItem & {
-  // tag each price as pay what you can or fixed (shops with pay what you can on)
-  showPriceMarker?: boolean;
   onChange?: (payload: { pickupDayId: number; quantity: number }) => void;
 };
 
 export function Item(props: ItemProps) {
-  const { id, price, credits, image, name, payWhatYouCan, showPriceMarker } =
-    props;
+  const { id, price, credits, image, name } = props;
   return (
     <div className="col-6 mb-4" data-testid={`item-${id}`}>
       <img
@@ -241,16 +237,7 @@ export function Item(props: ItemProps) {
         style={{ objectFit: "contain" }}
       />
       <div>{name}</div>
-      {showPriceMarker ? (
-        <div className="d-flex align-items-center flex-wrap">
-          <Price {...{ price, credits }} />
-          <span className="ml-2">
-            {payWhatYouCan ? <PayWhatYouCanTag /> : <FixedPriceTag />}
-          </span>
-        </div>
-      ) : (
-        <Price {...{ price, credits }} />
-      )}
+      <Price {...{ price, credits }} />
       <Ordering {...props} itemId={id} />
     </div>
   );
@@ -258,7 +245,6 @@ export function Item(props: ItemProps) {
 
 type ItemsProps = {
   items: MenuItem[];
-  showPriceMarkers?: boolean;
   onAddToCart?: (
     item: MenuItem & { quantity: number; pickupDayId: number }
   ) => void;
@@ -267,7 +253,6 @@ type ItemsProps = {
 
 export default function Items({
   items,
-  showPriceMarkers,
   onAddToCart: handleAddToCart,
 }: ItemsProps) {
   return (
@@ -276,7 +261,6 @@ export default function Items({
         <Item
           key={i.id}
           {...i}
-          showPriceMarker={showPriceMarkers}
           onChange={
             handleAddToCart
               ? ({ quantity, pickupDayId }) =>

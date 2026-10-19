@@ -21,6 +21,24 @@ class ItemTest < ActiveSupport::TestCase
     assert_nil items(:classic).image_path
   end
 
+  test "image_path is the blob for a photo" do
+    item = items(:classic)
+    item.image.attach(io: file_fixture("bread-corn.jpg").open, filename: "bread-corn.jpg", content_type: "image/jpeg")
+
+    assert_match %r{/rails/active_storage/blobs/redirect/.+/bread-corn\.jpg\z}, item.image_path
+  end
+
+  # Item 132 (a letterpress print) was uploaded as a PDF, and the menu's <img>
+  # can't show a PDF, so a PDF gets a rendered preview of its first page.
+  test "image_path is a rendered preview for a PDF" do
+    item = items(:classic)
+    item.image.attach(io: file_fixture("letterpress.pdf").open, filename: "letterpress.pdf", content_type: "application/pdf")
+
+    assert_match %r{/rails/active_storage/representations/redirect/}, item.image_path
+    preview = item.image.representation(Item::MENU_IMAGE_SIZE).processed
+    assert preview.image.blob.image?
+  end
+
   # Admin thumbnails only render a variant URL; the resize runs on first request.
   # Processing one here catches a missing ruby-vips gem or libvips library.
   test "image variant processes" do
