@@ -9,13 +9,13 @@ Check recent production logs and surface operational issues so the user knows ab
 
 ## How to run
 
-Launch as a **background agent** so it doesn't block the conversation. The agent should read the last few hours from the log drain (it requires network access):
+Run it in the background so it doesn't block the conversation. Start with the last few hours from the log drain:
 
 ```bash
 bin/prod-logs --since 6h
 ```
 
-This needs `dangerouslyDisableSandbox: true` since it hits the network and `heroku config`.
+It reaches the network (`logs.thepuff.co`, and `heroku config` for the token unless `LOG_DRAIN_READ_TOKEN` is set).
 
 The log drain keeps **30 days** of production logs (Heroku itself keeps only the last 1,500 lines, often just minutes). Use it to look further back or narrow down:
 
@@ -51,7 +51,16 @@ Focus on problems — don't report things that are working normally.
 
 ### Infrastructure events
 - Unexpected dyno restarts, deploys, release phase output.
-- SolidQueue jobs that errored or appear stuck.
+
+### Error tracker and jobs (database)
+Errors are captured in the self-hosted `error_events` table (it replaced Sentry), and failed jobs stay in Solid Queue. Both are more reliable than grepping logs for them:
+
+```bash
+heroku pg:psql --app motzibread -c "select id, error_class, left(message, 80) as message, occurred_at from error_events where resolved_at is null and occurred_at > now() - interval '24 hours' order by id desc limit 20"
+heroku pg:psql --app motzibread -c "select j.class_name, left(fe.error, 80) as error, fe.created_at from solid_queue_failed_executions fe join solid_queue_jobs j on j.id = fe.job_id where fe.created_at > now() - interval '24 hours' order by fe.created_at desc limit 20"
+```
+
+Link anything new as `https://motzibread.herokuapp.com/admin/error_events/<id>` (the `.txt` format there is LLM-ready). Failed and stuck jobs are also visible at `/jobs`.
 
 ## How to report
 
