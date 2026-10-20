@@ -620,6 +620,56 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert_match(/RAPID DUPLICATE — same order confirmed twice/, verbose)
   end
 
+  test "rapid pair with the order's items rewritten between the sends is an edit, not a duplicate" do
+    # #424: member placed an order, then added an item 15s later.
+    travel_to_week_id(@week_id) do
+      sent = Time.zone.now + 1.day
+      order = orders(:ljf_week1)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent)
+      order.order_items.first.update_columns(created_at: sent + 14.seconds)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent + 15.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Rapid duplicate confirmations: 0 this week/, text)
+  end
+
+  test "identical sends a fraction of a second apart are still a RAPID DUPLICATE" do
+    # The order_updated event and item rewrite both precede the first send:
+    # one edit, two emails.
+    travel_to_week_id(@week_id) do
+      sent = Time.zone.now + 1.day
+      order = orders(:ljf_week1)
+      track_order_updated(users(:ljf), sent - 1.second)
+      order.order_items.first.update_columns(created_at: sent - 1.second)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent + 0.12.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+    verbose = ActivityFeed.new(@week_id).to_text(verbose: true)
+
+    assert_match(/Rapid duplicate confirmations: 1 pair for the same order within 2 min affecting 1 member/, text)
+    assert_match(/RAPID DUPLICATE — same order confirmed twice/, verbose)
+  end
+
+  test "an edit to the member's other order does not hide a rapid duplicate" do
+    # Codex on #434: a user-wide edit signal let order B's edit mask order A's duplicate.
+    travel_to_week_id(@week_id) do
+      sent = Time.zone.now + 1.day
+      order = orders(:ljf_week1)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent)
+      orders(:ljf_passover).order_items.first.update_columns(created_at: sent + 10.seconds)
+      track_order_updated(users(:ljf), sent + 10.seconds)
+      Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: @menu, user: users(:ljf), order: order, sent_at: sent + 30.seconds)
+    end
+
+    text = ActivityFeed.new(@week_id).to_text
+
+    assert_match(/Rapid duplicate confirmations: 1 pair/, text)
+  end
+
   test "menu context lists each menu's item names" do
     text = ActivityFeed.new(@week_id).to_text
     menu_context = text[/== Menu Context ==.*?(?=== Orders by Day ==)/m]
@@ -778,5 +828,11 @@ class ActivityFeedTest < ActiveSupport::TestCase
     day_two = events.find { |e| e.details[:checks] == 1 }
     assert_equal 0, day_two.details[:pct]
     assert_equal 1, day_two.details[:failures]
+  end
+  private
+
+  def track_order_updated(user, time)
+    visit = Ahoy::Visit.create!(user: user, started_at: time, visit_token: SecureRandom.hex(8), visitor_token: SecureRandom.hex(8))
+    Ahoy::Event.create!(name: "order_updated", user: user, visit: visit, time: time)
   end
 end
