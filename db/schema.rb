@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_18_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_20_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -248,7 +248,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_18_120000) do
 
   create_table "credit_items", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.integer "good_for_weeks"
     t.string "memo"
     t.integer "quantity"
     t.decimal "stripe_charge_amount", precision: 8, scale: 2
