@@ -54,9 +54,11 @@ Rails.application.configure do
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   config.force_ssl = true
 
-  # Use the lowest log level to ensure availability of diagnostic information
-  # when problems arise.
-  config.log_level = :debug
+  # :debug logged every SQL query, which pushed everything else out of
+  # Heroku's 1,500-line buffer within minutes. Logs now also go to the log
+  # drain (30 days, see LogDrain). Set RAILS_LOG_LEVEL=debug to dig into a
+  # problem.
+  config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
 
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]

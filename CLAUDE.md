@@ -183,6 +183,17 @@ token-guarded `/health/admin?token=…` (server-side subchecks: menu, orders,
 error_events, queue staleness; 404 without the token) instead of plain `/admin`.
 Generate/set like `REPLY_WEBHOOK_SECRET` below.
 
+## Logs (log drain)
+
+Heroku keeps only the last 1,500 log lines, so production logs also stream to a Cloudflare Worker at `logs.thepuff.co` (`cloudflare/workers/log-drain/`), which stores them in the R2 bucket `thepuff-logs` for **30 days** (bucket lifecycle rule). Production logs at `info`; set `RAILS_LOG_LEVEL=debug` on Heroku temporarily for SQL-level detail.
+
+```
+bin/prod-logs --since 6h                  # 30m, 6h, 2d, or an ISO time
+bin/prod-logs --since 2d -q "status=5"    # filter (case-insensitive)
+```
+
+`LogDrain.fetch(since:)` reads it from Ruby; `CaptureDynoMetricsJob` uses it. **Env vars on Heroku:** `LOG_DRAIN_URL` (`https://logs.thepuff.co/motzi`) and `LOG_DRAIN_READ_TOKEN`. The Heroku drain URL carries the write token (`DRAIN_TOKEN`) as basic auth. Both tokens are worker secrets; see the worker's README to rotate them.
+
 ## Heroku Memory / R14
 
 R14 is a **soft** memory warning — the dyno exceeded its 512MB quota and went to swap. On Heroku's essential tier this is expected behavior; the process keeps running. Do not treat R14 as an error or escalate it. Only R15 (hard kill, dyno terminated) is a real problem. The worker dyno routinely runs above quota in swap — this is acceptable for our workload.

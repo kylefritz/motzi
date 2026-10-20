@@ -9,13 +9,25 @@ Check recent production logs and surface operational issues so the user knows ab
 
 ## How to run
 
-Launch as a **background agent** so it doesn't block the conversation. The agent should run this command (it requires network access):
+Run it in the background so it doesn't block the conversation. Start with the last few hours from the log drain:
 
 ```bash
-heroku logs --app motzibread --num 1500
+bin/prod-logs --since 6h
 ```
 
-This needs `dangerouslyDisableSandbox: true` since it hits the Heroku API.
+It reaches the network (`logs.thepuff.co`, and `heroku config` for the token unless `LOG_DRAIN_READ_TOKEN` is set).
+
+The log drain keeps **30 days** of production logs (Heroku itself keeps only the last 1,500 lines, often just minutes). Use it to look further back or narrow down:
+
+```bash
+bin/prod-logs --since 2d -q "status=5"            # 5xx router lines, last 2 days
+bin/prod-logs --since 1d -q "Error R15"           # hard memory kills
+bin/prod-logs --since 2026-10-19T20:00Z --until 2026-10-19T21:00Z   # one hour
+```
+
+`--since` takes `30m`, `6h`, `2d` or an ISO time; `-q` keeps lines containing the text (case-insensitive). Output is the `heroku logs` format. If the drain isn't configured, the script falls back to `heroku logs -n 1500` and says so on stderr. `heroku logs --tail --app motzibread` is still the way to watch live.
+
+Production logs at `info` (no SQL). If a problem needs SQL-level detail, `heroku config:set RAILS_LOG_LEVEL=debug` temporarily, and unset it afterwards.
 
 ## What to scan for
 
@@ -35,11 +47,20 @@ Focus on problems — don't report things that are working normally.
 - Ruby exceptions (`NoMethodError`, `ArgumentError`, `RuntimeError`, etc.), `ActionView::Template::Error`, `ActiveRecord` errors.
 - **500 responses** — `status=500` in router lines means something crashed.
 - **Job failures** — SolidQueue job errors, `perform` exceptions, retry exhaustion.
-- **Ignore noise**: Sentry "Discarding" debug lines, `SolidQueue::Semaphore` cleanup queries, and rate-limiting messages are normal — skip them.
+- **Ignore noise**: rate-limiting messages are normal — skip them.
 
 ### Infrastructure events
 - Unexpected dyno restarts, deploys, release phase output.
-- SolidQueue jobs that errored or appear stuck.
+
+### Error tracker and jobs (database)
+Errors are captured in the self-hosted `error_events` table (it replaced Sentry), and failed jobs stay in Solid Queue. Both are more reliable than grepping logs for them:
+
+```bash
+heroku pg:psql --app motzibread -c "select id, error_class, left(message, 80) as message, occurred_at from error_events where resolved_at is null and occurred_at > now() - interval '24 hours' order by id desc limit 20"
+heroku pg:psql --app motzibread -c "select j.class_name, left(fe.error, 80) as error, fe.created_at from solid_queue_failed_executions fe join solid_queue_jobs j on j.id = fe.job_id where fe.created_at > now() - interval '24 hours' order by fe.created_at desc limit 20"
+```
+
+Link anything new as `https://motzibread.herokuapp.com/admin/error_events/<id>` (the `.txt` format there is LLM-ready). Failed and stuck jobs are also visible at `/jobs`.
 
 ## How to report
 
@@ -61,4 +82,4 @@ After reviewing logs, also run `gh issue list` to surface any open GitHub issues
 
 ## Context
 
-The `CaptureDynoMetricsJob` runs every 30 minutes (at :03 and :33) and stores memory snapshots in the `dyno_metrics` table. This skill supplements that with real-time, broader log analysis — it catches errors and events that the job doesn't track.
+The `CaptureDynoMetricsJob` runs every 30 minutes (at :03 and :33), reads the previous 30 minutes from the log drain, and stores memory snapshots in the `dyno_metrics` table. This skill supplements that with broader log analysis — it catches errors and events that the job doesn't track.

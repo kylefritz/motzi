@@ -58,6 +58,26 @@ class CaptureDynoMetricsJobTest < ActiveSupport::TestCase
     assert_equal 6, web_metric.r14_count
   end
 
+  test "perform reads the last 30 minutes from the log drain when it's configured" do
+    env = ENV.to_h.slice("LOG_DRAIN_URL", "LOG_DRAIN_READ_TOKEN")
+    ENV["LOG_DRAIN_URL"] = "https://logs.example.test/motzi"
+    ENV["LOG_DRAIN_READ_TOKEN"] = "read-token"
+
+    freeze_time do
+      drain = stub_request(:get, "https://logs.example.test/motzi/logs")
+        .with(query: { since: 30.minutes.ago.utc.iso8601(3) })
+        .to_return(status: 200, body: SAMPLE_LOGS)
+
+      assert_difference "DynoMetric.count", 2 do
+        CaptureDynoMetricsJob.perform_now
+      end
+      assert_requested drain
+      assert_not_requested :post, "https://api.heroku.com/apps/motzibread/log-sessions"
+    end
+  ensure
+    %w[LOG_DRAIN_URL LOG_DRAIN_READ_TOKEN].each { |k| env.key?(k) ? ENV[k] = env[k] : ENV.delete(k) }
+  end
+
   test "perform logs warning and exits when HEROKU_API_KEY missing" do
     original = ENV["HEROKU_API_KEY"]
     ENV.delete("HEROKU_API_KEY")
