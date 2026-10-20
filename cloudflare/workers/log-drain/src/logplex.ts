@@ -6,10 +6,19 @@ const decoder = new TextDecoder();
 // A logplex body is a run of octet-counted syslog frames: "<len> <msg><len> <msg>…"
 // where <len> counts bytes, not characters. Each <msg> is RFC 5424 as Heroku
 // sends it: "<190>1 2026-10-19T20:01:51.596325+00:00 host app web.1 - message".
-// Returns lines in the `heroku logs` format the app's parsers already read:
+// Lines come back in the `heroku logs` format the app's parsers already read:
 // "2026-10-19T20:01:51.596325+00:00 app[web.1]: message".
-export function parseLogplex(body: Uint8Array): string[] {
+//
+// `complete` is false when the body doesn't end on a frame boundary (a
+// malformed header or a truncated frame). The caller compares `frames` with
+// the Logplex-Msg-Count header so a partial batch is never acknowledged.
+export function parseLogplex(body: Uint8Array): {
+  lines: string[];
+  frames: number;
+  complete: boolean;
+} {
   const lines: string[] = [];
+  let frames = 0;
   let i = 0;
   while (i < body.length) {
     let len = 0;
@@ -19,15 +28,18 @@ export function parseLogplex(body: Uint8Array): string[] {
       i++;
       digits++;
     }
-    // Not a frame header: stop rather than misread the rest of the body.
-    if (digits === 0 || body[i] !== 0x20) break;
+    // Not a frame header, or the frame runs past the body.
+    if (digits === 0 || body[i] !== 0x20 || i + 1 + len > body.length) {
+      return { lines, frames, complete: false };
+    }
     i++;
     const frame = decoder.decode(body.subarray(i, i + len));
     i += len;
-    const line = syslogToLine(frame);
-    if (line) lines.push(line);
+    frames++;
+    // Keep a frame we can't reformat as-is rather than drop it.
+    lines.push(syslogToLine(frame) ?? frame.replace(/\r?\n$/, ""));
   }
-  return lines;
+  return { lines, frames, complete: true };
 }
 
 export function syslogToLine(frame: string): string | null {

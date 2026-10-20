@@ -23,10 +23,14 @@ describe("parseLogplex", () => {
       '<190>1 2026-10-19T20:01:51.596325+00:00 host app web.1 - I, [2026-10-19T20:01:51] INFO -- : Started GET "/menu"\n',
       '<158>1 2026-10-19T20:01:52.100000+00:00 host heroku router - at=info method=GET path="/menu" status=200'
     );
-    expect(parseLogplex(body)).toEqual([
-      '2026-10-19T20:01:51.596325+00:00 app[web.1]: I, [2026-10-19T20:01:51] INFO -- : Started GET "/menu"',
-      '2026-10-19T20:01:52.100000+00:00 heroku[router]: at=info method=GET path="/menu" status=200',
-    ]);
+    expect(parseLogplex(body)).toEqual({
+      lines: [
+        '2026-10-19T20:01:51.596325+00:00 app[web.1]: I, [2026-10-19T20:01:51] INFO -- : Started GET "/menu"',
+        '2026-10-19T20:01:52.100000+00:00 heroku[router]: at=info method=GET path="/menu" status=200',
+      ],
+      frames: 2,
+      complete: true,
+    });
   });
 
   test("counts bytes, not characters, so multibyte text doesn't shift frames", () => {
@@ -34,7 +38,7 @@ describe("parseLogplex", () => {
       "<190>1 2026-10-19T20:00:00+00:00 host app web.1 - Café crème ✓",
       "<190>1 2026-10-19T20:00:01+00:00 host app worker.1 - next"
     );
-    expect(parseLogplex(body)).toEqual([
+    expect(parseLogplex(body).lines).toEqual([
       "2026-10-19T20:00:00+00:00 app[web.1]: Café crème ✓",
       "2026-10-19T20:00:01+00:00 app[worker.1]: next",
     ]);
@@ -49,8 +53,33 @@ describe("parseLogplex", () => {
     );
   });
 
-  test("stops at a malformed frame instead of misreading the rest", () => {
-    expect(parseLogplex(enc.encode("garbage"))).toEqual([]);
+  test("flags a malformed header as incomplete", () => {
+    expect(parseLogplex(enc.encode("garbage"))).toEqual({
+      lines: [],
+      frames: 0,
+      complete: false,
+    });
+  });
+
+  test("flags a truncated last frame as incomplete, so the batch isn't acknowledged", () => {
+    const whole = frames(
+      "<190>1 2026-10-19T20:00:00+00:00 host app web.1 - one"
+    );
+    const cut = frames(
+      "<190>1 2026-10-19T20:00:00+00:00 host app web.1 - one",
+      "<190>1 2026-10-19T20:00:01+00:00 host app web.1 - two"
+    ).subarray(0, whole.byteLength + 20);
+    const result = parseLogplex(cut);
+    expect(result.complete).toBe(false);
+    expect(result.frames).toBe(1);
+  });
+
+  test("keeps a frame it can't reformat instead of dropping it", () => {
+    expect(parseLogplex(frames("not syslog at all\n"))).toEqual({
+      lines: ["not syslog at all"],
+      frames: 1,
+      complete: true,
+    });
   });
 });
 

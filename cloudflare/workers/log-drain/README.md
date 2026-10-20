@@ -6,7 +6,9 @@ Heroku HTTPS log drain → R2, with 30-day retention. Heroku keeps only the last
 - `POST https://logs.thepuff.co/<app>/drain`: Heroku's drain. Basic auth; the
   password is `DRAIN_TOKEN`. Logplex frames are converted to `heroku logs`
   lines and buffered in a Durable Object (SQLite), which writes one R2 object
-  per minute (or per 1MB) under `<app>/YYYY/MM/DD/HH/`.
+  per minute (or per 1MB) under `<app>/YYYY/MM/DD/HH/`. A batch whose frame
+  count doesn't match `Logplex-Msg-Count` (truncated or malformed) gets a 400
+  so Logplex retries it, and a retried `Logplex-Frame-Id` is stored only once.
 - `GET https://logs.thepuff.co/<app>/logs?since=30m&until=<iso>&q=<text>`:
   reads them back, oldest first, including the not-yet-flushed buffer.
   `Authorization: Bearer <READ_TOKEN>`. Long windows are paged: repeat the

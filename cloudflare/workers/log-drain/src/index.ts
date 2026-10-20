@@ -31,6 +31,9 @@ const READ_BUDGET = 40;
 // little before `since` so a batch that straddles it isn't missed.
 const LOOKBACK_MS = 10 * 60_000;
 const HOUR_MS = 3_600_000;
+// How long to remember flushed Logplex-Frame-Ids; Logplex retries within
+// seconds to minutes.
+const FRAME_MEMORY_MS = 30 * 60_000;
 
 // One buffer per app, flushed to R2 on an alarm. Each drain POST is one row
 // in the object's SQLite storage, so a restart (deploy, eviction, runtime
@@ -38,23 +41,51 @@ const HOUR_MS = 3_600_000;
 export class LogBuffer extends DurableObject<Env> {
   private sql: SqlStorage;
   private bytes = 0;
+  // Logplex-Frame-Ids of batches already flushed to R2, kept for a while so a
+  // retried POST that arrives after the flush isn't stored twice. Batches
+  // still in the buffer are deduplicated by the table's unique frame_id.
+  private flushedFrames = new Map<string, number>();
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
     this.sql = ctx.storage.sql;
     this.sql.exec(
-      "CREATE TABLE IF NOT EXISTS buffer (id INTEGER PRIMARY KEY AUTOINCREMENT, app TEXT NOT NULL, body TEXT NOT NULL)"
+      "CREATE TABLE IF NOT EXISTS batches (id INTEGER PRIMARY KEY AUTOINCREMENT, frame_id TEXT UNIQUE, app TEXT NOT NULL, body TEXT NOT NULL)"
     );
+    // The first version's table had no frame_id; carry over anything unflushed.
+    const legacy = this.sql
+      .exec(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'buffer'"
+      )
+      .toArray();
+    if (legacy.length > 0) {
+      this.sql.exec(
+        "INSERT INTO batches (app, body) SELECT app, body FROM buffer ORDER BY id"
+      );
+      this.sql.exec("DROP TABLE buffer");
+    }
     this.bytes = this.sql
       .exec<{ bytes: number }>(
-        "SELECT COALESCE(SUM(LENGTH(body)), 0) AS bytes FROM buffer"
+        "SELECT COALESCE(SUM(LENGTH(body)), 0) AS bytes FROM batches"
       )
       .one().bytes;
   }
 
-  async append(app: string, lines: string[]): Promise<void> {
+  async append(
+    app: string,
+    lines: string[],
+    frameId: string | null
+  ): Promise<void> {
+    if (frameId && this.flushedFrames.has(frameId)) return;
+
     const body = lines.join("\n");
-    this.sql.exec("INSERT INTO buffer (app, body) VALUES (?, ?)", app, body);
+    const { rowsWritten } = this.sql.exec(
+      "INSERT OR IGNORE INTO batches (frame_id, app, body) VALUES (?, ?, ?)",
+      frameId,
+      app,
+      body
+    );
+    if (rowsWritten === 0) return; // a retry of a batch still in the buffer
     this.bytes += body.length + 1;
     this.trim();
 
@@ -74,11 +105,9 @@ export class LogBuffer extends DurableObject<Env> {
     return this.rows().flatMap((row) => row.body.split("\n"));
   }
 
-  private rows(): { id: number; app: string; body: string }[] {
+  private rows(): Batch[] {
     return this.sql
-      .exec<{ id: number; app: string; body: string }>(
-        "SELECT id, app, body FROM buffer ORDER BY id"
-      )
+      .exec<Batch>("SELECT id, frame_id, app, body FROM batches ORDER BY id")
       .toArray();
   }
 
@@ -87,7 +116,8 @@ export class LogBuffer extends DurableObject<Env> {
     if (rows.length === 0) return;
 
     const batch = rows.flatMap((row) => row.body.split("\n"));
-    const { first, last } = batchRange(batch, Date.now());
+    const now = Date.now();
+    const { first, last } = batchRange(batch, now);
     const key = objectKey(
       rows[0].app,
       first,
@@ -106,8 +136,17 @@ export class LogBuffer extends DurableObject<Env> {
       }
       return;
     }
-    this.sql.exec("DELETE FROM buffer WHERE id <= ?", rows[rows.length - 1].id);
+    this.sql.exec(
+      "DELETE FROM batches WHERE id <= ?",
+      rows[rows.length - 1].id
+    );
     this.bytes = 0;
+
+    for (const row of rows)
+      if (row.frame_id) this.flushedFrames.set(row.frame_id, now);
+    for (const [id, at] of this.flushedFrames) {
+      if (now - at > FRAME_MEMORY_MS) this.flushedFrames.delete(id);
+    }
   }
 
   // If R2 stays down, keep at most MAX_BUFFER_BYTES and drop the oldest rows.
@@ -115,15 +154,17 @@ export class LogBuffer extends DurableObject<Env> {
     while (this.bytes > MAX_BUFFER_BYTES) {
       const oldest = this.sql
         .exec<{ id: number; len: number }>(
-          "SELECT id, LENGTH(body) AS len FROM buffer ORDER BY id LIMIT 1"
+          "SELECT id, LENGTH(body) AS len FROM batches ORDER BY id LIMIT 1"
         )
         .toArray()[0];
       if (!oldest) break;
-      this.sql.exec("DELETE FROM buffer WHERE id = ?", oldest.id);
+      this.sql.exec("DELETE FROM batches WHERE id = ?", oldest.id);
       this.bytes -= oldest.len + 1;
     }
   }
 }
+
+type Batch = { id: number; frame_id: string | null; app: string; body: string };
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -139,8 +180,25 @@ export default {
       if (!tokenMatches(basicPassword(request), env.DRAIN_TOKEN)) {
         return new Response("Unauthorized\n", { status: 401 });
       }
-      const lines = parseLogplex(new Uint8Array(await request.arrayBuffer()));
-      if (lines.length > 0) await buffer(env, app).append(app, lines);
+      const { lines, frames, complete } = parseLogplex(
+        new Uint8Array(await request.arrayBuffer())
+      );
+      const expected = request.headers.get("Logplex-Msg-Count");
+      if (!complete || (expected !== null && Number(expected) !== frames)) {
+        // Not acknowledging lets Logplex retry the whole batch instead of
+        // silently losing its tail.
+        console.error(
+          `log-drain: incomplete batch (${frames} of ${expected ?? "?"} frames)`
+        );
+        return new Response("Incomplete batch\n", { status: 400 });
+      }
+      if (lines.length > 0) {
+        await buffer(env, app).append(
+          app,
+          lines,
+          request.headers.get("Logplex-Frame-Id")
+        );
+      }
       return new Response(null, { status: 204 });
     }
 
