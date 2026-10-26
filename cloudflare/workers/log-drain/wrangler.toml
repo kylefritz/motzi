@@ -8,6 +8,11 @@ workers_dev = false
 preview_urls = false
 routes = [{ pattern = "logs.thepuff.co", custom_domain = true }]
 
+# Workers Logs: keeps console output and uncaught exceptions (with stack
+# traces) for 3 days. About 20k invocations a day, inside the free 200k.
+[observability]
+enabled = true
+
 [vars]
 APPS = "motzi"
 

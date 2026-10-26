@@ -1,7 +1,7 @@
 class CaptureDynoMetricsJob < ApplicationJob
   queue_as :default
   limits_concurrency to: 1, key: "capture_dyno_metrics"
-  retry_on Net::OpenTimeout, Net::ReadTimeout, SocketError, Errno::ECONNREFUSED,
+  retry_on Net::OpenTimeout, Net::ReadTimeout, SocketError, Errno::ECONNREFUSED, LogDrain::ServerError,
            wait: :polynomially_longer, attempts: 3
 
   APP_NAME = "motzibread"
