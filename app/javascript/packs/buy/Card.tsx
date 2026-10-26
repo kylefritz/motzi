@@ -113,7 +113,12 @@ export default function Card({
   blockedText,
   minPrice,
   maxPrice,
-}: PayProps & { price: number | null }) {
+  onLoadError,
+}: PayProps & {
+  price: number | null;
+  // the card form (Payment Element) couldn't load
+  onLoadError?: (error: unknown) => void;
+}) {
   const stripe = useStripe();
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -256,6 +261,7 @@ export default function Card({
         <div className="mb-3">
           <PaymentElement
             onChange={({ complete }) => setCardFilled(complete)}
+            onLoadError={({ error }) => onLoadError?.(error)}
             options={{
               layout: "tabs",
               // Apple Pay and Google Pay are in the Express Checkout Element
