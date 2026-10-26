@@ -1,4 +1,5 @@
 import { DurableObject } from "cloudflare:workers";
+import { isRetryable } from "./errors";
 import {
   batchRange,
   filterLines,
@@ -193,11 +194,16 @@ export default {
         return new Response("Incomplete batch\n", { status: 400 });
       }
       if (lines.length > 0) {
-        await buffer(env, app).append(
-          app,
-          lines,
-          request.headers.get("Logplex-Frame-Id")
-        );
+        const frameId = request.headers.get("Logplex-Frame-Id");
+        try {
+          await withBuffer(env, app, (stub) =>
+            stub.append(app, lines, frameId)
+          );
+        } catch (err) {
+          // Logplex retries the batch; the frame id keeps it from doubling.
+          console.error("log-drain: buffer append failed", err);
+          return new Response("Buffer unavailable\n", { status: 503 });
+        }
       }
       return new Response(null, { status: 204 });
     }
@@ -206,7 +212,14 @@ export default {
       if (!tokenMatches(bearerToken(request), env.READ_TOKEN)) {
         return new Response("Unauthorized\n", { status: 401 });
       }
-      return readLogs(env, app, url);
+      try {
+        return await readLogs(env, app, url);
+      } catch (err) {
+        console.error("log-drain: read failed", err);
+        return new Response("Log store unavailable, try again\n", {
+          status: 503,
+        });
+      }
     }
 
     return new Response("Not found\n", { status: 404 });
@@ -277,7 +290,12 @@ async function readLogs(env: Env, app: string, url: URL): Promise<Response> {
 
   if (next === null && until >= now - FLUSH_MS * 2) {
     out.push(
-      ...filterLines(await buffer(env, app).pending(), since, until, query)
+      ...filterLines(
+        await withBuffer(env, app, (stub) => stub.pending()),
+        since,
+        until,
+        query
+      )
     );
   }
 
@@ -301,6 +319,23 @@ async function readLogs(env: Env, app: string, url: URL): Promise<Response> {
 
 function buffer(env: Env, app: string): DurableObjectStub<LogBuffer> {
   return env.LOG_BUFFER.get(env.LOG_BUFFER.idFromName(app));
+}
+
+// Durable Object calls occasionally fail with a transient internal error
+// (err.retryable). Cloudflare's advice is to retry with a fresh stub, since a
+// stub that threw may be broken. Overloaded objects aren't retried.
+async function withBuffer<T>(
+  env: Env,
+  app: string,
+  call: (stub: DurableObjectStub<LogBuffer>) => Promise<T>
+): Promise<T> {
+  try {
+    return await call(buffer(env, app));
+  } catch (err) {
+    if (!isRetryable(err)) throw err;
+    console.warn("log-drain: retrying buffer call", err);
+    return await call(buffer(env, app));
+  }
 }
 
 // "motzi/2026/10/19/20/…" → the start of that hour.

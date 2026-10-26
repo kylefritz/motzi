@@ -37,7 +37,14 @@ class LogDrainTest < ActiveSupport::TestCase
   test "fetch raises on an error response" do
     stub_request(:get, "#{URL}/logs").with(query: hash_including({})).to_return(status: 401)
 
-    error = assert_raises(RuntimeError) { LogDrain.fetch(since: 30.minutes.ago) }
+    error = assert_raises(LogDrain::Error) { LogDrain.fetch(since: 30.minutes.ago) }
     assert_match "401", error.message
+    assert_not_kind_of LogDrain::ServerError, error
+  end
+
+  test "fetch raises a retryable ServerError on a 5xx" do
+    stub_request(:get, "#{URL}/logs").with(query: hash_including({})).to_return(status: 503)
+
+    assert_raises(LogDrain::ServerError) { LogDrain.fetch(since: 30.minutes.ago) }
   end
 end

@@ -2,6 +2,8 @@ require "test_helper"
 require "webmock/minitest"
 
 class CaptureDynoMetricsJobTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+
   SAMPLE_LOGS = File.read(Rails.root.join("test/fixtures/files/heroku_memory_logs.txt"))
 
   # Assertions read back the rows the job writes; start without the fixtures.
@@ -73,6 +75,22 @@ class CaptureDynoMetricsJobTest < ActiveSupport::TestCase
       end
       assert_requested drain
       assert_not_requested :post, "https://api.heroku.com/apps/motzibread/log-sessions"
+    end
+  ensure
+    %w[LOG_DRAIN_URL LOG_DRAIN_READ_TOKEN].each { |k| env.key?(k) ? ENV[k] = env[k] : ENV.delete(k) }
+  end
+
+  # error_events #3202, #3235: a transient 500 from the log drain failed the run.
+  test "perform retries later when the log drain has a server error" do
+    env = ENV.to_h.slice("LOG_DRAIN_URL", "LOG_DRAIN_READ_TOKEN")
+    ENV["LOG_DRAIN_URL"] = "https://logs.example.test/motzi"
+    ENV["LOG_DRAIN_READ_TOKEN"] = "read-token"
+    stub_request(:get, "https://logs.example.test/motzi/logs").with(query: hash_including({})).to_return(status: 503)
+
+    assert_enqueued_with(job: CaptureDynoMetricsJob) do
+      assert_no_difference "DynoMetric.count" do
+        CaptureDynoMetricsJob.perform_now
+      end
     end
   ensure
     %w[LOG_DRAIN_URL LOG_DRAIN_READ_TOKEN].each { |k| env.key?(k) ? ENV[k] = env[k] : ENV.delete(k) }
