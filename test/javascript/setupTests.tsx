@@ -3,10 +3,13 @@ import { afterEach, beforeAll, beforeEach, mock } from "bun:test";
 import { cleanup, configure } from "@testing-library/react";
 import { resetNow } from "./support/clock";
 import stripeMock, {
+  ahoyMock,
   elementsMock,
   expressCheckout,
+  paymentElementMock,
   recordElementsOptions,
   resetStripeMock,
+  stripeLoader,
 } from "./menu/stripeMock";
 
 // Pin luxon "now" to FIXED_NOW (see support/clock.ts). Set at preload
@@ -40,13 +43,22 @@ const Elements: React.FC<{ children?: React.ReactNode; options?: unknown }> = ({
 
 const PaymentElement: React.FC<{
   onChange?: (event: { complete: boolean }) => void;
-}> = ({ onChange }) => (
-  <input
-    data-testid="payment-element"
-    aria-label="Card details"
-    onChange={() => onChange?.({ complete: true })}
-  />
-);
+  onLoadError?: (event: { error: { message: string } }) => void;
+}> = ({ onChange, onLoadError }) => {
+  // Like Stripe's, it reports a load error once, as it mounts.
+  React.useEffect(() => {
+    const error = paymentElementMock.loadError;
+    if (error) onLoadError?.({ error });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    <input
+      data-testid="payment-element"
+      aria-label="Card details"
+      onChange={() => onChange?.({ complete: true })}
+    />
+  );
+};
 
 // Clicking it plays the wallet flow: onClick must resolve before the sheet
 // "opens", then the customer authorizes and onConfirm runs.
@@ -80,9 +92,16 @@ mock.module("@stripe/react-stripe-js", () => ({
 mock.module("@stripe/stripe-js", () => ({
   loadStripe: mock(() => Promise.resolve(stripeMock)),
 }));
+mock.module("@stripe/stripe-js/pure", () => ({
+  loadStripe: (key: string) => stripeLoader.loadStripe(key),
+}));
+
+// ahoy.js posts events to /ahoy/events; tests inspect ahoyMock instead.
+mock.module("ahoy.js", () => ({ default: ahoyMock }));
 
 beforeEach(() => {
   resetStripeMock();
+  ahoyMock.track = mock(() => {});
 });
 
 beforeAll(() => {
