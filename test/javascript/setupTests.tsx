@@ -86,7 +86,9 @@ beforeEach(() => {
 });
 
 beforeAll(() => {
-  window.alert = mock(() => {});
+  // Both: `window` here is the jsdom window, a different object from globalThis,
+  // and components that call bare alert(...) resolve it on globalThis.
+  window.alert = globalThis.alert = mock(() => {});
 });
 
 afterEach(() => {

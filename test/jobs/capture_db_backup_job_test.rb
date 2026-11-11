@@ -28,9 +28,10 @@ class CaptureDbBackupJobTest < ActiveJob::TestCase
 
   test "succeeds when authorizations response body is empty" do
     stub_authorizations_request(status: 200, body: "")
-    stub_backup_capture
+    backup = stub_backup_capture
 
-    assert_nothing_raised { CaptureDbBackupJob.perform_now }
+    CaptureDbBackupJob.perform_now
+    assert_requested backup
   end
 
   test "succeeds with valid authorizations (no expiring token)" do
@@ -38,9 +39,10 @@ class CaptureDbBackupJobTest < ActiveJob::TestCase
       { "access_token" => { "token" => "some-other-key", "expires_in" => 86_400 } }
     ]
     stub_authorizations_request(status: 200, body: authorizations.to_json)
-    stub_backup_capture
+    backup = stub_backup_capture
 
-    assert_nothing_raised { CaptureDbBackupJob.perform_now }
+    CaptureDbBackupJob.perform_now
+    assert_requested backup
   end
 
   test "sends alert email when API key is expiring within 14 days" do
@@ -48,11 +50,12 @@ class CaptureDbBackupJobTest < ActiveJob::TestCase
       { "access_token" => { "token" => FAKE_API_KEY, "expires_in" => 10 * 86_400 } }
     ]
     stub_authorizations_request(status: 200, body: authorizations.to_json)
-    stub_backup_capture
+    backup = stub_backup_capture
 
     assert_emails 1 do
       CaptureDbBackupJob.perform_now
     end
+    assert_requested backup
   end
 
   test "does not send alert when API key expires in more than 14 days" do
@@ -60,11 +63,12 @@ class CaptureDbBackupJobTest < ActiveJob::TestCase
       { "access_token" => { "token" => FAKE_API_KEY, "expires_in" => 30 * 86_400 } }
     ]
     stub_authorizations_request(status: 200, body: authorizations.to_json)
-    stub_backup_capture
+    backup = stub_backup_capture
 
     assert_no_emails do
       CaptureDbBackupJob.perform_now
     end
+    assert_requested backup
   end
 
   test "raises and sends alert when API key is invalid (401)" do
@@ -87,13 +91,15 @@ class CaptureDbBackupJobTest < ActiveJob::TestCase
     ENV["HEROKU_POSTGRESQL_ADDON_ID"] = nil
 
     stub_authorizations_request(status: 200, body: "[]")
-    stub_addon_attachments_request(body: [
+    attachments = stub_addon_attachments_request(body: [
       { "name" => "DATABASE", "addon" => { "id" => "pg-resolved-456" } },
       { "name" => "HEROKU_POSTGRESQL_SILVER", "addon" => { "id" => "pg-other" } }
     ].to_json)
-    stub_backup_capture(addon_id: "pg-resolved-456")
+    backup = stub_backup_capture(addon_id: "pg-resolved-456")
 
-    assert_nothing_raised { CaptureDbBackupJob.perform_now }
+    CaptureDbBackupJob.perform_now
+    assert_requested attachments
+    assert_requested backup
   end
 
   private
@@ -111,11 +117,10 @@ class CaptureDbBackupJobTest < ActiveJob::TestCase
   end
 
   def stub_backup_capture(addon_id: FAKE_ADDON_ID)
-    # The heroku-api-postgres gem hits this endpoint for backups
-    stub_request(:post, %r{postgres-api\.heroku\.com.*#{addon_id}.*backups})
-      .to_return(status: 200, body: { "uuid" => "b001" }.to_json)
-    # Also stub the starter-api variant
-    stub_request(:post, %r{postgres-starter-api\.heroku\.com.*#{addon_id}.*backups})
+    # The heroku-api-postgres gem hits one of two hosts for backups (postgres-api
+    # or postgres-starter-api). Returns the stub so tests can assert_requested it:
+    # without that, deleting the capture call left every test here green.
+    stub_request(:post, %r{postgres(-starter)?-api\.heroku\.com.*#{addon_id}.*backups})
       .to_return(status: 200, body: { "uuid" => "b001" }.to_json)
   end
 end

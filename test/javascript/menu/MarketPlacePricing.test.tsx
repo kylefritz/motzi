@@ -64,9 +64,12 @@ test("an all pay-what-you-can cart shows no breakdown", async () => {
 
 test("mixed cart looks like any cart until the price dips under the fixed total", async () => {
   const user = userEvent.setup();
+  // Marketplace calls bare alert(...), which is globalThis.alert in this
+  // harness (not the jsdom window's), so spy on both.
   const originalAlert = window.alert;
+  const originalGlobalAlert = globalThis.alert;
   const alertSpy = mock(() => {});
-  window.alert = alertSpy;
+  window.alert = globalThis.alert = alertSpy;
   const { onCreateOrder } = renderMenu({
     order: false,
     user: false,
@@ -115,7 +118,8 @@ test("mixed cart looks like any cart until the price dips under the fixed total"
     screen.getByRole("button", { name: "Charge credit card $30.00" })
   ).toBeTruthy();
 
-  expect(alertSpy).not.toHaveBeenCalled();
   window.alert = originalAlert;
+  globalThis.alert = originalGlobalAlert;
+  expect(alertSpy).not.toHaveBeenCalled();
   expect(onCreateOrder).not.toHaveBeenCalled();
 });
