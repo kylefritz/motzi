@@ -164,7 +164,9 @@ ActiveAdmin.register_page "Dashboard" do
 
       column do
         panel "New Mailing List - last 2 weeks" do
-          users = User.mailing_list.where("created_at > ?", 2.weeks.ago).order("created_at desc").limit(20)
+          # reorder: User's default scope sorts by name, so a plain .order would
+          # only break ties and the limit would keep the alphabetically first 20.
+          users = User.mailing_list.where("created_at > ?", 2.weeks.ago).reorder(created_at: :desc).limit(20)
           table_for users do
             column ("user") { |u| u }
             column ("Created At") { |u| u.created_at }

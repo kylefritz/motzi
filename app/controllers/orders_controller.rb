@@ -95,7 +95,7 @@ class OrdersController < ApplicationController
     order = Order.find(params[:id])
 
     if current_admin_user.blank?
-      if order.user_id != current_user.id
+      if order.user_id != current_user&.id
         return render json: { message: "not your order" }, status: :unauthorized
       end
 

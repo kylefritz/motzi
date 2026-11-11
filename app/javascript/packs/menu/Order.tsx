@@ -27,7 +27,7 @@ export default function Order({ menu, user, order, onEditOrder }: OrderProps) {
       <Cart {...{ cart, menu, stripeChargeAmount }} />
       {stripeReceiptUrl && (
         <p className="text-center my-2">
-          <a href={stripeReceiptUrl} target="blank">
+          <a href={stripeReceiptUrl} target="_blank" rel="noopener">
             View receipt
           </a>
         </p>
