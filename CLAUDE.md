@@ -149,6 +149,13 @@ CSRF: `ApplicationController` calls `skip_before_action :verify_authenticity_tok
 globally, so the JS reporter does not need to thread `X-CSRF-Token`. It still
 forwards a token if a `csrf-token` meta tag is present.
 
+`/admin` is the exception: every ActiveAdmin controller and `Admin::ErrorEventsController`
+turn the check back on (`config/initializers/active_admin.rb`), and a missing token is a 422.
+Admin forms, `button_to` and `data-method` links carry the token already. A hand-written
+`<form>` in Arbre needs a hidden `authenticity_token` (`form_authenticity_token`), and a React
+island mounted in admin must call `installCsrfHeader(axios)` (`app/javascript/lib/csrf.ts`) in
+its entrypoint. `test/integration/admin_csrf_test.rb` fails if an admin controller skips it.
+
 To report a handled exception from a service or job, call
 `Rails.error.report(exception, handled: true, severity: :warning, context: {...})`.
 The subscriber will persist it (severity `:info` is skipped).

@@ -2,6 +2,7 @@
 // All failures are swallowed — the reporter must never break the page.
 
 import type { ErrorEventRequest } from "../types/api";
+import { csrfToken } from "./csrf";
 
 // Shape is defined by test/schemas/error_event_request.json.
 type ReportPayload = ErrorEventRequest;
@@ -31,11 +32,6 @@ function shouldDrop(p: ReportPayload): boolean {
     recent.shift();
   }
   return false;
-}
-
-function csrfToken(): string | null {
-  const el = document.querySelector('meta[name="csrf-token"]');
-  return el ? el.getAttribute("content") : null;
 }
 
 export function reportError(payload: ReportPayload): void {

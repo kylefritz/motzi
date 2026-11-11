@@ -25,6 +25,18 @@ module ViteAdminHead
 end
 ActiveAdmin::Views::Pages::Base.prepend(ViteAdminHead)
 
+# ApplicationController skips the CSRF check for the member site (JSON APIs,
+# uid links, the error reporter). Admin actions change menus, credits and users
+# on the strength of the session cookie alone, so every ActiveAdmin controller
+# turns the check back on. A missing or wrong token raises
+# ActionController::InvalidAuthenticityToken (422). Forms and button_to carry
+# the token, jquery_ujs adds it to data-method links, and the React islands
+# send X-CSRF-Token (app/javascript/lib/csrf.ts).
+# Admin::ErrorEventsController is a plain controller and does the same itself.
+ActiveSupport.on_load(:active_admin_controller) do
+  protect_from_forgery with: :exception, prepend: true
+end
+
 ActiveAdmin.setup do |config|
   # == Site Title
   #
