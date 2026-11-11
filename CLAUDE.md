@@ -14,24 +14,26 @@ Neighborhood bakery's CSA site. Members browse menus, choose pickup days, and pl
 
 ## Tests
 
-There are three test suites. The first two run in CI; the third is manual.
+There are five test suites. Rails, system and JS tests run in CI on every PR; the visual suite runs monthly; the log-drain worker's tests run only by hand.
 
 | Suite | Command | What it tests | Speed | CI? |
 |-------|---------|---------------|-------|-----|
 | **Rails** | `bundle exec rails test` | Models, controllers, mailers, jobs, SQL queries | ~35s | Yes |
+| **System** | `bin/rails test:system` | Browser tests in `test/system` | — | Yes (`test_system` job) |
 | **JS** | `bun test` | React components (menu, cart, builder, credits) via jsdom | ~3s | Yes |
-| **Visual** | `bunx playwright test` | Email template screenshots — mobile (iPhone 14) & desktop | ~20s | Monthly + on demand (`LLM evals` workflow), never per PR |
+| **Visual** | `bunx playwright test` | Email template and marketing page screenshots — mobile (iPhone 14) & desktop | ~20s | Monthly + on demand (`LLM evals` workflow), never per PR |
+| **Worker** | `bun test` in `cloudflare/workers/log-drain` | Log drain parsing, keys, filters | — | No |
 
 **Local CI**: `bin/ci` (Rails 8.1 local CI, steps in `config/ci.rb`) runs rubocop, Prettier (`bun run format:check`; fix with `bun run format`), ESLint with react-hooks (`bun run lint`), bundler-audit, brakeman, the Rails and JS suites, and the typecheck in one go.
 
 ### Visual tests
 
-Playwright screenshots all 6 email templates at mobile and desktop viewports, then sends each screenshot to Claude Haiku for visual QA (checks for overlapping text, broken layout, clipped content). Each run is 12 Haiku calls, so it never runs per PR.
+Playwright screenshots all 6 email templates and 4 marketing pages (home, about, subscribe, contact) at mobile and desktop viewports, then sends each screenshot to Claude Haiku for visual QA (checks for overlapping text, broken layout, clipped content). Each run is 20 Haiku calls, so it never runs per PR.
 
 **Cadence:** the `LLM evals` workflow (`.github/workflows/llm-evals.yml`) runs it on the 1st of each month and on demand (Actions → LLM evals → Run workflow, or `gh workflow run llm-evals.yml`). CI loads the committed test fixtures into a throwaway dev database, so no production data is involved; the mailer previews only need one order, credit item, user, menu and analysis. CI retries a failed test once (a fresh Haiku judgment). Needs the `ANTHROPIC_API_KEY` repo secret.
 
 ```
-bunx playwright test                              # run all (12 tests: 6 emails × 2 viewports)
+bunx playwright test                              # run all (20 tests: 6 emails + 4 marketing pages, × 2 viewports)
 bunx playwright test --project mobile             # mobile only
 bunx playwright test --grep "havent_ordered"       # single email
 ```
@@ -42,8 +44,8 @@ bunx playwright test --grep "havent_ordered"       # single email
 
 **Files:**
 - `playwright.config.ts` — project config (mobile/desktop viewports)
-- `test/visual/email-screenshots.spec.ts` — the test
-- `test/visual/email-check-prompt.txt` — Claude's visual QA prompt (edit to tune what it checks)
+- `test/visual/email-screenshots.spec.ts`, `test/visual/marketing-screenshots.spec.ts` — the tests
+- `test/visual/email-check-prompt.txt`, `test/visual/marketing-check-prompt.txt` — Claude's visual QA prompts (edit to tune what it checks)
 - `test/visual/screenshots/` — output (gitignored)
 
 ### Anomaly report eval
@@ -111,7 +113,7 @@ Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgr
 
 ## Analysis Replies (email ingress)
 
-The weekly anomaly report emails have a `Reply-To` of `reply+analysis-{id}@thepuff.co`. A Cloudflare Email Worker (`cloudflare/workers/reply-ingress/`) receives replies and POSTs them to `/reply_ingress` on Motzi, where they get stored as `AnalysisReply` records and fed into next week's prompt.
+The nightly anomaly report emails have a `Reply-To` of `motzi-analysis-replies@thepuff.co` and a `Message-ID` of `analysis-{id}@motzibread.herokuapp.com`. A Cloudflare Email Worker (`cloudflare/workers/reply-ingress/`) receives replies, reads the analysis id from the `In-Reply-To` header, and POSTs them to `/reply_ingress` on Motzi, where they get stored as `AnalysisReply` records and fed into later prompts.
 
 **Required env var on Heroku:** `REPLY_WEBHOOK_SECRET` (shared with the worker)
 
@@ -177,7 +179,7 @@ the admin on a usage-weighted schedule (`UptimeSchedule`), recording to
 public site) and `UPTIME_PROBE_TOKEN` — when set, the admin probe hits the
 token-guarded `/health/admin?token=…` (server-side subchecks: menu, orders,
 error_events, queue staleness; 404 without the token) instead of plain `/admin`.
-Generate/set like `REPLY_WEBHOOK_SECRET` below.
+Generate/set like `REPLY_WEBHOOK_SECRET` above.
 
 ## Logs (log drain)
 

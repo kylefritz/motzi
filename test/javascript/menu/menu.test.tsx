@@ -151,3 +151,31 @@ test("old menu disables submit", () => {
   });
   expect(submitButton.disabled).toBe(true);
 });
+
+test("editing an order with a line whose pickup day left the menu shows a note instead of crashing", async () => {
+  const data = mockSubscriberMenuJson();
+  const [first] = data.order!.items;
+  // Baguette (item 3) was ordered for a day the bakery has since trimmed
+  data.order!.items[0] = { ...first, pickupDayId: 99 };
+  const onCreateOrder = mock((_order: MenuOrderRequest) => Promise.resolve());
+
+  render(
+    <SettingsContext.Provider
+      value={{ showCredits: true, bundles: data.bundles }}
+    >
+      <Menu {...data} onCreateOrder={onCreateOrder} />
+    </SettingsContext.Provider>
+  );
+
+  expect(screen.getByTestId("removed-from-order").textContent).toBe(
+    "Baguette isn't available for that pickup day anymore, so we took it out of your order."
+  );
+  expect(getCartTotalText()).toContain("2 credits"); // Classic only
+
+  const user = userEvent.setup();
+  await user.click(screen.getByRole("button", { name: "Update Order" }));
+  await waitFor(() => expect(onCreateOrder).toHaveBeenCalledTimes(1));
+  expect(
+    onCreateOrder.mock.calls[0][0].cart.map(({ itemId }) => itemId)
+  ).toStrictEqual([1]);
+});
