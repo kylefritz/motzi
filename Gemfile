@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "3.3.10"
+ruby "3.3.13"
 
 #
 # please keep gems sorted; include comment for why a gem is needed
