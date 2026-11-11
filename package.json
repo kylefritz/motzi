@@ -56,8 +56,8 @@
     "test-watch": "bun test --watch",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "typecheck:test": "IS_REACT_ACT_ENVIRONMENT=false tsc --noEmit -p tsconfig.test.json",
-    "format": "prettier --write \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts postcss.config.js vite.config.mts",
-    "format:check": "prettier --check \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts postcss.config.js vite.config.mts",
+    "format": "prettier --write \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts vite.config.mts",
+    "format:check": "prettier --check \"app/javascript/**/*.{js,ts,tsx}\" \"test/javascript/**/*.{js,ts,tsx}\" \"test/visual/**/*.ts\" \"types/**/*.ts\" \"cloudflare/workers/*/src/**/*.ts\" playwright.config.ts vite.config.mts",
     "lint": "eslint --max-warnings=0 app/javascript test/javascript vite.config.mts"
   }
 }

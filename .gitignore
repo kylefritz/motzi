@@ -26,9 +26,6 @@
 # Vite build output (vite_rails)
 /public/vite*
 /node_modules
-/yarn-error.log
-yarn-debug.log*
-.yarn-integrity
 .env
 /coverage
 .playwright-mcp/
@@ -36,4 +33,5 @@ test/visual/screenshots/
 /test-results/
 /playwright-report/
 .worktrees/
+.claude/worktrees/
 .remember/

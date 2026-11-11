@@ -320,12 +320,6 @@ class ActivityFeed
     { text: "#{format_change(change)} #{suffix}", tone: tone, tooltip: tooltip }
   end
 
-  def job_context(current)
-    return "#{current[:incomplete_jobs]} incomplete" if current[:incomplete_jobs].positive?
-
-    "#{current[:anomaly_jobs]} anomaly runs"
-  end
-
   def percent_change(current, average)
     return 0 if average.to_f.zero?
 
@@ -408,10 +402,6 @@ class ActivityFeed
       anomaly_jobs: anomaly_jobs.sum { |event| event.details[:total].to_i },
       incomplete_jobs: jobs.sum { |event| event.details[:total].to_i - event.details[:finished].to_i }
     }
-  end
-
-  def email_rate_label(current)
-    "#{current[:email_open_rate]}% opened"
   end
 
   def mailer_open_rate_trend(mailer, lookback: 4)
