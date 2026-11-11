@@ -26,7 +26,17 @@ Rails.application.configure do
   config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
   # Vite tags are <script type="module" crossorigin>, which browsers fetch in
   # CORS mode. Allow it so pages on a host other than asset_host still load JS.
-  config.public_file_server.headers = { "access-control-allow-origin" => "*" }
+  #
+  # The CSS, JS and images pages link to are fingerprinted (/assets from
+  # Sprockets, /vite/assets from Vite), so browsers can keep them for a year.
+  # Without Cache-Control they revalidated or refetched them on every page.
+  # The header applies to every file in public/, so the few files without a
+  # fingerprint (favicon.ico, the apple-touch icons, 500.html) are cached the
+  # same way: give one a new name if it ever changes.
+  config.public_file_server.headers = {
+    "access-control-allow-origin" => "*",
+    "cache-control" => "public, max-age=#{1.year.to_i}, immutable"
+  }
 
   # Compress CSS using a preprocessor.
   # config.assets.css_compressor = :sass

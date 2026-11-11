@@ -23,7 +23,9 @@ ActiveAdmin.register User do
   scope :owners
   scope :admin
 
-  batch_action :destroy
+  # No batch delete: users are deleted one at a time (only without orders, see
+  # #destroy below) or from Advanced > Spam.
+  batch_action :destroy, false
 
   action_item :order, except: [ :index, :new ] do
     if params[:id].present?
@@ -258,19 +260,6 @@ ActiveAdmin.register User do
 
     # modify the destroy action to disallow deleting users who have orders
     def destroy
-      if params[:id] == "batch_action"
-        users = User.includes(:orders).where(id: params[:collection_selection])
-        num_deleted = 0
-
-        users.find_each do |user|
-          if user.orders.empty?
-            user.destroy!
-            num_deleted += 1
-          end
-        end
-        return redirect_to collection_path, notice: "Deleted #{num_deleted} users"
-      end
-
       unless resource.orders.empty?
         return redirect_to collection_path, alert: "Only users without orders can be deleted"
       end

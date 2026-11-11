@@ -54,7 +54,7 @@ Note: React `act(...)` warnings can still appear during `bun run test`; those ar
 
 ### Data
 
-Fixtures: `rails db:fixtures:load fake_data:users fake_data:orders`
+Fixtures: `rails db:fixtures:load`. For a copy of production data, use `bin/seed_local`.
 
 ### Emails
 

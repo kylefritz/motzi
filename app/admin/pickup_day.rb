@@ -2,10 +2,26 @@ ActiveAdmin.register PickupDay do
   permit_params :menu_id, :pickup_at, :order_deadline_at
   menu false
 
+  controller do
+    # The menu builder deletes pickup days with DELETE /admin/pickup_days/:id.json.
+    # PickupDay refuses when members have order items for the day; say why.
+    def destroy
+      destroy! do |success, failure|
+        failure.json do
+          render json: { error: resource.errors.full_messages.to_sentence }, status: :unprocessable_entity
+        end
+        failure.html do
+          redirect_back fallback_location: admin_menu_path(resource.menu_id),
+                        alert: resource.errors.full_messages.to_sentence
+        end
+      end
+    end
+  end
+
   show title: proc { |pd| pd.day_str } do |pickup_day|
     date = pickup_day.pickup_at.to_date
     pickup_days = PickupDay.unscoped
-      .where("pickup_at::date = ?", date)
+      .on_date(date)
       .order(:pickup_at)
 
     rows_hash = {}

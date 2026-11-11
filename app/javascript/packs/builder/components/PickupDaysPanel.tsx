@@ -57,7 +57,13 @@ export default function PickupDaysPanel({
     if (!confirmed) {
       return;
     }
-    api.pickupDay.remove(pickupDayId);
+    // The server refuses (422) when members have already ordered for the day.
+    api.pickupDay.remove(pickupDayId).catch((error) => {
+      console.error("cant remove pickupDay", error);
+      window.alert(
+        error?.response?.data?.error || "We couldn't delete that pickup day."
+      );
+    });
   };
 
   function handleSubmit(event: React.FormEvent) {

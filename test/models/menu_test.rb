@@ -34,9 +34,9 @@ class MenuTest < ActiveSupport::TestCase
     refute week3.current?, "week 2 starts as the current menu"
 
     week3.update!(week_id: Time.zone.now.prev_week_id)
-    assert_raise(StandardError) do
-      week3.publish_to_subscribers!
-    end
+    error = assert_raises(Menu::PublishError) { week3.publish_to_subscribers! }
+    assert_match(/current week's menu or future week's menu/, error.message)
+    assert_nil week3.reload.emailed_at, "a refused publish isn't recorded as sent"
 
     week3.update!(week_id: Time.zone.now.week_id)
     assert_email_sent(User.receive_weekly_menu.count) do
@@ -320,6 +320,50 @@ class MenuTest < ActiveSupport::TestCase
       week3.publish_to_subscribers!
     end
     assert week3.current?
+  end
+
+  # The "Email to N subscribers" button stays up while the first batch is still
+  # going out (recipients are only excluded once their email has been
+  # delivered), so a second click used to email everyone again.
+  test "publish_to_subscribers! refuses a second send started right after the first" do
+    week3 = menus(:week3)
+    week3.update!(week_id: Time.zone.now.week_id)
+    freeze_time
+
+    assert_enqueued_jobs 1, only: SendWeeklyMenuJob do
+      week3.publish_to_subscribers!
+
+      travel 2.minutes
+      error = assert_raises(Menu::PublishError) { Menu.find(week3.id).publish_to_subscribers! }
+      assert_match(/emailed 2 minutes ago/, error.message)
+    end
+  end
+
+  test "publish_to_subscribers! allows another send once the first has had time to go out" do
+    week3 = menus(:week3)
+    week3.update!(week_id: Time.zone.now.week_id)
+    freeze_time
+
+    assert_enqueued_jobs 2, only: SendWeeklyMenuJob do
+      week3.publish_to_subscribers!
+      travel Menu::RESEND_WAIT + 1.minute
+      week3.publish_to_subscribers!
+    end
+  end
+
+  # Holiday menus are announced in the regular menu's subscriber note; they
+  # must never go out as the weekly email.
+  test "publish_to_subscribers! refuses holiday menus" do
+    holiday = menus(:passover_2026)
+
+    travel_to(holiday.latest_deadline - 1.day) do
+      assert holiday.can_publish?
+      assert_no_enqueued_jobs only: SendWeeklyMenuJob do
+        error = assert_raises(Menu::PublishError) { holiday.publish_to_subscribers! }
+        assert_match(/holiday/i, error.message)
+      end
+    end
+    assert_nil holiday.reload.emailed_at
   end
 
   test "two menus can share week_id with different menu_type" do

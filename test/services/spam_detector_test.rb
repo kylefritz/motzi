@@ -18,10 +18,36 @@ class SpamDetectorTest < ActiveSupport::TestCase
     assert_equal [], result
   end
 
-  test "parse_spam_ids returns empty array on malformed JSON" do
+  test "parse_spam_ids raises on malformed JSON instead of reporting a clean scan" do
     detector = SpamDetector.new
-    result = detector.send(:parse_spam_ids, "[{broken json")
-    assert_equal [], result
+    assert_raises(SpamDetector::UnreadableResponse) { detector.send(:parse_spam_ids, "[{broken json]") }
+  end
+
+  # A reply cut off mid-array has no closing bracket, so it used to look like
+  # "no JSON here" and count as zero spam.
+  test "parse_spam_ids raises when the array is cut off" do
+    detector = SpamDetector.new
+    truncated = "[{\"id\": 1, \"reason\": \"bot\"}, {\"id\": 5, \"reas"
+    assert_raises(SpamDetector::UnreadableResponse) { detector.send(:parse_spam_ids, truncated) }
+  end
+
+  test "scan raises when Claude stops at the token limit" do
+    detector = SpamDetector.new
+    reply = { text: "[{\"id\": 1, \"reason\": \"bot\"}]\n[{\"id\": 5, \"reas", stop_reason: "max_tokens" }
+
+    detector.stub(:call_claude, reply) do
+      error = assert_raises(SpamDetector::UnreadableResponse) { detector.scan }
+      assert_match(/cut off/, error.message)
+    end
+  end
+
+  test "scan returns the flagged accounts from a complete reply" do
+    detector = SpamDetector.new
+    reply = { text: "[{\"id\": 1, \"reason\": \"bot\"}]", stop_reason: "end_turn" }
+
+    detector.stub(:call_claude, reply) do
+      assert_equal [ { id: 1, reason: "bot" } ], detector.scan
+    end
   end
 
   test "build_user_message formats users as markdown table" do
