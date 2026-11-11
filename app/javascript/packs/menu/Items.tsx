@@ -26,7 +26,6 @@ function shortDay(day: string) {
 type DayButtonProps = MenuItemPickupDay & {
   itemId: number;
   onSetDayId: (dayId: number) => void;
-  orderingDeadlineText?: string;
 };
 
 export function DayButton({
@@ -36,22 +35,20 @@ export function DayButton({
   remaining,
   id: dayId,
   onSetDayId,
-  orderingDeadlineText,
 }: DayButtonProps) {
   const day = weekday(pickupAt);
   const isPastDeadline = useDeadlineContext().isClosed(orderDeadlineAt);
 
   if (remaining < 1 || isPastDeadline) {
-    const [short, long, title] = isPastDeadline
-      ? [`Closed`, `Ordering closed for ${shortDay(day)}`, orderingDeadlineText]
-      : ["Sold Out", `${shortDay(day)} Sold Out`, undefined];
+    const [short, long] = isPastDeadline
+      ? [`Closed`, `Ordering closed for ${shortDay(day)}`]
+      : ["Sold Out", `${shortDay(day)} Sold Out`];
 
     return (
       <button
         type="button"
         className="btn btn-outline-primary btn-sm mr-2 mb-2"
         disabled={true}
-        title={title}
       >
         <span className="d-block d-md-none">{short}</span>
         <span className="d-none d-md-block">{long}</span>
@@ -248,7 +245,6 @@ type ItemsProps = {
   onAddToCart?: (
     item: MenuItem & { quantity: number; pickupDayId: number }
   ) => void;
-  disabled?: boolean;
 };
 
 export default function Items({

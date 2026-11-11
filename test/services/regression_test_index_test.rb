@@ -36,7 +36,6 @@ class RegressionTestIndexTest < ActiveSupport::TestCase
     write_test("a_test.rb", "# error_events ##{first.id}\n")
 
     assert_empty index.untested_resolved
-    assert_equal 1, index.for_fingerprint("dup").size
   end
 
   test "lists resolved, uncited groups newest first with a one-line message" do

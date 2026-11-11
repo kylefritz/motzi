@@ -145,7 +145,7 @@ export default function App() {
   const order = data?.order || null;
   const holidayMenu = data?.holidayMenu || null;
   const holidayOrder = data?.holidayOrder || null;
-  const { orderingDeadlineText, enablePayWhatYouCan } = menu || {};
+  const { enablePayWhatYouCan } = menu || {};
 
   return (
     <SettingsContext.Provider
@@ -158,13 +158,11 @@ export default function App() {
     >
       <DayContext.Provider
         value={{
-          orderingDeadlineText, // TODO: this needs fixed
           ignoreDeadline,
         }}
       >
         {holidayMenu ? (
           <MenuTabs
-            bundles={bundles}
             handleCreateRegularOrder={handleCreateOrder}
             handleCreateHolidayOrder={handleCreateHolidayOrder}
             isEditingOrder={isEditingOrder}
@@ -178,7 +176,6 @@ export default function App() {
           />
         ) : (
           <Layout
-            bundles={bundles}
             error={error}
             handleCreateOrder={handleCreateOrder}
             isEditingOrder={isEditingOrder}

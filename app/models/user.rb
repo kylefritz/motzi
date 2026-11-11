@@ -72,10 +72,6 @@ class User < ApplicationRecord
     end
   end
 
-  def authenticate(password)
-    Devise::Encryptor.compare(User, self.encrypted_password, password)
-  end
-
   def name
     [ first_name, last_name ].compact.join(" ").presence || email
   end
@@ -111,9 +107,6 @@ class User < ApplicationRecord
     User.find_by(email: KYLE_EMAIL)
   end
   MAYA_EMAIL = "mayapamela@gmail.com"
-  def self.maya
-    User.find_by(email: MAYA_EMAIL)
-  end
   RUSSELL_EMAIL = "trimmer.russell@gmail.com"
   SYSTEM_ID = 0
   def self.system

@@ -29,7 +29,6 @@ function renderMenuTabs({
       value={{ showCredits: true, bundles: data.bundles }}
     >
       <MenuTabs
-        bundles={data.bundles}
         handleCreateHolidayOrder={mock(() => Promise.resolve())}
         handleCreateRegularOrder={mock(() => Promise.resolve())}
         holidayMenu={holidayData.menu}

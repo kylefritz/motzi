@@ -3,22 +3,6 @@ import BuyCredits from "../buy/App";
 import { usePriceContext } from "./Contexts";
 import type { MenuUser } from "../../types/api";
 
-export const humanizeBreadsPerWeek = (perWeek: number) => {
-  if (perWeek === 0.5) {
-    return "Every other week";
-  }
-  if (perWeek === 1.0) {
-    return "Every week";
-  }
-  if (perWeek === 2.0) {
-    return "Two breads per week";
-  }
-  if (perWeek === 3.0) {
-    return "Three breads per week";
-  }
-  return `${perWeek} breads per week`;
-};
-
 type SubscriptionProps = {
   user: MenuUser;
   showBuyMoreButton?: boolean;

@@ -13,8 +13,6 @@ function makeTitle(orderDeadlineAt: string) {
     <Title
       menu={{
         name: "Week 6: toast",
-        orderingDeadlineText:
-          "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
         pickupDays: [{ id: 1, pickupAt, orderDeadlineAt }],
       }}
     />
@@ -75,7 +73,6 @@ test("Multiple pickup days: schedule wraps for mobile", () => {
     <Title
       menu={{
         name: "Week 6: toast",
-        orderingDeadlineText: "",
         pickupDays,
       }}
     />

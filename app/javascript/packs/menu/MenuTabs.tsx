@@ -5,7 +5,6 @@ import Layout from "./Layout";
 import HolidayMenuTab from "./HolidayMenuTab";
 import EmailSettings from "./EmailSettings";
 import type {
-  CreditBundle,
   Menu as MenuType,
   MenuOrder,
   MenuUser,
@@ -14,7 +13,6 @@ import type {
 } from "../../types/api";
 
 type MenuTabsProps = {
-  bundles: CreditBundle[];
   handleCreateHolidayOrder: (
     order: MenuOrderRequest | MarketplaceOrderRequest
   ) => Promise<unknown>;
@@ -32,7 +30,6 @@ type MenuTabsProps = {
 };
 
 export default function MenuTabs({
-  bundles,
   handleCreateHolidayOrder,
   handleCreateRegularOrder,
   holidayMenu,
@@ -113,7 +110,6 @@ export default function MenuTabs({
       {!showHoliday && regularMenu && (
         <div role="tabpanel" id="panel-regular" aria-labelledby="tab-regular">
           <Layout
-            bundles={bundles}
             handleCreateOrder={handleCreateRegularOrder}
             isEditingOrder={isEditingOrder}
             menu={regularMenu}
@@ -127,7 +123,6 @@ export default function MenuTabs({
       {showHoliday && (
         <div role="tabpanel" id="panel-holiday" aria-labelledby="tab-holiday">
           <HolidayMenuTab
-            bundles={bundles}
             handleCreateOrder={handleCreateHolidayOrder}
             menu={holidayMenu}
             order={holidayOrder}

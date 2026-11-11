@@ -1,12 +1,11 @@
 import React from "react";
-import { expect, mock, test } from "bun:test";
+import { expect, test } from "bun:test";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import Subscription, { humanizeBreadsPerWeek } from "menu/Subscription";
+import Subscription from "menu/Subscription";
 import { SettingsContext } from "menu/Contexts";
 import { mockSubscriberMenuJson } from "./mockMenuJson";
-import stripeMock from "./stripeMock";
 
 const setStripeKey = () => {
   window.gon = { stripeApiKey: "no-such-key" };
@@ -15,7 +14,6 @@ const setStripeKey = () => {
 test("buy credits", async () => {
   const user = userEvent.setup();
   setStripeKey();
-  window.Stripe = mock(() => stripeMock);
 
   const { user: subscriber, bundles } = mockSubscriberMenuJson();
 
@@ -63,7 +61,6 @@ test("buy credits", async () => {
 test("no payWhatYouCan", async () => {
   const user = userEvent.setup();
   setStripeKey();
-  window.Stripe = mock(() => stripeMock);
 
   const { user: subscriber, bundles } = mockSubscriberMenuJson();
   render(
@@ -86,12 +83,4 @@ test("no payWhatYouCan", async () => {
   expect(screen.getByText("Pay by credit card")).toBeTruthy();
   expect(screen.queryByLabelText("Price")).toBeNull();
   expect(screen.getByTestId("payment-element")).toBeTruthy();
-});
-
-test("humanizeBreadsPerWeek", () => {
-  expect(humanizeBreadsPerWeek(0.5)).toEqual("Every other week");
-  expect(humanizeBreadsPerWeek(1.0)).toEqual("Every week");
-  expect(humanizeBreadsPerWeek(2.0)).toEqual("Two breads per week");
-  expect(humanizeBreadsPerWeek(3.0)).toEqual("Three breads per week");
-  expect(humanizeBreadsPerWeek(5.3)).toEqual("5.3 breads per week");
 });

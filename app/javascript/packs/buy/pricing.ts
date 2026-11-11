@@ -8,7 +8,7 @@ import type { CartItem, MenuItem } from "../../types/api";
 // Upper bound on the amount beyond the minimum (OrderPricing::MAX_ABOVE_MINIMUM)
 export const MAX_ABOVE_MINIMUM = 250;
 
-export type PricedLine = {
+type PricedLine = {
   itemId: number;
   name: string;
   quantity: number;
@@ -24,7 +24,7 @@ export type CartPricing = {
   minimum: number;
 };
 
-export function isPayWhatYouCan(
+function isPayWhatYouCan(
   item: Pick<MenuItem, "payWhatYouCan"> | undefined,
   enablePayWhatYouCan: boolean
 ) {

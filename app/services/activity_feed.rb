@@ -142,59 +142,6 @@ class ActivityFeed
     }
   end
 
-  def watchlist_items(lookback: 4)
-    comparison = comparison_snapshot(lookback: lookback)
-    current = comparison[:current]
-    average = comparison[:average]
-    items = []
-
-    if average[:orders] >= 10 && current[:orders] < (average[:orders] * 0.85)
-      change = percent_change(current[:orders], average[:orders])
-      items << {
-        tone: current[:orders] < (average[:orders] * 0.7) ? :danger : :warning,
-        title: "Orders are tracking below normal",
-        body: "#{current[:orders]} orders #{comparison[:label]}, #{change.abs}% below the #{lookback}-week average of #{average[:orders]}."
-      }
-    end
-
-    if average[:visitors] >= 25 && current[:visitors] < (average[:visitors] * 0.8)
-      change = percent_change(current[:visitors], average[:visitors])
-      items << {
-        tone: :warning,
-        title: "Traffic is softer than usual",
-        body: "#{current[:visitors]} visitors #{comparison[:label]}, #{change.abs}% below the recent average of #{average[:visitors]}."
-      }
-    end
-
-    havent_ordered_trend = mailer_open_rate_trend("ReminderMailer#havent_ordered_email", lookback: lookback)
-    if !havent_ordered_trend[:maturing] && havent_ordered_trend[:current_rate] && havent_ordered_trend[:average_rate] && havent_ordered_trend[:current_rate] < (havent_ordered_trend[:average_rate] - 5)
-      items << {
-        tone: :warning,
-        title: "Haven't-ordered reminder engagement is slipping",
-        body: "#{havent_ordered_trend[:current_rate]}% opened this week versus a #{lookback}-week average of #{havent_ordered_trend[:average_rate]}%."
-      }
-    end
-
-    if current[:incomplete_jobs] > 0 || current[:anomaly_jobs] > 3
-      detail = []
-      detail << "#{current[:anomaly_jobs]} anomaly runs" if current[:anomaly_jobs] > 0
-      detail << "#{current[:incomplete_jobs]} incomplete jobs" if current[:incomplete_jobs] > 0
-      items << {
-        tone: current[:incomplete_jobs] > 0 ? :danger : :warning,
-        title: "Background job activity needs a look",
-        body: detail.join(" and ").capitalize
-      }
-    end
-
-    items << {
-      tone: :ok,
-      title: "No automatic watchlist issues",
-      body: "Core metrics are inside recent norms for #{comparison[:label]}."
-    } if items.empty?
-
-    items
-  end
-
   def git_commits(limit: 8)
     commits = github_commits
     commits = local_git_commits if commits.empty?
@@ -401,26 +348,6 @@ class ActivityFeed
       job_runs: jobs.sum { |event| event.details[:finished].to_i },
       anomaly_jobs: anomaly_jobs.sum { |event| event.details[:total].to_i },
       incomplete_jobs: jobs.sum { |event| event.details[:total].to_i - event.details[:finished].to_i }
-    }
-  end
-
-  def mailer_open_rate_trend(mailer, lookback: 4)
-    current = email_summary[mailer]
-    previous = prior_week_ids(lookback).filter_map do |wid|
-      self.class.new(wid).email_summary[mailer]&.dig(:open_rate)
-    end
-    average = if previous.any?
-      (previous.sum.to_f / previous.size).round
-    end
-
-    # A rate that includes a send from the last 24h hasn't settled yet —
-    # don't compare it against matured weekly averages.
-    last_sent = @menus.filter_map { |m| m.messages.where(mailer: mailer).maximum(:sent_at) }.max
-
-    {
-      current_rate: current&.dig(:open_rate),
-      average_rate: average,
-      maturing: last_sent.present? && last_sent > 24.hours.ago
     }
   end
 
