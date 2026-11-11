@@ -584,7 +584,9 @@ ActiveAdmin.register_page "Activity Feed" do
 
     # Claude Analyses
     if analyses.any?
-      markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, tables: true, fenced_code_blocks: true, autolink: true)
+      # escape_html: the report is model output built from member-written text, so
+      # raw tags in it must not reach the admin's browser (same reason as Order#comments_html).
+      markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new(escape_html: true), tables: true, fenced_code_blocks: true, autolink: true)
       panel "Claude Analyses" do
         analyses.each do |analysis|
           div class: "analysis-card" do

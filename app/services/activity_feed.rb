@@ -853,14 +853,14 @@ class ActivityFeed
           timestamp: ci.created_at,
           category: "customer",
           action: "credit_purchased",
-          description: "#{ci.user.name} purchased #{ci.quantity} credits ($#{'%.2f' % (ci.stripe_charge_amount / 100.0)})",
+          description: "#{ci.user.name} purchased #{ci.quantity} credits ($#{'%.2f' % ci.stripe_charge_amount})",
           details: { source: "credit_item", id: ci.id }
         )
       end
     else
       purchases.group_by { |ci| ci.created_at.to_date }.each do |date, daily|
         total_credits = daily.sum(&:quantity)
-        total_dollars = daily.sum(&:stripe_charge_amount) / 100.0
+        total_dollars = daily.sum(&:stripe_charge_amount) # stored in dollars
         events << Event.new(
           timestamp: daily.last.created_at,
           category: "customer",
