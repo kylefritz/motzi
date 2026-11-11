@@ -91,10 +91,25 @@ class Api::FeedbacksControllerTest < ActionDispatch::IntegrationTest
     assert_response :created
   end
 
-  test "requires turnstile for menu source when not authenticated" do
+  # The menu page's "Share feedback" form has no Turnstile widget and posts no
+  # uid, and the menu is open to guests and to members who arrive by uid link
+  # (no session). It is rate limited instead (rack_attack.rb).
+  test "accepts menu feedback from a guest or uid-link member, who has no session" do
+    assert_difference "Feedback.count", 1 do
+      assert_emails 1 do
+        post api_feedbacks_path, params: {
+          feedback: { source: "menu", message: "Love the challah", url: "http://www.example.com/menu?uid=abcd" }
+        }, as: :json
+      end
+    end
+
+    assert_response :created
+  end
+
+  test "requires turnstile for general source when not authenticated" do
     assert_no_difference "Feedback.count" do
       post api_feedbacks_path, params: {
-        feedback: { source: "menu", message: "Spam" }
+        feedback: { source: "general", message: "Spam" }
       }, as: :json
     end
 

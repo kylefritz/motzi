@@ -52,6 +52,49 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     assert_menu_json
   end
 
+  # Only the menus that are open (the current one and the current holiday
+  # menu) can be read by id; drafts and past menus are for admins.
+
+  test "a menu that isn't current can't be read by id" do
+    get "/menus/#{menus(:week3).id}.json"
+    assert_response :not_found
+
+    get "/menus/#{menus(:week3).id}.json?uid=#{users(:ljf).hashid}"
+    assert_response :not_found
+
+    sign_in users(:ljf)
+    get "/menus/#{menus(:week3).id}.json"
+    assert_response :not_found
+    get "/menus/#{menus(:week3).id}"
+    assert_response :not_found
+  end
+
+  test "a holiday menu that isn't open can't be read by id" do
+    Setting.holiday_menu_id = nil
+    get "/menus/#{menus(:passover_2026).id}.json"
+    assert_response :not_found
+  end
+
+  test "the current holiday menu can be read by id (the marketing nav links to it)" do
+    Setting.holiday_menu_id = menus(:passover_2026).id
+    get "/menus/#{menus(:passover_2026).id}"
+    assert_response :success
+    get "/menus/#{menus(:passover_2026).id}.json"
+    assert_response :success
+    assert_equal menus(:passover_2026).id, response.parsed_body["menu"]["id"]
+  ensure
+    Setting.holiday_menu_id = nil
+  end
+
+  test "an admin can preview any menu by id" do
+    sign_in users(:kyle)
+    get "/menus/#{menus(:week3).id}"
+    assert_response :success
+    get "/menus/#{menus(:week3).id}.json"
+    assert_response :success
+    assert_equal menus(:week3).id, response.parsed_body["menu"]["id"]
+  end
+
   test "GET /menu.json with no holiday menu returns holidayMenu null" do
     Setting.holiday_menu_id = nil
     get "/menu.json"

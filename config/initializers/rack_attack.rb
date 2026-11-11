@@ -18,10 +18,23 @@ class Rack::Attack
     SCANNER_PATHS.match?(req.path)
   end
 
+  # Rails routes "/contact", "/contact/", "/contact.json" and so on to the same
+  # action, so the throttles below match the path with any format suffix or
+  # trailing slash.
+  def self.path_matches?(req, path)
+    req.path.match?(%r{\A#{Regexp.escape(path)}(\.\w+)?/?\z})
+  end
+
   # Limit contact form submissions to 5 per hour per IP. The form is public, so
   # this is the main spam mitigation alongside the view-layer honeypot field.
   throttle("contact form per ip", limit: 5, period: 1.hour) do |req|
-    req.ip if req.path == "/contact" && req.post?
+    req.ip if req.post? && path_matches?(req, "/contact")
+  end
+
+  # Feedback forms (error pages, the menu's "Share feedback") email the bakery
+  # and some skip Turnstile, so they get the same limit.
+  throttle("feedback per ip", limit: 5, period: 1.hour) do |req|
+    req.ip if req.post? && path_matches?(req, "/api/feedbacks")
   end
 end
 

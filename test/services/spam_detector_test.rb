@@ -45,6 +45,16 @@ class SpamDetectorTest < ActiveSupport::TestCase
     assert_empty users_with_orders, "candidates should not have orders"
   end
 
+  test "load_candidates excludes members who have bought credits but not ordered yet" do
+    jess = users(:jess)
+    assert jess.credit_items.any? && jess.orders.none?, "fixture: credits, no orders"
+
+    candidates = SpamDetector.new.send(:load_candidates)
+
+    assert_not_includes candidates, jess
+    assert_empty candidates.select { |u| u.credit_items.any? }, "candidates should not have credit items"
+  end
+
   test "load_candidates excludes owners" do
     detector = SpamDetector.new
     candidates = detector.send(:load_candidates)
