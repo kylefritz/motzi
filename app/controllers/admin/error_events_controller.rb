@@ -1,4 +1,8 @@
 class Admin::ErrorEventsController < ApplicationController
+  # ApplicationController skips the CSRF check for the member site; /admin
+  # turns it back on (see config/initializers/active_admin.rb).
+  protect_from_forgery with: :exception, prepend: true
+
   before_action :redirect_unless_user_is_admin!
   before_action :load_event, only: [ :show, :resolve, :unresolve ]
 
