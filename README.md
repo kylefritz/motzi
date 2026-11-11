@@ -74,7 +74,7 @@ Auto-deploys from `master` when CI passes. Full review-app config in `app.json`.
 
 | Addon | Plan | Purpose |
 |-------|------|---------|
-| heroku-postgresql | essential-0 (v17) | Primary database |
+| heroku-postgresql | essential-1 (v18) | Primary database |
 
 ActionCable runs on Solid Cable (`config/cable.yml`), so Redis is not required for runtime.
 
