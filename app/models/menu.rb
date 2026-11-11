@@ -32,10 +32,6 @@ class Menu < ApplicationRecord
     nil
   end
 
-  def self.for_current_week_id
-    Menu.find_by(week_id: Time.zone.now.week_id)
-  end
-
   def make_current!
     if holiday?
       Setting.holiday_menu_id = self.id
@@ -50,10 +46,6 @@ class Menu < ApplicationRecord
     else
       self.id == Setting.menu_id
     end
-  end
-
-  def for_current_week_id?
-    self.week_id == Time.zone.now.week_id
   end
 
   def can_publish?
