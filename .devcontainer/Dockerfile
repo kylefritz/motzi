@@ -17,7 +17,7 @@ RUN sed -i 's/scram-sha-256/trust/g' /etc/postgresql/*/main/pg_hba.conf \
     && sed -i 's/md5/trust/g' /etc/postgresql/*/main/pg_hba.conf
 
 # 3. Install 'mise' manually (since the feature failed)
-# This will allow your bin/setup script to manage Ruby 3.3.10 and Bun versions automatically
+# This will allow your bin/setup script to manage Ruby 3.3.13 and Bun versions automatically
 RUN curl https://mise.run | MIS_INSTALL_PATH=/usr/local/bin/mise sh
 
 # 4. Add mise to the shell for interactive use
