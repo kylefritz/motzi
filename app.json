@@ -9,7 +9,7 @@
   "addons": [
     {
       "plan": "heroku-postgresql:essential-0",
-      "options": { "version": "17" }
+      "options": { "version": "18" }
     }
   ],
   "env": {

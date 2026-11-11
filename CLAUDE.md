@@ -14,24 +14,26 @@ Neighborhood bakery's CSA site. Members browse menus, choose pickup days, and pl
 
 ## Tests
 
-There are three test suites. The first two run in CI; the third is manual.
+There are five test suites. Rails, system and JS tests run in CI on every PR; the visual suite runs monthly; the log-drain worker's tests run only by hand.
 
 | Suite | Command | What it tests | Speed | CI? |
 |-------|---------|---------------|-------|-----|
 | **Rails** | `bundle exec rails test` | Models, controllers, mailers, jobs, SQL queries | ~35s | Yes |
+| **System** | `bin/rails test:system` | Browser tests in `test/system` | — | Yes (`test_system` job) |
 | **JS** | `bun test` | React components (menu, cart, builder, credits) via jsdom | ~3s | Yes |
-| **Visual** | `bunx playwright test` | Email template screenshots — mobile (iPhone 14) & desktop | ~20s | Monthly + on demand (`LLM evals` workflow), never per PR |
+| **Visual** | `bunx playwright test` | Email template and marketing page screenshots — mobile (iPhone 14) & desktop | ~20s | Monthly + on demand (`LLM evals` workflow), never per PR |
+| **Worker** | `bun test` in `cloudflare/workers/log-drain` | Log drain parsing, keys, filters | — | No |
 
 **Local CI**: `bin/ci` (Rails 8.1 local CI, steps in `config/ci.rb`) runs rubocop, Prettier (`bun run format:check`; fix with `bun run format`), ESLint with react-hooks (`bun run lint`), bundler-audit, brakeman, the Rails and JS suites, and the typecheck in one go.
 
 ### Visual tests
 
-Playwright screenshots all 6 email templates at mobile and desktop viewports, then sends each screenshot to Claude Haiku for visual QA (checks for overlapping text, broken layout, clipped content). Each run is 12 Haiku calls, so it never runs per PR.
+Playwright screenshots all 6 email templates and 4 marketing pages (home, about, subscribe, contact) at mobile and desktop viewports, then sends each screenshot to Claude Haiku for visual QA (checks for overlapping text, broken layout, clipped content). Each run is 20 Haiku calls, so it never runs per PR.
 
 **Cadence:** the `LLM evals` workflow (`.github/workflows/llm-evals.yml`) runs it on the 1st of each month and on demand (Actions → LLM evals → Run workflow, or `gh workflow run llm-evals.yml`). CI loads the committed test fixtures into a throwaway dev database, so no production data is involved; the mailer previews only need one order, credit item, user, menu and analysis. CI retries a failed test once (a fresh Haiku judgment). Needs the `ANTHROPIC_API_KEY` repo secret.
 
 ```
-bunx playwright test                              # run all (12 tests: 6 emails × 2 viewports)
+bunx playwright test                              # run all (20 tests: 6 emails + 4 marketing pages, × 2 viewports)
 bunx playwright test --project mobile             # mobile only
 bunx playwright test --grep "havent_ordered"       # single email
 ```
@@ -42,8 +44,8 @@ bunx playwright test --grep "havent_ordered"       # single email
 
 **Files:**
 - `playwright.config.ts` — project config (mobile/desktop viewports)
-- `test/visual/email-screenshots.spec.ts` — the test
-- `test/visual/email-check-prompt.txt` — Claude's visual QA prompt (edit to tune what it checks)
+- `test/visual/email-screenshots.spec.ts`, `test/visual/marketing-screenshots.spec.ts` — the tests
+- `test/visual/email-check-prompt.txt`, `test/visual/marketing-check-prompt.txt` — Claude's visual QA prompts (edit to tune what it checks)
 - `test/visual/screenshots/` — output (gitignored)
 
 ### Anomaly report eval
@@ -74,8 +76,6 @@ rake ai:eval_baseline       # accept the latest scorecard as the baseline (no AP
 - **IAM user**: `motzi-s3` — can read/write objects but cannot manage bucket policies
 - **Config**: `config/storage.yml` (`amazon` service), credentials via `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`
 - **Public prefix**: `s3://motzi/public/` is publicly readable. Everything else (Active Storage files) is private.
-- **PR screenshots**: Uploaded to `s3://motzi/public/gh/pr-<NUMBER>/` — see "PR Screenshots" below.
-
 ## Design system
 
 The **Motzi Design System** lives in Claude Design (not in this repo): https://claude.ai/design/p/d2b552b1-ff9d-4b5d-8f8d-eca059ebda5d (project id `d2b552b1-ff9d-4b5d-8f8d-eca059ebda5d`). Use it for any UI or email change. Claude can read it with the `DesignSync` tool (`list_files` / `get_file`; run `/design-login` once to authorize). Start with `readme.md` (brand, voice, visual rules), then `tokens/{colors,typography,spacing}.css`, `components/{app,menu,preorder,email,marketing}/*` (each has a `.prompt.md`), and `ui_kits/menu-app/` (ordering flow) and `ui_kits/pizza-preorder/` (pre-order flow, #408). The readme ends with "Reconciliation notes" explaining each token or component decision. Its `github.md` records which repo files each screen was synced from.
@@ -91,19 +91,14 @@ Quick reference:
 
 PRs with visual changes should include screenshots in the PR description (not comments).
 
-**Quick way** (screenshots multiple URLs and updates the PR description):
+Take the shot, then attach it (full steps in the `pr-screenshots` skill):
 ```
-bin/screenshot-pr /404 /422 /500.html
-bin/screenshot-pr --device "iPhone 14" /rails/mailers/reminder_mailer/havent_ordered_email
-```
-
-**Manual way** (screenshot a single URL):
-```
-bin/screenshot /some-page my-feature
-# outputs S3 URL and markdown to paste
+bin/screenshot --device mobile /menu my-feature     # saves tmp/screenshots/my-feature.png
+bin/screenshot --admin /admin/users admin-users
+attach-screenshot --pr <N> tmp/screenshots/my-feature.png   # prints markdown for the PR body
 ```
 
-Screenshots are uploaded to `s3://motzi/public/gh/pr-<NUMBER>/` and embedded in the PR body under a `## Screenshots` section. The `bin/screenshot-pr` script replaces any existing screenshots section when re-run.
+`attach-screenshot` stores the images in the repo itself (an orphan commit under `refs/uploads/`), so no bucket is involved. Put the markdown under a `## Screenshots` section in the PR body. Phone width by default; before/after for visual fixes.
 
 ## Deployment
 
@@ -111,7 +106,7 @@ Heroku app `motzibread` auto-deploys from `master` when CI passes. Heroku Postgr
 
 ## Analysis Replies (email ingress)
 
-The weekly anomaly report emails have a `Reply-To` of `reply+analysis-{id}@thepuff.co`. A Cloudflare Email Worker (`cloudflare/workers/reply-ingress/`) receives replies and POSTs them to `/reply_ingress` on Motzi, where they get stored as `AnalysisReply` records and fed into next week's prompt.
+The nightly anomaly report emails have a `Reply-To` of `motzi-analysis-replies@thepuff.co` and a `Message-ID` of `analysis-{id}@motzibread.herokuapp.com`. A Cloudflare Email Worker (`cloudflare/workers/reply-ingress/`) receives replies, reads the analysis id from the `In-Reply-To` header, and POSTs them to `/reply_ingress` on Motzi, where they get stored as `AnalysisReply` records and fed into later prompts.
 
 **Required env var on Heroku:** `REPLY_WEBHOOK_SECRET` (shared with the worker)
 
@@ -177,7 +172,7 @@ the admin on a usage-weighted schedule (`UptimeSchedule`), recording to
 public site) and `UPTIME_PROBE_TOKEN` — when set, the admin probe hits the
 token-guarded `/health/admin?token=…` (server-side subchecks: menu, orders,
 error_events, queue staleness; 404 without the token) instead of plain `/admin`.
-Generate/set like `REPLY_WEBHOOK_SECRET` below.
+Generate/set like `REPLY_WEBHOOK_SECRET` above.
 
 ## Logs (log drain)
 
@@ -202,9 +197,9 @@ R14 is a **soft** memory warning — the dyno exceeded its 512MB quota and went 
 
 ## Worktrees
 
-Feature work uses git worktrees in `.worktrees/` (or `.claude/worktrees/`). When setting up a worktree:
+Feature work uses git worktrees in `.claude/worktrees/<name>`. Remove the worktree when its PR merges. When setting up a worktree:
 
-- **Symlink `.env`**: `ln -s ../../.env .env` in `.worktrees/<name>`, `ln -s ../../../.env .env` in `.claude/worktrees/<name>` (worktrees don't get untracked files)
+- **Symlink `.env`**: `ln -s ../../../.env .env` in `.claude/worktrees/<name>` (worktrees don't get untracked files)
 - **JS deps**: run `bun install` first. `bin/rails test` builds the JS with Vite before forking, and without `node_modules` it stalls instead of failing
 - **Bundler lockfile**: use `BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update` so bundler writes to the worktree, not the main repo
 - **Tests**: automatic. In a worktree, `bin/rails`/`bin/rake` disable Spring and the test DB defaults to `motzi_test_<worktree dir>` (`lib/worktree_env.rb`; `TEST_DATABASE` still overrides). Run `bin/rails db:test:prepare` once, then `bin/rails test`. Concurrent runs on the same test DB wait for each other (`test/support/test_db_lock.rb`) and print "Another test run is using …"; that's expected, not a hang.

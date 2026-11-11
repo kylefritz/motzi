@@ -21,14 +21,14 @@ function makeTitle(orderDeadlineAt: string) {
   );
 }
 
-test("After deadline: ordering close", () => {
+test("Before deadline: shows the order-by deadline", () => {
   const orderDeadlineAt = now().plus(Duration.fromISO("PT12H")).toISO()!;
   const { container } = makeTitle(orderDeadlineAt);
   const deadlineEl = container.querySelector("#deadline");
   expect(deadlineEl).toBeTruthy();
 });
 
-test("Before deadline: small warning", () => {
+test("After deadline: shows the ordering-closed warning", () => {
   const orderDeadlineAt = now().minus(Duration.fromISO("PT12H")).toISO()!;
   const { container } = makeTitle(orderDeadlineAt);
   const warningEl = container.querySelector("#past-deadline");

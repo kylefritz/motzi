@@ -303,7 +303,10 @@ class MenuTest < ActiveSupport::TestCase
   test "open_for_orders! rejects regular menus" do
     regular = menus(:week3)
     regular.update!(week_id: Time.zone.now.week_id)
-    assert_raises(RuntimeError, /holiday/) { regular.open_for_orders! }
+    # Minitest reads extra arguments as exception classes, never as a message
+    # pattern, so match the message explicitly.
+    error = assert_raises(RuntimeError) { regular.open_for_orders! }
+    assert_match(/holiday/, error.message)
   end
 
   test "open_for_orders! raises when deadline passed" do

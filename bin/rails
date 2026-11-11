@@ -2,6 +2,8 @@
 # Spring cross-loads apps between git worktrees and hangs; skip it there.
 require_relative "../lib/worktree_env"
 ENV["DISABLE_SPRING"] ||= "1" if WorktreeEnv.worktree?
+# macOS: libpq's GSS lookup crashes forked parallel test workers.
+ENV["PGGSSENCMODE"] ||= "disable" if RUBY_PLATFORM.include?("darwin")
 begin
   load File.expand_path('../spring', __FILE__)
 rescue LoadError => e

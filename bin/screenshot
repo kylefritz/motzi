@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Take a screenshot of a local dev URL and upload to S3.
+ * Take a screenshot of a local dev URL.
  *
  * Usage:
  *   bin/screenshot [options] <url> [filename]
@@ -10,7 +10,7 @@
  *
  * Options:
  *   --admin            Sign in as admin first (hits /dev/login_as_admin)
- *   --device <name>    Viewport: "mobile" (390x844), "desktop" (1280x900), or WxH
+ *   --device <name>    Viewport: "mobile" (390x844), "desktop" (1280x900), or W,H
  *
  * Saves to tmp/screenshots/ locally.
  */

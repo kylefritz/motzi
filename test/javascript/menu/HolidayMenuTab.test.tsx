@@ -54,7 +54,7 @@ test("shows USD prices, not credits, in holiday menu", () => {
   expect(screen.queryByText("1 credit")).toBeNull();
 });
 
-test("editing resets to confirmation after save", async () => {
+test("Edit Order opens the order form", async () => {
   const user = userEvent.setup();
   const handleCreateOrder = mock(() => Promise.resolve());
   renderHolidayMenuTab({ handleCreateOrder });

@@ -177,13 +177,47 @@ function Cart(props: DaysProps & { cart: CartItemType[] }) {
   );
 }
 
-export default function CartWrapper(
-  props: DaysProps & { cart: CartItemType[] }
-) {
+// Lines dropped from an order being edited (see useCart's removedItems).
+function RemovedNote({
+  menu: { items },
+  removedItems,
+}: {
+  menu: Pick<MenuType, "items">;
+  removedItems: CartItemType[];
+}) {
+  const menuItemsById = _.keyBy(items, ({ id }) => id);
+  const names = _.uniq(
+    removedItems.map(
+      ({ itemId }) => menuItemsById[itemId]?.name || `Item ${itemId}`
+    )
+  );
+  if (!names.length) {
+    return null;
+  }
+  const one = names.length === 1;
+  return (
+    <div
+      role="status"
+      className="alert alert-warning py-2 px-3"
+      data-testid="removed-from-order"
+    >
+      <small>
+        {names.join(", ")} {one ? "isn't" : "aren't"} available for that pickup
+        day anymore, so we took {one ? "it" : "them"} out of your order.
+      </small>
+    </div>
+  );
+}
+
+export default function CartWrapper({
+  removedItems = [],
+  ...props
+}: DaysProps & { cart: CartItemType[]; removedItems?: CartItemType[] }) {
   return (
     <>
       <h5>Your order</h5>
       <div className="ml-2">
+        <RemovedNote menu={props.menu} removedItems={removedItems} />
         <Cart {...props} />
       </div>
     </>
@@ -211,7 +245,9 @@ function cartTotal({
       )
     );
 
-  return { price: addBy("price"), credits: addBy("credits") };
+  // whole cents: 3 × $0.60 is 1.7999999999999998 as a float
+  const price = Math.round(addBy("price") * 100) / 100;
+  return { price, credits: addBy("credits") };
 }
 
 export function orderCredits({
@@ -238,8 +274,23 @@ export type AddToCartPayload = {
 };
 
 export function useCart({ order = null, items }: UseCartInput) {
-  const [cart, setCart] = useState<CartItemType[]>(
+  const [savedCart, setCart] = useState<CartItemType[]>(
     (_.get(order, "items", []) as MenuOrderItem[]) || []
+  );
+
+  // A line can outlive its pickup day: the bakery may take a day off an item
+  // after members have ordered it. Those lines can't be edited or re-saved,
+  // so they leave the cart and are handed back as removedItems for a note.
+  const itemsById = _.keyBy(items, ({ id }) => id);
+  const [cart, removedItems] = _.partition(
+    savedCart,
+    ({ itemId, pickupDayId }) => {
+      const item = itemsById[itemId];
+      if (itemId === PAY_IT_FORWARD_ID || !item) {
+        return true;
+      }
+      return item.pickupDays.some(({ id }) => id === pickupDayId);
+    }
   );
 
   const calcTotal = (cart: CartItemType[]) => cartTotal({ cart, items });
@@ -251,7 +302,7 @@ export function useCart({ order = null, items }: UseCartInput) {
   }: AddToCartPayload) => {
     console.log("addToCart", itemId, "x", quantity, "on", pickupDayId);
     const nextCart = [...cart, { itemId, quantity, pickupDayId }];
-    setCart(nextCart);
+    setCart([...nextCart, ...removedItems]);
     return calcTotal(nextCart).price;
   };
 
@@ -270,7 +321,7 @@ export function useCart({ order = null, items }: UseCartInput) {
     console.log("rmCartItem", { itemId, quantity, pickupDayId }, "@", index);
     const nextCart = [...cart];
     nextCart.splice(index, 1);
-    setCart(nextCart);
+    setCart([...nextCart, ...removedItems]);
     return calcTotal(nextCart).price;
   };
   // update pickupDay.remaining on items
@@ -287,7 +338,7 @@ export function useCart({ order = null, items }: UseCartInput) {
     }
     const pickupDay = item.pickupDays.find(({ id }) => id === pickupDayId);
     if (pickupDay === undefined) {
-      throw "cant find pickupDay";
+      return; // already moved to removedItems above
     }
     pickupDay.remaining -= quantity;
   });
@@ -302,6 +353,7 @@ export function useCart({ order = null, items }: UseCartInput) {
 
   return {
     cart,
+    removedItems,
     addToCart,
     rmCartItem,
     setCart,
