@@ -82,6 +82,16 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test "a visitor with no uid or session cannot update an order" do
+    before_deadline do
+      assert_order_placed users(:ljf).hashid
+      order = users(:ljf).current_order
+
+      put_order order.id, different_order_attrs(nil)
+    end
+    assert_response :unauthorized
+  end
+
   test "hashid_user cannot update their own order past deadline" do
     before_deadline do
       assert_order_placed users(:ljf).hashid

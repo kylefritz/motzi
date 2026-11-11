@@ -35,11 +35,18 @@ export default function Menu({
   isHoliday,
   onShowEmailSettings,
 }: MenuProps) {
-  const { cart, addToCart, rmCartItem, total, subscriberItems, payItForward } =
-    useCart({
-      order,
-      items: menu.items,
-    });
+  const {
+    cart,
+    removedItems,
+    addToCart,
+    rmCartItem,
+    total,
+    subscriberItems,
+    payItForward,
+  } = useCart({
+    order,
+    items: menu.items,
+  });
   const [comments, setComments] = useState<string | null>(
     _.get(order, "comments", null)
   );
@@ -128,7 +135,7 @@ export default function Menu({
           />
         </div>
       </div>
-      <Cart {...{ cart, menu, rmCartItem }} />
+      <Cart {...{ cart, menu, rmCartItem, removedItems }} />
       <div className="row mt-2 mb-3">
         <div className="col">
           <SubmitButton

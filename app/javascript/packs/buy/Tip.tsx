@@ -9,22 +9,29 @@ type TipBtnProps = {
 function TipBtn({ text, onClick, selected }: TipBtnProps) {
   const cls = selected ? "btn-primary" : "btn-outline-primary";
   return (
-    <button type="button" onClick={onClick} className={`btn ml-2 ${cls}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={`btn ml-2 ${cls}`}
+    >
       {text}
     </button>
   );
 }
 
-const style = {
+const style: React.CSSProperties = {
   display: "flex",
+  flexWrap: "wrap",
   placeContent: "flex-end",
   alignItems: "center",
+  rowGap: "0.5rem",
 };
 
 type TipProps = {
   price: number | null;
   tip: string | null | undefined;
-  onTip: (tip: string) => void;
+  onTip: (tip: string | null) => void;
 };
 
 export default function Tip({ price, tip, onTip }: TipProps) {
@@ -43,6 +50,7 @@ export default function Tip({ price, tip, onTip }: TipProps) {
           }}
         />
       ))}
+      <TipBtn text="No tip" selected={!tip} onClick={() => onTip(null)} />
     </div>
   );
 }
@@ -55,7 +63,7 @@ export function applyTip(
     return price;
   }
   if (tip[0] === "$") {
-    return price + parseFloat(tip.slice(1));
+    return parseFloat((price + parseFloat(tip.slice(1))).toFixed(2));
   }
   if (tip.slice(tip.length - 1) === "%") {
     const fraction = 1.0 + parseFloat(tip.slice(0, tip.length - 1)) / 100.0;

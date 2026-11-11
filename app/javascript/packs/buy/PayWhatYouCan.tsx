@@ -7,7 +7,7 @@ type PayWhatYouCanProps = {
   price: number | null;
   onPricedChanged: (price: number) => void;
   tip: string | null;
-  onTip: (tip: string) => void;
+  onTip: (tip: string | null) => void;
   disabled?: boolean;
   // an order's cart priced by line; credit purchases have no fixed lines
   pricing?: CartPricing;

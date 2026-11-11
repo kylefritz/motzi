@@ -77,5 +77,10 @@ export function isBelowMinimum(price: number | null, minimum: number) {
   if (minimum <= 0) {
     return false;
   }
-  return price === null || Number.isNaN(price) || price < minimum;
+  if (price === null || Number.isNaN(price)) {
+    return true;
+  }
+  // In cents: a float total (4.35 + 2.10 = 6.449999999999999) must not read
+  // as under its own rounded minimum (6.45). The server rounds the same way.
+  return Math.round(price * 100) < Math.round(minimum * 100);
 }

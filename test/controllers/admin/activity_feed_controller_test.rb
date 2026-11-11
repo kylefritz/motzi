@@ -79,6 +79,20 @@ class Admin::ActivityFeedControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "analysis text can't inject markup into the admin page" do
+    # The report is model output built from member-written text (order comments,
+    # feedback, names), so raw HTML in it must be escaped, while markdown still renders.
+    analysis = anomaly_analyses(:week1_analysis)
+    analysis.update!(result: "**Status: OK**\n\n<script>alert('x')</script><img src=x onerror=alert(1)>")
+
+    get "/admin/activity_feed?week_id=#{analysis.week_id}"
+
+    assert_response :success
+    assert_select ".analysis-body script", 0
+    assert_select ".analysis-body img", 0
+    assert_select ".analysis-body strong", text: "Status: OK"
+  end
+
   test "analyses panel renders a quick reply form" do
     analysis = anomaly_analyses(:week1_analysis)
 

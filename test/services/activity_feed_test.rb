@@ -144,7 +144,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
     CreditItem.create!(
       user: users(:kyle),
       quantity: 6,
-      stripe_charge_amount: 4800,
+      stripe_charge_amount: 48, # dollars, as StripeCheckout::Payment stores it
       memo: "test purchase",
       created_at: week_start + 1.hour
     )
@@ -163,7 +163,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
     CreditItem.create!(
       user: users(:kyle),
       quantity: 6,
-      stripe_charge_amount: 4800,
+      stripe_charge_amount: 48, # dollars
       memo: "test purchase",
       created_at: week_start + 1.hour
     )
@@ -174,6 +174,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
 
     assert credit_events.any?, "Verbose should show individual credit purchases"
     assert_includes credit_events.first.description, "Kyle Fritz"
+    assert_includes credit_events.first.description, "($48.00)"
   end
 
   test "visit events show daily breakdown" do
