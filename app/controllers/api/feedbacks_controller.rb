@@ -27,13 +27,17 @@ class Api::FeedbacksController < ApplicationController
 
   # Skip Turnstile for sources that don't include the widget:
   # - "500" pages can't reliably load external scripts
-  # - "menu"/"general" are only used by authenticated members
+  # - "menu" is the menu page's "Share feedback" form, which has no widget.
+  #   The menu is open to guests and to members who arrive by uid link, and
+  #   neither has a session, so this can't depend on being signed in.
+  # - "general" has no form today; it stays limited to signed-in members
+  # These are rate limited per IP instead (config/initializers/rack_attack.rb).
   def skip_turnstile?
     return false if params[:turnstile_token].present?
 
     source = feedback_params[:source]
-    return true if source == "500"
-    return true if source.in?(%w[menu general]) && current_user.present?
+    return true if source.in?(%w[500 menu])
+    return true if source == "general" && current_user.present?
 
     false
   end
