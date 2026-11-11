@@ -25,7 +25,9 @@ ActiveAdmin.register_page "Spam Users" do
   page_action :delete_selected, method: :post do
     ids = Array(params[:user_ids]).map(&:to_i).reject(&:zero?)
     if ids.any?
-      users = User.where(id: ids).left_joins(:orders).where(orders: { id: nil })
+      # Deleting a user deletes their orders and credit items with them, so
+      # anyone who has either is a member, whatever was ticked.
+      users = User.where(id: ids).where.missing(:orders, :credit_items)
       count = users.count
       users.destroy_all
       Rails.cache.delete(spam_cache_key)
@@ -39,8 +41,9 @@ ActiveAdmin.register_page "Spam Users" do
 
   content title: "Spam Users" do
     # Load candidates
-    candidates = User.left_joins(:orders)
-                     .where(orders: { id: nil })
+    # A member who bought credits by uid link and hasn't ordered yet has no
+    # orders and no sign-ins, but isn't spam.
+    candidates = User.where.missing(:orders, :credit_items)
                      .where("sign_in_count <= 1")
                      .where.not(id: 0)
                      .order(:created_at)
@@ -54,7 +57,7 @@ ActiveAdmin.register_page "Spam Users" do
     spam_ids = scan_results.map { |r| r[:id] }.to_set
     reasons = scan_results.index_by { |r| r[:id] }
 
-    para "#{candidates.count} users with no orders and 0-1 sign-ins. Use Claude to identify likely spam accounts."
+    para "#{candidates.count} users with no orders, no credits and 0-1 sign-ins. Use Claude to identify likely spam accounts."
 
     if candidates.any?
       div class: "spam-toolbar" do

@@ -24,6 +24,10 @@ Rails.application.routes.draw do
   # get the menu for the week
   get "/menu", to: "menus#show", as: :current_menu
 
+  # one-click unsubscribe: mailbox providers POST to the List-Unsubscribe URL
+  # in our emails, which is the menu link (ApplicationMailer)
+  post "/menu", to: "email_preferences#unsubscribe"
+
   # token-guarded uptime probe target (404s unless UPTIME_PROBE_TOKEN matches)
   get "/health/admin", to: "health#admin"
 

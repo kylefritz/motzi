@@ -31,8 +31,7 @@ class SpamDetector
   private
 
   def load_candidates
-    User.left_joins(:orders)
-        .where(orders: { id: nil })
+    User.where.missing(:orders, :credit_items) # anyone with either is a member
         .where("sign_in_count <= 1")
         .where.not(email: [ User::MAYA_EMAIL, User::RUSSELL_EMAIL ].compact)
         .where.not(id: User::SYSTEM_ID) # exclude system user
