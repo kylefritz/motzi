@@ -489,6 +489,21 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
                  JSON.parse(response.body)["message"]
   end
 
+  test "a member's $0 pay-what-you-can order uses no credits" do
+    sign_in users(:ljf)
+    balance = users(:ljf).credits
+
+    before_deadline do
+      assert_ordered do
+        post "/orders.json", params: order_attrs(nil).merge(price: 0), as: :json
+      end
+    end
+
+    assert_response :success
+    assert_equal 0, Order.last.stripe_charge_amount
+    assert_equal balance, users(:ljf).credits
+  end
+
   # PUT /orders/:id swaps the cart and never charges, so an order that was paid
   # by card can't grow through an edit.
 
