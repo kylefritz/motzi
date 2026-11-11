@@ -13,9 +13,11 @@ class SendWeeklyMenuJobTest < ActiveJob::TestCase
   end
 
   test "respects receive_weekly_menu preference" do
+    # Count before opting out: counting with the same scope afterwards would
+    # agree with the job even if the scope ignored the preference.
+    before = User.receive_weekly_menu.count
     users(:kyle).update!(receive_weekly_menu: false)
-    expected = User.receive_weekly_menu.count
-    assert_menu_emailed(expected, :sun, "10:00 AM")
+    assert_menu_emailed(before - 1, :sun, "10:00 AM")
   end
 
   def assert_menu_emailed(num_emails, day, time, msg = nil)

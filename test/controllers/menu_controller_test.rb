@@ -10,7 +10,8 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
   test "should get menu if signed in" do
     sign_in users(:ljf)
     get "/menu.json"
-    assert_menu_json
+    menu = assert_menu_json
+    assert_equal users(:ljf).id, menu["user"]["id"], "menu json is for the signed-in member"
   end
 
   test "should get menu & order once placed" do
@@ -18,12 +19,14 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     order = orders(:ljf_week1)
     order.update(menu: Menu.current)
     get "/menu.json"
-    assert_menu_json
+    menu = assert_menu_json
+    assert_equal order.id, menu["order"]["id"], "the member's order comes back with the menu"
   end
 
   test "should get menu if hashid" do
     get "/menu.json?uid=#{users(:ljf).hashid}"
-    assert_menu_json
+    menu = assert_menu_json
+    assert_equal users(:ljf).id, menu["user"]["id"], "the uid link identifies the member"
   end
 
   test "menu ok if no user" do
@@ -143,8 +146,8 @@ class MenuControllerTest < ActionDispatch::IntegrationTest
     json  = @response.body
     assert json =~ /Rye Five Ways/, "items serialized"
     assert json =~ /subscriberNote/, "subscriberNote"
-    menu = JSON.load(json)
 
     validate_json_schema :menu, json
+    JSON.parse(json)
   end
 end

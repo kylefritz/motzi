@@ -101,7 +101,9 @@ mock.module("axios", () => ({
   },
 }));
 
-mock.module("../../app/javascript/lib/errorReporter", () => ({
+// Three levels up from test/javascript/builder. The two-level path pointed at
+// test/app/..., which doesn't exist, so the mock never applied.
+mock.module("../../../app/javascript/lib/errorReporter", () => ({
   reportException: () => {},
   reportError: () => {},
   installGlobalErrorReporter: () => {},
@@ -333,7 +335,10 @@ test("copy from menu defaults are wired up", async () => {
   const copyForm = within(copySection);
 
   // The menu selector should exist and be required.
-  expect(copyForm.getByRole("combobox", { name: "Menu:" })).toBeTruthy();
+  expect(
+    copyForm.getByRole<HTMLSelectElement>("combobox", { name: "Menu:" })
+      .required
+  ).toBe(true);
 
   // All note copy checkboxes should be present and default checked.
   for (const name of ["Subscriber", "Menu", "Day of"]) {
