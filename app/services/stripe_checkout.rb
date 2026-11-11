@@ -60,8 +60,9 @@ class StripeCheckout
       charge_id = charge.is_a?(String) ? charge : charge&.id
       new(
         payment_intent_id: intent.id,
-        # A paid order is told apart from a credit-spending one by
-        # stripe_charge_id (see User#credits), so it must never be blank.
+        # Admin links a paid order to its Stripe payment by stripe_charge_id,
+        # so it must never be blank. (What tells a paid order from a
+        # credit-spending one is the amount: see Order.subscriber.)
         charge_id: charge_id.presence || intent.id,
         receipt_url: charge.respond_to?(:receipt_url) ? charge.receipt_url : nil,
         amount: BigDecimal(intent.amount) / 100

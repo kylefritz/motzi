@@ -131,9 +131,8 @@ class OrdersController < ApplicationController
   private
 
   # A real paid marketplace order results in a Stripe charge (price > 0 with a
-  # card payment), which sets stripe_charge_id and so is excluded from credit
-  # accounting. A $0 or card-less order would leave stripe_charge_id NULL and
-  # count against the member's credit balance.
+  # card payment). A guest's $0 or card-less order for an existing member's
+  # email must not be placed in that member's name.
   def paid_marketplace_order?
     price_param.positive? && params[:confirmation_token_id].present?
   end

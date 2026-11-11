@@ -60,7 +60,7 @@ class User < ApplicationRecord
   def credit_ledger
     # quantity is nullable on old rows; SUM skips NULLs, so count them as 0
     purchases = credit_items.map { |ci| { at: ci.created_at, change: ci.quantity.to_i, source: ci } }
-    deductions = orders.where(stripe_charge_id: nil).includes(:menu, order_items: :item)
+    deductions = orders.subscriber.includes(:menu, order_items: :item)
                        .map { |o| { at: o.created_at, change: -o.credits, source: o } }
     entries = purchases + deductions
     creators = record_creators(entries.map { |e| e[:source] })
