@@ -2,6 +2,8 @@ require "test_helper"
 require "webmock/minitest"
 
 class RegistrationsControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+
   TURNSTILE_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
   setup do
@@ -10,6 +12,21 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
   teardown do
     ENV["TURNSTILE_SECRET_KEY"] = @original_secret
+  end
+
+  test "a member can't delete their own account, and their orders stay" do
+    member = users(:kyle)
+    sign_in member
+
+    assert_no_difference [ "User.count", "Order.count", "CreditItem.count" ] do
+      delete user_registration_path
+    end
+
+    assert_redirected_to edit_user_registration_path
+    assert_match Setting.shop.email_reply_to, flash[:alert]
+
+    get edit_user_registration_path
+    assert_select "form[action='#{user_registration_path}'] input[name='_method'][value='delete']", 0
   end
 
   test "signup succeeds when turnstile key is not configured" do
