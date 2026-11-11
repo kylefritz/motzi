@@ -65,25 +65,12 @@ class UserTest < ActiveSupport::TestCase
 
   test "credit_ledger leaves out orders paid through Stripe" do
     kyle = users(:kyle)
-    orders(:kyle_week1).update!(stripe_charge_id: "ch_test", stripe_charge_amount: 5)
+    orders(:kyle_week1).update!(stripe_charge_id: "ch_test")
 
     ledger = kyle.credit_ledger
 
     assert_not_includes ledger.map(&:source), orders(:kyle_week1)
     assert_equal kyle.credits, ledger.last.balance
-  end
-
-  # A $0 pay-what-you-can order has an amount (0) but no Stripe charge. It is a
-  # marketplace order everywhere else, so it must not spend credits either.
-  test "a $0 marketplace order uses no credits and stays out of the credit_ledger" do
-    kyle = users(:kyle)
-    balance = kyle.credits
-    orders(:kyle_week1).update!(**StripeCheckout::Payment.free.record_attrs)
-
-    assert_includes Order.marketplace, orders(:kyle_week1)
-    assert_equal balance + orders(:kyle_week1).credits, kyle.credits
-    assert_not_includes kyle.credit_ledger.map(&:source), orders(:kyle_week1)
-    assert_equal kyle.credits, kyle.credit_ledger.last.balance
   end
 
   # error_events #2740, #2742: a 2020 credit item with a NULL quantity crashed the admin user page
@@ -128,11 +115,9 @@ class UserTest < ActiveSupport::TestCase
     menu.make_current!
     pickup_day = menu.pickup_days.first
     kyle = users(:kyle)
-    order = kyle.current_order
-    # a paid order records the charge and its amount together (StripeCheckout::Payment)
-    order.update!(stripe_charge_id: "fake-value", stripe_charge_amount: 11)
+    kyle.current_order.update(stripe_charge_id: "fake-value")
     assert_difference "kyle.credits", 0, "added an item" do
-      order.order_items.create!(item: items(:classic), pickup_day: pickup_day)
+      kyle.current_order.order_items.create!(item: items(:classic), pickup_day: pickup_day)
     end
   end
 

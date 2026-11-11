@@ -3,9 +3,7 @@ with used_credits as (
     select user_id, sum(quantity * order_items.credits) as value
     from order_items
     join orders on orders.id = order_items.order_id
-    /* credit orders only: the same test as the Order.subscriber scope. A marketplace
-       order has an amount, even a $0 pay-what-you-can one that has no Stripe charge */
-    where orders.stripe_charge_amount is null
+    where orders.stripe_charge_id is null /* subscription orders not marketplace orders */
     group by user_id
 ),
 bought_credits as (
