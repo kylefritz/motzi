@@ -1,8 +1,11 @@
 Thanks for ordering from <%= Setting.shop.name %>.
 
-Your order: <%= @order.item_list%>
+Your order: <%= @order.item_list(long_days: true) %>
 <% if @order.stripe_charge_amount.present? %>
 You were charged: <%= number_to_currency(@order.stripe_charge_amount) %>
 <% end %>
 
+<% @order.pickup_days_with_items.each do |pickup_day| %>
+<%= pickup_day.pickup_summary %>
+<% end %>
 <%= Setting.pickup_instructions %>

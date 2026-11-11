@@ -28,6 +28,17 @@ class PickupDay < ApplicationRecord
     pickup_at.strftime("%a %m/%d")
   end
 
+  # e.g. "Tuesday 11/24", for the confirmation email so a holiday pickup
+  # can't be mistaken for an ordinary Tuesday.
+  def long_name
+    pickup_at.strftime("%A %-m/%-d")
+  end
+
+  # e.g. "Tuesday 11/24, pickup after 3pm"
+  def pickup_summary
+    "#{long_name}, pickup after #{pickup_at.strftime("%-l:%M%P").sub(":00", "")}"
+  end
+
   def deadline_data
     {
       pickup_day: pickup_at.strftime("%a"),

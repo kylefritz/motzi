@@ -15,6 +15,16 @@ class PickupDayTest < ActiveSupport::TestCase
     assert_equal "Thu", pickup_days(:w1_d1_thurs).day_abbr
   end
 
+  test "long_name and pickup_summary spell out the weekday and date" do
+    assert_equal "Thursday 1/3", pickup_days(:w1_d1_thurs).long_name
+    assert_equal "Thursday 1/3, pickup after 3pm", pickup_days(:w1_d1_thurs).pickup_summary
+    assert_equal "Saturday 1/5, pickup after 8am", pickup_days(:w1_d2_sat).pickup_summary
+
+    # e.g. the 2026 holiday pickup, Tuesday 11/24 (stored in UTC, shown in Eastern)
+    holiday = PickupDay.new(pickup_at: Time.zone.parse("2026-11-24 10:30 AM"))
+    assert_equal "Tuesday 11/24, pickup after 10:30am", holiday.pickup_summary
+  end
+
   test "for_pickup_at" do
     deadline_at = Time.zone.parse("2021-01-03 9:00 PM") # 2am next day UTC
     pickup_at = deadline_at + 1.day

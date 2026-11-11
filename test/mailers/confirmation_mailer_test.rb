@@ -15,8 +15,30 @@ class ConfirmationMailerTest < ActionMailer::TestCase
     assert_includes email.subject, order.menu.name
 
     assert_in_both email, "Pumpkin", "items"
-    assert_in_both email, order.menu.pickup_days.first.day_abbr, "pickup day_abbr"
+    assert_in_both email, "Thursday 1/3: Pumpkin", "items labeled with full weekday and date"
+    assert_in_both email, "Thursday 1/3, pickup after 3pm", "pickup day summary"
     assert_in_both email, "call when you get here", "Setting.pickup_instructions"
+  end
+
+  test "order email lists each pickup day once, and skips a day with only pay it forward" do
+    order = orders(:kyle_week1)
+    sat = pickup_days(:w1_d2_sat)
+    order.order_items.create!(item: items(:classic), quantity: 1, pickup_day: sat)
+    order.order_items.create!(item: items(:classic), quantity: 1, pickup_day: sat)
+
+    email = ConfirmationMailer.with(order: order).order_email
+    email.deliver_now
+
+    [ "Thursday 1/3", "Saturday 1/5" ].each do |day|
+      assert_in_both email, "#{day}, pickup after", "summary for #{day}"
+      assert_equal 1, email.text_part.body.to_s.scan("#{day}, pickup after").size, "#{day} listed once"
+    end
+
+    pif_only = Order.create!(menu: menus(:week1), user: users(:ljf))
+    pif_only.order_items.create!(item: items(:pay_it_forward), quantity: 1, pickup_day: sat)
+    email = ConfirmationMailer.with(order: pif_only).order_email
+    email.deliver_now
+    refute_includes email.text_part.body.to_s, "pickup after", "nothing to pick up"
   end
 
   test "order_email records the order on the ahoy message" do

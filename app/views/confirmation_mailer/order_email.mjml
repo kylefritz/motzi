@@ -22,7 +22,7 @@
         </mj-text>
 
         <mj-text padding="0 0 24px 0" font-size="18px" font-weight="500" line-height="1.7" color="#2E2927">
-          <%= @order.item_list %>
+          <%= @order.item_list(long_days: true) %>
         </mj-text>
 
         <% if @order.stripe_charge_amount.present? %>
@@ -36,6 +36,9 @@
         <mj-text padding="16px 20px" background-color="#FFECD6" border-radius="4px" font-size="15px" line-height="1.6" color="#2E2927">
           <strong style="color: #352C63; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;">Pickup Details</strong>
           <br /><br />
+          <% @order.pickup_days_with_items.each do |pickup_day| %>
+          <strong><%= pickup_day.pickup_summary %></strong><br />
+          <% end %>
           <%= Setting.pickup_instructions_html %>
         </mj-text>
       </mj-column>
