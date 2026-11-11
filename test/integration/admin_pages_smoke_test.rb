@@ -49,6 +49,15 @@ class AdminPagesSmokeTest < ActionDispatch::IntegrationTest
     sign_in users(:kyle)
   end
 
+  # The tests below are generated from the routes. If discovery ever came back
+  # empty or short (a renamed namespace, a changed route API) this file would
+  # generate nothing and pass, so pin a floor and catch stale SKIP entries.
+  test "admin GET routes are discovered" do
+    keys = self.class.admin_get_routes.map(&:first)
+    assert_operator keys.size, :>=, 50, "only found #{keys.size} admin GET routes"
+    assert_empty SKIP.keys - keys, "SKIP names routes that no longer exist"
+  end
+
   admin_get_routes.each do |key, path_template|
     next if SKIP.key?(key)
 

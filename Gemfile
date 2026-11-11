@@ -22,7 +22,6 @@ gem "gon" # rails variables in javascript
 gem "hashid-rails" # lookup models by hashid
 gem "heroku-api-postgres" # Heroku Postgres API for automated backups
 gem "image_processing", "~> 2.1" # Active Storage variants (item thumbnails in admin)
-gem "jaro_winkler", "~> 1.5.5" # pinned for compatibility
 gem "jbuilder", "~> 2.7" # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem "json", "~> 2.21", ">= 2.21.2" # json 3.0 (Sep 2026) dropped the positional options hash and breaks ActiveSupport::JSON.decode on Rails 8.1.3; 2.21.2 has the CVE fix
 gem "mission_control-jobs" # job UI for ActiveJob backends
@@ -64,9 +63,6 @@ group :development do
   gem "foreman" # run Procfile.dev (Rails + bun watch) locally
   gem "listen", "~> 3.3" # listen to changes on a file
   gem "rack-mini-profiler", "~> 4.0" # request profiling UI compatible with modern Rack/Rails
-  gem "rcodetools" # code completion in vscode; requires ruby extension
-  gem "fastri" # helps rcodetools
-  gem "solargraph" # ruby intellisense in vscode; requires solargraph extension
   gem "spring"   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem "rubocop-rails-omakase" # Rails 8 default rubocop config
   gem "web-console", ">= 4.1.0" # Access an interactive console on exception pages or by calling 'console' anywhere in the code.

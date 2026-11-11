@@ -1,4 +1,5 @@
 require "test_helper"
+require "minitest/mock"
 
 class ErrorsControllerTest < ActionDispatch::IntegrationTest
   test "404 renders not found page" do
@@ -15,10 +16,38 @@ class ErrorsControllerTest < ActionDispatch::IntegrationTest
     assert_select "textarea" # feedback form
   end
 
-  test "500 renders internal server error page" do
-    get "/500"
+  # GET /500 is answered by the static public/500.html before it reaches the
+  # router, so this raises inside a real request and lets the exceptions app
+  # (config.exceptions_app = routes) render errors#internal_server_error, the
+  # way production does.
+  test "an error raised in a request renders the internal server error page" do
+    env_config = Rails.application.env_config
+    original = env_config.slice("action_dispatch.show_exceptions", "action_dispatch.show_detailed_exceptions")
+    env_config["action_dispatch.show_exceptions"] = :all
+    env_config["action_dispatch.show_detailed_exceptions"] = false
+    menus(:week2).make_current!
+
+    # ApplicationController#push_gon reads Setting.shop on every page. Fail
+    # that once; the error page's own layout reads it again and must work.
+    shop = Setting.shop
+    failed = false
+    fail_once = lambda do
+      next shop if failed
+      failed = true
+      raise "the oven is on fire"
+    end
+
+    assert_difference -> { ErrorEvent.where(message: "the oven is on fire").count }, 1 do
+      Setting.stub(:shop, fail_once) { get "/menu" }
+    end
+
+    assert_response :internal_server_error
     assert_select "h1", /500/
-    assert_select "textarea" # feedback form
+    assert_select "a.btn", "Back to the bakery" # only in the ERB template, not public/500.html
+    assert_select "textarea.form-control" # feedback form
+    assert_no_match(/oven is on fire/, response.body)
+  ensure
+    env_config.merge!(original)
   end
 
   # The error pages only exist as HTML. A stale asset fingerprint (Accept:

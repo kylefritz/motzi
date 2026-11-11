@@ -323,6 +323,38 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert items.any? { |item| item[:title].include?("Haven't-ordered reminder engagement is slipping") }
   end
 
+  # Connection failures and timeouts are Faraday errors, not Octokit::Error,
+  # so a GitHub blip used to fail the whole nightly analysis.
+  test "a GitHub connection failure is reported and the feed goes on without GitHub's commits" do
+    ENV["GITHUB_TOKEN"] = "test-token" # test_helper's teardown restores it
+    feed = ActivityFeed.new(@week_id)
+    feed.define_singleton_method(:local_git_commits) { [] }
+    github = stub_request(:get, %r{\Ahttps://api\.github\.com/repos/.+/commits})
+      .to_raise(Faraday::ConnectionFailed.new("execution expired"))
+
+    commits = nil
+    assert_error_reported(Faraday::ConnectionFailed) { commits = feed.git_commits }
+
+    assert_requested github
+    assert_equal [], commits
+    assert_kind_of String, feed.to_text
+  end
+
+  test "a GitHub timeout is reported and falls back to local history" do
+    ENV["GITHUB_TOKEN"] = "test-token"
+    feed = ActivityFeed.new(@week_id)
+    commit = ActivityFeed::Commit.new(sha: "abcdef123456", short_sha: "abcdef1", summary: "Local commit",
+                                      committed_at: Time.zone.parse("2019-01-01 12:00"),
+                                      url: "https://example.com/commit", current_week: true)
+    feed.define_singleton_method(:local_git_commits) { [ commit ] }
+    stub_request(:get, %r{\Ahttps://api\.github\.com/repos/.+/commits}).to_timeout
+
+    commits = nil
+    assert_error_reported(Faraday::Error) { commits = feed.git_commits }
+
+    assert_equal [ "Local commit" ], commits.map(&:summary)
+  end
+
   test "git commits falls back to local history" do
     feed = ActivityFeed.new(@week_id)
     feed.define_singleton_method(:github_commits) { [] }

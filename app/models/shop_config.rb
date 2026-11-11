@@ -23,11 +23,10 @@ class ShopConfig
   end
 
   def self.load_config_for_shop_id!(shop_id)
-    Rails.application.config_for(:shop, env: shop_id).tap do |shop_hash|
-      if shop_hash.empty?
-        throw "No shop settings for #{shop_id}"
-      end
-      shop_hash[:id] = shop_id
-    end
+    shop_hash = Rails.application.config_for(:shop, env: shop_id)
+    # config_for returns nil (not {}) when shop.yml has no entry for the id
+    raise "No shop settings for #{shop_id}" if shop_hash.blank?
+
+    shop_hash.tap { |hash| hash[:id] = shop_id }
   end
 end

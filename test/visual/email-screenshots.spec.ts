@@ -71,8 +71,10 @@ for (const { mailer, action } of emails) {
     });
 
     const result = await assertEmailLooksGood(screenshot, page);
-    expect(result, `Visual check failed for ${mailer}/${action}`).toContain(
-      "pass"
+    // The prompt asks for "pass" or "fail: <reason>". Match the verdict at the
+    // start: toContain("pass") also accepted "fail: the Passover heading overlaps".
+    expect(result, `Visual check failed for ${mailer}/${action}`).toMatch(
+      /^pass\b/
     );
   });
 }

@@ -260,6 +260,65 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_select ".flash_alert", text: /only for holiday menus/
   end
 
+  test "email_menu makes the menu current and queues the weekly email" do
+    menu = menus(:week3)
+    menu.update!(week_id: Time.zone.now.week_id)
+
+    assert_enqueued_jobs 1, only: SendWeeklyMenuJob do
+      post "/admin/menus/#{menu.id}/email_menu"
+    end
+
+    assert_redirected_to "/admin/menus"
+    assert menu.reload.current?
+    follow_redirect!
+    assert_select ".flash_notice", text: /was emailed to/
+  end
+
+  test "email_menu refuses a second send while the first is still going out" do
+    menu = menus(:week3)
+    menu.update!(week_id: Time.zone.now.week_id)
+
+    assert_enqueued_jobs 1, only: SendWeeklyMenuJob do
+      post "/admin/menus/#{menu.id}/email_menu"
+      assert_no_difference [ "ActiveAdmin::Comment.count", "ActivityEvent.count" ] do
+        post "/admin/menus/#{menu.id}/email_menu"
+      end
+    end
+
+    assert_redirected_to "/admin/menus/#{menu.id}"
+    follow_redirect!
+    assert_select ".flash_alert", text: /already emailed|was emailed/
+  end
+
+  test "email_menu refuses holiday menus" do
+    menu = menus(:passover_2026)
+
+    travel_to(menu.latest_deadline - 1.day) do
+      assert_no_enqueued_jobs only: SendWeeklyMenuJob do
+        post "/admin/menus/#{menu.id}/email_menu"
+      end
+    end
+
+    assert_redirected_to "/admin/menus/#{menu.id}"
+    assert_nil menu.reload.emailed_at
+    follow_redirect!
+    assert_select ".flash_alert", text: /holiday/i
+  end
+
+  # A stale "Email to N subscribers" button used to be a 500 (UncaughtThrowError).
+  test "email_menu for a past week's menu is refused with a message" do
+    menu = menus(:week3)
+    menu.update!(week_id: Time.zone.now.prev_week_id)
+
+    assert_no_enqueued_jobs only: SendWeeklyMenuJob do
+      post "/admin/menus/#{menu.id}/email_menu"
+    end
+
+    assert_redirected_to "/admin/menus/#{menu.id}"
+    follow_redirect!
+    assert_select ".flash_alert", text: /current week's menu or future week's menu/
+  end
+
   test "copy_from copies notes and menu items" do
     original = Menu.create!(
       name: "Copy Source",

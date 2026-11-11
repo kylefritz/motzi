@@ -1,5 +1,6 @@
 require "active_support/core_ext/integer/time"
 require_relative "../../app/models/shop_config"
+require_relative "../../lib/fingerprinted_asset_cache"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -27,6 +28,12 @@ Rails.application.configure do
   # Vite tags are <script type="module" crossorigin>, which browsers fetch in
   # CORS mode. Allow it so pages on a host other than asset_host still load JS.
   config.public_file_server.headers = { "access-control-allow-origin" => "*" }
+  # Fingerprinted files (/assets, /vite/assets) get a one-year immutable
+  # Cache-Control; without it browsers refetched the CSS and images on every
+  # page. Not set in the hash above, which applies to every file in public/,
+  # including favicon.ico and 500.html. Outermost, so it sees the response of
+  # whichever middleware serves the file.
+  config.middleware.insert_before 0, FingerprintedAssetCache
 
   # Compress CSS using a preprocessor.
   # config.assets.css_compressor = :sass

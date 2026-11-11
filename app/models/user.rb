@@ -115,9 +115,6 @@ class User < ApplicationRecord
     User.find_by(email: MAYA_EMAIL)
   end
   RUSSELL_EMAIL = "trimmer.russell@gmail.com"
-  def self.russell
-    User.find_by(email: RUSSELL_EMAIL)
-  end
   SYSTEM_ID = 0
   def self.system
     User.find_by(id: SYSTEM_ID)

@@ -54,7 +54,7 @@ Note: React `act(...)` warnings can still appear during `bun run test`; those ar
 
 ### Data
 
-Fixtures: `rails db:fixtures:load fake_data:users fake_data:orders`
+Fixtures: `rails db:fixtures:load`. For a copy of production data, use `bin/seed_local`.
 
 ### Emails
 
@@ -74,7 +74,7 @@ Auto-deploys from `master` when CI passes. Full review-app config in `app.json`.
 
 | Addon | Plan | Purpose |
 |-------|------|---------|
-| heroku-postgresql | essential-0 (v17) | Primary database |
+| heroku-postgresql | essential-1 (v18) | Primary database |
 
 ActionCable runs on Solid Cable (`config/cable.yml`), so Redis is not required for runtime.
 

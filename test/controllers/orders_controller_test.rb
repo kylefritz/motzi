@@ -504,7 +504,103 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_equal balance, users(:ljf).credits
   end
 
+  # PUT /orders/:id swaps the cart and never charges, so an order that was paid
+  # by card can't grow through an edit.
+
+  test "update rejects adding to a card-paid order and leaves it alone" do
+    order = card_paid_rye_order(users(:ljf), quantity: 2)
+
+    before_deadline do
+      assert_no_difference -> { order.order_items.sum(:quantity) } do
+        refute_emails_sent do
+          put_order order.id, rye_thursday_order(users(:ljf).hashid, quantity: 3)
+        end
+      end
+    end
+
+    assert_response :unprocessable_content
+    assert_match(/already been paid for/, response.parsed_body["message"])
+    assert_match(/#{Regexp.escape(Setting.shop.email_reply_to)}/, response.parsed_body["message"])
+  end
+
+  test "update rejects swapping a card-paid order for pricier items" do
+    order = card_paid_rye_order(users(:ljf), quantity: 2) # $10
+
+    before_deadline do
+      put_order order.id, { uid: users(:ljf).hashid, cart: [
+        { item_id: items(:donuts).id, quantity: 2, pickup_day_id: pickup_days(:w2_d1_thurs).id } # $12
+      ] }
+    end
+
+    assert_response :unprocessable_content
+    assert_equal [ items(:rye).id ], order.order_items.reload.map(&:item_id)
+  end
+
+  test "update rejects adding to a $0 pay-what-you-can order" do
+    order = card_paid_rye_order(users(:ljf), quantity: 1, payment: StripeCheckout::Payment.free)
+
+    before_deadline do
+      put_order order.id, rye_thursday_order(users(:ljf).hashid, quantity: 4)
+    end
+
+    assert_response :unprocessable_content
+    assert_equal 1, order.order_items.sum(:quantity)
+  end
+
+  test "update still lets a card-paid order keep or lower its total" do
+    order = card_paid_rye_order(users(:ljf), quantity: 2) # $10
+
+    before_deadline do
+      # same total: a different loaf at the same price, on the other day
+      put_order order.id, { uid: users(:ljf).hashid, cart: [
+        { item_id: items(:classic).id, quantity: 2, pickup_day_id: pickup_days(:w2_d2_sat).id }
+      ] }
+      assert_response :success
+      assert_equal [ items(:classic).id ], order.order_items.reload.map(&:item_id)
+
+      put_order order.id, { uid: users(:ljf).hashid, cart: [
+        { item_id: items(:classic).id, quantity: 1, pickup_day_id: pickup_days(:w2_d2_sat).id }
+      ] }
+      assert_response :success
+      assert_equal 1, order.order_items.sum(:quantity)
+    end
+  end
+
+  test "a later price rise doesn't lock a card-paid order's own items" do
+    order = card_paid_rye_order(users(:ljf), quantity: 2)
+    items(:rye).update!(price: 9)
+
+    before_deadline do
+      put_order order.id, { uid: users(:ljf).hashid, comments: "slice it please", cart: [
+        { item_id: items(:rye).id, quantity: 2, pickup_day_id: pickup_days(:w2_d2_sat).id }
+      ] }
+    end
+
+    assert_response :success
+    assert_equal "slice it please", order.reload.comments
+  end
+
+  test "an admin can still add to a card-paid order" do
+    order = card_paid_rye_order(users(:ljf), quantity: 2)
+    sign_in users(:maya)
+
+    before_deadline do
+      put_order order.id, rye_thursday_order(nil, quantity: 3)
+    end
+
+    assert_response :success
+    assert_equal 3, order.order_items.sum(:quantity)
+  end
+
   private
+
+  def card_paid_rye_order(user, quantity:, payment: nil)
+    payment ||= StripeCheckout::Payment.new(payment_intent_id: "pi_test_paid", charge_id: "ch_test_paid",
+                                            receipt_url: nil, amount: BigDecimal(5 * quantity))
+    user.orders.create!(menu: menus(:week2), **payment.record_attrs).tap do |order|
+      order.order_items.create!(item: items(:rye), pickup_day: pickup_days(:w2_d1_thurs), quantity: quantity)
+    end
+  end
 
   def rye_thursday_order(hashid, quantity:)
     { comment: "rye", uid: hashid, cart: [

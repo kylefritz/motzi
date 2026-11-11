@@ -76,8 +76,6 @@ rake ai:eval_baseline       # accept the latest scorecard as the baseline (no AP
 - **IAM user**: `motzi-s3` — can read/write objects but cannot manage bucket policies
 - **Config**: `config/storage.yml` (`amazon` service), credentials via `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`
 - **Public prefix**: `s3://motzi/public/` is publicly readable. Everything else (Active Storage files) is private.
-- **PR screenshots**: Uploaded to `s3://motzi/public/gh/pr-<NUMBER>/` — see "PR Screenshots" below.
-
 ## Design system
 
 The **Motzi Design System** lives in Claude Design (not in this repo): https://claude.ai/design/p/d2b552b1-ff9d-4b5d-8f8d-eca059ebda5d (project id `d2b552b1-ff9d-4b5d-8f8d-eca059ebda5d`). Use it for any UI or email change. Claude can read it with the `DesignSync` tool (`list_files` / `get_file`; run `/design-login` once to authorize). Start with `readme.md` (brand, voice, visual rules), then `tokens/{colors,typography,spacing}.css`, `components/{app,menu,preorder,email,marketing}/*` (each has a `.prompt.md`), and `ui_kits/menu-app/` (ordering flow) and `ui_kits/pizza-preorder/` (pre-order flow, #408). The readme ends with "Reconciliation notes" explaining each token or component decision. Its `github.md` records which repo files each screen was synced from.
@@ -93,19 +91,14 @@ Quick reference:
 
 PRs with visual changes should include screenshots in the PR description (not comments).
 
-**Quick way** (screenshots multiple URLs and updates the PR description):
+Take the shot, then attach it (full steps in the `pr-screenshots` skill):
 ```
-bin/screenshot-pr /404 /422 /500.html
-bin/screenshot-pr --device "iPhone 14" /rails/mailers/reminder_mailer/havent_ordered_email
-```
-
-**Manual way** (screenshot a single URL):
-```
-bin/screenshot /some-page my-feature
-# outputs S3 URL and markdown to paste
+bin/screenshot --device mobile /menu my-feature     # saves tmp/screenshots/my-feature.png
+bin/screenshot --admin /admin/users admin-users
+attach-screenshot --pr <N> tmp/screenshots/my-feature.png   # prints markdown for the PR body
 ```
 
-Screenshots are uploaded to `s3://motzi/public/gh/pr-<NUMBER>/` and embedded in the PR body under a `## Screenshots` section. The `bin/screenshot-pr` script replaces any existing screenshots section when re-run.
+`attach-screenshot` stores the images in the repo itself (an orphan commit under `refs/uploads/`), so no bucket is involved. Put the markdown under a `## Screenshots` section in the PR body. Phone width by default; before/after for visual fixes.
 
 ## Deployment
 
@@ -194,7 +187,7 @@ bin/prod-logs --since 2d -q "status=5"    # filter (case-insensitive)
 
 ## Heroku Memory / R14
 
-R14 is a **soft** memory warning — the dyno exceeded its 512MB quota and went to swap. On Heroku's essential tier this is expected behavior; the process keeps running. Do not treat R14 as an error or escalate it. Only R15 (hard kill, dyno terminated) is a real problem. The worker dyno routinely runs above quota in swap — this is acceptable for our workload.
+R14 is a **soft** memory warning — the dyno exceeded its 512MB quota and went to swap. On Heroku's essential tier this is expected behavior; the process keeps running. Do not treat R14 as an error or escalate it. Only R15 (hard kill, dyno terminated) is a real problem. The worker dyno routinely runs above quota in swap — this is acceptable for our workload. `CaptureDynoMetricsJob` counts both (`dyno_metrics.r14_count`, `r15_count`) and reports each R15 to error tracking as `CaptureDynoMetricsJob::DynoKilled`.
 
 ## MCP Notes
 
@@ -204,9 +197,9 @@ R14 is a **soft** memory warning — the dyno exceeded its 512MB quota and went 
 
 ## Worktrees
 
-Feature work uses git worktrees in `.worktrees/` (or `.claude/worktrees/`). When setting up a worktree:
+Feature work uses git worktrees in `.claude/worktrees/<name>`. Remove the worktree when its PR merges. When setting up a worktree:
 
-- **Symlink `.env`**: `ln -s ../../.env .env` in `.worktrees/<name>`, `ln -s ../../../.env .env` in `.claude/worktrees/<name>` (worktrees don't get untracked files)
+- **Symlink `.env`**: `ln -s ../../../.env .env` in `.claude/worktrees/<name>` (worktrees don't get untracked files)
 - **JS deps**: run `bun install` first. `bin/rails test` builds the JS with Vite before forking, and without `node_modules` it stalls instead of failing
 - **Bundler lockfile**: use `BUNDLE_GEMFILE=$PWD/Gemfile bundle lock --update` so bundler writes to the worktree, not the main repo
 - **Tests**: automatic. In a worktree, `bin/rails`/`bin/rake` disable Spring and the test DB defaults to `motzi_test_<worktree dir>` (`lib/worktree_env.rb`; `TEST_DATABASE` still overrides). Run `bin/rails db:test:prepare` once, then `bin/rails test`. Concurrent runs on the same test DB wait for each other (`test/support/test_db_lock.rb`) and print "Another test run is using …"; that's expected, not a hang.

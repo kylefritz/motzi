@@ -108,6 +108,7 @@ class OrdersController < ApplicationController
       order.menu, params[:cart],
       existing: order.order_items.pluck(:item_id, :pickup_day_id).to_set
     )
+    reject_adding_to_paid_order!(order, cart_items)
 
     Order.transaction do
       enforce_item_limits!(order.menu, cart_items, order: order)
@@ -129,6 +130,28 @@ class OrdersController < ApplicationController
   end
 
   private
+
+  # Editing an order swaps its items and never charges a card, so a
+  # marketplace order (paid by card, or a $0 pay-what-you-can order) can only
+  # be edited to a cart that costs the same or less than what it held when it
+  # was paid for. Items already on the order are priced as they were then, so
+  # a later price rise doesn't block moving them to another day. Admins are
+  # the bakery, and settle any difference themselves.
+  def reject_adding_to_paid_order!(order, cart_items)
+    return if order.stripe_charge_amount.nil? || current_admin_user.present?
+
+    paid_prices = order.order_items.to_h { |oi| [ oi.item_id, oi.price ] }
+    current_prices = Item.where(id: cart_items.map { |attrs| attrs[:item_id] }).pluck(:id, :price).to_h
+    new_total = cart_items.sum(BigDecimal("0")) do |attrs|
+      (paid_prices[attrs[:item_id]] || current_prices[attrs[:item_id]]).to_d * attrs[:quantity].to_i
+    end
+    return if new_total <= order.retail_price
+
+    raise OrderError.new(
+      "This order has already been paid for, so we can't add to it here. " \
+      "Please email us at #{Setting.shop.email_reply_to} and we'll sort it out."
+    )
+  end
 
   # A real paid marketplace order results in a Stripe charge (price > 0 with a
   # card payment). A guest's $0 or card-less order for an existing member's

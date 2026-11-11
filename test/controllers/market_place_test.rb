@@ -17,8 +17,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     order_attrs = build_order_attrs
     assert_user_created { assert_ordered_emailed(order_attrs) }
 
-    new_user = User.unscoped.order("created_at desc").last
-    assert_equal order_attrs[:email], new_user.email
+    new_user = User.find_by!(email: order_attrs[:email])
     assert_equal order_attrs[:first_name], new_user.first_name
     assert_equal order_attrs[:last_name], new_user.last_name
     assert_equal order_attrs[:phone], new_user.phone
@@ -72,7 +71,7 @@ class MarketPlaceTest < ActionDispatch::IntegrationTest
     order_attrs[:mailing_list] = true
     assert_user_created { assert_ordered_emailed(order_attrs) }
 
-    new_user = User.unscoped.order("created_at desc").last
+    new_user = User.find_by!(email: order_attrs[:email])
     assert new_user.mailing_list?, "should be on mailing list"
   end
 

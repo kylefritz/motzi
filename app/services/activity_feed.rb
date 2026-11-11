@@ -320,12 +320,6 @@ class ActivityFeed
     { text: "#{format_change(change)} #{suffix}", tone: tone, tooltip: tooltip }
   end
 
-  def job_context(current)
-    return "#{current[:incomplete_jobs]} incomplete" if current[:incomplete_jobs].positive?
-
-    "#{current[:anomaly_jobs]} anomaly runs"
-  end
-
   def percent_change(current, average)
     return 0 if average.to_f.zero?
 
@@ -408,10 +402,6 @@ class ActivityFeed
       anomaly_jobs: anomaly_jobs.sum { |event| event.details[:total].to_i },
       incomplete_jobs: jobs.sum { |event| event.details[:total].to_i - event.details[:finished].to_i }
     }
-  end
-
-  def email_rate_label(current)
-    "#{current[:email_open_rate]}% opened"
   end
 
   def mailer_open_rate_trend(mailer, lookback: 4)
@@ -681,6 +671,12 @@ class ActivityFeed
     end.reverse
   rescue Octokit::Error => e
     Rails.logger.warn "[ActivityFeed] GitHub API error: #{e.message}"
+    []
+  rescue Faraday::Error => e
+    # Connection failures and timeouts aren't Octokit::Error. Commit history is
+    # nice to have; it must not fail the nightly analysis or the admin feed.
+    Rails.logger.warn "[ActivityFeed] GitHub unreachable: #{e.class}: #{e.message}"
+    Rails.error.report(e, handled: true, severity: :warning, context: { source: "activity_feed_github_commits" })
     []
   end
 
