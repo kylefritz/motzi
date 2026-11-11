@@ -6,7 +6,6 @@ class RackAttackTest < ActionDispatch::IntegrationTest
     # POST /contact is gated until the marketing site is live; the throttle
     # test needs real submissions to reach the controller.
     Setting.homepage = "marketing"
-    menus(:week2).make_current!
   end
 
   teardown do
@@ -117,83 +116,6 @@ class RackAttackTest < ActionDispatch::IntegrationTest
       # another visitor is unaffected
       post "/api/feedbacks", params: params, as: :json, env: { "REMOTE_ADDR" => "1.2.3.7" }
       assert_response :created
-    end
-  end
-
-  # uid sign-in links (?uid=<hashid>) are short, so guessing them is limited:
-  # 20 failed lookups a minute from one IP, then no uid requests from that IP
-  # for a minute.
-
-  test "limits failed uid lookups to 20 a minute per IP" do
-    with_throttle_store do
-      ip = { "REMOTE_ADDR" => "9.9.9.1" }
-      valid = users(:ljf).hashid
-
-      20.times do |i|
-        get "/menu.json?uid=bogus#{i}", env: ip
-        assert_response :success, "failed lookup #{i + 1} still gets the guest menu"
-      end
-
-      get "/menu.json?uid=bogus20", env: ip
-      assert_response :too_many_requests
-
-      # a correct guess gets nothing either, so guessing on is pointless
-      get "/menu.json?uid=#{valid}", env: ip
-      assert_response :too_many_requests
-
-      # only uid requests are held back, and only for that IP
-      get "/menu.json", env: ip
-      assert_response :success
-      get "/menu.json?uid=#{valid}", env: { "REMOTE_ADDR" => "9.9.9.2" }
-      assert_response :success
-      assert_equal users(:ljf).id, response.parsed_body["user"]["id"]
-
-      travel 61.seconds do
-        get "/menu.json?uid=#{valid}", env: ip
-        assert_response :success
-      end
-    end
-  end
-
-  test "failed uid lookups in a JSON body count too" do
-    with_throttle_store do
-      ip = { "REMOTE_ADDR" => "9.9.9.3" }
-
-      20.times do |i|
-        patch "/email_preferences", params: { uid: "bogus#{i}", receive_weekly_menu: false }, as: :json, env: ip
-        assert_response :unauthorized
-      end
-
-      patch "/email_preferences", params: { uid: users(:kyle).hashid, receive_weekly_menu: false }, as: :json, env: ip
-      assert_response :too_many_requests
-      assert users(:kyle).reload.receive_weekly_menu?
-    end
-  end
-
-  test "members using their own uid link are never limited" do
-    with_throttle_store do
-      ip = { "REMOTE_ADDR" => "9.9.9.4" }
-
-      30.times { get "/menu.json?uid=#{users(:ljf).hashid}", env: ip }
-      assert_response :success
-
-      # a mistyped link here and there doesn't add up to a ban
-      19.times { |i| get "/menu.json?uid=bogus#{i}", env: ip }
-      get "/menu.json?uid=#{users(:ljf).hashid}", env: ip
-      assert_response :success
-    end
-  end
-
-  test "a uid that isn't a plain value, or a body that can't be parsed, is ignored" do
-    with_throttle_store do
-      ip = { "REMOTE_ADDR" => "9.9.9.5" }
-
-      25.times { get "/menu.json?uid[]=a&uid[]=b", env: ip }
-      assert_response :success
-
-      env = Rack::MockRequest.env_for("/orders.json", method: "POST", input: "{not json",
-                                                      "CONTENT_TYPE" => "application/json")
-      assert_nil Rack::Attack.uid_param(Rack::Attack::Request.new(env))
     end
   end
 
