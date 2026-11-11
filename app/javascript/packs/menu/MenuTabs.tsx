@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 import Layout from "./Layout";
 import HolidayMenuTab from "./HolidayMenuTab";
+import EmailSettings from "./EmailSettings";
 import type {
   CreditBundle,
   Menu as MenuType,
@@ -27,6 +28,7 @@ type MenuTabsProps = {
   regularOrder: MenuOrder | null;
   setIsEditingOrder: React.Dispatch<React.SetStateAction<boolean>>;
   user: MenuUser | null;
+  initialTab?: string;
 };
 
 export default function MenuTabs({
@@ -40,7 +42,13 @@ export default function MenuTabs({
   regularOrder,
   setIsEditingOrder,
   user,
+  initialTab,
 }: MenuTabsProps) {
+  // ?tab=email (the unsubscribe and email-preferences links) wins over both
+  // menus, the same as it does in Layout when there is no holiday menu.
+  const [showEmailSettings, setShowEmailSettings] = useState(
+    initialTab === "email"
+  );
   const [showHoliday, setShowHoliday] = useState(!regularMenu);
   const regularTabRef = useRef<HTMLButtonElement>(null);
   const holidayTabRef = useRef<HTMLButtonElement>(null);
@@ -59,6 +67,12 @@ export default function MenuTabs({
       });
     }
   };
+
+  if (showEmailSettings && user) {
+    return (
+      <EmailSettings user={user} onBack={() => setShowEmailSettings(false)} />
+    );
+  }
 
   return (
     <>

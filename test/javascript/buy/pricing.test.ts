@@ -77,3 +77,17 @@ test("isBelowMinimum", () => {
   expect(isBelowMinimum(0, 0)).toBe(false);
   expect(isBelowMinimum(null, 0)).toBe(false);
 });
+
+test("isBelowMinimum compares in cents, so float totals at the minimum pass", () => {
+  // 3 × $0.60 and $4.35 + $2.10 land a hair under their rounded minimums
+  expect(3 * 0.6).toBeLessThan(1.8);
+  expect(isBelowMinimum(3 * 0.6, 1.8)).toBe(false);
+  expect(4.35 + 2.1).toBeLessThan(6.45);
+  expect(isBelowMinimum(4.35 + 2.1, 6.45)).toBe(false);
+
+  // one cent either side of the boundary
+  expect(isBelowMinimum(6.44, 6.45)).toBe(true);
+  expect(isBelowMinimum(6.45, 6.45)).toBe(false);
+  expect(isBelowMinimum(6.46, 6.45)).toBe(false);
+  expect(isBelowMinimum(1.79, 1.8)).toBe(true);
+});
