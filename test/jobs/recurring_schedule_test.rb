@@ -30,6 +30,18 @@ class RecurringScheduleTest < ActiveSupport::TestCase
     end
   end
 
+  # The activity feed and anomaly report read Solid Queue's finished jobs for
+  # the current week and the four before it. Clearing them sooner leaves the
+  # older comparison weeks with no job history.
+  test "finished jobs are kept for as long as the activity feed compares against" do
+    command = @production.fetch("clear_solid_queue_finished_jobs").fetch("command")
+    days = command[/finished_before: (\d+)\.days\.ago/, 1]
+
+    assert days, "expected a finished_before: N.days.ago in #{command}"
+    # this week + AnomalyDetector's 4 comparison weeks
+    assert_operator days.to_i.days, :>=, 5.weeks
+  end
+
   test "all schedules parse as Fugit::Cron" do
     @production.each do |name, config|
       schedule = config["schedule"]

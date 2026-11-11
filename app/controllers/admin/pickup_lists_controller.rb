@@ -4,7 +4,7 @@ class Admin::PickupListsController < ApplicationController
   def show
     date = Date.parse(params[:date])
     pickup_day = PickupDay.unscoped
-      .where("pickup_at::date = ?", date)
+      .on_date(date)
       .order(:pickup_at)
       .first
 

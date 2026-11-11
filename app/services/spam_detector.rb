@@ -1,6 +1,10 @@
 class SpamDetector
   MODEL = "claude-haiku-4-5"
 
+  # Claude's reply was cut off or isn't the JSON we asked for. Raised instead
+  # of returning [], which the admin page would show as "0 spam accounts".
+  class UnreadableResponse < StandardError; end
+
   def initialize(&on_progress)
     @on_progress = on_progress || ->(_msg) { }
   end
@@ -14,6 +18,12 @@ class SpamDetector
     @on_progress.call("Sending #{candidates.size} accounts to Claude (#{MODEL})...")
     response = call_claude(user_message)
     @on_progress.call("Parsing results...")
+
+    # A reply that ran out of tokens can still end in a complete-looking array
+    # that lists only some of the spam.
+    if response[:stop_reason].to_s == "max_tokens"
+      raise UnreadableResponse, "Claude's reply was cut off at the token limit (#{candidates.size} accounts sent)"
+    end
 
     parse_spam_ids(response[:text])
   end
@@ -52,15 +62,19 @@ class SpamDetector
       block.text if block.respond_to?(:text)
     end.join("\n")
 
-    { text: text }
+    { text: text, stop_reason: response.stop_reason }
   end
 
+  # No "[" at all means Claude answered in prose that nothing looks like spam.
+  # An array that was started but can't be parsed is a broken reply.
   def parse_spam_ids(text)
+    return [] unless text.include?("[")
+
     json = text[/\[.*\]/m]
-    return [] unless json
+    raise UnreadableResponse, "Claude's reply has a list that was never finished" unless json
 
     JSON.parse(json, symbolize_names: true)
-  rescue JSON::ParserError
-    []
+  rescue JSON::ParserError => e
+    raise UnreadableResponse, "Claude's reply isn't valid JSON: #{e.message.first(200)}"
   end
 end

@@ -14,8 +14,10 @@
 # is 4:15am ET, the quietest part of the night for the bakery.
 
 production: &default
+  # 35 days: the activity feed and anomaly report read finished jobs for this
+  # week and the four weeks before it.
   clear_solid_queue_finished_jobs:
-    command: "SolidQueue::Job.clear_finished_in_batches(finished_before: 16.days.ago, sleep_between_batches: 0.3)"
+    command: "SolidQueue::Job.clear_finished_in_batches(finished_before: 35.days.ago, sleep_between_batches: 0.3)"
     schedule: every day at 4:15am
 
   send_day_of_reminder:
@@ -31,7 +33,8 @@ production: &default
     schedule: every day at 4:30am
 
   # Stored nightly; emailed only on warning/problem or a status change, plus
-  # Sunday night's run as the weekly summary (AnalyzeAnomaliesJob::WEEKLY_SUMMARY_WDAY).
+  # Sunday night's run as the weekly summary of the week that just ended
+  # (AnalyzeAnomaliesJob::WEEKLY_SUMMARY_WDAY).
   analyze_anomalies:
     class: AnalyzeAnomaliesJob
     schedule: every day at 9:21pm America/New_York

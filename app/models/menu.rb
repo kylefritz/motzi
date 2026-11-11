@@ -116,12 +116,34 @@ class Menu < ApplicationRecord
     @day_of_note_html ||= MARKDOWN.render(self.day_of_note || "").html_safe
   end
 
+  # Raised when publish_to_subscribers! refuses to send; the message is shown
+  # to the admin.
+  class PublishError < StandardError; end
+
+  # How long after one send before another may start. SendWeeklyMenuJob only
+  # skips subscribers whose email has already been delivered, so a second send
+  # while the first batch is still going out would email everyone again.
+  RESEND_WAIT = 15.minutes
+
   def publish_to_subscribers!
-    unless can_publish?
-      throw "can only publish_to_subscribers for current week's menu or future week's menu"
+    if holiday?
+      raise PublishError, "Holiday menus aren't emailed to subscribers. Open it for orders and announce it in the regular menu's subscriber note."
     end
-    self.make_current!
-    self.touch :emailed_at # create audit that email was sent
+    unless can_publish?
+      raise PublishError, "can only publish_to_subscribers for current week's menu or future week's menu"
+    end
+
+    # Row lock, so two sends started at the same moment can't both get through.
+    with_lock do
+      if emailed_at.present? && emailed_at > RESEND_WAIT.ago
+        ago = ActionController::Base.helpers.time_ago_in_words(emailed_at)
+        raise PublishError, "This menu was emailed #{ago} ago and those emails may still be going out. " \
+                            "Wait #{RESEND_WAIT.inspect} after a send before sending again."
+      end
+      self.make_current!
+      self.touch :emailed_at # create audit that email was sent
+    end
+
     SendWeeklyMenuJob.users_to_email_count(self).tap do
       # Pass the specific menu ID to the job
       SendWeeklyMenuJob.perform_later(id)

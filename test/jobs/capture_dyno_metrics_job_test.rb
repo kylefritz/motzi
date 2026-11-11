@@ -29,6 +29,46 @@ class CaptureDynoMetricsJobTest < ActiveSupport::TestCase
     assert_equal 0, worker[:r14_count]
   end
 
+  # R14 is a soft warning and only counted. R15 is the dyno being killed: it
+  # gets its own count and each one goes to error tracking.
+  R15_LINES = <<~LOG
+    2026-03-28T16:34:01.000000+00:00 heroku[worker.1]: Error R15 (Memory quota vastly exceeded)
+    2026-03-28T16:34:02.000000+00:00 heroku[worker.1]: Stopping process with SIGKILL
+    2026-03-28T16:44:01.000000+00:00 heroku[worker.1]: Error R15 (Memory quota vastly exceeded)
+  LOG
+
+  test "parse_log_lines counts R15 separately from R14" do
+    result = CaptureDynoMetricsJob.new.send(:parse_log_lines, SAMPLE_LOGS + R15_LINES)
+
+    assert_equal 2, result["worker.1"][:r15_count]
+    assert_equal 0, result["worker.1"][:r14_count]
+    assert_equal 0, result["web.1"][:r15_count]
+    assert_equal 6, result["web.1"][:r14_count]
+    assert_includes result["worker.1"][:errors_summary], "Error R15", "still listed with the dyno's errors"
+  end
+
+  test "perform stores the R15 count and reports each R15 to error tracking" do
+    ENV["HEROKU_API_KEY"] ||= "test-key-for-ci"
+
+    assert_difference -> { ErrorEvent.where(error_class: "CaptureDynoMetricsJob::DynoKilled").count }, 2 do
+      stub_heroku_api(SAMPLE_LOGS + R15_LINES) { CaptureDynoMetricsJob.perform_now }
+    end
+
+    assert_equal 2, DynoMetric.find_by(dyno: "worker.1").r15_count
+    assert_equal 0, DynoMetric.find_by(dyno: "web.1").r15_count
+    event = ErrorEvent.where(error_class: "CaptureDynoMetricsJob::DynoKilled").last
+    assert_match(/worker\.1.*R15 \(Memory quota vastly exceeded\)/, event.message)
+    assert_equal true, event.context["handled"]
+  end
+
+  test "perform reports nothing for R14s" do
+    ENV["HEROKU_API_KEY"] ||= "test-key-for-ci"
+
+    assert_no_difference "ErrorEvent.count" do
+      stub_heroku_api(SAMPLE_LOGS) { CaptureDynoMetricsJob.perform_now }
+    end
+  end
+
   test "parse_log_lines returns empty hash for logs without memory samples" do
     job = CaptureDynoMetricsJob.new
     result = job.send(:parse_log_lines, "2026-03-28T16:33:03+00:00 app[web.1]: some random log line\n")

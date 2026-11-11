@@ -27,21 +27,34 @@ class AnalyzeAnomaliesJobTest < ActiveJob::TestCase
 
   # --- Scheduled runs only email when there's something to say (#405) ---
 
-  # 2026-10-12 is a Monday; 2026-10-11 a Sunday (last night of ISO week 26w41).
+  # 2026-10-12 is a Monday; 2026-10-11 a Sunday. week_id weeks start on
+  # Sunday, so both nights are in 26w42 and the week that just ended is 26w41.
   MONDAY_NIGHT = Time.zone.parse("2026-10-12 21:21")
   SUNDAY_NIGHT = Time.zone.parse("2026-10-11 21:21")
 
   # Stands in for AnomalyDetector so we don't call Claude; stores an analysis
   # with the given status the way the real detector does.
   class FakeDetector
-    def initialize(status)
+    def initialize(status, week_id: nil)
       @status = status
+      @week_id = week_id
     end
 
     def analyze(trigger:, user: nil)
-      AnomalyAnalysis.create!(week_id: Time.zone.now.week_id, result: "Status: #{@status}", trigger: trigger, user: user,
-                              cost_cents: 10, input_tokens: 1000, output_tokens: 200)
+      AnomalyAnalysis.create!(week_id: @week_id || Time.zone.now.week_id, result: "Status: #{@status}",
+                              trigger: trigger, user: user, cost_cents: 10, input_tokens: 1000, output_tokens: 200)
     end
+  end
+
+  # The week ids the job hands to AnomalyDetector while the block runs.
+  def analyzed_week_ids(at:, &block)
+    seen = []
+    detector = lambda do |week_id, *_args, &_progress|
+      seen << week_id
+      FakeDetector.new("Healthy", week_id: week_id)
+    end
+    travel_to(at) { AnomalyDetector.stub(:new, detector, &block) }
+    seen
   end
 
   def with_fake_detector(status, at:, &block)
@@ -107,6 +120,35 @@ class AnalyzeAnomaliesJobTest < ActiveJob::TestCase
       end
     end
     assert_includes ActionMailer::Base.deliveries.last.subject, "Weekly summary"
+  end
+
+  # week_id weeks start on Sunday, so "this week" on Sunday night is 12 hours
+  # old. The weekly summary has to cover the week that just ended.
+  test "Sunday night's scheduled run analyzes the week that just ended" do
+    clear_history
+
+    assert_equal [ "26w41" ], analyzed_week_ids(at: SUNDAY_NIGHT) { AnalyzeAnomaliesJob.perform_now }
+    assert_equal "26w41", AnomalyAnalysis.last.week_id
+    assert_includes ActionMailer::Base.deliveries.last.subject, "Weekly summary"
+    assert_includes ActionMailer::Base.deliveries.last.subject, "26w41"
+  end
+
+  test "other nights' scheduled runs analyze the current week" do
+    clear_history
+
+    assert_equal [ "26w42" ], analyzed_week_ids(at: MONDAY_NIGHT) { AnalyzeAnomaliesJob.perform_now }
+    assert_equal [ "26w41" ], analyzed_week_ids(at: SUNDAY_NIGHT - 1.day) { AnalyzeAnomaliesJob.perform_now }
+  end
+
+  test "a week_id passed in, or a manual run, on Sunday is left alone" do
+    clear_history
+
+    assert_equal [ "26w42" ], analyzed_week_ids(at: SUNDAY_NIGHT) {
+      AnalyzeAnomaliesJob.perform_now(week_id: "26w42")
+    }
+    assert_equal [ "26w42" ], analyzed_week_ids(at: SUNDAY_NIGHT) {
+      AnalyzeAnomaliesJob.perform_now(trigger: "manual", user_id: users(:kyle).id)
+    }
   end
 
   test "manual runs are always emailed" do

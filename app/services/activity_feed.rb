@@ -672,6 +672,12 @@ class ActivityFeed
   rescue Octokit::Error => e
     Rails.logger.warn "[ActivityFeed] GitHub API error: #{e.message}"
     []
+  rescue Faraday::Error => e
+    # Connection failures and timeouts aren't Octokit::Error. Commit history is
+    # nice to have; it must not fail the nightly analysis or the admin feed.
+    Rails.logger.warn "[ActivityFeed] GitHub unreachable: #{e.class}: #{e.message}"
+    Rails.error.report(e, handled: true, severity: :warning, context: { source: "activity_feed_github_commits" })
+    []
   end
 
   def local_git_commits

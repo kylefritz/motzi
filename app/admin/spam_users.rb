@@ -15,6 +15,10 @@ ActiveAdmin.register_page "Spam Users" do
     Rails.cache.write(spam_cache_key, results.to_json, expires_in: 1.hour)
     redirect_to admin_spam_users_path,
                 notice: "Claude identified #{results.size} spam accounts."
+  rescue SpamDetector::UnreadableResponse => e
+    Rails.error.report(e, handled: true, severity: :warning, context: { source: "spam_scan" })
+    redirect_to admin_spam_users_path,
+                alert: "The scan didn't finish, so nothing was flagged: #{e.message}. Try again."
   end
 
   # Delete selected users

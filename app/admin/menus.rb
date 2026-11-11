@@ -246,6 +246,8 @@ ActiveAdmin.register Menu do
     )
 
     redirect_to collection_path, notice: notice
+  rescue Menu::PublishError => e
+    redirect_to resource_path, alert: e.message
   end
 
   member_action :open_for_orders, method: :post do
