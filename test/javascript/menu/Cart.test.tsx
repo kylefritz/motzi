@@ -193,3 +193,70 @@ test("marketplaceItems vs subscriberItems", () => {
   expect(marketplaceItems.map(({ id }) => id)).toStrictEqual([1, 2, 3]);
   expect(subscriberItems.map(({ id }) => id)).toStrictEqual([4, 5]);
 });
+
+test("an order line whose pickup day was trimmed from the item is dropped, not thrown", () => {
+  const [thurOnly] = makePickupDays(0);
+  const items = [
+    buildItem({
+      id: 1,
+      name: "Classic",
+      credits: 1,
+      subscriber: true,
+      pickupDays: [thurOnly],
+    }),
+  ];
+  const line = (quantity: number, pickupDayId: number) => ({
+    itemId: 1,
+    quantity,
+    pickupDayId,
+    pickupAt: basePickupAt,
+    day: "Thursday",
+  });
+  const order = {
+    id: 9,
+    comments: null,
+    stripeReceiptUrl: null,
+    stripeChargeAmount: null,
+    items: [line(1, thur), line(2, sat)],
+  };
+
+  const { result } = renderHook(() => useCart({ order, items }));
+
+  expect(
+    result.current.cart.map(({ quantity, pickupDayId }) => [
+      quantity,
+      pickupDayId,
+    ])
+  ).toStrictEqual([[1, thur]]);
+  expect(
+    result.current.removedItems.map(({ quantity, pickupDayId }) => [
+      quantity,
+      pickupDayId,
+    ])
+  ).toStrictEqual([[2, sat]]);
+  expect(result.current.total.credits).toBe(1);
+  expect(result.current.subscriberItems[0].pickupDays[0].remaining).toBe(9);
+
+  // the note outlives later cart changes
+  act(() => {
+    result.current.addToCart({ id: 1, quantity: 1, pickupDayId: thur });
+  });
+  expect(result.current.cart).toHaveLength(2);
+  expect(result.current.removedItems).toHaveLength(1);
+  act(() => {
+    result.current.rmCartItem(1, 1, thur);
+  });
+  expect(result.current.cart).toHaveLength(1);
+  expect(result.current.removedItems).toHaveLength(1);
+});
+
+test("cart total is rounded to cents", () => {
+  const items = [buildItem({ id: 1, price: 0.6 })];
+  const { result } = renderHook(() => useCart({ items }));
+  let price: number | null = null;
+  act(() => {
+    price = result.current.addToCart({ id: 1, quantity: 3, pickupDayId: thur });
+  });
+  expect(price as number | null).toBe(1.8); // 3 × 0.6 is 1.7999999999999998 as a float
+  expect(result.current.total.price).toBe(1.8);
+});
