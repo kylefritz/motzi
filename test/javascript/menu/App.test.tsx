@@ -32,7 +32,23 @@ mock.module("../../../app/javascript/lib/errorReporter", () => ({
 const networkError = (message: string) => () =>
   Promise.reject(new Error(message)); // no .response — axios network failure
 
-afterEach(cleanup);
+// The real backoff is 0.5s then 1.5s. Tests zero it (as MarketPlace.test does
+// with buy/Card's resumeRetry) so they don't sleep through it.
+let defaultRetryDelays: number[] | undefined;
+async function importApp() {
+  const { default: App, menuFetchRetry } = await import("menu/App");
+  defaultRetryDelays ??= [...menuFetchRetry.delaysMs];
+  menuFetchRetry.delaysMs = [0, 0];
+  return App;
+}
+
+afterEach(async () => {
+  cleanup();
+  if (defaultRetryDelays) {
+    const { menuFetchRetry } = await import("menu/App");
+    menuFetchRetry.delaysMs = defaultRetryDelays;
+  }
+});
 
 beforeEach(() => {
   getMock.mockClear();
@@ -43,13 +59,12 @@ beforeEach(() => {
 
 test("retries a network error and recovers without reporting", async () => {
   getMock.mockImplementationOnce(networkError("Network Error recovers"));
-  const { default: App } = await import("menu/App");
+  const App = await importApp();
+  expect(defaultRetryDelays).toStrictEqual([500, 1500]);
 
   render(<App />);
 
-  await waitFor(() => expect(getMock).toHaveBeenCalledTimes(2), {
-    timeout: 3000,
-  });
+  await waitFor(() => expect(getMock).toHaveBeenCalledTimes(2));
   await waitFor(() =>
     expect(screen.queryByText("We can't load the menu")).toBeNull()
   );
@@ -58,13 +73,12 @@ test("retries a network error and recovers without reporting", async () => {
 
 test("reports and shows error once retries are exhausted", async () => {
   getMock.mockImplementation(networkError("Network Error exhausted"));
-  const { default: App } = await import("menu/App");
+  const App = await importApp();
 
   render(<App />);
 
-  await waitFor(
-    () => expect(screen.getByText("We can't load the menu")).toBeTruthy(),
-    { timeout: 5000 }
+  await waitFor(() =>
+    expect(screen.getByText("We can't load the menu")).toBeTruthy()
   );
   expect(getMock).toHaveBeenCalledTimes(3);
   expect(reportExceptionMock).toHaveBeenCalledTimes(1);
@@ -83,7 +97,7 @@ test("does not retry HTTP errors", async () => {
     err.response = { status: 500 };
     return Promise.reject(err);
   });
-  const { default: App } = await import("menu/App");
+  const App = await importApp();
 
   render(<App />);
 
@@ -92,4 +106,18 @@ test("does not retry HTTP errors", async () => {
   );
   expect(getMock).toHaveBeenCalledTimes(1);
   expect(reportExceptionMock).toHaveBeenCalledTimes(1);
+});
+
+test("?tab=email opens Email Settings while a holiday menu is open", async () => {
+  const holiday = mockMenuJson({ order: false });
+  holiday.menu.name = "Passover Pre-Order";
+  getMock.mockImplementation(() =>
+    Promise.resolve({ data: { ...menuResponse, holidayMenu: holiday.menu } })
+  );
+  window.history.pushState({}, "", "/menu?tab=email");
+  const App = await importApp();
+
+  render(<App />);
+
+  await waitFor(() => expect(screen.getByText("Email Settings")).toBeTruthy());
 });
