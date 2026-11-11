@@ -31,7 +31,13 @@ class SpamDetectorTest < ActiveSupport::TestCase
     assert_raises(SpamDetector::UnreadableResponse) { detector.send(:parse_spam_ids, truncated) }
   end
 
+  # scan only calls Claude when there is an account to review.
+  def create_candidate
+    User.create!(first_name: "Zx", last_name: "Qv", email: "spam@example.com")
+  end
+
   test "scan raises when Claude stops at the token limit" do
+    create_candidate
     detector = SpamDetector.new
     reply = { text: "[{\"id\": 1, \"reason\": \"bot\"}]\n[{\"id\": 5, \"reas", stop_reason: "max_tokens" }
 
@@ -42,6 +48,7 @@ class SpamDetectorTest < ActiveSupport::TestCase
   end
 
   test "scan returns the flagged accounts from a complete reply" do
+    create_candidate
     detector = SpamDetector.new
     reply = { text: "[{\"id\": 1, \"reason\": \"bot\"}]", stop_reason: "end_turn" }
 
