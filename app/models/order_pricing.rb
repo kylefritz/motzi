@@ -47,14 +47,6 @@ class OrderPricing
     fixed_lines.sum(BigDecimal("0"), &:subtotal)
   end
 
-  def suggested_pwyc_subtotal
-    lines.select(&:pay_what_you_can).sum(BigDecimal("0"), &:subtotal)
-  end
-
-  def suggested_total
-    fixed_subtotal + suggested_pwyc_subtotal
-  end
-
   def minimum
     fixed_subtotal
   end

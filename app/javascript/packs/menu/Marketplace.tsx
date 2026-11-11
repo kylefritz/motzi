@@ -122,11 +122,7 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
       <BakersNote note={menuNote} />
 
       <h5>Menu</h5>
-      <Items
-        items={marketplaceItems}
-        onAddToCart={handleAddToCart}
-        disabled={disabled}
-      />
+      <Items items={marketplaceItems} onAddToCart={handleAddToCart} />
       {payItForward && (
         <PayItForward
           {...payItForward}

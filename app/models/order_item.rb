@@ -3,7 +3,6 @@ class OrderItem < ApplicationRecord
   belongs_to :order
   belongs_to :pickup_day
   has_paper_trail
-  scope :requires_pickup, -> { where("item_id != ?", Item::PAY_IT_FORWARD_ID) }
 
   # credits/price are immutable snapshots of the item's pricing at order time,
   # so later repricing an item never changes past order totals or balances (#170)

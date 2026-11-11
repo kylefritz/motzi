@@ -5,7 +5,6 @@ import { cleanup, render } from "@testing-library/react";
 import Layout from "menu/Layout";
 import { SettingsContext } from "menu/Contexts";
 import mockMenuJson from "./mockMenuJson";
-import stripeMock from "./stripeMock";
 
 afterEach(cleanup);
 
@@ -14,7 +13,6 @@ afterEach(cleanup);
 // hook order between those renders, which React reports via console.error.
 test("keeps hook order stable when menu loads after the loading state", () => {
   window.gon = { stripeApiKey: "no-such-key" };
-  window.Stripe = mock(() => stripeMock);
 
   const originalConsoleError = console.error;
   const errors: string[] = [];
@@ -23,9 +21,8 @@ test("keeps hook order stable when menu loads after the loading state", () => {
   };
 
   try {
-    const { menu, bundles } = mockMenuJson({ user: false, order: false });
+    const { menu } = mockMenuJson({ user: false, order: false });
     const props = {
-      bundles,
       handleCreateOrder: mock(() => Promise.resolve()),
       isEditingOrder: false,
       order: null,
@@ -57,9 +54,8 @@ test("keeps hook order stable when menu loads after the loading state", () => {
 // error_events #2773, #2784: a menu with no pickup days yet must still render
 test("renders a menu that has no pickup days yet", () => {
   window.gon = { stripeApiKey: "no-such-key" };
-  window.Stripe = mock(() => stripeMock);
 
-  const { menu, bundles } = mockMenuJson({ user: false, order: false });
+  const { menu } = mockMenuJson({ user: false, order: false });
   const emptyMenu = {
     ...menu,
     pickupDays: [],
@@ -69,7 +65,6 @@ test("renders a menu that has no pickup days yet", () => {
   const { container } = render(
     <SettingsContext.Provider value={{}}>
       <Layout
-        bundles={bundles}
         handleCreateOrder={mock(() => Promise.resolve())}
         isEditingOrder={false}
         order={null}

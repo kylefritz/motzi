@@ -3,10 +3,9 @@ require "test_helper"
 class UserTest < ActiveSupport::TestCase
   test "maya's password is wine" do
     maya = users(:maya)
-    assert maya.authenticate("wine")
-    refute maya.authenticate("not-wine")
+    assert maya.valid_password?("wine")
+    refute maya.valid_password?("not-wine")
     assert maya.is_admin
-    assert_equal maya.id, User.maya.id
   end
 
   test "previewing_marketing? requires both admin and the preview flag" do

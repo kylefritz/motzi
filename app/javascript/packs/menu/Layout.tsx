@@ -6,7 +6,6 @@ import Marketplace from "./Marketplace";
 import Order from "./Order";
 import EmailSettings from "./EmailSettings";
 import type {
-  CreditBundle,
   Menu as MenuType,
   MenuOrder,
   MenuOrderRequest,
@@ -15,7 +14,6 @@ import type {
 } from "../../types/api";
 
 export type LayoutProps = {
-  bundles: CreditBundle[];
   error?: string;
   handleCreateOrder: (
     order: MenuOrderRequest | MarketplaceOrderRequest
@@ -29,7 +27,6 @@ export type LayoutProps = {
 };
 
 export default function Layout({
-  bundles,
   error,
   handleCreateOrder,
   isEditingOrder,
@@ -76,7 +73,6 @@ export default function Layout({
           user,
           order,
           menu,
-          bundles,
           onEditOrder: handleEditOrder,
         }}
       />
@@ -93,7 +89,6 @@ export default function Layout({
         user,
         order,
         menu,
-        bundles,
         onCreateOrder: handleCreateOrder,
         onShowEmailSettings: () => setShowEmailSettings(true),
       }}

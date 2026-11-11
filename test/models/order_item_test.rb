@@ -10,16 +10,6 @@ class OrderItemTest < ActiveSupport::TestCase
     assert_equal "Saturday", order_items(:ljf_w1_classic_day2).day
   end
 
-  test "scopes" do
-    assert_difference("OrderItem.requires_pickup.count", 2, "requires_pickup") do
-      make_order_item(pickup: pickup_days(:w1_d1_thurs))
-      make_order_item(pickup: pickup_days(:w1_d2_sat))
-    end
-    assert_difference("OrderItem.requires_pickup.count", 0, "requires_pickup") do
-      make_order_item(item: Item.pay_it_forward)
-    end
-  end
-
   test "snapshots item pricing on create" do
     order_item = make_order_item(item: items(:donuts))
 

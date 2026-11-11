@@ -4,11 +4,11 @@ import { mock, type Mock } from "bun:test";
 // Payment / Express Checkout Elements flow. setupTests.tsx wires these into
 // the @stripe/react-stripe-js mock, so tests can override a result or inspect
 // calls here.
-export type ConfirmationTokenResult =
+type ConfirmationTokenResult =
   | { confirmationToken: { id: string }; error?: undefined }
   | { confirmationToken?: undefined; error: { message: string } };
 
-export type HandleNextActionResult =
+type HandleNextActionResult =
   | { paymentIntent: { id: string; status: string }; error?: undefined }
   | { paymentIntent?: undefined; error: { message: string } };
 

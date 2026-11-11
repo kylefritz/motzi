@@ -239,6 +239,49 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert menu.menu_items.find_by!(item: items(:donuts)).pay_what_you_can
   end
 
+  test "builder removes one pickup day from a menu item" do
+    menu = menus(:week2)
+    menu_item = menu_items(:w2_rye)
+    thursday = pickup_days(:w2_d1_thurs)
+
+    assert_difference "MenuItemPickupDay.count", -1 do
+      post "/admin/menus/#{menu.id}/remove_menu_item_pickup_day.json",
+           params: { menu_item_id: menu_item.id, pickup_day_id: thursday.id }, as: :json
+    end
+
+    assert_response :success
+    validate_json_schema :admin_menu_builder, @response.body
+    assert_equal [ pickup_days(:w2_d2_sat).id ], menu_item.reload.menu_item_pickup_days.pluck(:pickup_day_id)
+    rye = JSON.parse(@response.body)["menuItems"].find { |mi| mi["menuItemId"] == menu_item.id }
+    assert_equal 1, rye["pickupDays"].size
+  end
+
+  test "builder removes one item from the menu and leaves the rest" do
+    menu = menus(:week2)
+
+    assert_difference -> { menu.menu_items.count } => -1, "MenuItemPickupDay.count" => -2 do
+      post "/admin/menus/#{menu.id}/remove_menu_item.json", params: { item_id: items(:rye).id }, as: :json
+    end
+
+    assert_response :success
+    validate_json_schema :admin_menu_builder, @response.body
+    assert_equal [ items(:classic).id, items(:donuts).id ].sort, menu.menu_items.pluck(:item_id).sort
+    assert Item.exists?(items(:rye).id), "the item itself stays"
+  end
+
+  test "builder removes every item from this menu only" do
+    menu = menus(:week2)
+
+    assert_no_difference -> { menus(:week1).menu_items.count } do
+      post "/admin/menus/#{menu.id}/remove_menu_items.json", as: :json
+    end
+
+    assert_response :success
+    validate_json_schema :admin_menu_builder, @response.body
+    assert_empty menu.menu_items.reload
+    assert_empty JSON.parse(@response.body)["menuItems"]
+  end
+
   test "open_for_orders sets current holiday menu" do
     menu = menus(:passover_2026)
     travel_to(Time.zone.parse("2026-04-01 10:00")) do
