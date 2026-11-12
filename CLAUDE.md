@@ -14,7 +14,7 @@ Neighborhood bakery's CSA site. Members browse menus, choose pickup days, and pl
 
 ## Tests
 
-There are five test suites. Rails, system and JS tests run in CI on every PR; the visual suite runs monthly; the log-drain worker's tests run only by hand.
+There are five test suites. Rails, system, JS and worker tests run in CI on every PR; the visual suite runs monthly.
 
 | Suite | Command | What it tests | Speed | CI? |
 |-------|---------|---------------|-------|-----|
@@ -22,7 +22,7 @@ There are five test suites. Rails, system and JS tests run in CI on every PR; th
 | **System** | `bin/rails test:system` | Browser tests in `test/system` | — | Yes (`test_system` job) |
 | **JS** | `bun test` | React components (menu, cart, builder, credits) via jsdom | ~3s | Yes |
 | **Visual** | `bunx playwright test` | Email template and marketing page screenshots — mobile (iPhone 14) & desktop | ~20s | Monthly + on demand (`LLM evals` workflow), never per PR |
-| **Worker** | `bun test` in `cloudflare/workers/log-drain` | Log drain parsing, keys, filters | — | No |
+| **Worker** | `bun test` in `cloudflare/workers/log-drain` | Log drain parsing, keys, filters | — | Yes (`test_workers` job, which also typechecks both workers) |
 
 **Local CI**: `bin/ci` (Rails 8.1 local CI, steps in `config/ci.rb`) runs rubocop, Prettier (`bun run format:check`; fix with `bun run format`), ESLint with react-hooks (`bun run lint`), bundler-audit, brakeman, the Rails and JS suites, and the typecheck in one go.
 

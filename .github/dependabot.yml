@@ -16,7 +16,14 @@ updates:
 
   # JS packages (bun.lock). Security updates only, same as bundler.
   - package-ecosystem: bun
-    directories: [/, /cloudflare/workers/reply-ingress]
+    directories: [/, /cloudflare/workers/reply-ingress, /cloudflare/workers/log-drain]
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+
+  # Actions used by the workflows. Security updates only, same as above.
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 0
