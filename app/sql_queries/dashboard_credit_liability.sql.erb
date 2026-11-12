@@ -1,0 +1,24 @@
+<%#
+  Prepaid credits members are still holding: bread already paid for and not
+  yet baked. Split by how recently the holder ordered (as of @as_of):
+  active = within 90 days, dormant = not in a year (or never).
+%>
+<% as_of = quote(@as_of.utc.to_fs(:db)) %>
+<%= partial :user_credits %>,
+last_orders as (
+    select user_id, max(created_at) as last_ordered_at
+    from orders
+    group by user_id
+)
+select count(*)::int as holders,
+    coalesce(sum(credit_balance), 0)::int as outstanding,
+    coalesce(sum(credit_balance) filter (
+        where last_orders.last_ordered_at > <%= as_of %>::timestamp - interval '90 days'
+    ), 0)::int as active,
+    coalesce(sum(credit_balance) filter (
+        where last_orders.last_ordered_at is null
+            or last_orders.last_ordered_at < <%= as_of %>::timestamp - interval '365 days'
+    ), 0)::int as dormant
+from user_credits
+    left join last_orders on last_orders.user_id = user_credits.user_id
+where credit_balance > 0

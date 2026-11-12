@@ -1,4 +1,5 @@
 require "test_helper"
+require "minitest/mock"
 
 class AnomalyDetectorIntegrationTest < ActiveSupport::TestCase
   include WebMock::API
@@ -51,6 +52,47 @@ class AnomalyDetectorIntegrationTest < ActiveSupport::TestCase
         assert_equal menu.week_id, analysis.week_id
         assert_equal "test", analysis.trigger
         assert_equal AnomalyDetector.model, analysis.model_used
+      end
+    end
+  end
+
+  test "a stored setting that names a retired model runs its successor" do
+    Setting.anomaly_model = "claude-sonnet-4-6"
+    assert_equal "claude-sonnet-5-5", AnomalyDetector.model
+    assert_equal "Sonnet 5.5", AnomalyDetector.model_label
+
+    Setting.anomaly_model = "claude-haiku-4-5"
+    assert_equal "claude-haiku-5-5", AnomalyDetector.model
+  ensure
+    Setting.anomaly_model = nil
+  end
+
+  test "old analyses keep their model's label and price" do
+    assert_equal "Sonnet 4.6", AnomalyDetector.label_for("claude-sonnet-4-6")
+    assert_equal "some-future-model", AnomalyDetector.label_for("some-future-model")
+    # 1M in + 1M out at Sonnet 4.6's $3 / $15
+    assert_in_delta 18.0, AnomalyDetector.estimate_cost(1_000_000, 1_000_000, "claude-sonnet-4-6")
+  end
+
+  test "estimate_cost uses current prices, and Haiku's higher rate past 100K prompt tokens" do
+    assert_in_delta 0.12, AnomalyDetector.estimate_cost(50_000, 2_000, "claude-sonnet-5-5")
+    assert_in_delta 0.006, AnomalyDetector.estimate_cost(50_000, 2_000, "claude-haiku-5-5")
+    assert_in_delta 0.08, AnomalyDetector.estimate_cost(150_000, 2_000, "claude-haiku-5-5")
+  end
+
+  test "a refusal raises instead of saving an empty report" do
+    refusal = Struct.new(:content, :stop_reason, :model, :usage).new([], :refusal, "claude-sonnet-5-5", nil)
+    messages = Object.new
+    messages.define_singleton_method(:create) { |**_params| refusal }
+    client = Struct.new(:messages).new(messages)
+
+    Anthropic::Client.stub(:new, client) do
+      error = assert_raises(AnomalyDetector::NoReport) { AnomalyDetector.new("19w01").run_analysis }
+      assert_match(/refusal/, error.message)
+    end
+    assert_no_difference -> { AnomalyAnalysis.count } do
+      Anthropic::Client.stub(:new, client) do
+        assert_raises(AnomalyDetector::NoReport) { AnomalyDetector.new("19w01").analyze(trigger: "test") }
       end
     end
   end

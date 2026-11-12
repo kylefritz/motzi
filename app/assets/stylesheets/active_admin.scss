@@ -1150,3 +1150,137 @@ body.admin_activity_feed {
   color: #8d8378;
   font-size: 1.1em;
 }
+
+// ─── Dashboard ───
+// Tiles and charts share the Activity Feed's look (glance-* text, tone-*
+// colors). Design-system tokens that the SCSS has no variable for yet:
+$dash-ink-soft: #6b615b;
+$dash-line: #e9dcc6;
+$dash-crust: #b8793a;
+$dash-red: #d5482c;
+
+// Same fix as the Activity Feed: #wrapper is display:table, which stops charts shrinking
+body.admin_dashboard #wrapper {
+  display: block;
+}
+
+// Five columns in the narrow left column: tighter cells so Total isn't clipped
+body.admin_dashboard table.subscribers {
+  th,
+  td {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}
+
+.dash-note {
+  color: $dash-ink-soft;
+  font-size: 0.85em;
+  margin: 0 0 8px;
+}
+
+.dash-tiles {
+  display: grid;
+  // 130px: two tiles side by side on a phone
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.dash-tile {
+  display: block;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid $dash-line;
+  border-left: 3px solid $dash-line;
+  border-radius: 3px;
+  background: #fffdfa;
+  color: inherit;
+
+  &,
+  &:hover,
+  &:visited {
+    color: inherit;
+    text-decoration: none !important;
+  }
+  &[href]:hover {
+    border-color: $primary;
+  }
+
+  .glance-label,
+  .glance-detail {
+    color: $dash-ink-soft;
+  }
+  .glance-num {
+    font-size: 1.5em;
+    color: $primary;
+  }
+  .glance-delta {
+    font-weight: 500;
+  }
+
+  // Red is for the one thing that needs doing
+  &.tone-danger {
+    border-left-color: $dash-red;
+    .glance-num,
+    .glance-delta {
+      color: $dash-red;
+    }
+  }
+  &.tone-warning {
+    border-left-color: #a8802e;
+  }
+  &.tone-ok {
+    border-left-color: #2c7a4b;
+  }
+  &.tone-holiday {
+    border-left-color: $dash-crust;
+    .glance-num,
+    .glance-delta {
+      color: $dash-crust;
+    }
+  }
+}
+
+.dash-row {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 20px;
+
+  > .panel {
+    margin-bottom: 0;
+    min-width: 0;
+  }
+
+  &.dash-row-wide-narrow {
+    grid-template-columns: 2fr 1fr;
+  }
+  &.dash-row-halves {
+    grid-template-columns: 1fr 1fr;
+  }
+  &.dash-row-thirds {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+}
+
+.dash-chart {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 800px) {
+  .dash-row.dash-row-wide-narrow,
+  .dash-row.dash-row-halves {
+    grid-template-columns: 1fr;
+  }
+
+  // ActiveAdmin lays columns out with inline widths; stack them on a phone
+  body.admin_dashboard .columns > .column {
+    float: none;
+    width: 100% !important;
+    margin-right: 0 !important;
+  }
+}

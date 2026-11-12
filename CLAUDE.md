@@ -50,7 +50,7 @@ bunx playwright test --grep "havent_ordered"       # single email
 
 ### Anomaly report eval
 
-`rake ai:eval` replays the nightly anomaly report agent against labeled historical weeks (real prod data via `bin/seed_local`) and grades each report on three axes: status accuracy (deterministic parse), required findings caught, and noise violations (false alarms). Findings are judged by Claude Haiku (`ANOMALY_JUDGE_MODEL` to override).
+`rake ai:eval` replays the nightly anomaly report agent against labeled historical weeks (real prod data via `bin/seed_local`) and grades each report on three axes: status accuracy (deterministic parse), required findings caught, and noise violations (false alarms). Findings are judged by Claude Haiku (`ANOMALY_JUDGE_MODEL` to override). Models: the report runs on Sonnet 5.5 (`AnomalyDetector::DEFAULT_MODEL`, switchable in `/admin/activity_feed`); the judge, the spam scan and the visual QA run on Haiku 5.5.
 
 ```
 rake ai:eval                # all labeled weeks (~$2.50, ~5 min at EVAL_THREADS=3)
@@ -59,6 +59,8 @@ rake ai:eval_report         # re-print last scorecard + failure details
 rake "ai:eval_dry[26w14]"   # show prompt without calling Claude
 rake ai:eval_baseline       # accept the latest scorecard as the baseline (no API calls; FILE=... to pick one)
 ```
+
+**Free replay (no API spend):** when tuning the prompt or the feed, replay weeks with in-session agents before paying for `rake ai:eval`. `rake "ai:dump_prompts[26w46 26w45]"` writes each week's exact system prompt and user message to `tmp/ai_eval/prompts/<week>.txt` (no argument: every labeled week). Give each file to a subagent on the report's model (Sonnet) with the instruction to answer as that API call would, using nothing but the file, and write the report to a file; then grade the reports against `test/anomaly_expectations.yml` yourself. To replay current production data without touching the dev database, pull it into a second database and point the task at it: `heroku pg:pull DATABASE_URL motzi_eval --app motzibread` (Postgres 18 client tools on the PATH; its non-zero exit over `heroku_ext` is expected), then `DATABASE_URL=postgres://localhost/motzi_eval rake "ai:dump_prompts[...]"`. A replay can't set the API's effort level and isn't the regression gate: run `rake ai:eval` once before accepting a new baseline.
 
 **Regression gate:** `test/anomaly_eval_baseline.yml` records the last accepted outcome per week: whether the status matched, plus caught/missed for each `must_flag` and clean/violated for each `must_not_flag`. After scoring, `rake ai:eval` prints regressed, improved, flaky and unchanged weeks, and **exits non-zero if anything that was good in the baseline went bad**. Comparison is per item, so a week with a known miss still fails if a different item regresses. Improvements, new weeks and new labels never fail the run.
 - *Noise policy:* status regressions fail immediately. The status is parsed deterministically from the report. Findings verdicts come from the Haiku judge, which can flip on identical text, so a week whose only regressions are findings gets its saved report re-judged once (the agent is not re-run). It fails only if the regression survives; otherwise it's reported as FLAKY. Logic and tests: `AnomalyEvalBaseline`, `test/services/anomaly_eval_baseline_test.rb`.

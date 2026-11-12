@@ -39,6 +39,42 @@ ActiveAdmin.register_page "Dashboard" do
     menu = Menu.current
     holiday_menu = Menu.current_holiday
 
+    # as_of: look at the charts as they stood at another moment (development
+    # and tests only), e.g. ?as_of=2026-10-13T10:00 for a Tuesday mid-week.
+    as_of = (Time.zone.parse(params[:as_of].to_s) unless Rails.env.production?)
+    insights = DashboardInsights.new(menu: menu, holiday_menu: holiday_menu, now: as_of || Time.zone.now)
+    special_requests = menu.orders.includes(:user).with_comments.to_a
+    low_credit_users = SqlQuery.new(:low_credit_users, balance: 4, ordered_within_days: 30).execute
+
+    # What needs a look right now. Each tile jumps to the panel behind it.
+    panel "This week", id: "this-week" do
+      div class: "dash-tiles" do
+        insights.tiles(special_requests: special_requests.size, low_credit: low_credit_users.size).each do |tile|
+          attrs = { class: "glance-stat dash-tile tone-#{tile[:tone]}", id: "tile-#{tile[:key]}" }
+          attrs[:href] = tile[:href] if tile[:href]
+          send(tile[:href] ? :a : :div, **attrs) do
+            div tile[:label], class: "glance-label"
+            div tile[:value].to_s, class: "glance-num"
+            div tile[:detail], class: "glance-detail" if tile[:detail].present?
+            div tile[:delta], class: "glance-delta tone-#{tile[:tone]}-text" if tile[:delta].present?
+          end
+        end
+      end
+    end
+
+    nearly_sold_out = insights.nearly_sold_out
+    if nearly_sold_out.any?
+      panel "Sold out or close", id: "limits" do
+        para "These have a limit and are at 75% of it or more. Raise the limit on the menu if you can bake more.", class: "dash-note"
+        table_for nearly_sold_out, class: "limits" do
+          column("Item") { |r| r[:item_name] }
+          column("Pickup") { |r| r[:day] }
+          column("Ordered") { |r| "#{r[:ordered]} of #{r[:limit]}" }
+          column("Left") { |r| r[:left].zero? ? "Sold out" : r[:left] }
+        end
+      end
+    end
+
     columns do
       column do
         panel "Menu" do
@@ -103,6 +139,108 @@ ActiveAdmin.register_page "Dashboard" do
       end
     end
 
+    # ── Charts. Data comes from DashboardInsights; the drawing is in
+    #    app/views/admin/dashboard/_charts.html.erb. ──
+    pace = insights.pace
+    compared_to = "the last #{pace[:history_weeks]} menus"
+
+    div class: "dash-row dash-row-wide-narrow" do
+      panel "Order pace", id: "order-pace" do
+        if pace[:usual].any?
+          para class: "dash-note" do
+            text_node "Orders in so far, against #{compared_to} at the same point in the week. "
+            text_node "The band is the middle half of those weeks."
+          end
+        else
+          para "Orders in so far. The usual pace shows up here once a few menus have gone out.", class: "dash-note"
+        end
+        div(class: "dash-chart") { canvas id: "chart-order-pace" }
+      end
+
+      panel "Items by pickup day", id: "pickup-days" do
+        load = insights.pickup_day_load
+        if load.any?
+          para "Ordered so far, next to where that day usually ends up.", class: "dash-note"
+          div(class: "dash-chart") { canvas id: "chart-pickup-days" }
+        else
+          para "No pickup days on this menu yet.", class: "empty-state"
+        end
+      end
+    end
+
+    waiting = insights.regulars_waiting
+    drifting = insights.drifting
+    holiday_pace = insights.holiday_pace
+    member_table = proc do |rows, weeks_label, weeks_key, out_of|
+      table_for rows.first(12), class: "dash-members" do
+        column("Member") { |r| r[:user] }
+        column(weeks_label) { |r| "#{r[weeks_key]} of #{out_of}" }
+        column("Last order") { |r| r[:last_ordered_at]&.strftime("%-m/%-d") }
+        column("Credits") { |r| r[:credit_balance] }
+      end
+      para "and #{rows.size - 12} more", class: "dash-note" if rows.size > 12
+    end
+
+    div class: "dash-row dash-row-thirds" do
+      panel insights.ordering_open? ? "Regulars yet to order" : "Regulars who skipped this week", id: "regulars" do
+        if waiting.any?
+          para "They ordered from at least #{DashboardInsights::REGULAR_MIN} of the last 8 menus and have nothing in for this one.", class: "dash-note"
+          member_table.call(waiting, "Last 8 menus", :weeks, 8)
+        elsif insights.regulars_count.positive?
+          para "Every regular has ordered. Nice.", class: "empty-state"
+        else
+          para "No regulars yet: nobody has ordered from #{DashboardInsights::REGULAR_MIN} of the last 8 menus.", class: "empty-state"
+        end
+      end
+
+      panel "Drifting away", id: "drifting" do
+        if drifting.any?
+          para "Used to order most weeks, then nothing for the last four menus. Worth a hello.", class: "dash-note"
+          member_table.call(drifting, "8 menus before", :prior_weeks, 8)
+        else
+          para "Nobody has dropped off lately.", class: "empty-state"
+        end
+      end
+
+      if holiday_pace
+        panel "#{holiday_menu.name} pre-orders", id: "holiday-pace" do
+          para class: "dash-note" do
+            text_node "#{holiday_pace[:orders]} #{'pre-order'.pluralize(holiday_pace[:orders])}, #{holiday_pace[:items]} #{'item'.pluralize(holiday_pace[:items])}. "
+            if holiday_pace[:deadline_at]
+              closes = holiday_pace[:deadline_at].in_time_zone.strftime("%a %-m/%-d at %-l:%M%P").sub(":00", "")
+              text_node holiday_pace[:days_left] ? "Ordering closes #{closes}." : "Ordering closed #{closes}."
+            end
+          end
+          div(class: "dash-chart") { canvas id: "chart-holiday-pace" }
+        end
+      end
+    end
+
+    div class: "dash-row dash-row-halves" do
+      panel "Orders by week", id: "weekly-orders" do
+        if insights.weekly_orders.size > 1
+          para "Each regular menu, by its first pickup day. Bars are orders; the line is items.", class: "dash-note"
+          div(class: "dash-chart") { canvas id: "chart-weekly-orders" }
+        else
+          para "The trend shows up here after a couple of menus.", class: "empty-state"
+        end
+      end
+
+      panel "Credits bought and used", id: "credits" do
+        owed = insights.credit_liability
+        para class: "dash-note" do
+          text_node "#{number_with_delimiter(owed[:outstanding])} prepaid credits are still out with #{number_with_delimiter(owed[:holders])} #{'member'.pluralize(owed[:holders])}"
+          if owed[:dormant].positive?
+            text_node "; #{number_with_delimiter(owed[:dormant])} of them belong to people who haven't ordered in a year"
+          end
+          text_node "."
+        end
+        div(class: "dash-chart") { canvas id: "chart-credits" }
+      end
+    end
+
+    render "admin/dashboard/charts", data: insights.chart_data
+
 
     columns do
       column do
@@ -117,10 +255,9 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       column do
-        panel "Credit balance < 4" do
-          low_credit_users = SqlQuery.new(:low_credit_users, balance: 4, ordered_within_days: 30).execute
+        panel "Credit balance < 4", id: "low-credit" do
           users = Hash[User.find(low_credit_users.map { |r| r["user_id"] }).map { |u| [ u.id, u ] }]
-          para "Subscribers with low credit balance who ordered in the last 30 days.", style: "color: #888; font-size: 0.85em; margin-bottom: 8px"
+          para "Subscribers with low credit balance who ordered in the last 30 days.", class: "dash-note"
           table_for low_credit_users do
             column ("user") { |r| users[r["user_id"]] }
             column ("balance") { |r| r["credit_balance"] }
@@ -141,8 +278,8 @@ ActiveAdmin.register_page "Dashboard" do
 
     columns do
       column do
-        panel "Special Requests" do
-          table_for menu.orders.includes(:user).with_comments do
+        panel "Special Requests", id: "special-requests" do
+          table_for special_requests do
             column ("comments") { |order| order.comments_html }
             column ("user") { |order| order.user }
             column ("order") { |order| order }

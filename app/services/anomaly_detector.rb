@@ -2,25 +2,46 @@
 # Prompt tuning: use `rake ai:eval` to test against historical weeks.
 # See also: rake ai:full_prompt, rake ai:analysis, rake ai:history
 class AnomalyDetector
-  # Per-token pricing (dollars per million tokens)
-  DEFAULT_MODEL = "claude-sonnet-4-6"
+  DEFAULT_MODEL = "claude-sonnet-5-5"
 
+  # The models an admin can pick, with pricing in dollars per million tokens.
+  # Haiku 5.5 bills a higher rate once the prompt passes 100K tokens.
   MODEL_PRICING = {
-    "claude-opus-4-6"   => { input: 5.0, output: 25.0, label: "Opus 4.6" },
-    "claude-sonnet-4-6" => { input: 3.0, output: 15.0, label: "Sonnet 4.6" },
-    "claude-haiku-4-5"  => { input: 0.80, output: 4.0, label: "Haiku 4.5" }
+    "claude-opus-5-5"   => { input: 4.0, output: 20.0, label: "Opus 5.5" },
+    "claude-sonnet-5-5" => { input: 2.0, output: 10.0, label: "Sonnet 5.5" },
+    "claude-haiku-5-5"  => { input: 0.10, output: 0.50, label: "Haiku 5.5",
+                             long_prompt: { over: 100_000, input: 0.50, output: 2.50 } }
   }.freeze
 
+  # Models this app used to run. Old analyses still name them (so their label
+  # and cost keep working), and a stored setting that names one moves to its
+  # successor.
+  RETIRED_MODELS = {
+    "claude-opus-4-6"   => { input: 5.0, output: 25.0, label: "Opus 4.6", successor: "claude-opus-5-5" },
+    "claude-sonnet-4-6" => { input: 3.0, output: 15.0, label: "Sonnet 4.6", successor: "claude-sonnet-5-5" },
+    "claude-haiku-4-5"  => { input: 1.0, output: 5.0, label: "Haiku 4.5", successor: "claude-haiku-5-5" }
+  }.freeze
+
+  # The model declined to write the report, or returned no text.
+  class NoReport < StandardError; end
+
   def self.model
-    Setting.anomaly_model.presence || DEFAULT_MODEL
+    chosen = Setting.anomaly_model.presence || DEFAULT_MODEL
+    RETIRED_MODELS.dig(chosen, :successor) || chosen
   end
 
   def self.model_label
-    MODEL_PRICING.dig(model, :label) || model
+    label_for(model)
+  end
+
+  def self.label_for(model_id)
+    (MODEL_PRICING[model_id] || RETIRED_MODELS[model_id])&.fetch(:label) || model_id
   end
 
   def self.estimate_cost(input_tokens, output_tokens, model_id = nil)
-    pricing = MODEL_PRICING[model_id || model] || MODEL_PRICING[DEFAULT_MODEL]
+    pricing = MODEL_PRICING[model_id || model] || RETIRED_MODELS[model_id] || MODEL_PRICING[DEFAULT_MODEL]
+    long = pricing[:long_prompt]
+    pricing = long if long && input_tokens > long[:over]
     (input_tokens * pricing[:input] / 1_000_000) + (output_tokens * pricing[:output] / 1_000_000)
   end
 
@@ -161,9 +182,12 @@ class AnomalyDetector
 
   def call_claude(user_message)
     client = Anthropic::Client.new
+    # The 5.5 models think before answering and that thinking counts toward
+    # max_tokens, so the cap leaves room for it on top of a ~1K-token report.
     response = client.messages.create(
       model: self.class.model,
-      max_tokens: 4096,
+      max_tokens: 16_000,
+      output_config: { effort: :high },
       system_: system_prompt,
       messages: [ { role: "user", content: user_message } ]
     )
@@ -171,6 +195,12 @@ class AnomalyDetector
     text = response.content.filter_map { |block|
       block.text if block.respond_to?(:text)
     }.join("\n")
+
+    # A refusal is an HTTP 200 with no report in it. Fail the job (it lands in
+    # error tracking) rather than email an empty analysis.
+    if response.stop_reason.to_s == "refusal" || text.blank?
+      raise NoReport, "#{self.class.model} returned no report (stop_reason: #{response.stop_reason})"
+    end
 
     usage = response.usage
     {

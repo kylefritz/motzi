@@ -365,7 +365,72 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert_match(/Dyno Memory/, text)
     assert_match(/web\.1/, text)
     assert_match(/max 504MB/, text)
-    assert_match(/2 R14/, text)
+    assert_match(/web\.1: .* — no R15 kills/, text)
+    assert_no_match(/R14/, text, "R14 is routine swap; its running total read as a memory crisis (analyses 7360, 7393, 7426)")
+  end
+
+  test "to_text reports R15 dyno kills and leaves R14 out of the log errors too" do
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+    DynoMetric.create!(
+      recorded_at: week_start + 1.hour, dyno: "worker.1", memory_total: 900, memory_quota: 512, r14_count: 40, r15_count: 2,
+      errors_summary: "Error R14 (Memory quota exceeded)\nError R15 (Memory quota vastly exceeded)\n" \
+                      "ActionController::RoutingError (No route matches [GET] \"/wp-admin\"):\n" \
+                      "I, [2026-11-10T02:19:30 #2]  INFO -- : Parameters: {\"error_class\"=>\"Error\"}"
+    )
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_match(/worker\.1: .* — 2 R15 KILLS \(dyno terminated\)/, text)
+    assert_includes text, "Error R15 (Memory quota vastly exceeded)"
+    assert_no_match(/R14/, text)
+    assert_no_match(/RoutingError|INFO -- :/, text, "scanner 404s and INFO request logs are not app errors")
+  end
+
+  # Analysis 5842 read its own in-progress run as a failed job.
+  test "the anomaly job writing the report is not counted as incomplete" do
+    skip "needs Solid Queue tables" unless defined?(SolidQueue::Job)
+    travel_to_week_id(@week_id) do
+      travel 2.days
+      SolidQueue::Job.create!(class_name: "AnalyzeAnomaliesJob", queue_name: "default", finished_at: 1.day.ago, created_at: 1.day.ago)
+      SolidQueue::Job.create!(class_name: "AnalyzeAnomaliesJob", queue_name: "default", created_at: 2.minutes.ago)
+
+      descriptions = ActivityFeed.new(@week_id).summary.select { |e| e.action == "recurring_jobs_summary" }.map(&:description)
+
+      assert_includes descriptions, "Anomaly analysis: 0 runs (plus the run writing this report)"
+      assert_empty descriptions.grep(/incomplete/)
+    end
+  end
+
+  test "a week with no emails says so instead of dropping the Email Health section" do
+    text = ActivityFeed.new("99w52").to_text
+
+    assert_includes text, "== Email Health ==\nNo emails recorded for this week's menus."
+  end
+
+  # 53 of 57 reports (fall 2026) restated the same old error groups, because
+  # the feed printed each one in full every night.
+  test "errors already known from earlier weeks get one line; a spike gets full detail again" do
+    ErrorEvent.delete_all
+    week_id = Time.zone.now.week_id
+    week_start = Time.zone.from_week_id(week_id)
+    make = lambda do |fingerprint, klass, at, user: nil|
+      ErrorEvent.create!(fingerprint: fingerprint, source: "browser", error_class: klass, message: "#{klass} happened",
+                         url: "/menu", environment: "production", occurred_at: at, user: user)
+    end
+
+    3.times { |i| make.call("fp-known", "KnownError", week_start - (i + 1).weeks) }
+    make.call("fp-known", "KnownError", week_start + 1.hour, user: users(:ljf))
+    make.call("fp-spike", "SpikeError", week_start - 1.week)
+    10.times { |i| make.call("fp-spike", "SpikeError", week_start + (i + 1).hours) }
+
+    text = ActivityFeed.new(week_id).to_text
+
+    assert_match(/Known from earlier weeks, at their usual rate/, text)
+    assert_match(/\[browser\] KnownError ×1 this week, 3 in the prior 4 weeks \(1 signed-in member; id \d+\)/, text)
+    assert_not_includes text, "msg: KnownError happened", "a known error at its usual rate is not spelled out again"
+    assert_match(/SpikeError ×10 \(last .*, 0 signed-in members\) \[SPIKE — 10 this week vs 1 in the prior 4 weeks\]/, text)
+    assert_includes text, "msg: SpikeError happened"
   end
 
   test "to_text omits dyno memory section when no metrics" do
@@ -841,7 +906,109 @@ class ActivityFeedTest < ActiveSupport::TestCase
     assert_equal 0, day_two.details[:pct]
     assert_equal 1, day_two.details[:failures]
   end
+
+  # 26w46 (anomaly analysis 7558): the menu for 11/12–11/14 was filed as 26w47
+  # and a blank placeholder sat at 26w46, so the report saw "untitled menu,
+  # zero orders, no Email Health" and warned about a healthy week.
+  test "a menu filed under the wrong week still belongs to the week it's picked up in" do
+    week = misfiled_week
+
+    travel_to(week[:start] + 3.days + 12.hours) do
+      feed = ActivityFeed.new("24w20")
+      text = feed.to_text
+
+      assert_equal week[:menu], feed.primary_menu
+      assert_match(/^Menu: Weekly Menu 5\/16 - 5\/18$/, text)
+      assert_match(/Filed in admin under week 24w21, but it is picked up this week/, text)
+      assert_match(/Draft menu \(ignore\): \(untitled\)/, text)
+      assert_match(/Total so far: 2 orders \(2 items\)/, text)
+      assert_includes text, "== Email Health =="
+      assert_match(/Weekly menu email: 1 sent/, text)
+      assert_includes text, "Weekly menu emailed", "admin events logged under the filed week come along"
+      assert_equal 2, feed.headline_metrics.find { |m| m[:label] == "Orders" }[:value]
+    end
+  end
+
+  test "a menu filed under the wrong week does not also show up in the week it was filed under" do
+    week = misfiled_week
+
+    feed = ActivityFeed.new("24w21")
+
+    assert_nil feed.primary_menu
+    assert_not_includes feed.to_text, week[:menu].name
+    assert_empty feed.summary.select { |e| e.action == "orders_summary" }
+  end
+
+  test "holiday pre-orders placed this week are reported apart from the weekly menu" do
+    week = misfiled_week
+    holiday = holiday_preorders(week)
+
+    travel_to(week[:start] + 3.days + 12.hours) do
+      feed = ActivityFeed.new("24w20")
+      text = feed.to_text
+
+      assert_match(/Holiday pre-order menu \(open for orders now, picked up in a later week\): Thanksgiving Orders/, text)
+      assert_match(/== Holiday Pre-orders: Thanksgiving Orders \(pickup Tue 5\/28\) ==/, text)
+      assert_match(/This week: 1 orders \(1 items\)\. 1 since pre-orders opened\./, text)
+      assert_match(/Total so far: 2 orders \(2 items\)/, text, "pre-orders stay out of the weekly menu's total")
+      assert_match(/\[pre-order: Thanksgiving Orders\]/, text)
+      assert_match(/Order email: 1 sent/, text, "the pre-order's confirmation counts in Email Health")
+
+      preorders = feed.summary.select { |e| e.action == "orders_summary" && e.details[:preorder] }
+      assert_equal 1, preorders.size
+      assert_match(/1 holiday pre-orders placed for Thanksgiving Orders/, preorders.first.description)
+      assert_equal holiday.id, preorders.first.details[:menu_id]
+    end
+  end
+
+  test "a holiday menu's own week notes the pre-orders that came in earlier" do
+    week = misfiled_week
+    holiday_preorders(week)
+
+    travel_to(week[:start] + 2.weeks + 1.day) do
+      text = ActivityFeed.new("24w22").to_text
+
+      assert_match(/^Holiday menu: Thanksgiving Orders$/, text)
+      assert_match(/Total so far: 0 orders/, text)
+      assert_match(/Plus 1 placed before this week began/, text)
+      assert_not_includes text, "== Holiday Pre-orders"
+    end
+  end
+
   private
+
+  # Week 24w20 (Sun 5/12/2024): a blank draft filed as 24w20, and the real
+  # menu, picked up Thu 5/16 and Sat 5/18, filed as 24w21.
+  def misfiled_week
+    start = Time.zone.from_week_id("24w20")
+    Menu.create!(week_id: "24w20", name: "")
+    menu = Menu.create!(week_id: "24w21", name: "Weekly Menu 5/16 - 5/18", emailed_at: start + 9.hours)
+    menu.menu_items.create!(item: items(:classic))
+    thu = menu.pickup_days.create!(pickup_at: start + 4.days + 7.hours, order_deadline_at: start + 3.days + 12.hours)
+    menu.pickup_days.create!(pickup_at: start + 6.days + 5.hours, order_deadline_at: start + 5.days + 12.hours)
+
+    [ users(:adrian), users(:ljf) ].each_with_index do |user, i|
+      order = user.orders.create!(menu: menu, created_at: start + (i + 1).days)
+      order.order_items.create!(item: items(:classic), pickup_day: thu, quantity: 1)
+    end
+    Ahoy::Message.create!(mailer: "MenuMailer#weekly_menu_email", menu: menu, user: users(:adrian), sent_at: start + 9.hours)
+    ActivityEvent.create!(action: "menu_emailed", week_id: "24w21", description: "Weekly menu emailed", created_at: start + 9.hours)
+
+    { start: start, menu: menu }
+  end
+
+  # A holiday menu picked up two weeks later (Tue 5/28, week 24w22) that takes
+  # one pre-order during 24w20.
+  def holiday_preorders(week)
+    start = week[:start]
+    holiday = Menu.create!(week_id: "24w22", name: "Thanksgiving Orders", menu_type: "holiday")
+    holiday.menu_items.create!(item: items(:rye))
+    pickup = holiday.pickup_days.create!(pickup_at: start + 16.days + 8.hours, order_deadline_at: start + 14.days)
+    order = users(:kyle).orders.create!(menu: holiday, created_at: start + 2.days)
+    order.order_items.create!(item: items(:rye), pickup_day: pickup, quantity: 1)
+    Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: holiday, user: users(:kyle), order_id: order.id, sent_at: start + 2.days)
+    holiday
+  end
 
   def track_order_updated(user, time)
     visit = Ahoy::Visit.create!(user: user, started_at: time, visit_token: SecureRandom.hex(8), visitor_token: SecureRandom.hex(8))

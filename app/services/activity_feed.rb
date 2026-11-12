@@ -27,10 +27,21 @@ class ActivityFeed
     @week_id = week_id
     @week_start = Time.zone.from_week_id(week_id)
     @week_end = @week_start + 7.days
-    @menus = [
-      Menu.find_by(week_id: week_id, menu_type: "regular"),
-      Menu.find_by(week_id: week_id, menu_type: "holiday")
-    ].compact
+    # Menus picked up this week, regular first. Matched on pickup days, not on
+    # the hand-typed week_id (see Menu.for_pickup_week).
+    @menus = Menu.for_pickup_week(week_id).to_a.sort_by { |m| [ m.holiday? ? 1 : 0, m.id ] }
+    # Holiday menus picked up in a later week that took orders this week.
+    # Thanksgiving pre-orders open weeks ahead; without these the feed showed
+    # none of that ordering until the holiday week itself.
+    @preorder_menus = Menu.holiday
+      .where.not(id: @menus.map(&:id))
+      .where(id: Order.where(created_at: @week_start..@week_end).select(:menu_id))
+      .to_a
+  end
+
+  # The menu the week is named after: the first one that isn't an empty draft.
+  def primary_menu
+    live_menus.first
   end
 
   def events(verbose: false)
@@ -55,8 +66,8 @@ class ActivityFeed
 
   def email_summary
     stats = {}
-    @menus.each do |menu|
-      menu.messages.group_by(&:mailer).each do |mailer, messages|
+    feed_menus.each do |menu|
+      messages_for(menu).group_by(&:mailer).each do |mailer, messages|
         existing = stats[mailer]
         if existing
           existing[:sent] += messages.size
@@ -216,6 +227,12 @@ class ActivityFeed
       lines << deliverability_text
       lines << rapid_duplicate_summary_text
       lines << ""
+    elsif header
+      # Said out loud, so a week with nothing sent yet doesn't read as a
+      # section that went missing.
+      lines << "== Email Health =="
+      lines << "No emails recorded for this week's menus."
+      lines << ""
     end
 
     evts = events(verbose: verbose)
@@ -233,6 +250,35 @@ class ActivityFeed
   private
 
   GITHUB_REPO = "kylefritz/motzi"
+
+  def feed_menus
+    @menus + @preorder_menus
+  end
+
+  def preorder?(menu)
+    @preorder_menus.include?(menu)
+  end
+
+  # This week's menus minus empty drafts (a blank menu someone started and
+  # abandoned). If a draft is all there is, it stays: an unpublished menu is
+  # worth seeing.
+  def live_menus
+    @live_menus ||= @menus.reject(&:draft?).presence || @menus
+  end
+
+  # A pre-order menu contributes only what happened this week; the feed for
+  # its own pickup week carries the whole menu.
+  def orders_for(menu)
+    preorder?(menu) ? menu.orders.where(created_at: @week_start..@week_end) : menu.orders
+  end
+
+  def messages_for(menu)
+    preorder?(menu) ? menu.messages.where(sent_at: @week_start..@week_end) : menu.messages
+  end
+
+  def day_label(time)
+    time.strftime("%a %-m/%-d")
+  end
 
   def metric_card(label, value, detail, delta)
     {
@@ -383,7 +429,8 @@ class ActivityFeed
         "MAX(occurred_at) AS last_seen",
         "MIN(occurred_at) AS first_seen",
         "MAX(source) AS source",
-        "MAX(error_class) AS error_class"
+        "MAX(error_class) AS error_class",
+        "COUNT(DISTINCT user_id) AS member_count"
       )
       .order(Arel.sql("COUNT(*) DESC, MAX(occurred_at) DESC"))
       .limit(15)
@@ -402,26 +449,45 @@ class ActivityFeed
 
     latest_events = ErrorEvent.where(id: groups.map(&:latest_id)).index_by(&:id)
     recurred = ErrorEvent.where(fingerprint: groups.map(&:fingerprint)).where.not(resolved_at: nil).distinct.pluck(:fingerprint).to_set
-    seen_before = ErrorEvent
+    prior_counts = ErrorEvent
       .where(fingerprint: groups.map(&:fingerprint), occurred_at: (@week_start - 4.weeks)...@week_start)
-      .distinct.pluck(:fingerprint).to_set
+      .group(:fingerprint).count
 
     lines = [ "== Application Errors (#{total} events: #{source_summary}) ==" ]
+    known = []
     groups.each do |g|
       latest = latest_events[g.latest_id]
+      prior = prior_counts[g.fingerprint].to_i
+      members = "#{g.member_count} signed-in member#{'s' unless g.member_count == 1}"
+      last_seen = g.last_seen.strftime("%-m/%d %l:%M%P").strip
+      tags = []
+      tags << " [NEW this week — not seen in prior 4 weeks]" if prior.zero?
+      tags << " [recurred after resolve]" if recurred.include?(g.fingerprint)
+      # Ten or more, and over twice the previous four weeks combined: a known
+      # error that has changed character and deserves a fresh look.
+      tags << " [SPIKE — #{g.event_count} this week vs #{prior} in the prior 4 weeks]" if prior.positive? && g.event_count >= 10 && g.event_count > prior * 2
+
+      # An error the reader has already been told about, at its usual rate,
+      # gets one line. Printed in full every night, these were copied into
+      # every report as a standing backlog (53 of 57 reports, fall 2026).
+      if tags.empty?
+        known << "  [#{g.source}] #{g.error_class} ×#{g.event_count} this week, #{prior} in the prior 4 weeks (#{members}; id #{latest&.id})"
+        next
+      end
+
       message = latest&.message.to_s.lines.first&.strip
       message = message[0, 160] + "…" if message && message.length > 160
       top_frame = latest&.backtrace.to_s.lines.find { |l| l.include?("/app/") }&.strip
-      tags = []
-      tags << " [NEW this week — not seen in prior 4 weeks]" unless seen_before.include?(g.fingerprint)
-      tags << " [recurred after resolve]" if recurred.include?(g.fingerprint)
-      status = tags.join
-      header = "  [#{g.source}] #{g.error_class} ×#{g.event_count} (last #{g.last_seen.strftime('%-m/%d %l:%M%P').strip})#{status}"
-      lines << header
+      lines << "  [#{g.source}] #{g.error_class} ×#{g.event_count} (last #{last_seen}, #{members})#{tags.join}"
       lines << "    msg: #{message}" if message.present?
       lines << "    at:  #{top_frame}" if top_frame.present?
       lines << "    url: #{latest.http_method} #{latest.url}".rstrip if latest&.url.present?
       lines << "    id:  #{latest.id} (fingerprint #{g.fingerprint})" if latest
+    end
+
+    if known.any?
+      lines << "  Known from earlier weeks, at their usual rate (already reported; open list at /admin/error_events):"
+      lines.concat(known)
     end
     lines.join("\n")
   end
@@ -559,18 +625,29 @@ class ActivityFeed
     end
   end
 
+  # Log lines the scraper picks up because they contain "error" but that say
+  # nothing about the app: routine R14 swap warnings, bots asking for paths we
+  # never had, and INFO-level request logs (the browser error reporter's own
+  # POSTs, which error_events already records properly).
+  LOG_NOISE = [ "R14", "ActionController::RoutingError", "INFO -- :" ].freeze
+
   def memory_metrics_text
     summary = DynoMetric.summary_for_period(@week_start, @week_end)
     return nil if summary.empty?
 
+    # R14 (soft quota, the dyno swaps and keeps running) is left out on purpose.
+    # It is routine here, and its week-to-date count kept being read as a
+    # growing memory crisis. R15 is the dyno being killed, and is the one that
+    # matters.
     lines = [ "== Dyno Memory ==" ]
     all_errors = []
     summary.sort_by { |dyno, _| dyno }.each do |dyno, stats|
       parts = [ "avg #{stats[:avg_memory_total]}MB", "max #{stats[:max_memory_total]}MB" ]
       parts << "(quota #{stats[:memory_quota]}MB)" if stats[:memory_quota]
-      r14_label = stats[:total_r14] > 0 ? "#{stats[:total_r14]} R14 events" : "0 R14 events"
-      lines << "  #{dyno}: #{parts.join(' / ')} — #{r14_label}"
-      all_errors.concat(stats[:errors]) if stats[:errors].any?
+      kills = stats[:total_r15].to_i
+      kill_label = kills.zero? ? "no R15 kills" : "#{kills} R15 KILL#{'S' unless kills == 1} (dyno terminated)"
+      lines << "  #{dyno}: #{parts.join(' / ')} — #{kill_label}"
+      all_errors.concat(stats[:errors].reject { |e| LOG_NOISE.any? { |noise| e.include?(noise) } }) if stats[:errors].any?
     end
     if all_errors.any?
       lines << ""
@@ -649,18 +726,48 @@ class ActivityFeed
   # against what was actually offered (#363: without the list, the report
   # claimed on-menu marketplace items were "not on the published menu").
   def menu_context_text
-    ActiveRecord::Associations::Preloader.new(records: @menus, associations: { menu_items: :item }).call
+    ActiveRecord::Associations::Preloader.new(records: feed_menus, associations: [ :pickup_days, { menu_items: :item } ]).call
 
     lines = [ "== Menu Context ==" ]
     @menus.each do |menu|
-      lines << "Menu: #{menu.name}"
-      lines << "  Baker's note: #{menu.subscriber_note}" if menu.subscriber_note.present?
-      lines << "  Menu note: #{menu.menu_note}" if menu.menu_note.present?
-      lines << "  Day-of note: #{menu.day_of_note}" if menu.day_of_note.present?
-      item_names = menu.sorted_menu_items.filter_map { |mi| mi.item&.name }
-      lines << "  Items (#{item_names.size}): #{item_names.join(', ')}" if item_names.any?
+      name = menu.name.presence || "(untitled)"
+      if menu.draft? && live_menus != @menus
+        lines << "Draft menu (ignore): #{name} — an empty placeholder with no items, no orders, never emailed. It is not this week's menu."
+        next
+      end
+
+      lines << "#{menu.holiday? ? 'Holiday menu' : 'Menu'}: #{name}"
+      lines << "  Draft: no items, no orders, never emailed." if menu.draft?
+      pickups = menu.pickup_days.sort_by(&:pickup_at)
+      lines << "  Pickup: #{pickups.map { |pd| day_label(pd.pickup_at) }.join(', ')}" if pickups.any?
+      if menu.week_id != @week_id
+        lines << "  Filed in admin under week #{menu.week_id}, but it is picked up this week, so this is this week's menu. " \
+                 "Admin events for it are logged under #{menu.week_id}."
+      end
+      lines.concat(menu_notes_and_items(menu))
+    end
+
+    @preorder_menus.each do |menu|
+      pickups = menu.pickup_days.sort_by(&:pickup_at)
+      lines << "Holiday pre-order menu (open for orders now, picked up in a later week): #{menu.name}"
+      lines << "  Pickup: #{pickups.map { |pd| day_label(pd.pickup_at) }.join(', ')} (week #{menu.week_id})" if pickups.any?
+      deadline = pickups.map(&:order_deadline_at).compact.max
+      lines << "  Ordering closes: #{deadline.strftime('%a %-m/%-d %l:%M%P').squish}" if deadline
+      lines << "  Holiday menus have no menu email of their own; the bakers announce them in the weekly menu's note. " \
+               "Pre-orders trickle in over several weeks and are counted separately from the weekly menu."
+      lines.concat(menu_notes_and_items(menu))
     end
     lines.join("\n")
+  end
+
+  def menu_notes_and_items(menu)
+    lines = []
+    lines << "  Baker's note: #{menu.subscriber_note}" if menu.subscriber_note.present?
+    lines << "  Menu note: #{menu.menu_note}" if menu.menu_note.present?
+    lines << "  Day-of note: #{menu.day_of_note}" if menu.day_of_note.present?
+    item_names = menu.sorted_menu_items.filter_map { |mi| mi.item&.name }
+    lines << "  Items (#{item_names.size}): #{item_names.join(', ')}" if item_names.any?
+    lines
   end
 
   def orders_by_day_text
@@ -670,7 +777,8 @@ class ActivityFeed
     total_items = 0
     all_orders = []
 
-    @menus.each do |menu|
+    live_menus.each do |menu|
+      lines << "  #{menu.name}:" if live_menus.size > 1
       by_day = menu.orders.includes(:user, order_items: :item).where(created_at: @week_start..@week_end)
                    .group_by { |o| o.created_at.to_date }
 
@@ -696,11 +804,33 @@ class ActivityFeed
 
     lines << "  Total so far: #{total_orders} orders (#{total_items} items)"
 
+    # Orders for these menus that landed before the week began: the hours after
+    # the weekend menu email, or weeks of pre-orders for a holiday menu.
+    early = live_menus.sum { |menu| menu.orders.where(created_at: ...@week_start).count }
+    lines << "  Plus #{early} placed before this week began (after the menu email, or as earlier holiday pre-orders)" if early.positive?
+
+    preorder_names = {}
+    @preorder_menus.each do |menu|
+      orders = orders_for(menu).includes(:user, order_items: :item).order(:created_at).to_a
+      pickup = menu.pickup_days.map(&:pickup_at).min
+      lines << ""
+      lines << "== Holiday Pre-orders: #{menu.name}#{" (pickup #{day_label(pickup)})" if pickup} =="
+      orders.group_by { |o| o.created_at.to_date }.sort.each do |date, daily|
+        lines << "  #{day_label(date)}: #{daily.size} orders (#{daily.sum { |o| o.order_items.size }} items)"
+      end
+      lines << "  This week: #{orders.size} orders (#{orders.sum { |o| o.order_items.size }} items). " \
+               "#{menu.orders.count} since pre-orders opened."
+      lines << "  These are on top of the weekly menu's orders above. Don't add them to weekly order volume or compare them with it."
+      orders.each { |o| preorder_names[o.id] = menu.name }
+      all_orders.concat(orders)
+    end
+
     if all_orders.any?
       lines << ""
       lines << "== Order Details (check for unusual items or quantities) =="
       all_orders.sort_by(&:created_at).each do |order|
-        lines << "  #{order.user.name}: #{order.item_list}"
+        tag = preorder_names[order.id] ? " [pre-order: #{preorder_names[order.id]}]" : ""
+        lines << "  #{order.user.name}: #{order.item_list}#{tag}"
       end
     end
 
@@ -708,7 +838,9 @@ class ActivityFeed
   end
 
   def activity_events(verbose: false)
-    ActivityEvent.for_week(@week_id).order(:created_at).map do |ae|
+    # A menu filed under another week logs its admin events under that week.
+    week_ids = ([ @week_id ] + @menus.map(&:week_id)).uniq
+    ActivityEvent.where(week_id: week_ids).order(:created_at).map do |ae|
       desc = ae.description
       desc = "#{desc} #{ae.metadata.to_json}" if verbose && ae.metadata.present? && ae.metadata != {}
       Event.new(
@@ -723,8 +855,9 @@ class ActivityFeed
 
   def order_events(verbose: false)
     events = []
-    @menus.each do |menu|
-      orders = menu.orders.includes(:user, order_items: :item)
+    feed_menus.each do |menu|
+      orders = orders_for(menu).includes(:user, order_items: :item)
+      preorder = preorder?(menu)
 
       if verbose
         orders.each do |order|
@@ -732,7 +865,7 @@ class ActivityFeed
             timestamp: order.created_at,
             category: "customer",
             action: "order_placed",
-            description: "#{order.user.name} ordered: #{order.item_list}",
+            description: "#{order.user.name} #{preorder ? "pre-ordered from #{menu.name}" : 'ordered'}: #{order.item_list}",
             details: { source: "order", id: order.id, menu_id: menu.id }
           )
         end
@@ -757,8 +890,8 @@ class ActivityFeed
             timestamp: daily_orders.last.created_at,
             category: "customer",
             action: "orders_summary",
-            description: "#{daily_orders.size} orders placed for #{menu.name} (#{item_count} items)",
-            details: { source: "orders", menu_id: menu.id, count: daily_orders.size, item_count: item_count, date: date.to_s }
+            description: "#{daily_orders.size} #{preorder ? 'holiday pre-orders' : 'orders'} placed for #{menu.name} (#{item_count} items)",
+            details: { source: "orders", menu_id: menu.id, count: daily_orders.size, item_count: item_count, date: date.to_s, preorder: preorder }
           )
         end
       end
@@ -820,9 +953,13 @@ class ActivityFeed
       jobs.group_by { |j| [ j.class_name, j.created_at.to_date ] }.each do |(class_name, date), day_jobs|
         label = RECURRING_JOB_LABELS[class_name] || class_name
         finished = day_jobs.count(&:finished?)
-        failed = day_jobs.size - finished
+        # The report is written from inside an AnalyzeAnomaliesJob, so the
+        # newest one is always unfinished. Don't let it read as a stuck job.
+        running_now = class_name == "AnalyzeAnomaliesJob" ? day_jobs.count { |j| !j.finished? && j.created_at > 1.hour.ago } : 0
+        failed = day_jobs.size - finished - running_now
         desc = "#{label}: #{finished} runs"
         desc += " (#{failed} incomplete)" if failed > 0
+        desc += " (plus the run writing this report)" if running_now > 0
         events << Event.new(
           timestamp: day_jobs.last.created_at,
           category: "system",
@@ -934,8 +1071,8 @@ class ActivityFeed
   def rapid_duplicate_summary_text
     pair_count = 0
     affected_users = Set.new
-    @menus.each do |menu|
-      menu.messages.where("mailer LIKE 'ConfirmationMailer%'").group_by(&:mailer).each_value do |messages|
+    feed_menus.each do |menu|
+      messages_for(menu).where("mailer LIKE 'ConfirmationMailer%'").group_by(&:mailer).each_value do |messages|
         each_rapid_pair(messages) do |user_id, _a, _b|
           pair_count += 1
           affected_users << user_id
@@ -964,8 +1101,8 @@ class ActivityFeed
 
   def email_events(verbose: false)
     events = []
-    @menus.each do |menu|
-      messages_by_mailer = menu.messages.includes(:user).group_by(&:mailer)
+    feed_menus.each do |menu|
+      messages_by_mailer = messages_for(menu).includes(:user).group_by(&:mailer)
 
       messages_by_mailer.each do |mailer, messages|
         label = MAILER_LABELS[mailer] || mailer

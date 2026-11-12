@@ -47,6 +47,18 @@ class SpamDetectorTest < ActiveSupport::TestCase
     end
   end
 
+  # Haiku 5.5 can decline a request; that reply has no list in it.
+  test "scan raises when Claude declines, instead of reporting a clean scan" do
+    create_candidate
+    detector = SpamDetector.new
+    reply = { text: "", stop_reason: :refusal }
+
+    detector.stub(:call_claude, reply) do
+      error = assert_raises(SpamDetector::UnreadableResponse) { detector.scan }
+      assert_match(/declined/, error.message)
+    end
+  end
+
   test "scan returns the flagged accounts from a complete reply" do
     create_candidate
     detector = SpamDetector.new

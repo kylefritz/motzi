@@ -1,0 +1,38 @@
+<%#
+  CTEs only (no leading "with"), so a query can chain them after others:
+  "with [this partial] select ... from compared".
+
+  compared = the menu @menu_id (weeks_back 0) plus the @weeks emailed regular
+  menus picked up before it (weeks_back 1 = the week before, and so on).
+
+  Menus are placed in time by their first pickup day, never by menus.week_id,
+  which is typed by hand and has been a week off. anchor_on is the Saturday
+  before the pickup week (weeks start Sunday): the day the menu email usually
+  goes out, so "day 0" lines up across weeks whatever day the email went.
+
+  SqlQuery#execute squeezes the template onto one line before running ERB, so
+  keep each ERB tag to one statement and use only ERB or /* */ comments.
+%>
+<% tz = quote(Time.zone.tzinfo.identifier) %>
+<% menu_id = @menu_id.to_i %>
+menu_weeks as (
+    select menus.id as menu_id,
+        min(pickup_days.pickup_at) as first_pickup_at,
+        (min(pickup_days.pickup_at) at time zone 'UTC' at time zone <%= tz %>)::date as first_pickup_on
+    from menus
+        join pickup_days on pickup_days.menu_id = menus.id
+    where menus.menu_type = 'regular'
+        and (menus.emailed_at is not null or menus.id = <%= menu_id %>)
+    group by menus.id
+),
+compared as (
+    select menu_weeks.*,
+        menu_weeks.menu_id = <%= menu_id %> as is_current,
+        menu_weeks.first_pickup_on - extract(dow from menu_weeks.first_pickup_on)::int - 1 as anchor_on,
+        row_number() over (order by menu_weeks.first_pickup_at desc, menu_weeks.menu_id desc) - 1 as weeks_back
+    from menu_weeks
+    where menu_weeks.menu_id = <%= menu_id %>
+        or menu_weeks.first_pickup_at < (select first_pickup_at from menu_weeks where menu_id = <%= menu_id %>)
+    order by menu_weeks.first_pickup_at desc, menu_weeks.menu_id desc
+    limit <%= @weeks.to_i + 1 %>
+)

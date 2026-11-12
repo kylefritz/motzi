@@ -1,0 +1,19 @@
+<%#
+  Every item with a per-pickup-day limit on the menus @menu_ids, with how many
+  have been ordered for that day. No rows when no limits are set.
+%>
+<% menu_ids = Array(@menu_ids).map(&:to_i) %>
+select menu_items.menu_id, items.id as item_id, items.name as item_name,
+    pickup_days.id as pickup_day_id, pickup_days.pickup_at,
+    menu_item_pickup_days."limit" as item_limit,
+    coalesce(sum(order_items.quantity), 0)::int as ordered
+from menu_item_pickup_days
+    join menu_items on menu_items.id = menu_item_pickup_days.menu_item_id
+    join items on items.id = menu_items.item_id
+    join pickup_days on pickup_days.id = menu_item_pickup_days.pickup_day_id
+    left join order_items on order_items.item_id = menu_items.item_id
+        and order_items.pickup_day_id = menu_item_pickup_days.pickup_day_id
+where menu_items.menu_id in (<%= menu_ids.join(",") %>)
+    and menu_item_pickup_days."limit" > 0
+group by menu_items.menu_id, items.id, items.name, pickup_days.id, pickup_days.pickup_at, menu_item_pickup_days."limit"
+order by coalesce(sum(order_items.quantity), 0)::float / menu_item_pickup_days."limit" desc, pickup_days.pickup_at

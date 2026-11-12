@@ -21,6 +21,28 @@ class Menu < ApplicationRecord
     persisted? && (emailed_at_in_database.present? || orders.exists?)
   end
 
+  # Menus picked up during a week. week_id is typed in by hand and has been a
+  # week off (the 11/12–11/14/2026 menu was filed as 26w47, leaving 26w46
+  # looking empty), so when a menu has pickup days, its first one decides which
+  # week it belongs to. A menu with no pickup days yet falls back to week_id.
+  def self.for_pickup_week(week_id)
+    week_start = Time.zone.from_week_id(week_id).beginning_of_day
+    picked_up = PickupDay.unscoped.group(:menu_id)
+      .having("MIN(pickup_at) >= ? AND MIN(pickup_at) < ?", week_start, week_start + 7.days)
+      .pluck(:menu_id)
+    undated = unscoped.where(week_id: week_id).where.missing(:pickup_days).pluck(:id)
+    where(id: picked_up + undated)
+  end
+
+  # Created but never filled in: nothing to order, nobody told, nothing ordered.
+  def draft?
+    emailed_at.blank? && !current? && menu_items.none? && orders.none?
+  end
+
+  def first_pickup_at
+    pickup_days.minimum(:pickup_at)
+  end
+
   def self.current
     Menu.find(Setting.menu_id)
   end
