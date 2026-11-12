@@ -17,8 +17,4 @@ class CreditBundle < ApplicationRecord
   def name_description
     [ name, description ].compact.join(", ")
   end
-
-  def description_html
-    @description_html ||= Menu::MARKDOWN.render(self.description || "").html_safe
-  end
 end

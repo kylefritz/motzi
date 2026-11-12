@@ -156,7 +156,7 @@ export default function Buy({ user: passedUser }: BuyProps) {
       <div className="alert alert-success" role="alert">
         <h2>Thanks for your support!!</h2>
         <p className="text-center my-3">
-          <a href={receipt} target="blank">
+          <a href={receipt} target="_blank" rel="noopener">
             Here's your receipt
           </a>
         </p>

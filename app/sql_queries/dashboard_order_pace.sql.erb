@@ -1,0 +1,25 @@
+<%#
+  Orders per menu per day of the ordering week, for this menu and the @weeks
+  before it. day_index: 0 = the Saturday before the pickup week ... 6 = Friday;
+  anything earlier or later is folded into the first or last day.
+  orders_by_now counts the orders placed no later than @elapsed_seconds into
+  that menu's own week, i.e. by the same weekday and time as right now.
+%>
+<% tz = quote(Time.zone.tzinfo.identifier) %>
+with <%= partial :dashboard_menu_weeks %>,
+placed as (
+    select compared.menu_id, compared.is_current, compared.weeks_back, compared.anchor_on,
+        orders.id as order_id,
+        orders.created_at at time zone 'UTC' at time zone <%= tz %> as placed_at
+    from compared
+        left join orders on orders.menu_id = compared.menu_id
+)
+select menu_id, is_current, weeks_back,
+    least(greatest(placed_at::date - anchor_on, 0), 6) as day_index,
+    count(order_id) as orders,
+    count(order_id) filter (
+        where extract(epoch from (placed_at - anchor_on::timestamp)) <= <%= @elapsed_seconds.to_i %>
+    ) as orders_by_now
+from placed
+group by menu_id, is_current, weeks_back, day_index
+order by weeks_back, day_index

@@ -1,6 +1,12 @@
 import React from "react";
 import { beforeEach, expect, mock, test } from "bun:test";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const menuResponse = {
@@ -101,7 +107,9 @@ mock.module("axios", () => ({
   },
 }));
 
-mock.module("../../app/javascript/lib/errorReporter", () => ({
+// Three levels up from test/javascript/builder. The two-level path pointed at
+// test/app/..., which doesn't exist, so the mock never applied.
+mock.module("../../../app/javascript/lib/errorReporter", () => ({
   reportException: () => {},
   reportError: () => {},
   installGlobalErrorReporter: () => {},
@@ -259,6 +267,27 @@ test("removes a pickup day only after confirming", async () => {
   expect(deleteMock).toHaveBeenCalledWith("/admin/pickup_days/1.json");
 });
 
+test("shows the server's reason when a pickup day can't be deleted", async () => {
+  const user = userEvent.setup();
+  await renderBuilder();
+
+  const reason =
+    "Can't delete Wednesday 01/10/24: 3 order items are for this pickup day. Move or remove those orders first.";
+  deleteMock.mockImplementationOnce(() =>
+    Promise.reject({ response: { status: 422, data: { error: reason } } })
+  );
+  const alertSpy = mock(() => {});
+  window.alert = alertSpy;
+
+  await user.click(
+    pickupDayCard("Wed, Jan 10 at 10a").getByRole("button", { name: "x" })
+  );
+
+  await waitFor(() => expect(alertSpy).toHaveBeenCalledWith(reason));
+  // Still listed: nothing was deleted.
+  expect(pickupDayCard("Wed, Jan 10 at 10a")).toBeTruthy();
+});
+
 test("edits an existing pickup day", async () => {
   const user = userEvent.setup();
   await renderBuilder();
@@ -333,7 +362,10 @@ test("copy from menu defaults are wired up", async () => {
   const copyForm = within(copySection);
 
   // The menu selector should exist and be required.
-  expect(copyForm.getByRole("combobox", { name: "Menu:" })).toBeTruthy();
+  expect(
+    copyForm.getByRole<HTMLSelectElement>("combobox", { name: "Menu:" })
+      .required
+  ).toBe(true);
 
   // All note copy checkboxes should be present and default checked.
   for (const name of ["Subscriber", "Menu", "Day of"]) {

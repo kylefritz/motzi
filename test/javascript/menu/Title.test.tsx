@@ -13,22 +13,20 @@ function makeTitle(orderDeadlineAt: string) {
     <Title
       menu={{
         name: "Week 6: toast",
-        orderingDeadlineText:
-          "9:00 pm Tuesday for Thursday pickup or 9:00 pm Thurs for Sat pickup",
         pickupDays: [{ id: 1, pickupAt, orderDeadlineAt }],
       }}
     />
   );
 }
 
-test("After deadline: ordering close", () => {
+test("Before deadline: shows the order-by deadline", () => {
   const orderDeadlineAt = now().plus(Duration.fromISO("PT12H")).toISO()!;
   const { container } = makeTitle(orderDeadlineAt);
   const deadlineEl = container.querySelector("#deadline");
   expect(deadlineEl).toBeTruthy();
 });
 
-test("Before deadline: small warning", () => {
+test("After deadline: shows the ordering-closed warning", () => {
   const orderDeadlineAt = now().minus(Duration.fromISO("PT12H")).toISO()!;
   const { container } = makeTitle(orderDeadlineAt);
   const warningEl = container.querySelector("#past-deadline");
@@ -75,7 +73,6 @@ test("Multiple pickup days: schedule wraps for mobile", () => {
     <Title
       menu={{
         name: "Week 6: toast",
-        orderingDeadlineText: "",
         pickupDays,
       }}
     />

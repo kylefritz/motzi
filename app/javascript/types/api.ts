@@ -7,7 +7,6 @@ import type {
   CreditItemResponse,
   ErrorEventRequest,
   MenuResponse,
-  OrderErrorResponse,
 } from "./api.generated";
 
 export type {
@@ -16,7 +15,6 @@ export type {
   CreditItemResponse,
   ErrorEventRequest,
   MenuResponse,
-  OrderErrorResponse,
 };
 
 export type Menu = MenuResponse["menu"];
@@ -27,21 +25,16 @@ export type CreditBundle = MenuResponse["bundles"][number];
 export type MenuUser = NonNullable<MenuResponse["user"]>;
 export type MenuOrder = NonNullable<MenuResponse["order"]>;
 export type MenuOrderItem = MenuOrder["items"][number];
-export type HolidayMenu = NonNullable<MenuResponse["holidayMenu"]>;
-export type HolidayOrder = NonNullable<MenuResponse["holidayOrder"]>;
 
 // Pay-it-forward items are added without a pickupDayId; the server assigns
 // them to the menu's first pickup day.
 export type CartItem = Pick<MenuOrderItem, "itemId" | "quantity"> &
   Partial<Pick<MenuOrderItem, "pickupDayId" | "day" | "pickupAt">>;
 
-export type AdminMenu = AdminMenuBuilderResponse;
 export type AdminPickupDay = AdminMenuBuilderResponse["pickupDays"][number];
 export type AdminMenuItem = AdminMenuBuilderResponse["menuItems"][number];
 export type AdminMenuItemPickupDay = AdminMenuItem["pickupDays"][number];
 export type AdminItem = AdminItemsResponse["items"][number];
-
-export type CreditItem = CreditItemResponse["creditItem"];
 
 export type MenuOrderRequest = {
   uid?: string | null;

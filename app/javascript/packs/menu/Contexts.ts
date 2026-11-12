@@ -8,7 +8,6 @@ function pastDeadline(deadline: string) {
 }
 
 type DayContextValue = {
-  orderingDeadlineText?: string;
   ignoreDeadline?: boolean | string | null;
 };
 

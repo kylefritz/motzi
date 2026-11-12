@@ -19,9 +19,8 @@ class ShopConfigTest < ActiveSupport::TestCase
   end
 
   test "non-existant shop" do
-    assert_raise do
-      ShopConfig.load_config_for_shop_id!("shoppy")
-    end
+    error = assert_raises(RuntimeError) { ShopConfig.load_config_for_shop_id!("shoppy") }
+    assert_equal "No shop settings for shoppy", error.message
   end
 
   test "no config for retired shops" do

@@ -21,6 +21,28 @@ class Menu < ApplicationRecord
     persisted? && (emailed_at_in_database.present? || orders.exists?)
   end
 
+  # Menus picked up during a week. week_id is typed in by hand and has been a
+  # week off (the 11/12–11/14/2026 menu was filed as 26w47, leaving 26w46
+  # looking empty), so when a menu has pickup days, its first one decides which
+  # week it belongs to. A menu with no pickup days yet falls back to week_id.
+  def self.for_pickup_week(week_id)
+    week_start = Time.zone.from_week_id(week_id).beginning_of_day
+    picked_up = PickupDay.unscoped.group(:menu_id)
+      .having("MIN(pickup_at) >= ? AND MIN(pickup_at) < ?", week_start, week_start + 7.days)
+      .pluck(:menu_id)
+    undated = unscoped.where(week_id: week_id).where.missing(:pickup_days).pluck(:id)
+    where(id: picked_up + undated)
+  end
+
+  # Created but never filled in: nothing to order, nobody told, nothing ordered.
+  def draft?
+    emailed_at.blank? && !current? && menu_items.none? && orders.none?
+  end
+
+  def first_pickup_at
+    pickup_days.minimum(:pickup_at)
+  end
+
   def self.current
     Menu.find(Setting.menu_id)
   end
@@ -30,10 +52,6 @@ class Menu < ApplicationRecord
     Menu.find(Setting.holiday_menu_id)
   rescue ActiveRecord::RecordNotFound
     nil
-  end
-
-  def self.for_current_week_id
-    Menu.find_by(week_id: Time.zone.now.week_id)
   end
 
   def make_current!
@@ -50,10 +68,6 @@ class Menu < ApplicationRecord
     else
       self.id == Setting.menu_id
     end
-  end
-
-  def for_current_week_id?
-    self.week_id == Time.zone.now.week_id
   end
 
   def can_publish?
@@ -124,12 +138,34 @@ class Menu < ApplicationRecord
     @day_of_note_html ||= MARKDOWN.render(self.day_of_note || "").html_safe
   end
 
+  # Raised when publish_to_subscribers! refuses to send; the message is shown
+  # to the admin.
+  class PublishError < StandardError; end
+
+  # How long after one send before another may start. SendWeeklyMenuJob only
+  # skips subscribers whose email has already been delivered, so a second send
+  # while the first batch is still going out would email everyone again.
+  RESEND_WAIT = 15.minutes
+
   def publish_to_subscribers!
-    unless can_publish?
-      throw "can only publish_to_subscribers for current week's menu or future week's menu"
+    if holiday?
+      raise PublishError, "Holiday menus aren't emailed to subscribers. Open it for orders and announce it in the regular menu's subscriber note."
     end
-    self.make_current!
-    self.touch :emailed_at # create audit that email was sent
+    unless can_publish?
+      raise PublishError, "can only publish_to_subscribers for current week's menu or future week's menu"
+    end
+
+    # Row lock, so two sends started at the same moment can't both get through.
+    with_lock do
+      if emailed_at.present? && emailed_at > RESEND_WAIT.ago
+        ago = ActionController::Base.helpers.time_ago_in_words(emailed_at)
+        raise PublishError, "This menu was emailed #{ago} ago and those emails may still be going out. " \
+                            "Wait #{RESEND_WAIT.inspect} after a send before sending again."
+      end
+      self.make_current!
+      self.touch :emailed_at # create audit that email was sent
+    end
+
     SendWeeklyMenuJob.users_to_email_count(self).tap do
       # Pass the specific menu ID to the job
       SendWeeklyMenuJob.perform_later(id)

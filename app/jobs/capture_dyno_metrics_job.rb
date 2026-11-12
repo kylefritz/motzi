@@ -8,6 +8,11 @@ class CaptureDynoMetricsJob < ApplicationJob
   # Matches the schedule (:03 and :33), so each run sees every sample once.
   WINDOW = 30.minutes
 
+  # Heroku killed a dyno for using far more than its memory quota (R15).
+  # Unlike R14 (a soft warning we expect and only count), this is an outage
+  # for whatever the dyno was doing.
+  class DynoKilled < StandardError; end
+
   def perform
     log_content = recent_logs
     return if log_content.nil?
@@ -29,14 +34,26 @@ class CaptureDynoMetricsJob < ApplicationJob
         memory_swap: metrics[:memory_swap],
         memory_quota: metrics[:memory_quota],
         r14_count: metrics[:r14_count],
+        r15_count: metrics[:r15_count],
         errors_summary: metrics[:errors_summary]
       )
+      report_r15s(dyno, metrics[:r15_lines])
     end
 
     Rails.logger.info("[CaptureDynoMetricsJob] Saved metrics for #{metrics_by_dyno.size} dyno(s)")
   end
 
   private
+
+  # One error event per R15 line. The schedule matches WINDOW, so each line is
+  # seen (and reported) once.
+  def report_r15s(dyno, lines)
+    lines.each do |line|
+      Rails.error.report(DynoKilled.new("#{dyno} was killed by Heroku: #{line}"),
+                         handled: true, severity: :error,
+                         context: { source: "capture_dyno_metrics", dyno: dyno })
+    end
+  end
 
   # The log drain has the whole window. Heroku's log session only has the last
   # 1,500 lines, which can be just a few minutes when it's busy.
@@ -79,18 +96,20 @@ class CaptureDynoMetricsJob < ApplicationJob
     JSON.parse(response.body)
   end
 
-  # Parses Heroku log lines for memory samples and R14 errors.
-  # Returns max memory values per dyno and R14 count.
+  # Parses Heroku log lines for memory samples and R14/R15 errors.
+  # Returns max memory values per dyno, the R14 count, and the R15 count/lines.
   #
   # Memory sample format:
   #   source=web.1 dyno=heroku.123 sample#memory_total=635.12MB sample#memory_rss=504.00MB ...
   # R14 format:
   #   heroku[web.1]: Error R14 (Memory quota exceeded)
+  # R15 format:
+  #   heroku[web.1]: Error R15 (Memory quota vastly exceeded)
   def parse_log_lines(log_content)
     # Logplex bodies arrive as binary and occasionally contain invalid UTF-8;
     # unscrubbed bytes blow up the DynoMetric insert (PG::CharacterNotInRepertoire).
     log_content = log_content.dup.force_encoding(Encoding::UTF_8).scrub("?")
-    samples = Hash.new { |h, k| h[k] = { memory_totals: [], memory_rss: [], memory_swaps: [], memory_quotas: [], r14_count: 0, errors: [] } }
+    samples = Hash.new { |h, k| h[k] = { memory_totals: [], memory_rss: [], memory_swaps: [], memory_quotas: [], r14_count: 0, r15_lines: [], errors: [] } }
 
     log_content.each_line do |line|
       if line.include?("sample#memory_total=")
@@ -109,6 +128,12 @@ class CaptureDynoMetricsJob < ApplicationJob
       elsif line.include?("Error R14")
         dyno = line[/heroku\[(\S+)\]/, 1]
         samples[dyno][:r14_count] += 1 if dyno
+      elsif line.include?("Error R15")
+        dyno = line[/heroku\[(\S+)\]/, 1]
+        next unless dyno
+        samples[dyno][:r15_lines] << line[/Error R15.*/].strip.first(200)
+        # Still listed with the dyno's errors, ahead of the 20-line cap.
+        samples[dyno][:errors].unshift(line.strip.first(500))
       elsif line.match?(/(?:Error|Exception|FATAL)\b/) && !line.include?("sample#")
         next if line.include?("sentry") || line.include?("Discarding") || line.include?("rate limiting")
         dyno = line[/app\[(\S+)\]/, 1] || line[/heroku\[(\S+)\]/, 1]
@@ -125,6 +150,8 @@ class CaptureDynoMetricsJob < ApplicationJob
         memory_swap: data[:memory_swaps].max,
         memory_quota: data[:memory_quotas].last,
         r14_count: data[:r14_count],
+        r15_count: data[:r15_lines].size,
+        r15_lines: data[:r15_lines],
         errors_summary: data[:errors].any? ? data[:errors].join("\n") : nil
       }
     end

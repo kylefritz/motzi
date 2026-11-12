@@ -1,5 +1,9 @@
 class SpamDetector
-  MODEL = "claude-haiku-4-5"
+  MODEL = "claude-haiku-5-5"
+
+  # Claude's reply was cut off or isn't the JSON we asked for. Raised instead
+  # of returning [], which the admin page would show as "0 spam accounts".
+  class UnreadableResponse < StandardError; end
 
   def initialize(&on_progress)
     @on_progress = on_progress || ->(_msg) { }
@@ -15,14 +19,24 @@ class SpamDetector
     response = call_claude(user_message)
     @on_progress.call("Parsing results...")
 
+    # A reply that ran out of tokens can still end in a complete-looking array
+    # that lists only some of the spam.
+    if response[:stop_reason].to_s == "max_tokens"
+      raise UnreadableResponse, "Claude's reply was cut off at the token limit (#{candidates.size} accounts sent)"
+    end
+    # A refusal comes back as a normal reply with no list, which would
+    # otherwise read as "no spam found".
+    if response[:stop_reason].to_s == "refusal"
+      raise UnreadableResponse, "Claude declined to review the accounts (#{candidates.size} sent)"
+    end
+
     parse_spam_ids(response[:text])
   end
 
   private
 
   def load_candidates
-    User.left_joins(:orders)
-        .where(orders: { id: nil })
+    User.where.missing(:orders, :credit_items) # anyone with either is a member
         .where("sign_in_count <= 1")
         .where.not(email: [ User::MAYA_EMAIL, User::RUSSELL_EMAIL ].compact)
         .where.not(id: User::SYSTEM_ID) # exclude system user
@@ -44,7 +58,9 @@ class SpamDetector
     client = Anthropic::Client.new
     response = client.messages.create(
       model: MODEL,
-      max_tokens: 4096,
+      # Haiku 5.5 thinks before answering, and thinking counts toward max_tokens.
+      max_tokens: 16_000,
+      output_config: { effort: :medium },
       system_: system_prompt,
       messages: [ { role: "user", content: user_message } ]
     )
@@ -53,15 +69,19 @@ class SpamDetector
       block.text if block.respond_to?(:text)
     end.join("\n")
 
-    { text: text }
+    { text: text, stop_reason: response.stop_reason }
   end
 
+  # No "[" at all means Claude answered in prose that nothing looks like spam.
+  # An array that was started but can't be parsed is a broken reply.
   def parse_spam_ids(text)
+    return [] unless text.include?("[")
+
     json = text[/\[.*\]/m]
-    return [] unless json
+    raise UnreadableResponse, "Claude's reply has a list that was never finished" unless json
 
     JSON.parse(json, symbolize_names: true)
-  rescue JSON::ParserError
-    []
+  rescue JSON::ParserError => e
+    raise UnreadableResponse, "Claude's reply isn't valid JSON: #{e.message.first(200)}"
   end
 end

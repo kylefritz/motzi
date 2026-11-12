@@ -70,7 +70,7 @@ export type PayProps = {
 };
 
 // What stops a price from being paid by card, if anything.
-export function cardPriceProblem(
+function cardPriceProblem(
   price: number | null,
   {
     minPrice = MINIMUM_CARD_PAYMENT,

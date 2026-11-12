@@ -53,18 +53,20 @@ class SendHaventOrderedReminderJobTest < ActiveJob::TestCase
   end
 
   test "respects receive_havent_ordered_reminder preference" do
-    users(:kyle).update!(receive_havent_ordered_reminder: false)
-    new_num = @user_ids_to_remind.count { |id| id != users(:kyle).id }
+    # ljf hasn't ordered, so would be reminded. (kyle has an order on this menu
+    # and is never reminded, so opting him out proved nothing.)
+    assert_includes @user_ids_to_remind, users(:ljf).id
+    users(:ljf).update!(receive_havent_ordered_reminder: false)
     assert_commented do
-      assert_reminders_emailed(new_num, :sun, "7:00 PM", "kyle opted out")
+      assert_reminders_emailed(@num_to_remind - 1, :sun, "7:00 PM", "ljf opted out")
     end
   end
 
   test "receive_havent_ordered_reminder gated by receive_weekly_menu" do
-    users(:kyle).update!(receive_weekly_menu: false)
-    new_num = @user_ids_to_remind.count { |id| id != users(:kyle).id }
+    assert_includes @user_ids_to_remind, users(:ljf).id
+    users(:ljf).update!(receive_weekly_menu: false)
     assert_commented do
-      assert_reminders_emailed(new_num, :sun, "7:00 PM", "kyle off weekly menu")
+      assert_reminders_emailed(@num_to_remind - 1, :sun, "7:00 PM", "ljf off weekly menu")
     end
   end
 

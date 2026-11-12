@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_20_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_120100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -129,6 +129,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_120000) do
     t.string "utm_term"
     t.string "visit_token"
     t.string "visitor_token"
+    t.index [ "started_at" ], name: "index_ahoy_visits_on_started_at"
     t.index [ "user_id" ], name: "index_ahoy_visits_on_user_id"
     t.index [ "visit_token" ], name: "index_ahoy_visits_on_visit_token", unique: true
   end
@@ -271,6 +272,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_120000) do
     t.integer "r14_count", default: 0
     t.datetime "recorded_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "r15_count", default: 0
     t.index [ "dyno", "recorded_at" ], name: "index_dyno_metrics_on_dyno_and_recorded_at"
   end
 
@@ -368,6 +370,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_120000) do
     t.datetime "updated_at", null: false
     t.index [ "item_id" ], name: "index_order_items_on_item_id"
     t.index [ "order_id" ], name: "index_order_items_on_order_id"
+    t.index [ "pickup_day_id" ], name: "index_order_items_on_pickup_day_id"
   end
 
   create_table "orders", force: :cascade do |t|

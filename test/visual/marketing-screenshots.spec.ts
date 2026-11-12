@@ -51,8 +51,10 @@ async function reviewMarketingPage(
   }
 
   const response = await client.messages.create({
-    model: "claude-haiku-4-5",
-    max_tokens: 256,
+    model: "claude-haiku-5-5",
+    // Haiku 5.5 thinks before answering; thinking counts toward max_tokens.
+    max_tokens: 2048,
+    output_config: { effort: "low" },
     messages: [
       {
         role: "user",
@@ -71,8 +73,10 @@ async function reviewMarketingPage(
     ],
   });
 
-  const result =
-    response.content[0].type === "text" ? response.content[0].text : "";
+  // The reply can open with a thinking block, so find the text by type.
+  const result = response.content
+    .map((block) => (block.type === "text" ? block.text : ""))
+    .join("");
   return result.trim();
 }
 

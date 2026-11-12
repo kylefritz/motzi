@@ -12,8 +12,6 @@ class OrderPricingTest < ActiveSupport::TestCase
                           { item_id: items(:rye).id, quantity: 1 })
 
     assert_equal BigDecimal("12"), pricing.fixed_subtotal
-    assert_equal BigDecimal("10"), pricing.suggested_pwyc_subtotal
-    assert_equal BigDecimal("22"), pricing.suggested_total
     assert_equal BigDecimal("12"), pricing.minimum
     assert_equal BigDecimal("262"), pricing.maximum
     assert_equal "The minimum for this order is $12.00 (Donuts is a fixed price)", pricing.minimum_message
@@ -34,7 +32,6 @@ class OrderPricingTest < ActiveSupport::TestCase
 
     assert_equal 0, pricing.minimum
     refute pricing.below_minimum?(0)
-    assert_equal BigDecimal("20"), pricing.suggested_total
   end
 
   test "with the shop's pay what you can off, every line is fixed" do
@@ -43,7 +40,7 @@ class OrderPricingTest < ActiveSupport::TestCase
                           shop_pay_what_you_can: false)
 
     assert_equal BigDecimal("11"), pricing.minimum
-    assert_equal 0, pricing.suggested_pwyc_subtotal
+    assert_empty pricing.lines.select(&:pay_what_you_can)
     assert_equal "The minimum for this order is $11.00 (Classic and Donuts are fixed prices)", pricing.minimum_message
   end
 

@@ -140,25 +140,14 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select ".flash_alert", text: /without orders/
   end
 
-  test "batch delete only removes users without orders" do
-    deletable = User.create!(
-      email: "deletable@example.com",
-      first_name: "Delete",
-      last_name: "Me",
-      password: "password123"
-    )
-    keep = users(:kyle)
-    assert keep.orders.any?, "fixture user should have orders"
-
-    assert_difference "User.count", -1 do
-      delete "/admin/users/batch_action", params: {
-        collection_selection: [ deletable.id, keep.id ]
-      }
-    end
-
-    assert_redirected_to "/admin/users"
-    assert_nil User.find_by(id: deletable.id)
-    assert User.exists?(keep.id)
+  # "Delete Selected" was listed in the Batch Actions menu but posted to an
+  # empty action: nothing was deleted and nothing was shown. Users are deleted
+  # one at a time (or from Advanced > Spam), so the option is gone.
+  test "index does not offer a batch delete" do
+    get "/admin/users"
+    assert_response :success
+    assert_select "[data-action=destroy]", count: 0
+    assert_select ".batch_actions_selector", count: 0
   end
 
   private

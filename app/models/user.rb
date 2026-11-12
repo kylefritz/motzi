@@ -60,7 +60,7 @@ class User < ApplicationRecord
   def credit_ledger
     # quantity is nullable on old rows; SUM skips NULLs, so count them as 0
     purchases = credit_items.map { |ci| { at: ci.created_at, change: ci.quantity.to_i, source: ci } }
-    deductions = orders.where(stripe_charge_id: nil).includes(:menu, order_items: :item)
+    deductions = orders.subscriber.includes(:menu, order_items: :item)
                        .map { |o| { at: o.created_at, change: -o.credits, source: o } }
     entries = purchases + deductions
     creators = record_creators(entries.map { |e| e[:source] })
@@ -70,10 +70,6 @@ class User < ApplicationRecord
       balance += e[:change]
       CreditLedgerEntry.new(**e, balance: balance, by: creators[[ e[:source].class.name, e[:source].id ]])
     end
-  end
-
-  def authenticate(password)
-    Devise::Encryptor.compare(User, self.encrypted_password, password)
   end
 
   def name
@@ -111,13 +107,7 @@ class User < ApplicationRecord
     User.find_by(email: KYLE_EMAIL)
   end
   MAYA_EMAIL = "mayapamela@gmail.com"
-  def self.maya
-    User.find_by(email: MAYA_EMAIL)
-  end
   RUSSELL_EMAIL = "trimmer.russell@gmail.com"
-  def self.russell
-    User.find_by(email: RUSSELL_EMAIL)
-  end
   SYSTEM_ID = 0
   def self.system
     User.find_by(id: SYSTEM_ID)

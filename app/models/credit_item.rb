@@ -7,8 +7,4 @@ class CreditItem < ApplicationRecord
     tf = t0 + 7.days
     where("created_at > ? and created_at < ?", t0, tf)
   }
-
-  def retail_price
-    CreditBundle.find_by(credits: quantity)&.price || 0
-  end
 end

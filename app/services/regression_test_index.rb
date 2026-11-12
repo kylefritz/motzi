@@ -19,12 +19,6 @@ class RegressionTestIndex
     @references ||= scan.group_by(&:event_id)
   end
 
-  # References citing any event in the fingerprint's group.
-  def for_fingerprint(fingerprint)
-    ids = ErrorEvent.where(fingerprint: fingerprint).pluck(:id)
-    references.values_at(*ids).compact.flatten
-  end
-
   # Resolved error groups (latest occurrence within `since`) that no test cites.
   # Returns [{ fingerprint:, latest_id:, error_class:, message:, resolved_at: }].
   def untested_resolved(since: 90.days.ago)

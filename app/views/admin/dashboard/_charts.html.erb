@@ -1,0 +1,172 @@
+<%# Draws the dashboard charts from DashboardInsights#chart_data. Same Chart.js
+    build and look as /admin/activity_feed. A chart whose canvas isn't on the
+    page (its panel had nothing to show) is skipped. %>
+<script type="application/json" id="dashboard-chart-data"><%= raw json_escape(data.to_json) %></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof Chart === 'undefined') return;
+    var data = JSON.parse(document.getElementById('dashboard-chart-data').textContent);
+
+    var PURPLE = '#352C63', PURPLE_SOFT = '#A9A3CC', INK_SOFT = '#6B615B',
+        WHEAT = '#F7E4C6', WHEAT_DEEP = '#E3C795', CRUST = '#B8793A', GRID = 'rgba(0,0,0,0.05)';
+
+    Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+    Chart.defaults.color = INK_SOFT;
+
+    function draw(id, config) {
+      var canvas = document.getElementById(id);
+      if (!canvas) return;
+      config.options = Object.assign({
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' }
+      }, config.options);
+      config.options.layout = { padding: { right: 8 } };
+      return new Chart(canvas, config);
+    }
+
+    function legend(hidden) {
+      return {
+        position: 'bottom',
+        labels: {
+          boxWidth: 12, boxHeight: 12, padding: 10,
+          filter: function (item) { return (hidden || []).indexOf(item.text) === -1; }
+        }
+      };
+    }
+
+    var countAxis = { beginAtZero: true, grid: { color: GRID }, ticks: { precision: 0 } };
+    var plainX = { grid: { display: false } };
+
+    // Order pace: this week's running total against the usual curve.
+    var pace = data.pace;
+    var hasUsual = pace.usual.length > 0;
+    var paceSets = [{
+      label: 'This week',
+      data: pace.current,
+      borderColor: PURPLE, backgroundColor: PURPLE,
+      borderWidth: 2.5, pointRadius: 3, tension: 0.25, order: 0
+    }];
+    if (hasUsual) {
+      paceSets.push(
+        { label: 'Usual', data: pace.usual, borderColor: INK_SOFT, backgroundColor: INK_SOFT,
+          borderWidth: 1.5, borderDash: [5, 4], pointRadius: 0, tension: 0.25, order: 1 },
+        { label: 'Usual range', data: pace.high, borderColor: 'transparent', backgroundColor: WHEAT,
+          pointRadius: 0, tension: 0.25, fill: '+1', order: 2 },
+        { label: 'low', data: pace.low, borderColor: 'transparent', backgroundColor: WHEAT,
+          pointRadius: 0, tension: 0.25, fill: false, order: 3 }
+      );
+    }
+    draw('chart-order-pace', {
+      type: 'line',
+      data: { labels: pace.labels, datasets: paceSets },
+      options: {
+        plugins: {
+          legend: legend(['low']),
+          tooltip: { filter: function (item) { return item.dataset.label !== 'low' && item.dataset.label !== 'Usual range'; } }
+        },
+        scales: { y: Object.assign({ title: { display: true, text: 'Orders' } }, countAxis), x: plainX }
+      }
+    });
+
+    // Items per pickup day: so far vs where that weekday usually ends.
+    var days = data.pickupDays;
+    var daySets = [{ label: 'So far', data: days.map(function (d) { return d.items; }), backgroundColor: PURPLE, borderRadius: 2 }];
+    if (days.some(function (d) { return d.usual !== null; })) {
+      daySets.push({ label: 'Usually ends at', data: days.map(function (d) { return d.usual; }),
+                     backgroundColor: WHEAT, borderColor: WHEAT_DEEP, borderWidth: 1, borderRadius: 2 });
+    }
+    draw('chart-pickup-days', {
+      type: 'bar',
+      data: { labels: days.map(function (d) { return d.label; }), datasets: daySets },
+      options: {
+        plugins: { legend: legend() },
+        scales: { y: Object.assign({ title: { display: true, text: 'Items' } }, countAxis), x: plainX }
+      }
+    });
+
+    // Orders by week: credit vs marketplace orders stacked, items as a line.
+    var weekly = data.weekly;
+    draw('chart-weekly-orders', {
+      data: {
+        labels: weekly.map(function (w) { return w.label; }),
+        datasets: [
+          { type: 'line', label: 'Items', data: weekly.map(function (w) { return w.items; }),
+            borderColor: INK_SOFT, backgroundColor: INK_SOFT, borderWidth: 1.5, borderDash: [4, 3],
+            pointRadius: 2, tension: 0.3, yAxisID: 'y_items', order: 0 },
+          { type: 'bar', label: 'Credit orders', data: weekly.map(function (w) { return w.credit_orders; }),
+            backgroundColor: PURPLE, stack: 'orders', yAxisID: 'y', order: 1 },
+          { type: 'bar', label: 'Marketplace orders', data: weekly.map(function (w) { return w.marketplace_orders; }),
+            backgroundColor: PURPLE_SOFT, stack: 'orders', yAxisID: 'y', order: 1 }
+        ]
+      },
+      options: {
+        plugins: { legend: legend() },
+        scales: {
+          y: Object.assign({ stacked: true, title: { display: true, text: 'Orders' } }, countAxis),
+          y_items: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false },
+                     ticks: { precision: 0 }, title: { display: true, text: 'Items' } },
+          x: {
+            stacked: true, grid: { display: false },
+            ticks: {
+              font: function (ctx) { return weekly[ctx.index] && weekly[ctx.index].current ? { weight: 'bold' } : {}; },
+              color: function (ctx) { return weekly[ctx.index] && weekly[ctx.index].current ? PURPLE : INK_SOFT; }
+            }
+          }
+        }
+      }
+    });
+
+    // Credits bought and used per month.
+    var credits = data.credits;
+    draw('chart-credits', {
+      type: 'bar',
+      data: {
+        labels: credits.map(function (m) { return m.label; }),
+        datasets: [
+          { label: 'Bought', data: credits.map(function (m) { return m.bought; }), backgroundColor: PURPLE, borderRadius: 2 },
+          { label: 'Used', data: credits.map(function (m) { return m.used; }),
+            backgroundColor: WHEAT, borderColor: WHEAT_DEEP, borderWidth: 1, borderRadius: 2 }
+        ]
+      },
+      options: {
+        plugins: {
+          legend: legend(),
+          tooltip: {
+            callbacks: {
+              afterBody: function (items) {
+                var m = credits[items[0].dataIndex];
+                return m.purchases ? m.purchases + (m.purchases === 1 ? ' purchase, $' : ' purchases, $') + Math.round(m.dollars).toLocaleString() : '';
+              }
+            }
+          }
+        },
+        scales: { y: Object.assign({ title: { display: true, text: 'Credits' } }, countAxis), x: plainX }
+      }
+    });
+
+    // Holiday pre-orders: per day and running total, with the days left to the cutoff still blank.
+    var holiday = data.holiday;
+    if (holiday) {
+      draw('chart-holiday-pace', {
+        data: {
+          labels: holiday.labels,
+          datasets: [
+            { type: 'line', label: 'Total so far', data: holiday.cumulative, borderColor: CRUST, backgroundColor: CRUST,
+              borderWidth: 2.5, pointRadius: 2, tension: 0.2, order: 0 },
+            { type: 'bar', label: 'That day', data: holiday.daily, backgroundColor: WHEAT,
+              borderColor: WHEAT_DEEP, borderWidth: 1, borderRadius: 2, order: 1 }
+          ]
+        },
+        options: {
+          plugins: { legend: legend() },
+          scales: {
+            y: Object.assign({ title: { display: true, text: 'Pre-orders' } }, countAxis),
+            x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } }
+          }
+        }
+      });
+    }
+  });
+</script>

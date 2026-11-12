@@ -6,6 +6,10 @@ class Order < ApplicationRecord
   has_paper_trail
   visitable :ahoy_visit
   scope :with_comments, -> { where("COALESCE(TRIM(comments), '') <> ''",) }
+  # The one definition of a marketplace order vs a credit order: a marketplace
+  # order has an amount (0 for a $0 pay-what-you-can order, which has no Stripe
+  # charge), a credit order has none. Credit balances use the same test
+  # (app/sql_queries/_user_credits.sql.erb, User#credit_ledger).
   scope :marketplace, -> { where("stripe_charge_amount is not NULL") }
   scope :subscriber, -> { where("stripe_charge_amount is NULL") }
 

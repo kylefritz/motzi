@@ -6,15 +6,13 @@ class Setting < RailsSettings::Base
   field :holiday_menu_id, type: :integer, default: nil
   field :google_analytics_tracker, default: nil, type: :string
   field :automated_reminder_emails, default: true, type: :boolean
-  field :pickup_day1, default: "Tuesday", type: :string
-  field :pickup_day2, default: "Thursday", type: :string
   field :leadtime_hours, default: 27, type: :integer
   field :reminder_hours, default: 3, type: :integer
   field :pickup_instructions, type: :string
   field :credit_purchase_note, type: :string
   field :signup_form_note, type: :string
   field :accepting_subscribers, default: true, type: :boolean
-  field :anomaly_model, default: "claude-sonnet-4-6", type: :string
+  field :anomaly_model, default: "claude-sonnet-5-5", type: :string
   # What "/" serves: "menu" redirects to the weekly menu (pre-#351 behavior);
   # "marketing" makes the marketing pages public. Flip it in Advanced → Settings.
   HOMEPAGES = %w[menu marketing].freeze

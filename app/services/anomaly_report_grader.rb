@@ -8,7 +8,7 @@
 #
 # The judge is only called when there are findings to grade.
 class AnomalyReportGrader
-  DEFAULT_JUDGE_MODEL = "claude-haiku-4-5"
+  DEFAULT_JUDGE_MODEL = "claude-haiku-5-5"
 
   def self.judge_model
     ENV["ANOMALY_JUDGE_MODEL"].presence || DEFAULT_JUDGE_MODEL
@@ -62,7 +62,9 @@ class AnomalyReportGrader
     client = Anthropic::Client.new
     response = client.messages.create(
       model: self.class.judge_model,
-      max_tokens: 1500,
+      # Room for the model's thinking as well as the JSON verdict.
+      max_tokens: 8_000,
+      output_config: { effort: :medium },
       system_: judge_system_prompt,
       messages: [ { role: "user", content: judge_user_message } ]
     )

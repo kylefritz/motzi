@@ -27,7 +27,7 @@
         <% end %>
 
         <mj-text padding="16px 20px" background-color="#f7f0e8" border-radius="4px" font-size="14px" line-height="1.7" color="#2E2927" font-family="Menlo, Consolas, monospace">
-          <%= Redcarpet::Markdown.new(Redcarpet::Render::HTML, tables: true, fenced_code_blocks: true, autolink: true).render(@analysis.result).html_safe %>
+          <%= Redcarpet::Markdown.new(Redcarpet::Render::HTML.new(escape_html: true), tables: true, fenced_code_blocks: true, autolink: true).render(@analysis.result).html_safe %>
         </mj-text>
 
         <mj-divider border-color="#e8e0d8" border-width="1px" padding="28px 0 16px 0" />

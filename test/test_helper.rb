@@ -24,6 +24,14 @@ TEST_DB_LOCK = TestDbLock.acquire!(ActiveRecord::Base.connection_db_config.datab
 # worker's first page render would race to auto-build public/vite-test.
 ViteRuby.commands.build || abort("Vite build failed; see the log above")
 
+# Resolve the Sprockets assets once too. Otherwise every worker compiles (cold
+# tmp/cache/assets, as in CI) or re-resolves them itself the first time it
+# renders a page, all at once. Forked workers inherit the result: about 3s off
+# a 15s run and 15+ CPU-seconds less, measured 2026-11-11.
+%w[application.css marketing.css active_admin.css active_admin.js].each do |asset|
+  Rails.application.assets.find_asset(asset) || abort("Sprockets couldn't find #{asset}")
+end
+
 # json-schema still defaults to MultiJson and warns about it; use the stdlib JSON directly.
 JSON::Validator.use_multi_json = false
 

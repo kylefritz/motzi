@@ -23,7 +23,6 @@ type MenuProps = {
   order: MenuOrder | null;
   user: MenuUser;
   onCreateOrder: (order: MenuOrderRequest) => Promise<unknown>;
-  isHoliday?: boolean;
   onShowEmailSettings?: () => void;
 };
 
@@ -32,14 +31,20 @@ export default function Menu({
   order,
   user,
   onCreateOrder,
-  isHoliday,
   onShowEmailSettings,
 }: MenuProps) {
-  const { cart, addToCart, rmCartItem, total, subscriberItems, payItForward } =
-    useCart({
-      order,
-      items: menu.items,
-    });
+  const {
+    cart,
+    removedItems,
+    addToCart,
+    rmCartItem,
+    total,
+    subscriberItems,
+    payItForward,
+  } = useCart({
+    order,
+    items: menu.items,
+  });
   const [comments, setComments] = useState<string | null>(
     _.get(order, "comments", null)
   );
@@ -62,7 +67,7 @@ export default function Menu({
 
   // if editing an order, "give back" credits from the order
   const userCredits = user.credits + orderCredits({ order, items: menu.items });
-  if (!isHoliday && userCredits < 1) {
+  if (userCredits < 1) {
     // Must buy credits!
     return (
       <>
@@ -77,26 +82,20 @@ export default function Menu({
         <BuyCredits user={user} />
 
         <h5 className="mt-5">Preview of current menu</h5>
-        <Items items={subscriberItems} disabled={true} />
+        <Items items={subscriberItems} />
       </>
     );
   }
 
   const { subscriberNote, isCurrent } = menu;
   const menuClosed = allClosed(menu);
-  const insufficientCredits = !isHoliday && total.credits > userCredits;
+  const insufficientCredits = total.credits > userCredits;
   return (
     <>
-      <Subscription
-        user={user}
-        showBuyMoreButton={!isHoliday}
-        onShowEmailSettings={onShowEmailSettings}
-      />
+      <Subscription user={user} onShowEmailSettings={onShowEmailSettings} />
 
       {/* if low, show nag to buy credits*/}
-      {!isHoliday && (userCredits < 4 || insufficientCredits) && (
-        <BuyCredits user={user} />
-      )}
+      {(userCredits < 4 || insufficientCredits) && <BuyCredits user={user} />}
 
       <Title menu={menu} />
 
@@ -105,7 +104,7 @@ export default function Menu({
       <h5>Menu</h5>
       <Items items={subscriberItems} onAddToCart={addToCart} />
 
-      {!isHoliday && <SkipNote />}
+      <SkipNote />
 
       {payItForward && (
         <PayItForward
@@ -128,7 +127,7 @@ export default function Menu({
           />
         </div>
       </div>
-      <Cart {...{ cart, menu, rmCartItem }} />
+      <Cart {...{ cart, menu, rmCartItem, removedItems }} />
       <div className="row mt-2 mb-3">
         <div className="col">
           <SubmitButton

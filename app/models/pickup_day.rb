@@ -1,9 +1,20 @@
 class PickupDay < ApplicationRecord
   belongs_to :menu
-  has_many :order_items, dependent: :destroy
+  # Order items are the record of what members ordered and what their credits
+  # paid for, so a pickup day that has any can't be deleted (same rule as Item).
+  # Declared before the associations so it runs before their dependent: :destroy.
+  before_destroy :refuse_destroy_with_order_items
+  has_many :order_items
   has_many :menu_item_pickup_days, dependent: :destroy
   default_scope { order("pickup_at") }
   has_paper_trail
+
+  # Pickup days whose pickup_at falls on this date in the app's time zone
+  # (Eastern). pickup_at is stored in UTC, so a plain ::date cast puts an
+  # evening pickup on the next day.
+  def self.on_date(date)
+    where("(pickup_at AT TIME ZONE 'UTC' AT TIME ZONE ?)::date = ?", Time.zone.tzinfo.identifier, date)
+  end
 
   def self.for_pickup_at(dt)
      PickupDay.where("? between pickup_at - interval '8 hours' AND pickup_at + interval '2 hours' ", dt)
@@ -53,5 +64,16 @@ class PickupDay < ApplicationRecord
   def deadline_text
     d = deadline_data
     "#{d[:pickup_day]}, #{d[:pickup_date]} pickup after #{d[:pickup_time]} — order by #{d[:deadline_day]}, #{d[:deadline_date]} at #{d[:deadline_time]}"
+  end
+
+  private
+
+  def refuse_destroy_with_order_items
+    count = order_items.count
+    return if count.zero?
+
+    errors.add(:base, "Can't delete #{name}: #{count} order #{'item'.pluralize(count)} #{count == 1 ? 'is' : 'are'} " \
+                      "for this pickup day. Move or remove those orders first.")
+    throw :abort
   end
 end

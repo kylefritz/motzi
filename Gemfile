@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "3.3.10"
+ruby "3.3.13"
 
 #
 # please keep gems sorted; include comment for why a gem is needed
@@ -17,24 +17,21 @@ gem "bootsnap", ">= 1.4.4", require: false # Reduces boot times through caching;
 gem "bootstrap", "~> 4.3.1" # nice style
 gem "concurrent-ruby", "~> 1.3", ">= 1.3.7" # was pinned to 1.3.4 for the pre-Rails-7.1 logger issue; 1.3.7+ fixes lock CVEs
 gem "devise" # for authentication
-gem "drb" # stdlib gem (Ruby 3.4 deprecation warning)
 gem "gon" # rails variables in javascript
 gem "hashid-rails" # lookup models by hashid
 gem "heroku-api-postgres" # Heroku Postgres API for automated backups
 gem "image_processing", "~> 2.1" # Active Storage variants (item thumbnails in admin)
-gem "jaro_winkler", "~> 1.5.5" # pinned for compatibility
 gem "jbuilder", "~> 2.7" # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem "json", "~> 2.21", ">= 2.21.2" # json 3.0 (Sep 2026) dropped the positional options hash and breaks ActiveSupport::JSON.decode on Rails 8.1.3; 2.21.2 has the CVE fix
 gem "mission_control-jobs" # job UI for ActiveJob backends
 gem "mjml-rails" # responsive email templates with MJML
 gem "mrml" # Rust MJML binary (no Node dependency)
-gem "mutex_m" # stdlib gem (Ruby 3.4 deprecation warning)
 gem "naturalsort", require: "natural_sort_kernel" # implements a natural, human-friendly alphanumeric sort
 gem "octokit", "~> 10.0" # GitHub API for git commit history in anomaly detection
 gem "olive_branch" # convert snake_case to camelCase for json
 gem "paper_trail" # audits
 gem "pg", ">= 0.18", "< 2.0"
-gem "progress_bar"
+gem "progress_bar" # progress output in lib/tasks/s3.rake (and old data migrations)
 gem "puma", "~> 8.0" # web/app server
 gem "rack-attack" # block scanner traffic / rate limit
 gem "rails", "~> 8.1.3"
@@ -50,9 +47,7 @@ gem "stripe", "~> 19.6" # accept credit cards; tests stub api.stripe.com with We
 gem "vite_rails", "~> 3.11" # build JS with Vite (app/javascript/entrypoints); hooks into assets:precompile
 
 group :development, :test do
-  gem "byebug" # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem "dotenv-rails" # load secrets `.env` file (ask kyle for it; not checked into git)
-  gem "faker" # fake names
   gem "json-schema" # make sure json objects have the right schema
   gem "letter_opener_web" # nice place to preview emails
   gem "minitest", "~> 5.0" # pinned to 5.x — minitest 6 breaks parallel tests with DRb
@@ -64,9 +59,6 @@ group :development do
   gem "foreman" # run Procfile.dev (Rails + bun watch) locally
   gem "listen", "~> 3.3" # listen to changes on a file
   gem "rack-mini-profiler", "~> 4.0" # request profiling UI compatible with modern Rack/Rails
-  gem "rcodetools" # code completion in vscode; requires ruby extension
-  gem "fastri" # helps rcodetools
-  gem "solargraph" # ruby intellisense in vscode; requires solargraph extension
   gem "spring"   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem "rubocop-rails-omakase" # Rails 8 default rubocop config
   gem "web-console", ">= 4.1.0" # Access an interactive console on exception pages or by calling 'console' anywhere in the code.

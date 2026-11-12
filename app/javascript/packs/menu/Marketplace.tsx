@@ -95,7 +95,14 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
 
   if (!marketplaceItems.length) {
     console.warn("marketplace has no items", marketplaceItems);
-    return null;
+    return (
+      <>
+        <Title menu={menu} />
+        <p className="text-center my-5" data-testid="nothing-on-sale">
+          Nothing's on sale right now. Check back soon!
+        </p>
+      </>
+    );
   }
 
   const { menuNote, enablePayWhatYouCan } = menu;
@@ -115,11 +122,7 @@ export default function Marketplace({ menu, onCreateOrder }: MarketplaceProps) {
       <BakersNote note={menuNote} />
 
       <h5>Menu</h5>
-      <Items
-        items={marketplaceItems}
-        onAddToCart={handleAddToCart}
-        disabled={disabled}
-      />
+      <Items items={marketplaceItems} onAddToCart={handleAddToCart} />
       {payItForward && (
         <PayItForward
           {...payItForward}

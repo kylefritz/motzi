@@ -64,9 +64,12 @@ test("an all pay-what-you-can cart shows no breakdown", async () => {
 
 test("mixed cart looks like any cart until the price dips under the fixed total", async () => {
   const user = userEvent.setup();
+  // Marketplace calls bare alert(...), which is globalThis.alert in this
+  // harness (not the jsdom window's), so spy on both.
   const originalAlert = window.alert;
+  const originalGlobalAlert = globalThis.alert;
   const alertSpy = mock(() => {});
-  window.alert = alertSpy;
+  window.alert = globalThis.alert = alertSpy;
   const { onCreateOrder } = renderMenu({
     order: false,
     user: false,
@@ -115,7 +118,32 @@ test("mixed cart looks like any cart until the price dips under the fixed total"
     screen.getByRole("button", { name: "Charge credit card $30.00" })
   ).toBeTruthy();
 
-  expect(alertSpy).not.toHaveBeenCalled();
   window.alert = originalAlert;
+  globalThis.alert = originalGlobalAlert;
+  expect(alertSpy).not.toHaveBeenCalled();
   expect(onCreateOrder).not.toHaveBeenCalled();
+});
+
+test("a fixed-price cart whose float total sits at the minimum can still be paid", async () => {
+  const user = userEvent.setup();
+  renderMenu({
+    order: false,
+    user: false,
+    enablePayWhatYouCan: false,
+    items: [
+      item({ id: 1, name: "Roll", price: 4.35, payWhatYouCan: false }),
+      item({ id: 2, name: "Bun", price: 2.1, payWhatYouCan: false }),
+    ],
+  });
+
+  // $4.35 + $2.10 sums to 6.449999999999999 as a float
+  await addToCart(user, 1);
+  await addToCart(user, 2);
+
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Charge credit card $6.45" })
+    ).toBeTruthy()
+  );
+  expect(screen.queryByRole("button", { name: /Enter at least/ })).toBeNull();
 });

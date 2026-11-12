@@ -54,7 +54,7 @@ Note: React `act(...)` warnings can still appear during `bun run test`; those ar
 
 ### Data
 
-Fixtures: `rails db:fixtures:load fake_data:users fake_data:orders`
+Fixtures: `rails db:fixtures:load`. For a copy of production data, use `bin/seed_local`.
 
 ### Emails
 
@@ -74,9 +74,9 @@ Auto-deploys from `master` when CI passes. Full review-app config in `app.json`.
 
 | Addon | Plan | Purpose |
 |-------|------|---------|
-| heroku-postgresql | essential-0 (v17) | Primary database |
+| heroku-postgresql | essential-1 (v18) | Primary database |
 
-ActionCable runs with the `async` adapter in production, so Redis is not required for runtime.
+ActionCable runs on Solid Cable (`config/cable.yml`), so Redis is not required for runtime.
 
 ### Recurring jobs
 
@@ -84,9 +84,14 @@ All recurring jobs run via Solid Queue (`config/recurring.yml`):
 
 | Job | Frequency |
 |-----|-----------|
-| `SendDayOfReminderJob` | Hourly |
-| `SendHaventOrderedReminderJob` | Hourly |
-| `trim_analytics` | Daily at 4am |
+| `SendDayOfReminderJob` | Hourly at :05 |
+| `SendHaventOrderedReminderJob` | Hourly at :15 |
+| `UptimeCheckJob` | Every 5 minutes |
+| `CaptureDynoMetricsJob` | Twice an hour (:03, :33) |
+| `AnalyzeAnomaliesJob` | Daily at 9:21pm ET |
+| `clear_solid_queue_finished_jobs` | Daily at 4:15am ET |
+| `TrimAnalyticsJob` | Daily at 4:30am ET |
+| `CaptureDbBackupJob` | Sundays at 3:07am ET |
 
 ### Email
 

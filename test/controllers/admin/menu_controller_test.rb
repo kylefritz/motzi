@@ -239,6 +239,49 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert menu.menu_items.find_by!(item: items(:donuts)).pay_what_you_can
   end
 
+  test "builder removes one pickup day from a menu item" do
+    menu = menus(:week2)
+    menu_item = menu_items(:w2_rye)
+    thursday = pickup_days(:w2_d1_thurs)
+
+    assert_difference "MenuItemPickupDay.count", -1 do
+      post "/admin/menus/#{menu.id}/remove_menu_item_pickup_day.json",
+           params: { menu_item_id: menu_item.id, pickup_day_id: thursday.id }, as: :json
+    end
+
+    assert_response :success
+    validate_json_schema :admin_menu_builder, @response.body
+    assert_equal [ pickup_days(:w2_d2_sat).id ], menu_item.reload.menu_item_pickup_days.pluck(:pickup_day_id)
+    rye = JSON.parse(@response.body)["menuItems"].find { |mi| mi["menuItemId"] == menu_item.id }
+    assert_equal 1, rye["pickupDays"].size
+  end
+
+  test "builder removes one item from the menu and leaves the rest" do
+    menu = menus(:week2)
+
+    assert_difference -> { menu.menu_items.count } => -1, "MenuItemPickupDay.count" => -2 do
+      post "/admin/menus/#{menu.id}/remove_menu_item.json", params: { item_id: items(:rye).id }, as: :json
+    end
+
+    assert_response :success
+    validate_json_schema :admin_menu_builder, @response.body
+    assert_equal [ items(:classic).id, items(:donuts).id ].sort, menu.menu_items.pluck(:item_id).sort
+    assert Item.exists?(items(:rye).id), "the item itself stays"
+  end
+
+  test "builder removes every item from this menu only" do
+    menu = menus(:week2)
+
+    assert_no_difference -> { menus(:week1).menu_items.count } do
+      post "/admin/menus/#{menu.id}/remove_menu_items.json", as: :json
+    end
+
+    assert_response :success
+    validate_json_schema :admin_menu_builder, @response.body
+    assert_empty menu.menu_items.reload
+    assert_empty JSON.parse(@response.body)["menuItems"]
+  end
+
   test "open_for_orders sets current holiday menu" do
     menu = menus(:passover_2026)
     travel_to(Time.zone.parse("2026-04-01 10:00")) do
@@ -258,6 +301,65 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to "/admin/menus/#{menu.id}"
     follow_redirect!
     assert_select ".flash_alert", text: /only for holiday menus/
+  end
+
+  test "email_menu makes the menu current and queues the weekly email" do
+    menu = menus(:week3)
+    menu.update!(week_id: Time.zone.now.week_id)
+
+    assert_enqueued_jobs 1, only: SendWeeklyMenuJob do
+      post "/admin/menus/#{menu.id}/email_menu"
+    end
+
+    assert_redirected_to "/admin/menus"
+    assert menu.reload.current?
+    follow_redirect!
+    assert_select ".flash_notice", text: /was emailed to/
+  end
+
+  test "email_menu refuses a second send while the first is still going out" do
+    menu = menus(:week3)
+    menu.update!(week_id: Time.zone.now.week_id)
+
+    assert_enqueued_jobs 1, only: SendWeeklyMenuJob do
+      post "/admin/menus/#{menu.id}/email_menu"
+      assert_no_difference [ "ActiveAdmin::Comment.count", "ActivityEvent.count" ] do
+        post "/admin/menus/#{menu.id}/email_menu"
+      end
+    end
+
+    assert_redirected_to "/admin/menus/#{menu.id}"
+    follow_redirect!
+    assert_select ".flash_alert", text: /already emailed|was emailed/
+  end
+
+  test "email_menu refuses holiday menus" do
+    menu = menus(:passover_2026)
+
+    travel_to(menu.latest_deadline - 1.day) do
+      assert_no_enqueued_jobs only: SendWeeklyMenuJob do
+        post "/admin/menus/#{menu.id}/email_menu"
+      end
+    end
+
+    assert_redirected_to "/admin/menus/#{menu.id}"
+    assert_nil menu.reload.emailed_at
+    follow_redirect!
+    assert_select ".flash_alert", text: /holiday/i
+  end
+
+  # A stale "Email to N subscribers" button used to be a 500 (UncaughtThrowError).
+  test "email_menu for a past week's menu is refused with a message" do
+    menu = menus(:week3)
+    menu.update!(week_id: Time.zone.now.prev_week_id)
+
+    assert_no_enqueued_jobs only: SendWeeklyMenuJob do
+      post "/admin/menus/#{menu.id}/email_menu"
+    end
+
+    assert_redirected_to "/admin/menus/#{menu.id}"
+    follow_redirect!
+    assert_select ".flash_alert", text: /current week's menu or future week's menu/
   end
 
   test "copy_from copies notes and menu items" do

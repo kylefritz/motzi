@@ -6,7 +6,6 @@ import userEvent from "@testing-library/user-event";
 import HolidayMenuTab from "menu/HolidayMenuTab";
 import { SettingsContext } from "menu/Contexts";
 import mockMenuJson from "./mockMenuJson";
-import stripeMock from "./stripeMock";
 
 function renderHolidayMenuTab({
   order: withOrder = true,
@@ -16,14 +15,12 @@ function renderHolidayMenuTab({
   handleCreateOrder?: ReturnType<typeof mock>;
 } = {}) {
   window.gon = { stripeApiKey: "no-such-key" };
-  window.Stripe = mock(() => stripeMock);
   const data = mockMenuJson({ order: withOrder });
   const { menu, user, order, bundles } = data;
 
   const utils = render(
     <SettingsContext.Provider value={{ showCredits: true, bundles }}>
       <HolidayMenuTab
-        bundles={bundles}
         handleCreateOrder={handleCreateOrder}
         menu={menu}
         order={order}
@@ -54,7 +51,7 @@ test("shows USD prices, not credits, in holiday menu", () => {
   expect(screen.queryByText("1 credit")).toBeNull();
 });
 
-test("editing resets to confirmation after save", async () => {
+test("Edit Order opens the order form", async () => {
   const user = userEvent.setup();
   const handleCreateOrder = mock(() => Promise.resolve());
   renderHolidayMenuTab({ handleCreateOrder });

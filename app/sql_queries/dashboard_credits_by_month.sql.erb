@@ -1,0 +1,41 @@
+<%#
+  Credits bought (paid through Stripe) and credits used on orders, per calendar
+  month in the bakery's time zone, for the @months months ending with the month
+  of @as_of. Gifts and manual adjustments are not "bought". Used = the
+  order-time snapshot on credit orders, the same rule as _user_credits.
+%>
+<% tz = quote(Time.zone.tzinfo.identifier) %>
+<% as_of = quote(@as_of.to_date.iso8601) %>
+with months as (
+    select generate_series(
+        date_trunc('month', <%= as_of %>::date) - interval '<%= @months.to_i - 1 %> months',
+        date_trunc('month', <%= as_of %>::date),
+        interval '1 month'
+    )::date as month
+),
+bought as (
+    select date_trunc('month', created_at at time zone 'UTC' at time zone <%= tz %>)::date as month,
+        sum(quantity) as credits,
+        sum(stripe_charge_amount) as dollars,
+        count(*) as purchases
+    from credit_items
+    where stripe_charge_amount is not null
+    group by 1
+),
+used as (
+    select date_trunc('month', orders.created_at at time zone 'UTC' at time zone <%= tz %>)::date as month,
+        sum(order_items.quantity * order_items.credits) as credits
+    from order_items
+        join orders on orders.id = order_items.order_id
+    where orders.stripe_charge_amount is null
+    group by 1
+)
+select months.month,
+    coalesce(bought.credits, 0)::int as bought,
+    coalesce(bought.dollars, 0)::float as dollars,
+    coalesce(bought.purchases, 0)::int as purchases,
+    coalesce(used.credits, 0)::int as used
+from months
+    left join bought on bought.month = months.month
+    left join used on used.month = months.month
+order by months.month

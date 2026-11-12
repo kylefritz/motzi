@@ -4,13 +4,7 @@ import { parse, shortDate, shortTime } from "../../lib/dates";
 import { useDeadlineContext } from "./Contexts";
 import type { MenuPickupDay } from "../../types/api";
 
-function PickupSchedule({
-  pickupDays,
-  muted,
-}: {
-  pickupDays: MenuPickupDay[];
-  muted?: string;
-}) {
+function PickupSchedule({ pickupDays }: { pickupDays: MenuPickupDay[] }) {
   if (!pickupDays || pickupDays.length === 0) return null;
 
   return (
@@ -32,7 +26,7 @@ function PickupSchedule({
             <br />
             <span>pickup after {shortTime(pickup)}</span>
             <br />
-            <span style={{ fontSize: "0.85em", opacity: 0.7, color: muted }}>
+            <span style={{ fontSize: "0.85em", opacity: 0.7 }}>
               order by {shortDate(deadline)} at {shortTime(deadline)}
             </span>
           </div>
@@ -45,7 +39,6 @@ function PickupSchedule({
 type TitleProps = {
   menu: {
     name: string;
-    orderingDeadlineText: string;
     pickupDays: MenuPickupDay[];
   };
 };

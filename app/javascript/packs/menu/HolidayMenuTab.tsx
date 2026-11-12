@@ -8,7 +8,6 @@ import {
 import Marketplace from "./Marketplace";
 import Order from "./Order";
 import type {
-  CreditBundle,
   Menu as MenuType,
   MenuOrder,
   MenuOrderRequest,
@@ -17,7 +16,6 @@ import type {
 } from "../../types/api";
 
 type HolidayMenuTabProps = {
-  bundles: CreditBundle[];
   handleCreateOrder: (
     order: MenuOrderRequest | MarketplaceOrderRequest
   ) => Promise<unknown>;
@@ -27,7 +25,6 @@ type HolidayMenuTabProps = {
 };
 
 export default function HolidayMenuTab({
-  bundles,
   handleCreateOrder,
   menu,
   order,
@@ -59,7 +56,6 @@ export default function HolidayMenuTab({
             user,
             order,
             menu,
-            bundles,
             onEditOrder: handleEditOrder,
           }}
         />

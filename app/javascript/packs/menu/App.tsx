@@ -17,7 +17,8 @@ import type {
 
 // Network blips (no response at all) get retried before we report an error
 // and give up — members on flaky mobile connections see them regularly.
-const MENU_FETCH_RETRY_DELAYS_MS = [500, 1500];
+// An object so tests can zero the delays (like resumeRetry in buy/Card).
+export const menuFetchRetry = { delaysMs: [500, 1500] };
 
 // The post-back after 3D Secure: the card has been charged, so a failure is
 // retried by Card instead of being shown as "couldn't create order".
@@ -50,7 +51,7 @@ export default function App() {
           setData(newData); // expect: menu, user, order
         })
         .catch((err) => {
-          const delay = MENU_FETCH_RETRY_DELAYS_MS[tryIndex];
+          const delay = menuFetchRetry.delaysMs[tryIndex];
           if (!err.response && delay !== undefined) {
             console.warn("menu fetch failed, retrying", tryIndex + 1, err);
             setTimeout(() => attempt(tryIndex + 1), delay);
@@ -144,7 +145,7 @@ export default function App() {
   const order = data?.order || null;
   const holidayMenu = data?.holidayMenu || null;
   const holidayOrder = data?.holidayOrder || null;
-  const { orderingDeadlineText, enablePayWhatYouCan } = menu || {};
+  const { enablePayWhatYouCan } = menu || {};
 
   return (
     <SettingsContext.Provider
@@ -157,13 +158,11 @@ export default function App() {
     >
       <DayContext.Provider
         value={{
-          orderingDeadlineText, // TODO: this needs fixed
           ignoreDeadline,
         }}
       >
         {holidayMenu ? (
           <MenuTabs
-            bundles={bundles}
             handleCreateRegularOrder={handleCreateOrder}
             handleCreateHolidayOrder={handleCreateHolidayOrder}
             isEditingOrder={isEditingOrder}
@@ -173,10 +172,10 @@ export default function App() {
             holidayOrder={holidayOrder}
             setIsEditingOrder={setIsEditingOrder}
             user={user}
+            initialTab={tab}
           />
         ) : (
           <Layout
-            bundles={bundles}
             error={error}
             handleCreateOrder={handleCreateOrder}
             isEditingOrder={isEditingOrder}

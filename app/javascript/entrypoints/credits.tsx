@@ -5,6 +5,11 @@ import App from "../packs/credits/App";
 
 import React from "react";
 import { createRoot } from "react-dom/client";
+import axios from "axios";
+import { installCsrfHeader } from "../lib/csrf";
+
+// the credits form posts to /admin/credit_items.json, which checks the CSRF token
+installCsrfHeader(axios);
 
 document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("react-credits");

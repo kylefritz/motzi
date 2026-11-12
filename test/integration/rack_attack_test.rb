@@ -84,4 +84,49 @@ class RackAttackTest < ActionDispatch::IntegrationTest
   ensure
     Rack::Attack.cache.store = original_store
   end
+
+  test "the contact throttle can't be dodged with a format suffix or trailing slash" do
+    with_throttle_store do
+      valid_params = { contact_message: { name: "X", email: "x@y.com", message: "hi" } }
+
+      assert_difference -> { ContactMessage.count }, 5 do
+        [ "/contact.json", "/contact/", "/contact.json", "/contact", "/contact.html", "/contact.json", "/contact/" ].each do |path|
+          post path, params: valid_params, env: { "REMOTE_ADDR" => "1.2.3.5" }
+        end
+      end
+      assert_response :too_many_requests
+    end
+  end
+
+  test "throttles excessive POST /api/feedbacks submissions per IP" do
+    with_throttle_store do
+      params = { feedback: { source: "500", message: "Everything broke" } }
+
+      assert_difference -> { Feedback.count }, 5 do
+        5.times do
+          post "/api/feedbacks", params: params, as: :json, env: { "REMOTE_ADDR" => "1.2.3.6" }
+          assert_response :created
+        end
+        post "/api/feedbacks", params: params, as: :json, env: { "REMOTE_ADDR" => "1.2.3.6" }
+        assert_response :too_many_requests
+        post "/api/feedbacks.json", params: params, as: :json, env: { "REMOTE_ADDR" => "1.2.3.6" }
+        assert_response :too_many_requests
+      end
+
+      # another visitor is unaffected
+      post "/api/feedbacks", params: params, as: :json, env: { "REMOTE_ADDR" => "1.2.3.7" }
+      assert_response :created
+    end
+  end
+
+  private
+
+  # The test env uses NullStore, so swap in a real MemoryStore for counting.
+  def with_throttle_store
+    original_store = Rack::Attack.cache.store
+    Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
+    yield
+  ensure
+    Rack::Attack.cache.store = original_store
+  end
 end

@@ -27,9 +27,15 @@ test("menu", async () => {
   await waitFor(() => expect(getCartTotalText()).toContain("$5.00"));
 });
 
-test("noItems", () => {
+test("noItems: guests get a short line instead of a blank page", () => {
   const { container } = renderMenu({ order: false, user: false, items: [] });
-  expect(container.firstChild).toBeNull();
+  expect(container.firstChild).not.toBeNull();
+  expect(screen.getByTestId("nothing-on-sale").textContent).toBe(
+    "Nothing's on sale right now. Check back soon!"
+  );
+  // no ordering UI to fill in
+  expect(screen.queryByText("Your order")).toBeNull();
+  expect(screen.queryByLabelText("Email")).toBeNull();
 });
 
 test("payWhatYouCan false", () => {

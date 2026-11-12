@@ -18,10 +18,55 @@ class SpamDetectorTest < ActiveSupport::TestCase
     assert_equal [], result
   end
 
-  test "parse_spam_ids returns empty array on malformed JSON" do
+  test "parse_spam_ids raises on malformed JSON instead of reporting a clean scan" do
     detector = SpamDetector.new
-    result = detector.send(:parse_spam_ids, "[{broken json")
-    assert_equal [], result
+    assert_raises(SpamDetector::UnreadableResponse) { detector.send(:parse_spam_ids, "[{broken json]") }
+  end
+
+  # A reply cut off mid-array has no closing bracket, so it used to look like
+  # "no JSON here" and count as zero spam.
+  test "parse_spam_ids raises when the array is cut off" do
+    detector = SpamDetector.new
+    truncated = "[{\"id\": 1, \"reason\": \"bot\"}, {\"id\": 5, \"reas"
+    assert_raises(SpamDetector::UnreadableResponse) { detector.send(:parse_spam_ids, truncated) }
+  end
+
+  # scan only calls Claude when there is an account to review.
+  def create_candidate
+    User.create!(first_name: "Zx", last_name: "Qv", email: "spam@example.com")
+  end
+
+  test "scan raises when Claude stops at the token limit" do
+    create_candidate
+    detector = SpamDetector.new
+    reply = { text: "[{\"id\": 1, \"reason\": \"bot\"}]\n[{\"id\": 5, \"reas", stop_reason: "max_tokens" }
+
+    detector.stub(:call_claude, reply) do
+      error = assert_raises(SpamDetector::UnreadableResponse) { detector.scan }
+      assert_match(/cut off/, error.message)
+    end
+  end
+
+  # Haiku 5.5 can decline a request; that reply has no list in it.
+  test "scan raises when Claude declines, instead of reporting a clean scan" do
+    create_candidate
+    detector = SpamDetector.new
+    reply = { text: "", stop_reason: :refusal }
+
+    detector.stub(:call_claude, reply) do
+      error = assert_raises(SpamDetector::UnreadableResponse) { detector.scan }
+      assert_match(/declined/, error.message)
+    end
+  end
+
+  test "scan returns the flagged accounts from a complete reply" do
+    create_candidate
+    detector = SpamDetector.new
+    reply = { text: "[{\"id\": 1, \"reason\": \"bot\"}]", stop_reason: "end_turn" }
+
+    detector.stub(:call_claude, reply) do
+      assert_equal [ { id: 1, reason: "bot" } ], detector.scan
+    end
   end
 
   test "build_user_message formats users as markdown table" do
@@ -43,6 +88,16 @@ class SpamDetectorTest < ActiveSupport::TestCase
 
     users_with_orders = candidates.select { |u| u.orders.any? }
     assert_empty users_with_orders, "candidates should not have orders"
+  end
+
+  test "load_candidates excludes members who have bought credits but not ordered yet" do
+    jess = users(:jess)
+    assert jess.credit_items.any? && jess.orders.none?, "fixture: credits, no orders"
+
+    candidates = SpamDetector.new.send(:load_candidates)
+
+    assert_not_includes candidates, jess
+    assert_empty candidates.select { |u| u.credit_items.any? }, "candidates should not have credit items"
   end
 
   test "load_candidates excludes owners" do

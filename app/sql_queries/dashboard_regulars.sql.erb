@@ -1,0 +1,39 @@
+<%#
+  Members whose ordering habit says something about this week:
+    - regulars: ordered from at least @regular_min of the last 8 menus
+    - drifting: ordered from at least @drifting_min of the 8 menus before the
+      last 4, then from none of the last 4 or this one
+  One row per member with the counts; DashboardInsights sorts them into lists.
+  Call with weeks: 12. @exclude_user_ids / @exclude_emails drop house accounts.
+%>
+<% exclude_ids = Array(@exclude_user_ids).map(&:to_i) %>
+<% exclude_emails = Array(@exclude_emails).map { |e| quote(e) } %>
+<%= partial :user_credits %>,
+<%= partial :dashboard_menu_weeks %>,
+habits as (
+    select orders.user_id,
+        count(distinct orders.menu_id) filter (where compared.weeks_back between 1 and 8) as recent_weeks,
+        count(distinct orders.menu_id) filter (where compared.weeks_back between 1 and 4) as last4_weeks,
+        count(distinct orders.menu_id) filter (where compared.weeks_back between 5 and 12) as prior_weeks,
+        bool_or(compared.is_current) as ordered_current,
+        max(orders.created_at) as last_ordered_at
+    from compared
+        join orders on orders.menu_id = compared.menu_id
+    group by orders.user_id
+)
+select habits.*, user_credits.credit_balance
+from habits
+    join users on users.id = habits.user_id
+    join user_credits on user_credits.user_id = habits.user_id
+where (
+        habits.recent_weeks >= <%= @regular_min.to_i %>
+        or (habits.prior_weeks >= <%= @drifting_min.to_i %> and habits.last4_weeks = 0 and not habits.ordered_current)
+    )
+    and users.email not like '%@example.com'
+<% if exclude_ids.any? %>
+    and users.id not in (<%= exclude_ids.join(",") %>)
+<% end %>
+<% if exclude_emails.any? %>
+    and users.email not in (<%= exclude_emails.join(",") %>)
+<% end %>
+order by habits.recent_weeks desc, habits.prior_weeks desc, habits.last_ordered_at desc
