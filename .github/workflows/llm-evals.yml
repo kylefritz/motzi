@@ -67,7 +67,7 @@ jobs:
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: "1.4.2"
 
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
@@ -84,7 +84,7 @@ jobs:
         run: |
           bin/rails server -p 3000 > rails-server.log 2>&1 &
           for _ in $(seq 1 60); do
-            curl -sf http://localhost:3000/up > /dev/null && exit 0
+            curl -sf http://localhost:3000/menu.json > /dev/null && exit 0
             sleep 2
           done
           echo "::error::Rails did not start"
@@ -110,11 +110,14 @@ jobs:
           if-no-files-found: ignore
 
   reminder:
-    if: github.event_name == 'schedule'
+    # Runs after the visual job, pass or fail, so the issue can say which.
+    needs: visual
+    if: always() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     permissions:
       issues: write
     env:
+      VISUAL_RESULT: ${{ needs.visual.result }}
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -144,7 +147,7 @@ jobs:
           heroku run rake error_events:untested --app motzibread
           \`\`\`
 
-          This month's visual email checks ran in CI: ${RUN_URL}
+          This month's visual email checks in CI: **${VISUAL_RESULT}** (${RUN_URL})
 
           Close this issue once the eval and the error check have been run.
           EOF
