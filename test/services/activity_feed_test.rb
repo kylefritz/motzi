@@ -925,6 +925,7 @@ class ActivityFeedTest < ActiveSupport::TestCase
       assert_includes text, "== Email Health =="
       assert_match(/Weekly menu email: 1 sent/, text)
       assert_includes text, "Weekly menu emailed", "admin events logged under the filed week come along"
+      assert_not_includes text, "4 credits added next week", "the filed week's unrelated events stay out"
       assert_equal 2, feed.headline_metrics.find { |m| m[:label] == "Orders" }[:value]
     end
   end
@@ -961,6 +962,23 @@ class ActivityFeedTest < ActiveSupport::TestCase
     end
   end
 
+  test "a holiday menu with no new orders this week still reports the emails it sent" do
+    week = misfiled_week
+    holiday = holiday_preorders(week)
+    order = holiday.orders.first
+    # The member edits the pre-order a week later: a new confirmation, no new order.
+    Ahoy::Message.create!(mailer: "ConfirmationMailer#order_email", menu: holiday, user: users(:kyle),
+                          order_id: order.id, sent_at: week[:start] + 8.days)
+
+    travel_to(week[:start] + 10.days) do
+      text = ActivityFeed.new("24w21").to_text
+
+      assert_match(/== Holiday Pre-orders: Thanksgiving Orders/, text)
+      assert_match(/This week: 0 orders \(0 items\)\. 1 since pre-orders opened\./, text)
+      assert_match(/Order email: 1 sent/, text)
+    end
+  end
+
   test "a holiday menu's own week notes the pre-orders that came in earlier" do
     week = misfiled_week
     holiday_preorders(week)
@@ -992,7 +1010,12 @@ class ActivityFeedTest < ActiveSupport::TestCase
       order.order_items.create!(item: items(:classic), pickup_day: thu, quantity: 1)
     end
     Ahoy::Message.create!(mailer: "MenuMailer#weekly_menu_email", menu: menu, user: users(:adrian), sent_at: start + 9.hours)
-    ActivityEvent.create!(action: "menu_emailed", week_id: "24w21", description: "Weekly menu emailed", created_at: start + 9.hours)
+    ActivityEvent.create!(action: "menu_emailed", week_id: "24w21", description: "Weekly menu emailed",
+                          metadata: { menu_id: menu.id }, created_at: start + 9.hours)
+    # Logged under the calendar week it happened in, which is also the week
+    # the menu is filed under. It is not this menu's event.
+    ActivityEvent.create!(action: "credits_added_by_admin", week_id: "24w21", description: "4 credits added next week",
+                          metadata: { quantity: 4 }, created_at: start + 8.days)
 
     { start: start, menu: menu }
   end

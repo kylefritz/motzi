@@ -30,13 +30,15 @@ class ActivityFeed
     # Menus picked up this week, regular first. Matched on pickup days, not on
     # the hand-typed week_id (see Menu.for_pickup_week).
     @menus = Menu.for_pickup_week(week_id).to_a.sort_by { |m| [ m.holiday? ? 1 : 0, m.id ] }
-    # Holiday menus picked up in a later week that took orders this week.
+    # Holiday menus picked up in a later week that were active this week.
     # Thanksgiving pre-orders open weeks ahead; without these the feed showed
-    # none of that ordering until the holiday week itself.
-    @preorder_menus = Menu.holiday
-      .where.not(id: @menus.map(&:id))
-      .where(id: Order.where(created_at: @week_start..@week_end).select(:menu_id))
-      .to_a
+    # none of that ordering until the holiday week itself. Emails count as
+    # activity too: editing an order re-sends its confirmation without making
+    # a new order, and those sends still belong in Email Health.
+    week = @week_start..@week_end
+    active_ids = Order.where(created_at: week).distinct.pluck(:menu_id) |
+                 Ahoy::Message.where(sent_at: week).where.not(menu_id: nil).distinct.pluck(:menu_id)
+    @preorder_menus = Menu.holiday.where(id: active_ids - @menus.map(&:id)).to_a
   end
 
   # The menu the week is named after: the first one that isn't an empty draft.
@@ -839,8 +841,17 @@ class ActivityFeed
 
   def activity_events(verbose: false)
     # A menu filed under another week logs its admin events under that week.
-    week_ids = ([ @week_id ] + @menus.map(&:week_id)).uniq
-    ActivityEvent.where(week_id: week_ids).order(:created_at).map do |ae|
+    # Take only this week's menus' events from there: the rest of that week
+    # (credit adjustments, another menu) belongs to its own report.
+    scope = ActivityEvent.where(week_id: @week_id)
+    other_weeks = @menus.map(&:week_id).uniq - [ @week_id ]
+    if other_weeks.any?
+      scope = scope.or(
+        ActivityEvent.where(week_id: other_weeks)
+                     .where("metadata->>'menu_id' IN (?)", @menus.map { |m| m.id.to_s })
+      )
+    end
+    scope.order(:created_at).map do |ae|
       desc = ae.description
       desc = "#{desc} #{ae.metadata.to_json}" if verbose && ae.metadata.present? && ae.metadata != {}
       Event.new(
