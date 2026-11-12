@@ -98,6 +98,111 @@ class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Market Place", holiday_rows[0].css("td")[0].text.strip
   end
 
+  # ── "This week" tiles and charts (DashboardInsights; its own tests cover the numbers) ──
+
+  def chart_data
+    JSON.parse(css_select("#dashboard-chart-data").first.text)
+  end
+
+  test "this week tiles sit above what to bake and link to their panels" do
+    get "/admin/dashboard"
+    assert_response :success
+
+    assert_select ".panel#this-week .dash-tile", minimum: 4
+    assert_select "#tile-orders .glance-num", text: "3"
+    assert_select "a#tile-requests[href='#special-requests'] .glance-num", text: "2", count: 1
+    assert_select "a#tile-low-credit[href='#low-credit']"
+    assert_select ".panel#special-requests"
+    assert_select ".panel#low-credit"
+    assert_select "#tile-holiday", count: 0
+    assert_select "#tile-limits", count: 0
+
+    ids = document_root_element.css(".panel[id], .column[id]").map { |el| el["id"] }
+    assert_operator ids.index("this-week"), :<, ids.index("what-to-bake-Thu")
+    assert_operator ids.index("what-to-bake-Thu"), :<, ids.index("order-pace"), "what to bake stays above the charts"
+    assert_operator ids.index("credits"), :<, ids.index("new-website"), "tools stay below the baker content"
+  end
+
+  test "chart panels render with fixture data and no history" do
+    get "/admin/dashboard"
+    assert_response :success
+
+    %w[chart-order-pace chart-pickup-days chart-credits].each do |id|
+      assert_select "canvas##{id}", 1
+    end
+    assert_select "#weekly-orders .empty-state", 1, "one menu isn't a trend"
+    assert_select "canvas#chart-weekly-orders", 0
+    assert_select ".panel#holiday-pace", 0
+    assert_select ".panel#limits", 0
+    assert_select "#regulars .empty-state", 1
+    assert_select "#drifting .empty-state", 1
+
+    data = chart_data
+    assert_equal %w[Sat Sun Mon Tue Wed Thu Fri], data["pace"]["labels"]
+    assert_equal 3, data["pace"]["current"].last
+    assert_equal [], data["pace"]["usual"], "no emailed menus before this one"
+    assert_equal %w[Thu Sat], data["pickupDays"].map { |d| d["label"] }
+    assert_equal 12, data["credits"].size
+    assert_nil data["holiday"]
+  end
+
+  test "holiday menu adds a pre-order tile and chart" do
+    menus(:week_26w15).make_current!
+    menus(:passover_2026).make_current!
+
+    get "/admin/dashboard"
+    assert_response :success
+
+    assert_select "a#tile-holiday.tone-holiday[href='#holiday-pace']" do
+      assert_select ".glance-label", text: "Passover Specials 2026"
+      assert_select ".glance-num", text: "2 pre-orders"
+    end
+    assert_select ".panel#holiday-pace canvas#chart-holiday-pace", 1
+    assert_equal 2, chart_data["holiday"]["cumulative"].compact.last
+  end
+
+  test "regulars who haven't ordered are listed, with the usual pace on the chart" do
+    regular = User.create!(first_name: "Rye", last_name: "Regular", email: "rye@motzi.test", receive_weekly_menu: true)
+    week = Time.zone.parse("2026-10-10")
+    current = Menu.create!(name: "this week", week_id: "31w50", emailed_at: week)
+    current.pickup_days.create!(pickup_at: week + 5.days + 15.hours, order_deadline_at: week + 4.days + 21.hours)
+    current.make_current!
+    (1..4).each do |n|
+      start = week - n.weeks
+      past = Menu.create!(name: "past #{n}", week_id: "31w#{50 - n}", emailed_at: start)
+      day = past.pickup_days.create!(pickup_at: start + 5.days + 15.hours, order_deadline_at: start + 4.days + 21.hours)
+      order = regular.orders.create!(menu: past, created_at: start + 1.day)
+      order.order_items.create!(item: items(:classic), pickup_day: day, quantity: 2)
+    end
+
+    get "/admin/dashboard", params: { as_of: "2026-10-13T10:00" }
+    assert_response :success
+
+    assert_select "#tile-regulars .glance-num", text: "1 of 1"
+    assert_select "#regulars table.dash-members tbody tr", 1
+    assert_select "#regulars table.dash-members a", text: "Rye Regular"
+    assert_select "#tile-orders .glance-detail", text: /usually 1 by now/
+    assert_select "#tile-cutoff .glance-num", text: "Wed 9pm"
+    assert_select "canvas#chart-weekly-orders", 1
+
+    data = chart_data
+    assert_equal [ 0, 0, 0, 0, nil, nil, nil ], data["pace"]["current"]
+    assert_equal 1, data["pace"]["usual"].last
+    assert_equal [ { "label" => "Thu", "items" => 0, "usual" => 2 } ], data["pickupDays"]
+    assert_equal 5, data["weekly"].size
+  end
+
+  test "sold out panel shows up when an item hits its limit" do
+    menu_item_pickup_days(:w1_classic_thurs).update!(limit: 1)
+
+    get "/admin/dashboard"
+    assert_response :success
+
+    assert_select "a#tile-limits.tone-danger[href='#limits']"
+    assert_select ".panel#limits table.limits tbody tr", 1
+    assert_select ".panel#limits td", text: "Sold out"
+  end
+
   test "dashboard still renders when a version's whodunnit is not a user id" do
     # e.g. PaperTrail.request.whodunnit set to a script name in a console session
     PaperTrail::Version.create!(item_type: "Menu", item_id: menus(:week1).id, event: "update", whodunnit: "repair-script-2026-09-12")
@@ -119,9 +224,11 @@ class Admin::DashboardControllerTest < ActionDispatch::IntegrationTest
   # the growth step adds, so older fixture/setup versions (e.g. Setting) can't
   # fall out of the window and change the count.
   #
-  # DASHBOARD_MAX_QUERIES: measured 41 on 2026-09-14, plus headroom. Raise it
-  # deliberately for a new panel; never to paper over growth.
-  DASHBOARD_MAX_QUERIES = 45
+  # DASHBOARD_MAX_QUERIES: measured 50 on 2026-11-12, plus headroom (41 before
+  # the "This week" tiles and charts, which add one aggregate query each: see
+  # DashboardInsights). Raise it deliberately for a new panel; never to paper
+  # over growth.
+  DASHBOARD_MAX_QUERIES = 55
 
   test "dashboard query count does not grow with orders, users, or credits" do
     add_dashboard_activity(3)

@@ -66,7 +66,7 @@ ActiveAdmin.register_page "Activity Feed" do
     weeks = (0..16).map { |i| (Time.zone.now - i.weeks).week_id }.uniq
 
     # Week header
-    menu = Menu.find_by(week_id: week_id)
+    menu = feed.primary_menu
     div class: "activity-feed-header" do
       span(menu&.name || week_id, class: "week-id")
       span "#{week_id} · #{week_start.strftime('%A %-m/%-d')} — #{week_end.strftime('%A %-m/%-d/%Y')}", class: "date-range"
@@ -123,7 +123,8 @@ ActiveAdmin.register_page "Activity Feed" do
     trend_data = weeks.map do |wid|
       ws = Time.zone.from_week_id(wid)
       we = ws + 7.days
-      menus = Menu.where(week_id: wid)
+      # By pickup week, so a menu filed under the wrong week_id still lands in its own week.
+      menus = Menu.for_pickup_week(wid)
       order_count = menus.any? ? Order.where(menu_id: menus.select(:id)).count : 0
       item_count = menus.any? ? OrderItem.joins(:order).where(orders: { menu_id: menus.select(:id) }).count : 0
       email_count = menus.any? ? Ahoy::Message.where(menu_id: menus.select(:id)).count : 0
@@ -342,7 +343,7 @@ ActiveAdmin.register_page "Activity Feed" do
                               next_day = (Date.parse(d[:date]) + 1).to_s
                               a href: admin_orders_path(q: { created_at_gteq: d[:date], created_at_lteq: next_day }), class: "cell-link" do
                                 span d[:count].to_s, class: "cell-num"
-                                span " orders ", class: "cell-label"
+                                span d[:preorder] ? " holiday pre-orders " : " orders ", class: "cell-label"
                                 span "(#{d[:item_count]} items)", class: "cell-dim" if d[:item_count].to_i > 0
                               end
                             when "credits_summary"
@@ -502,7 +503,7 @@ ActiveAdmin.register_page "Activity Feed" do
           div class: "glance-stat" do
             div "Claude Cost", class: "glance-label"
             div "$#{'%.2f' % (week_cost_cents / 100.0)}", class: "glance-num"
-            models_used = analyses.pluck(:model_used).uniq.map { |m| AnomalyDetector::MODEL_PRICING.dig(m, :label) || m }.join(", ")
+            models_used = analyses.pluck(:model_used).uniq.map { |m| AnomalyDetector.label_for(m) }.join(", ")
             div "#{analyses.size} report#{'s' if analyses.size != 1} · #{models_used}", class: "glance-detail"
           end
         end

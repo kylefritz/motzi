@@ -1,0 +1,15 @@
+<%# Pre-orders per day (bakery time zone) for the holiday menu @menu_id. %>
+<% tz = quote(Time.zone.tzinfo.identifier) %>
+with order_sizes as (
+    select orders.id as order_id,
+        (orders.created_at at time zone 'UTC' at time zone <%= tz %>)::date as placed_on,
+        coalesce(sum(order_items.quantity), 0) as items
+    from orders
+        left join order_items on order_items.order_id = orders.id
+    where orders.menu_id = <%= @menu_id.to_i %>
+    group by orders.id
+)
+select placed_on, count(*)::int as orders, sum(items)::int as items
+from order_sizes
+group by placed_on
+order by placed_on

@@ -1,0 +1,15 @@
+<%#
+  Items ordered per pickup day, for this menu and the @weeks before it.
+  wday is the pickup's weekday in the bakery's time zone (0 = Sunday).
+%>
+<% tz = quote(Time.zone.tzinfo.identifier) %>
+with <%= partial :dashboard_menu_weeks %>
+select compared.menu_id, compared.is_current,
+    pickup_days.id as pickup_day_id,
+    extract(dow from (pickup_days.pickup_at at time zone 'UTC' at time zone <%= tz %>))::int as wday,
+    coalesce(sum(order_items.quantity), 0)::int as items
+from compared
+    join pickup_days on pickup_days.menu_id = compared.menu_id
+    left join order_items on order_items.pickup_day_id = pickup_days.id
+group by compared.menu_id, compared.is_current, pickup_days.id, pickup_days.pickup_at
+order by pickup_days.pickup_at

@@ -1,0 +1,23 @@
+<%#
+  Orders and items per regular menu, this menu and the @weeks before it,
+  oldest first. Credit orders vs marketplace: the same test as the
+  Order.subscriber / Order.marketplace scopes.
+%>
+with <%= partial :dashboard_menu_weeks %>,
+order_sizes as (
+    select orders.id as order_id, orders.menu_id,
+        orders.stripe_charge_amount is null as paid_with_credits,
+        coalesce(sum(order_items.quantity), 0) as items
+    from compared
+        join orders on orders.menu_id = compared.menu_id
+        left join order_items on order_items.order_id = orders.id
+    group by orders.id
+)
+select compared.menu_id, compared.is_current, compared.first_pickup_on,
+    count(order_sizes.order_id) filter (where order_sizes.paid_with_credits) as credit_orders,
+    count(order_sizes.order_id) filter (where not order_sizes.paid_with_credits) as marketplace_orders,
+    coalesce(sum(order_sizes.items), 0)::int as items
+from compared
+    left join order_sizes on order_sizes.menu_id = compared.menu_id
+group by compared.menu_id, compared.is_current, compared.first_pickup_on
+order by compared.first_pickup_on

@@ -73,6 +73,25 @@ namespace :ai do
     puts detector.build_user_message
   end
 
+  desc "Write each week's full report prompt to a file, for replaying with in-session agents instead of the API. " \
+       "Usage: rake \"ai:dump_prompts[26w46 26w45]\" (default: every labeled week). OUT=dir to choose where."
+  task :dump_prompts, [ :weeks ] => :quiet do |_t, args|
+    weeks = args[:weeks].to_s.split.presence || YAML.load_file(expectations_path).keys
+    out_dir = Pathname.new(ENV["OUT"].presence || eval_results_dir.join("prompts"))
+    FileUtils.mkdir_p(out_dir)
+
+    weeks.each do |week_id|
+      # Same rule as ai:eval: a past week only sees analyses that existed by
+      # the time it ended. The week in progress sees everything so far.
+      week_end = Time.zone.from_week_id(week_id) + 7.days
+      detector = AnomalyDetector.new(week_id, analyses_before: (week_end if week_end <= Time.current))
+      text = "=== SYSTEM PROMPT ===\n\n#{detector.system_prompt}\n\n=== USER MESSAGE ===\n\n#{detector.build_user_message}"
+      path = out_dir.join("#{week_id}.txt")
+      File.write(path, text)
+      puts "#{week_id}: #{text.length} chars -> #{path}"
+    end
+  end
+
   desc "Evaluate anomaly detector against historical weeks. Usage: rake ai:eval or rake ai:eval[26w05]. EVAL_THREADS=3 to change parallelism."
   task :eval, [ :week_id ] => :quiet do |_t, args|
     expectations = YAML.load_file(expectations_path)

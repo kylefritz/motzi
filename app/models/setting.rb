@@ -12,7 +12,7 @@ class Setting < RailsSettings::Base
   field :credit_purchase_note, type: :string
   field :signup_form_note, type: :string
   field :accepting_subscribers, default: true, type: :boolean
-  field :anomaly_model, default: "claude-sonnet-4-6", type: :string
+  field :anomaly_model, default: "claude-sonnet-5-5", type: :string
   # What "/" serves: "menu" redirects to the weekly menu (pre-#351 behavior);
   # "marketing" makes the marketing pages public. Flip it in Advanced → Settings.
   HOMEPAGES = %w[menu marketing].freeze
