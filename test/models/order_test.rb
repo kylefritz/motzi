@@ -88,6 +88,8 @@ class OrderTest < ActiveSupport::TestCase
       o.order_items.create!(item: items(:pumpkin), quantity: 1, pickup_day: thu)
 
       assert_equal "Thu: Classic; 6x Pumpkin. Sat: Classic", o.item_list
+      assert_equal "Thursday 1/3: Classic; 6x Pumpkin. Saturday 1/5: Classic", o.item_list(long_days: true)
+      assert_equal [ thu, sat ], o.pickup_days_with_items
 
       assert_equal 40, o.retail_price
     end
@@ -96,6 +98,7 @@ class OrderTest < ActiveSupport::TestCase
       o.order_items.create!(item: items(:pumpkin), quantity: 1, pickup_day: thu)
       o.order_items.create!(item: items(:pay_it_forward), quantity: 1, pickup_day: thu)
       assert_equal "Thu: Pumpkin. Pay it forward", o.item_list
+      assert_equal "Thursday 1/3: Pumpkin. Pay it forward", o.item_list(long_days: true)
 
       o.order_items.create!(item: items(:pay_it_forward), quantity: 2, pickup_day: thu)
       assert_equal "Thu: Pumpkin. 3x Pay it forward", o.item_list

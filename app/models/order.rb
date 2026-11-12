@@ -53,7 +53,16 @@ class Order < ApplicationRecord
     order_items.filter { |oi| oi.pickup_day == pickup_day && !oi.pay_it_forward? }
   end
 
-  def item_list
+  # Days this order has something to pick up (pay it forward isn't picked up).
+  def pickup_days_with_items
+    PickupDay.where(id: order_items.map(&:pickup_day_id).uniq)
+             .sort_by(&:pickup_at)
+             .reject { |pickup_day| items_for_pickup(pickup_day).empty? }
+  end
+
+  # "Thu: Classic; 6x Pumpkin". long_days labels each day with its weekday
+  # and date instead ("Thursday 1/3: ..."), for the confirmation email.
+  def item_list(long_days: false)
     if order_items.empty?
       return "No items"
     end
@@ -61,13 +70,11 @@ class Order < ApplicationRecord
       prior_day_had_items = false
 
       pay_it_forwards = order_items.filter { |oi| oi.pay_it_forward? }
-      pickup_days = PickupDay.where(id: order_items.map(&:pickup_day_id).uniq).sort_by(&:pickup_at)
 
-      pickup_days.each do |pickup_day|
+      pickup_days_with_items.each do |pickup_day|
         day_items = items_for_pickup(pickup_day)
-        next if day_items.empty?
 
-        s << "#{prior_day_had_items ? ". " : ""}#{pickup_day.day_abbr}: "
+        s << "#{prior_day_had_items ? ". " : ""}#{long_days ? pickup_day.long_name : pickup_day.day_abbr}: "
 
         prior_day_had_items = true
 
