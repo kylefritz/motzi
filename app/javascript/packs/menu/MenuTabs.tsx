@@ -103,7 +103,7 @@ export default function MenuTabs({
           onClick={() => setShowHoliday(true)}
         >
           <HolidayBadge aria-hidden="true">Holiday</HolidayBadge>
-          {holidayMenu.name}
+          <span>{holidayMenu.name}</span>
         </TabButton>
       </TabBar>
 
@@ -156,13 +156,16 @@ const TabButton = styled.button<{ active: boolean }>`
   transition:
     background 0.15s,
     color 0.15s;
+  /* Badge stacks above the name, and the name wraps, so a long menu name
+     ("Weekly Menu 11/12 - 11/14") never clips at phone width. */
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  gap: 4px;
+  text-align: center;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 
   &:hover {
     background: ${({ active }) =>
