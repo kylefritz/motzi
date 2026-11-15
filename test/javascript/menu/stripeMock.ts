@@ -23,6 +23,25 @@ export const expressCheckout: { paymentFailed: Mock<() => void> } = {
   paymentFailed: mock(() => {}),
 };
 
+// loadStripe from @stripe/stripe-js/pure. Tests make it reject to play a
+// Stripe.js load failure.
+export const stripeLoader: {
+  loadStripe: Mock<(key: string) => Promise<unknown>>;
+} = {
+  loadStripe: mock(() => Promise.resolve(null)),
+};
+
+// ahoy.js (setupTests.tsx mocks the module with this), for the stripe_load
+// tracking events.
+export const ahoyMock: {
+  track: Mock<(name: string, properties?: Record<string, unknown>) => void>;
+} = { track: mock(() => {}) };
+
+// When set, the Payment Element reports this load error as it mounts.
+export const paymentElementMock: { loadError: { message: string } | null } = {
+  loadError: null,
+};
+
 type SubmitResult = { error?: { message: string } };
 
 export const elementsMock: {
@@ -51,6 +70,8 @@ const stripeMock: {
 
 // Back to the default (successful) results, with fresh call logs.
 export function resetStripeMock() {
+  stripeLoader.loadStripe = mock(() => Promise.resolve(stripeMock));
+  paymentElementMock.loadError = null;
   expressCheckout.paymentFailed = mock(() => {});
   elementsMock.submit = mock(() => Promise.resolve({}));
   stripeMock.createConfirmationToken = mock(() =>
