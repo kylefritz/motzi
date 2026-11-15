@@ -140,6 +140,17 @@ class ActiveSupport::TestCase
     end
   end
 
+  # Files a fixture menu under another week and moves its pickup days (and
+  # deadlines) with it, so the label and the pickup days still agree.
+  def refile_menu(menu, week_id)
+    shift = Time.zone.from_week_id(week_id) - Time.zone.from_week_id(menu.week_id)
+    menu.pickup_days.each do |day|
+      day.update!(pickup_at: day.pickup_at + shift, order_deadline_at: day.order_deadline_at + shift)
+    end
+    menu.update!(week_id: week_id)
+    menu
+  end
+
   def travel_to_day_time(day, time, &block)
     days = { sun:   "11-10",
             mon:   "11-11",

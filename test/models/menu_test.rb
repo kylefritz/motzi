@@ -33,12 +33,12 @@ class MenuTest < ActiveSupport::TestCase
 
     refute week3.current?, "week 2 starts as the current menu"
 
-    week3.update!(week_id: Time.zone.now.prev_week_id)
+    refile_menu(week3, Time.zone.now.prev_week_id)
     error = assert_raises(Menu::PublishError) { week3.publish_to_subscribers! }
     assert_match(/current week's menu or future week's menu/, error.message)
     assert_nil week3.reload.emailed_at, "a refused publish isn't recorded as sent"
 
-    week3.update!(week_id: Time.zone.now.week_id)
+    refile_menu(week3, Time.zone.now.week_id)
     assert_email_sent(User.receive_weekly_menu.count) do
       num_emails = week3.publish_to_subscribers!
       assert_equal num_emails, User.receive_weekly_menu.count, "sent emails returned"
@@ -318,7 +318,7 @@ class MenuTest < ActiveSupport::TestCase
 
   test "publish_to_subscribers! still works for regular menu (regression)" do
     week3 = menus(:week3)
-    week3.update!(week_id: Time.zone.now.week_id)
+    refile_menu(week3, Time.zone.now.week_id)
     assert_email_sent(User.receive_weekly_menu.count) do
       week3.publish_to_subscribers!
     end
@@ -330,7 +330,7 @@ class MenuTest < ActiveSupport::TestCase
   # delivered), so a second click used to email everyone again.
   test "publish_to_subscribers! refuses a second send started right after the first" do
     week3 = menus(:week3)
-    week3.update!(week_id: Time.zone.now.week_id)
+    refile_menu(week3, Time.zone.now.week_id)
     freeze_time
 
     assert_enqueued_jobs 1, only: SendWeeklyMenuJob do
@@ -344,7 +344,7 @@ class MenuTest < ActiveSupport::TestCase
 
   test "publish_to_subscribers! allows another send once the first has had time to go out" do
     week3 = menus(:week3)
-    week3.update!(week_id: Time.zone.now.week_id)
+    refile_menu(week3, Time.zone.now.week_id)
     freeze_time
 
     assert_enqueued_jobs 2, only: SendWeeklyMenuJob do
@@ -411,5 +411,62 @@ class MenuTest < ActiveSupport::TestCase
     menu = menus(:week3)
     menu.update!(week_id: "19w09")
     assert_equal "19w09", menu.reload.week_id
+  end
+
+  # Copies a menu's pickup days into a new menu filed under week_id, keeping
+  # the real dates, to build a menu whose label is off from its pickups.
+  def misfiled_copy_of(menu, week_id)
+    Menu.create!(name: "misfiled", week_id: week_id).tap do |misfiled|
+      menu.pickup_days.each do |day|
+        misfiled.pickup_days.create!(pickup_at: day.pickup_at, order_deadline_at: day.order_deadline_at)
+      end
+    end
+  end
+
+  test "pickup_week_id is the week of the first pickup day" do
+    assert_equal "19w03", menus(:week3).pickup_week_id
+    assert_nil Menu.create!(name: "blank", week_id: "19w09").pickup_week_id
+  end
+
+  test "week_mismatch? when a regular menu is filed under another week than its pickups" do
+    refute menus(:week3).week_mismatch?
+    refute Menu.create!(name: "blank", week_id: "19w09").week_mismatch?, "no pickup days yet: nothing to compare"
+    assert misfiled_copy_of(menus(:week3), "19w04").week_mismatch?
+  end
+
+  test "week_mismatch? ignores holiday menus, which are filed by their own rules" do
+    holiday = misfiled_copy_of(menus(:week3), "19w07")
+    holiday.update!(menu_type: "holiday")
+    refute holiday.week_mismatch?
+  end
+
+  # 11/8/2026: the 11/12–11/14 menu went out filed under the next week (26w47),
+  # and once emailed its week was locked, so 11/19–11/21 had nowhere to go.
+  test "publish_to_subscribers! refuses a menu filed under another week than its pickups" do
+    week3 = refile_menu(menus(:week3), Time.zone.now.week_id)
+    week3.update!(week_id: (Time.zone.now + 1.week).week_id)
+    assert week3.can_publish?
+
+    assert_no_enqueued_jobs only: SendWeeklyMenuJob do
+      error = assert_raises(Menu::PublishError) { week3.publish_to_subscribers! }
+      assert_match(/filed under #{week3.week_id}/, error.message)
+      assert_match(/#{Time.zone.now.week_id}/, error.message)
+    end
+    assert_nil week3.reload.emailed_at
+    refute week3.current?
+  end
+
+  test "copy_from measures pickup days from the source's real pickup week, not its label" do
+    # Pickups in 19w03 but filed under 19w05. Going by labels, a copy into
+    # 19w04 would land a week *before* the source; by real dates, a week after.
+    original = misfiled_copy_of(menus(:week3), "19w05")
+    original.menu_items.create!(item: items(:classic))
+    target = Menu.create!(name: "next week", week_id: "19w04")
+    target.copy_from(original)
+
+    assert_equal original.pickup_days.order(:pickup_at).map { |d| d.pickup_at + 7.days },
+                 target.pickup_days.order(:pickup_at).map(&:pickup_at),
+                 "one week after the source's real pickups"
+    refute target.reload.week_mismatch?
   end
 end

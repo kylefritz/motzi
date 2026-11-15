@@ -305,7 +305,7 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
 
   test "email_menu makes the menu current and queues the weekly email" do
     menu = menus(:week3)
-    menu.update!(week_id: Time.zone.now.week_id)
+    refile_menu(menu, Time.zone.now.week_id)
 
     assert_enqueued_jobs 1, only: SendWeeklyMenuJob do
       post "/admin/menus/#{menu.id}/email_menu"
@@ -319,7 +319,7 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
 
   test "email_menu refuses a second send while the first is still going out" do
     menu = menus(:week3)
-    menu.update!(week_id: Time.zone.now.week_id)
+    refile_menu(menu, Time.zone.now.week_id)
 
     assert_enqueued_jobs 1, only: SendWeeklyMenuJob do
       post "/admin/menus/#{menu.id}/email_menu"
@@ -348,10 +348,55 @@ class Admin::MenuControllerTest < ActionDispatch::IntegrationTest
     assert_select ".flash_alert", text: /holiday/i
   end
 
+  # A menu filed a week off from its pickups (11/8/2026: 11/12–11/14 filed as
+  # 26w47): warn everywhere, and hold back the email button.
+  def misfile(menu)
+    refile_menu(menu, Time.zone.now.week_id)
+    menu.update!(week_id: (Time.zone.now + 1.week).week_id)
+    menu
+  end
+
+  test "show warns when the week doesn't match the pickup days and offers no email button" do
+    menu = misfile(menus(:week3))
+    get "/admin/menus/#{menu.id}"
+    assert_response :success
+    assert_select ".week-mismatch", text: /filed under #{menu.week_id}.*#{Time.zone.now.week_id}/m
+    assert_select "form[action='/admin/menus/#{menu.id}/email_menu']", count: 0
+  end
+
+  test "edit and index flag a menu whose week doesn't match its pickup days" do
+    menu = misfile(menus(:week3))
+    get "/admin/menus/#{menu.id}/edit"
+    assert_select ".week-mismatch", text: /#{Time.zone.now.week_id}/
+    get "/admin/menus"
+    assert_select ".week-mismatch", text: /Pickups in #{Time.zone.now.week_id}/i
+  end
+
+  test "email_menu refuses a menu filed under another week than its pickups" do
+    menu = misfile(menus(:week3))
+    assert_no_enqueued_jobs only: SendWeeklyMenuJob do
+      post "/admin/menus/#{menu.id}/email_menu"
+    end
+    assert_redirected_to "/admin/menus/#{menu.id}"
+    follow_redirect!
+    assert_select ".flash_alert", text: /filed under/
+  end
+
+  # 11/7/2026: a blank menu took 26w46, so the next new menu silently defaulted
+  # to 26w47.
+  test "new menu form points out an empty draft holding a week" do
+    draft = Menu.create!(name: "", week_id: Time.zone.now.week_id)
+    get "/admin/menus/new"
+    assert_response :success
+    assert_select ".empty-drafts", text: /#{draft.week_id}/
+    assert_select ".empty-drafts a[href='/admin/menus/#{draft.id}/edit']"
+    assert_select "#menu_week_id option[value='#{draft.week_id}']", text: /empty draft ##{draft.id}/
+  end
+
   # A stale "Email to N subscribers" button used to be a 500 (UncaughtThrowError).
   test "email_menu for a past week's menu is refused with a message" do
     menu = menus(:week3)
-    menu.update!(week_id: Time.zone.now.prev_week_id)
+    refile_menu(menu, Time.zone.now.prev_week_id)
 
     assert_no_enqueued_jobs only: SendWeeklyMenuJob do
       post "/admin/menus/#{menu.id}/email_menu"
