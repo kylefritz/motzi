@@ -51,6 +51,11 @@ ActiveAdmin.register Menu do
       para auto_link menu.week_id
       t = Time.zone.from_week_id(menu.week_id)
       small "#{t.strftime('%a %m/%d')}"
+      if menu.week_mismatch?
+        br
+        status_tag "Pickups in #{menu.pickup_week_id}", class: "week-mismatch", color: "red",
+                   title: menu.week_mismatch_message
+      end
     end
     column :stats do |menu|
       if menu.emailed_at.blank? || menu.emailed_at > 6.weeks.ago
@@ -82,15 +87,23 @@ ActiveAdmin.register Menu do
           .group_by(&:first).transform_values { |pairs| pairs.map(&:last) }
     end
 
+    # Empty regular menus holding this week or a later one, by week. A blank
+    # draft at 26w46 once pushed the next new menu to 26w47 without a word.
+    def empty_drafts(menu)
+      Menu.regular.where.not(id: menu.id).where("week_id >= ?", Time.zone.now.week_id)
+          .select(&:draft?).index_by(&:week_id)
+    end
+
     # Each option carries data-taken so the picker script can re-disable options
     # when the menu type changes; disabled is set server-side for the current type.
-    def week_options(menu, taken)
+    def week_options(menu, taken, drafts)
       week_ids = (0..10).map { |i| (Time.zone.now + i.weeks).week_id }
       week_ids.push(menu.week_id) if menu.week_id.present?
       week_ids.uniq.sort.map do |w|
         t = Time.zone.from_week_id(w).strftime("%a %m/%d")
         types_taken = taken[w] || []
-        suffix = types_taken.any? ? " (has #{types_taken.join(', ')})" : ""
+        labels = types_taken.map { |type| type == "regular" && drafts[w] ? "empty draft ##{drafts[w].id}" : type }
+        suffix = labels.any? ? " (has #{labels.join(', ')})" : ""
         [ "#{w} starts #{t}#{suffix}", w,
           { disabled: types_taken.include?(menu.menu_type), data: { taken: types_taken.join(",") } } ]
       end
@@ -112,6 +125,25 @@ ActiveAdmin.register Menu do
 
     menu = f.object
     taken = weeks_taken(menu)
+    drafts = menu.week_locked? ? {} : empty_drafts(menu)
+
+    if menu.week_mismatch?
+      para menu.week_mismatch_message, class: "flash flash_alert week-mismatch"
+    end
+    if menu.new_record? && drafts.any?
+      div class: "flash flash_alert empty-drafts" do
+        drafts.values.sort_by(&:week_id).each do |draft|
+          para do
+            text_node "#{draft.week_id} already has an empty menu (##{draft.id}), so it's not in the week list below. " \
+                      "If this new menu is for that week, "
+            a "fill in that one instead", href: edit_admin_menu_path(draft)
+            text_node " or "
+            a "delete it", href: admin_menu_path(draft)
+            text_node " first."
+          end
+        end
+      end
+    end
 
     inputs do
       input :menu_type, as: :select,
@@ -120,7 +152,7 @@ ActiveAdmin.register Menu do
       if menu.week_locked?
         input :week_id, as: :string, input_html: { disabled: true }, hint: week_locked_hint(menu)
       else
-        input :week_id, as: :select, collection: week_options(menu, taken), include_blank: false,
+        input :week_id, as: :select, collection: week_options(menu, taken, drafts), include_blank: false,
               selected: default_week_id(menu, taken)
       end
       input :name
@@ -143,6 +175,9 @@ ActiveAdmin.register Menu do
         span menu.week_id
         if menu.current?
           status_tag true, style: "margin-left: 3px", label: "Current"
+        end
+        if menu.week_mismatch?
+          para menu.week_mismatch_message, class: "flash flash_alert week-mismatch", style: "margin-top: 8px"
         end
       end
       row :sales do

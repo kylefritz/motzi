@@ -43,6 +43,32 @@ class Menu < ApplicationRecord
     pickup_days.minimum(:pickup_at)
   end
 
+  # The week the menu is actually picked up in, by its first pickup day; nil
+  # until it has pickup days.
+  def pickup_week_id
+    first_pickup_at&.week_id
+  end
+
+  # A regular menu filed under a different week than its first pickup day.
+  # Holiday menus take orders weeks ahead and aren't held to this.
+  def week_mismatch?
+    regular? && pickup_week_id.present? && pickup_week_id != week_id
+  end
+
+  def week_mismatch_message
+    return unless week_mismatch?
+    mismatch = "This menu is filed under #{week_id}, but its first pickup day " \
+               "(#{first_pickup_at.strftime('%a %-m/%-d')}) is in #{pickup_week_id}."
+    if week_locked?
+      "#{mismatch} It's been emailed or has orders, so its week can't change now; " \
+        "reports go by the pickup days."
+    else
+      "#{mismatch} Edit the menu and change its week to #{pickup_week_id} before emailing it " \
+        "(if another menu holds that week, delete or move that one first). " \
+        "Once it's emailed, the week can't be changed."
+    end
+  end
+
   def self.current
     Menu.find(Setting.menu_id)
   end
@@ -154,6 +180,9 @@ class Menu < ApplicationRecord
     unless can_publish?
       raise PublishError, "can only publish_to_subscribers for current week's menu or future week's menu"
     end
+    # Once emailed the week is locked, so a wrong label has to be caught while
+    # it can still be fixed.
+    raise PublishError, week_mismatch_message if week_mismatch? && !week_locked?
 
     # Row lock, so two sends started at the same moment can't both get through.
     with_lock do
@@ -222,8 +251,10 @@ class Menu < ApplicationRecord
   def map_pickup_days_from(original_menu)
     # we intentionally don't support multiple pickup days on the same weekday
 
-    original_week_start = Time.zone.from_week_id(original_menu.week_id)
-    target_week_start = Time.zone.from_week_id(self.week_id)
+    # Measure from the weeks the menus are really picked up in: week_id is typed
+    # by hand and has been a week off, which put copied days in the wrong week.
+    original_week_start = original_menu.pickup_week_start
+    target_week_start = pickup_week_start
 
     target_days_by_wday = self.pickup_days.index_by { |day| day.pickup_at.wday }
 
@@ -258,6 +289,12 @@ class Menu < ApplicationRecord
     end
 
     update!(attrs) if attrs.any?
+  end
+
+  # Start of the week the menu is picked up in (its first pickup day's week,
+  # else its week_id), in from_week_id's terms, so pickup offsets line up.
+  def pickup_week_start
+    Time.zone.from_week_id(pickup_week_id || week_id)
   end
 
   MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
