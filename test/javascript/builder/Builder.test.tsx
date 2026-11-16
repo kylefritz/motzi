@@ -361,7 +361,9 @@ test("copy from menu form posts the CSRF token", async () => {
   try {
     await renderBuilder();
 
-    const form = screen.getByText("Copy from menu").closest("section")
+    const form = screen
+      .getByText("Copy from menu")
+      .closest("section")
       ?.querySelector("form");
     const field = form?.querySelector<HTMLInputElement>(
       'input[name="authenticity_token"]'
