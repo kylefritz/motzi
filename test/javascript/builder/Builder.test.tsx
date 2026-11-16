@@ -351,6 +351,29 @@ test("adds a menu item", async () => {
   );
 });
 
+// Maya got a 422 copying a menu (2026-11-15): /admin checks the CSRF token
+// and this form is a plain POST, so the token has to be in the form body.
+test("copy from menu form posts the CSRF token", async () => {
+  const meta = document.createElement("meta");
+  meta.name = "csrf-token";
+  meta.content = "token-from-the-page";
+  document.head.appendChild(meta);
+  try {
+    await renderBuilder();
+
+    const form = screen
+      .getByText("Copy from menu")
+      .closest("section")
+      ?.querySelector("form");
+    const field = form?.querySelector<HTMLInputElement>(
+      'input[name="authenticity_token"]'
+    );
+    expect(field?.value).toBe("token-from-the-page");
+  } finally {
+    meta.remove();
+  }
+});
+
 test("copy from menu defaults are wired up", async () => {
   await renderBuilder();
 

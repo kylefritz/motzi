@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 import type { AdminMenuBuilderResponse } from "../../../types/api";
+import { csrfToken } from "../../../lib/csrf";
 import { Button } from "./ui/Button";
 import { Panel, PanelBody, PanelHeader } from "./ui/Panel";
 import { ControlSelect } from "./ui/FormControls";
@@ -18,6 +19,13 @@ export default function CopyFrom({ menuId, recentMenus }: CopyFromProps) {
     <Section>
       <h2>Copy from menu</h2>
       <form method="POST" action={`/admin/menus/${menuId}/copy_from`}>
+        {/* A plain form post, not axios, so installCsrfHeader doesn't cover
+            it: /admin answers 422 without the token in the body. */}
+        <input
+          type="hidden"
+          name="authenticity_token"
+          value={csrfToken() ?? ""}
+        />
         <FieldRow>
           <label htmlFor="original_menu_id">Menu:</label>
           <MenuSelect
