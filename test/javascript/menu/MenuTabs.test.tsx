@@ -1,9 +1,9 @@
 import React from "react";
-import { expect, mock, test } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { afterEach, expect, mock, test } from "bun:test";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import MenuTabs from "menu/MenuTabs";
+import MenuTabs, { hashOpensHoliday, menuSlug } from "menu/MenuTabs";
 import { SettingsContext } from "menu/Contexts";
 import mockMenuJson from "./mockMenuJson";
 
@@ -43,6 +43,75 @@ function renderMenuTabs({
     </SettingsContext.Provider>
   );
 }
+
+const selected = (name: RegExp) =>
+  screen.getByRole("tab", { name }).getAttribute("aria-selected");
+
+afterEach(() => {
+  cleanup();
+  window.history.replaceState({}, "", "/menu");
+});
+
+test("hashOpensHoliday matches #holiday and words of the menu name", () => {
+  const name = "Thanksgiving Pre-Order 2026";
+  expect(menuSlug(name)).toBe("thanksgiving-pre-order-2026");
+  expect(hashOpensHoliday("#thanksgiving", name)).toBe(true);
+  expect(hashOpensHoliday("#Thanksgiving-2026", name)).toBe(true);
+  expect(hashOpensHoliday("#thanksgiving%20pre-order", name)).toBe(true);
+  expect(hashOpensHoliday("#holiday", name)).toBe(true);
+  expect(hashOpensHoliday("#passover", name)).toBe(false);
+  expect(hashOpensHoliday("#thanks", name)).toBe(false);
+  expect(hashOpensHoliday("", name)).toBe(false);
+  expect(hashOpensHoliday("#%E0%A4%A", name)).toBe(false);
+});
+
+test("the regular menu opens first without a hash", () => {
+  renderMenuTabs();
+  expect(selected(/Passover/)).toBe("false");
+});
+
+test("/menu#passover deep-links to the holiday menu", () => {
+  window.history.replaceState({}, "", "/menu?uid=abc#passover");
+  renderMenuTabs();
+  expect(selected(/Passover/)).toBe("true");
+});
+
+test("an unrelated hash leaves the regular menu open", () => {
+  window.history.replaceState({}, "", "/menu#thanksgiving");
+  renderMenuTabs();
+  expect(selected(/Passover/)).toBe("false");
+});
+
+test("switching tabs keeps the hash (and the query) in step", async () => {
+  const user = userEvent.setup();
+  window.history.replaceState({}, "", "/menu?uid=abc");
+  renderMenuTabs();
+
+  await user.click(screen.getByRole("tab", { name: /Passover/ }));
+  expect(selected(/Passover/)).toBe("true");
+  expect(location.hash).toBe("#passover-pre-order");
+  expect(location.search).toBe("?uid=abc");
+
+  await user.click(screen.getAllByRole("tab")[0]);
+  expect(selected(/Passover/)).toBe("false");
+  expect(location.hash).toBe("");
+  expect(location.search).toBe("?uid=abc");
+});
+
+test("a hash change while the page is open switches tabs", () => {
+  renderMenuTabs();
+  act(() => {
+    window.location.hash = "#holiday";
+    window.dispatchEvent(new window.Event("hashchange"));
+  });
+  expect(selected(/Passover/)).toBe("true");
+
+  act(() => {
+    window.history.replaceState({}, "", "/menu");
+    window.dispatchEvent(new window.Event("hashchange"));
+  });
+  expect(selected(/Passover/)).toBe("false");
+});
 
 test("holiday badge is visible before placing order", () => {
   renderMenuTabs();

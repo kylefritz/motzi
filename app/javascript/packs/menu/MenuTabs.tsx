@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 
 import Layout from "./Layout";
@@ -29,6 +29,30 @@ type MenuTabsProps = {
   initialTab?: string;
 };
 
+// "Thanksgiving Pre-Order 2026" → "thanksgiving-pre-order-2026"
+export const menuSlug = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+// Does a URL hash point at the holiday menu? "#holiday" always does; otherwise
+// every word of the hash must be a word of the menu's name, so "#thanksgiving"
+// opens "Thanksgiving Pre-Order 2026" and keeps working next year.
+export function hashOpensHoliday(hash: string, holidayName: string) {
+  let raw = hash.replace(/^#/, "");
+  try {
+    raw = decodeURIComponent(raw);
+  } catch {
+    // malformed escape: match on the raw text
+  }
+  const want = menuSlug(raw);
+  if (!want) return false;
+  if (want === "holiday") return true;
+  const words = menuSlug(holidayName).split("-");
+  return want.split("-").every((word) => words.includes(word));
+}
+
 export default function MenuTabs({
   handleCreateHolidayOrder,
   handleCreateRegularOrder,
@@ -46,22 +70,47 @@ export default function MenuTabs({
   const [showEmailSettings, setShowEmailSettings] = useState(
     initialTab === "email"
   );
-  const [showHoliday, setShowHoliday] = useState(!regularMenu);
+  const hasRegularMenu = !!regularMenu;
+  const holidayName = holidayMenu.name;
+  // /menu#thanksgiving (or #holiday) lands on the holiday tab.
+  const [showHoliday, setShowHoliday] = useState(
+    () => !hasRegularMenu || hashOpensHoliday(location.hash, holidayName)
+  );
   const regularTabRef = useRef<HTMLButtonElement>(null);
   const holidayTabRef = useRef<HTMLButtonElement>(null);
 
+  // Keep the address bar in step with the open tab, so copying the URL
+  // shares the menu you're looking at. replaceState: no extra history entry.
+  const selectTab = (holiday: boolean) => {
+    setShowHoliday(holiday);
+    const hash = holiday ? `#${menuSlug(holidayName)}` : "";
+    window.history.replaceState(
+      null,
+      "",
+      location.pathname + location.search + hash
+    );
+  };
+
+  // A hash typed or followed while the page is open (e.g. the nav link).
+  useEffect(() => {
+    const onHashChange = () => {
+      if (hashOpensHoliday(location.hash, holidayName)) {
+        setShowHoliday(true);
+      } else if (!location.hash && hasRegularMenu) {
+        setShowHoliday(false);
+      }
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, [holidayName, hasRegularMenu]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!hasRegularMenu) return; // one tab: nothing to switch to
     if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
       e.preventDefault();
-      setShowHoliday((prev) => {
-        const next = !prev;
-        if (next) {
-          holidayTabRef.current?.focus();
-        } else {
-          regularTabRef.current?.focus();
-        }
-        return next;
-      });
+      const next = !showHoliday;
+      selectTab(next);
+      (next ? holidayTabRef : regularTabRef).current?.focus();
     }
   };
 
@@ -87,7 +136,7 @@ export default function MenuTabs({
             aria-controls="panel-regular"
             tabIndex={!showHoliday ? 0 : -1}
             active={!showHoliday}
-            onClick={() => setShowHoliday(false)}
+            onClick={() => selectTab(false)}
           >
             {regularMenu.name}
           </TabButton>
@@ -100,7 +149,7 @@ export default function MenuTabs({
           aria-controls="panel-holiday"
           tabIndex={showHoliday ? 0 : -1}
           active={showHoliday}
-          onClick={() => setShowHoliday(true)}
+          onClick={() => selectTab(true)}
         >
           <HolidayBadge aria-hidden="true">Holiday</HolidayBadge>
           <span>{holidayMenu.name}</span>
